@@ -96,7 +96,7 @@ type TypeOfRoutes<TRoutes extends Route[]> = TRoutes extends [Route]
 export type TypeOf<
   TRoutes extends RouteMap,
   TPath extends PathsOf<TRoutes>,
-  TWithDefaultOutput extends boolean = true
+  TWithDefaultOutput extends boolean = true,
 > = TypeOfRoutes<Match<TRoutes, TPath>> & (TWithDefaultOutput extends true ? DefaultOutput : {});
 
 export type TypeAsArgs<TObject> = keyof TObject extends never
@@ -152,7 +152,7 @@ export interface Router<TRoutes extends RouteMap> {
 
 type AppendPath<
   TPrefix extends string,
-  TPath extends string
+  TPath extends string,
 > = NormalizePath<`${TPrefix}${NormalizePath<`/${TPath}`>}`>;
 
 type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> & {
@@ -177,7 +177,7 @@ type MapRoute<TRoute extends RouteWithPath, TParents extends RouteWithPath[] = [
 
 type FromRouteMap<
   TRouteMap extends RouteMap,
-  TParents extends RouteWithPath[] = []
+  TParents extends RouteWithPath[] = [],
 > = UnionToIntersection<
   ValuesType<{
     [key in keyof TRouteMap]: MapRoute<TRouteMap[key] & { path: key & string }, TParents>;

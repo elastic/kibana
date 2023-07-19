@@ -45,7 +45,7 @@ export function ApmHeaderActionMenu() {
 
   const isLabsButtonEnabled = core.uiSettings.get<boolean>(
     apmLabsButton,
-    false
+    false,
   );
 
   return (

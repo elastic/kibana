@@ -58,7 +58,7 @@ describe('ErrorMarker', () => {
   }
   function getKueryDecoded(url: string) {
     return decodeURIComponent(
-      url.substring(url.indexOf('kuery='), url.indexOf('&'))
+      url.substring(url.indexOf('kuery='), url.indexOf('&')),
     );
   }
   it('renders link with trace and transaction', () => {
@@ -66,7 +66,7 @@ describe('ErrorMarker', () => {
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
 
     expect(getKueryDecoded(errorLink.search)).toEqual(
-      'kuery=trace.id : "123" and transaction.id : "456"'
+      'kuery=trace.id : "123" and transaction.id : "456"',
     );
   });
   it('renders link with trace', () => {
@@ -88,7 +88,7 @@ describe('ErrorMarker', () => {
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
     expect(getKueryDecoded(errorLink.search)).toEqual(
-      'kuery=transaction.id : "456"'
+      'kuery=transaction.id : "456"',
     );
   });
   it('renders link without trance and transaction', () => {

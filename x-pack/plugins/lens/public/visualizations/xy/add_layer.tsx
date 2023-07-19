@@ -43,7 +43,7 @@ export function AddLayerButton({
     icon,
     disabled,
     toolTipContent,
-  }: typeof supportedLayers[0]) => {
+  }: (typeof supportedLayers)[0]) => {
     return {
       panel: 1,
       toolTipContent,

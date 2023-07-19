@@ -10,7 +10,7 @@ import { ActionGroup } from './rule_type';
 
 export type DefaultActionGroupId = 'default';
 
-export type RecoveredActionGroupId = typeof RecoveredActionGroup['id'];
+export type RecoveredActionGroupId = (typeof RecoveredActionGroup)['id'];
 export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.freeze({
   id: 'recovered',
   name: i18n.translate('xpack.alerting.builtinActionGroups.recovered', {
@@ -24,7 +24,7 @@ export type ReservedActionGroups<RecoveryActionGroupId extends string> =
 
 export type WithoutReservedActionGroups<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > = ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds;
 
 export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(

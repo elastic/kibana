@@ -26,7 +26,7 @@ export function useTransactionBreakdown({
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -59,7 +59,7 @@ export function useTransactionBreakdown({
                 transactionType,
               },
             },
-          }
+          },
         );
       }
     },
@@ -72,7 +72,7 @@ export function useTransactionBreakdown({
       transactionType,
       transactionTypeStatus,
       transactionName,
-    ]
+    ],
   );
 
   return {

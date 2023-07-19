@@ -37,7 +37,7 @@ export interface FetcherResult<Data> {
 }
 
 function getDetailsFromErrorResponse(
-  error: IHttpFetchError<ResponseErrorBody>
+  error: IHttpFetchError<ResponseErrorBody>,
 ) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
@@ -55,7 +55,7 @@ function getDetailsFromErrorResponse(
 
 const createAutoAbortedAPMClient = (
   signal: AbortSignal,
-  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void,
 ): AutoAbortedAPMClient => {
   return ((endpoint, options) => {
     return callApmApi(endpoint, {
@@ -93,7 +93,7 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
-  } = {}
+  } = {},
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
@@ -118,7 +118,7 @@ export function useFetcher<TReturn>(
       const signal = controller.signal;
 
       const promise = fn(
-        createAutoAbortedAPMClient(signal, addInspectorRequest)
+        createAutoAbortedAPMClient(signal, addInspectorRequest),
       );
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).

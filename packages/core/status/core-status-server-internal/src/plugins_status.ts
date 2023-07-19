@@ -65,7 +65,10 @@ export class PluginsStatusService {
   private newRegistrationsAllowed = true;
   private coreSubscription: Subscription;
 
-  constructor(deps: Deps, private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS) {
+  constructor(
+    deps: Deps,
+    private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS
+  ) {
     this.pluginData = this.initPluginData(deps.pluginDependencies);
     this.rootPlugins = this.getRootPlugins();
     this.orderedPluginNames = this.getOrderedPluginNames();

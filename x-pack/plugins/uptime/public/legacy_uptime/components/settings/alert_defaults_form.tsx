@@ -175,8 +175,8 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           <EuiComboBox
             placeholder={alertFormI18n.inputPlaceHolder}
             options={options}
-            selectedOptions={options.filter((opt) =>
-              formFields?.defaultConnectors?.includes(opt.value)
+            selectedOptions={options.filter(
+              (opt) => formFields?.defaultConnectors?.includes(opt.value)
             )}
             inputRef={(input) => {
               inputRef.current = input;

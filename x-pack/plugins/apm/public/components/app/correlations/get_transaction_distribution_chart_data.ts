@@ -29,7 +29,7 @@ export function getTransactionDistributionChartData({
     transactionDistributionChartData.push({
       id: i18n.translate(
         'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
+        { defaultMessage: 'All transactions' },
       ),
       histogram: allTransactionsHistogram,
       areaSeriesColor: euiTheme.eui.euiColorVis1,
@@ -40,7 +40,7 @@ export function getTransactionDistributionChartData({
     transactionDistributionChartData.push({
       id: i18n.translate(
         'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
-        { defaultMessage: 'Failed transactions' }
+        { defaultMessage: 'Failed transactions' },
       ),
       histogram: failedTransactionsHistogram,
       areaSeriesColor: euiTheme.eui.euiColorVis7,

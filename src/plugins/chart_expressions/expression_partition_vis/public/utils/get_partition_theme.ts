@@ -112,7 +112,7 @@ const getSpecificTheme: GetThemeByTypeFn = (chartType, visParams, dimensions, re
     [ChartTypes.TREEMAP]: () => getTreemapMosaicCommonTheme(visParams),
     [ChartTypes.MOSAIC]: () => getTreemapMosaicCommonTheme(visParams),
     [ChartTypes.WAFFLE]: () => getPieDonutWaffleCommonTheme(visParams, dimensions, rescaleFactor),
-  }[chartType]());
+  })[chartType]();
 
 export const getPartitionTheme: GetThemeFn = (
   chartType,

@@ -151,7 +151,7 @@ export type ActionTypeIndex = Record<string, ActionType>;
 export type RuleTypeIndex = Map<string, RuleType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
-  ActionParams = unknown
+  ActionParams = unknown,
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
 export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
@@ -311,7 +311,7 @@ export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<s
 
 export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>
+  Secrets = Record<string, unknown>,
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -325,12 +325,12 @@ type AsActionVariables<Keys extends string> = {
 export const REQUIRED_ACTION_VARIABLES = ['params'] as const;
 export const CONTEXT_ACTION_VARIABLES = ['context'] as const;
 export const OPTIONAL_ACTION_VARIABLES = [...CONTEXT_ACTION_VARIABLES, 'state'] as const;
-export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
-  Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
+export type ActionVariables = AsActionVariables<(typeof REQUIRED_ACTION_VARIABLES)[number]> &
+  Partial<AsActionVariables<(typeof OPTIONAL_ACTION_VARIABLES)[number]>>;
 
 export interface RuleType<
   ActionGroupIds extends string = string,
-  RecoveryActionGroupId extends string = string
+  RecoveryActionGroupId extends string = string,
 > extends Pick<
     CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
@@ -372,7 +372,7 @@ export interface RuleTableItem extends Rule {
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
-  ActionGroupIds extends string = string
+  ActionGroupIds extends string = string,
 > {
   ruleParams: Params;
   ruleInterval: string;

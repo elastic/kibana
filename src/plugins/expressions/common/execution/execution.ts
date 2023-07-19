@@ -188,7 +188,7 @@ export class Execution<
   Output = unknown,
   InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object
     ? ExpressionExecutionParams['inspectorAdapters']
-    : DefaultInspectorAdapters
+    : DefaultInspectorAdapters,
 > {
   /**
    * Dynamic state of the execution.
@@ -248,7 +248,10 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
+  constructor(
+    public readonly execution: ExecutionParams,
+    private readonly logger?: Logger
+  ) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);

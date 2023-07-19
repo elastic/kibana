@@ -28,7 +28,9 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }
   });
 
   const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    ? moment(lastResultsData?.['@timestamp'][0])
+        .subtract(interval, 'seconds')
+        .toISOString()
     : `now-${interval}s`;
   const endDate = lastResultsData?.['@timestamp']
     ? moment(lastResultsData?.['@timestamp'][0]).toISOString()

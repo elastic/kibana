@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
   request: KibanaRequest,
-  controller: AbortController
+  controller: AbortController,
 ): T {
   const subscription = request.events.aborted$.subscribe(() => {
     controller.abort();

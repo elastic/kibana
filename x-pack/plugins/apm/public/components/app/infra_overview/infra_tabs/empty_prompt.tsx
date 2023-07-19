@@ -28,7 +28,7 @@ export function EmptyPrompt() {
               'xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle',
               {
                 defaultMessage: 'Expand your time range',
-              }
+              },
             )}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
@@ -36,7 +36,7 @@ export function EmptyPrompt() {
               'xpack.apm.infraTabs.emptyMessagePromptDescription',
               {
                 defaultMessage: 'Try searching over a longer period of time.',
-              }
+              },
             )}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
@@ -75,5 +75,5 @@ function NoResultsIllustration() {
 
 const noResultsIllustrationAlternativeText = i18n.translate(
   'xpack.apm.infraTabs.emptyMessageIllustrationAlternativeText',
-  { defaultMessage: 'A magnifying glass with an exclamation mark' }
+  { defaultMessage: 'A magnifying glass with an exclamation mark' },
 );

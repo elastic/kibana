@@ -119,7 +119,7 @@ describe('createStaticDataView', () => {
     expect(dataViewService.createAndSave).toHaveBeenCalled();
     // @ts-ignore
     expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(
-      expectedDataViewTitle
+      expectedDataViewTitle,
     );
     // @ts-ignore
     expect(dataViewService.createAndSave.mock.calls[0][1]).toBe(true);
@@ -132,7 +132,7 @@ describe('createStaticDataView', () => {
       .mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
+      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*',
     );
 
     await createStaticDataView({

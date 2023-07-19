@@ -193,7 +193,7 @@ describe('agent name helpers', () => {
     describe('when the serverlessType is AZURE_FUNCTIONS', () => {
       it('returns true', () => {
         expect(isAzureFunctionsAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(
-          true
+          true,
         );
       });
     });

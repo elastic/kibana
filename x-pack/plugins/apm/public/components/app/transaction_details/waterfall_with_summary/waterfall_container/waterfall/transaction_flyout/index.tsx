@@ -58,10 +58,10 @@ export function TransactionFlyout({
     (callApmApi) => {
       return callApmApi(
         'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
-        { params: { path: { traceId, transactionId }, query: { start, end } } }
+        { params: { path: { traceId, transactionId }, query: { start, end } } },
       );
     },
-    [traceId, transactionId, start, end]
+    [traceId, transactionId, start, end],
   );
 
   const isLoading = isPending(status);
@@ -78,7 +78,7 @@ export function TransactionFlyout({
                     'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
                     {
                       defaultMessage: 'Transaction details',
-                    }
+                    },
                   )}
                 </h4>
               </EuiTitle>

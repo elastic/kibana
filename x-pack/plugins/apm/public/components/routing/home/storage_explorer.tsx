@@ -43,7 +43,7 @@ export const storageExplorer = {
                   'xpack.apm.views.storageExplorer.giveFeedback',
                   {
                     defaultMessage: 'Give feedback',
-                  }
+                  },
                 )}
               </EuiLink>,
             ],

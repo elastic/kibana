@@ -17,7 +17,7 @@ describe('ChartContainer', () => {
         const { queryAllByTestId } = render(
           <ChartContainer height={100} status={status} hasData={false}>
             <div>My amazing component</div>
-          </ChartContainer>
+          </ChartContainer>,
         );
 
         expect(queryAllByTestId('loading')[0]).toBeInTheDocument();
@@ -28,7 +28,7 @@ describe('ChartContainer', () => {
         const { queryAllByText } = render(
           <ChartContainer height={100} status={status} hasData={true}>
             <div>My amazing component</div>
-          </ChartContainer>
+          </ChartContainer>,
         );
         expect(queryAllByText('My amazing component')[0]).toBeInTheDocument();
       });
@@ -44,12 +44,12 @@ describe('ChartContainer', () => {
           hasData={true}
         >
           <div>My amazing component</div>
-        </ChartContainer>
+        </ChartContainer>,
       );
       expect(
         getByText(
-          'An error happened when trying to fetch data. Please try again'
-        )
+          'An error happened when trying to fetch data. Please try again',
+        ),
       ).toBeInTheDocument();
     });
     it('shows failure message when status equals to Failure and has no data', () => {
@@ -60,12 +60,12 @@ describe('ChartContainer', () => {
           hasData={false}
         >
           <div>My amazing component</div>
-        </ChartContainer>
+        </ChartContainer>,
       );
       expect(
         getByText(
-          'An error happened when trying to fetch data. Please try again'
-        )
+          'An error happened when trying to fetch data. Please try again',
+        ),
       ).toBeInTheDocument();
     });
   });
@@ -79,7 +79,7 @@ describe('ChartContainer', () => {
           hasData={true}
         >
           <div>My amazing component</div>
-        </ChartContainer>
+        </ChartContainer>,
       );
       expect(getByText('My amazing component')).toBeInTheDocument();
     });
@@ -91,7 +91,7 @@ describe('ChartContainer', () => {
           hasData={false}
         >
           <div>My amazing component</div>
-        </ChartContainer>
+        </ChartContainer>,
       );
       expect(getByText('My amazing component')).toBeInTheDocument();
     });

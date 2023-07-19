@@ -56,7 +56,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: () => ({ get: () => {} } as any),
+  shortUrls: () => ({ get: () => {} }) as any,
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 
@@ -144,7 +144,7 @@ export function MockApmPluginStorybook({
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
   const KibanaReactContext = createKibanaReactContext(
-    contextMock.core as unknown as Partial<CoreStart>
+    contextMock.core as unknown as Partial<CoreStart>,
   );
 
   const history2 = createMemoryHistory({

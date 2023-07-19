@@ -18,7 +18,7 @@ export async function getLatestApmPackage({
 }) {
   const packageClient = fleetPluginStart.packageService.asScoped(request);
   const latestPackage = await packageClient.fetchFindLatestPackage(
-    APM_PACKAGE_NAME
+    APM_PACKAGE_NAME,
   );
   const packageInfo =
     'buffer' in latestPackage

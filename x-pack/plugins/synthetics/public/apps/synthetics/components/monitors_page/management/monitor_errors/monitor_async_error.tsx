@@ -40,11 +40,10 @@ export const MonitorAsyncError = () => {
           {Object.values(syncErrors ?? {}).map((e) => {
             return (
               <li key={e.locationId}>
-                {`${
-                  locations.find((location) => location.id === e.locationId)?.label
-                } - ${STATUS_LABEL}: ${e.error?.status ?? NOT_AVAILABLE_LABEL}; ${REASON_LABEL}: ${
-                  e.error?.reason ?? NOT_AVAILABLE_LABEL
-                }`}
+                {`${locations.find((location) => location.id === e.locationId)
+                  ?.label} - ${STATUS_LABEL}: ${
+                  e.error?.status ?? NOT_AVAILABLE_LABEL
+                }; ${REASON_LABEL}: ${e.error?.reason ?? NOT_AVAILABLE_LABEL}`}
               </li>
             );
           })}

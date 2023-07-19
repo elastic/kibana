@@ -59,7 +59,7 @@ export function ServiceGroupsCard({
             {serviceGroup.description ||
               i18n.translate(
                 'xpack.apm.serviceGroups.cardsList.emptyDescription',
-                { defaultMessage: 'No description available' }
+                { defaultMessage: 'No description available' },
               )}
           </EuiText>
         </EuiFlexItem>
@@ -74,7 +74,7 @@ export function ServiceGroupsCard({
                       defaultMessage:
                         '{servicesCount} {servicesCount, plural, one {service} other {services}}',
                       values: { servicesCount: serviceGroupCounts.services },
-                    }
+                    },
                   )}
               </EuiText>
             </EuiFlexItem>
@@ -87,7 +87,7 @@ export function ServiceGroupsCard({
                   'xpack.apm.home.serviceGroups.tooltip.activeAlertsExplanation',
                   {
                     defaultMessage: 'Active alerts',
-                  }
+                  },
                 )}
               >
                 <EuiBadge
@@ -106,7 +106,7 @@ export function ServiceGroupsCard({
                       defaultMessage:
                         '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
                       values: { alertsCount: serviceGroupCounts.alerts },
-                    }
+                    },
                   )}
                 </EuiBadge>
               </EuiToolTip>

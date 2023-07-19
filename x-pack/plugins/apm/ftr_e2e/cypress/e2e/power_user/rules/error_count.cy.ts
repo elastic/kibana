@@ -48,7 +48,7 @@ describe('Rules', () => {
       generateData({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -94,7 +94,7 @@ describe('Rules', () => {
 
         // Go to stack management
         cy.visitKibana(
-          '/app/management/insightsAndAlerting/triggersActions/rules'
+          '/app/management/insightsAndAlerting/triggersActions/rules',
         );
 
         // Create a rule

@@ -28,15 +28,15 @@ export function ErrorMetadata({ error }: Props) {
               id: error.error.id,
             },
           },
-        }
+        },
       );
     },
-    [error.error.id]
+    [error.error.id],
   );
 
   const sections = useMemo(
     () => getSectionsFromFields(errorEvent?.metadata || {}),
-    [errorEvent?.metadata]
+    [errorEvent?.metadata],
   );
 
   return (

@@ -22,7 +22,7 @@ export function useDateRangeRedirect() {
   const { data, uiSettings } = useKibanaServices();
 
   const timePickerTimeDefaults = uiSettings.get<TimePickerTimeDefaults>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS,
   );
 
   const timePickerSharedState = data.query.timefilter.timefilter.getTime();

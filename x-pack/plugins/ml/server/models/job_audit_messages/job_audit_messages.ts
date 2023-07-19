@@ -20,7 +20,7 @@ const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
 
 type LevelName = keyof typeof LEVEL;
-type LevelValue = typeof LEVEL[keyof typeof LEVEL];
+type LevelValue = (typeof LEVEL)[keyof typeof LEVEL];
 
 // filter to match job_type: 'anomaly_detector' or no job_type field at all
 // if no job_type field exist, we can assume the message is for an anomaly detector job

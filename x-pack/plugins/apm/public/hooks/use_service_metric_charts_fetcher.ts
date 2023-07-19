@@ -55,11 +55,11 @@ export function useServiceMetricChartsFetcher({
                 agentName,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end, agentName, serviceNodeName]
+    [environment, kuery, serviceName, start, end, agentName, serviceNodeName],
   );
 
   return {

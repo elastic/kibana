@@ -65,7 +65,7 @@ function getCypressCliArgs(): Record<string, unknown> {
   }
 
   const { $0, _, ...cypressCliArgs } = JSON.parse(
-    process.env.CYPRESS_CLI_ARGS
+    process.env.CYPRESS_CLI_ARGS,
   ) as Record<string, unknown>;
 
   const spec =

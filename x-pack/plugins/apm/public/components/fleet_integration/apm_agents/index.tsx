@@ -47,7 +47,7 @@ export function ApmAgents({ policy, newPolicy, onChange }: Props) {
             </EuiPanel>
             <EuiSpacer />
           </Fragment>
-        )
+        ),
       )}
     </div>
   );

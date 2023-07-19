@@ -20,7 +20,7 @@ describe('ServiceLink', () => {
 
     expect(await screen.findByTestId('serviceLink_java')).toHaveAttribute(
       'href',
-      `/basepath/app/apm/services/opbeans-java/overview?${params}`
+      `/basepath/app/apm/services/opbeans-java/overview?${params}`,
     );
   });
 
@@ -29,15 +29,15 @@ describe('ServiceLink', () => {
     expect(() => render(<IOSAgent />)).not.toThrowError();
 
     expect(
-      await screen.findByTestId('serviceLink_android/java')
+      await screen.findByTestId('serviceLink_android/java'),
     ).toHaveAttribute(
       'href',
-      `/basepath/app/apm/mobile-services/opbeans-android/overview?${params}`
+      `/basepath/app/apm/mobile-services/opbeans-android/overview?${params}`,
     );
 
     expect(await screen.findByTestId('serviceLink_iOS/swift')).toHaveAttribute(
       'href',
-      `/basepath/app/apm/mobile-services/opbeans-swift/overview?${params}`
+      `/basepath/app/apm/mobile-services/opbeans-swift/overview?${params}`,
     );
   });
 });

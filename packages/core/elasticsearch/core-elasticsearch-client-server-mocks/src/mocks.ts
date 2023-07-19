@@ -56,7 +56,7 @@ export interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInst
 
 const createMockedApi = <
   T = unknown,
-  Y extends [any, TransportRequestOptions] = [any, TransportRequestOptions]
+  Y extends [any, TransportRequestOptions] = [any, TransportRequestOptions],
 >(): ClientApiMockInstance<T, Y> => {
   const mock: ClientApiMockInstance<T, Y> = jest.fn() as any;
 

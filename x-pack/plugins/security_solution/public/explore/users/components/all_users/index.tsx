@@ -53,7 +53,7 @@ export type UsersTableColumns = [
   Columns<User['name']>,
   Columns<User['lastSeen']>,
   Columns<User['domain']>,
-  Columns<RiskSeverity>?
+  Columns<RiskSeverity>?,
 ];
 
 const rowItems: ItemsPerRow[] = [

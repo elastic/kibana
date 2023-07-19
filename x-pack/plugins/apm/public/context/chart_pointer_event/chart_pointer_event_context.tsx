@@ -23,7 +23,7 @@ export function ChartPointerEventContextProvider({
   const pointerEventTargetRef = useRef(new EventTarget());
   const updatePointerEventRef = useRef((pointerEvent: PointerEvent) => {
     pointerEventTargetRef.current.dispatchEvent(
-      new CustomEvent(UPDATE_POINTER_EVENT, { detail: pointerEvent })
+      new CustomEvent(UPDATE_POINTER_EVENT, { detail: pointerEvent }),
     );
   });
 

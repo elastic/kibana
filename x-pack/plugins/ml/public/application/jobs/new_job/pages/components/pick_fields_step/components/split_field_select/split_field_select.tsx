@@ -40,7 +40,7 @@ export const SplitFieldSelect: FC<Props> = ({
         label: f.name,
         field: f,
         css: optionCss,
-      } as DropDownLabel)
+      }) as DropDownLabel
   );
 
   const selection: EuiComboBoxOptionOption[] = [];

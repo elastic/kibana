@@ -43,11 +43,11 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
       }}
       cancelButtonText={i18n.translate(
         'xpack.apm.agentConfig.deleteModal.cancel',
-        { defaultMessage: `Cancel` }
+        { defaultMessage: `Cancel` },
       )}
       confirmButtonText={i18n.translate(
         'xpack.apm.agentConfig.deleteModal.confirm',
-        { defaultMessage: `Delete` }
+        { defaultMessage: `Delete` },
       )}
       confirmButtonDisabled={isDeleting}
       buttonColor="danger"
@@ -68,7 +68,7 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
 
 async function deleteConfig(
   config: Config,
-  toasts: NotificationsStart['toasts']
+  toasts: NotificationsStart['toasts'],
 ) {
   try {
     await callApmApi(
@@ -83,13 +83,13 @@ async function deleteConfig(
             },
           },
         },
-      }
+      },
     );
 
     toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.agentConfig.deleteSection.deleteConfigSucceededTitle',
-        { defaultMessage: 'Configuration was deleted' }
+        { defaultMessage: 'Configuration was deleted' },
       ),
       text: i18n.translate(
         'xpack.apm.agentConfig.deleteSection.deleteConfigSucceededText',
@@ -97,14 +97,14 @@ async function deleteConfig(
           defaultMessage:
             'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
           values: { serviceName: getOptionLabel(config.service.name) },
-        }
+        },
       ),
     });
   } catch (error) {
     toasts.addDanger({
       title: i18n.translate(
         'xpack.apm.agentConfig.deleteSection.deleteConfigFailedTitle',
-        { defaultMessage: 'Configuration could not be deleted' }
+        { defaultMessage: 'Configuration could not be deleted' },
       ),
       text: i18n.translate(
         'xpack.apm.agentConfig.deleteSection.deleteConfigFailedText',
@@ -115,7 +115,7 @@ async function deleteConfig(
             serviceName: getOptionLabel(config.service.name),
             errorMessage: error.message,
           },
-        }
+        },
       ),
     });
   }

@@ -135,7 +135,7 @@ export function createBackgroundTaskUtilizationAggregator(
       ([adhoc, recurring, load]: [
         Pick<BackgroundTaskUtilizationStat, 'adhoc'>,
         Pick<BackgroundTaskUtilizationStat, 'recurring'>,
-        Pick<BackgroundTaskUtilizationStat, 'load'>
+        Pick<BackgroundTaskUtilizationStat, 'load'>,
       ]) => {
         return {
           key: 'utilization',

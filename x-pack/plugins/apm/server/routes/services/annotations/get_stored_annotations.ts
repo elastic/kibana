@@ -61,8 +61,8 @@ export function getStoredAnnotations({
               index: annotationsClient.index,
               body,
             },
-            { meta: true }
-          )
+            { meta: true },
+          ),
         )) as any;
 
       return response.hits.hits.map((hit) => {
@@ -88,7 +88,7 @@ export function getStoredAnnotations({
 
         if (type === 'security_exception') {
           logger.warn(
-            `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
+            `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`,
           );
           return [];
         }

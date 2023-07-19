@@ -26,7 +26,7 @@ function StepComponent() {
             {
               defaultMessage:
                 'After the agent starts, you can install APM agents on your hosts to collect data from your applications and services.',
-            }
+            },
           )}
         </p>
       </EuiText>
@@ -39,7 +39,7 @@ function StepComponent() {
       >
         {i18n.translate(
           'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText',
-          { defaultMessage: 'Install APM Agent' }
+          { defaultMessage: 'Install APM Agent' },
         )}
       </EuiButton>
     </>
@@ -55,7 +55,7 @@ export function getApmEnrollmentFlyoutData(): Pick<
       'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentTitle',
       {
         defaultMessage: 'Install APM Agent',
-      }
+      },
     ),
     Component: StepComponent,
   };

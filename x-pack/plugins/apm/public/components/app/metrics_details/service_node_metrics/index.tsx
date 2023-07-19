@@ -74,7 +74,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
         query,
       }),
     }),
-    [apmRouter, query, serviceName, serviceNodeName]
+    [apmRouter, query, serviceName, serviceNodeName],
   );
 
   const { data } = useServiceMetricChartsFetcher({
@@ -98,11 +98,11 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
                 environment,
               },
             },
-          }
+          },
         );
       }
     },
-    [kuery, serviceName, serviceNodeName, start, end, environment]
+    [kuery, serviceName, serviceNodeName, start, end, environment],
   );
 
   const { docLinks } = useApmPluginContext().core;
@@ -117,7 +117,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
             'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningTitle',
             {
               defaultMessage: 'Could not identify JVMs',
-            }
+            },
           )}
           iconType="help"
           color="warning"
@@ -133,7 +133,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
                 >
                   {i18n.translate(
                     'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningDocumentationLink',
-                    { defaultMessage: 'documentation of APM Server' }
+                    { defaultMessage: 'documentation of APM Server' },
                   )}
                 </EuiLink>
               ),
@@ -151,7 +151,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
                   'xpack.apm.serviceNodeMetrics.serviceName',
                   {
                     defaultMessage: 'Service name',
-                  }
+                  },
                 )}
                 title={
                   <EuiToolTip content={serviceName}>
@@ -168,7 +168,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
                   'xpack.apm.serviceNodeMetrics.host',
                   {
                     defaultMessage: 'Host',
-                  }
+                  },
                 )}
                 title={
                   <EuiToolTip content={host}>
@@ -185,7 +185,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
                   'xpack.apm.serviceNodeMetrics.containerId',
                   {
                     defaultMessage: 'Container ID',
-                  }
+                  },
                 )}
                 title={
                   <EuiToolTip content={containerId}>

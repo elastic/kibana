@@ -12,7 +12,7 @@ import { customLogsRoutes } from '../components/app/custom_logs/wizard';
 import { Home } from '../components/app/home';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<
-  typeof routes[T]['params']
+  (typeof routes)[T]['params']
 >;
 
 type DecodeParams<TParams extends Params | undefined> = {

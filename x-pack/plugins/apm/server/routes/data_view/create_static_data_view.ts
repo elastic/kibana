@@ -73,7 +73,7 @@ export async function createStaticDataView({
         created: false,
         reason: i18n.translate(
           'xpack.apm.dataView.alreadyExistsInActiveSpace',
-          { defaultMessage: 'Dataview already exists in the active space' }
+          { defaultMessage: 'Dataview already exists in the active space' },
         ),
       };
     }
@@ -98,7 +98,7 @@ export async function createStaticDataView({
               {
                 defaultMessage:
                   'Dataview already exists in another space but is not made available in this space',
-              }
+              },
             ),
           };
         }
@@ -138,7 +138,7 @@ async function addDataViewToAllSpaces(resources: APMRouteHandlerResources) {
   return scopedClient.updateObjectsSpaces(
     [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
     ['*'],
-    []
+    [],
   );
 }
 
@@ -186,6 +186,6 @@ function createAndSaveStaticDataView({
         },
       },
     },
-    true
+    true,
   );
 }

@@ -35,11 +35,11 @@ import { baseRoutes, routes } from '../routes';
 import { CustomLogs } from '../routes/templates/custom_logs';
 
 export type BreadcrumbTitle<
-  T extends { [K in keyof T]?: string | undefined } = {}
+  T extends { [K in keyof T]?: string | undefined } = {},
 > = string | ((props: RouteComponentProps<T>) => string) | null;
 
 export interface RouteDefinition<
-  T extends { [K in keyof T]?: string | undefined } = any
+  T extends { [K in keyof T]?: string | undefined } = any,
 > extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;
 }
@@ -48,7 +48,7 @@ export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
   {
     defaultMessage: 'Onboarding',
-  }
+  },
 );
 
 export const breadcrumbsApp = {
@@ -196,7 +196,7 @@ export const renderApp = ({
       deps={deps}
       corePlugins={corePlugins}
     />,
-    element
+    element,
   );
   return () => {
     corePlugins.data.search.session.clear();

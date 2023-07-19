@@ -14,7 +14,7 @@ export type EmbeddableFactoryDefinition<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T = unknown
+  T = unknown,
 > =
   // Required parameters
   Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> &

@@ -37,7 +37,7 @@ export function LabsFlyout({ onClose }: Props) {
 
   const { data, status } = useFetcher(
     (callApmApi) => callApmApi('GET /internal/apm/settings/labs'),
-    []
+    [],
   );
   const labsItems = data?.labsItems || [];
 

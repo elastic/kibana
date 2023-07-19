@@ -54,7 +54,7 @@ export function FormRowSuggestionsSelect({
           isClearable={false}
           placeholder={i18n.translate(
             'xpack.apm.agentConfig.servicePage.service.placeholder',
-            { defaultMessage: 'Select Option' }
+            { defaultMessage: 'Select Option' },
           )}
           dataTestSubj={dataTestSubj}
           start={moment().subtract(24, 'h').toISOString()}

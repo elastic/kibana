@@ -18,7 +18,7 @@ describe('getCriticalPath', () => {
     const waterfall = getWaterfall({
       traceItems: {
         traceDocs: events.map(
-          (event) => dedot(event, {}) as Transaction | Span
+          (event) => dedot(event, {}) as Transaction | Span,
         ),
         errorDocs: [],
         exceedsMax: false,
@@ -46,9 +46,9 @@ describe('getCriticalPath', () => {
         .timestamp(1)
         .duration(100)
         .children(
-          service.span('foo', 'external', 'db').duration(100).timestamp(1)
+          service.span('foo', 'external', 'db').duration(100).timestamp(1),
         )
-        .serialize()
+        .serialize(),
     );
 
     expect(segments).toEqual([
@@ -71,13 +71,13 @@ describe('getCriticalPath', () => {
         .duration(100)
         .children(
           service.span('foo', 'external', 'db').duration(99).timestamp(1),
-          service.span('bar', 'external', 'db').duration(100).timestamp(1)
+          service.span('bar', 'external', 'db').duration(100).timestamp(1),
         )
-        .serialize()
+        .serialize(),
     );
 
     const longerSpan = waterfall.items.find(
-      (item) => (item.doc as Span).span?.name === 'bar'
+      (item) => (item.doc as Span).span?.name === 'bar',
     );
 
     expect(segments).toEqual([
@@ -104,9 +104,9 @@ describe('getCriticalPath', () => {
         .timestamp(1)
         .duration(100)
         .children(
-          service.span('foo', 'external', 'db').duration(50).timestamp(11)
+          service.span('foo', 'external', 'db').duration(50).timestamp(11),
         )
-        .serialize()
+        .serialize(),
     );
 
     expect(
@@ -115,7 +115,7 @@ describe('getCriticalPath', () => {
         duration: segment.duration,
         id: segment.item.id,
         offset: segment.offset,
-      }))
+      })),
     ).toEqual([
       { self: false, duration: 100000, id: waterfall.items[0].id, offset: 0 },
       {
@@ -166,10 +166,10 @@ describe('getCriticalPath', () => {
             .timestamp(1)
             .children(
               service.span('s6', 'external', 'db').duration(30).timestamp(5),
-              service.span('s7', 'external', 'db').duration(30).timestamp(35)
-            )
+              service.span('s7', 'external', 'db').duration(30).timestamp(35),
+            ),
         )
-        .serialize()
+        .serialize(),
     );
 
     const [_s1, s2, _s5, _s6, _s7, s3, s4] = waterfall.items;
@@ -183,7 +183,7 @@ describe('getCriticalPath', () => {
           offset: segment.offset,
         }))
         .filter((segment) => segment.self)
-        .map((segment) => segment.id)
+        .map((segment) => segment.id),
     ).toEqual([s4.id, s3.id, s2.id]);
   });
 
@@ -207,10 +207,10 @@ describe('getCriticalPath', () => {
             .timestamp(41)
             .children(
               service.span('s4', 'external', 'db').duration(20).timestamp(61),
-              service.span('s5', 'external', 'db').duration(30).timestamp(51)
-            )
+              service.span('s5', 'external', 'db').duration(30).timestamp(51),
+            ),
         )
-        .serialize()
+        .serialize(),
     );
 
     const [s1, s2, s3, s5, _s4] = waterfall.items;
@@ -223,7 +223,7 @@ describe('getCriticalPath', () => {
           id: segment.item.id,
           offset: segment.offset,
         }))
-        .filter((segment) => segment.self)
+        .filter((segment) => segment.self),
     ).toEqual([
       // T9-T10
       {

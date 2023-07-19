@@ -466,10 +466,13 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list.map(mapFn).reduce((result: Record<string, any>, value, i) => {
-    result[`condition${i}`] = value;
-    return result;
-  }, {} as Record<string, unknown>);
+  list.map(mapFn).reduce(
+    (result: Record<string, any>, value, i) => {
+      result[`condition${i}`] = value;
+      return result;
+    },
+    {} as Record<string, unknown>
+  );
 
 const formatAlertResult = <AlertResult>(
   alertResult: {

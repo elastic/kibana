@@ -26,7 +26,7 @@ const rackServiceNameHint = i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
   {
     defaultMessage: "Defaults to the name of your Rack app's class.",
-  }
+  },
 );
 
 export const rackLineNumbers = {

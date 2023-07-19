@@ -20,7 +20,7 @@ describe('Popover', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('link', { name: /Dependency Details/i })
+          screen.getByRole('link', { name: /Dependency Details/i }),
         ).toBeInTheDocument();
       });
     });
@@ -32,7 +32,7 @@ describe('Popover', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/813-mam-392.mktoresp.com:443/)
+          screen.getByText(/813-mam-392.mktoresp.com:443/),
         ).toBeInTheDocument();
       });
     });
@@ -54,7 +54,7 @@ describe('Popover', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('link', { name: /service details/i })
+          screen.getByRole('link', { name: /service details/i }),
         ).toBeInTheDocument();
       });
     });

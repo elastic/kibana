@@ -203,25 +203,29 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                       },
                     }}
                   />
-                  {formData.index_options !== 'positions' && formData.index_options !== 'offsets' && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiCallOut
-                        title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorTitle', {
-                          defaultMessage: 'Positions not enabled.',
-                        })}
-                        color="danger"
-                        iconType="warning"
-                      >
-                        <p>
-                          {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
-                            defaultMessage:
-                              'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
-                          })}
-                        </p>
-                      </EuiCallOut>
-                    </>
-                  )}
+                  {formData.index_options !== 'positions' &&
+                    formData.index_options !== 'offsets' && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiCallOut
+                          title={i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
+                            {
+                              defaultMessage: 'Positions not enabled.',
+                            }
+                          )}
+                          color="danger"
+                          iconType="warning"
+                        >
+                          <p>
+                            {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
+                              defaultMessage:
+                                'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
+                            })}
+                          </p>
+                        </EuiCallOut>
+                      </>
+                    )}
                 </>
               );
             }}

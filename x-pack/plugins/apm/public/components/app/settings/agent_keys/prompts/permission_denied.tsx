@@ -19,7 +19,7 @@ export function PermissionDenied() {
             'xpack.apm.settings.agentKeys.noPermissionToManagelApiKeysTitle',
             {
               defaultMessage: 'You need permission to manage API keys',
-            }
+            },
           )}
         </h2>
       }
@@ -29,7 +29,7 @@ export function PermissionDenied() {
             'xpack.apm.settings.agentKeys.noPermissionToManagelApiKeysDescription',
             {
               defaultMessage: 'Contact your system administrator',
-            }
+            },
           )}
         </p>
       }

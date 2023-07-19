@@ -11,18 +11,21 @@ import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
-  return Object.entries(params).reduce((acc, [key, field]) => {
-    const objectKey = pKey.length ? `${pKey}.${key}` : key;
-    if (typeof field === 'object' && field != null) {
-      if (Array.isArray(field) && field.length > 0) {
-        return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
-      } else {
-        return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
+  return Object.entries(params).reduce(
+    (acc, [key, field]) => {
+      const objectKey = pKey.length ? `${pKey}.${key}` : key;
+      if (typeof field === 'object' && field != null) {
+        if (Array.isArray(field) && field.length > 0) {
+          return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
+        } else {
+          return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
+        }
       }
-    }
-    acc[objectKey] = Array.isArray(field) ? field : [field];
-    return acc;
-  }, {} as Record<string, unknown[]>);
+      acc[objectKey] = Array.isArray(field) ? field : [field];
+      return acc;
+    },
+    {} as Record<string, unknown[]>
+  );
 };
 
 export const getInventoryViewInAppUrl = (

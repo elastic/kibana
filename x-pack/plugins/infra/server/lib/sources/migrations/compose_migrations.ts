@@ -23,7 +23,7 @@ type MigratedAttributesOf<MigrationFn> = MigrationFn extends SavedObjectMigratio
 export function composeMigrations<
   FirstFn extends SavedObjectMigrationFn<any, any>,
   IntermediateFns extends SavedObjectMigrationFn[],
-  LastFn extends SavedObjectMigrationFn<any, any>
+  LastFn extends SavedObjectMigrationFn<any, any>,
 >(
   ...migrations: [FirstFn, ...IntermediateFns, LastFn]
 ): SavedObjectMigrationFn<InputAttributesOf<FirstFn>, MigratedAttributesOf<LastFn>> {

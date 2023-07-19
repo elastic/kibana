@@ -21,7 +21,7 @@ export function criticalPathToFlamegraph(
   params: {
     criticalPath: CriticalPathResponse;
     colors: string[];
-  } & ({ serviceName: string; transactionName: string } | {})
+  } & ({ serviceName: string; transactionName: string } | {}),
 ): {
   viewModel: ColumnarViewModel;
   operationId: string[];
@@ -61,7 +61,7 @@ export function criticalPathToFlamegraph(
       const rgb = parseToRgb(lightenColor(vizColor));
 
       return [rgb.red / 255, rgb.green / 255, rgb.blue / 255, 1];
-    }
+    },
   );
 
   const pickColor = memoize((identifier: string) => {
@@ -73,7 +73,7 @@ export function criticalPathToFlamegraph(
   function addNodeToFlamegraph(
     node: CriticalPathTreeNode,
     x: number,
-    y: number
+    y: number,
   ) {
     let nodeOperationId: string;
     let nodeLabel: string;

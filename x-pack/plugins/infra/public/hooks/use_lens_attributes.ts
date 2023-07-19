@@ -36,7 +36,7 @@ export type LayerType = Exclude<LensLayerType, 'annotations' | 'metricTrendline'
 export interface Layer<
   TOptions extends Options,
   TFormulaConfig extends FormulaConfig | FormulaConfig[],
-  TLayerType extends LayerType = LayerType
+  TLayerType extends LayerType = LayerType,
 > {
   layerType: TLayerType;
   data: TFormulaConfig;
@@ -45,7 +45,7 @@ export interface Layer<
 
 interface UseLensAttributesBaseParams<
   TOptions extends Options,
-  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
+  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>,
 > {
   dataView?: DataView;
   layers: TLayers;
@@ -175,7 +175,7 @@ export const useLensAttributes = ({
 
 const chartFactory = <
   TOptions,
-  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
+  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>,
 >({
   dataView,
   formulaAPI,

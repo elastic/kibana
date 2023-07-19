@@ -315,7 +315,9 @@ describe('ReferenceLines', () => {
       ['yAccessorLeft', 'below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
       ['yAccessorRight', 'above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['yAccessorRight', 'below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
-    ] as Array<[string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]>)(
+    ] as Array<
+      [string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]
+    >)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const position = getAxisFromId(layerPrefix);
@@ -371,7 +373,9 @@ describe('ReferenceLines', () => {
     it.each([
       ['xAccessor', 'above', { x0: 1, x1: 2 }, { x0: 2, x1: undefined }],
       ['xAccessor', 'below', { x0: undefined, x1: 1 }, { x0: 1, x1: 2 }],
-    ] as Array<[string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, XCoords, XCoords]>)(
+    ] as Array<
+      [string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, XCoords, XCoords]
+    >)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const wrapper = shallow(
@@ -480,7 +484,9 @@ describe('ReferenceLines', () => {
     it.each([
       ['above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
-    ] as Array<[Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]>)(
+    ] as Array<
+      [Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]
+    >)(
       'should allow overlap for different axes when on same direction on different axes: 1x Left + 1x Right both %s',
       (fill, coordsA, coordsB) => {
         const wrapper = shallow(
@@ -670,7 +676,9 @@ describe('ReferenceLines', () => {
     it.each([
       ['yAccessorLeft', 'above', { y0: 10, y1: undefined }, { y0: 10, y1: undefined }],
       ['yAccessorLeft', 'below', { y0: undefined, y1: 5 }, { y0: undefined, y1: 5 }],
-    ] as Array<[string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]>)(
+    ] as Array<
+      [string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]
+    >)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const position = getAxisFromId(layerPrefix);
@@ -723,7 +731,9 @@ describe('ReferenceLines', () => {
     it.each([
       ['xAccessor', 'above', { x0: 1, x1: undefined }, { x0: 1, x1: undefined }],
       ['xAccessor', 'below', { x0: undefined, x1: 1 }, { x0: undefined, x1: 1 }],
-    ] as Array<[string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, XCoords, XCoords]>)(
+    ] as Array<
+      [string, Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, XCoords, XCoords]
+    >)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const value = coordsA.x0 ?? coordsA.x1!;

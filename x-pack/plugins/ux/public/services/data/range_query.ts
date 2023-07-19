@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 export function rangeQuery(
   start?: number,
   end?: number,
-  field = '@timestamp'
+  field = '@timestamp',
 ): estypes.QueryDslQueryContainer[] {
   return [
     {

@@ -42,7 +42,7 @@ export const sourceMapRt = t.intersection([
 export type SourceMap = t.TypeOf<typeof sourceMapRt>;
 
 function throwNotImplementedIfSourceMapNotAvailable(
-  featureFlags: ApmFeatureFlags
+  featureFlags: ApmFeatureFlags,
 ): void {
   if (!featureFlags.sourcemapApiAvailable) {
     throw Boom.notImplemented();
@@ -81,7 +81,7 @@ const listSourceMapRoute = createApmServerRoute({
     } catch (e) {
       throw Boom.internal(
         'Something went wrong while fetching artifacts source maps',
-        e
+        e,
       );
     }
   },
@@ -163,7 +163,7 @@ const uploadSourceMapRoute = createApmServerRoute({
     } catch (e) {
       throw Boom.internal(
         'Something went wrong while creating a new source map',
-        e
+        e,
       );
     }
   },
@@ -200,7 +200,7 @@ const deleteSourceMapRoute = createApmServerRoute({
     } catch (e) {
       throw Boom.internal(
         `Something went wrong while deleting source map. id: ${id}`,
-        e
+        e,
       );
     }
   },

@@ -16,7 +16,10 @@ const DEFAULT_BUFFER_MAX_DURATION = 50;
 
 export class BufferedTaskStore implements Updatable {
   private bufferedUpdate: Operation<ConcreteTaskInstance>;
-  constructor(private readonly taskStore: TaskStore, options: BufferOptions) {
+  constructor(
+    private readonly taskStore: TaskStore,
+    options: BufferOptions
+  ) {
     this.bufferedUpdate = createBuffer<ConcreteTaskInstance>(
       // Setting validate: false because we'll validate per update call
       //

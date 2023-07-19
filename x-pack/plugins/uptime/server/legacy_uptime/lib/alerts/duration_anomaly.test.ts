@@ -192,9 +192,8 @@ describe('duration anomaly alert', () => {
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_REASON]: `Abnormal (${getSeverityType(
               anomaly.severity
-            )} level) response time detected on uptime-monitor with url ${
-              mockPing.url?.full
-            } at date. Anomaly severity score is ${anomaly.severity}.
+            )} level) response time detected on uptime-monitor with url ${mockPing.url
+              ?.full} at date. Anomaly severity score is ${anomaly.severity}.
 Response times as high as ${slowestResponse} ms have been detected from location ${
               anomaly.entityValue
             }. Expected response time is ${typicalResponse} ms.`,
@@ -222,9 +221,8 @@ Response times as high as ${slowestResponse} ms have been detected from location
         });
         const reasonMsg = `Abnormal (${getSeverityType(
           anomaly.severity
-        )} level) response time detected on uptime-monitor with url ${
-          mockPing.url?.full
-        } at date. Anomaly severity score is ${anomaly.severity}.
+        )} level) response time detected on uptime-monitor with url ${mockPing.url
+          ?.full} at date. Anomaly severity score is ${anomaly.severity}.
 Response times as high as ${slowestResponse} ms have been detected from location ${
           anomaly.entityValue
         }. Expected response time is ${typicalResponse} ms.`;

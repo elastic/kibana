@@ -51,11 +51,11 @@ export function useLatencyCorrelations() {
   // `setResponse.flush()` can be used to enforce an update.
   const [response, setResponseUnDebounced] = useReducer(
     getReducer<LatencyCorrelationsResponse & CorrelationsProgress>(),
-    getInitialResponse()
+    getInitialResponse(),
   );
   const setResponse = useMemo(
     () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
-    []
+    [],
   );
 
   const abortCtrl = useRef(new AbortController());
@@ -102,7 +102,7 @@ export function useLatencyCorrelations() {
               chartType: LatencyDistributionChartType.latencyCorrelations,
             },
           },
-        }
+        },
       );
       responseUpdate.overallHistogram = overallHistogram;
       responseUpdate.totalDocCount = totalDocCount;
@@ -125,7 +125,7 @@ export function useLatencyCorrelations() {
           params: {
             query: fetchParams,
           },
-        }
+        },
       );
 
       if (abortCtrl.current.signal.aborted) {
@@ -154,7 +154,7 @@ export function useLatencyCorrelations() {
                 fieldCandidates: fieldCandidateChunk,
               },
             },
-          }
+          },
         );
 
         if (fieldValuePairChunkResponse.fieldValuePairs.length > 0) {
@@ -186,7 +186,7 @@ export function useLatencyCorrelations() {
       const latencyCorrelations: LatencyCorrelation[] = [];
       const fieldValuePairChunks = chunk(
         getPrioritizedFieldValuePairs(fieldValuePairs),
-        chunkSize
+        chunkSize,
       );
 
       const fallbackResults: LatencyCorrelation[] = [];
@@ -203,7 +203,7 @@ export function useLatencyCorrelations() {
                 fieldValuePairs: fieldValuePairChunk,
               },
             },
-          }
+          },
         );
 
         if (significantCorrelations.latencyCorrelations.length > 0) {
@@ -211,7 +211,7 @@ export function useLatencyCorrelations() {
             fieldsToSample.add(d.fieldName);
           });
           latencyCorrelations.push(
-            ...significantCorrelations.latencyCorrelations
+            ...significantCorrelations.latencyCorrelations,
           );
           responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
@@ -300,7 +300,7 @@ export function useLatencyCorrelations() {
       loaded: Math.round(loaded * 100) / 100,
       isRunning,
     }),
-    [error, loaded, isRunning]
+    [error, loaded, isRunning],
   );
 
   return {

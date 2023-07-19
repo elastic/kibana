@@ -23,7 +23,7 @@ export enum ServerlessType {
 
 export function getServerlessTypeFromCloudData(
   cloudProvider?: string,
-  cloudServiceName?: string
+  cloudServiceName?: string,
 ): ServerlessType | undefined {
   if (
     cloudProvider?.toLowerCase() === 'aws' &&

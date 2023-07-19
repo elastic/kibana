@@ -474,13 +474,14 @@ export class ActionsClient {
       actionFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
     );
 
-    savedObjectsActions.forEach(({ id }) =>
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.FIND,
-          savedObject: { type: 'action', id },
-        })
-      )
+    savedObjectsActions.forEach(
+      ({ id }) =>
+        this.auditLogger?.log(
+          connectorAuditEvent({
+            action: ConnectorAuditAction.FIND,
+            savedObject: { type: 'action', id },
+          })
+        )
     );
 
     const mergedResult = [
@@ -504,14 +505,15 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('get');
     } catch (error) {
-      ids.forEach((id) =>
-        this.auditLogger?.log(
-          connectorAuditEvent({
-            action: ConnectorAuditAction.GET,
-            savedObject: { type: 'action', id },
-            error,
-          })
-        )
+      ids.forEach(
+        (id) =>
+          this.auditLogger?.log(
+            connectorAuditEvent({
+              action: ConnectorAuditAction.GET,
+              savedObject: { type: 'action', id },
+              error,
+            })
+          )
       );
       throw error;
     }

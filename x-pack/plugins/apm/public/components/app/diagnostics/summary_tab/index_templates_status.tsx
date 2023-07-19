@@ -46,12 +46,12 @@ export function getIsIndexTemplateOk(diagnosticsBundle?: DiagnosticsBundle) {
 
   const hasNonStandardIndexTemplates =
     diagnosticsBundle.apmIndexTemplates?.some(
-      ({ isNonStandard }) => isNonStandard
+      ({ isNonStandard }) => isNonStandard,
     );
 
   const isEveryExpectedApmIndexTemplateInstalled =
     diagnosticsBundle.apmIndexTemplates.every(
-      ({ exists, isNonStandard }) => isNonStandard || exists
+      ({ exists, isNonStandard }) => isNonStandard || exists,
     );
 
   return (

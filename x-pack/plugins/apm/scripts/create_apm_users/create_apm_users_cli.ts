@@ -23,28 +23,28 @@ async function init() {
 
   if (!esPassword) {
     console.error(
-      'Please specify credentials for elasticsearch: `--username elastic --password abcd` '
+      'Please specify credentials for elasticsearch: `--username elastic --password abcd` ',
     );
     process.exit();
   }
 
   if (!esUrl) {
     console.error(
-      'Please specify the url for elasticsearch: `--es-url http://localhost:9200` '
+      'Please specify the url for elasticsearch: `--es-url http://localhost:9200` ',
     );
     process.exit();
   }
 
   if (!esUrl.startsWith('https://') && !esUrl.startsWith('http://')) {
     console.error(
-      'Elasticsearch url must be prefixed with http(s):// `--es-url http://localhost:9200`'
+      'Elasticsearch url must be prefixed with http(s):// `--es-url http://localhost:9200`',
     );
     process.exit();
   }
 
   if (!kibanaBaseUrl) {
     console.error(
-      'Please specify the url for Kibana: `--kibana-url http://localhost:5601` '
+      'Please specify the url for Kibana: `--kibana-url http://localhost:5601` ',
     );
     process.exit();
   }
@@ -54,7 +54,7 @@ async function init() {
     !kibanaBaseUrl.startsWith('http://')
   ) {
     console.error(
-      'Kibana url must be prefixed with http(s):// `--kibana-url http://localhost:5601`'
+      'Kibana url must be prefixed with http(s):// `--kibana-url http://localhost:5601`',
     );
     process.exit();
   }
@@ -75,7 +75,7 @@ async function init() {
   const credentials = users.map((u) => ` - ${u} / ${esPassword}`).join('\n');
 
   console.log(
-    `\nYou can now login to ${kibana.hostname} with:\n${credentials}`
+    `\nYou can now login to ${kibana.hostname} with:\n${credentials}`,
   );
 }
 
@@ -84,9 +84,8 @@ init().catch((e) => {
     console.error(e.message);
   } else if (isAxiosError(e)) {
     console.error(
-      `${e.config.method?.toUpperCase() || 'GET'} ${e.config.url} (Code: ${
-        e.response?.status
-      })`
+      `${e.config.method?.toUpperCase() || 'GET'} ${e.config.url} (Code: ${e
+        .response?.status})`,
     );
 
     if (e.response) {
@@ -94,8 +93,8 @@ init().catch((e) => {
         JSON.stringify(
           { request: e.config, response: e.response.data },
           null,
-          2
-        )
+          2,
+        ),
       );
     }
   } else {

@@ -73,7 +73,7 @@ describe('ProcessMetricsCollector', () => {
         () =>
           ({
             heap_size_limit: heapSizeLimit,
-          } as HeapInfo)
+          }) as HeapInfo
       );
 
       const metrics = collector.collect();

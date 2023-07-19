@@ -77,7 +77,7 @@ export function BreakdownChart({
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
   const theme = useTheme();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

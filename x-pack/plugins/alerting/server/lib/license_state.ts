@@ -181,7 +181,7 @@ export class LicenseState {
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData
+    AlertData extends RuleAlertData,
   >(
     ruleType: RuleType<
       Params,

@@ -39,7 +39,7 @@ const chartBase: ChartBase = {
     'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
     {
       defaultMessage: 'System memory usage',
-    }
+    },
   ),
   key: 'memory_usage_chart',
   type: 'linemark',

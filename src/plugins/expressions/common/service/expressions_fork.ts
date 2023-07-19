@@ -45,7 +45,10 @@ export class ExpressionsServiceFork implements ExpressionServiceFork {
   /**
    * @note Workaround since the expressions service is frozen.
    */
-  constructor(private namespace: string, private expressionsService: ExpressionsService) {
+  constructor(
+    private namespace: string,
+    private expressionsService: ExpressionsService
+  ) {
     this.registerFunction = this.registerFunction.bind(this);
     this.registerRenderer = this.registerRenderer.bind(this);
     this.registerType = this.registerType.bind(this);

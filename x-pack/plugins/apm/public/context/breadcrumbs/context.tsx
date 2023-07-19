@@ -26,7 +26,7 @@ interface BreadcrumbApi {
 }
 
 export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(
-  undefined
+  undefined,
 );
 
 export function BreadcrumbsContextProvider({
@@ -62,11 +62,11 @@ export function BreadcrumbsContextProvider({
             const breadcrumb = breadcrumbs.get(match.route);
 
             return breadcrumb;
-          })
+          }),
         );
       },
     }),
-    [breadcrumbs]
+    [breadcrumbs],
   );
 
   const formattedBreadcrumbs: ChromeBreadcrumb[] = api

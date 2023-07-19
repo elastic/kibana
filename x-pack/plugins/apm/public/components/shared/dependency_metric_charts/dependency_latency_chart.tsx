@@ -78,11 +78,11 @@ export function DependencyLatencyChart({
       spanName,
       isTimeRangeMetadataLoading,
       searchServiceDestinationMetrics,
-    ]
+    ],
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.LATENCY_AVG
+    ChartType.LATENCY_AVG,
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();

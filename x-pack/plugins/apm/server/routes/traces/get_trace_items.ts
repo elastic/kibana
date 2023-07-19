@@ -67,7 +67,7 @@ export async function getTraceItems(
   config: APMConfig,
   apmEventClient: APMEventClient,
   start: number,
-  end: number
+  end: number,
 ): Promise<TraceItems> {
   const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];

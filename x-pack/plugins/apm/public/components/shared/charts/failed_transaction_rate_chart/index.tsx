@@ -68,7 +68,7 @@ export function FailedTransactionRateChart({
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -86,7 +86,7 @@ export function FailedTransactionRateChart({
   const { environment } = useEnvironmentsContext();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    ApmMlDetectorType.txFailureRate
+    ApmMlDetectorType.txFailureRate,
   );
 
   const { serviceName, transactionType, transactionTypeStatus } =
@@ -124,7 +124,7 @@ export function FailedTransactionRateChart({
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
-          }
+          },
         );
       }
     },
@@ -140,11 +140,11 @@ export function FailedTransactionRateChart({
       offset,
       comparisonEnabled,
       preferred,
-    ]
+    ],
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.FAILED_TRANSACTION_RATE
+    ChartType.FAILED_TRANSACTION_RATE,
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();

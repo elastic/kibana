@@ -63,21 +63,22 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         await Promise.all(
-          currentPackagePolicies.map((packagePolicy) =>
-            packagePolicyService?.update(
-              savedObjectsClient,
-              esClient,
-              packagePolicy.id,
-              produce(packagePolicy, (draft) => {
-                unset(draft, 'id');
-                unset(
-                  draft,
-                  `inputs[0].config.osquery.value.packs.${[currentPackSO.attributes.name]}`
-                );
+          currentPackagePolicies.map(
+            (packagePolicy) =>
+              packagePolicyService?.update(
+                savedObjectsClient,
+                esClient,
+                packagePolicy.id,
+                produce(packagePolicy, (draft) => {
+                  unset(draft, 'id');
+                  unset(
+                    draft,
+                    `inputs[0].config.osquery.value.packs.${[currentPackSO.attributes.name]}`
+                  );
 
-                return draft;
-              })
-            )
+                  return draft;
+                })
+              )
           )
         );
 

@@ -80,7 +80,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
             isLoading={isLoading || isProfilingPluginInitialized === undefined}
             onClick={() =>
               setIsActionPopoverOpen(
-                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
+                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen,
               )
             }
           />
@@ -112,7 +112,7 @@ function ActionMenuSections({
   const apmRouter = useApmRouter();
 
   const infraLinksAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.InfraUiAvailable
+    ApmFeatureFlagName.InfraUiAvailable,
   );
 
   const sections = getSections({

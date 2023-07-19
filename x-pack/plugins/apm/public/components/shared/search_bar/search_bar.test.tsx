@@ -80,7 +80,7 @@ function setup({
           </ApmServiceContextProvider>
         </UrlParamsProvider>
       </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    </KibanaReactContext.Provider>,
   );
 }
 
@@ -126,7 +126,7 @@ describe('when transactionType is selected and multiple transaction types are gi
     });
 
     expect(history.location.search).toEqual(
-      '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
+      '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now',
     );
 
     // transaction type selector
@@ -143,7 +143,7 @@ describe('when transactionType is selected and multiple transaction types are gi
     expect(dropdown).toHaveValue('firstType');
     expect(history.push).toHaveBeenCalled();
     expect(history.location.search).toEqual(
-      '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
+      '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now',
     );
   });
 });

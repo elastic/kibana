@@ -100,7 +100,7 @@ export function DependencyDetailOperationsList() {
       environment,
       kuery,
       searchServiceDestinationMetrics,
-    ]
+    ],
   );
 
   const comparisonStatsFetch = useFetcher(
@@ -133,14 +133,14 @@ export function DependencyDetailOperationsList() {
       kuery,
       comparisonEnabled,
       searchServiceDestinationMetrics,
-    ]
+    ],
   );
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [
     {
       name: i18n.translate(
         'xpack.apm.dependencyDetailOperationsList.spanNameColumnLabel',
-        { defaultMessage: 'Span name' }
+        { defaultMessage: 'Span name' },
       ),
       field: 'spanName',
       sortable: true,
@@ -154,14 +154,14 @@ export function DependencyDetailOperationsList() {
 
   const comparisonOperationsBySpanName = keyBy(
     comparisonStatsFetch.data?.operations,
-    'spanName'
+    'spanName',
   );
 
   const noItemsMessage = (
     <EmptyMessage
       heading={i18n.translate(
         'xpack.apm.dependencyDetailOperationsList.notFoundLabel',
-        { defaultMessage: 'No operations found' }
+        { defaultMessage: 'No operations found' },
       )}
     />
   );
@@ -192,7 +192,7 @@ export function DependencyDetailOperationsList() {
               }
             : undefined,
         };
-      }
+      },
     ) ?? [];
 
   return (

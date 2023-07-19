@@ -35,7 +35,7 @@ export function useTransactionLatencyChartsFetcher({
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -90,7 +90,7 @@ export function useTransactionLatencyChartsFetcher({
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
-          }
+          },
         );
       }
     },
@@ -108,7 +108,7 @@ export function useTransactionLatencyChartsFetcher({
       transactionName,
       comparisonEnabled,
       offset,
-    ]
+    ],
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -121,7 +121,7 @@ export function useTransactionLatencyChartsFetcher({
       }),
     // It should only update when the data has changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data]
+    [data],
   );
 
   return {

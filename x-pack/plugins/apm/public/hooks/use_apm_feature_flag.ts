@@ -12,9 +12,9 @@ import {
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export function useApmFeatureFlag<
-  TApmFeatureFlagName extends ApmFeatureFlagName
+  TApmFeatureFlagName extends ApmFeatureFlagName,
 >(
-  featureFlag: TApmFeatureFlagName
+  featureFlag: TApmFeatureFlagName,
 ): ValueOfApmFeatureFlag<TApmFeatureFlagName> {
   const { config } = useApmPluginContext();
   return config.featureFlags[featureFlag];

@@ -51,7 +51,7 @@ export function DependencyDetailTemplate({ children }: Props) {
         },
       });
     },
-    [dependencyName, start, end]
+    [dependencyName, start, end],
   );
 
   const { data: { metadata } = {} } = dependencyMetadataFetch;

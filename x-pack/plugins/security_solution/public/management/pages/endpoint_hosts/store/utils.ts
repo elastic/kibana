@@ -16,9 +16,8 @@ export const getFailedOrWarningActionCountFromPolicyResponse = (
     Object.entries(applied.response.configurations).map(([key, val]) => {
       let count = 0;
       for (const action of val.concerned_actions) {
-        const actionStatus = applied.actions.find(
-          (policyActions) => policyActions.name === action
-        )?.status;
+        const actionStatus = applied.actions.find((policyActions) => policyActions.name === action)
+          ?.status;
         if (
           actionStatus === HostPolicyResponseActionStatus.failure ||
           actionStatus === HostPolicyResponseActionStatus.warning

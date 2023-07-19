@@ -35,7 +35,7 @@ export function getNonEmptySections(sectionRecord: SectionRecord) {
           ...section,
           actions: section.actions.filter((action) => action.condition),
         }))
-        .filter((section) => !isEmpty(section.actions))
+        .filter((section) => !isEmpty(section.actions)),
     )
     .filter((sections) => !isEmpty(sections));
 }

@@ -21,13 +21,13 @@ export function merge<TBase extends Record<string, any>, TSource1 extends Record
 export function merge<
   TBase extends Record<string, any>,
   TSource1 extends Record<string, any>,
-  TSource2 extends Record<string, any>
+  TSource2 extends Record<string, any>,
 >(baseObj: TBase, overrideObj: TSource1, overrideObj2: TSource2): TBase & TSource1 & TSource2;
 export function merge<
   TBase extends Record<string, any>,
   TSource1 extends Record<string, any>,
   TSource2 extends Record<string, any>,
-  TSource3 extends Record<string, any>
+  TSource3 extends Record<string, any>,
 >(
   baseObj: TBase,
   overrideObj: TSource1,

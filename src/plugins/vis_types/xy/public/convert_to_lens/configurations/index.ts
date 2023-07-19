@@ -115,9 +115,8 @@ function getDataLayers(
   const overwriteColors: Record<string, string> = vis.uiState.get('vis.colors', {});
   return layers.map((layer) => {
     const xColumn = layer.columns.find((c) => c.isBucketed && !c.isSplit);
-    const splitAccessor = layer.columns.find(
-      (column) => column.isBucketed && column.isSplit
-    )?.columnId;
+    const splitAccessor = layer.columns.find((column) => column.isBucketed && column.isSplit)
+      ?.columnId;
     // as type and mode will be the same for all metrics we can use first to define it
     const firstSeries = series.find((s) => s.data.id === layer.seriesIdsMap[layer.metrics[0]]);
     const isHistogram =

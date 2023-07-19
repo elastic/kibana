@@ -26,6 +26,6 @@ export function useFiltersForEmbeddableCharts({
         meta: {},
         query,
       })),
-    [environment, serviceName]
+    [environment, serviceName],
   );
 }

@@ -48,7 +48,7 @@ describe('UserActionPersister', () => {
       connectorId: '1',
       owner: 'cases',
       user: { email: '', full_name: '', username: '' },
-    } as CreateUserActionClient<'connector'>);
+    }) as CreateUserActionClient<'connector'>;
 
   const getBulkCreateAttachmentRequest = (): BulkCreateAttachmentUserAction => ({
     caseId: 'test',

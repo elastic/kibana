@@ -49,7 +49,7 @@ export function HttpRequestsChart({
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.HTTP_REQUESTS
+    ChartType.HTTP_REQUESTS,
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -72,7 +72,7 @@ export function HttpRequestsChart({
               offset: comparisonEnabled ? offset : undefined,
             },
           },
-        }
+        },
       );
     },
     [
@@ -84,7 +84,7 @@ export function HttpRequestsChart({
       transactionName,
       offset,
       comparisonEnabled,
-    ]
+    ],
   );
 
   const timeseries = [
@@ -126,7 +126,7 @@ export function HttpRequestsChart({
               'xpack.apm.transactions.httpRequestsTooltip',
               {
                 defaultMessage: 'Total http requests',
-              }
+              },
             )}
             position="right"
           />

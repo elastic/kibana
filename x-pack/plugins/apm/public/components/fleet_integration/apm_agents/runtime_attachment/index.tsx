@@ -68,16 +68,16 @@ export function RuntimeAttachment(props: Props) {
       initialDiscoveryRules.map((discoveryRule) => ({
         id: generateId(),
         discoveryRule,
-      }))
+      })),
     );
   const [editDiscoveryRuleId, setEditDiscoveryRuleId] = useState<null | string>(
-    null
+    null,
   );
   const [version, setVersion] = useState<RuntimeAttachmentSettings['version']>(
-    props.version
+    props.version,
   );
   const [isValidVersion, setIsValidVersion] = useState(
-    validateVersion(props.version)
+    validateVersion(props.version),
   );
 
   useEffect(
@@ -90,7 +90,7 @@ export function RuntimeAttachment(props: Props) {
     },
     // props shouldn't be listed as dependency here
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isEnabled, isValidVersion]
+    [isEnabled, isValidVersion],
   );
 
   const onToggleEnable = useCallback(() => {
@@ -108,24 +108,24 @@ export function RuntimeAttachment(props: Props) {
   const onDelete = useCallback(
     (discoveryRuleId: string) => {
       const filteredDiscoveryRuleList = discoveryRuleList.filter(
-        ({ id }) => id !== discoveryRuleId
+        ({ id }) => id !== discoveryRuleId,
       );
       setDiscoveryRuleList(filteredDiscoveryRuleList);
       onChange({
         enabled: isEnabled,
         discoveryRules: filteredDiscoveryRuleList.map(
-          ({ discoveryRule }) => discoveryRule
+          ({ discoveryRule }) => discoveryRule,
         ),
         version,
       });
     },
-    [isEnabled, discoveryRuleList, onChange, version]
+    [isEnabled, discoveryRuleList, onChange, version],
   );
 
   const onEdit = useCallback(
     (discoveryRuleId: string) => {
       const editingDiscoveryRule = discoveryRuleList.find(
-        ({ id }) => id === discoveryRuleId
+        ({ id }) => id === discoveryRuleId,
       );
       if (editingDiscoveryRule) {
         const {
@@ -137,7 +137,7 @@ export function RuntimeAttachment(props: Props) {
         setEditDiscoveryRuleId(discoveryRuleId);
       }
     },
-    [discoveryRuleList]
+    [discoveryRuleList],
   );
 
   const [stagedOperationText, setStagedOperationText] = useState('');
@@ -148,16 +148,16 @@ export function RuntimeAttachment(props: Props) {
     (operationText: string) => {
       setStagedOperationText(operationText);
       const selectedOperationTypes = props.operationTypes.find(
-        ({ operation }) => operationText === operation.value
+        ({ operation }) => operationText === operation.value,
       );
       const selectedTypeAvailable = selectedOperationTypes?.types.some(
-        ({ value }) => stagedTypeText === value
+        ({ value }) => stagedTypeText === value,
       );
       if (!selectedTypeAvailable) {
         setStagedTypeText(selectedOperationTypes?.types[0].value ?? '');
       }
     },
-    [props.operationTypes, stagedTypeText]
+    [props.operationTypes, stagedTypeText],
   );
 
   const onChangeType = useCallback((operationText: string) => {
@@ -180,7 +180,7 @@ export function RuntimeAttachment(props: Props) {
 
   const onSubmit = useCallback(() => {
     const editDiscoveryRuleIndex = discoveryRuleList.findIndex(
-      ({ id }) => id === editDiscoveryRuleId
+      ({ id }) => id === editDiscoveryRuleId,
     );
     const editDiscoveryRule = discoveryRuleList[editDiscoveryRuleIndex];
     const nextDiscoveryRuleList = [
@@ -203,7 +203,7 @@ export function RuntimeAttachment(props: Props) {
     onChange({
       enabled: isEnabled,
       discoveryRules: nextDiscoveryRuleList.map(
-        ({ discoveryRule }) => discoveryRule
+        ({ discoveryRule }) => discoveryRule,
       ),
       version,
     });
@@ -247,19 +247,19 @@ export function RuntimeAttachment(props: Props) {
         const nextDiscoveryRuleList = euiDragDropReorder(
           discoveryRuleList,
           source.index,
-          destination.index
+          destination.index,
         );
         setDiscoveryRuleList(nextDiscoveryRuleList);
         onChange({
           enabled: isEnabled,
           discoveryRules: nextDiscoveryRuleList.map(
-            ({ discoveryRule }) => discoveryRule
+            ({ discoveryRule }) => discoveryRule,
           ),
           version,
         });
       }
     },
-    [isEnabled, discoveryRuleList, onChange, version]
+    [isEnabled, discoveryRuleList, onChange, version],
   );
 
   function onChangeVersion(nextVersion: RuntimeAttachmentSettings['version']) {

@@ -73,7 +73,7 @@ interface Props {
 
 function getCurrentTab(
   tabs: ErrorTab[] = [],
-  currentTabKey: string | undefined
+  currentTabKey: string | undefined,
 ): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ?? (first(tabs) || {});
@@ -185,7 +185,7 @@ export function ErrorSampleDetails({
                 'xpack.apm.errorSampleDetails.errorOccurrenceTitle',
                 {
                   defaultMessage: 'Error sample',
-                }
+                },
               )}
             </h3>
           </EuiTitle>
@@ -215,7 +215,7 @@ export function ErrorSampleDetails({
                     'xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer',
                     {
                       defaultMessage: 'Explore traces with this error',
-                    }
+                    },
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -238,7 +238,7 @@ export function ErrorSampleDetails({
                     defaultMessage:
                       'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover',
                     values: { occurrencesCount },
-                  }
+                  },
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -273,7 +273,7 @@ export function ErrorSampleDetails({
                   'xpack.apm.errorSampleDetails.relatedTransactionSample',
                   {
                     defaultMessage: 'Related transaction sample',
-                  }
+                  },
                 )}
               >
                 <TransactionDetailLink
@@ -298,7 +298,7 @@ export function ErrorSampleDetails({
                   'xpack.apm.errorSampleDetails.serviceEnvironment',
                   {
                     defaultMessage: 'Environment',
-                  }
+                  },
                 )}
               >
                 <EuiBadge color="hollow">{environment}</EuiBadge>
@@ -310,7 +310,7 @@ export function ErrorSampleDetails({
                   'xpack.apm.errorSampleDetails.serviceVersion',
                   {
                     defaultMessage: 'Service version',
-                  }
+                  },
                 )}
               >
                 <EuiBadge color="hollow">{serviceVersion}</EuiBadge>

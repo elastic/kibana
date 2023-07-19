@@ -15,7 +15,7 @@ export const withRuleDataClientFactory =
     TState extends RuleTypeState,
     TParams extends RuleTypeParams,
     TAlertInstanceContext extends AlertInstanceContext,
-    TServices extends Record<string, any> = {}
+    TServices extends Record<string, any> = {},
   >(
     type: AlertTypeWithExecutor<
       TState,

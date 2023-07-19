@@ -28,8 +28,7 @@ const services: CloudChatServices = {
 
 export const getCloudContextProvider: () => React.FC =
   () =>
-  ({ children }) =>
-    <ServicesProvider {...services}>{children}</ServicesProvider>;
+  ({ children }) => <ServicesProvider {...services}>{children}</ServicesProvider>;
 
 export const getCloudContextDecorator: DecoratorFn = (storyFn) => {
   const CloudContextProvider = getCloudContextProvider();

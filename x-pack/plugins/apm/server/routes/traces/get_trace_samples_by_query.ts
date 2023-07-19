@@ -109,8 +109,8 @@ export async function getTraceSamplesByQuery({
         })
       ).hits?.sequences?.flatMap((sequence) =>
         sequence.events.map(
-          (event) => (event._source as { trace: { id: string } }).trace.id
-        )
+          (event) => (event._source as { trace: { id: string } }).trace.id,
+        ),
       ) ?? [];
   }
 
@@ -161,7 +161,7 @@ export async function getTraceSamplesByQuery({
           },
         },
       },
-    }
+    },
   );
 
   return (

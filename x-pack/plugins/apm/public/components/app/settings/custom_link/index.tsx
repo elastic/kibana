@@ -40,7 +40,7 @@ export function CustomLinkOverview() {
         return callApmApi('GET /internal/apm/settings/custom_links');
       }
     },
-    [hasValidLicense]
+    [hasValidLicense],
   );
 
   const customLinks = data?.customLinks ?? [];

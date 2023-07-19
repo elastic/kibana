@@ -87,5 +87,5 @@ ace.define(
 
     const dom = acequire('../lib/dom');
     dom.importCssString(exports.cssText, exports.cssClass);
-  }
+  },
 );

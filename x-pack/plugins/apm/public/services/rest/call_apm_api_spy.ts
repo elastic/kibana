@@ -19,7 +19,7 @@ export type CreateCallApmApiSpy = jest.SpyInstance<AbstractAPMClient>;
 export const getCreateCallApmApiSpy = () =>
   jest.spyOn(
     createCallApmApi,
-    'createCallApmApi'
+    'createCallApmApi',
   ) as unknown as CreateCallApmApiSpy;
 export const getCallApmApiSpy = () =>
   jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;
@@ -27,8 +27,8 @@ export const getCallApmApiSpy = () =>
 type MockApmApiCall = <TEndpoint extends APIEndpoint>(
   endpoint: TEndpoint,
   fn: (
-    params: createCallApmApi.APIClientRequestParamsOf<TEndpoint>
-  ) => createCallApmApi.APIReturnType<TEndpoint>
+    params: createCallApmApi.APIClientRequestParamsOf<TEndpoint>,
+  ) => createCallApmApi.APIReturnType<TEndpoint>,
 ) => void;
 
 const getSpy = once(() => {

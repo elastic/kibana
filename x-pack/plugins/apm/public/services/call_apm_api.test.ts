@@ -37,7 +37,7 @@ describe('callApmApi', () => {
       {},
       expect.objectContaining({
         pathname: '/internal/apm/foo/to/bar',
-      })
+      }),
     );
   });
 
@@ -60,7 +60,7 @@ describe('callApmApi', () => {
           foo: 'bar',
           bar: 'foo',
         },
-      })
+      }),
     );
   });
 
@@ -84,7 +84,7 @@ describe('callApmApi', () => {
           foo: 'bar',
           bar: 'foo',
         },
-      })
+      }),
     );
   });
 });

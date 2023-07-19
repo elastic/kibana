@@ -19,7 +19,7 @@ export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
 export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
   return {
     async search<TDocument, TParams extends InfraMetricsSearchParams>(
-      opts: TParams
+      opts: TParams,
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       const {
         savedObjects: { client: savedObjectsClient },
@@ -37,7 +37,7 @@ export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
       };
 
       return esClient.asCurrentUser.search<TDocument>(
-        searchParams
+        searchParams,
       ) as Promise<any>;
     },
   };

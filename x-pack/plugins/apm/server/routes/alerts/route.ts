@@ -54,7 +54,7 @@ const transactionErrorRateChartPreview = createApmServerRoute({
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     errorRateChartPreview: PreviewChartResponse;
   }> => {
@@ -77,7 +77,7 @@ const transactionErrorCountChartPreview = createApmServerRoute({
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     errorCountChartPreview: PreviewChartResponse;
   }> => {
@@ -100,7 +100,7 @@ const transactionDurationChartPreview = createApmServerRoute({
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     latencyChartPreview: PreviewChartResponse;
   }> => {

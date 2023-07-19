@@ -55,7 +55,7 @@ export const osVersionTab = {
     'xpack.apm.mobile.transactions.overview.tabs.os.version',
     {
       defaultMessage: 'OS version',
-    }
+    },
   ),
   component: OSVersionTab,
 };

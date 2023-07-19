@@ -54,7 +54,7 @@ export function ServiceGroupsTour({
                 >
                   {i18n.translate(
                     'xpack.apm.serviceGroups.tour.content.link.docs',
-                    { defaultMessage: 'docs' }
+                    { defaultMessage: 'docs' },
                   )}
                 </ElasticDocsLink>
               ),

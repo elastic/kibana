@@ -45,7 +45,7 @@ export interface UseDataGridColumnsCellActionsProps
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
-  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
+  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps,
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
 // static actions array references to prevent React updates

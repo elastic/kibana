@@ -86,15 +86,15 @@ describe('getPreferredBucketSizeAndDataSource', () => {
         });
 
       expect(source.documentType).toBe(
-        ApmDocumentType.ServiceTransactionMetric
+        ApmDocumentType.ServiceTransactionMetric,
       );
 
       expect(intervalToSeconds(source.rollupInterval)).toBe(
-        intervalToSeconds(test.out)
+        intervalToSeconds(test.out),
       );
 
       expect(bucketSizeInSeconds).toBeGreaterThanOrEqual(
-        intervalToSeconds(test.out)
+        intervalToSeconds(test.out),
       );
     });
   });

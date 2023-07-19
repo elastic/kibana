@@ -53,7 +53,7 @@ export function MetadataTable({ sections, isLoading }: Props) {
         }),
       });
     },
-    [history, location]
+    [history, location],
   );
   const noResultFound = Boolean(searchTerm) && isEmpty(filteredSections);
   return (
@@ -120,7 +120,7 @@ function NoResultFound({ value }: { value: string }) {
             {
               defaultMessage: `No results for "{value}".`,
               values: { value },
-            }
+            },
           )}
         </EuiText>
       </EuiFlexItem>

@@ -173,13 +173,14 @@ export async function find<Params extends RuleTypeParams = never>(
     return rule;
   });
 
-  authorizedData.forEach(({ id }) =>
-    context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.FIND,
-        savedObject: { type: 'alert', id },
-      })
-    )
+  authorizedData.forEach(
+    ({ id }) =>
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.FIND,
+          savedObject: { type: 'alert', id },
+        })
+      )
   );
 
   // format legacy actions for SIEM rules, if there any

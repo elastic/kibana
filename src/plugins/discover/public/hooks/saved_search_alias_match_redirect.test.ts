@@ -25,7 +25,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
         location: {
           search: '?_g=foo',
         },
-      } as History);
+      }) as History;
   });
 
   test('should redirect in case of aliasMatch', () => {

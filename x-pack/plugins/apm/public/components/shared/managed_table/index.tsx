@@ -48,7 +48,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 function defaultSortFn<T extends any>(
   items: T[],
   sortField: string,
-  sortDirection: 'asc' | 'desc'
+  sortDirection: 'asc' | 'desc',
 ) {
   return orderBy(items, sortField, sortDirection);
 }
@@ -56,7 +56,7 @@ function defaultSortFn<T extends any>(
 export type SortFunction<T> = (
   items: T[],
   sortField: string,
-  sortDirection: 'asc' | 'desc'
+  sortDirection: 'asc' | 'desc',
 ) => T[];
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
@@ -120,7 +120,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
         }),
       });
     },
-    [history]
+    [history],
   );
 
   const paginationProps = useMemo(() => {
@@ -167,7 +167,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
 }
 
 const ManagedTable = React.memo(
-  UnoptimizedManagedTable
+  UnoptimizedManagedTable,
 ) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };

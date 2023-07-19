@@ -11,7 +11,7 @@ import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function getConfigsAppliedToAgentsThroughFleet(
-  internalESClient: APMInternalESClient
+  internalESClient: APMInternalESClient,
 ) {
   const params = {
     index: internalESClient.apmIndices.metric,
@@ -23,7 +23,7 @@ export async function getConfigsAppliedToAgentsThroughFleet(
             ...termQuery(METRICSET_NAME, 'agent_config'),
             ...rangeQuery(
               datemath.parse('now-15m')!.valueOf(),
-              datemath.parse('now')!.valueOf()
+              datemath.parse('now')!.valueOf(),
             ),
           ],
         },
@@ -41,7 +41,7 @@ export async function getConfigsAppliedToAgentsThroughFleet(
 
   const response = await internalESClient.search(
     'get_config_applied_to_agent_through_fleet',
-    params
+    params,
   );
 
   return (
@@ -50,7 +50,7 @@ export async function getConfigsAppliedToAgentsThroughFleet(
         configsAppliedToAgentsThroughFleet[bucket.key as string] = true;
         return configsAppliedToAgentsThroughFleet;
       },
-      {} as Record<string, true>
+      {} as Record<string, true>,
     ) ?? {}
   );
 }

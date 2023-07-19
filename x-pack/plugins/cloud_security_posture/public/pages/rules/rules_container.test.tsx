@@ -75,7 +75,7 @@ const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
       tags: [chance.word(), chance.word()],
       version: chance.sentence(),
     },
-  } as CspRuleTemplate);
+  }) as CspRuleTemplate;
 
 const params = {
   packagePolicyId: chance.guid(),

@@ -55,7 +55,7 @@ function renderTestCases(
   getRender: () => Promise<
     [
       InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
-      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps,
     ]
   >
 ) {
@@ -190,7 +190,7 @@ function renderDarkModeTestCases(
   getRender: () => Promise<
     [
       InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
-      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps,
     ]
   >
 ) {

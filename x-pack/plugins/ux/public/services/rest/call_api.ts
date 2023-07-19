@@ -14,7 +14,7 @@ import { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(
   fetchOptions: FetchOptions,
-  inspectableEsQueriesEnabled: boolean
+  inspectableEsQueriesEnabled: boolean,
 ) {
   const debugEnabled =
     inspectableEsQueriesEnabled &&
@@ -42,10 +42,10 @@ export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
   { http, uiSettings }: CoreStart | CoreSetup,
-  fetchOptions: FetchOptions
+  fetchOptions: FetchOptions,
 ): Promise<T> {
   const inspectableEsQueriesEnabled: boolean = uiSettings.get(
-    enableInspectEsQueries
+    enableInspectEsQueries,
   );
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);

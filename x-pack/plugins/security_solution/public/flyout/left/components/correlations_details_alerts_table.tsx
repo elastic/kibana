@@ -82,10 +82,13 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': 
     return data
       .map((hit) => hit.fields)
       .map((fields = {}) =>
-        Object.keys(fields).reduce((result, fieldName) => {
-          result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
-          return result;
-        }, {} as Record<string, unknown>)
+        Object.keys(fields).reduce(
+          (result, fieldName) => {
+            result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
+            return result;
+          },
+          {} as Record<string, unknown>
+        )
       );
   }, [data]);
 

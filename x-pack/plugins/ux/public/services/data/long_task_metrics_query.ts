@@ -19,7 +19,7 @@ export function longTaskMetricsQuery(
   end: number,
   percentile: number = PERCENTILE_DEFAULT,
   urlQuery?: string,
-  uiFilters?: UxUIFilters
+  uiFilters?: UxUIFilters,
 ) {
   const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({

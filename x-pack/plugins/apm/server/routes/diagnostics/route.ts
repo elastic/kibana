@@ -49,7 +49,7 @@ const getDiagnosticsRoute = createApmServerRoute({
     }),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     esResponses: {
       existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];

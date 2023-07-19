@@ -42,7 +42,7 @@ export const buildRouteValidation =
 export const buildRouteValidationWithExcess =
   <
     T extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,
-    A = rt.TypeOf<T>
+    A = rt.TypeOf<T>,
   >(
     schema: T
   ): RouteValidationFunction<A> =>

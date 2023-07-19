@@ -38,7 +38,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .errors(
           opbeansJava
             .error({ message: `Error ${index}`, type: `exception ${index}` })
-            .timestamp(timestamp)
+            .timestamp(timestamp),
         ),
       opbeansNode
         .transaction({ transactionName: 'GET /banana 🍌' })
@@ -84,7 +84,7 @@ export function generateErrors({
               return opbeansJava
                 .error({ message: `Error ${idx}`, type: `exception ${idx}` })
                 .timestamp(timestamp);
-            })
+            }),
         ),
     ]);
 }

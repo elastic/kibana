@@ -31,7 +31,7 @@ import { useRegisterTreeNode } from './use_register_tree_node';
 function getIdFromNavigationNode<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >({ id: _id, link, title }: NodeProps<LinkId, Id, ChildrenId>): string {
   const id = _id ?? link;
 
@@ -86,7 +86,7 @@ function isNodeVisible(
 function getTitleForNode<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >(
   navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
   { deepLink, cloudLinks }: { deepLink?: ChromeNavLink; cloudLinks: CloudLinks }
@@ -114,7 +114,7 @@ function getTitleForNode<
 function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >({ link, href, cloudLink }: NodePropsEnhanced<LinkId, Id, ChildrenId>) {
   if (link && cloudLink) {
     throw new Error(`Only one of "link" or "cloudLink" can be provided.`);
@@ -127,7 +127,7 @@ function validateNodeProps<
 function createInternalNavNode<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >(
   id: string,
   _navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
@@ -175,7 +175,7 @@ function isSamePath(pathA: string[] | null, pathB: string[] | null) {
 export const useInitNavNode = <
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >(
   node: NodePropsEnhanced<LinkId, Id, ChildrenId>,
   { cloudLinks }: { cloudLinks: CloudLinks }

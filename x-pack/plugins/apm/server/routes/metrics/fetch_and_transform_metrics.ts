@@ -125,7 +125,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
 
   const { hits, aggregations } = await apmEventClient.search(
     operationName,
-    params
+    params,
   );
   const timeseriesData = aggregations?.timeseriesData;
 

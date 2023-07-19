@@ -64,14 +64,14 @@ export const useGetIlmPolicies = () => {
   }, []);
 
   const syntheticsILMPolicies =
-    data?.filter(({ indexTemplates }) =>
-      indexTemplates?.some((indTemp) => indTemp.includes('synthetics'))
+    data?.filter(
+      ({ indexTemplates }) => indexTemplates?.some((indTemp) => indTemp.includes('synthetics'))
     ) ?? [];
 
   return {
     data: policyLabels.map(({ name, label, indexTemplate }) => {
-      const policy = syntheticsILMPolicies.find((p) =>
-        p.indexTemplates?.some((indTemp) => indTemp.includes(indexTemplate))
+      const policy = syntheticsILMPolicies.find(
+        (p) => p.indexTemplates?.some((indTemp) => indTemp.includes(indexTemplate))
       );
       const policyIndices = sizeData?.data?.filter((d) => policy?.indices?.includes(d.index!));
 

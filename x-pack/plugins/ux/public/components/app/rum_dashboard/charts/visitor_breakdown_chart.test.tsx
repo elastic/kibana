@@ -82,7 +82,7 @@ describe('VisitorBreakdownChart', () => {
             to: props.end,
           },
           attributes: getVisitorBreakdownLensAttributes(props),
-        })
+        }),
       );
     });
   });

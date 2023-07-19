@@ -14,7 +14,7 @@ export const apmActionVariables = {
       {
         defaultMessage:
           'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
-      }
+      },
     ),
     name: 'alertDetailsUrl' as const,
     usesPublicBaseUrl: true,
@@ -22,7 +22,7 @@ export const apmActionVariables = {
   environment: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.environment',
-      { defaultMessage: 'The transaction type the alert is created for' }
+      { defaultMessage: 'The transaction type the alert is created for' },
     ),
     name: 'environment' as const,
   },
@@ -32,7 +32,7 @@ export const apmActionVariables = {
       {
         defaultMessage:
           'The length and unit of the time period where the alert conditions were met',
-      }
+      },
     ),
     name: 'interval' as const,
   },
@@ -41,14 +41,14 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.reasonMessage',
       {
         defaultMessage: 'A concise description of the reason for the alert',
-      }
+      },
     ),
     name: 'reason' as const,
   },
   serviceName: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.serviceName',
-      { defaultMessage: 'The service the alert is created for' }
+      { defaultMessage: 'The service the alert is created for' },
     ),
     name: 'serviceName' as const,
   },
@@ -62,14 +62,14 @@ export const apmActionVariables = {
   transactionType: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.transactionType',
-      { defaultMessage: 'The transaction type the alert is created for' }
+      { defaultMessage: 'The transaction type the alert is created for' },
     ),
     name: 'transactionType' as const,
   },
   transactionName: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.transactionName',
-      { defaultMessage: 'The transaction name the alert is created for' }
+      { defaultMessage: 'The transaction name the alert is created for' },
     ),
     name: 'transactionName' as const,
   },
@@ -79,7 +79,7 @@ export const apmActionVariables = {
       {
         defaultMessage:
           'The value that breached the threshold and triggered the alert',
-      }
+      },
     ),
     name: 'triggerValue' as const,
   },
@@ -88,7 +88,7 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.viewInAppUrl',
       {
         defaultMessage: 'Link to the alert source',
-      }
+      },
     ),
     name: 'viewInAppUrl' as const,
     usesPublicBaseUrl: true,
@@ -98,7 +98,7 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.errorGroupingKey',
       {
         defaultMessage: 'The error grouping key the alert is created for',
-      }
+      },
     ),
     name: 'errorGroupingKey' as const,
   },
@@ -107,7 +107,7 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.errorGroupingName',
       {
         defaultMessage: 'The error grouping name the alert is created for',
-      }
+      },
     ),
     name: 'errorGroupingName' as const,
   },

@@ -127,9 +127,8 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       return [];
     }
 
-    const defaultOutputName = outputsRequest.data.items.find(
-      (item) => item.is_default_monitoring
-    )?.name;
+    const defaultOutputName = outputsRequest.data.items.find((item) => item.is_default_monitoring)
+      ?.name;
     return [
       getDefaultOutput(defaultOutputName),
       ...outputsRequest.data.items.map((item) => {

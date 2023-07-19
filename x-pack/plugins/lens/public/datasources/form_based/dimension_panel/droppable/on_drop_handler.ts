@@ -124,9 +124,8 @@ const isFieldDropType = (dropType: DropType) =>
 function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boolean) {
   const { setState, state, source, target, targetLayerDimensionGroups, indexPatterns } = props;
 
-  const prioritizedOperation = targetLayerDimensionGroups.find(
-    (g) => g.groupId === target.groupId
-  )?.prioritizedOperation;
+  const prioritizedOperation = targetLayerDimensionGroups.find((g) => g.groupId === target.groupId)
+    ?.prioritizedOperation;
 
   const layer = state.layers[target.layerId];
   const indexPattern = indexPatterns[layer.indexPatternId];

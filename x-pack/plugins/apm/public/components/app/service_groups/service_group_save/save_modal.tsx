@@ -74,7 +74,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
         notifications.toasts.addSuccess(
           isEdit
             ? getEditSuccessToastLabels(newServiceGroup)
-            : getCreateSuccessToastLabels(newServiceGroup)
+            : getCreateSuccessToastLabels(newServiceGroup),
         );
         refreshServiceGroups();
         navigateToServiceGroups();
@@ -83,7 +83,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
         notifications.toasts.addDanger(
           isEdit
             ? getEditFailureToastLabels(newServiceGroup, error)
-            : getCreateFailureToastLabels(newServiceGroup, error)
+            : getCreateFailureToastLabels(newServiceGroup, error),
         );
       }
       onClose();
@@ -95,7 +95,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
       onClose,
       isEdit,
       navigateToServiceGroups,
-    ]
+    ],
   );
 
   const onDelete = useCallback(
@@ -103,7 +103,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
       setIsLoading(true);
       if (!savedServiceGroup) {
         notifications.toasts.addDanger(
-          getDeleteFailureUnknownIdToastLabels(stagedServiceGroup!)
+          getDeleteFailureUnknownIdToastLabels(stagedServiceGroup!),
         );
         return;
       }
@@ -113,14 +113,14 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
           signal: null,
         });
         notifications.toasts.addSuccess(
-          getDeleteSuccessToastLabels(stagedServiceGroup!)
+          getDeleteSuccessToastLabels(stagedServiceGroup!),
         );
         refreshServiceGroups();
         navigateToServiceGroups();
       } catch (error) {
         console.error(error);
         notifications.toasts.addDanger(
-          getDeleteFailureToastLabels(stagedServiceGroup!, error)
+          getDeleteFailureToastLabels(stagedServiceGroup!, error),
         );
       }
       onClose();
@@ -132,7 +132,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
       onClose,
       navigateToServiceGroups,
       savedServiceGroup,
-    ]
+    ],
   );
 
   return (
@@ -193,7 +193,7 @@ function getEditSuccessToastLabels({ groupName }: StagedServiceGroup) {
 
 function getCreateFailureToastLabels(
   { groupName }: StagedServiceGroup,
-  error: Error & { body: { message: string } }
+  error: Error & { body: { message: string } },
 ) {
   return {
     title: i18n.translate('xpack.apm.serviceGroups.createFailure.toast.title', {
@@ -206,7 +206,7 @@ function getCreateFailureToastLabels(
 
 function getEditFailureToastLabels(
   { groupName }: StagedServiceGroup,
-  error: Error & { body: { message: string } }
+  error: Error & { body: { message: string } },
 ) {
   return {
     title: i18n.translate('xpack.apm.serviceGroups.editFailure.toast.title', {
@@ -235,18 +235,18 @@ function getDeleteFailureUnknownIdToastLabels({
       {
         defaultMessage: 'Error while deleting "{groupName}" group',
         values: { groupName },
-      }
+      },
     ),
     text: i18n.translate(
       'xpack.apm.serviceGroups.deleteFailure.unknownId.toast.text',
-      { defaultMessage: 'Unable to delete group: unknown service group id.' }
+      { defaultMessage: 'Unable to delete group: unknown service group id.' },
     ),
   };
 }
 
 function getDeleteFailureToastLabels(
   { groupName }: StagedServiceGroup,
-  error: Error & { body: { message: string } }
+  error: Error & { body: { message: string } },
 ) {
   return {
     title: i18n.translate('xpack.apm.serviceGroups.deleteFailure.toast.title', {

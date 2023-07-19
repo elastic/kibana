@@ -10,7 +10,7 @@ import { APIResponseType } from '.';
 
 const DEFAULT_STANDALONE_CONFIG_LABEL = i18n.translate(
   'xpack.apm.tutorial.agent_config.defaultStandaloneConfig',
-  { defaultMessage: 'Default Standalone configuration' }
+  { defaultMessage: 'Default Standalone configuration' },
 );
 
 export type PolicyOption = ReturnType<typeof getPolicyOptions>[0];
@@ -39,7 +39,7 @@ export function getPolicyOptions({
   });
 
   const hasFleetAgentsSelected = fleetAgentsOptions.some(
-    ({ isSelected }) => isSelected
+    ({ isSelected }) => isSelected,
   );
 
   return [

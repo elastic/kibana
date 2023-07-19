@@ -45,11 +45,11 @@ export function ServiceLogs() {
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end]
+    [environment, kuery, serviceName, start, end],
   );
 
   return (
@@ -90,6 +90,6 @@ export function getInfrastructureKQLFilter({
     : [];
 
   return [serviceNameAndEnvironmentCorrelation, ...containerIdCorrelation].join(
-    ' or '
+    ' or ',
   );
 }

@@ -145,7 +145,7 @@ describe('useFetcher', () => {
             args: ['a'],
           },
           wrapper,
-        }
+        },
       );
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -205,7 +205,7 @@ describe('useFetcher', () => {
             args: ['a'],
           },
           wrapper,
-        }
+        },
       );
       await hook.waitForNextUpdate();
       const firstResult = hook.result.current;

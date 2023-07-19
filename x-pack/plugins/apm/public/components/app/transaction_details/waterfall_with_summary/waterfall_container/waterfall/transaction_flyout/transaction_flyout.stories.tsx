@@ -34,7 +34,7 @@ function generateData() {
     .errors(
       instanceJava
         .error({ message: '[ResponseError] index_not_found_exception' })
-        .timestamp(50)
+        .timestamp(50),
     )
     .children(
       instanceJava
@@ -45,7 +45,7 @@ function generateData() {
         })
         .timestamp(50)
         .duration(900)
-        .success()
+        .success(),
     )
     .serialize();
   return { events, transactionEvent: events[0] };

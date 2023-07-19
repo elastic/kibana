@@ -21,13 +21,13 @@ describe('apm-fleet-apm-integration', () => {
           expect(
             isSettingsFormValid(settings, {
               [key]: { value: 0, type: 'integer' },
-            })
+            }),
           ).toBeFalsy();
 
           expect(
             isSettingsFormValid(settings, {
               [key]: { value: -1, type: 'integer' },
-            })
+            }),
           ).toBeFalsy();
         });
       });

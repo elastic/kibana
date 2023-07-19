@@ -23,7 +23,7 @@ const apiRequestsToIntercept = [
 ];
 
 const aliasNames = apiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
+  ({ aliasName }) => `@${aliasName}`,
 );
 
 const apmMobileServiceOverview = url.format({
@@ -39,7 +39,7 @@ describe('Mobile Service overview page', () => {
       generateMobileData({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -81,7 +81,7 @@ describe('Mobile Service overview page', () => {
         cy.expectAPIsToHaveBeenCalledWith({
           apisIntercepted: aliasNames,
           value: `start=${encodeURIComponent(
-            new Date(timeStart).toISOString()
+            new Date(timeStart).toISOString(),
           )}&end=${encodeURIComponent(new Date(timeEnd).toISOString())}`,
         });
         cy.getByTestSubj('mostUsedNoResultsFound').should('exist');

@@ -18,7 +18,7 @@ export interface FilterEventsAgainstListOptions<T> {
 
 export type FilterEventsAgainstListReturn<T> = [
   Array<estypes.SearchHit<T>>,
-  Array<estypes.SearchHit<T>>
+  Array<estypes.SearchHit<T>>,
 ];
 
 export interface CreateSetToFilterAgainstOptions<T> {

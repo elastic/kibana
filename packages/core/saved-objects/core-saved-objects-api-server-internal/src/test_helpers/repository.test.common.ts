@@ -477,7 +477,7 @@ export const getMockMgetResponse = (
         ? obj
         : getMockGetResponse(registry, obj, obj.initialNamespaces ?? namespace)
     ),
-  } as estypes.MgetResponse<SavedObjectsRawDocSource>);
+  }) as estypes.MgetResponse<SavedObjectsRawDocSource>;
 
 expect.extend({
   toBeDocumentWithoutError(received, type, id) {
@@ -675,7 +675,7 @@ export const getMockBulkUpdateResponse = (
         result: 'updated',
       },
     })),
-  } as estypes.BulkResponse);
+  }) as estypes.BulkResponse;
 
 export const bulkUpdateSuccess = async (
   client: ElasticsearchClientMock,
@@ -916,7 +916,7 @@ export const getMockEsBulkDeleteResponse = (
         result: 'deleted',
       },
     })),
-  } as estypes.BulkResponse);
+  }) as estypes.BulkResponse;
 
 export const bulkDeleteSuccess = async (
   client: ElasticsearchClientMock,

@@ -87,7 +87,7 @@ export function Stackframe({
 }
 
 function hasLineContext(
-  stackframe: StackframeType
+  stackframe: StackframeType,
 ): stackframe is StackframeWithLineContext {
   return stackframe.line?.hasOwnProperty('context') || false;
 }

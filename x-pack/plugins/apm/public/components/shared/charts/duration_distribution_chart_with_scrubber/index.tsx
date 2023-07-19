@@ -70,20 +70,20 @@ export function DurationDistributionChartWithScrubber({
     'xpack.apm.durationDistributionChartWithScrubber.emptySelectionText',
     {
       defaultMessage: 'Click and drag to select a range',
-    }
+    },
   );
 
   const clearSelectionAriaLabel = i18n.translate(
     'xpack.apm.durationDistributionChartWithScrubber.clearSelectionAriaLabel',
     {
       defaultMessage: 'Clear selection',
-    }
+    },
   );
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const onTrackedChartSelection: BrushEndListener = (
-    brushEvent: BrushEvent
+    brushEvent: BrushEvent,
   ) => {
     onChartSelection(brushEvent as XYBrushEvent);
     // metric name is transaction_x for bwc
@@ -110,7 +110,7 @@ export function DurationDistributionChartWithScrubber({
                 'xpack.apm.durationDistributionChartWithScrubber.panelTitle',
                 {
                   defaultMessage: 'Latency distribution',
-                }
+                },
               )}
             </h5>
           </EuiTitle>
@@ -151,7 +151,7 @@ export function DurationDistributionChartWithScrubber({
                       values: {
                         formattedSelection: getFormattedSelection(selection),
                       },
-                    }
+                    },
                   )}
                 </EuiBadge>
               </EuiFlexItem>

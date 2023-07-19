@@ -25,7 +25,7 @@ const getDeps = () =>
     searchSessionId: '123',
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
-  } as unknown as FetchDeps);
+  }) as unknown as FetchDeps;
 
 describe('test fetchDocuments', () => {
   test('resolves with returned documents', async () => {

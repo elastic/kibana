@@ -49,7 +49,7 @@ export async function addApiKeysToEveryPackagePolicyIfMissing({
         fleet,
         logger,
       });
-    })
+    }),
   );
 }
 
@@ -101,7 +101,7 @@ export async function addApiKeysToPackagePolicyIfMissing({
     savedObjectsClient,
     internalESClient,
     policy.id,
-    policyWithApiKeys
+    policyWithApiKeys,
   );
 
   logger.debug(`Added api keys to policy ${policy.id}`);

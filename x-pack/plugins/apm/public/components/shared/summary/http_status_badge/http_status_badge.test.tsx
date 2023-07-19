@@ -22,7 +22,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={100} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          neutralColor
+          neutralColor,
         );
       });
     });
@@ -32,7 +32,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={200} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          successColor
+          successColor,
         );
       });
     });
@@ -42,7 +42,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={301} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          neutralColor
+          neutralColor,
         );
       });
     });
@@ -52,7 +52,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          warningColor
+          warningColor,
         );
       });
     });
@@ -62,7 +62,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={502} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          errorColor
+          errorColor,
         );
       });
     });
@@ -72,7 +72,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={700} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          'default'
+          'default',
         );
       });
     });

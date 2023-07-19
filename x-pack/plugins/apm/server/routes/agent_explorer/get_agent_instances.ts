@@ -104,7 +104,7 @@ export async function getAgentInstances({
     response.aggregations?.serviceNodes.buckets.map((agentInstance) => ({
       serviceNode: agentInstance.key as string,
       environments: agentInstance.environments.buckets.map(
-        (environmentBucket) => environmentBucket.key as string
+        (environmentBucket) => environmentBucket.key as string,
       ),
       agentVersion: agentInstance.sample.top[0].metrics[
         AGENT_VERSION

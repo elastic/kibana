@@ -96,9 +96,9 @@ export class VisualizeEmbeddableFactory
       );
     },
     getTooltipForSavedObject: (savedObject) => {
-      return `${savedObject.attributes.title} (${
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.title
-      })`;
+      return `${savedObject.attributes.title} (${getTypes().get(
+        JSON.parse(savedObject.attributes.visState).type
+      )?.title})`;
     },
     showSavedObject: (savedObject) => {
       try {

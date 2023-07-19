@@ -14,7 +14,7 @@ import { MathArguments, MathInput } from './math';
 
 function pivotObjectArray<
   RowType extends { [key: string]: unknown },
-  ReturnColumns extends keyof RowType & string
+  ReturnColumns extends keyof RowType & string,
 >(rows: RowType[], columns?: ReturnColumns[]) {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {

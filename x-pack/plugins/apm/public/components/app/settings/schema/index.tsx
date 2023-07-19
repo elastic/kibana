@@ -31,7 +31,7 @@ export function Schema() {
   const [apmDataStreamsMigrationStatus, setApmDataStreamsMigrationStatus] =
     useLocalStorage(
       'apm.dataStreamsMigrationStatus',
-      APM_DATA_STREAMS_MIGRATION_STATUS_LS
+      APM_DATA_STREAMS_MIGRATION_STATUS_LS,
     );
 
   const { toasts } = useApmPluginContext().core.notifications;
@@ -48,7 +48,7 @@ export function Schema() {
   } = useFetcher(
     (callApi) => callApi('GET /internal/apm/fleet/migration_check'),
     [],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
   const isLoading = status !== FETCH_STATUS.SUCCESS;
   const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;
@@ -100,7 +100,7 @@ export function Schema() {
             setIsSwitchActive(false);
             const apmPackagePolicy = await createCloudApmPackagePolicy(
               toasts,
-              updateLocalStorage
+              updateLocalStorage,
             );
             if (!apmPackagePolicy) {
               return;
@@ -118,14 +118,14 @@ export function Schema() {
 }
 
 async function getUnsupportedApmServerConfigs(
-  toasts: NotificationsStart['toasts']
+  toasts: NotificationsStart['toasts'],
 ) {
   try {
     const { unsupported } = await callApmApi(
       'GET /internal/apm/fleet/apm_server_schema/unsupported',
       {
         signal: null,
-      }
+      },
     );
     return unsupported;
   } catch (error) {
@@ -134,7 +134,7 @@ async function getUnsupportedApmServerConfigs(
         'xpack.apm.settings.unsupportedConfigs.errorToast.title',
         {
           defaultMessage: 'Unable to fetch APM Server settings',
-        }
+        },
       ),
       text: error.body?.message || error.message,
     });
@@ -143,7 +143,7 @@ async function getUnsupportedApmServerConfigs(
 
 async function createCloudApmPackagePolicy(
   toasts: NotificationsStart['toasts'],
-  updateLocalStorage: (status: FETCH_STATUS) => void
+  updateLocalStorage: (status: FETCH_STATUS) => void,
 ) {
   updateLocalStorage(FETCH_STATUS.LOADING);
   try {
@@ -151,7 +151,7 @@ async function createCloudApmPackagePolicy(
       'POST /internal/apm/fleet/cloud_apm_package_policy',
       {
         signal: null,
-      }
+      },
     );
     updateLocalStorage(FETCH_STATUS.SUCCESS);
     return cloudApmPackagePolicy;
@@ -163,7 +163,7 @@ async function createCloudApmPackagePolicy(
         {
           defaultMessage:
             'Unable to create APM package policy on cloud agent policy',
-        }
+        },
       ),
       text: error.body?.message || error.message,
     });

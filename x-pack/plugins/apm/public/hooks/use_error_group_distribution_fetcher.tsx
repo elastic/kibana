@@ -46,7 +46,7 @@ export function useErrorGroupDistributionFetcher({
                 groupId,
               },
             },
-          }
+          },
         );
       }
     },
@@ -59,7 +59,7 @@ export function useErrorGroupDistributionFetcher({
       offset,
       groupId,
       comparisonEnabled,
-    ]
+    ],
   );
 
   return { errorDistributionData: data, status };

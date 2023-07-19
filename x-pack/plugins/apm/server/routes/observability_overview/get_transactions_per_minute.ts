@@ -46,7 +46,7 @@ export async function getTransactionsPerMinute({
             filter: [
               ...rangeQuery(start, end),
               ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
+                searchAggregatedTransactions,
               ),
             ],
           },
@@ -71,7 +71,7 @@ export async function getTransactionsPerMinute({
           },
         },
       },
-    }
+    },
   );
 
   if (!aggregations || !aggregations.transactionType.buckets) {
@@ -80,7 +80,7 @@ export async function getTransactionsPerMinute({
 
   const topTransactionTypeBucket =
     aggregations.transactionType.buckets.find(({ key: transactionType }) =>
-      isDefaultTransactionType(transactionType as string)
+      isDefaultTransactionType(transactionType as string),
     ) || aggregations.transactionType.buckets[0];
 
   return {

@@ -31,7 +31,7 @@ export function useDependencyDetailOperationsBreadcrumb() {
       {
         title: i18n.translate(
           'xpack.apm.dependencyDetailOperations.breadcrumbTitle',
-          { defaultMessage: 'Operations' }
+          { defaultMessage: 'Operations' },
         ),
         href: apmRouter.link('/dependencies/operations', {
           query: {
@@ -57,6 +57,6 @@ export function useDependencyDetailOperationsBreadcrumb() {
       rangeTo,
       refreshInterval,
       refreshPaused,
-    ]
+    ],
   );
 }

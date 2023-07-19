@@ -30,7 +30,7 @@ export type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
 
 export interface CreateEncryptedSavedObjectsMigrationFnOpts<
   InputAttributes = unknown,
-  MigratedAttributes = InputAttributes
+  MigratedAttributes = InputAttributes,
 > {
   isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>;
   migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
@@ -41,7 +41,7 @@ export interface CreateEncryptedSavedObjectsMigrationFnOpts<
 
 export type CreateEncryptedSavedObjectsMigrationFn = <
   InputAttributes = unknown,
-  MigratedAttributes = InputAttributes
+  MigratedAttributes = InputAttributes,
 >(
   opts: CreateEncryptedSavedObjectsMigrationFnOpts<InputAttributes, MigratedAttributes>
 ) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>;

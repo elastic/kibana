@@ -51,7 +51,7 @@ export const AGENT_NAMES: AgentName[] = [
 ];
 
 export function isOpenTelemetryAgentName(
-  agentName: string
+  agentName: string,
 ): agentName is OpenTelemetryAgentName {
   return OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as AgentName);
 }
@@ -59,7 +59,7 @@ export function isOpenTelemetryAgentName(
 export const JAVA_AGENT_NAMES: AgentName[] = ['java', 'opentelemetry/java'];
 
 export function isJavaAgentName(
-  agentName?: string
+  agentName?: string,
 ): agentName is 'java' | 'opentelemetry/java' {
   return JAVA_AGENT_NAMES.includes(agentName! as AgentName);
 }
@@ -71,7 +71,7 @@ export const RUM_AGENT_NAMES: AgentName[] = [
 ];
 
 export function isRumAgentName(
-  agentName?: string
+  agentName?: string,
 ): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }

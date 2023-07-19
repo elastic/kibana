@@ -100,7 +100,7 @@ export function ServicesTable() {
 
   const useOptimizedSorting =
     useKibana().services.uiSettings?.get<boolean>(
-      apmServiceInventoryOptimizedSorting
+      apmServiceInventoryOptimizedSorting,
     ) || false;
 
   const sortedAndFilteredServicesFetch = useFetcher(
@@ -117,7 +117,7 @@ export function ServicesTable() {
         });
       }
     },
-    [environment, kuery, indexLifecyclePhase, useOptimizedSorting]
+    [environment, kuery, indexLifecyclePhase, useOptimizedSorting],
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
@@ -134,7 +134,7 @@ export function ServicesTable() {
         },
       });
     },
-    [indexLifecyclePhase, start, end, environment, kuery]
+    [indexLifecyclePhase, start, end, environment, kuery],
   );
 
   const serviceStatisticsItems =
@@ -157,7 +157,7 @@ export function ServicesTable() {
         : []),
       ...serviceStatisticsItems,
     ],
-    'serviceName'
+    'serviceName',
   );
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
@@ -167,7 +167,7 @@ export function ServicesTable() {
         'xpack.apm.storageExplorer.table.serviceColumnName',
         {
           defaultMessage: 'Service',
-        }
+        },
       ),
       sortable: true,
       render: (_, { serviceName, agentName }) => {
@@ -201,7 +201,7 @@ export function ServicesTable() {
         'xpack.apm.storageExplorer.table.environmentColumnName',
         {
           defaultMessage: 'Environment',
-        }
+        },
       ),
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
@@ -217,7 +217,7 @@ export function ServicesTable() {
             'xpack.apm.storageExplorer.table.samplingColumnDescription',
             {
               defaultMessage: `The number of sampled transactions divided by total throughput. This value may differ from the configured transaction sample rate because it might be affected by the initial service's decision when using head-based sampling or by a set of policies when using tail-based sampling.`,
-            }
+            },
           )}
         >
           <>
@@ -225,7 +225,7 @@ export function ServicesTable() {
               'xpack.apm.storageExplorer.table.samplingColumnName',
               {
                 defaultMessage: 'Sampling rate',
-              }
+              },
             )}{' '}
             <EuiIcon
               size="s"
@@ -297,7 +297,7 @@ export function ServicesTable() {
             onClick={() =>
               downloadJson({
                 fileName: `storage-explorefpr-${moment(Date.now()).format(
-                  'YYYYMMDDHHmmss'
+                  'YYYYMMDDHHmmss',
                 )}.json`,
                 data: {
                   filters: {
@@ -331,7 +331,7 @@ export function ServicesTable() {
           'xpack.apm.storageExplorer.table.caption',
           {
             defaultMessage: 'Storage Explorer',
-          }
+          },
         )}
         items={items ?? []}
         columns={columns}

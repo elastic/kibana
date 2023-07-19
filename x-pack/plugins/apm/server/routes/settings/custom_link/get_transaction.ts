@@ -26,7 +26,7 @@ export async function getTransaction({
         if (value) {
           return { terms: { [key]: splitFilterValueByComma(value) } };
         }
-      })
+      }),
   );
 
   const params = {
@@ -46,7 +46,7 @@ export async function getTransaction({
   };
   const resp = await apmEventClient.search(
     'get_transaction_for_custom_link',
-    params
+    params,
   );
   return resp.hits.hits[0]?._source;
 }

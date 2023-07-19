@@ -25,7 +25,7 @@ const nodeServiceNameHint = i18n.translate(
   'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
   {
     defaultMessage: 'Overrides the service name in package.json.',
-  }
+  },
 );
 
 export const nodeLineNumbers = {
@@ -44,7 +44,7 @@ export const node = `// ${i18n.translate(
   {
     defaultMessage:
       'Add this to the very top of the first file loaded in your app',
-  }
+  },
 )}
 var apm = require('elastic-apm-node').start({
   ${nodeVariables.apmServiceName}: '{{{apmServiceName}}}',

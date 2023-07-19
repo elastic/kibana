@@ -36,7 +36,7 @@ export interface FetcherResult<Data> {
 }
 
 function getDetailsFromErrorResponse(
-  error: IHttpFetchError<ResponseErrorBody>
+  error: IHttpFetchError<ResponseErrorBody>,
 ) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
@@ -54,7 +54,7 @@ function getDetailsFromErrorResponse(
 
 const createAutoAbortedClient = (
   signal: AbortSignal,
-  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void,
 ): AutoAbortedObservabilityClient => {
   return ((endpoint, options) => {
     return callObservabilityOnboardingApi(endpoint, {
@@ -92,7 +92,7 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
-  } = {}
+  } = {},
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
@@ -155,7 +155,7 @@ export function useFetcher<TReturn>(
                 'xpack.observability_onboarding.fetcher.error.title',
                 {
                   defaultMessage: `Error while fetching resource`,
-                }
+                },
               ),
 
               body: (
@@ -165,7 +165,7 @@ export function useFetcher<TReturn>(
                       'xpack.observability_onboarding.fetcher.error.status',
                       {
                         defaultMessage: `Error`,
-                      }
+                      },
                     )}
                   </h5>
 

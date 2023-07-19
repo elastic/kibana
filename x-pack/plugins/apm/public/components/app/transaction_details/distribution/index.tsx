@@ -46,7 +46,7 @@ export function TransactionDistribution({
     query: { rangeFrom, rangeTo, showCriticalPath, environment },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -82,7 +82,7 @@ export function TransactionDistribution({
         },
       });
     },
-    [history]
+    [history],
   );
 
   const onTabClick = useCallback(
@@ -95,7 +95,7 @@ export function TransactionDistribution({
         }),
       });
     },
-    [history]
+    [history],
   );
 
   return (

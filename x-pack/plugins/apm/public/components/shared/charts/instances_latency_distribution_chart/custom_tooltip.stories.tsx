@@ -21,7 +21,7 @@ function getLatencyFormatter(props: TooltipInfo) {
     ...props.values.map((value) => {
       const datum = value.datum as unknown as MainStatsServiceInstanceItem;
       return datum.latency ?? 0;
-    })
+    }),
   );
   return getDurationFormatter(maxLatency);
 }

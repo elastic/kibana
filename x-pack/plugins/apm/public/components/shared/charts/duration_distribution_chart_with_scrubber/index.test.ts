@@ -14,7 +14,7 @@ describe('getFormattedSelection', () => {
 
   it('displays two units when from and to have different units', () => {
     expect(getFormattedSelection([100000, 1000000000])).toEqual(
-      '100 ms - 17 min'
+      '100 ms - 17 min',
     );
   });
 });

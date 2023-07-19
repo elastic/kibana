@@ -11,7 +11,7 @@ const isString = (val: any): boolean => typeof val === 'string';
 
 export function pivotObjectArray<
   RowType extends { [key: string]: any },
-  ReturnColumns extends string | number | symbol = keyof RowType
+  ReturnColumns extends string | number | symbol = keyof RowType,
 >(rows: RowType[], columns?: string[]): Record<string, ReturnColumns[]> {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {

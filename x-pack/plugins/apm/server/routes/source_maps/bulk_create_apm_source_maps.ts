@@ -25,7 +25,7 @@ export async function bulkCreateApmSourceMaps({
         await getUnzippedArtifactBody(artifact.body);
 
       const { contentEncoded, contentHash } = await getEncodedContent(
-        sourceMap
+        sourceMap,
       );
 
       return {
@@ -41,7 +41,7 @@ export async function bulkCreateApmSourceMaps({
           version: serviceVersion,
         },
       };
-    })
+    }),
   );
 
   return internalESClient.bulk<ApmSourceMap>({

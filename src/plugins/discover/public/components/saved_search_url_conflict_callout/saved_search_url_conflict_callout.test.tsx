@@ -27,7 +27,7 @@ describe('SavedSearchURLConflictCallout', () => {
         location: {
           search: '?_g=foo',
         },
-      } as History);
+      }) as History;
   });
 
   test("should render URLConflictCallout in case of id's conflicts", () => {

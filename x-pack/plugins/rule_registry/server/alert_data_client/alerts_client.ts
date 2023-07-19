@@ -332,14 +332,15 @@ export class AlertsClient {
       if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
         await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.hits.hits.map((item) =>
-          this.auditLogger?.log(
-            alertAuditEvent({
-              action: operationAlertAuditActionMap[operation],
-              id: item._id,
-              ...this.getOutcome(operation),
-            })
-          )
+        result?.hits.hits.map(
+          (item) =>
+            this.auditLogger?.log(
+              alertAuditEvent({
+                action: operationAlertAuditActionMap[operation],
+                id: item._id,
+                ...this.getOutcome(operation),
+              })
+            )
         );
       }
 

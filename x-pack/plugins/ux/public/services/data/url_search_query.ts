@@ -17,7 +17,7 @@ import { mergeProjection } from '../../../common/utils/merge_projection';
 export function urlSearchQuery(
   restFilters: any,
   uxQuery: any,
-  searchValue: string
+  searchValue: string,
 ) {
   const setup: SetupUX = { uiFilters: restFilters ? restFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({

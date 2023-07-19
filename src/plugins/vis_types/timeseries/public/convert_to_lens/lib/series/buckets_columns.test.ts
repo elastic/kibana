@@ -111,7 +111,7 @@ describe('getBucketsColumns', () => {
     [
       string,
       Parameters<typeof getBucketsColumns>,
-      Array<Partial<Exclude<Column, 'params'> & { params: Partial<Column['params']> }>> | null
+      Array<Partial<Exclude<Column, 'params'> & { params: Partial<Column['params']> }>> | null,
     ]
   >([
     [

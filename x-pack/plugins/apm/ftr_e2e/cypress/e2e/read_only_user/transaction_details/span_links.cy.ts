@@ -46,12 +46,12 @@ describe('Span links', () => {
     describe('span links count on trace waterfall', () => {
       it('Shows two children and no parents on producer-internal-only Span A', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-internal-only' })
+          getServiceInventoryUrl({ serviceName: 'producer-internal-only' }),
         );
         cy.contains('Transaction A').click();
         cy.contains('2 Span links');
         cy.getByTestSubj(
-          `spanLinksBadge_${ids.producerInternalOnlyIds.spanAId}`
+          `spanLinksBadge_${ids.producerInternalOnlyIds.spanAId}`,
         ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('2 incoming');
@@ -60,12 +60,12 @@ describe('Span links', () => {
 
       it('Shows one parent and one children on producer-external-only Span B', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-external-only' })
+          getServiceInventoryUrl({ serviceName: 'producer-external-only' }),
         );
         cy.contains('Transaction B').click();
         cy.contains('2 Span links');
         cy.getByTestSubj(
-          `spanLinksBadge_${ids.producerExternalOnlyIds.spanBId}`
+          `spanLinksBadge_${ids.producerExternalOnlyIds.spanBId}`,
         ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
@@ -74,12 +74,12 @@ describe('Span links', () => {
 
       it('Shows one parent and one children on producer-consumer Transaction C', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' }),
         );
         cy.contains('Transaction C').click();
         cy.contains('2 Span links');
         cy.getByTestSubj(
-          `spanLinksBadge_${ids.producerConsumerIds.transactionCId}`
+          `spanLinksBadge_${ids.producerConsumerIds.transactionCId}`,
         ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
@@ -88,12 +88,12 @@ describe('Span links', () => {
 
       it('Shows no parent and one children on producer-consumer Span C', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' }),
         );
         cy.contains('Transaction C').click();
         cy.contains('1 Span link');
         cy.getByTestSubj(
-          `spanLinksBadge_${ids.producerConsumerIds.spanCId}`
+          `spanLinksBadge_${ids.producerConsumerIds.spanCId}`,
         ).trigger('mouseover');
         cy.contains('1 Span link found');
         cy.contains('1 incoming');
@@ -102,12 +102,12 @@ describe('Span links', () => {
 
       it('Shows two parents and one children on consumer-multiple Transaction D', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' }),
         );
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
         cy.getByTestSubj(
-          `spanLinksBadge_${ids.producerMultipleIds.transactionDId}`
+          `spanLinksBadge_${ids.producerMultipleIds.transactionDId}`,
         ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
@@ -116,12 +116,12 @@ describe('Span links', () => {
 
       it('Shows two parents and one children on consumer-multiple Span E', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' }),
         );
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
         cy.getByTestSubj(
-          `spanLinksBadge_${ids.producerMultipleIds.spanEId}`
+          `spanLinksBadge_${ids.producerMultipleIds.spanEId}`,
         ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
@@ -132,7 +132,7 @@ describe('Span links', () => {
     describe('span link flyout', () => {
       it('Shows children details on producer-internal-only Span A', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-internal-only' })
+          getServiceInventoryUrl({ serviceName: 'producer-internal-only' }),
         );
         cy.contains('Transaction A').click();
         cy.contains('Span A').click();
@@ -144,7 +144,7 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `/link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`
+            `/link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`,
           );
         cy.contains('consumer-multiple')
           .should('have.attr', 'href')
@@ -153,17 +153,17 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`,
           );
         cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
-          'Outgoing links (0)'
+          'Outgoing links (0)',
         );
       });
 
       it('Shows children and parents details on producer-external-only Span B', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-external-only' })
+          getServiceInventoryUrl({ serviceName: 'producer-external-only' }),
         );
         cy.contains('Transaction B').click();
         cy.contains('Span B').click();
@@ -176,7 +176,7 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`,
           );
         cy.getByTestSubj('spanLinkTypeSelect').select('Outgoing links (1)');
         cy.contains('Unknown');
@@ -185,11 +185,11 @@ describe('Span links', () => {
 
       it('Shows children and parents details on producer-consumer Transaction C', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' }),
         );
         cy.contains('Transaction C').click();
         cy.get(
-          `[aria-controls="${ids.producerConsumerIds.transactionCId}"]`
+          `[aria-controls="${ids.producerConsumerIds.transactionCId}"]`,
         ).click();
         cy.getByTestSubj('spanLinksTab').click();
 
@@ -200,7 +200,7 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`,
           );
 
         cy.getByTestSubj('spanLinkTypeSelect').select('Outgoing links (1)');
@@ -211,13 +211,13 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`
+            `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`,
           );
       });
 
       it('Shows children and parents details on producer-consumer Span C', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' }),
         );
         cy.contains('Transaction C').click();
         cy.contains('Span C').click();
@@ -230,22 +230,22 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`,
           );
 
         cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
-          'Outgoing links (0)'
+          'Outgoing links (0)',
         );
       });
 
       it('Shows children and parents details on consumer-multiple Transaction D', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' }),
         );
         cy.contains('Transaction D').click();
         cy.get(
-          `[aria-controls="${ids.producerMultipleIds.transactionDId}"]`
+          `[aria-controls="${ids.producerMultipleIds.transactionDId}"]`,
         ).click();
         cy.getByTestSubj('spanLinksTab').click();
 
@@ -256,7 +256,7 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.spanCId}`
+            `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.spanCId}`,
           );
 
         cy.contains('producer-internal-only')
@@ -266,18 +266,18 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`
+            `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`,
           );
 
         cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
-          'Incoming links (0)'
+          'Incoming links (0)',
         );
       });
 
       it('Shows children and parents details on consumer-multiple Span E', () => {
         cy.visitKibana(
-          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' }),
         );
         cy.contains('Transaction D').click();
         cy.contains('Span E').click();
@@ -290,7 +290,7 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerExternalOnlyIds.transactionBId}?waterfallItemId=${ids.producerExternalOnlyIds.spanBId}`
+            `link-to/transaction/${ids.producerExternalOnlyIds.transactionBId}?waterfallItemId=${ids.producerExternalOnlyIds.spanBId}`,
           );
 
         cy.contains('producer-consumer')
@@ -300,12 +300,12 @@ describe('Span links', () => {
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`
+            `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`,
           );
 
         cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
-          'Incoming links (0)'
+          'Incoming links (0)',
         );
       });
     });

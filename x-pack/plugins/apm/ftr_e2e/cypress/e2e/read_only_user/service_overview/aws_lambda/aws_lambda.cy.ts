@@ -28,7 +28,7 @@ describe('Service overview - aws lambda', () => {
       generateData({
         start: new Date(start).getTime(),
         end: new Date(end).getTime(),
-      })
+      }),
     );
   });
 

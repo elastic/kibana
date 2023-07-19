@@ -74,7 +74,7 @@ interface Variables {
 }
 
 const apmAgentVariablesMap: (
-  secretToken?: string
+  secretToken?: string,
 ) => Record<string, Variables> = (secretToken?: string) => ({
   java: javaVariables(secretToken),
   node: nodeVariables(secretToken),
@@ -92,7 +92,7 @@ interface LineNumbers {
 }
 
 const apmAgentLineNumbersMap: (
-  apiKey?: string | null
+  apiKey?: string | null,
 ) => Record<string, LineNumbers> = (apiKey?: string | null) => ({
   java: javaLineNumbers(apiKey),
   node: nodeLineNumbers(),
@@ -151,7 +151,7 @@ export function getApmAgentVariables(variantId: string, secretToken?: string) {
 
 export function getApmAgentLineNumbers(
   variantId: string,
-  apiKey?: string | null
+  apiKey?: string | null,
 ) {
   return apmAgentLineNumbersMap(apiKey)[variantId];
 }

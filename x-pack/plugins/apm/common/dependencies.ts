@@ -17,7 +17,7 @@ export const unifiedSearchBarPlaceholder = i18n.translate(
   'xpack.apm.dependencies.unifiedSearchBarPlaceholder',
   {
     defaultMessage: `Search dependency metrics (e.g. span.destination.service.resource:elasticsearch)`,
-  }
+  },
 );
 
 export const getSearchBarBoolFilter = ({

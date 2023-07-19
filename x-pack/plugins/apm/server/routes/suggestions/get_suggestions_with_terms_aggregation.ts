@@ -62,13 +62,13 @@ export async function getSuggestionsWithTermsAggregation({
           },
         },
       },
-    }
+    },
   );
 
   return {
     terms:
       response.aggregations?.items.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key as string,
       ) ?? [],
   };
 }

@@ -78,7 +78,7 @@ describe('#importSavedObjectsFromStream', () => {
       ({
         // other attributes aren't needed for the purposes of injecting metadata
         management: { icon: `${type}-icon` },
-      } as any),
+      }) as any,
     importHooks = {},
     managed,
   }: {

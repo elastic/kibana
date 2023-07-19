@@ -144,7 +144,7 @@ export function generateMobileData({ from, to }: { from: number; to: number }) {
               })
               .duration(800)
               .success()
-              .timestamp(timestamp + 400)
+              .timestamp(timestamp + 400),
           ),
         galaxy10
           .transaction('Second View - View Appearing', 'Android Activity')
@@ -160,7 +160,7 @@ export function generateMobileData({ from, to }: { from: number; to: number }) {
               })
               .duration(400)
               .success()
-              .timestamp(10000 + timestamp + 250)
+              .timestamp(10000 + timestamp + 250),
           ),
         huaweiP2
           .transaction('Start View - View Appearing', 'huaweiP2 Activity')
@@ -187,7 +187,7 @@ export function generateMobileData({ from, to }: { from: number; to: number }) {
               })
               .duration(800)
               .success()
-              .timestamp(timestamp + 400)
+              .timestamp(timestamp + 400),
           ),
         galaxy7
           .transaction('Start View - View Appearing', 'Android Activity')
@@ -214,7 +214,7 @@ export function generateMobileData({ from, to }: { from: number; to: number }) {
               })
               .duration(800)
               .success()
-              .timestamp(timestamp + 400)
+              .timestamp(timestamp + 400),
           ),
       ];
     });

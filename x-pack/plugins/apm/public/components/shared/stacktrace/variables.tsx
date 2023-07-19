@@ -37,7 +37,7 @@ export function Variables({ vars }: Props) {
           className="euiAccordion"
           buttonContent={i18n.translate(
             'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
-            { defaultMessage: 'Local variables' }
+            { defaultMessage: 'Local variables' },
           )}
         >
           <React.Fragment>

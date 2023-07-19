@@ -51,7 +51,7 @@ export function AddEnvironments({
     (callApmApi) =>
       callApmApi(`GET /internal/apm/settings/anomaly-detection/environments`),
     [],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const environmentOptions = data.environments.map((env) => ({
@@ -82,7 +82,7 @@ export function AddEnvironments({
         <h2>
           {i18n.translate(
             'xpack.apm.settings.anomalyDetection.addEnvironments.titleText',
-            { defaultMessage: 'Select environments' }
+            { defaultMessage: 'Select environments' },
           )}
         </h2>
       </EuiTitle>
@@ -95,7 +95,7 @@ export function AddEnvironments({
           {
             defaultMessage:
               'Select the service environments that you want to enable anomaly detection in. Anomalies will surface for all services and transaction types within the selected environments.',
-          }
+          },
         )}
       </EuiText>
       <EuiSpacer size="l" />
@@ -104,7 +104,7 @@ export function AddEnvironments({
           'xpack.apm.settings.anomalyDetection.addEnvironments.selectorLabel',
           {
             defaultMessage: 'Environments',
-          }
+          },
         )}
         fullWidth
       >
@@ -114,7 +114,7 @@ export function AddEnvironments({
             'xpack.apm.settings.anomalyDetection.addEnvironments.selectorPlaceholder',
             {
               defaultMessage: 'Select or add environments',
-            }
+            },
           )}
           options={environmentOptions}
           selectedOptions={selectedOptions}
@@ -145,7 +145,7 @@ export function AddEnvironments({
               'xpack.apm.settings.anomalyDetection.addEnvironments.cancelButtonText',
               {
                 defaultMessage: 'Cancel',
-              }
+              },
             )}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -159,7 +159,7 @@ export function AddEnvironments({
               setIsSaving(true);
 
               const selectedEnvironments = selectedOptions.map(
-                ({ value }) => value as string
+                ({ value }) => value as string,
               );
               const success = await createJobs({
                 environments: selectedEnvironments,
@@ -176,7 +176,7 @@ export function AddEnvironments({
               'xpack.apm.settings.anomalyDetection.addEnvironments.createJobsButtonText',
               {
                 defaultMessage: 'Create Jobs',
-              }
+              },
             )}
           </EuiButton>
         </EuiFlexItem>

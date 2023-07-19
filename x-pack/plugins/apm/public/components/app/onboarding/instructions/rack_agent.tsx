@@ -18,7 +18,7 @@ import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createRackAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,
@@ -42,13 +42,13 @@ export const createRackAgentInstructions = (
       'xpack.apm.onboarding.rack.configure.commands.requiredComment',
       {
         defaultMessage: 'required',
-      }
+      },
     )}
     config_file: '' # ${i18n.translate(
       'xpack.apm.onboarding.rack.configure.commands.optionalComment',
       {
         defaultMessage: 'optional, defaults to config/elastic_apm.yml',
-      }
+      },
     )}
   )
 

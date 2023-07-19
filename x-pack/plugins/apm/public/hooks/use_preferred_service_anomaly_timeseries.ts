@@ -12,7 +12,7 @@ import { useEnvironmentsContext } from '../context/environments_context/use_envi
 import { useServiceAnomalyTimeseriesContext } from '../context/service_anomaly_timeseries/use_service_anomaly_timeseries_context';
 
 export function usePreferredServiceAnomalyTimeseries(
-  detectorType: ApmMlDetectorType
+  detectorType: ApmMlDetectorType,
 ) {
   const { allAnomalyTimeseries } = useServiceAnomalyTimeseriesContext();
 

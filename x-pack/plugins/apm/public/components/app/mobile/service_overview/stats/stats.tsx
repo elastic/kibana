@@ -61,10 +61,10 @@ export function MobileStats({
               offset,
             },
           },
-        }
+        },
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType, offset]
+    [start, end, environment, kuery, serviceName, transactionType, offset],
   );
 
   const getComparisonValueFormatter = useCallback(
@@ -77,7 +77,7 @@ export function MobileStats({
         </span>
       );
     },
-    [comparisonEnabled, previousPeriodLabel]
+    [comparisonEnabled, previousPeriodLabel],
   );
 
   const getIcon = useCallback(
@@ -97,7 +97,7 @@ export function MobileStats({
           <EuiIcon type={type} width={width} height={height} fill={color} />
         );
       },
-    [status]
+    [status],
   );
 
   const loadingStats = isPending(status);

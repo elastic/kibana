@@ -62,7 +62,7 @@ export function createPluginSetupContext<
   TSetup,
   TStart,
   TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsStart extends object,
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
@@ -100,7 +100,7 @@ export function createPluginStartContext<
   TSetup,
   TStart,
   TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsStart extends object,
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,

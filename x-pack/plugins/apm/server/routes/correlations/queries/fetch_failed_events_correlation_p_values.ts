@@ -82,7 +82,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
           },
         },
       },
-    }
+    },
   );
 
   const { aggregations } = resp;

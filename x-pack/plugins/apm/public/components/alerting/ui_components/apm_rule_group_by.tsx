@@ -29,7 +29,7 @@ export function APMRuleGroupBy({
       const groupByOption = selectedOptions.map((option) => option.label);
       onChange([...new Set(preSelectedOptions.concat(groupByOption))]);
     },
-    [onChange, preSelectedOptions]
+    [onChange, preSelectedOptions],
   );
 
   const getPreSelectedOptions = () => {

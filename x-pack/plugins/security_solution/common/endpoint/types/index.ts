@@ -1137,7 +1137,7 @@ export type NewPolicyData = UpdatePackagePolicy & {
           value: PolicyConfig;
         };
       };
-    }
+    },
   ];
 };
 

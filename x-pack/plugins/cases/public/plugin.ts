@@ -83,7 +83,7 @@ export class CasesUiPlugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           CasesPluginStart,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./application');

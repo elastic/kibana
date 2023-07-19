@@ -51,7 +51,7 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       debugSettings: getDebugSettings(),
       agentAuthorizationSettings: getAgentAuthorizationSettings(),
       tailSamplingSettings: getTailSamplingSettings(
-        tailSamplingPoliciesDocsLink
+        tailSamplingPoliciesDocsLink,
       ),
     };
   }, [tailSamplingPoliciesDocsLink]);
@@ -77,11 +77,11 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       id: 'apm',
       title: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.settings.title',
-        { defaultMessage: 'General' }
+        { defaultMessage: 'General' },
       ),
       subtitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.settings.subtitle',
-        { defaultMessage: 'Settings for the APM integration.' }
+        { defaultMessage: 'Settings for the APM integration.' },
       ),
       settings: apmSettings,
     },
@@ -89,11 +89,11 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       id: 'rum',
       title: i18n.translate(
         'xpack.apm.fleet_integration.settings.rum.settings.title',
-        { defaultMessage: 'Real User Monitoring' }
+        { defaultMessage: 'Real User Monitoring' },
       ),
       subtitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.rum.settings.subtitle',
-        { defaultMessage: 'Manage the configuration of the RUM JS agent.' }
+        { defaultMessage: 'Manage the configuration of the RUM JS agent.' },
       ),
       settings: rumSettings,
     },
@@ -101,11 +101,11 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       id: 'tls',
       title: i18n.translate(
         'xpack.apm.fleet_integration.settings.tls.settings.title',
-        { defaultMessage: 'TLS Settings' }
+        { defaultMessage: 'TLS Settings' },
       ),
       subtitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.tls.settings.subtitle',
-        { defaultMessage: 'Settings for TLS certification.' }
+        { defaultMessage: 'Settings for TLS certification.' },
       ),
       settings: tlsSettings,
     },
@@ -113,7 +113,7 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       id: 'agentAuthorization',
       title: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.settings.title',
-        { defaultMessage: 'Agent authorization' }
+        { defaultMessage: 'Agent authorization' },
       ),
       settings: agentAuthorizationSettings,
     },
@@ -123,14 +123,14 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
             id: 'tailSampling',
             title: i18n.translate(
               'xpack.apm.fleet_integration.settings.tailSampling.settings.title',
-              { defaultMessage: 'Tail-based sampling' }
+              { defaultMessage: 'Tail-based sampling' },
             ),
             subtitle: i18n.translate(
               'xpack.apm.fleet_integration.settings.tailSampling.settings.subtitle',
               {
                 defaultMessage:
                   'Manage tail-based sampling for services and traces.',
-              }
+              },
             ),
             settings: tailSamplingSettings,
             isPlatinumLicence: true,
@@ -141,11 +141,11 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       id: 'debug',
       title: i18n.translate(
         'xpack.apm.fleet_integration.settings.debug.settings.title',
-        { defaultMessage: 'Debug settings' }
+        { defaultMessage: 'Debug settings' },
       ),
       subtitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.debug.settings.subtitle',
-        { defaultMessage: 'Settings for the APM server debug flags' }
+        { defaultMessage: 'Settings for the APM server debug flags' },
       ),
       settings: debugSettings,
     },

@@ -88,7 +88,7 @@ export async function getTopTracesPrimaryStats({
               filter: [
                 ...termQuery(TRANSACTION_NAME, transactionName),
                 ...getDocumentTypeFilterForTransactions(
-                  searchAggregatedTransactions
+                  searchAggregatedTransactions,
                 ),
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
@@ -133,14 +133,14 @@ export async function getTopTracesPrimaryStats({
                     avg: {
                       avg: {
                         field: getDurationFieldForTransactions(
-                          searchAggregatedTransactions
+                          searchAggregatedTransactions,
                         ),
                       },
                     },
                     sum: {
                       sum: {
                         field: getDurationFieldForTransactions(
-                          searchAggregatedTransactions
+                          searchAggregatedTransactions,
                         ),
                       },
                     },
@@ -150,13 +150,13 @@ export async function getTopTracesPrimaryStats({
             },
           },
         },
-      }
+      },
     );
 
     const calculateImpact = calculateImpactBuilder(
       response.aggregations?.sample.transaction_groups.buckets.map(
-        ({ sum }) => sum.value
-      )
+        ({ sum }) => sum.value,
+      ),
     );
 
     const items = response.aggregations?.sample.transaction_groups.buckets.map(
@@ -179,7 +179,7 @@ export async function getTopTracesPrimaryStats({
             AGENT_NAME
           ] as AgentName,
         };
-      }
+      },
     );
 
     return {

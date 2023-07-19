@@ -86,7 +86,7 @@ export const fetchFieldValueFieldStats = async ({
         }),
         aggs,
       },
-    }
+    },
   );
 
   const results = (

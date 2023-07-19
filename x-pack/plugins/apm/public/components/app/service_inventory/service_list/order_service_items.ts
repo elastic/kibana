@@ -68,7 +68,7 @@ export function orderServiceItems({
     return orderBy(
       items,
       [sortFn, tiebreakerSortFn],
-      [sortDirection, tiebreakerSortDirection]
+      [sortDirection, tiebreakerSortDirection],
     );
   }
   return orderBy(items, [sortFn], [sortDirection]);

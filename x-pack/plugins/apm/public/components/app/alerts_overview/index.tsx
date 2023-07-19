@@ -28,7 +28,7 @@ export function AlertsOverview() {
     query: { environment, rangeFrom, rangeTo, kuery, alertStatus },
   } = useAnyOfApmParams(
     '/services/{serviceName}/alerts',
-    '/mobile-services/{serviceName}/alerts'
+    '/mobile-services/{serviceName}/alerts',
   );
   const { services } = useKibana<ApmPluginStartDeps>();
   const [alertStatusFilter, setAlertStatusFilter] =
@@ -74,7 +74,7 @@ export function AlertsOverview() {
 
   const onKueryChange = useCallback(
     (value) => push(history, { query: { kuery: value } }),
-    [history]
+    [history],
   );
 
   return (

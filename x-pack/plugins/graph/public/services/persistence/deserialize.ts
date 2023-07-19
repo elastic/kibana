@@ -74,9 +74,8 @@ export function migrateLegacyIndexPatternRef(
   if (!legacyIndexPatternRef) {
     return { success: true };
   }
-  const dataViewId = dataViews.find(
-    (dataViewItem) => dataViewItem.title === legacyIndexPatternRef
-  )?.id;
+  const dataViewId = dataViews.find((dataViewItem) => dataViewItem.title === legacyIndexPatternRef)
+    ?.id;
   if (!dataViewId) {
     return { success: false, missingIndexPattern: legacyIndexPatternRef };
   }

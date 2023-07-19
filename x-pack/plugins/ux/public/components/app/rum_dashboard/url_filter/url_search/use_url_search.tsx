@@ -33,7 +33,7 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
       setSearchValue(query);
     },
     250,
-    [query]
+    [query],
   );
 
   const { dataViewTitle } = useDataView();
@@ -45,7 +45,7 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
       ...urlSearchQuery(restFilters, uxQuery, searchValue),
     },
     [dataViewTitle, popoverIsOpen, uxQuery, searchValue],
-    { name: 'UX_URL_SEARCH' }
+    { name: 'UX_URL_SEARCH' },
   );
 
   const data = useMemo(() => {

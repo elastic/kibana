@@ -50,7 +50,7 @@ interface ContentEditorConfig
 }
 
 export interface TableListViewTableProps<
-  T extends UserContentCommonSchema = UserContentCommonSchema
+  T extends UserContentCommonSchema = UserContentCommonSchema,
 > {
   entityName: string;
   entityNamePlural: string;

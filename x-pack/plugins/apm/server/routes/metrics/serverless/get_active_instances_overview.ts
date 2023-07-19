@@ -129,7 +129,7 @@ export async function getServerlessActiveInstancesOverview({
 
   const response = await apmEventClient.search(
     'ger_serverless_active_instances_overview',
-    params
+    params,
   );
 
   return (
@@ -163,7 +163,7 @@ export async function getServerlessActiveInstancesOverview({
                 {
                   serverlessDuration: [],
                   billedDuration: [],
-                }
+                },
               );
             return [
               ...acc,
@@ -183,7 +183,7 @@ export async function getServerlessActiveInstancesOverview({
               },
             ];
           },
-          []
+          [],
         );
       return serverlessFunctionsDetails;
     }) || []

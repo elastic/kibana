@@ -18,7 +18,7 @@ import type {
 
 export const useGetActionDetails = <
   TOutputType extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 >(
   actionId: string,
   options: UseQueryOptions<ActionDetailsApiResponse<TOutputType, TParameters>, IHttpFetchError> = {}

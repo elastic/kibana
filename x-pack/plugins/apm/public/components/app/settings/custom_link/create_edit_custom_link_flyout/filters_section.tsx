@@ -38,7 +38,7 @@ export function FiltersSection({
   const onChangeFilter = (
     key: Filter['key'],
     value: Filter['value'],
-    idx: number
+    idx: number,
   ) => {
     const newFilters = [...filters];
     newFilters[idx] = { key, value };
@@ -71,7 +71,7 @@ export function FiltersSection({
             'xpack.apm.settings.customLink.flyout.filters.title',
             {
               defaultMessage: 'Filters',
-            }
+            },
           )}
         </h3>
       </EuiTitle>
@@ -82,7 +82,7 @@ export function FiltersSection({
           {
             defaultMessage:
               'Use the filter options to scope them to only appear for specific services.',
-          }
+          },
         )}
       </EuiText>
 
@@ -105,7 +105,7 @@ export function FiltersSection({
                   'xpack.apm.settings.customLink.flyout.filters.prepend',
                   {
                     defaultMessage: 'Field',
-                  }
+                  },
                 )}
                 onChange={(e) =>
                   // set value to empty string to reset value when new field is selected
@@ -124,7 +124,7 @@ export function FiltersSection({
                 fieldName={key}
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
-                  { defaultMessage: 'Value' }
+                  { defaultMessage: 'Value' },
                 )}
                 onChange={(selectedValue) =>
                   onChangeFilter(key, selectedValue as string, idx)
@@ -176,7 +176,7 @@ function AddFilterButton({
         'xpack.apm.settings.customLink.flyout.filters.addAnotherFilter',
         {
           defaultMessage: 'Add another filter',
-        }
+        },
       )}
     </EuiButtonEmpty>
   );

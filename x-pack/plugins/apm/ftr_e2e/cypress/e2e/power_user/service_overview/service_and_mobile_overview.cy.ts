@@ -28,7 +28,7 @@ describe('Service overview page', () => {
       generateData({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -100,7 +100,7 @@ describe('Service overview page', () => {
 
         cy.location().should((loc) => {
           expect(loc.pathname).to.eq(
-            '/app/apm/mobile-services/synth-ios/overview'
+            '/app/apm/mobile-services/synth-ios/overview',
           );
         });
       });
@@ -120,7 +120,7 @@ describe('Service overview page', () => {
 
         cy.location().should((loc) => {
           expect(loc.pathname).to.eq(
-            '/app/apm/mobile-services/synth-android/overview'
+            '/app/apm/mobile-services/synth-android/overview',
           );
         });
       });

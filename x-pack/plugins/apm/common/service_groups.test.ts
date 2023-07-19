@@ -37,7 +37,7 @@ describe('service_groups common utils', () => {
   describe('validateServiceGroupKuery', () => {
     it('should validate supported KQL filter for a service group', () => {
       const result = validateServiceGroupKuery(
-        `service.name: testbeans* or agent.name: "nodejs"`
+        `service.name: testbeans* or agent.name: "nodejs"`,
       );
       expect(result).toHaveProperty('isValidFields', true);
       expect(result).toHaveProperty('isValidSyntax', true);
@@ -45,18 +45,18 @@ describe('service_groups common utils', () => {
     });
     it('should return validation error when unsupported fields are used', () => {
       const result = validateServiceGroupKuery(
-        `service.name: testbeans* or agent.name: "nodejs" or transaction.type: request`
+        `service.name: testbeans* or agent.name: "nodejs" or transaction.type: request`,
       );
       expect(result).toHaveProperty('isValidFields', false);
       expect(result).toHaveProperty('isValidSyntax', true);
       expect(result).toHaveProperty(
         'message',
-        'Query filter for service group does not support fields [transaction.type]'
+        'Query filter for service group does not support fields [transaction.type]',
       );
     });
     it('should return parsing error when KQL is incomplete', () => {
       const result = validateServiceGroupKuery(
-        `service.name: testbeans* or agent.name: "nod`
+        `service.name: testbeans* or agent.name: "nod`,
       );
       expect(result).toHaveProperty('isValidFields', false);
       expect(result).toHaveProperty('isValidSyntax', false);

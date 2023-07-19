@@ -35,14 +35,14 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
         i18n.translate('xpack.apm.settings.agentKeys.invalidate.succeeded', {
           defaultMessage: 'Deleted APM agent key "{name}"',
           values: { name },
-        })
+        }),
       );
     } catch (error) {
       toasts.addDanger(
         i18n.translate('xpack.apm.settings.agentKeys.invalidate.failed', {
           defaultMessage: 'Error deleting APM agent key "{name}"',
           values: { name },
-        })
+        }),
       );
     }
   };
@@ -54,7 +54,7 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
         {
           defaultMessage: 'Delete APM agent key "{name}"?',
           values: { name },
-        }
+        },
       )}
       onCancel={onCancel}
       onConfirm={async () => {
@@ -67,13 +67,13 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
         'xpack.apm.settings.agentKeys.deleteConfirmModal.cancel',
         {
           defaultMessage: 'Cancel',
-        }
+        },
       )}
       confirmButtonText={i18n.translate(
         'xpack.apm.settings.agentKeys.deleteConfirmModal.delete',
         {
           defaultMessage: 'Delete',
-        }
+        },
       )}
       confirmButtonDisabled={isDeleting}
       buttonColor="danger"

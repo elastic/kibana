@@ -48,7 +48,7 @@ export interface Context<Id extends string = any> extends State {
 const formWizardContext = createContext<Context>({} as Context);
 
 export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWizardProvider<
-  T extends object = { [key: string]: any }
+  T extends object = { [key: string]: any },
 >({ children, defaultActiveStep = 0, isEditing, onSave, onStepChange }: Props<T>) {
   const { getData, validate, validation } = useMultiContentContext<T>();
 

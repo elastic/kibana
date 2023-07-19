@@ -84,7 +84,7 @@ export class TestReporter implements Reporter {
 
   async onJourneyEnd(
     journey: Journey,
-    { error, start, end, status }: JourneyEndResult
+    { error, start, end, status }: JourneyEndResult,
   ) {
     const { failed, succeeded, skipped } = this.metrics;
     const total = failed + succeeded + skipped;
@@ -92,7 +92,7 @@ export class TestReporter implements Reporter {
       this.write(renderError(error));
     }
     const message = `${symbols[status]} Took  (${renderDuration(
-      end - start
+      end - start,
     )} seconds)`;
     this.write(message);
 
@@ -110,17 +110,17 @@ export class TestReporter implements Reporter {
               data,
               {
                 encoding: 'base64',
-              }
+              },
             );
           })();
         }
-      }
+      },
     );
   }
 
   onEnd() {
     const failedJourneys = Array.from(this.journeys.entries()).filter(
-      ([, steps]) => steps.some((step) => step.status === 'failed')
+      ([, steps]) => steps.some((step) => step.status === 'failed'),
     );
 
     if (failedJourneys.length > 0) {
@@ -133,7 +133,7 @@ export class TestReporter implements Reporter {
             const message = `${
               symbols[status]
             }  Step: '${stepName}' ${status} (${renderDuration(
-              (end - start) * 1000
+              (end - start) * 1000,
             )} ms)`;
             this.write(indent(message));
             if (error) {
@@ -145,7 +145,7 @@ export class TestReporter implements Reporter {
     }
 
     const successfulJourneys = Array.from(this.journeys.entries()).filter(
-      ([, steps]) => steps.every((step) => step.status === 'succeeded')
+      ([, steps]) => steps.every((step) => step.status === 'succeeded'),
     );
 
     successfulJourneys.forEach(([journeyName, steps]) => {
@@ -157,7 +157,7 @@ export class TestReporter implements Reporter {
           'Failed to delete video file for path ' +
             '.journeys/videos/' +
             journeyName +
-            '.webm'
+            '.webm',
         );
       }
     });

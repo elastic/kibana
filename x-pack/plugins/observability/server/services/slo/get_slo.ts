@@ -11,7 +11,10 @@ import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
 
 export class GetSLO {
-  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
+  constructor(
+    private repository: SLORepository,
+    private summaryClient: SummaryClient
+  ) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);

@@ -18,7 +18,7 @@ export function clientMetricsQuery(
   end: number,
   percentile: number = 50,
   urlQuery?: string,
-  uiFilters?: UxUIFilters
+  uiFilters?: UxUIFilters,
 ) {
   const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({

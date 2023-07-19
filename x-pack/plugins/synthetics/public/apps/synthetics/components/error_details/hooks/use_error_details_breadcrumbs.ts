@@ -25,9 +25,9 @@ export const useErrorDetailsBreadcrumbs = (
   const errorsBreadcrumbs = [
     {
       text: ERRORS_CRUMB,
-      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors?locationId=${
-        selectedLocation?.id
-      }`,
+      href: `${appPath}/monitor/${monitor?.[
+        ConfigKey.CONFIG_ID
+      ]}/errors?locationId=${selectedLocation?.id}`,
     },
     ...(extraCrumbs ?? []),
   ];

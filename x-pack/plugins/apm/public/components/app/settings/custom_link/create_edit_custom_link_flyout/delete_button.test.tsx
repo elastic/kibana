@@ -30,7 +30,7 @@ describe('DeleteButton', () => {
     const onDeleteMock = jest.fn();
     const { getByText } = render(
       <DeleteButton onDelete={onDeleteMock} customLinkId="1" />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     await act(async () => {

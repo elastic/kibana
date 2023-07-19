@@ -184,7 +184,7 @@ interface RuleUuidData extends GenericBuckets {
           _source: {
             'kibana.alert.rule.uuid': string;
           };
-        }
+        },
       ];
     };
   };

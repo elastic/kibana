@@ -45,7 +45,7 @@ enum AgentExplorerInstanceFieldName {
 export function getInstanceColumns(
   serviceName: string,
   agentName: AgentName,
-  agentDocsPageUrl?: string
+  agentDocsPageUrl?: string,
 ): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
   return [
     {
@@ -54,7 +54,7 @@ export function getInstanceColumns(
         'xpack.apm.agentExplorerInstanceTable.InstanceColumnLabel',
         {
           defaultMessage: 'Instance',
-        }
+        },
       ),
       sortable: true,
       render: (_, { serviceNode }) => {
@@ -68,7 +68,7 @@ export function getInstanceColumns(
                 'xpack.apm.agentExplorerInstanceTable.noServiceNodeName.tooltip',
                 {
                   defaultMessage: 'Tooltip for missing serviceNodeName',
-                }
+                },
               )}
             >
               <EuiText style={{ width: `${unit * 24}px` }} size="s">
@@ -91,7 +91,7 @@ export function getInstanceColumns(
                             'xpack.apm.agentExplorerInstanceTable.noServiceNodeName.configurationOptions',
                             {
                               defaultMessage: 'configuration options',
-                            }
+                            },
                           )}
                         </EuiLink>
                       ),
@@ -129,7 +129,7 @@ export function getInstanceColumns(
         'xpack.apm.agentExplorerInstanceTable.environmentColumnLabel',
         {
           defaultMessage: 'Environment',
-        }
+        },
       ),
       width: `${unit * 16}px`,
       sortable: true,
@@ -141,7 +141,7 @@ export function getInstanceColumns(
       field: AgentExplorerInstanceFieldName.AgentVersion,
       name: i18n.translate(
         'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel',
-        { defaultMessage: 'Agent Version' }
+        { defaultMessage: 'Agent Version' },
       ),
       width: `${unit * 16}px`,
       sortable: true,
@@ -156,7 +156,7 @@ export function getInstanceColumns(
                 values: { versionsCount: versions.length },
                 defaultMessage:
                   '{versionsCount, plural, one {1 version} other {# versions}}',
-              }
+              },
             )}
           />
         );
@@ -168,7 +168,7 @@ export function getInstanceColumns(
         'xpack.apm.agentExplorerInstanceTable.lastReportColumnLabel',
         {
           defaultMessage: 'Last report',
-        }
+        },
       ),
       width: `${unit * 16}px`,
       sortable: true,

@@ -28,11 +28,11 @@ export function CustomLogs({ children }: Props) {
       {
         text: i18n.translate(
           'xpack.observability_onboarding.breadcrumbs.customLogs',
-          { defaultMessage: 'Custom Logs' }
+          { defaultMessage: 'Custom Logs' },
         ),
       },
     ],
-    breadcrumbsApp
+    breadcrumbsApp,
   );
   return <AnimatedTransitionsWizard>{children}</AnimatedTransitionsWizard>;
 }
@@ -74,7 +74,7 @@ function AnimatedTransitionsWizard({ children }: Props) {
                 'xpack.observability_onboarding.title.collectCustomLogs',
                 {
                   defaultMessage: 'Collect custom logs',
-                }
+                },
               )}
             </h1>
           </EuiTitle>

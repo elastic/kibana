@@ -83,7 +83,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const initialControlsObj = useMemo(
     () =>
-      initialControls.reduce<Record<string, typeof initialControls[0]>>((prev, current) => {
+      initialControls.reduce<Record<string, (typeof initialControls)[0]>>((prev, current) => {
         prev[current.fieldName] = current;
         return prev;
       }, {}),

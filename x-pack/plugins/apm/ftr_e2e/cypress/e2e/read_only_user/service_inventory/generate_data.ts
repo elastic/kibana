@@ -24,7 +24,7 @@ export function generateMultipleServicesData({
           environment: 'production',
           agentName: 'nodejs',
         })
-        .instance('opbeans-node-prod-1')
+        .instance('opbeans-node-prod-1'),
     );
 
   return range
@@ -36,7 +36,7 @@ export function generateMultipleServicesData({
           .transaction({ transactionName: 'GET /foo' })
           .timestamp(timestamp)
           .duration(500)
-          .success()
-      )
+          .success(),
+      ),
     );
 }

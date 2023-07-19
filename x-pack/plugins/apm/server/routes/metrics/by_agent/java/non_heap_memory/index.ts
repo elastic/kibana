@@ -30,7 +30,7 @@ const series = {
       'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
       {
         defaultMessage: 'Avg. used',
-      }
+      },
     ),
     color: theme.euiColorVis0,
   },
@@ -39,7 +39,7 @@ const series = {
       'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
       {
         defaultMessage: 'Avg. committed',
-      }
+      },
     ),
     color: theme.euiColorVis1,
   },

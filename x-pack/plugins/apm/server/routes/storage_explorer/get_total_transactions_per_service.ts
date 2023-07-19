@@ -56,7 +56,7 @@ export async function getTotalTransactionsPerService({
           bool: {
             filter: [
               ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
+                searchAggregatedTransactions,
               ),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -64,7 +64,7 @@ export async function getTotalTransactionsPerService({
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                   )
                 : []),
             ],
@@ -84,7 +84,7 @@ export async function getTotalTransactionsPerService({
           },
         },
       },
-    }
+    },
   );
 
   return (
@@ -93,7 +93,7 @@ export async function getTotalTransactionsPerService({
         transactionsPerService[bucket.key as string] = bucket.doc_count;
         return transactionsPerService;
       },
-      {} as Record<string, number>
+      {} as Record<string, number>,
     ) ?? {}
   );
 }

@@ -15,4 +15,4 @@ export const getIcons = (type: GaugeShape) =>
     [GaugeShapes.VERTICAL_BULLET]: IconChartVerticalBullet,
     [GaugeShapes.ARC]: 'visGoal',
     [GaugeShapes.CIRCLE]: 'visGoal',
-  }[type]);
+  })[type];

@@ -25,7 +25,7 @@ describe('Error details', () => {
         generateData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
-        })
+        }),
       );
     });
 
@@ -62,7 +62,7 @@ describe('Error details', () => {
               rangeTo: end,
               kuery: 'service.name: "opbeans-node"',
             },
-          })
+          }),
         );
         cy.contains('0 occ');
       });

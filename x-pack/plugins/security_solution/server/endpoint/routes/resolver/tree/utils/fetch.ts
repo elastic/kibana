@@ -53,7 +53,10 @@ export type TreeResponse = Promise<
  */
 export class Fetcher {
   private alertsClient?: AlertsClient;
-  constructor(private readonly client: IScopedClusterClient, alertsClient?: AlertsClient) {
+  constructor(
+    private readonly client: IScopedClusterClient,
+    alertsClient?: AlertsClient
+  ) {
     this.alertsClient = alertsClient;
   }
 

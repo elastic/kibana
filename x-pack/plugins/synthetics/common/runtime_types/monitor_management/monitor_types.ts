@@ -419,7 +419,7 @@ export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   }),
 ]);
 
-export type Secret = typeof secretKeys[number];
+export type Secret = (typeof secretKeys)[number];
 
 export type SyntheticsMonitorWithSecrets = Omit<
   t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,

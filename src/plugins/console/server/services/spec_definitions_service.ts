@@ -101,24 +101,27 @@ export class SpecDefinitionsService {
     const generatedFiles = globby.sync(normalizePath(join(dirname, 'generated', '*.json')));
     const overrideFiles = globby.sync(normalizePath(join(dirname, 'overrides', '*.json')));
 
-    return generatedFiles.reduce((acc, file) => {
-      const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
-      const loadedSpec: Record<string, EndpointDescription> = JSON.parse(
-        readFileSync(file, 'utf8')
-      );
-      if (overrideFile) {
-        merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
-      }
-      Object.entries(loadedSpec).forEach(([key, value]) => {
-        if (acc[key]) {
-          // add time to remove key collision
-          acc[`${key}${Date.now()}`] = value;
-        } else {
-          acc[key] = value;
+    return generatedFiles.reduce(
+      (acc, file) => {
+        const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
+        const loadedSpec: Record<string, EndpointDescription> = JSON.parse(
+          readFileSync(file, 'utf8')
+        );
+        if (overrideFile) {
+          merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
         }
-      });
-      return acc;
-    }, {} as Record<string, EndpointDescription>);
+        Object.entries(loadedSpec).forEach(([key, value]) => {
+          if (acc[key]) {
+            // add time to remove key collision
+            acc[`${key}${Date.now()}`] = value;
+          } else {
+            acc[key] = value;
+          }
+        });
+        return acc;
+      },
+      {} as Record<string, EndpointDescription>
+    );
   }
 
   private loadJsonSpec(endpointsAvailability: string) {

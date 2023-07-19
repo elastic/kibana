@@ -17,8 +17,8 @@ describe('ServiceNodeMetrics', () => {
         shallow(
           <MockApmPluginContextWrapper>
             <ServiceNodeMetrics serviceNodeName="foo" />
-          </MockApmPluginContextWrapper>
-        )
+          </MockApmPluginContextWrapper>,
+        ),
       ).not.toThrowError();
     });
   });

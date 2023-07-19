@@ -148,7 +148,7 @@ export function InstanceDetails({
           initialIsOpen
           title={i18n.translate(
             'xpack.apm.serviceOverview.instanceTable.details.serviceTitle',
-            { defaultMessage: 'Service' }
+            { defaultMessage: 'Service' },
           )}
           icon={getAgentIcon(data.agent?.name, theme.darkMode)}
           keyValueList={serviceDetailsKeyValuePairs}
@@ -159,7 +159,7 @@ export function InstanceDetails({
         <KeyValueFilterList
           title={i18n.translate(
             'xpack.apm.serviceOverview.instanceTable.details.containerTitle',
-            { defaultMessage: 'Container' }
+            { defaultMessage: 'Container' },
           )}
           icon={getContainerIcon(containerType)}
           keyValueList={[
@@ -173,7 +173,7 @@ export function InstanceDetails({
         <KeyValueFilterList
           title={i18n.translate(
             'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
-            { defaultMessage: 'Cloud' }
+            { defaultMessage: 'Cloud' },
           )}
           icon={getCloudIcon(data.cloud?.provider)}
           keyValueList={cloudDetailsKeyValuePairs}

@@ -23,7 +23,7 @@ import { SettingsPage } from './settings_page/settings_page';
 type PageStep = 'choose-service-step' | 'choose-settings-step' | 'review-step';
 
 function getInitialNewConfig(
-  existingConfig: AgentConfigurationIntake | undefined
+  existingConfig: AgentConfigurationIntake | undefined,
 ) {
   return {
     agent_name: existingConfig?.agent_name,
@@ -59,7 +59,7 @@ function getUnsavedChanges({
       }
 
       return existingValue !== value;
-    })
+    }),
   );
 }
 
@@ -74,7 +74,7 @@ export function AgentConfigurationCreateEdit({
   const existingConfig = existingConfigResult?.data;
   const isEditMode = Boolean(existingConfigResult);
   const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>(
-    getInitialNewConfig(existingConfig)
+    getInitialNewConfig(existingConfig),
   );
 
   const resetSettings = useCallback(() => {

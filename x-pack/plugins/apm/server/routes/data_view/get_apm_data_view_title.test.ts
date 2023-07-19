@@ -17,7 +17,7 @@ describe('getApmDataViewTitle', () => {
       metric: 'apm-*-metrics-*',
     } as ApmIndicesConfig);
     expect(title).toBe(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
+      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*',
     );
   });
 

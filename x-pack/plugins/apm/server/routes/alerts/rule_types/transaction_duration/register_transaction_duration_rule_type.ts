@@ -106,7 +106,7 @@ export function registerTransactionDurationRuleType({
     executor: async ({ params: ruleParams, services, spaceId }) => {
       const allGroupByFields = getAllGroupByFields(
         ApmRuleType.TransactionDuration,
-        ruleParams.groupBy
+        ruleParams.groupBy,
       );
 
       const config = await firstValueFrom(config$);
@@ -131,7 +131,7 @@ export function registerTransactionDurationRuleType({
         : indices.transaction;
 
       const field = getDurationFieldForTransactions(
-        searchAggregatedTransactions
+        searchAggregatedTransactions,
       );
 
       const searchParams = {
@@ -150,7 +150,7 @@ export function registerTransactionDurationRuleType({
                   },
                 },
                 ...getDocumentTypeFilterForTransactions(
-                  searchAggregatedTransactions
+                  searchAggregatedTransactions,
                 ),
                 ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                   queryEmptyString: false,
@@ -204,7 +204,7 @@ export function registerTransactionDurationRuleType({
             obj[allGroupByFields[bucketIndex]] = bucketKey;
             return obj;
           },
-          {} as Record<string, string>
+          {} as Record<string, string>,
         );
 
         const bucketKey = bucket.key;
@@ -265,7 +265,7 @@ export function registerTransactionDurationRuleType({
         const alertDetailsUrl = getAlertDetailsUrl(
           basePath,
           spaceId,
-          alertUuid
+          alertUuid,
         );
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
@@ -275,15 +275,15 @@ export function registerTransactionDurationRuleType({
             getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
               SERVICE_ENVIRONMENT
             ],
-            groupByFields[TRANSACTION_TYPE]
-          )
+            groupByFields[TRANSACTION_TYPE],
+          ),
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
-            ruleParams.windowUnit as TimeUnitChar
+            ruleParams.windowUnit as TimeUnitChar,
           ),
           reason,
           // When group by doesn't include transaction.name, the context.transaction.name action variable will contain value of the Transaction Name filter

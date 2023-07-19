@@ -10,7 +10,7 @@ import { isEmpty, isNil } from 'lodash';
 
 export function termQuery<T extends string>(
   field: T,
-  value: string | boolean | number | undefined | null
+  value: string | boolean | number | undefined | null,
 ): QueryDslQueryContainer[] {
   if (isNil(value) || isEmpty(value)) {
     return [];

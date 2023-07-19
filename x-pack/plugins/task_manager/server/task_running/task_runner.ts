@@ -514,11 +514,14 @@ export class TaskManagerRunner implements TaskRunner {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
           // try to release claim as an unknown failure prevented us from marking as running
-          mapErr((errReleaseClaim: Error) => {
-            this.logger.error(
-              `[Task Runner] Task ${this.id} failed to release claim after failure: ${errReleaseClaim}`
-            );
-          }, await this.releaseClaimAndIncrementAttempts());
+          mapErr(
+            (errReleaseClaim: Error) => {
+              this.logger.error(
+                `[Task Runner] Task ${this.id} failed to release claim after failure: ${errReleaseClaim}`
+              );
+            },
+            await this.releaseClaimAndIncrementAttempts()
+          );
         }
 
         throw error;

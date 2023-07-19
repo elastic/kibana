@@ -12,7 +12,7 @@ import { APMInternalESClient } from '../../../lib/helpers/create_es_client/creat
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 
 export async function listConfigurations(
-  internalESClient: APMInternalESClient
+  internalESClient: APMInternalESClient,
 ) {
   const params = {
     index: APM_AGENT_CONFIGURATION_INDEX,
@@ -22,7 +22,7 @@ export async function listConfigurations(
   const [agentConfigs, configsAppliedToAgentsThroughFleet] = await Promise.all([
     internalESClient.search<AgentConfiguration>(
       'list_agent_configuration',
-      params
+      params,
     ),
     getConfigsAppliedToAgentsThroughFleet(internalESClient),
   ]);

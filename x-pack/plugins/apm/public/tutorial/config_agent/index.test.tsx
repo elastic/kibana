@@ -58,7 +58,7 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
       expect(component.getByTestId('loading')).toBeInTheDocument();
     });
@@ -78,10 +78,10 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled={false}
           kibanaVersion="8.0.0"
-        />
+        />,
       );
       expect(
-        await screen.findByText('Default Standalone configuration')
+        await screen.findByText('Default Standalone configuration'),
       ).toBeInTheDocument();
       let commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
@@ -126,13 +126,13 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled={false}
             kibanaVersion="8.0.0"
-          />
+          />,
         );
         expect(
-          await screen.findByText('Default Standalone configuration')
+          await screen.findByText('Default Standalone configuration'),
         ).toBeInTheDocument();
         expect(
-          component.getByTestId('policySelector_onPrem')
+          component.getByTestId('policySelector_onPrem'),
         ).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
@@ -162,13 +162,13 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
         expect(
-          await screen.findByText('Default Standalone configuration')
+          await screen.findByText('Default Standalone configuration'),
         ).toBeInTheDocument();
         expect(
-          component.getByTestId('policySelector_onPrem')
+          component.getByTestId('policySelector_onPrem'),
         ).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
@@ -204,13 +204,13 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
         expect(
-          await screen.findByText('Default Standalone configuration')
+          await screen.findByText('Default Standalone configuration'),
         ).toBeInTheDocument();
         expect(
-          component.getByTestId('policySelector_cloud')
+          component.getByTestId('policySelector_cloud'),
         ).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
@@ -243,13 +243,13 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
         expect(
-          await screen.findByText('Elastic Cloud agent policy')
+          await screen.findByText('Elastic Cloud agent policy'),
         ).toBeInTheDocument();
         expect(
-          component.getByTestId('policySelector_policy-elastic-agent-on-cloud')
+          component.getByTestId('policySelector_policy-elastic-agent-on-cloud'),
         ).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
@@ -278,10 +278,10 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
         expect(
-          await screen.findByText('Default Standalone configuration')
+          await screen.findByText('Default Standalone configuration'),
         ).toBeInTheDocument();
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
@@ -314,7 +314,7 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
 
       expectTextsNotInDocument(component, [
@@ -338,13 +338,13 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
       expect(
-        await screen.findByText('Default Standalone configuration')
+        await screen.findByText('Default Standalone configuration'),
       ).toBeInTheDocument();
       expect(
-        component.getByTestId('policySelector_onPrem')
+        component.getByTestId('policySelector_onPrem'),
       ).toBeInTheDocument();
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
@@ -377,10 +377,10 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
       expect(
-        await screen.findByText('Default Standalone configuration')
+        await screen.findByText('Default Standalone configuration'),
       ).toBeInTheDocument();
       expect(component.getByTestId('policySelector_cloud')).toBeInTheDocument();
       const commands = component.getByTestId('commands').innerHTML;

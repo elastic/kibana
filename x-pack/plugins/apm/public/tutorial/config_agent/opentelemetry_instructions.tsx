@@ -62,7 +62,7 @@ export function OpenTelemetryInstructions({
         'xpack.apm.tutorial.config_otel.column.configSettings',
         {
           defaultMessage: 'Configuration setting (1)',
-        }
+        },
       ),
     },
     {
@@ -72,7 +72,7 @@ export function OpenTelemetryInstructions({
         'xpack.apm.tutorial.config_otel.column.configValue',
         {
           defaultMessage: 'Configuration value',
-        }
+        },
       ),
       render: (_, { value }) => (
         <EuiText size="s" color="accent">
@@ -150,7 +150,7 @@ export function OpenTelemetryInstructions({
                   'xpack.apm.tutorial.config_otel.instrumentationGuide',
                   {
                     defaultMessage: 'OpenTelemetry Instrumentation guide',
-                  }
+                  },
                 )}
               </EuiLink>
             ),

@@ -17,7 +17,7 @@ describe('CauseStacktrace', () => {
         const props = { id: 'testId', message: 'testMessage' };
 
         expect(
-          mountWithTheme(<CauseStacktrace {...props} />).find('CausedBy')
+          mountWithTheme(<CauseStacktrace {...props} />).find('CausedBy'),
         ).toHaveLength(1);
       });
     });
@@ -32,7 +32,7 @@ describe('CauseStacktrace', () => {
         expect(
           mountWithTheme(<CauseStacktrace {...props} />)
             .find('EuiTitle span')
-            .text()
+            .text(),
         ).toEqual('…');
       });
     });
@@ -47,8 +47,8 @@ describe('CauseStacktrace', () => {
 
         expect(
           shallow(<CauseStacktrace {...props} />).find(
-            'Styled(EuiAccordionClass)'
-          )
+            'Styled(EuiAccordionClass)',
+          ),
         ).toHaveLength(1);
       });
     });

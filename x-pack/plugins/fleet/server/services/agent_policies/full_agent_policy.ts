@@ -94,10 +94,13 @@ export async function getFullAgentPolicy(
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput)
   );
-  const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
-    acc[name] = featureConfig;
-    return acc;
-  }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
+  const features = (agentPolicy.agent_features || []).reduce(
+    (acc, { name, ...featureConfig }) => {
+      acc[name] = featureConfig;
+      return acc;
+    },
+    {} as NonNullable<FullAgentPolicy['agent']>['features']
+  );
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {

@@ -12,7 +12,7 @@ export const serviceNameHint = i18n.translate(
   {
     defaultMessage:
       'The service name is the primary filter in the APM UI and is used to group errors and trace data together. Allowed characters are a-z, A-Z, 0-9, -, _, and space.',
-  }
+  },
 );
 
 export const secretTokenHint = i18n.translate(
@@ -20,7 +20,7 @@ export const secretTokenHint = i18n.translate(
   {
     defaultMessage:
       'Use if APM Server requires a secret token. Both the agent and APM Server must be configured with the same token. This ensures that only your agents can send data to your APM server.',
-  }
+  },
 );
 
 export const serverUrlHint = i18n.translate(
@@ -29,12 +29,12 @@ export const serverUrlHint = i18n.translate(
     defaultMessage:
       'Set the custom APM Server URL (default: {defaultApmServerUrl}). The URL must be fully qualified, including protocol (http or https) and port.',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
-  }
+  },
 );
 
 export const serviceEnvironmentHint = i18n.translate(
   'xpack.apm.tutorial.shared_clients.configure.commands.serviceEnvironmentHint',
   {
     defaultMessage: `The name of the environment this service is deployed in, e.g., "production" or "staging". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.`,
-  }
+  },
 );

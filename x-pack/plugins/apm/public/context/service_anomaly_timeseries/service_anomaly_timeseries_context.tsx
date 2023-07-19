@@ -46,7 +46,7 @@ export function ServiceAnomalyTimeseriesContextProvider({
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -71,7 +71,7 @@ export function ServiceAnomalyTimeseriesContextProvider({
               environment: preferredEnvironment,
             },
           },
-        }
+        },
       );
     },
     [
@@ -81,7 +81,7 @@ export function ServiceAnomalyTimeseriesContextProvider({
       start,
       end,
       preferredEnvironment,
-    ]
+    ],
   );
 
   return (

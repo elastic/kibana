@@ -61,7 +61,7 @@ const apisToIntercept = [
 describe('Service overview - header filters', () => {
   before(() => {
     synthtrace.index(
-      opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() })
+      opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() }),
     );
   });
 
@@ -79,13 +79,13 @@ describe('Service overview - header filters', () => {
       cy.url().should('not.include', 'transactionType');
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'request'
+        'request',
       );
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'Worker'
+        'Worker',
       );
     });
 
@@ -96,7 +96,7 @@ describe('Service overview - header filters', () => {
       cy.visitKibana(serviceOverviewHref);
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'request'
+        'request',
       );
 
       cy.expectAPIsToHaveBeenCalledWith({
@@ -108,7 +108,7 @@ describe('Service overview - header filters', () => {
       cy.url().should('include', 'transactionType=Worker');
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'Worker'
+        'Worker',
       );
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
@@ -126,25 +126,25 @@ describe('Service overview - header filters', () => {
         url.format({
           pathname: '/app/apm/services/opbeans-java/overview',
           query: { rangeFrom: start, rangeTo: end },
-        })
+        }),
       );
       cy.contains('opbeans-java');
       cy.getByTestSubj('apmUnifiedSearchBar').type('transaction.n');
       cy.contains('transaction.name');
       cy.getByTestSubj(
-        'autocompleteSuggestion-field-transaction.name-'
+        'autocompleteSuggestion-field-transaction.name-',
       ).click();
       cy.getByTestSubj('apmUnifiedSearchBar').type(':');
       cy.getByTestSubj('autoCompleteSuggestionText').should('have.length', 1);
       cy.getByTestSubj(
         Cypress.$.escapeSelector(
-          'autocompleteSuggestion-value-"GET-/api/product"-'
-        )
+          'autocompleteSuggestion-value-"GET-/api/product"-',
+        ),
       ).click();
       cy.getByTestSubj('apmUnifiedSearchBar').type('{enter}');
       cy.url().should(
         'include',
-        '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%22%20'
+        '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%22%20',
       );
     });
   });

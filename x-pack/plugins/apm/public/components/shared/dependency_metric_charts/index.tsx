@@ -67,7 +67,7 @@ export function DependencyMetricCharts() {
             <h2>
               {i18n.translate(
                 'xpack.apm.dependencyDetailThroughputChartTitle',
-                { defaultMessage: 'Throughput' }
+                { defaultMessage: 'Throughput' },
               )}
             </h2>
           </EuiTitle>
@@ -80,7 +80,7 @@ export function DependencyMetricCharts() {
             <h2>
               {i18n.translate(
                 'xpack.apm.dependencyDetailFailedTransactionRateChartTitle',
-                { defaultMessage: 'Failed transaction rate' }
+                { defaultMessage: 'Failed transaction rate' },
               )}
             </h2>
           </EuiTitle>

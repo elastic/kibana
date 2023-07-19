@@ -60,7 +60,7 @@ export const settingsRoute = {
       '/settings/general-settings': page({
         title: i18n.translate(
           'xpack.apm.views.settings.generalSettings.title',
-          { defaultMessage: 'General settings' }
+          { defaultMessage: 'General settings' },
         ),
         element: <GeneralSettings />,
         tab: 'general-settings',
@@ -69,7 +69,7 @@ export const settingsRoute = {
         tab: 'agent-configuration',
         title: i18n.translate(
           'xpack.apm.views.settings.agentConfiguration.title',
-          { defaultMessage: 'Agent Configuration' }
+          { defaultMessage: 'Agent Configuration' },
         ),
         element: <AgentConfigurations />,
       }),
@@ -77,7 +77,7 @@ export const settingsRoute = {
         ...page({
           title: i18n.translate(
             'xpack.apm.views.settings.createAgentConfiguration.title',
-            { defaultMessage: 'Create Agent Configuration' }
+            { defaultMessage: 'Create Agent Configuration' },
           ),
           tab: 'agent-configuration',
           element: <CreateAgentConfigurationRouteView />,
@@ -92,7 +92,7 @@ export const settingsRoute = {
         ...page({
           title: i18n.translate(
             'xpack.apm.views.settings.editAgentConfiguration.title',
-            { defaultMessage: 'Edit Agent Configuration' }
+            { defaultMessage: 'Edit Agent Configuration' },
           ),
           tab: 'agent-configuration',
           element: <EditAgentConfigurationRouteView />,
@@ -131,7 +131,7 @@ export const settingsRoute = {
           'xpack.apm.views.settings.anomalyDetection.title',
           {
             defaultMessage: 'Anomaly detection',
-          }
+          },
         ),
         element: <AnomalyDetection />,
         tab: 'anomaly-detection',
@@ -149,7 +149,7 @@ export const settingsRoute = {
             'xpack.apm.views.settings.agentExplorer.title',
             {
               defaultMessage: 'Agent explorer',
-            }
+            },
           ),
           element: <AgentExplorer />,
           tab: 'agent-explorer',

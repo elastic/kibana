@@ -121,7 +121,7 @@ export interface PluginSetupContract {
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
     RecoveryActionGroupId extends string = never,
-    AlertData extends RuleAlertData = never
+    AlertData extends RuleAlertData = never,
   >(
     ruleType: RuleType<
       Params,
@@ -358,7 +358,7 @@ export class AlertingPlugin {
         InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never,
-        AlertData extends RuleAlertData = never
+        AlertData extends RuleAlertData = never,
       >(
         ruleType: RuleType<
           Params,

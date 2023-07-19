@@ -48,10 +48,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
   it('detecting migration related changes in registered types', () => {
     const allTypes = typeRegistry.getAllTypes();
 
-    const hashMap = allTypes.reduce((map, type) => {
-      map[type.name] = getMigrationHash(type);
-      return map;
-    }, {} as Record<string, string>);
+    const hashMap = allTypes.reduce(
+      (map, type) => {
+        map[type.name] = getMigrationHash(type);
+        return map;
+      },
+      {} as Record<string, string>
+    );
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {

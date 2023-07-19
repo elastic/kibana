@@ -123,7 +123,7 @@ describe('check metadata transforms task', () => {
             },
           ],
         },
-      } as unknown as TransportResult<TransformGetTransformStatsResponse>);
+      }) as unknown as TransportResult<TransformGetTransformStatsResponse>;
 
     describe('transforms restart', () => {
       it('should stop task if transform stats response fails', async () => {

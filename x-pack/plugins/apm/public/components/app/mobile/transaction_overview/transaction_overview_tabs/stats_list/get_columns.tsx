@@ -51,7 +51,7 @@ export function getColumns({
         'xpack.apm.mobile.transactions.overview.table.nameColumnLabel',
         {
           defaultMessage: 'Name',
-        }
+        },
       ),
     },
     // latency
@@ -61,7 +61,7 @@ export function getColumns({
         'xpack.apm.mobile.transactions.overview.table.latencyColumnAvgLabel',
         {
           defaultMessage: 'Latency (avg.)',
-        }
+        },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { latency, name }) => {
@@ -71,7 +71,7 @@ export function getColumns({
           detailedStatistics?.previousPeriod?.[name]?.latency;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.LATENCY_AVG
+          ChartType.LATENCY_AVG,
         );
 
         return (
@@ -95,7 +95,7 @@ export function getColumns({
       field: 'throughput',
       name: i18n.translate(
         'xpack.apm.mobile.transactions.overview.table.throughputColumnAvgLabel',
-        { defaultMessage: 'Throughput' }
+        { defaultMessage: 'Throughput' },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
@@ -105,7 +105,7 @@ export function getColumns({
           detailedStatistics?.previousPeriod?.[name]?.throughput;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.THROUGHPUT
+          ChartType.THROUGHPUT,
         );
 
         return (
@@ -131,7 +131,7 @@ export function getColumns({
         'xpack.apm.mobile.transactions.overview.table.crashRateColumnLabel',
         {
           defaultMessage: 'Crash rate',
-        }
+        },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { crashRate }) => {

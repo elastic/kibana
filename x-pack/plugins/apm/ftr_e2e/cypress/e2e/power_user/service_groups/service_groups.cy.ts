@@ -54,7 +54,7 @@ describe('Service groups', () => {
       generateData({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 

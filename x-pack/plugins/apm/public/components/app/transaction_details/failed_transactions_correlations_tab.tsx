@@ -46,7 +46,7 @@ function FailedTransactionsCorrelationsTab({ onFilter }: TabContentProps) {
         'xpack.apm.failedTransactionsCorrelations.licenseCheckText',
         {
           defaultMessage: `To use the failed transaction correlations feature, you must be subscribed to an Elastic Platinum license. With it, you'll be able to discover which attributes are contributing to failed transactions.`,
-        }
+        },
       )}
     />
   );
@@ -61,7 +61,7 @@ export const failedTransactionsCorrelationsTab = {
         'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsLabel',
         {
           defaultMessage: 'Failed transaction correlations',
-        }
+        },
       )}
     </>
   ),

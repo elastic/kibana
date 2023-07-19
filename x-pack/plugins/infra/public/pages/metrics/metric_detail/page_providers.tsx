@@ -11,11 +11,10 @@ import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const withMetricPageProviders =
   <T extends object>(Component: React.ComponentType<T>) =>
-  (props: T) =>
-    (
-      <EuiErrorBoundary>
-        <MetricsTimeProvider>
-          <Component {...props} />
-        </MetricsTimeProvider>
-      </EuiErrorBoundary>
-    );
+  (props: T) => (
+    <EuiErrorBoundary>
+      <MetricsTimeProvider>
+        <Component {...props} />
+      </MetricsTimeProvider>
+    </EuiErrorBoundary>
+  );

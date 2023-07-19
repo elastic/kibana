@@ -43,12 +43,12 @@ import { ChartContainer } from '../chart_container';
 
 const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
   'xpack.apm.durationDistribution.chart.numberOfTransactionsLabel',
-  { defaultMessage: 'Transactions' }
+  { defaultMessage: 'Transactions' },
 );
 
 const NUMBER_OF_SPANS_LABEL = i18n.translate(
   'xpack.apm.durationDistribution.chart.numberOfSpansLabel',
-  { defaultMessage: 'Spans' }
+  { defaultMessage: 'Spans' },
 );
 
 export interface DurationDistributionChartData {
@@ -86,7 +86,7 @@ const Y_AXIS_MIN_DOMAIN = 0.5;
 const Y_AXIS_MIN_VALUE = 0.0001;
 
 export const replaceHistogramZerosWithMinimumDomainValue = (
-  histogramItems: HistogramItem[]
+  histogramItems: HistogramItem[],
 ) =>
   histogramItems.reduce((histogramItem, _, i) => {
     if (histogramItem[i].doc_count === 0) {
@@ -125,7 +125,7 @@ export function DurationDistributionChart({
           values: {
             markerPercentile,
           },
-        }
+        },
       ),
     },
   ];
@@ -133,7 +133,7 @@ export function DurationDistributionChart({
   // This will create y axis ticks for 1, 10, 100, 1000 ...
   const yMax =
     Math.max(
-      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
+      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count),
     ) ?? 0;
   const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisMaxDomain = Math.pow(10, yTicks);
@@ -163,7 +163,7 @@ export function DurationDistributionChart({
         ...d,
         histogram: replaceHistogramZerosWithMinimumDomainValue(d.histogram),
       })),
-    [data]
+    [data],
   );
 
   return (
@@ -232,7 +232,7 @@ export function DurationDistributionChart({
                     'xpack.apm.durationDistribution.chart.currentEventMarkerLabel',
                     {
                       defaultMessage: 'Current sample',
-                    }
+                    },
                   ),
                 },
               ]}
@@ -241,7 +241,7 @@ export function DurationDistributionChart({
                 'xpack.apm.durationDistribution.chart.currentEventMarkerLabel',
                 {
                   defaultMessage: 'Current sample',
-                }
+                },
               )}
               markerPosition={'bottom'}
             />
@@ -258,7 +258,7 @@ export function DurationDistributionChart({
             id="x-axis"
             title={i18n.translate(
               'xpack.apm.durationDistribution.chart.latencyLabel',
-              { defaultMessage: 'Latency' }
+              { defaultMessage: 'Latency' },
             )}
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}

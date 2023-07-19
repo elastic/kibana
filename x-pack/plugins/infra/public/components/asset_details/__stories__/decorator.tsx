@@ -70,7 +70,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       },
     },
     uiSettings: {
-      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+      get: () => ({ key: 'mock', defaultOverride: undefined }) as any,
     },
     triggersActionsUi: {
       getAlertSummaryWidget: AlertSummaryWidget as (
@@ -79,8 +79,8 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     charts: {
       theme: {
-        useChartsTheme: () => ({} as Theme),
-        useChartsBaseTheme: () => ({} as Theme),
+        useChartsTheme: () => ({}) as Theme,
+        useChartsBaseTheme: () => ({}) as Theme,
       },
     },
     settings: {
@@ -106,7 +106,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
               navigate: async () => {
                 return Promise.resolve();
               },
-            } as unknown as LocatorPublic<any>),
+            }) as unknown as LocatorPublic<any>,
         },
       },
     },

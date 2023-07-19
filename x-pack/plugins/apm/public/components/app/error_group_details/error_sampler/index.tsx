@@ -61,11 +61,11 @@ export function ErrorSampler({
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId, errorId]
+    [environment, kuery, serviceName, start, end, groupId, errorId],
   );
   const onSampleClick = (sample: string) => {
     history.push({

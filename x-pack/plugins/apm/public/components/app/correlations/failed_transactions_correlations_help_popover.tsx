@@ -31,7 +31,7 @@ export function FailedTransactionsCorrelationsHelpPopover() {
         'xpack.apm.correlations.failedTransactions.helpPopover.title',
         {
           defaultMessage: 'Failed transaction correlations',
-        }
+        },
       )}
     >
       <p>

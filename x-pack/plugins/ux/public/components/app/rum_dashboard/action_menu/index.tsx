@@ -28,7 +28,7 @@ const ANALYZE_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
-  }
+  },
 );
 
 export function UXActionMenu({
@@ -55,7 +55,7 @@ export function UXActionMenu({
         },
       ],
     },
-    http.basePath.get()
+    http.basePath.get(),
   );
 
   return (

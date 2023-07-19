@@ -175,19 +175,22 @@ function normalizeMetrics(metrics: estypes.AggregationsStringTermsAggregate | un
   const metricBuckets = metrics.buckets as Array<
     { key: string } & { [key: string]: estypes.AggregationsPercentilesAggregateBase }
   >;
-  return metricBuckets.reduce((accum, next) => {
-    return {
-      ...accum,
-      [next.key]: {
-        pdf_pages: next.pdf_pages,
-        pdf_cpu: next.pdf_cpu,
-        pdf_memory: next.pdf_memory,
-        png_cpu: next.png_cpu,
-        png_memory: next.png_memory,
-        csv_rows: next.csv_rows,
-      },
-    };
-  }, {} as { [K in keyof JobTypes]: MetricsStats });
+  return metricBuckets.reduce(
+    (accum, next) => {
+      return {
+        ...accum,
+        [next.key]: {
+          pdf_pages: next.pdf_pages,
+          pdf_cpu: next.pdf_cpu,
+          pdf_memory: next.pdf_memory,
+          png_cpu: next.png_cpu,
+          png_memory: next.png_memory,
+          csv_rows: next.csv_rows,
+        },
+      };
+    },
+    {} as { [K in keyof JobTypes]: MetricsStats }
+  );
 }
 
 type RangeStatSets = Partial<RangeStats> & { last7Days: Partial<RangeStats> };

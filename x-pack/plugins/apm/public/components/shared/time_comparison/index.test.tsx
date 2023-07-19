@@ -93,14 +93,14 @@ describe('TimeComparison component', () => {
     jest
       .spyOn(
         useAnomalyDetectionJobsContextModule,
-        'useAnomalyDetectionJobsContext'
+        'useAnomalyDetectionJobsContext',
       )
       .mockReturnValue(
         // @ts-ignore mocking only partial data
         {
           anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
           anomalyDetectionJobsData: ML_AD_JOBS,
-        }
+        },
       );
 
     jest
@@ -135,7 +135,7 @@ describe('TimeComparison component', () => {
           // @ts-ignore mocking only partial data
           {
             preferredEnvironment: ENVIRONMENT_ALL.value,
-          }
+          },
         );
 
       const Wrapper = getWrapper({
@@ -156,7 +156,7 @@ describe('TimeComparison component', () => {
       ]);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
 
@@ -187,7 +187,7 @@ describe('TimeComparison component', () => {
       ]);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
 
@@ -195,14 +195,14 @@ describe('TimeComparison component', () => {
       jest
         .spyOn(
           useAnomalyDetectionJobsContextModule,
-          'useAnomalyDetectionJobsContext'
+          'useAnomalyDetectionJobsContext',
         )
         .mockReturnValue(
           // @ts-ignore mocking only partial data
           {
             anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
             anomalyDetectionJobsData: NO_ML_AD_JOBS,
-          }
+          },
         );
 
       const Wrapper = getWrapper({
@@ -224,7 +224,7 @@ describe('TimeComparison component', () => {
       expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
 
@@ -262,7 +262,7 @@ describe('TimeComparison component', () => {
           // @ts-ignore mocking only partial data
           {
             preferredEnvironment: ENVIRONMENT_ALL.value,
-          }
+          },
         );
 
       const Wrapper = getWrapper({
@@ -287,7 +287,7 @@ describe('TimeComparison component', () => {
       ]);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
   });
@@ -316,7 +316,7 @@ describe('TimeComparison component', () => {
       expectTextsInDocument(component, ['Day before', 'Week before']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
 
@@ -331,7 +331,7 @@ describe('TimeComparison component', () => {
       expectTextsInDocument(component, ['Day before', 'Week before']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
   });
@@ -380,7 +380,7 @@ describe('TimeComparison component', () => {
       expectTextsInDocument(component, ['Week before']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
   });
@@ -400,7 +400,7 @@ describe('TimeComparison component', () => {
       expectTextsInDocument(component, ['19/05 18:32 - 27/05 18:32']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
 
@@ -418,7 +418,7 @@ describe('TimeComparison component', () => {
       expectTextsInDocument(component, ['20/05/19 18:32 - 27/05/20 18:32']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
-          .selectedIndex
+          .selectedIndex,
       ).toEqual(0);
     });
   });

@@ -27,11 +27,11 @@ export function useClientMetricsQuery() {
         callDateMath(end),
         percentile,
         searchTerm,
-        uxUiFilters
+        uxUiFilters,
       ),
     },
     [start, end, percentile, searchTerm, uxUiFilters, dataViewTitle, rangeId],
-    { name: 'UxClientMetrics' }
+    { name: 'UxClientMetrics' },
   );
 
   const data = useMemo(() => {

@@ -157,15 +157,18 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     const extendedProps = Object.entries({
       ...this.props,
       ...newProps,
-    }).reduce((memo, [key, value]) => {
-      if (value !== null && value !== undefined) {
-        return {
-          ...memo,
-          [key]: value,
-        };
-      }
-      return memo;
-    }, {} as ExtendedProps<P, NP>);
+    }).reduce(
+      (memo, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          return {
+            ...memo,
+            [key]: value,
+          };
+        }
+        return memo;
+      },
+      {} as ExtendedProps<P, NP>
+    );
 
     const extendedOptions = {
       ...this.options,

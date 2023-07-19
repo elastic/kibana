@@ -128,15 +128,15 @@ export async function getAgentsItems({
       return {
         serviceName: bucket.key as string,
         environments: bucket.environments.buckets.map(
-          (env) => env.key as string
+          (env) => env.key as string,
         ),
         agentName: bucket.sample.top[0].metrics[AGENT_NAME] as AgentName,
         agentVersion: bucket.agentVersions.buckets.map(
-          (version) => version.key as string
+          (version) => version.key as string,
         ),
         agentTelemetryAutoVersion:
           bucket.agentTelemetryAutoVersions.buckets.map(
-            (version) => version.key as string
+            (version) => version.key as string,
           ),
         // service.node.name is set by the server only if a container.id or host.name are set. Otherwise should be explicitly set by agents.
         instances: (bucket.instances.value as number) || 1,

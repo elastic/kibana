@@ -70,7 +70,7 @@ export async function searchConfigurations({
 
   const resp = await internalESClient.search<AgentConfiguration, typeof params>(
     'search_agent_configurations',
-    params
+    params,
   );
 
   const hit = resp.hits.hits[0] as SearchHit<AgentConfiguration> | undefined;

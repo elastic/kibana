@@ -49,7 +49,7 @@ export abstract class AbstractStorybookMock<
   /** The arguments for a story that will influence the prop values. */
   PropArguments extends Args = {},
   /** The arguments for a story that will influence the service values. */
-  ServiceArguments extends Args = {}
+  ServiceArguments extends Args = {},
 > {
   /** Define the arguments for prop values in this object.
    *

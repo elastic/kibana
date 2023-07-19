@@ -41,7 +41,7 @@ export interface SeverityRuleAlertsAggsResponse {
                 'kibana.alert.rule.uuid': string;
                 'kibana.alert.severity': Severity;
               };
-            }
+            },
           ];
         };
       };

@@ -80,7 +80,7 @@ describe('CSV exporter', () => {
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
         escapeFormulaValues: true,
-        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+        formatFactory: () => ({ convert: (v: unknown) => v }) as FieldFormat,
       })
     ).toMatch('columnOne\r\n"\'=1"\r\n');
   });
@@ -92,7 +92,7 @@ describe('CSV exporter', () => {
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
         escapeFormulaValues: true,
-        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+        formatFactory: () => ({ convert: (v: unknown) => v }) as FieldFormat,
       })
     ).toMatch('columnOne\r\n"a,b"\r\n');
   });

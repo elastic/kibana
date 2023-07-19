@@ -47,7 +47,7 @@ async function getTopDependenciesForTimeRange({
   });
 
   return getConnectionStatsItemsWithRelativeImpact(
-    statsItems.filter((item) => item.location.type !== NodeType.service)
+    statsItems.filter((item) => item.location.type !== NodeType.service),
   );
 }
 
@@ -66,7 +66,7 @@ export interface TopDependenciesResponse {
 }
 
 export async function getTopDependencies(
-  options: Options
+  options: Options,
 ): Promise<TopDependenciesResponse> {
   const { offset, ...otherOptions } = options;
   const [currentDependencies, previousDependencies] = await Promise.all([
@@ -80,7 +80,7 @@ export async function getTopDependencies(
     dependencies: currentDependencies.map((dependency) => {
       const { stats, ...rest } = dependency;
       const prev = previousDependencies.find(
-        (item): boolean => item.location.id === dependency.location.id
+        (item): boolean => item.location.id === dependency.location.id,
       );
       return {
         ...rest,

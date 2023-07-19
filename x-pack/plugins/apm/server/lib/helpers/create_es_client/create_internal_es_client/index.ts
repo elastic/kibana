@@ -73,14 +73,14 @@ export async function createInternalESClient({
       requestType: string;
       makeRequestWithSignal: (signal: AbortSignal) => Promise<T>;
       params: Record<string, any>;
-    }
+    },
   ) {
     return callAsyncWithDebug({
       cb: () => {
         const controller = new AbortController();
         const res = makeRequestWithSignal(controller.signal);
         return unwrapEsResponse(
-          request ? cancelEsRequestOnAbort(res, request, controller) : res
+          request ? cancelEsRequestOnAbort(res, request, controller) : res,
         );
       },
       getDebugMessage: () => {
@@ -101,10 +101,10 @@ export async function createInternalESClient({
     apmIndices: await getApmIndices({ savedObjectsClient, config }),
     search: async <
       TDocument = unknown,
-      TSearchRequest extends ESSearchRequest = ESSearchRequest
+      TSearchRequest extends ESSearchRequest = ESSearchRequest,
     >(
       operationName: string,
-      params: TSearchRequest
+      params: TSearchRequest,
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
         requestType: 'search',
@@ -126,7 +126,7 @@ export async function createInternalESClient({
     },
     delete: (
       operationName: string,
-      params: estypes.DeleteRequest
+      params: estypes.DeleteRequest,
     ): Promise<{ result: string }> => {
       return callEs(operationName, {
         requestType: 'delete',
@@ -137,7 +137,7 @@ export async function createInternalESClient({
     },
     indicesCreate: (
       operationName: string,
-      params: estypes.IndicesCreateRequest
+      params: estypes.IndicesCreateRequest,
     ) => {
       return callEs(operationName, {
         requestType: 'indices.create',

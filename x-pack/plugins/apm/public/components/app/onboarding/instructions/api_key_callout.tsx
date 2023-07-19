@@ -26,7 +26,7 @@ export function ApiKeyCallout({
             'xpack.apm.onboarding.apiKey.success.calloutTitle',
             {
               defaultMessage: 'API key created',
-            }
+            },
           )}
           color="success"
           iconType="check"
@@ -36,7 +36,7 @@ export function ApiKeyCallout({
             'xpack.apm.onboarding.apiKey.success.calloutMessage',
             {
               defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue`,
-            }
+            },
           )}
         </EuiCallOut>
       </>
@@ -54,7 +54,7 @@ export function ApiKeyCallout({
           'xpack.apm.onboarding.apiKey.warning.calloutTitle',
           {
             defaultMessage: 'User does not have permissions to create API Key',
-          }
+          },
         )}
         color="warning"
         iconType="warning"

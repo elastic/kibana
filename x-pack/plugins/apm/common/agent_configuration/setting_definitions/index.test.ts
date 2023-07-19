@@ -55,7 +55,7 @@ describe('filterByAgent', () => {
           'transaction_ignore_urls',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
@@ -87,19 +87,19 @@ describe('filterByAgent', () => {
           'transaction_ignore_urls',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual(
-        expect.arrayContaining(['transaction_sample_rate'])
+        expect.arrayContaining(['transaction_sample_rate']),
       );
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual(
-        expect.arrayContaining(['transaction_sample_rate'])
+        expect.arrayContaining(['transaction_sample_rate']),
       );
     });
 
@@ -112,7 +112,7 @@ describe('filterByAgent', () => {
           'transaction_ignore_urls',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
@@ -130,7 +130,7 @@ describe('filterByAgent', () => {
           'transaction_ignore_urls',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
@@ -147,7 +147,7 @@ describe('filterByAgent', () => {
           'transaction_ignore_urls',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
@@ -165,7 +165,7 @@ describe('filterByAgent', () => {
           'transaction_ignore_urls',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
@@ -176,7 +176,7 @@ describe('filterByAgent', () => {
           'recording',
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
 
@@ -199,7 +199,7 @@ describe('filterByAgent', () => {
         expect.arrayContaining([
           'transaction_max_spans',
           'transaction_sample_rate',
-        ])
+        ]),
       );
     });
   });
@@ -221,7 +221,7 @@ describe('settingDefinitions', () => {
           ]),
           validationName: def.validation.name,
         };
-      })
+      }),
     ).toMatchSnapshot();
   });
 });

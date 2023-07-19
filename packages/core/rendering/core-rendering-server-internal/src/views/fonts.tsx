@@ -244,11 +244,11 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
           font-style: ${style};
           font-weight: ${weight};
           src: ${src};${
-                unicodeRange
-                  ? `
+            unicodeRange
+              ? `
           unicode-range: ${unicodeRange};`
-                  : ''
-              }
+              : ''
+          }
         }`;
             })
           )

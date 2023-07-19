@@ -60,7 +60,7 @@ export function LatencyChart({ height, kuery }: Props) {
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const { environment } = useEnvironmentsContext();
@@ -77,7 +77,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    ApmMlDetectorType.txLatency
+    ApmMlDetectorType.txLatency,
   );
   const anomalyTimeseriesColor = previousPeriod?.color as string;
 
@@ -102,7 +102,7 @@ export function LatencyChart({ height, kuery }: Props) {
                       'xpack.apm.serviceOverview.latencyChartTitle',
                       {
                         defaultMessage: 'Latency',
-                      }
+                      },
                     )}
                   </h2>
                 </EuiTitle>
@@ -113,7 +113,7 @@ export function LatencyChart({ height, kuery }: Props) {
                   compressed
                   prepend={i18n.translate(
                     'xpack.apm.serviceOverview.latencyChartTitle.prepend',
-                    { defaultMessage: 'Metric' }
+                    { defaultMessage: 'Metric' },
                   )}
                   options={options}
                   value={latencyAggregationType}

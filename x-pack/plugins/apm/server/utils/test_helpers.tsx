@@ -14,7 +14,7 @@ import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices
 
 interface Options {
   mockResponse?: (
-    request: ESSearchRequest
+    request: ESSearchRequest,
   ) => ESSearchResponse<unknown, ESSearchRequest>;
   config?: Partial<APMConfig>;
 }
@@ -33,7 +33,7 @@ export async function inspectSearchParams(
     mockIndices: ApmIndicesConfig;
     mockApmAlertsClient: ApmAlertsClient;
   }) => Promise<any>,
-  options: Options = {}
+  options: Options = {},
 ) {
   const spy = jest.fn().mockImplementation(async (request) => {
     return options.mockResponse
@@ -84,7 +84,7 @@ export async function inspectSearchParams(
             return 30;
         }
       },
-    }
+    },
   ) as APMConfig;
   const mockInternalESClient = { search: spy } as any;
   const mockApmAlertsClient = { search: spy } as any;

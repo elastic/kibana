@@ -16,7 +16,7 @@ const INITIAL_STATE: Record<TourType, boolean> = {
 export function useServiceGroupsTour(type: TourType) {
   const [tourEnabled, setTourEnabled] = useLocalStorage(
     'apm.serviceGroupsTour',
-    INITIAL_STATE
+    INITIAL_STATE,
   );
 
   return {

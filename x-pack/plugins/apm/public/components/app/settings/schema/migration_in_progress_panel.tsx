@@ -20,14 +20,14 @@ export function MigrationInProgressPanel() {
           icon={<EuiLoadingSpinner size="xl" />}
           title={i18n.translate(
             'xpack.apm.settings.schema.migrationInProgressPanelTitle',
-            { defaultMessage: 'Switching to Elastic Agent...' }
+            { defaultMessage: 'Switching to Elastic Agent...' },
           )}
           description={i18n.translate(
             'xpack.apm.settings.schema.migrationInProgressPanelDescription',
             {
               defaultMessage:
                 "We're now creating a Fleet Server instance to contain the new APM Server while shutting down the old APM server instance. Within minutes you should see your data pour into the app again.",
-            }
+            },
           )}
         />
       </EuiFlexItem>

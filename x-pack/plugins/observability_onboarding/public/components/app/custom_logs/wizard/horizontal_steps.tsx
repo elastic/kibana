@@ -36,7 +36,7 @@ export function HorizontalSteps() {
             'xpack.observability_onboarding.steps.selectLogs',
             {
               defaultMessage: 'Select logs',
-            }
+            },
           ),
           status: getStatus('selectLogs'),
           onClick: () => {
@@ -48,7 +48,7 @@ export function HorizontalSteps() {
             'xpack.observability_onboarding.steps.configureLogs',
             {
               defaultMessage: 'Configure logs',
-            }
+            },
           ),
           status: getStatus('configureLogs'),
           disabled: isDisabled('configureLogs'),
@@ -61,7 +61,7 @@ export function HorizontalSteps() {
             'xpack.observability_onboarding.steps.installShipper',
             {
               defaultMessage: 'Install shipper',
-            }
+            },
           ),
           status: getStatus('installElasticAgent'),
           disabled: isDisabled('installElasticAgent'),

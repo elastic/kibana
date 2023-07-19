@@ -385,7 +385,7 @@ describe('getLayers', () => {
     [
       string,
       [Record<number, Layer>, Panel, DataViewsPublicPluginStart, boolean],
-      Array<Partial<XYLayerConfig>>
+      Array<Partial<XYLayerConfig>>,
     ]
   >([
     [

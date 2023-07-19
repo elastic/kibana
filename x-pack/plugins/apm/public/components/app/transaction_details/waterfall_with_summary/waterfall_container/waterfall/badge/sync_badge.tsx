@@ -22,14 +22,14 @@ const BLOCKING_LABEL = i18n.translate(
   'xpack.apm.transactionDetails.syncBadgeBlocking',
   {
     defaultMessage: 'blocking',
-  }
+  },
 );
 
 const ASYNC_LABEL = i18n.translate(
   'xpack.apm.transactionDetails.syncBadgeAsync',
   {
     defaultMessage: 'async',
-  }
+  },
 );
 
 // true will show blocking, false will show async.

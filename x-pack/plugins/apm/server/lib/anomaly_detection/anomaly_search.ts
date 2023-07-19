@@ -44,7 +44,7 @@ type AnomalyDocument = MlRecord | MlModelPlot;
 
 export async function anomalySearch<TParams extends ESSearchRequest>(
   mlAnomalySearch: Required<MlClient>['mlSystem']['mlAnomalySearch'],
-  params: TParams
+  params: TParams,
 ): Promise<ESSearchResponse<AnomalyDocument, TParams>> {
   const response = await mlAnomalySearch(params, []);
 

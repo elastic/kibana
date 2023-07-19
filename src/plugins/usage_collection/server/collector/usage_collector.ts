@@ -15,7 +15,7 @@ import { Collector } from './collector';
  */
 export type UsageCollectorOptions<
   TFetchReturn = unknown,
-  ExtraOptions extends object = {}
+  ExtraOptions extends object = {},
 > = CollectorOptions<TFetchReturn, ExtraOptions> &
   Required<Pick<CollectorOptions<TFetchReturn>, 'schema'>>;
 

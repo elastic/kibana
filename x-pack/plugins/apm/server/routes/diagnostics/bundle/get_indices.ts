@@ -38,9 +38,9 @@ export async function getIndicesAndIngestPipelines({
   const pipelineIds = compact(
     uniq(
       Object.values(indices).map(
-        (index) => index.settings?.index?.default_pipeline
-      )
-    )
+        (index) => index.settings?.index?.default_pipeline,
+      ),
+    ),
   ).join(',');
 
   const ingestPipelines = await esClient.ingest.getPipeline({

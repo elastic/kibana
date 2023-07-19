@@ -62,9 +62,8 @@ export const ConnectorConfiguration: React.FC = () => {
   }
 
   const hasApiKey = !!(index.connector.api_key_id ?? apiKeyData);
-  const docsUrl = CONNECTORS.find(
-    ({ serviceType }) => serviceType === index.connector.service_type
-  )?.docsUrl;
+  const docsUrl = CONNECTORS.find(({ serviceType }) => serviceType === index.connector.service_type)
+    ?.docsUrl;
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
@@ -155,11 +154,11 @@ export const ConnectorConfiguration: React.FC = () => {
   -
     connector_id: "${index.connector.id}"
     service_type: "${index.connector.service_type || 'changeme'}"${
-                          apiKeyData?.encoded
-                            ? `
+      apiKeyData?.encoded
+        ? `
     api_key: "${apiKeyData?.encoded}"`
-                            : ''
-                        }`}
+        : ''
+    }`}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">

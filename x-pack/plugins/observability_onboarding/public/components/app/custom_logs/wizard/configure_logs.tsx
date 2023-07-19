@@ -47,7 +47,7 @@ export function ConfigureLogs() {
   const [logFilePaths, setLogFilePaths] = useState(wizardState.logFilePaths);
   const [namespace, setNamespace] = useState(wizardState.namespace);
   const [customConfigurations, setCustomConfigurations] = useState(
-    wizardState.customConfigurations
+    wizardState.customConfigurations,
   );
 
   const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
@@ -74,11 +74,11 @@ export function ConfigureLogs() {
 
   function onLogFilePathChanges(
     index: number,
-    event: React.FormEvent<HTMLInputElement>
+    event: React.FormEvent<HTMLInputElement>,
   ) {
     const filepath = event.currentTarget?.value;
     setLogFilePaths((prev) =>
-      prev.map((path, i) => (i === index ? filepath : path))
+      prev.map((path, i) => (i === index ? filepath : path)),
     );
 
     if (index === 0) {
@@ -92,7 +92,7 @@ export function ConfigureLogs() {
         'xpack.observability_onboarding.configureLogs.title',
         {
           defaultMessage: 'Stream log files to Elastic',
-        }
+        },
       )}
       panelFooter={
         <StepPanelFooter
@@ -122,7 +122,7 @@ export function ConfigureLogs() {
               {
                 defaultMessage:
                   'Fill the paths to the log files on your hosts.',
-              }
+              },
             )}
           </p>
         </EuiText>
@@ -133,13 +133,13 @@ export function ConfigureLogs() {
               'xpack.observability_onboarding.configureLogs.logFile.path',
               {
                 defaultMessage: 'Log file path',
-              }
+              },
             )}
             helpText={i18n.translate(
               'xpack.observability_onboarding.configureLogs.logFile.helper',
               {
                 defaultMessage: 'You can use a log file path or a log pattern.',
-              }
+              },
             )}
           >
             <>
@@ -153,7 +153,7 @@ export function ConfigureLogs() {
                           'xpack.observability_onboarding.configureLogs.logFile.placeholder',
                           {
                             defaultMessage: 'Example: /var/log/application.*',
-                          }
+                          },
                         )}
                         value={filepath}
                         onChange={(ev) => onLogFilePathChanges(index, ev)}
@@ -185,7 +185,7 @@ export function ConfigureLogs() {
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
                   {
                     defaultMessage: 'Add row',
-                  }
+                  },
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -196,14 +196,14 @@ export function ConfigureLogs() {
               'xpack.observability_onboarding.configureLogs.dataset.name',
               {
                 defaultMessage: 'Dataset name',
-              }
+              },
             )}
             helpText={i18n.translate(
               'xpack.observability_onboarding.configureLogs.dataset.helper',
               {
                 defaultMessage:
                   "Pick a name for your logs. All lowercase, max 100 chars, special characters will be replaced with '_'.",
-              }
+              },
             )}
           >
             <EuiFieldText
@@ -211,7 +211,7 @@ export function ConfigureLogs() {
                 'xpack.observability_onboarding.configureLogs.dataset.placeholder',
                 {
                   defaultMessage: 'Dataset name',
-                }
+                },
               )}
               value={datasetName}
               onChange={(event) =>
@@ -225,7 +225,7 @@ export function ConfigureLogs() {
               'xpack.observability_onboarding.configureLogs.serviceName',
               {
                 defaultMessage: 'Service name',
-              }
+              },
             )}
             helpText={
               <FormattedMessage
@@ -239,7 +239,7 @@ export function ConfigureLogs() {
                 'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
                 {
                   defaultMessage: 'Give a name to your service',
-                }
+                },
               )}
               value={serviceName}
               onChange={(event) => setServiceName(event.target.value)}
@@ -269,7 +269,7 @@ export function ConfigureLogs() {
                   'xpack.observability_onboarding.configureLogs.advancedSettings',
                   {
                     defaultMessage: 'Advanced settings',
-                  }
+                  },
                 )}
               >
                 <EuiSpacer size="l" />
@@ -278,7 +278,7 @@ export function ConfigureLogs() {
                     'xpack.observability_onboarding.configureLogs.namespace',
                     {
                       defaultMessage: 'Namespace',
-                    }
+                    },
                   )}
                   helpText={
                     <FormattedMessage
@@ -297,7 +297,7 @@ export function ConfigureLogs() {
                               'xpack.observability_onboarding.configureLogs.learnMore',
                               {
                                 defaultMessage: 'Learn more',
-                              }
+                              },
                             )}
                           </EuiLink>
                         ),
@@ -310,7 +310,7 @@ export function ConfigureLogs() {
                       'xpack.observability_onboarding.configureLogs.namespace.placeholder',
                       {
                         defaultMessage: 'Namespace',
-                      }
+                      },
                     )}
                     value={namespace}
                     onChange={(event) => setNamespace(event.target.value)}
@@ -322,7 +322,7 @@ export function ConfigureLogs() {
                     'xpack.observability_onboarding.configureLogs.customConfig',
                     {
                       defaultMessage: 'Custom configurations',
-                    }
+                    },
                   )}
                   helpText={
                     <FormattedMessage
@@ -341,7 +341,7 @@ export function ConfigureLogs() {
                               'xpack.observability_onboarding.configureLogs.learnMore',
                               {
                                 defaultMessage: 'Learn more',
-                              }
+                              },
                             )}
                           </EuiLink>
                         ),

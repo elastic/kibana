@@ -24,15 +24,15 @@ const stories: Meta<{}> = {
 
       mockApmApiCallResponse(
         `GET /api/apm/services/{serviceName}/annotation/search 2023-10-31`,
-        () => ({ annotations: [] })
+        () => ({ annotations: [] }),
       );
       mockApmApiCallResponse(
         `GET /internal/apm/fallback_to_transactions`,
-        () => ({ fallbackToTransactions: false })
+        () => ({ fallbackToTransactions: false }),
       );
       mockApmApiCallResponse(
         `GET /internal/apm/services/{serviceName}/dependencies`,
-        () => ({ serviceDependencies: [] })
+        () => ({ serviceDependencies: [] }),
       );
 
       const serviceContextValue = {

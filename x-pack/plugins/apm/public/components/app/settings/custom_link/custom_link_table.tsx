@@ -68,11 +68,11 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
               {
                 name: i18n.translate(
                   'xpack.apm.settings.customLink.table.editButtonLabel',
-                  { defaultMessage: 'Edit' }
+                  { defaultMessage: 'Edit' },
                 ),
                 description: i18n.translate(
                   'xpack.apm.settings.customLink.table.editButtonDescription',
-                  { defaultMessage: 'Edit this custom link' }
+                  { defaultMessage: 'Edit this custom link' },
                 ),
                 icon: 'pencil',
                 color: 'primary',
@@ -106,7 +106,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
           'xpack.apm.settings.customLink.searchInput.filter',
           {
             defaultMessage: 'Filter links by Name and URL...',
-          }
+          },
         )}
       />
       <EuiSpacer size="s" />

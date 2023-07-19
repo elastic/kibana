@@ -10,7 +10,10 @@ import type { FleetErrorType } from './types';
 
 export class FleetError extends Error {
   attributes?: { type: FleetErrorType };
-  constructor(message?: string, public readonly meta?: unknown) {
+  constructor(
+    message?: string,
+    public readonly meta?: unknown
+  ) {
     super(message);
     this.name = this.constructor.name; // for stack traces
   }

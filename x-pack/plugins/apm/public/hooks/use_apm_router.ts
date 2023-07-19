@@ -20,7 +20,7 @@ export function useApmRouter() {
         ...router,
         link: (...args: [any]) =>
           core.http.basePath.prepend('/app/apm' + router.link(...args)),
-      } as unknown as ApmRouter),
-    [core.http.basePath, router]
+      }) as unknown as ApmRouter,
+    [core.http.basePath, router],
   );
 }

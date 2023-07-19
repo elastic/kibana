@@ -30,7 +30,7 @@ const chartBase: ChartBase = {
     coldStart: {
       title: i18n.translate(
         'xpack.apm.agentMetrics.serverless.coldStartDuration',
-        { defaultMessage: 'Cold start duration' }
+        { defaultMessage: 'Cold start duration' },
       ),
       color: theme.euiColorVis5,
     },
@@ -40,7 +40,7 @@ const chartBase: ChartBase = {
     {
       defaultMessage:
         'Cold start duration shows the execution duration of the serverless runtime for requests that experience cold starts.',
-    }
+    },
   ),
 };
 

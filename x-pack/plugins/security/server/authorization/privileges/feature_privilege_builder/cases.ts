@@ -11,7 +11,7 @@ import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugi
 
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-export type CasesSupportedOperations = typeof allOperations[number];
+export type CasesSupportedOperations = (typeof allOperations)[number];
 
 // if you add a value here you'll likely also need to make changes here:
 // x-pack/plugins/cases/server/authorization/index.ts

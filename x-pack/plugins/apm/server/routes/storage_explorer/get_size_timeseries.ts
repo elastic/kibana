@@ -81,7 +81,7 @@ export async function getSizeTimeseries({
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                   )
                 : []),
             ],
@@ -153,7 +153,7 @@ export async function getSizeTimeseries({
             x: dateHistogramBucket.key,
             y: estimatedSize,
           };
-        }
+        },
       );
 
       return {

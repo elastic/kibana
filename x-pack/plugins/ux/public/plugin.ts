@@ -159,8 +159,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           }
 
           return [];
-        })
-      )
+        }),
+      ),
     );
 
     core.application.register({

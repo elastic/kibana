@@ -64,7 +64,7 @@ const createMockUser = (user: Partial<AuthenticatedUser> = {}) =>
     username: 'mock_user',
     roles: [],
     ...user,
-  } as AuthenticatedUser);
+  }) as AuthenticatedUser;
 
 const kibanaFeature1 = new KibanaFeature({
   id: 'kibanaFeature1',

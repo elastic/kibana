@@ -52,5 +52,5 @@ storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
       propTables: false,
       source: false,
     },
-  }
+  },
 );

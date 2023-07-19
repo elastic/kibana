@@ -55,7 +55,7 @@ export function DependenciesInventoryTable() {
         },
       });
     },
-    [start, end, environment, offset, kuery, comparisonEnabled]
+    [start, end, environment, offset, kuery, comparisonEnabled],
   );
 
   const dependencies =
@@ -105,7 +105,7 @@ export function DependenciesInventoryTable() {
         'xpack.apm.dependenciesInventory.dependencyTableColumn',
         {
           defaultMessage: 'Dependency',
-        }
+        },
       )}
       status={status}
       compact={false}

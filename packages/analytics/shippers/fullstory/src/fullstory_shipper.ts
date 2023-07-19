@@ -124,12 +124,15 @@ export class FullStoryShipper implements IShipper {
     // > Note: You can capture up to 20 unique page properties (exclusive of pageName) for any given page
     // > and up to 500 unique page properties across all pages.
     // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
-    const pageVars = PAGE_VARS_KEYS.reduce((acc, key) => {
-      if (has(nonUserContext, key)) {
-        set(acc, key, get(nonUserContext, key));
-      }
-      return acc;
-    }, {} as Partial<Pick<EventContext, typeof PAGE_VARS_KEYS[number]>> & Record<string, unknown>);
+    const pageVars = PAGE_VARS_KEYS.reduce(
+      (acc, key) => {
+        if (has(nonUserContext, key)) {
+          set(acc, key, get(nonUserContext, key));
+        }
+        return acc;
+      },
+      {} as Partial<Pick<EventContext, (typeof PAGE_VARS_KEYS)[number]>> & Record<string, unknown>
+    );
 
     // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
     if (Object.keys(pageVars).length) {

@@ -27,10 +27,10 @@ export class UXDashboardDatePicker {
     this.dateEndButton = page.locator('.euiDatePopoverButton--end');
     this.datePopupAbsoluteTab = page.locator('text=Absolute');
     this.dateAbsoluteInput = page.locator(
-      byTestId('superDatePickerAbsoluteDateInput')
+      byTestId('superDatePickerAbsoluteDateInput'),
     );
     this.dateApplyButton = page.locator(
-      byTestId('superDatePickerApplyTimeButton')
+      byTestId('superDatePickerApplyTimeButton'),
     );
   }
 
@@ -54,12 +54,12 @@ export class UXDashboardDatePicker {
 
   async setDefaultE2eRange() {
     const startDateStr = moment(DEFAULT_ABS_START_UTC_DATE).format(
-      MOMENT_DATE_INPUT_FORMAT
+      MOMENT_DATE_INPUT_FORMAT,
     );
     await this.setAbsoluteStartDate(startDateStr);
 
     const endDateStr = moment(DEFAULT_ABS_END_UTC_DATE).format(
-      MOMENT_DATE_INPUT_FORMAT
+      MOMENT_DATE_INPUT_FORMAT,
     );
     await this.setAbsoluteEndDate(endDateStr);
 

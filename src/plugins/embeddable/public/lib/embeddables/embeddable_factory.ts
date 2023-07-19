@@ -34,7 +34,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes = unknown
+  TSavedObjectAttributes = unknown,
 > extends PersistableState<EmbeddableStateWithType> {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.

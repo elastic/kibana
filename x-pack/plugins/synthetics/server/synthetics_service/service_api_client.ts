@@ -172,8 +172,8 @@ export class ServiceAPIClient {
       data: ServicePayload;
     }> = [];
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = monitors.filter(({ locations }) =>
-        locations?.find((loc) => loc.id === id && loc.isServiceManaged)
+      const locMonitors = monitors.filter(
+        ({ locations }) => locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
         const data = this.getRequestData({ ...restOfData, monitors: locMonitors });

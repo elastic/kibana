@@ -51,13 +51,13 @@ export function ServiceOverviewThroughputChart({
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const { environment } = useEnvironmentsContext();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    ApmMlDetectorType.txThroughput
+    ApmMlDetectorType.txThroughput,
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -107,7 +107,7 @@ export function ServiceOverviewThroughputChart({
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
-          }
+          },
         );
       }
     },
@@ -123,11 +123,11 @@ export function ServiceOverviewThroughputChart({
       transactionName,
       comparisonEnabled,
       preferred,
-    ]
+    ],
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
+    ChartType.THROUGHPUT,
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -160,7 +160,7 @@ export function ServiceOverviewThroughputChart({
             <h2>
               {i18n.translate(
                 'xpack.apm.serviceOverview.throughtputChartTitle',
-                { defaultMessage: 'Throughput' }
+                { defaultMessage: 'Throughput' },
               )}
             </h2>
           </EuiTitle>

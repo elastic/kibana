@@ -75,7 +75,7 @@ function MapToolTipComponent({
             item.getPropertyKey() === TRANSACTION_DURATION_COUNTRY
           ) {
             setPageLoadDuration(
-              formatPageLoadValue(+(item.getRawValue() as string))
+              formatPageLoadValue(+(item.getRawValue() as string)),
             );
           }
         });

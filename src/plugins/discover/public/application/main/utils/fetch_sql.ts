@@ -63,7 +63,7 @@ export function fetchSql(
                   id: String(idx),
                   raw: row,
                   flattened: row,
-                } as unknown as DataTableRecord)
+                }) as unknown as DataTableRecord
             );
           }
         });

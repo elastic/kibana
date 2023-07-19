@@ -102,12 +102,12 @@ export function ErrorGroupOverview() {
                 sortDirection: normalizedSortDirection,
               },
             },
-          }
+          },
         ).then((response) => {
           const currentPageGroupIds = orderBy(
             response.errorGroups,
             sortField,
-            sortDirection
+            sortDirection,
           )
             .slice(page * pageSize, (page + 1) * pageSize)
             .map(({ groupId }) => groupId)
@@ -132,7 +132,7 @@ export function ErrorGroupOverview() {
       sortDirection,
       page,
       pageSize,
-    ]
+    ],
   );
 
   const { requestId, errorGroupMainStatistics, currentPageGroupIds } =
@@ -164,14 +164,14 @@ export function ErrorGroupOverview() {
                 groupIds: JSON.stringify(currentPageGroupIds),
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   return (
@@ -186,7 +186,7 @@ export function ErrorGroupOverview() {
                   distribution={errorDistributionData}
                   title={i18n.translate(
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-                    { defaultMessage: 'Error occurrences' }
+                    { defaultMessage: 'Error occurrences' },
                   )}
                 />
               </EuiPanel>
@@ -204,7 +204,7 @@ export function ErrorGroupOverview() {
             <h3>
               {i18n.translate(
                 'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
+                { defaultMessage: 'Errors' },
               )}
             </h3>
           </EuiTitle>
@@ -214,7 +214,7 @@ export function ErrorGroupOverview() {
             mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
             detailedStatisticsLoading={isPending(
-              errorGroupDetailedStatisticsStatus
+              errorGroupDetailedStatisticsStatus,
             )}
             detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}

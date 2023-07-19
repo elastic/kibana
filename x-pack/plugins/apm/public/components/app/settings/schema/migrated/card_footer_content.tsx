@@ -23,7 +23,7 @@ export function CardFooterContent() {
       >
         {i18n.translate(
           'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
-          { defaultMessage: 'View the APM integration in Fleet' }
+          { defaultMessage: 'View the APM integration in Fleet' },
         )}
       </EuiButton>
       <EuiSpacer size="xs" />
@@ -37,7 +37,7 @@ export function CardFooterContent() {
                 <LegacyAPMLink path="/services">
                   {i18n.translate(
                     'xpack.apm.settings.schema.success.returnText.serviceInventoryLink',
-                    { defaultMessage: 'Service inventory' }
+                    { defaultMessage: 'Service inventory' },
                   )}
                 </LegacyAPMLink>
               ),

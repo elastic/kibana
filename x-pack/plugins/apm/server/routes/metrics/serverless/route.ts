@@ -57,7 +57,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     charts: FetchAndTransformMetrics[];
   }> => {
@@ -110,7 +110,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     activeInstances: ActiveInstanceOverview[];
     timeseries: Coordinate[];
@@ -150,7 +150,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     serverlessFunctionsOverview: ServerlessFunctionsOverviewResponse;
   }> => {
@@ -203,7 +203,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
         .get<string>(apmAWSLambdaPriceFactor)
         .then(
           (value): AWSLambdaPriceFactor =>
-            JSON.parse(value) as AWSLambdaPriceFactor
+            JSON.parse(value) as AWSLambdaPriceFactor,
         ),
       uiSettingsClient.get<number>(apmAWSLambdaRequestCostPerMillion),
     ]);

@@ -540,10 +540,13 @@ export function mlSavedObjectServiceFactory(
   async function _bulkCreateTrainedModel(models: TrainedModelObject[], namespaceFallback?: string) {
     await isMlReady();
 
-    const namespacesPerJob = (await getAllJobObjectsForAllSpaces()).reduce((acc, cur) => {
-      acc[cur.attributes.job_id] = cur.namespaces;
-      return acc;
-    }, {} as Record<string, string[] | undefined>);
+    const namespacesPerJob = (await getAllJobObjectsForAllSpaces()).reduce(
+      (acc, cur) => {
+        acc[cur.attributes.job_id] = cur.namespaces;
+        return acc;
+      },
+      {} as Record<string, string[] | undefined>
+    );
 
     const results = await savedObjectsClient.bulkCreate<TrainedModelObject>(
       models.map((m) => {
@@ -707,14 +710,17 @@ export function mlSavedObjectServiceFactory(
     });
 
     const finedResult = await Promise.all(searches);
-    return finedResult.reduce((acc, cur) => {
-      const savedObject = cur.saved_objects[0];
-      if (savedObject) {
-        const jobId = savedObject.attributes.job!.job_id;
-        acc[jobId] = savedObject;
-      }
-      return acc;
-    }, {} as Record<string, SavedObjectsFindResult<TrainedModelObject>>);
+    return finedResult.reduce(
+      (acc, cur) => {
+        const savedObject = cur.saved_objects[0];
+        if (savedObject) {
+          const jobId = savedObject.attributes.job!.job_id;
+          acc[jobId] = savedObject;
+        }
+        return acc;
+      },
+      {} as Record<string, SavedObjectsFindResult<TrainedModelObject>>
+    );
   }
 
   async function updateTrainedModelsSpaces(

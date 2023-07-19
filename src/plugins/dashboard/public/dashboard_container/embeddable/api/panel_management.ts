@@ -26,7 +26,7 @@ import { PLACEHOLDER_EMBEDDABLE } from '../../../placeholder_embeddable';
 export async function addOrUpdateEmbeddable<
   EEI extends EmbeddableInput = EmbeddableInput,
   EEO extends EmbeddableOutput = EmbeddableOutput,
-  E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>,
 >(this: DashboardContainer, type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
   const idToReplace = embeddableId || explicitInput.id;
   if (idToReplace && this.input.panels[idToReplace]) {

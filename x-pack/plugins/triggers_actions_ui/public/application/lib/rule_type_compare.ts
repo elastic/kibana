@@ -16,7 +16,7 @@ export function ruleTypeGroupCompare(
       name: string;
       checkEnabledResult: IsEnabledResult | IsDisabledResult;
       ruleTypeItem: RuleTypeModel;
-    }>
+    }>,
   ],
   right: [
     string,
@@ -25,7 +25,7 @@ export function ruleTypeGroupCompare(
       name: string;
       checkEnabledResult: IsEnabledResult | IsDisabledResult;
       ruleTypeItem: RuleTypeModel;
-    }>
+    }>,
   ],
   groupNames: Map<string, string> | undefined
 ) {

@@ -21,7 +21,7 @@ interface Props {
 }
 
 function generateAnnotationData(
-  values?: Record<string, number | null>
+  values?: Record<string, number | null>,
 ): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
     dataValue: value[1],

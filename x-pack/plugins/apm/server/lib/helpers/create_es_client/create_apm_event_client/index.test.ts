@@ -42,7 +42,7 @@ describe('APMEventClient', () => {
           esClient: {
             search: async (
               params: any,
-              { signal }: { signal: AbortSignal }
+              { signal }: { signal: AbortSignal },
             ) => {
               abortSignal = signal;
               await setTimeoutPromise(3_000);
@@ -66,7 +66,7 @@ describe('APMEventClient', () => {
         });
 
         return res.ok({ body: 'ok' });
-      }
+      },
     );
 
     await server.start();

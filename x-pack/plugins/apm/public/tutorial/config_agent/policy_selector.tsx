@@ -44,7 +44,7 @@ export function PolicySelector({
           key: 'fleet_policies',
           label: i18n.translate(
             'xpack.apm.tutorial.agent_config.fleetPoliciesLabel',
-            { defaultMessage: 'Fleet policies' }
+            { defaultMessage: 'Fleet policies' },
           ),
           options: fleetAgents.map(({ key, label }) => ({ key, label })),
         },
@@ -55,7 +55,7 @@ export function PolicySelector({
     <EuiFormRow
       label={i18n.translate(
         'xpack.apm.tutorial.agent_config.choosePolicyLabel',
-        { defaultMessage: 'Choose policy' }
+        { defaultMessage: 'Choose policy' },
       )}
       labelAppend={
         fleetLink && (
@@ -74,7 +74,7 @@ export function PolicySelector({
         {
           defaultMessage:
             'Adds the selected policy configuration to the snippet below.',
-        }
+        },
       )}
     >
       <EuiComboBox
@@ -89,7 +89,7 @@ export function PolicySelector({
         }
         onChange={(selectedOptions) => {
           const newSelectedOption = options.find(
-            ({ key }) => key === selectedOptions[0].key
+            ({ key }) => key === selectedOptions[0].key,
           );
           onChange(newSelectedOption);
         }}

@@ -23,7 +23,7 @@ describe('fromQuery', () => {
         a: true,
         b: 5000,
         c: ':',
-      })
+      }),
     ).toEqual('a=true&b=5000&c=:');
   });
 
@@ -34,7 +34,7 @@ describe('fromQuery', () => {
         b: '.',
         c: ';',
         d: ' ',
-      })
+      }),
     ).toEqual('a=%40&b=.&c=%3B&d=%20');
   });
 
@@ -43,7 +43,7 @@ describe('fromQuery', () => {
       fromQuery({
         a: undefined,
         b: null,
-      })
+      }),
     ).toEqual('a=&b=');
   });
 
@@ -51,7 +51,7 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         arr: ['a', 'b'],
-      })
+      }),
     ).toEqual('arr=a%2Cb');
   });
 
@@ -60,7 +60,7 @@ describe('fromQuery', () => {
       fromQuery({
         traceId: 'bar',
         transactionId: 'john doe',
-      })
+      }),
     ).toEqual('traceId=bar&transactionId=john%20doe');
   });
 
@@ -69,9 +69,9 @@ describe('fromQuery', () => {
       fromQuery({
         rangeFrom: '2019-03-03T12:00:00.000Z',
         rangeTo: '2019-03-05T12:00:00.000Z',
-      })
+      }),
     ).toEqual(
-      'rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
+      'rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z',
     );
   });
 
@@ -81,7 +81,7 @@ describe('fromQuery', () => {
         flyoutDetailTab: undefined,
         refreshPaused: true,
         refreshInterval: 5000,
-      })
+      }),
     ).toEqual('flyoutDetailTab=&refreshPaused=true&refreshInterval=5000');
   });
 });
@@ -91,9 +91,9 @@ describe('fromQuery and toQuery', () => {
     expect(
       fromQuery(
         toQuery(
-          '?name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z'
-        )
-      )
+          '?name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z',
+        ),
+      ),
     ).toEqual('name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z');
   });
 });

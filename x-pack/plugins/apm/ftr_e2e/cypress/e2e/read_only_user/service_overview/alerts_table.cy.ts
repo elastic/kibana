@@ -23,7 +23,7 @@ describe('Errors table', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 

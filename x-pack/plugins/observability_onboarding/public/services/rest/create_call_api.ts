@@ -50,7 +50,7 @@ export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
 export let callObservabilityOnboardingApi: ObservabilityOnboardingClient =
   () => {
     throw new Error(
-      'callObservabilityOnboardingApi has to be initialized before used. Call createCallApi first.'
+      'callObservabilityOnboardingApi has to be initialized before used. Call createCallApi first.',
     );
   };
 

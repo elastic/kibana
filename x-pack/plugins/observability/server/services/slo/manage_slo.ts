@@ -10,7 +10,10 @@ import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 export class ManageSLO {
-  constructor(private repository: SLORepository, private transformManager: TransformManager) {}
+  constructor(
+    private repository: SLORepository,
+    private transformManager: TransformManager
+  ) {}
 
   async enable(sloId: string) {
     const slo = await this.repository.findById(sloId);

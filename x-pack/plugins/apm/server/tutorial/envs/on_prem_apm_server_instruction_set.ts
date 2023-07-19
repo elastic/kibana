@@ -105,20 +105,20 @@ export function getOnPremApmServerInstructionSet({
         'xpack.apm.tutorial.apmServer.statusCheck.btnLabel',
         {
           defaultMessage: 'Check APM Server status',
-        }
+        },
       ),
       success: i18n.translate(
         'xpack.apm.tutorial.apmServer.statusCheck.successMessage',
         {
           defaultMessage: 'You have correctly setup APM Server',
-        }
+        },
       ),
       error: i18n.translate(
         'xpack.apm.tutorial.apmServer.statusCheck.errorMessage',
         {
           defaultMessage:
             'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
-        }
+        },
       ),
       esHitsCheck: {
         index: apmConfig.indices.onboarding,

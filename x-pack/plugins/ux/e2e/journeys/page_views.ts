@@ -44,7 +44,7 @@ journey('Page Views Chart', async ({ page, params }) => {
   step('Check Page Views charts', async () => {
     await page.waitForLoadState('networkidle');
     await page.click(
-      'text=Total page viewsSelect an option: No breakdown, is selectedNo breakdown >> button'
+      'text=Total page viewsSelect an option: No breakdown, is selectedNo breakdown >> button',
     );
     await page.click('button[role="option"]:has-text("Browser")');
     expect(await page.waitForSelector('text=Chrome'));
@@ -57,7 +57,7 @@ journey('Page Views Chart', async ({ page, params }) => {
   step('can click through to exploratory view', async () => {
     expect(await page.hover('text=Firefox'));
     await page.click(
-      `.pageViewsChart  ${byTestId('embeddablePanelToggleMenuIcon')}`
+      `.pageViewsChart  ${byTestId('embeddablePanelToggleMenuIcon')}`,
     );
     await page.click(byTestId('embeddablePanelAction-expViewExplore'));
     await page.waitForNavigation();

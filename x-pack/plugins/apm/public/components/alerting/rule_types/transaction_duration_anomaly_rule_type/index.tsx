@@ -65,7 +65,7 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
       windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
       environment: ENVIRONMENT_ALL.value,
-    }
+    },
   );
 
   const fields = [
@@ -95,7 +95,7 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
         'xpack.apm.transactionDurationAnomalyRuleType.anomalySeverity',
         {
           defaultMessage: 'Has anomaly with severity',
-        }
+        },
       )}
     >
       <SelectAnomalySeverity

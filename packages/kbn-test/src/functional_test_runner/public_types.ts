@@ -56,7 +56,7 @@ export interface GenericFtrProviderContext<
   ServiceProviders extends {},
   PageObjectProviders extends {},
   ServiceMap = ProvidedTypeMap<ServiceProviders>,
-  PageObjectMap = ProvidedTypeMap<PageObjectProviders>
+  PageObjectMap = ProvidedTypeMap<PageObjectProviders>,
 > {
   /**
    * Determine if a service is avaliable

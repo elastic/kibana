@@ -136,7 +136,7 @@ export function getColumns({
           errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
             ?.timeseries;
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.ERROR_OCCURRENCES
+          ChartType.ERROR_OCCURRENCES,
         );
 
         return (

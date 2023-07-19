@@ -68,13 +68,16 @@ export function uncovertMetricNames(byDateBucketResponse: { buckets: MetricNameB
           doc_count,
           ...rest
         } = bucket;
-        const metrics = Object.entries(rest).reduce((accum, [k, value]) => {
-          if (k.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
-            const name = k.split('__')[1];
-            accum[name] = value;
-          }
-          return accum;
-        }, {} as Record<string, any>);
+        const metrics = Object.entries(rest).reduce(
+          (accum, [k, value]) => {
+            if (k.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
+              const name = k.split('__')[1];
+              accum[name] = value;
+            }
+            return accum;
+          },
+          {} as Record<string, any>
+        );
 
         return {
           key_as_string,

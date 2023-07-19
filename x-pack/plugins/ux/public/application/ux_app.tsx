@@ -218,7 +218,7 @@ export const renderApp = ({
       deps={deps}
       corePlugins={corePlugins}
     />,
-    element
+    element,
   );
   return () => {
     corePlugins.data.search.session.clear();

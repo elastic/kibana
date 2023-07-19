@@ -16,7 +16,7 @@ import type { Datatable } from '../../../expression_types';
  * overriding with any provided args.
  */
 export const functionWrapper = <
-  ExpressionFunctionDefinition extends AnyExpressionFunctionDefinition
+  ExpressionFunctionDefinition extends AnyExpressionFunctionDefinition,
 >(
   spec: ExpressionFunctionDefinition
 ) => {

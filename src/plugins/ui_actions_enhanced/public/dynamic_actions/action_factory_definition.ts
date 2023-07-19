@@ -26,7 +26,7 @@ import {
 export interface ActionFactoryDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
   ExecutionContext extends object = object,
-  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext>,
     PersistableStateDefinition<SerializedEvent> {

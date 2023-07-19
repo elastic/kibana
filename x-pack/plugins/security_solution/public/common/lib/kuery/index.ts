@@ -219,7 +219,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter =>
     $state: {
       store: FilterStateStore.APP_STATE,
     },
-  } as Filter);
+  }) as Filter;
 
 export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));

@@ -60,7 +60,7 @@ export interface Chart<TVisualizationState extends LensVisualizationState> {
   getDataView(): DataView;
 }
 export interface ChartConfig<
-  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
+  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>,
 > {
   dataView: DataView;
   layers: TLayer;

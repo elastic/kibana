@@ -53,8 +53,8 @@ export async function createApmUsers({
     // create custom roles
     await Promise.all(
       customRoleNames.map(async (roleName) =>
-        createCustomRole({ elasticsearch, kibana, roleName })
-      )
+        createCustomRole({ elasticsearch, kibana, roleName }),
+      ),
     );
 
     // create user

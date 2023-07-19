@@ -30,15 +30,15 @@ export const APM_SOURCE_MAP_INDEX = '.apm-source-map';
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
 async function getApmIndicesSavedObject(
-  savedObjectsClient: ISavedObjectsClient
+  savedObjectsClient: ISavedObjectsClient,
 ) {
   const apmIndicesSavedObject = await withApmSpan(
     'get_apm_indices_saved_object',
     () =>
       savedObjectsClient.get<Partial<APMIndices>>(
         APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-        APM_INDEX_SETTINGS_SAVED_OBJECT_ID
-      )
+        APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
+      ),
   );
   return apmIndicesSavedObject.attributes.apmIndices;
 }
@@ -62,7 +62,7 @@ export async function getApmIndices({
 }): Promise<ApmIndicesConfig> {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
-      savedObjectsClient
+      savedObjectsClient,
     );
     const apmIndicesConfig = getApmIndicesConfig(config);
     return { ...apmIndicesConfig, ...apmIndicesSavedObject };

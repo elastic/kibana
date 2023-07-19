@@ -41,7 +41,7 @@ export function DiagnosticsApmDocuments() {
           docCount === 0 &&
           intervals &&
           Object.values(intervals).every(
-            (interval) => interval.eventDocCount === 0
+            (interval) => interval.eventDocCount === 0,
           );
 
         return !isLegacyAndUnused;
@@ -175,7 +175,7 @@ function IntervalDocCount({
   return (
     <EuiToolTip
       content={`${asInteger(interval.metricDocCount)} docs / ${asInteger(
-        interval.eventDocCount
+        interval.eventDocCount,
       )} events`}
     >
       <div style={{ cursor: 'pointer' }}>

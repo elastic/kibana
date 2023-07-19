@@ -49,7 +49,7 @@ export const apmIndices: SavedObjectsType = {
               span: schema.maybe(schema.string()),
               transaction: schema.maybe(schema.string()),
               metric: schema.maybe(schema.string()),
-            })
+            }),
           ),
           isSpaceAware: schema.maybe(schema.boolean()),
         }),

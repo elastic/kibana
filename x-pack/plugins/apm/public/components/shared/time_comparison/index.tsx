@@ -42,7 +42,7 @@ export function TimeComparison() {
   } = useAnyOfApmParams(
     '/services',
     '/dependencies/*',
-    '/services/{serviceName}'
+    '/services/{serviceName}',
   );
 
   const location = useLocation();
@@ -62,12 +62,12 @@ export function TimeComparison() {
     // Only show the "Expected bounds" option in Overview and Transactions tabs
     const showExpectedBoundsForThisTab =
       !matchingRoutes.some(
-        (d) => d.path === '/services/{serviceName}/transactions/view'
+        (d) => d.path === '/services/{serviceName}/transactions/view',
       ) &&
       matchingRoutes.some(
         (d) =>
           d.path === '/services/{serviceName}/overview' ||
-          d.path === '/services/{serviceName}/transactions'
+          d.path === '/services/{serviceName}/transactions',
       );
 
     const timeComparisonOptions = getComparisonOptions({
@@ -92,7 +92,7 @@ export function TimeComparison() {
   ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
-    ({ value }) => value === offset
+    ({ value }) => value === offset,
   );
 
   // Replaces type when current one is no longer available in the select options
@@ -102,7 +102,7 @@ export function TimeComparison() {
     // then also default to first comparison option as well
     (offset === TimeRangeComparisonEnum.ExpectedBounds &&
       comparisonOptions.find(
-        (d) => d.value === TimeRangeComparisonEnum.ExpectedBounds
+        (d) => d.value === TimeRangeComparisonEnum.ExpectedBounds,
       )?.disabled === true)
   ) {
     urlHelpers.replace(history, {
@@ -136,7 +136,7 @@ export function TimeComparison() {
               urlHelpers.push(history, {
                 query: {
                   comparisonEnabled: Boolean(
-                    nextComparisonEnabledValue
+                    nextComparisonEnabledValue,
                   ).toString(),
                 },
               });

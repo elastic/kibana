@@ -27,7 +27,7 @@ export const getAnomaliesNetworkTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesByNetwork>,
   Columns<Anomaly['entityValue'], AnomaliesByNetwork>,
   Columns<Anomaly['influencers'], AnomaliesByNetwork>,
-  Columns<Anomaly['time'], AnomaliesByNetwork>
+  Columns<Anomaly['time'], AnomaliesByNetwork>,
 ] => [
   {
     name: i18n.NETWORK_NAME,

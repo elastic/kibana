@@ -30,7 +30,7 @@ describe('saveApmIndices', () => {
         apmIndices: { settingA: 'aa', settingF: 'ff', settingG: 'gg' },
         isSpaceAware: true,
       },
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 });

@@ -121,7 +121,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)
                 ? 'on'
                 : undefined,
-            } as EuiSelectableOption)
+            }) as EuiSelectableOption
         ),
     ],
     [hideUntitled, timelineId, timelineType]

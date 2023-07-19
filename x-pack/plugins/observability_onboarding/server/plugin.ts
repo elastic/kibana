@@ -36,7 +36,7 @@ export class ObservabilityOnboardingPlugin
 {
   private readonly logger: Logger;
   constructor(
-    private readonly initContext: PluginInitializerContext<ObservabilityOnboardingConfig>
+    private readonly initContext: PluginInitializerContext<ObservabilityOnboardingConfig>,
   ) {
     this.initContext = initContext;
     this.logger = this.initContext.logger.get();
@@ -44,7 +44,7 @@ export class ObservabilityOnboardingPlugin
 
   public setup(
     core: CoreSetup<ObservabilityOnboardingPluginStartDependencies>,
-    plugins: ObservabilityOnboardingPluginSetupDependencies
+    plugins: ObservabilityOnboardingPluginSetupDependencies,
   ) {
     this.logger.debug('observability_onboarding: Setup');
 

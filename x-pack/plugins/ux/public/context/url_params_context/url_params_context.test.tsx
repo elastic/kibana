@@ -25,7 +25,7 @@ function mountParams(location: Location) {
           )}
         </UrlParamsContext.Consumer>
       </UrlParamsProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
@@ -130,7 +130,7 @@ describe('UrlParamsContext', () => {
             }}
           </UrlParamsContext.Consumer>
         </UrlParamsProvider>
-      </Router>
+      </Router>,
     );
 
     await waitFor(() => {});
@@ -184,7 +184,7 @@ describe('UrlParamsContext', () => {
             }}
           </UrlParamsContext.Consumer>
         </UrlParamsProvider>
-      </Router>
+      </Router>,
     );
 
     await waitFor(() => {});

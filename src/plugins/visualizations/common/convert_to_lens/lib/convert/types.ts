@@ -60,7 +60,7 @@ export type SiblingPipelineMetric =
 
 export type BucketColumn = DateHistogramColumn | TermsColumn | FiltersColumn | RangeColumn;
 export interface CommonColumnConverterArgs<
-  Agg extends SupportedAggregation = SupportedAggregation
+  Agg extends SupportedAggregation = SupportedAggregation,
 > {
   agg: SchemaConfig<Agg>;
   dataView: DataView;
@@ -68,13 +68,13 @@ export interface CommonColumnConverterArgs<
 }
 
 export interface ExtendedColumnConverterArgs<
-  Agg extends SupportedAggregation = SupportedAggregation
+  Agg extends SupportedAggregation = SupportedAggregation,
 > extends CommonColumnConverterArgs<Agg> {
   aggs: Array<SchemaConfig<METRIC_TYPES>>;
 }
 
 export interface CommonBucketConverterArgs<
-  Agg extends SupportedAggregation = SupportedAggregation
+  Agg extends SupportedAggregation = SupportedAggregation,
 > {
   visType: string;
   agg: SchemaConfig<Agg>;

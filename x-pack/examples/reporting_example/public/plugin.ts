@@ -27,7 +27,7 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
         const [coreStart, depsStart] = (await core.getStartServices()) as [
           CoreStart,
           StartDeps,
-          unknown
+          unknown,
         ];
         // Render the application
         return renderApp(

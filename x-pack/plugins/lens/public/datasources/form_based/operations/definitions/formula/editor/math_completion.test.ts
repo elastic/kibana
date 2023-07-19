@@ -64,7 +64,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       ({
         dataType: field.type,
         isBucketed: false,
-      } as OperationMetadata),
+      }) as OperationMetadata,
   }),
   moving_average: createOperationDefinitionMock('moving_average', {
     input: 'fullReference',

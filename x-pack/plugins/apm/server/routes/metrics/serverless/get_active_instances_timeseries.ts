@@ -85,7 +85,7 @@ export async function getActiveInstancesTimeseries({
 
   const { aggregations } = await apmEventClient.search(
     'get_active_instances',
-    params
+    params,
   );
 
   return (

@@ -46,7 +46,7 @@ export function TopErrors() {
     path: { serviceName },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const {
@@ -80,7 +80,7 @@ export function TopErrors() {
                 maxNumberOfErrorGroups: 5,
               },
             },
-          }
+          },
         ).then((response) => {
           return {
             // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
@@ -103,7 +103,7 @@ export function TopErrors() {
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
-    ]
+    ],
   );
 
   const { requestId, items } = data;
@@ -132,18 +132,18 @@ export function TopErrors() {
               },
               body: {
                 groupIds: JSON.stringify(
-                  items.map(({ groupId: groupId }) => groupId).sort()
+                  items.map(({ groupId: groupId }) => groupId).sort(),
                 ),
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const errorGroupDetailedStatisticsLoading =
@@ -179,7 +179,7 @@ export function TopErrors() {
             status === FETCH_STATUS.FAILURE
               ? i18n.translate(
                   'xpack.apm.transactionDetails.topErrors.errorMessage',
-                  { defaultMessage: 'Failed to fetch errors' }
+                  { defaultMessage: 'Failed to fetch errors' },
                 )
               : ''
           }
@@ -187,14 +187,14 @@ export function TopErrors() {
             status === FETCH_STATUS.LOADING
               ? i18n.translate(
                   'xpack.apm.transactionDetails.topErrors.loading',
-                  { defaultMessage: 'Loading...' }
+                  { defaultMessage: 'Loading...' },
                 )
               : i18n.translate(
                   'xpack.apm.transactionDetails.topErrors.noResults',
                   {
                     defaultMessage:
                       'No errors found for this transaction group',
-                  }
+                  },
                 )
           }
           columns={columns}

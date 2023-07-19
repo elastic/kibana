@@ -16,7 +16,7 @@ const mockConfig = new Proxy(
   {},
   {
     get: () => 'myIndex',
-  }
+  },
 ) as APMConfig;
 
 function getMockApmEventClient(esResponse: any) {
@@ -114,7 +114,7 @@ describe('getTransactionBreakdown', () => {
 
       // missing values should be 0 if other span types do have data for that timestamp
       expect(
-        (appTimeseries as NonNullable<typeof appTimeseries>).data[1].y
+        (appTimeseries as NonNullable<typeof appTimeseries>).data[1].y,
       ).toBe(0);
     });
   });

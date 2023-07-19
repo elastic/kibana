@@ -42,7 +42,7 @@ async function getCoreWebVitalsResponse({
     'GET /internal/apm/data_view/title',
     {
       signal: null,
-    }
+    },
   );
 
   return await esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
@@ -68,7 +68,7 @@ const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
 };
 
 export const fetchUxOverviewDate = async (
-  params: WithDataPlugin<FetchDataParams>
+  params: WithDataPlugin<FetchDataParams>,
 ): Promise<UxFetchDataResponse> => {
   const coreWebVitalsResponse = await getCoreWebVitalsResponse(params);
   return {
@@ -80,13 +80,13 @@ export const fetchUxOverviewDate = async (
 };
 
 export async function hasRumData(
-  params: WithDataPlugin<HasDataParams>
+  params: WithDataPlugin<HasDataParams>,
 ): Promise<UXHasDataResponse> {
   const dataViewResponse = await callApmApi(
     'GET /internal/apm/data_view/title',
     {
       signal: null,
-    }
+    },
   );
 
   const esQueryResponse = await esQuery<ReturnType<typeof hasRumDataQuery>>(
@@ -99,7 +99,7 @@ export async function hasRumData(
           end: params?.absoluteTime?.end,
         }),
       },
-    }
+    },
   );
 
   return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewTitle);
@@ -107,7 +107,7 @@ export async function hasRumData(
 
 async function esQuery<T>(
   dataStartPlugin: DataPublicPluginStart,
-  query: IKibanaSearchRequest<T> & { params: { index?: string } }
+  query: IKibanaSearchRequest<T> & { params: { index?: string } },
 ) {
   return new Promise<ESSearchResponse<{}, T, { restTotalHitsAsInt: false }>>(
     (resolve, reject) => {
@@ -126,6 +126,6 @@ async function esQuery<T>(
             reject(err);
           },
         });
-    }
+    },
   );
 }

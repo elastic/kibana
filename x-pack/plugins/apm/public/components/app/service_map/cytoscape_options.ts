@@ -24,14 +24,14 @@ export const popoverWidth = 350;
 
 function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
   const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
-    'serviceAnomalyStats'
+    'serviceAnomalyStats',
   );
 
   return serviceAnomalyStats;
 }
 
 function getBorderColorFn(
-  theme: EuiTheme
+  theme: EuiTheme,
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
@@ -39,7 +39,7 @@ function getBorderColorFn(
     if (hasAnomalyDetectionJob) {
       return getServiceHealthStatusColor(
         theme,
-        anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
+        anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown,
       );
     }
     if (el.hasClass('primary') || el.selected()) {
@@ -85,7 +85,7 @@ function getBorderWidth(el: cytoscape.NodeSingular) {
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export const getAnimationOptions = (
-  theme: EuiTheme
+  theme: EuiTheme,
 ): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
   // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
@@ -106,7 +106,7 @@ function isService(el: cytoscape.NodeSingular) {
 
 const getStyle = (
   theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
+  isTraceExplorerEnabled: boolean,
 ): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
@@ -249,7 +249,7 @@ const getStyle = (
 // background grid of dots.
 export const getCytoscapeDivStyle = (
   theme: EuiTheme,
-  status: FETCH_STATUS
+  status: FETCH_STATUS,
 ): CSSProperties => ({
   background: `linear-gradient(
   90deg,
@@ -272,7 +272,7 @@ ${theme.eui.euiColorLightShade}`,
 
 export const getCytoscapeOptions = (
   theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
+  isTraceExplorerEnabled: boolean,
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,

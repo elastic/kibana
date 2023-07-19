@@ -55,13 +55,13 @@ export async function listCustomLinks({
   };
   const resp = await internalESClient.search<CustomLinkES>(
     'list_custom_links',
-    params
+    params,
   );
   const customLinks = resp.hits.hits.map((item) =>
     fromESFormat({
       id: item._id,
       ...item._source,
-    })
+    }),
   );
   return customLinks;
 }

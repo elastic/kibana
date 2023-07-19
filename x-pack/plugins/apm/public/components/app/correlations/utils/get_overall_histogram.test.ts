@@ -13,7 +13,7 @@ describe('getOverallHistogram', () => {
   it('returns "loading" when undefined and running', () => {
     const { overallHistogram, hasData, status } = getOverallHistogram(
       {} as LatencyCorrelationsResponse,
-      true
+      true,
     );
     expect(overallHistogram).toStrictEqual(undefined);
     expect(hasData).toBe(false);
@@ -23,7 +23,7 @@ describe('getOverallHistogram', () => {
   it('returns "success" when undefined and not running', () => {
     const { overallHistogram, hasData, status } = getOverallHistogram(
       {} as LatencyCorrelationsResponse,
-      false
+      false,
     );
     expect(overallHistogram).toStrictEqual([]);
     expect(hasData).toBe(false);
@@ -35,7 +35,7 @@ describe('getOverallHistogram', () => {
       {
         overallHistogram: [{ key: 1, doc_count: 1234 }],
       } as LatencyCorrelationsResponse,
-      true
+      true,
     );
     expect(overallHistogram).toStrictEqual([{ key: 1, doc_count: 1234 }]);
     expect(hasData).toBe(true);
@@ -47,7 +47,7 @@ describe('getOverallHistogram', () => {
       {
         overallHistogram: [{ key: 1, doc_count: 1234 }],
       } as LatencyCorrelationsResponse,
-      false
+      false,
     );
     expect(overallHistogram).toStrictEqual([{ key: 1, doc_count: 1234 }]);
     expect(hasData).toBe(true);

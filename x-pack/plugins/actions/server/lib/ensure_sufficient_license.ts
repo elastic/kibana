@@ -18,7 +18,7 @@ export function ensureSufficientLicense<
   Config extends ActionTypeConfig,
   Secrets extends ActionTypeSecrets,
   Params extends ActionTypeParams,
-  ExecutorResultData
+  ExecutorResultData,
 >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
   if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
     throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);

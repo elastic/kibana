@@ -18,7 +18,10 @@ export class GlobalSearchFindError extends Error {
     return new GlobalSearchFindError('invalid-license', message);
   }
 
-  private constructor(public readonly type: GlobalSearchFindErrorType, message: string) {
+  private constructor(
+    public readonly type: GlobalSearchFindErrorType,
+    message: string
+  ) {
     super(message);
 
     // Set the prototype explicitly, see:

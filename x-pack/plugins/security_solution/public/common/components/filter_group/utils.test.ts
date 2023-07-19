@@ -60,10 +60,13 @@ const thirdControlsSet: FilterItemObj[] = [
 
 const emptyControlSet: FilterItemObj[] = [];
 
-const defaultControlsObj = defaultControls.reduce((prev, current) => {
-  prev[current.fieldName] = current;
-  return prev;
-}, {} as Record<string, FilterItemObj>);
+const defaultControlsObj = defaultControls.reduce(
+  (prev, current) => {
+    prev[current.fieldName] = current;
+    return prev;
+  },
+  {} as Record<string, FilterItemObj>
+);
 describe('utils', () => {
   describe('getFilterItemObjListFromControlOutput', () => {
     it('should return ordered filterItem where passed in order', () => {

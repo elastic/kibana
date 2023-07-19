@@ -58,8 +58,8 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
     hasAlert = undefined;
   }
 
-  const defaultActions = (actionConnectors ?? []).filter((act) =>
-    settings?.defaultConnectors?.includes(act.id)
+  const defaultActions = (actionConnectors ?? []).filter(
+    (act) => settings?.defaultConnectors?.includes(act.id)
   );
 
   const enableAlert = () => {

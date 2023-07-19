@@ -52,7 +52,7 @@ export async function getHasTransactionsEvents({
           },
         },
       },
-    }
+    },
   );
 
   return response.hits.total.value > 0;
@@ -96,7 +96,7 @@ export function getDurationFieldForTransactions(
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent
     | boolean,
-  useDurationSummaryField?: boolean
+  useDurationSummaryField?: boolean,
 ) {
   let type: ApmDocumentType;
 
@@ -122,7 +122,7 @@ export function getDurationFieldForTransactions(
 }
 
 export function getDocumentTypeFilterForTransactions(
-  searchAggregatedTransactions: boolean
+  searchAggregatedTransactions: boolean,
 ) {
   return searchAggregatedTransactions
     ? [
@@ -140,7 +140,7 @@ export function getDocumentTypeFilterForTransactions(
 }
 
 export function getProcessorEventForTransactions(
-  searchAggregatedTransactions: boolean
+  searchAggregatedTransactions: boolean,
 ): ProcessorEvent.metric | ProcessorEvent.transaction {
   return searchAggregatedTransactions
     ? ProcessorEvent.metric

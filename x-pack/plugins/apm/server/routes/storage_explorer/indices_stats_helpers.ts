@@ -46,7 +46,7 @@ export function getEstimatedSizeForDocumentsInIndex({
 }
 
 export async function getApmDiskSpacedUsedPct(
-  context: ApmPluginRequestHandlerContext
+  context: ApmPluginRequestHandlerContext,
 ) {
   const esClient = (await context.core).elasticsearch.client;
   const { nodes: diskSpacePerNode } = await esClient.asCurrentUser.nodes.stats({
@@ -56,7 +56,7 @@ export async function getApmDiskSpacedUsedPct(
 
   const totalDiskSpace = sumBy(
     values(diskSpacePerNode),
-    (node) => node?.fs?.total?.total_in_bytes ?? 0
+    (node) => node?.fs?.total?.total_in_bytes ?? 0,
   );
 
   return totalDiskSpace;

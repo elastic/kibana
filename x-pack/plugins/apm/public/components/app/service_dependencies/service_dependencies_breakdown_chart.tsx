@@ -42,10 +42,10 @@ export function ServiceDependenciesBreakdownChart({
               environment,
             },
           },
-        }
+        },
       );
     },
-    [serviceName, start, end, kuery, environment]
+    [serviceName, start, end, kuery, environment],
   );
 
   const timeseries: Array<TimeSeries<Coordinate>> =

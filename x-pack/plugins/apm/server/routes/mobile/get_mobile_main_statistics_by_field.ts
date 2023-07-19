@@ -107,7 +107,7 @@ export async function getMobileMainStatisticsByField({
             },
           },
         },
-      }
+      },
     );
 
     return (
@@ -188,7 +188,7 @@ export async function getMobileMainStatisticsByField({
 
   const mainStatisticsMerged: MergedQueriesResponse = merge(
     transactioEventStatistics,
-    errorEventStatistics
+    errorEventStatistics,
   );
 
   const mainStatistics = mainStatisticsMerged.map((item) => {

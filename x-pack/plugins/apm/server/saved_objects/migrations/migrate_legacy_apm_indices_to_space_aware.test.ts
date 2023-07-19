@@ -123,7 +123,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
         {
           id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
           overwrite: true,
-        }
+        },
       );
     });
   });
@@ -203,7 +203,7 @@ describe('migrateLegacyAPMIndicesToSpaceAware', () => {
               initialNamespaces: [id],
               attributes: { ...attributes, isSpaceAware: true },
             };
-          })
+          }),
       );
     });
   });

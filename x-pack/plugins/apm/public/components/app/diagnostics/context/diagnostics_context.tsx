@@ -49,7 +49,7 @@ export function DiagnosticsContextProvider({
         },
       });
     },
-    [start, end, kuery]
+    [start, end, kuery],
   );
 
   const [importedDiagnosticsBundle, setImportedDiagnosticsBundle] = useState<

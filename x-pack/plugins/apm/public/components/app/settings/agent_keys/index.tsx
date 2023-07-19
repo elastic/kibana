@@ -47,7 +47,7 @@ export function AgentKeys() {
       return callApmApi('GET /internal/apm/agent_keys/privileges');
     },
     [],
-    { showToastOnError: false }
+    { showToastOnError: false },
   );
 
   const {
@@ -61,7 +61,7 @@ export function AgentKeys() {
       }
     },
     [areApiKeysEnabled, canManage],
-    { showToastOnError: false }
+    { showToastOnError: false },
   );
 
   const agentKeys = data?.agentKeys;
@@ -90,7 +90,7 @@ export function AgentKeys() {
                 'xpack.apm.settings.agentKeys.createAgentKeyButton',
                 {
                   defaultMessage: 'Create APM agent key',
-                }
+                },
               )}
             </EuiButton>
           </EuiFlexItem>
@@ -127,7 +127,7 @@ export function AgentKeys() {
                 defaultMessage:
                   'Error creating APM agent key "{keyName}". Error: "{message}"',
                 values: { keyName, message },
-              })
+              }),
             );
             setIsFlyoutVisible(false);
           }}
@@ -184,7 +184,7 @@ function AgentKeysContent({
                 'xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle',
                 {
                   defaultMessage: 'Loading APM agent keys...',
-                }
+                },
               )}
             </h2>
           }
@@ -202,7 +202,7 @@ function AgentKeysContent({
                 'xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle',
                 {
                   defaultMessage: 'Could not load APM agent keys.',
-                }
+                },
               )}
             </h2>
           }
@@ -249,7 +249,7 @@ function AgentKeysContent({
               'xpack.apm.settings.agentKeys.createAgentKeyButton',
               {
                 defaultMessage: 'Create APM agent key',
-              }
+              },
             )}
           </EuiButton>
         }

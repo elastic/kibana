@@ -58,12 +58,15 @@ export const registerScrollForCountRoute = (router: IRouter) => {
 
       const objects = await findAll(client, findOptions);
 
-      const counts = objects.reduce((accum, result) => {
-        const type = result.type;
-        accum[type] = accum[type] || 0;
-        accum[type]++;
-        return accum;
-      }, {} as Record<string, number>);
+      const counts = objects.reduce(
+        (accum, result) => {
+          const type = result.type;
+          accum[type] = accum[type] || 0;
+          accum[type]++;
+          return accum;
+        },
+        {} as Record<string, number>
+      );
 
       for (const type of typesToInclude) {
         if (!counts[type]) {

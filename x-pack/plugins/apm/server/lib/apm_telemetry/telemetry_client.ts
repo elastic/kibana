@@ -17,11 +17,11 @@ interface RequiredSearchParams {
 
 export interface TelemetryClient {
   search<TSearchRequest extends ESSearchRequest & RequiredSearchParams>(
-    params: TSearchRequest
+    params: TSearchRequest,
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
 
   indicesStats(
-    params: estypes.IndicesStatsRequest
+    params: estypes.IndicesStatsRequest,
     // promise returned by client has an abort property
     // so we cannot use its ReturnType
   ): Promise<{
@@ -50,15 +50,15 @@ export async function getTelemetryClient({
   return {
     search: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.search(params, { meta: true })
+        esClient.asInternalUser.search(params, { meta: true }),
       ) as any,
     indicesStats: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.indices.stats(params, { meta: true })
+        esClient.asInternalUser.indices.stats(params, { meta: true }),
       ),
     transportRequest: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.transport.request(params, { meta: true })
+        esClient.asInternalUser.transport.request(params, { meta: true }),
       ),
   };
 }

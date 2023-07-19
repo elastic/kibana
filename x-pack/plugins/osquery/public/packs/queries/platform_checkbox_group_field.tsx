@@ -83,11 +83,14 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
 
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     () =>
-      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
-        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+      (options as EuiCheckboxGroupOption[]).reduce(
+        (acc, option) => {
+          acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
 
-        return acc;
-      }, {} as Record<string, boolean>)
+          return acc;
+        },
+        {} as Record<string, boolean>
+      )
   );
 
   const handleChange = useCallback(
@@ -111,11 +114,14 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
 
   useEffect(() => {
     setCheckboxIdToSelectedMap(() =>
-      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
-        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+      (options as EuiCheckboxGroupOption[]).reduce(
+        (acc, option) => {
+          acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
 
-        return acc;
-      }, {} as Record<string, boolean>)
+          return acc;
+        },
+        {} as Record<string, boolean>
+      )
     );
   }, [value, options]);
 

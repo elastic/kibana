@@ -34,7 +34,7 @@ export const globalizeSelector =
 export const globalizeSelectors = <
   GlobalState,
   LocalSelectors extends Selectors<LocalState>,
-  LocalState = any
+  LocalState = any,
 >(
   globalizer: (globalState: GlobalState) => LocalState,
   selectors: LocalSelectors

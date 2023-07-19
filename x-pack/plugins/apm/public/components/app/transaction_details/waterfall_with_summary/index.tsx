@@ -112,7 +112,7 @@ export function WaterfallWithSummary<TSample extends {}>({
                   'xpack.apm.transactionDetails.traceSampleTitle',
                   {
                     defaultMessage: 'Trace sample',
-                  }
+                  },
                 )}
               </h5>
             </EuiTitle>

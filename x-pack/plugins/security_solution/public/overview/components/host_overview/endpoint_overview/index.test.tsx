@@ -22,7 +22,7 @@ jest.mock('../../../../common/lib/kibana');
 describe('EndpointOverview Component', () => {
   let endpointData: EndpointFields;
   let wrapper: ReturnType<typeof mount>;
-  let findData: ReturnType<typeof wrapper['find']>;
+  let findData: ReturnType<(typeof wrapper)['find']>;
   const render = (data: EndpointFields | null = endpointData) => {
     wrapper = mount(
       <TestProviders>

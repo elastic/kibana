@@ -62,12 +62,13 @@ export const getProcessorPipelineMap = (
     }
   };
 
-  Object.entries(pipelines).forEach(([name, pipeline]) =>
-    pipeline?.processors?.forEach((processor) => {
-      if (processor.pipeline?.name !== undefined) {
-        addPipelineToProcessorMap(processor.pipeline.name, name);
-      }
-    })
+  Object.entries(pipelines).forEach(
+    ([name, pipeline]) =>
+      pipeline?.processors?.forEach((processor) => {
+        if (processor.pipeline?.name !== undefined) {
+          addPipelineToProcessorMap(processor.pipeline.name, name);
+        }
+      })
   );
 
   return result;

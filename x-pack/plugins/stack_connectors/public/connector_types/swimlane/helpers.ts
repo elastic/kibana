@@ -70,11 +70,14 @@ export const validateMappingForConnector = (
   const requiredFields =
     connectorType === SwimlaneConnectorType.Alerts ? alertsRequiredFields : casesRequiredFields;
 
-  return requiredFields.reduce((errors, field) => {
-    if (mapping?.[field] == null) {
-      errors = { ...errors, [field]: translationMapping[field] };
-    }
+  return requiredFields.reduce(
+    (errors, field) => {
+      if (mapping?.[field] == null) {
+        errors = { ...errors, [field]: translationMapping[field] };
+      }
 
-    return errors;
-  }, {} as Record<string, string>);
+      return errors;
+    },
+    {} as Record<string, string>
+  );
 };

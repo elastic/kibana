@@ -42,7 +42,7 @@ if (totalJobs > maxCount) {
   console.error(
     `Buildkite builds can only contain 500 steps in total. Found ${totalJobs} in total. Make sure your test runs are less than ${
       maxCount - initialJobs
-    }`
+    }`,
   );
   process.exit(1);
 }
@@ -105,7 +105,7 @@ function getEnvFromMetadata() {
 function getIntValue(key, defaultValue) {
   let value = defaultValue;
   const cli = execSync(
-    `buildkite-agent meta-data get '${key}' --default ${defaultValue} `
+    `buildkite-agent meta-data get '${key}' --default ${defaultValue} `,
   )
     .toString()
     .trim();

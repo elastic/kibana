@@ -277,7 +277,10 @@ export const generateId = (
   docId: string,
   version: string,
   ruleId: string
-): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+): string =>
+  createHash('sha256')
+    .update(docIndex.concat(docId, version, ruleId))
+    .digest('hex');
 
 // TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
 export const generateSignalId = (signal: Signal) =>
@@ -550,7 +553,7 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * @param primaryTimestamp The primary timestamp to use.
  */
 export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -611,7 +614,7 @@ export const getValidDateFromDoc = ({
 };
 
 export const createSearchAfterReturnTypeFromResponse = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -681,7 +684,7 @@ export const createSearchAfterReturnType = ({
 };
 
 export const createSearchResultReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >(): SignalSearchResponse<TAggregations> => {
   const hits: SignalSourceHit[] = [];
   return {
@@ -766,7 +769,7 @@ export const mergeReturns = (
 };
 
 export const mergeSearchResults = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >(
   searchResults: Array<SignalSearchResponse<TAggregations>>
 ) => {

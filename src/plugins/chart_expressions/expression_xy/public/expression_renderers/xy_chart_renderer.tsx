@@ -105,11 +105,12 @@ const extractCounterEvents = (
     ).find((i) => i > 1);
 
     const multiSplitNonTerms = (dataLayer.splitAccessors ?? [])
-      .map((splitAccessor) =>
-        getColumnByAccessor(
-          splitAccessor,
-          dataLayer.table.columns
-        )?.meta?.sourceParams?.type?.toString()
+      .map(
+        (splitAccessor) =>
+          getColumnByAccessor(
+            splitAccessor,
+            dataLayer.table.columns
+          )?.meta?.sourceParams?.type?.toString()
       )
       .filter(Boolean);
 

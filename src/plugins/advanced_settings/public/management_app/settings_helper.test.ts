@@ -102,7 +102,7 @@ describe('Settings Helper', () => {
     remove: (key: string) => Promise.resolve(true),
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
-    getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),
+    getRegistered: () => ({}) as Readonly<Record<string, PublicUiSettingsParams>>,
     getUpdate$: () =>
       new Observable<{
         key: string;

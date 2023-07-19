@@ -34,7 +34,7 @@ const metricsChartsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     charts: FetchAndTransformMetrics[];
   }> => {
@@ -70,7 +70,7 @@ const serviceMetricsJvm = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{ serviceNodes: ServiceNodesResponse }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

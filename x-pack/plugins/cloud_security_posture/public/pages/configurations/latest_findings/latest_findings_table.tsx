@@ -70,7 +70,7 @@ const FindingsTableComponent = ({
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
-    ...Array<EuiTableFieldDataColumnType<CspFinding>>
+    ...Array<EuiTableFieldDataColumnType<CspFinding>>,
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: onOpenFlyout }),

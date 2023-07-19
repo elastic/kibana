@@ -78,7 +78,7 @@ function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
 
 function resetConnectedEdgeStyle(
   cytoscapeInstance: cytoscape.Core,
-  node?: cytoscape.NodeSingular
+  node?: cytoscape.NodeSingular,
 ) {
   cytoscapeInstance.edges().removeClass('highlight');
   if (node) {
@@ -129,7 +129,7 @@ export function useCytoscapeEventHandlers({
     // debounce hover tracking so it doesn't spam telemetry with redundant events
     const trackNodeEdgeHover = debounce(
       () => trackApmEvent({ metric: 'service_map_node_or_edge_hover' }),
-      1000
+      1000,
     );
 
     const mouseoverHandler: cytoscape.EventHandler = (event) => {
@@ -154,7 +154,7 @@ export function useCytoscapeEventHandlers({
     const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
         event.cy,
-        serviceName ? event.cy.getElementById(serviceName) : undefined
+        serviceName ? event.cy.getElementById(serviceName) : undefined,
       );
     };
     const debugHandler: cytoscape.EventHandler = (event) => {
@@ -193,7 +193,7 @@ export function useCytoscapeEventHandlers({
     if (cy) {
       cy.on(
         'custom:data drag dragfree layoutstop select tapstart tapend unselect',
-        debugHandler
+        debugHandler,
       );
       cy.on('custom:data', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
@@ -212,7 +212,7 @@ export function useCytoscapeEventHandlers({
         cy.removeListener(
           'custom:data drag dragfree layoutstop select tapstart tapend unselect',
           undefined,
-          debugHandler
+          debugHandler,
         );
         cy.removeListener('custom:data', undefined, dataHandler);
         cy.removeListener('layoutstop', undefined, layoutstopHandler);

@@ -42,7 +42,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
     field: 'environment',
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
-      { defaultMessage: 'Environment' }
+      { defaultMessage: 'Environment' },
     ),
     width: '100%',
     render: (_, { environment, jobId, jobState, datafeedState, version }) => {
@@ -68,7 +68,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
     align: RIGHT_ALIGNMENT,
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
-      { defaultMessage: 'Action' }
+      { defaultMessage: 'Action' },
     ),
     render: (_, { jobId }) => {
       return (
@@ -79,7 +79,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
                 'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
                 {
                   defaultMessage: 'Manage job',
-                }
+                },
               )}
             >
               {/* setting the key to remount the element as a workaround for https://github.com/elastic/kibana/issues/119951*/}
@@ -94,7 +94,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
                 'xpack.apm.settings.anomalyDetection.jobList.openAnomalyExplorerrLinkText',
                 {
                   defaultMessage: 'Open in Anomaly Explorer',
-                }
+                },
               )}
             >
               <MLExplorerLink jobId={jobId}>
@@ -129,7 +129,7 @@ export function JobsList({
 
   // default to showing legacy jobs if not up to date
   const [showLegacyJobs, setShowLegacyJobs] = useState(
-    setupState !== AnomalyDetectionSetupState.UpToDate
+    setupState !== AnomalyDetectionSetupState.UpToDate,
   );
 
   const mlManageJobsHref = useMlManageJobsHref();
@@ -154,7 +154,7 @@ export function JobsList({
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {
                     defaultMessage: 'Machine Learning',
-                  }
+                  },
                 )}
               </MLManageJobsLink>
             ),
@@ -176,21 +176,21 @@ export function JobsList({
                   'POST /internal/apm/settings/anomaly-detection/update_to_v3',
                   {
                     signal: null,
-                  }
+                  },
                 ).then(() => {
                   core.notifications.toasts.addSuccess({
                     title: i18n.translate(
                       'xpack.apm.jobsList.updateCompletedToastTitle',
                       {
                         defaultMessage: 'Anomaly detection jobs created!',
-                      }
+                      },
                     ),
                     text: i18n.translate(
                       'xpack.apm.jobsList.updateCompletedToastText',
                       {
                         defaultMessage:
                           'Your new anomaly detection jobs have been created successfully. You will start to see anomaly detection results in the app within minutes. The old jobs have been closed but the results are still available within Machine Learning.',
-                      }
+                      },
                     ),
                   });
                   onUpdateComplete();
@@ -211,7 +211,7 @@ export function JobsList({
                 'xpack.apm.settings.anomalyDetection.jobList.environments',
                 {
                   defaultMessage: 'Environments',
-                }
+                },
               )}
             </h2>
           </EuiTitle>
@@ -226,7 +226,7 @@ export function JobsList({
               'xpack.apm.settings.anomalyDetection.jobList.showLegacyJobsCheckboxText',
               {
                 defaultMessage: 'Show legacy jobs',
-              }
+              },
             )}
           />
         </EuiFlexItem>
@@ -240,7 +240,7 @@ export function JobsList({
               'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
               {
                 defaultMessage: 'Manage jobs',
-              }
+              },
             )}
           </EuiButton>
         </EuiFlexItem>
@@ -255,7 +255,7 @@ export function JobsList({
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
                 defaultMessage: 'Create job',
-              }
+              },
             )}
           </EuiButton>
         </EuiFlexItem>
@@ -286,13 +286,13 @@ function getNoItemsMessage({ status }: { status: FETCH_STATUS }) {
   if (status === FETCH_STATUS.FAILURE) {
     return i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-      { defaultMessage: 'Unable to fetch anomaly detection jobs.' }
+      { defaultMessage: 'Unable to fetch anomaly detection jobs.' },
     );
   }
 
   // no errors occurred
   return i18n.translate(
     'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
-    { defaultMessage: 'No anomaly detection jobs.' }
+    { defaultMessage: 'No anomaly detection jobs.' },
   );
 }

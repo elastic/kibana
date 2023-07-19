@@ -132,7 +132,7 @@ describe('Error count alert', () => {
 
     await executor({ params });
     ['foo_env-foo', 'foo_env-foo-2', 'bar_env-bar'].forEach((instanceName) =>
-      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName),
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);
@@ -234,7 +234,7 @@ describe('Error count alert', () => {
       'foo_env-foo-2_tx-name-foo-2',
       'bar_env-bar_tx-name-bar',
     ].forEach((instanceName) =>
-      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName),
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);
@@ -339,7 +339,7 @@ describe('Error count alert', () => {
       'foo_env-foo-2_error-key-foo-2',
       'bar_env-bar_error-key-bar',
     ].forEach((instanceName) =>
-      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName),
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);
@@ -440,7 +440,7 @@ describe('Error count alert', () => {
 
     await executor({ params });
     ['foo_env-foo', 'foo_env-foo-2', 'bar_env-bar'].forEach((instanceName) =>
-      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName),
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);
@@ -542,7 +542,7 @@ describe('Error count alert', () => {
       'foo_ENVIRONMENT_NOT_DEFINED',
       'bar_env-bar',
     ].forEach((instanceName) =>
-      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName),
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);
@@ -649,7 +649,7 @@ describe('Error count alert', () => {
       'foo_env-foo-2_error-key-foo-2_error-name-foo2',
       'bar_env-bar_error-key-bar_error-name-bar',
     ].forEach((instanceName) =>
-      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName),
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);

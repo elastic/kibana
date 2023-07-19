@@ -45,7 +45,7 @@ export function EmptyPrompt({
                   >
                     {i18n.translate(
                       'xpack.apm.settings.customLink.emptyPromptText.customLinkDocLinkText',
-                      { defaultMessage: 'docs' }
+                      { defaultMessage: 'docs' },
                     )}
                   </EuiLink>
                 ),

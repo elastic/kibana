@@ -28,7 +28,7 @@ describe('Service overview - azure functions', () => {
       generateData({
         start: new Date(start).getTime(),
         end: new Date(end).getTime(),
-      })
+      }),
     );
   });
 

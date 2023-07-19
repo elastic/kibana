@@ -31,9 +31,9 @@ export async function getIndexTemplatesByIndexPattern({
   return await handleInvalidIndexTemplateException(
     Promise.all(
       indexPatterns.map(async (indexPattern) =>
-        getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient })
-      )
-    )
+        getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient }),
+      ),
+    ),
   );
 }
 
@@ -62,8 +62,8 @@ async function getSimulatedIndexTemplateForIndexPattern({
           templateIndexPatterns,
           templateName,
         };
-      }
-    )
+      },
+    ),
   );
 
   return {
@@ -74,7 +74,7 @@ async function getSimulatedIndexTemplateForIndexPattern({
 
 async function getTemplatePriority(
   esClient: ElasticsearchClient,
-  name: string
+  name: string,
 ) {
   const res = await getIndexTemplate(esClient, { name });
   return res.index_templates[0]?.index_template?.priority;
@@ -105,7 +105,7 @@ async function handleInvalidIndexTemplateException<T>(promise: Promise<T>) {
       error.meta.body.error.type === 'invalid_index_template_exception'
     ) {
       console.error(
-        `Suppressed exception caused by cross cluster search: ${error.message}}`
+        `Suppressed exception caused by cross cluster search: ${error.message}}`,
       );
       return [];
     }

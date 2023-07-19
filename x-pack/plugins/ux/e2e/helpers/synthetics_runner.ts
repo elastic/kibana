@@ -57,7 +57,7 @@ export class SyntheticsRunner {
 
   async loadTestFiles(
     callback: (reload?: boolean) => Promise<void>,
-    reload = false
+    reload = false,
   ) {
     console.log('Loading test files');
     await callback(reload);

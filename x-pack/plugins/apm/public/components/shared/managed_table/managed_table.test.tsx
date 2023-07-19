@@ -37,8 +37,8 @@ describe('ManagedTable', () => {
           columns={columns}
           items={people}
           initialPageSize={25}
-        />
-      )
+        />,
+      ),
     ).toMatchSnapshot();
   });
 
@@ -53,8 +53,8 @@ describe('ManagedTable', () => {
           initialPageIndex={1}
           initialPageSize={2}
           showPerPageOptions={false}
-        />
-      )
+        />,
+      ),
     ).toMatchSnapshot();
   });
 });

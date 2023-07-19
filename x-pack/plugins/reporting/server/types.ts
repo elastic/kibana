@@ -86,7 +86,7 @@ export type RunTaskFnFactory<RunTaskFnType> = (
 
 export interface ExportTypeDefinition<
   CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
+  RunTaskFnType = RunTaskFn,
 > {
   id: string;
   name: string;

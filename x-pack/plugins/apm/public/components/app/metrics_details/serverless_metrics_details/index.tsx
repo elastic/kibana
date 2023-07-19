@@ -22,7 +22,7 @@ export function ServerlessMetricsDetails({ serverlessId }: Props) {
 
   const serverlessFunctionName = useMemo(
     () => getServerlessFunctionNameFromId(serverlessId),
-    [serverlessId]
+    [serverlessId],
   );
 
   useBreadcrumb(
@@ -33,7 +33,7 @@ export function ServerlessMetricsDetails({ serverlessId }: Props) {
         query,
       }),
     }),
-    [apmRouter, path, query, serverlessFunctionName]
+    [apmRouter, path, query, serverlessFunctionName],
   );
 
   return (

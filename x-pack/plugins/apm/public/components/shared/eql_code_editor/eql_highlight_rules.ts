@@ -10,7 +10,7 @@ import { acequire } from 'brace';
 import { EQLToken } from './tokens';
 
 const TextHighlightRules = acequire(
-  'ace/mode/text_highlight_rules'
+  'ace/mode/text_highlight_rules',
 ).TextHighlightRules;
 
 export class EQLHighlightRules extends TextHighlightRules {

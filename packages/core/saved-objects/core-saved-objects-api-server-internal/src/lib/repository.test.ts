@@ -4440,10 +4440,13 @@ describe('SavedObjectsRepository', () => {
                 type,
                 ...mockTimestampFields,
                 [type]: {
-                  ...fields.reduce((acc, field) => {
-                    acc[typeof field === 'string' ? field : field.fieldName] = 8468;
-                    return acc;
-                  }, {} as Record<string, number>),
+                  ...fields.reduce(
+                    (acc, field) => {
+                      acc[typeof field === 'string' ? field : field.fieldName] = 8468;
+                      return acc;
+                    },
+                    {} as Record<string, number>
+                  ),
                   defaultIndex: 'logstash-*',
                 },
               },

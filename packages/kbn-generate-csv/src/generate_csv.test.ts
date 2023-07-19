@@ -197,7 +197,7 @@ it('calculates the bytes of the content', async () => {
               fields: {
                 message: ['this is a great message'],
               },
-            } as unknown as estypes.SearchHit)
+            }) as unknown as estypes.SearchHit
         )
       ),
     })
@@ -245,7 +245,7 @@ it('warns if max size was reached', async () => {
                 ip: ['110.135.176.89'],
                 message: ['super cali fragile istic XPLA docious'],
               },
-            } as unknown as estypes.SearchHit)
+            }) as unknown as estypes.SearchHit
         )
       ),
     })
@@ -287,7 +287,7 @@ it('uses the pit ID to page all the data', async () => {
                   ip: ['110.135.176.89'],
                   message: ['hit from the initial search'],
                 },
-              } as unknown as estypes.SearchHit)
+              }) as unknown as estypes.SearchHit
           ),
           HITS_TOTAL
         ),
@@ -304,7 +304,7 @@ it('uses the pit ID to page all the data', async () => {
                   ip: ['110.135.176.89'],
                   message: ['hit from a subsequent scroll'],
                 },
-              } as unknown as estypes.SearchHit)
+              }) as unknown as estypes.SearchHit
           )
         ),
       })

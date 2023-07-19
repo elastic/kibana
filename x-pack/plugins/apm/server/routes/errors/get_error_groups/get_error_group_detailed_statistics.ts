@@ -100,7 +100,7 @@ export async function getErrorGroupDetailedStatistics({
           },
         },
       },
-    }
+    },
   );
 
   if (!timeseriesResponse.aggregations) {
@@ -188,7 +188,7 @@ export async function getErrorGroupPeriods({
           previousPeriodTimeseries: errorRateGroup.timeseries,
         }),
       })),
-      'groupId'
+      'groupId',
     ),
   };
 }

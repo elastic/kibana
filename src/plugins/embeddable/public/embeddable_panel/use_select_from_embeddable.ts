@@ -12,7 +12,7 @@ import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
 
 export const useSelectFromEmbeddableInput = <
   InputType extends EmbeddableInput,
-  KeyType extends keyof InputType
+  KeyType extends keyof InputType,
 >(
   key: KeyType,
   embeddable?: IEmbeddable<InputType>
@@ -31,7 +31,7 @@ export const useSelectFromEmbeddableInput = <
 
 export const useSelectFromEmbeddableOutput = <
   OutputType extends EmbeddableOutput,
-  KeyType extends keyof OutputType
+  KeyType extends keyof OutputType,
 >(
   key: KeyType,
   embeddable: IEmbeddable<EmbeddableInput, OutputType>

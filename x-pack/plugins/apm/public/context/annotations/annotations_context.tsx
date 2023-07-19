@@ -44,11 +44,11 @@ export function AnnotationsContextProvider({
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, start, end, serviceName]
+    [environment, start, end, serviceName],
   );
 
   return <AnnotationsContext.Provider value={data} children={children} />;

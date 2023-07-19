@@ -17,7 +17,7 @@ export type UrlDrilldownConfig = {
  */
 export interface UrlDrilldownScope<
   ContextScope extends object = object,
-  EventScope extends object = object
+  EventScope extends object = object,
 > extends UrlDrilldownGlobalScope {
   /**
    * Dynamic variables that are differ depending on where drilldown is created and used,

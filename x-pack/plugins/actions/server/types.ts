@@ -63,7 +63,7 @@ export interface ActionsPlugin {
 export interface ActionTypeExecutorOptions<
   Config extends Record<string, unknown>,
   Secrets extends Record<string, unknown>,
-  Params
+  Params,
 > {
   actionId: string;
   services: Services;
@@ -90,7 +90,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
 
 export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
 > extends ActionResult<Config> {
   secrets: Secrets;
   config: Config;
@@ -105,7 +105,7 @@ export type ExecutorType<
   Config extends Record<string, unknown>,
   Secrets extends Record<string, unknown>,
   Params,
-  ResultData
+  ResultData,
 > = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
@@ -137,7 +137,7 @@ export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 > {
   id: string;
   name: string;

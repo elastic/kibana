@@ -61,6 +61,6 @@ export function getObservabilityOverviewData({
         }),
       ]);
       return { serviceCount, transactionPerMinute };
-    }
+    },
   );
 }

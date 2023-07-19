@@ -227,11 +227,11 @@ export const buildXYExpression = (
     return null;
   }
 
-  const isLeftAxis = validDataLayers.some(({ yConfig }) =>
-    yConfig?.some((config) => config.axisMode === Position.Left)
+  const isLeftAxis = validDataLayers.some(
+    ({ yConfig }) => yConfig?.some((config) => config.axisMode === Position.Left)
   );
-  const isRightAxis = validDataLayers.some(({ yConfig }) =>
-    yConfig?.some((config) => config.axisMode === Position.Right)
+  const isRightAxis = validDataLayers.some(
+    ({ yConfig }) => yConfig?.some((config) => config.axisMode === Position.Right)
   );
 
   const yAxisConfigs: AxisConfig[] = [

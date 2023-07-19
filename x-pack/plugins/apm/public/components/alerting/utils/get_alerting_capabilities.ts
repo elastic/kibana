@@ -10,7 +10,7 @@ import { ApmPluginSetupDeps } from '../../../plugin';
 
 export const getAlertingCapabilities = (
   plugins: ApmPluginSetupDeps,
-  capabilities: Capabilities
+  capabilities: Capabilities,
 ) => {
   const canReadAlerts = !!capabilities.apm['alerting:show'];
   const canSaveAlerts = !!capabilities.apm['alerting:save'];

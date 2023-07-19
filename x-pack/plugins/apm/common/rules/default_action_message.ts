@@ -21,7 +21,7 @@ export const errorCountMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 export const errorCountRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.errorCount.defaultRecoveryMessage',
@@ -37,7 +37,7 @@ export const errorCountRecoveryMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 
 export const transactionDurationMessage = i18n.translate(
@@ -56,7 +56,7 @@ export const transactionDurationMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 export const transactionDurationRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDuration.defaultRecoveryMessage',
@@ -74,7 +74,7 @@ export const transactionDurationRecoveryMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 
 export const transactionErrorRateMessage = i18n.translate(
@@ -92,7 +92,7 @@ export const transactionErrorRateMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 export const transactionErrorRateRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionErrorRate.defaultRecoveryMessage',
@@ -109,7 +109,7 @@ export const transactionErrorRateRecoveryMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 
 export const anomalyMessage = i18n.translate(
@@ -127,7 +127,7 @@ export const anomalyMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );
 export const anomalyRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDurationAnomaly.defaultRecoveryMessage',
@@ -144,5 +144,5 @@ export const anomalyRecoveryMessage = i18n.translate(
 
 [View alert details](\\{\\{context.alertDetailsUrl\\}\\})
 `,
-  }
+  },
 );

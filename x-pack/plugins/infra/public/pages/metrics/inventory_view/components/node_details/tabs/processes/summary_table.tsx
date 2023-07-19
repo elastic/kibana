@@ -54,7 +54,7 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
         total: isLoading ? -1 : summary.total,
         ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
         ...(isLoading ? {} : summary),
-      } as SummaryRecord),
+      }) as SummaryRecord,
     [summary, isLoading]
   );
   return (

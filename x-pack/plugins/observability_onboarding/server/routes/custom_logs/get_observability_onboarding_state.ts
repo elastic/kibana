@@ -22,7 +22,7 @@ export async function getObservabilityOnboardingState({
   try {
     const result = await savedObjectsClient.get<ObservabilityOnboardingState>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-      savedObjectId
+      savedObjectId,
     );
     const { id, updated_at: updatedAt, attributes } = result;
     return {

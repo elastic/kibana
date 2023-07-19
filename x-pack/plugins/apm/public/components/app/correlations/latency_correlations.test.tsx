@@ -101,7 +101,7 @@ describe('correlations', () => {
           }}
         >
           <LatencyCorrelations onFilter={jest.fn()} />
-        </Wrapper>
+        </Wrapper>,
       );
 
       await waitFor(() => {
@@ -122,7 +122,7 @@ describe('correlations', () => {
           }}
         >
           <LatencyCorrelations onFilter={jest.fn()} />
-        </Wrapper>
+        </Wrapper>,
       );
 
       await waitFor(() => {

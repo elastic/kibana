@@ -84,7 +84,7 @@ function useUrlTimeRange(defaultTimeRange: TimeRange) {
 
 function getSearchBarPlaceholder(
   searchbarPlaceholder?: string,
-  processorEvent?: UIProcessorEvent
+  processorEvent?: UIProcessorEvent,
 ) {
   const examples = {
     transaction: 'transaction.duration.us > 300000',
@@ -154,7 +154,7 @@ export function UnifiedSearchBar({
     refreshIntervalFromUrl,
   } = useSearchBarParams(value);
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS,
   );
   const urlTimeRange = useUrlTimeRange(timePickerTimeDefaults);
 
@@ -197,7 +197,7 @@ export function UnifiedSearchBar({
   const { incrementTimeRangeId } = useTimeRangeId();
   const searchbarPlaceholder = getSearchBarPlaceholder(
     placeholder,
-    processorEvent
+    processorEvent,
   );
 
   const customFilters =
@@ -239,7 +239,7 @@ export function UnifiedSearchBar({
   };
   const handleSubmit = (
     payload: { dateRange: TimeRange; query?: Query },
-    isUpdate?: boolean
+    isUpdate?: boolean,
   ) => {
     if (dataView == null) {
       return;
@@ -251,7 +251,7 @@ export function UnifiedSearchBar({
     try {
       const res = convertKueryToEsQuery(
         query?.query as string,
-        dataView as DataView
+        dataView as DataView,
       );
       if (!res) {
         return;

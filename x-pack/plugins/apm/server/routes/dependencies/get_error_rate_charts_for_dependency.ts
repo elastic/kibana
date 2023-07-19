@@ -61,7 +61,7 @@ async function getErrorRateChartsForDependencyForTimeRange({
       apm: {
         events: [
           getProcessorEventForServiceDestinationStatistics(
-            searchServiceDestinationMetrics
+            searchServiceDestinationMetrics,
           ),
         ],
       },
@@ -76,7 +76,7 @@ async function getErrorRateChartsForDependencyForTimeRange({
               ...rangeQuery(startWithOffset, endWithOffset),
               ...termQuery(SPAN_NAME, spanName || null),
               ...getDocumentTypeFilterForServiceDestinationStatistics(
-                searchServiceDestinationMetrics
+                searchServiceDestinationMetrics,
               ),
               { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
               {
@@ -100,7 +100,7 @@ async function getErrorRateChartsForDependencyForTimeRange({
                     total_count: {
                       sum: {
                         field: getDocCountFieldForServiceDestinationStatistics(
-                          searchServiceDestinationMetrics
+                          searchServiceDestinationMetrics,
                         ),
                       },
                     },
@@ -119,7 +119,7 @@ async function getErrorRateChartsForDependencyForTimeRange({
                           sum: {
                             field:
                               getDocCountFieldForServiceDestinationStatistics(
-                                searchServiceDestinationMetrics
+                                searchServiceDestinationMetrics,
                               ),
                           },
                         },
@@ -131,7 +131,7 @@ async function getErrorRateChartsForDependencyForTimeRange({
           },
         },
       },
-    }
+    },
   );
 
   return (

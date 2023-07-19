@@ -23,7 +23,7 @@ const infrastructureRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     containerIds: string[];
     hostNames: string[];

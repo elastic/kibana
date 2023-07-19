@@ -34,7 +34,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.cloud.providerLabel',
         {
           defaultMessage: 'Cloud provider',
-        }
+        },
       ),
       description: cloud.provider,
     });
@@ -46,7 +46,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.cloud.serviceNameLabel',
         {
           defaultMessage: 'Cloud service',
-        }
+        },
       ),
       description: cloud.serviceName,
     });
@@ -60,7 +60,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
           defaultMessage:
             '{zones, plural, =0 {Availability zone} one {Availability zone} other {Availability zones}} ',
           values: { zones: cloud.availabilityZones.length },
-        }
+        },
       ),
       description: (
         <ul>
@@ -82,7 +82,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
           defaultMessage:
             '{regions, plural, =0 {Region} one {Region} other {Regions}} ',
           values: { regions: cloud.regions.length },
-        }
+        },
       ),
       description: (
         <ul>
@@ -104,7 +104,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
           defaultMessage:
             '{machineTypes, plural, =0{Machine type} one {Machine type} other {Machine types}} ',
           values: { machineTypes: cloud.machineTypes.length },
-        }
+        },
       ),
       description: (
         <ul>
@@ -124,7 +124,7 @@ export function CloudDetails({ cloud, isServerless }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.cloud.projectIdLabel',
         {
           defaultMessage: 'Project ID',
-        }
+        },
       ),
       description: cloud.projectName,
     });
