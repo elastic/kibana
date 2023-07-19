@@ -165,7 +165,7 @@ function ActionMenuSections({
   }
 
   return (
-    <div>
+    <div data-test-subj="apmActionMenuInvestigateButtonPopup">
       {sections.map((section, idx) => {
         const isLastSection = idx !== sections.length - 1;
         return (
