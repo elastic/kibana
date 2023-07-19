@@ -226,7 +226,7 @@ export const artificialLogDataViewTestData: TestData = {
   },
 };
 
-export const explainLogRateSpikesTestData: TestData[] = [
+export const logRateAnalysisTestData: TestData[] = [
   kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
