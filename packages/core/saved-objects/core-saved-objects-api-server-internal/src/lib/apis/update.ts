@@ -137,7 +137,7 @@ export const performUpdate = async <T>(
         id
       );
     }
-    migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(migrated, undefined);
+    // migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(migrated, undefined);
   }
   // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
 
@@ -240,7 +240,10 @@ export const performUpdate = async <T>(
     // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
 
     // const updatedAttributes = merge(migrated!.attributes, attributes); // PGA: commented for shallow merge for now.
-    const updatedAttributes = { ...migrated!.attributes, ...attributes };
+    const updatedAttributes = {
+      ...migrated!.attributes,
+      ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)),
+    };
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
       id,
@@ -248,12 +251,7 @@ export const performUpdate = async <T>(
       // need to override the redacted NS values from the decrypted/migrated document
       namespace: savedObjectNamespace,
       namespaces: savedObjectNamespaces,
-      attributes: await encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        namespace,
-        updatedAttributes
-      ),
+      attributes: updatedAttributes,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
