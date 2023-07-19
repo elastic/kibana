@@ -66,7 +66,7 @@ export function FieldTypeFilter({
     <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
       <EuiFilterGroup fullWidth>
         <EuiPopover
-          panelClassName="euiFilterGroup__popoverPanel presFilterByType__panel"
+          panelClassName="presFilterByType__panel"
           panelPaddingSize="none"
           display="block"
           isOpen={isPopoverOpen}
