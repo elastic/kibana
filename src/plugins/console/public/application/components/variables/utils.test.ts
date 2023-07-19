@@ -35,14 +35,14 @@ describe('utils', () => {
     });
 
     it('returns `true` to allowed styles', () => {
-      for (const name in ['camelCase', 'snake_case', 'PascalCase', 'MACRO_CASE']) {
+      for (const name of ['camelCase', 'snake_case', 'PascalCase', 'MACRO_CASE']) {
         expect(isValidVariableName(name)).toBe(true);
       }
     });
 
     it('returns `false` to disallowed styles', () => {
-      for (const name in ['kebab-case', 'COBOL-CASE', 'dot.notation', 'bracket[notation]']) {
-        expect(isValidVariableName(name)).toBe(true);
+      for (const name of ['kebab-case', 'COBOL-CASE', 'dot.notation', 'bracket[notation]']) {
+        expect(isValidVariableName(name)).toBe(false);
       }
     });
 
