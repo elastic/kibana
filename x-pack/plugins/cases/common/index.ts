@@ -40,16 +40,10 @@ export {
   LENS_ATTACHMENT_TYPE,
 } from './constants';
 
-export { ConnectorTypes } from './types/domain';
+export type { AttachmentAttributes } from './types/domain';
+export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
 
-export {
-  getCasesFromAlertsUrl,
-  throwErrors,
-  CaseStatuses,
-  CaseSeverity,
-  CommentType,
-  ExternalReferenceStorageType,
-} from './api';
+export { getCasesFromAlertsUrl, throwErrors, CaseStatuses, CaseSeverity } from './api';
 export { StatusAll } from './ui/types';
 export { createUICapabilities } from './utils/capabilities';
 export { getApiTags } from './utils/api_tags';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AttachmentType } from '../../types/domain/attachment/v1';
 import { ConnectorTypes } from '../../types/domain/connector/v1';
 import {
   RelatedCaseInfoRt,
@@ -26,7 +27,6 @@ import {
   CasesFindResponseRt,
   CaseResolveResponseRt,
 } from './case';
-import { CommentType } from './comment';
 import { CaseStatuses } from './status';
 
 const basicCase = {
@@ -37,7 +37,7 @@ const basicCase = {
   comments: [
     {
       comment: 'Solve this fast!',
-      type: CommentType.user,
+      type: AttachmentType.user,
       id: 'basic-comment-id',
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {

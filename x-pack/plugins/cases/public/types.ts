@@ -35,11 +35,6 @@ import type {
   CasesFindRequest,
   CasesMetricsRequest,
   CasesStatusRequest,
-  CommentRequestAlertType,
-  CommentRequestExternalReferenceNoSOType,
-  CommentRequestExternalReferenceSOType,
-  CommentRequestPersistableStateType,
-  CommentRequestUserType,
 } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
@@ -55,6 +50,13 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type {
+  AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+} from '../common/types/domain';
 
 export interface CasesPluginSetup {
   files: FilesSetup;
@@ -158,11 +160,11 @@ export interface CasesUiStart {
 }
 
 export type SupportedCaseAttachment =
-  | CommentRequestAlertType
-  | CommentRequestUserType
-  | CommentRequestPersistableStateType
-  | CommentRequestExternalReferenceNoSOType
-  | CommentRequestExternalReferenceSOType;
+  | AlertAttachmentPayload
+  | UserCommentAttachmentPayload
+  | PersistableStateAttachmentPayload
+  | ExternalReferenceNoSOAttachmentPayload
+  | ExternalReferenceSOAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

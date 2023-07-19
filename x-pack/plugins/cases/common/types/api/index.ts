@@ -9,8 +9,10 @@
 export * from './configure/latest';
 export * from './user_action/latest';
 export * from './connector/latest';
+export * from './attachment/latest';
 
 // V1
 export * as configureApiV1 from './configure/v1';
 export * as userActionApiV1 from './user_action/v1';
 export * as connectorApiV1 from './connector/v1';
+export * as attachmentApiV1 from './attachment/v1';

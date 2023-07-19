@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 
 import { UserRt } from '../user';
-import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseAssigneesRt } from './assignee';
 import {
@@ -32,6 +31,7 @@ import {
   MAX_CASES_PER_PAGE,
 } from '../../constants';
 import { CaseConnectorRt } from '../../types/domain/connector/v1';
+import { AttachmentRt } from '../../types/domain/attachment/v1';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
@@ -368,7 +368,7 @@ export const CaseRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(CommentRt),
+      comments: rt.array(AttachmentRt),
     })
   ),
 ]);

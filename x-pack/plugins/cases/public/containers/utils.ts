@@ -13,7 +13,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type { ToastInputFields } from '@kbn/core/public';
 import type { CaseUserActionStatsResponse } from '../../common/types/api';
 import type { Configuration, Configurations, UserActions } from '../../common/types/domain';
-import { ConfigurationRt, ConfigurationsRt, UserActionsRt } from '../../common/types/domain';
+import {
+  ConfigurationRt,
+  ConfigurationsRt,
+  UserActionsRt,
+  AttachmentType,
+} from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
   CasePatchRequest,
@@ -27,7 +32,6 @@ import {
   CaseRt,
   CasesRt,
   throwErrors,
-  CommentType,
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/api';
@@ -110,7 +114,7 @@ export const createUpdateSuccessToaster = (
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === CommentType.alert
+    (comment) => comment.type === AttachmentType.alert
   );
 
   const toast: ToastInputFields = {

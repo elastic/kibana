@@ -17,6 +17,8 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { AttachmentAttributes } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
   CaseAssignees,
@@ -25,14 +27,12 @@ import type {
   Case,
   CasesPatchRequest,
   Cases,
-  CommentAttributes,
   User,
 } from '../../../common/api';
 import {
   CasesPatchRequestRt,
   CasesRt,
   CaseStatuses,
-  CommentType,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
@@ -136,7 +136,7 @@ function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase
  * Get the id from a reference in a comment for a specific type.
  */
 function getID(
-  comment: SavedObject<CommentAttributes>,
+  comment: SavedObject<AttachmentAttributes>,
   type: typeof CASE_SAVED_OBJECT
 ): string | undefined {
   return comment.references.find((ref) => ref.type === type)?.id;
@@ -151,14 +151,14 @@ async function getAlertComments({
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-}): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+}): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
   return caseService.getAllCaseComments({
     id: idsOfCasesToSync,
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
   });
 }
@@ -170,7 +170,7 @@ function getSyncStatusForComment({
   alertComment,
   casesToSyncToStatus,
 }: {
-  alertComment: SavedObjectsFindResult<CommentAttributes>;
+  alertComment: SavedObjectsFindResult<AttachmentAttributes>;
   casesToSyncToStatus: Map<string, CaseStatuses>;
 }): CaseStatuses {
   const id = getID(alertComment, CASE_SAVED_OBJECT);

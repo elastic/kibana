@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { AttributesTypeUser, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
+import { UserCommentAttachmentAttributes, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await getCase({ supertest, caseId: postedCase.id, includeComments: true });
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
-        theCase.comments![0] as AttributesTypeUser
+        theCase.comments![0] as UserCommentAttachmentAttributes
       );
 
       expect(theCase.comments?.length).to.eql(1);
@@ -168,7 +168,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          theCase.comments![0] as AttributesTypeUser
+          theCase.comments![0] as UserCommentAttachmentAttributes
         );
 
         expect(theCase.comments?.length).to.eql(1);
