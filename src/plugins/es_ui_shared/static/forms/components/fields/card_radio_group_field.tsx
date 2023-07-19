@@ -13,7 +13,12 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib'
 
 interface Props {
   field: FieldHook;
-  options: Array<{ label: string; value: string; children: ReactChildren }>;
+  options: Array<{
+    label: string;
+    value: string;
+    children: ReactChildren;
+    'data-test-subj'?: string;
+  }>;
   euiFieldProps?: Record<string, any>;
   idAria?: string;
   [key: string]: any;
@@ -41,7 +46,7 @@ export const CardRadioGroupField = ({
       {...rest}
     >
       <>
-        {options.map(({ label, value, children }) => (
+        {options.map(({ label, value, children, 'data-test-subj': dataTestSubj }) => (
           <Fragment key={`${radioGroupId}-${value}`}>
             <EuiCheckableCard
               id={`${radioGroupId}-${value}`}
@@ -50,6 +55,7 @@ export const CardRadioGroupField = ({
               name={radioGroupId}
               checked={field.value === value}
               onChange={() => field.setValue(value)}
+              data-test-subj={dataTestSubj}
             >
               {children}
             </EuiCheckableCard>
