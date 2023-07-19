@@ -88,12 +88,7 @@ it('Provides a feature declaration ', () => {
 });
 
 it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => {
-  mockReportingPlugin = {
-    usesUiCapabilities: () => true,
-    registerExportTypes: () => {},
-    getSpaceId: jest.fn(),
-    getScreenshots: jest.fn(),
-  };
+  mockReportingPlugin.usesUiCapabilities = () => true;
   expect(getCanvasFeature({ reporting: mockReportingPlugin })).toMatchInlineSnapshot(`
     Object {
       "app": Array [

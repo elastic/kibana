@@ -22,10 +22,12 @@ const sizesAggResponse = {
   '99.0': 1.1935594e7,
 };
 let exportTypesRegistry: ExportTypesRegistry;
+let exportTypesHandler: ReturnType<typeof getExportTypesHandler>;
 
 beforeEach(async () => {
   const mockReporting = await createMockReportingCore(createMockConfigSchema());
   exportTypesRegistry = mockReporting.getExportTypesRegistry();
+  exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
   featureMap = { PNG: true, csv_searchsource: true, printable_pdf: true };
 });
 

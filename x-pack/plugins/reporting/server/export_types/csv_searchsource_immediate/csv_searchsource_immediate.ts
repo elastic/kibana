@@ -29,11 +29,6 @@ import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext } from '../../types';
 import { JobParamsDownloadCSV } from './types';
 
-/*
- * @TODO move to be within @kbn/reporitng-export-types
- * PR in place to try and remove this endpoint
- */
-
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
