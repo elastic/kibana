@@ -29,6 +29,7 @@ export function getRoutePaths() {
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
+    StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
   };
 }
 

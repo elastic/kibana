@@ -5,13 +5,48 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
+import { AsyncStatus } from '../../hooks/use_async';
+import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
+import { Summary } from './summary';
 
 export function StorageExplorerView() {
+  const { query } = useProfilingParams('/storage-explorer');
+  const { rangeFrom, rangeTo, kuery } = query;
+
+  const timeRange = useTimeRange({ rangeFrom, rangeTo });
+
+  const {
+    services: { fetchStorageExplorerSummary },
+  } = useProfilingDependencies();
+
+  const state = useTimeRangeAsync(
+    ({ http }) => {
+      return fetchStorageExplorerSummary({
+        http,
+        timeFrom: timeRange.inSeconds.start,
+        timeTo: timeRange.inSeconds.end,
+        kuery,
+      });
+    },
+    [fetchStorageExplorerSummary, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
+  );
+
   return (
     <ProfilingAppPageTemplate>
-      <span>storage-explorer</span>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <Summary data={state.data} isLoading={state.status === AsyncStatus.Loading} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div>caue</div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </ProfilingAppPageTemplate>
   );
 }

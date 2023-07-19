@@ -8,6 +8,7 @@ import { HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
+import { StorageExplorerSummary } from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
@@ -41,6 +42,12 @@ export interface Services {
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
   }) => Promise<SetupDataCollectionInstructions>;
+  fetchStorageExplorerSummary: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+  }) => Promise<StorageExplorerSummary>;
 }
 
 export function getServices(): Services {
@@ -92,6 +99,17 @@ export function getServices(): Services {
         {}
       )) as SetupDataCollectionInstructions;
       return instructions;
+    },
+    fetchStorageExplorerSummary: async ({ http, timeFrom, timeTo, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      const summary = (await http.get(paths.StorageExplorerSummary, {
+        query,
+      })) as StorageExplorerSummary;
+      return summary;
     },
   };
 }
