@@ -450,7 +450,17 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 
 describe('validateKuery validates real kueries', () => {
   describe('Agent policies', () => {
-    it('Test 1 - search by data_output_id', async () => {
+    it('Search by data_output_id', async () => {
+      const validationObj = validateKuery(
+        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by data_output_id without SO wrapping', async () => {
       const validationObj = validateKuery(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
@@ -483,7 +493,7 @@ describe('validateKuery validates real kueries', () => {
       );
     });
 
-    it('Kuery with non existent parameter', async () => {
+    it('Kuery with non existent parameter wrapped by SO', async () => {
       const validationObj = validateKuery(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter: 'test_id'`,
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
@@ -493,6 +503,19 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toContain(
         `KQLSyntaxError: This key 'ingest-agent-policies.non_existent_parameter' does NOT exist in ingest-agent-policies saved object index patterns`
+      );
+    });
+
+    it('Kuery with non existent parameter', async () => {
+      const validationObj = validateKuery(
+        `non_existent_parameter: 'test_id'`,
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toContain(
+        `KQLSyntaxError: This type 'non_existent_parameter' is not allowed`
       );
     });
   });
@@ -508,20 +531,17 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Test 2 - invalid kuery', async () => {
+    it('Test 2 - status kuery without SO wrapping', async () => {
       const validationObj = validateKuery(
         `status:online or (status:updating or status:unenrolling or status:enrolling)`,
         [AGENTS_PREFIX],
         AGENT_MAPPINGS,
         true
       );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toContain(
-        "KQLSyntaxError: This key 'status' need to be wrapped by a saved object type like fleet-agents"
-      );
+      expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Test 3 - valid kuery', async () => {
+    it('Test 3 - status kuery with SO wrapping', async () => {
       const validationObj = validateKuery(
         `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
         [AGENTS_PREFIX],
@@ -531,9 +551,9 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Test 4 - valid kuery', async () => {
+    it('Test 4 - valid kuery without SO wrapping', async () => {
       const validationObj = validateKuery(
-        `${AGENTS_PREFIX}.local_metadata.elastic.agent.version : "8.6.0"`,
+        `local_metadata.elastic.agent.version : "8.6.0"`,
         [AGENTS_PREFIX],
         AGENT_MAPPINGS,
         true
@@ -554,6 +574,16 @@ describe('validateKuery validates real kueries', () => {
     it('Search by complex query', async () => {
       const validationObj = validateKuery(
         `${AGENTS_PREFIX}.policy_id: "policyId" and not (_exists_: "${AGENTS_PREFIX}.unenrolled_at") and ${AGENTS_PREFIX}.enrolled_at >= now-10m`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by complex query without SO wrapping', async () => {
+      const validationObj = validateKuery(
+        `policy_id: "policyId" and not (_exists_: "unenrolled_at") and enrolled_at >= now-10m`,
         [AGENTS_PREFIX],
         AGENT_MAPPINGS,
         true
@@ -603,35 +633,50 @@ describe('validateKuery validates real kueries', () => {
   });
 
   describe('Package policies', () => {
-    it('Search by package name', async () => {
+    it('Search by package name without SO', async () => {
       const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
+        `package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
+        PACKAGE_POLICIES_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Invalid search by package name', async () => {
+    it('Search by package name', async () => {
       const validationObj = validateKuery(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
+        PACKAGE_POLICIES_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('invalid search by nested wrong parameter', async () => {
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.is_managed:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
+        `KQLSyntaxError: This key 'ingest-package-policies.package.is_managed' does NOT exist in ingest-package-policies saved object index patterns`
       );
     });
 
-    it('Invalid search by broken query', async () => {
+    it('invalid search by nested wrong parameter - without wrapped SO', async () => {
       const validationObj = validateKuery(
-        `package.name:packageName`,
+        `package.is_managed:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
+        PACKAGE_POLICIES_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toEqual(`KQLSyntaxError: This type package is not allowed`);
+      expect(validationObj?.error).toEqual(
+        `KQLSyntaxError: This key 'package.is_managed' does NOT exist in ingest-package-policies saved object index patterns`
+      );
     });
 
     it('Invalid search by non existent parameter', async () => {
@@ -646,12 +691,11 @@ describe('validateKuery validates real kueries', () => {
       );
     });
 
-    it('Search by package name works without attributes if skipNormalization is passed', async () => {
+    it('Search by package name works with attributes if skipNormalization is not passed', async () => {
       const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
+        PACKAGE_POLICIES_MAPPINGS
       );
       expect(validationObj?.isValid).toEqual(true);
     });
@@ -668,11 +712,22 @@ describe('validateKuery validates real kueries', () => {
   });
 
   describe('Enrollment keys', () => {
+    it('Search by policy id without SO name', async () => {
+      const validationObj = validateKuery(
+        `policy_id: policyId1`,
+        [FLEET_ENROLLMENT_API_PREFIX],
+        ENROLLMENT_API_KEY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
     it('Search by policy id', async () => {
       const validationObj = validateKuery(
         `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`,
         [FLEET_ENROLLMENT_API_PREFIX],
-        ENROLLMENT_API_KEY_MAPPINGS
+        ENROLLMENT_API_KEY_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(true);
     });

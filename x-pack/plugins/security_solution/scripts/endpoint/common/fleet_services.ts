@@ -20,7 +20,6 @@ import {
   agentRouteService,
   AGENTS_INDEX,
   AGENTS_PREFIX,
-  FLEET_ENROLLMENT_API_PREFIX,
 } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -195,7 +194,7 @@ export const fetchAgentPolicyEnrollmentKey = async (
     .request<GetEnrollmentAPIKeysResponse>({
       method: 'GET',
       path: enrollmentAPIKeyRouteService.getListPath(),
-      query: { kuery: `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: "${agentPolicyId}"` },
+      query: { kuery: `policy_id: "${agentPolicyId}"` },
     })
     .then((response) => response.data.items[0]);
 

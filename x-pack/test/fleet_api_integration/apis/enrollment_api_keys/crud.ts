@@ -66,6 +66,13 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
+      it('should return 200 if the passed kuery does not have prefix fleet-enrollment-api-keys', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
       it('should return 400 if the passed kuery is not correct', async () => {
         await supertest
           .get(
@@ -75,9 +82,9 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 400 if the passed kuery does not have prefix fleet-enrollment-api-keys', async () => {
+      it('should return 400 if the passed kuery is invalid', async () => {
         await supertest
-          .get(`/api/fleet/enrollment_api_keys?kuery=name:test`)
+          .get(`/api/fleet/enrollment_api_keys?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });

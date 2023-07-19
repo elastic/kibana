@@ -319,16 +319,23 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return 400 if passed kuery is not correct', async () => {
+    it('should return 200 also if the kuery does not have prefix fleet-agents', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=status:unhealthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+    });
+
+    it('should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
     });
 
-    it('should return 400 if the passed kuery does not have prefix fleet-agents', async () => {
+    it('should return 400 if passed kuery is not correct', async () => {
       await supertest
-        .get(`/api/fleet/agent_status?kuery=name:test`)
+        .get(`/api/fleet/agent_status?kuery='test%3A'`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
     });

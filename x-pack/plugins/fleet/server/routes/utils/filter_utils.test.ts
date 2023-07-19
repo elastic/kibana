@@ -165,7 +165,7 @@ describe('Filter Utils', () => {
         ]);
       });
 
-      it('Return Error if key is not wrapper by a saved object type', () => {
+      it('Accept defined key even if not wrapped by a saved object type', () => {
         const validationObject = validateFilterKueryNode({
           astFilter: esKuery.fromKueryExpression(
             'updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
@@ -177,7 +177,7 @@ describe('Filter Utils', () => {
         expect(validationObject).toEqual([
           {
             astPath: 'arguments.0',
-            error: "This key 'updated_at' need to be wrapped by a saved object type like foo",
+            error: null,
             isSavedObjectAttr: true,
             key: 'updated_at',
             type: null,
@@ -289,7 +289,7 @@ describe('Filter Utils', () => {
         expect(validationObject).toEqual([
           {
             astPath: 'arguments.0',
-            error: 'This type bar is not allowed',
+            error: `This key 'bar.updated_at' does NOT exist in foo saved object index patterns`,
             isSavedObjectAttr: true,
             key: 'bar.updated_at',
             type: 'bar',

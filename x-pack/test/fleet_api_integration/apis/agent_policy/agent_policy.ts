@@ -49,6 +49,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(responseBody.items.length).to.eql(1);
       });
 
+      it('should return 200 even if the passed kuery does not have prefix ingest-agent-policies', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+          })
+          .expect(200);
+        const { body: responseBody } = await supertest
+          .get(`/api/fleet/agent_policies?kuery=name:TEST`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(responseBody.items.length).to.eql(1);
+      });
+
       it('should return 400 if passed kuery is not correct', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
@@ -56,9 +72,9 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 400 if the passed kuery does not have prefix ingest-agent-policies', async () => {
+      it('should return 400 if passed kuery is invalid', async () => {
         await supertest
-          .get(`/api/fleet/package_policies?kuery=name:test`)
+          .get(`/api/fleet/agent_policies?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });

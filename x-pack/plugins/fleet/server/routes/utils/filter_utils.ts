@@ -135,14 +135,18 @@ export const hasFilterKeyError = (
     return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
   }
   if (!key.includes('.')) {
-    if (allowedTerms.some((term) => term === key)) {
+    if (allowedTerms.some((term) => term === key) || fieldDefined(indexMapping, key)) {
       return null;
     }
-    return `This key '${key}' need to be wrapped by a saved object type like ${types.join()}`;
+    return `This type '${key}' is not allowed`;
   } else if (key.includes('.')) {
     const keySplit = key.split('.');
-    if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
-      return `This type ${keySplit[0]} is not allowed`;
+    if (
+      keySplit.length <= 1 &&
+      !fieldDefined(indexMapping, keySplit[0]) &&
+      !types.includes(keySplit[0])
+    ) {
+      return `This type '${keySplit[0]}' is not allowed`;
     }
     // In some cases we don't want to check about the `attributes` presence
     // In that case pass the `skipNormalization` parameter
@@ -153,12 +157,15 @@ export const hasFilterKeyError = (
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
     }
     // Check that the key exists in the mappings
-    const searchKey = skipNormalization
-      ? `${keySplit[0]}.${keySplit.slice(1, keySplit.length).join('.')}`
-      : `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`;
-
+    const searchKey =
+      skipNormalization || keySplit[1] !== 'attributes'
+        ? `${keySplit[0]}.${keySplit.slice(1, keySplit.length).join('.')}`
+        : `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`;
     if (
       (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
+      (keySplit.length === 2 &&
+        !types.includes(keySplit[0]) &&
+        !fieldDefined(indexMapping, searchKey)) ||
       (keySplit.length > 2 && !fieldDefined(indexMapping, searchKey))
     ) {
       return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
