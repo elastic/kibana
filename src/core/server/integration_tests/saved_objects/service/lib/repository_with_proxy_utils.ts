@@ -27,6 +27,7 @@ export const setProxyInterrupt = (
     | 'openPit'
     | 'deleteByNamespace'
     | 'internalBulkResolve'
+    | 'update'
     | null
 ) => (proxyInterrupt = testArg);
 
@@ -249,6 +250,31 @@ export const declarePostUpdateByQueryRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'deleteByNamespace') {
+          return proxyResponseHandler(h, hostname, port);
+        } else {
+          return relayHandler(h, hostname, port);
+        }
+      },
+    },
+  });
+
+// PUT _doc
+export const declareIndexRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
+  hapiServer.route({
+    method: ['PUT', 'POST'],
+    path: `/${kbnIndex}/_doc/{_id?}`,
+    options: {
+      payload: {
+        output: 'data',
+        parse: false,
+      },
+      handler: (req, h) => {
+        if (proxyInterrupt === 'update') {
           return proxyResponseHandler(h, hostname, port);
         } else {
           return relayHandler(h, hostname, port);
