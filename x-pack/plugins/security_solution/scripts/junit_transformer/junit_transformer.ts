@@ -32,7 +32,7 @@ const CypressJunitReport = t.type({
   })
 })
 
-function validateCypressJunitReport(parsedReport: any): { result: 'success' } | { error: string} {
+function validateCypressJunitReport(parsedReport: unknown): { result: 'success' } | { error: string} {
   const decoded = CypressJunitReport.decode(parsedReport); // Either<Errors, User>
   if (isLeft(decoded)) {
     return { error: `Could not validate data: ${PathReporter.report(decoded).join("\n")}` }
