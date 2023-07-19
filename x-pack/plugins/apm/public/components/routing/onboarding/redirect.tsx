@@ -12,18 +12,19 @@ function TutorialRedirect() {
   const {
     config: { serverlessOnboarding },
     core: {
-      application: { navigateToUrl },
-      http: { basePath },
+      application: { navigateToApp },
     },
   } = useApmPluginContext();
 
   if (serverlessOnboarding) {
-    navigateToUrl(basePath.prepend('/app/apm/onboarding'), {
-      forceRedirect: true,
+    navigateToApp('apm', {
+      path: '/onboarding',
+      replace: true,
     });
   } else {
-    navigateToUrl(basePath.prepend('/app/home#/tutorial/apm'), {
-      forceRedirect: true,
+    navigateToApp('home', {
+      path: '#/tutorial/apm',
+      replace: true,
     });
   }
   return <></>;
