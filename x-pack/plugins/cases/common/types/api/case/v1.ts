@@ -37,6 +37,87 @@ import {
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseAssigneesRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
+  MAX_CASES_PER_PAGE,
+} from '../../constants';
+import { CaseConnectorRt } from '../../types/domain/connector/v1';
+import { AttachmentRt } from '../../types/domain/attachment/v1';
+
+export const AttachmentTotalsRt = rt.strict({
+  alerts: rt.number,
+  userComments: rt.number,
+});
+
+export const RelatedCaseInfoRt = rt.strict({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  createdAt: rt.string,
+  totals: AttachmentTotalsRt,
+});
+
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
+
+export const SettingsRt = rt.strict({
+  syncAlerts: rt.boolean,
+});
+
+export enum CaseSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export const CaseSeverityRt = rt.union([
+  rt.literal(CaseSeverity.LOW),
+  rt.literal(CaseSeverity.MEDIUM),
+  rt.literal(CaseSeverity.HIGH),
+  rt.literal(CaseSeverity.CRITICAL),
+]);
+
+const CaseBasicRt = rt.strict({
+  /**
+   * The description of the case
+   */
+  description: rt.string,
+  /**
+   * The current status of the case (open, closed, in-progress)
+   */
+  status: CaseStatusRt,
+  /**
+   * The identifying strings for filter a case
+   */
+  tags: rt.array(rt.string),
+  /**
+   * The title of a case
+   */
+  title: rt.string,
+  /**
+   * The external system that the case can be synced with
+   */
+  connector: CaseConnectorRt,
+  /**
+   * The alert sync settings
+   */
+  settings: SettingsRt,
+  /**
+   * The plugin owner of the case
+   */
+  owner: rt.string,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
+  /**
+   * The users assigned to this case
+   */
+  assignees: CaseAssigneesRt,
+  /**
+   * The category of the case.
+   */
+  category: rt.union([rt.string, rt.null]),
+});
 
 /**
  * Create case
@@ -265,6 +346,30 @@ export const CasesDeleteRequestRt = limitedArraySchema({
 /**
  * Resolve case
  */
+export const CasesByAlertIDRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
+     * that the user has access to will be returned.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
+
+export const CaseRt = rt.intersection([
+  CaseAttributesRt,
+  rt.strict({
+    id: rt.string,
+    totalComment: rt.number,
+    totalAlerts: rt.number,
+    version: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      comments: rt.array(AttachmentRt),
+    })
+  ),
+]);
 
 export const CaseResolveResponseRt = rt.intersection([
   rt.strict({

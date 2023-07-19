@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
-import type { CommentRequest } from '../../../../common/api';
+import type { AttachmentRequest } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -24,7 +24,7 @@ export const postCommentRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const comment = request.body as CommentRequest;
+      const comment = request.body as AttachmentRequest;
 
       return response.ok({
         body: await casesClient.attachments.add({ caseId, comment }),

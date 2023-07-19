@@ -6,6 +6,7 @@
  */
 
 import {
+  AttachmentType,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
@@ -13,7 +14,6 @@ import {
   UserActionTypes,
 } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CommentType } from '../../../common/api';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
@@ -156,7 +156,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: {
             comment: 'a comment!',
-            type: CommentType.user,
+            type: AttachmentType.user,
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
@@ -843,7 +843,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: {
             comment: 'a comment!',
-            type: CommentType.user,
+            type: AttachmentType.user,
             owner: SECURITY_SOLUTION_OWNER,
           },
         },

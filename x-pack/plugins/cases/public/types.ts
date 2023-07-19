@@ -27,14 +27,7 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
-import type {
-  CasesMetricsRequest,
-  CommentRequestAlertType,
-  CommentRequestExternalReferenceNoSOType,
-  CommentRequestExternalReferenceSOType,
-  CommentRequestPersistableStateType,
-  CommentRequestUserType,
-} from '../common/api';
+import type { CasesMetricsRequest } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { canUseCases } from './client/helpers/can_use_cases';
@@ -57,6 +50,13 @@ import type {
   CasesBulkGetRequest,
   CasesBulkGetResponse,
 } from '../common/types/api';
+import type {
+  AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+} from '../common/types/domain';
 
 export interface CasesPluginSetup {
   files: FilesSetup;
@@ -163,11 +163,11 @@ export interface CasesUiStart {
 }
 
 export type SupportedCaseAttachment =
-  | CommentRequestAlertType
-  | CommentRequestUserType
-  | CommentRequestPersistableStateType
-  | CommentRequestExternalReferenceNoSOType
-  | CommentRequestExternalReferenceSOType;
+  | AlertAttachmentPayload
+  | UserCommentAttachmentPayload
+  | PersistableStateAttachmentPayload
+  | ExternalReferenceNoSOAttachmentPayload
+  | ExternalReferenceSOAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

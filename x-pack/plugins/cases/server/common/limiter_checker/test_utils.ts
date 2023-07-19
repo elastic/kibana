@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
-import { CommentType, ExternalReferenceStorageType } from '../../../common/api';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
 import type {
-  CommentRequestUserType,
-  CommentRequestAlertType,
+  UserCommentAttachmentPayload,
   FileAttachmentMetadata,
-} from '../../../common/api';
+  AlertAttachmentPayload,
+} from '../../../common/types/domain';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type { FileAttachmentRequest } from '../types';
 
-export const createUserRequests = (num: number): CommentRequestUserType[] => {
+export const createUserRequests = (num: number): UserCommentAttachmentPayload[] => {
   const requests = [...Array(num).keys()].map((value) => {
     return {
       comment: `${value}`,
-      type: CommentType.user as const,
+      type: AttachmentType.user as const,
       owner: 'test',
     };
   });
@@ -44,7 +44,7 @@ export const createFileRequests = ({
 
   const requests: FileAttachmentRequest[] = [...Array(numRequests).keys()].map((value) => {
     return {
-      type: CommentType.externalReference as const,
+      type: AttachmentType.externalReference as const,
       externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
       externalReferenceId: 'so-id',
       externalReferenceMetadata: { files },
@@ -62,10 +62,10 @@ export const createFileRequests = ({
 export const createAlertRequests = (
   numberOfRequests: number,
   alertIds: string | string[]
-): CommentRequestAlertType[] => {
+): AlertAttachmentPayload[] => {
   const requests = [...Array(numberOfRequests).keys()].map((value) => {
     return {
-      type: CommentType.alert as const,
+      type: AttachmentType.alert as const,
       alertId: alertIds,
       index: alertIds,
       rule: {

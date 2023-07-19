@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import styled from 'styled-components';
 import { EuiText } from '@elastic/eui';
 
-import type { CommentResponseUserType } from '../../../../common/api';
+import type { UserCommentAttachment } from '../../../../common/types/domain';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionMarkdown } from '../markdown_form';
@@ -32,7 +32,7 @@ type BuilderArgs = Pick<
   | 'userProfiles'
   | 'appId'
 > & {
-  comment: SnakeToCamelCase<CommentResponseUserType>;
+  comment: SnakeToCamelCase<UserCommentAttachment>;
   caseId: string;
   outlined: boolean;
   isEdit: boolean;

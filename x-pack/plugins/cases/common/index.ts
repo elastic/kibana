@@ -33,7 +33,6 @@ export type {
 } from './ui/types';
 
 export { CaseSeverity, CaseStatuses } from './types/domain';
-export type { CommentAttributes } from './api';
 
 export {
   APP_ID,
@@ -53,15 +52,9 @@ export {
   CASE_COMMENT_SAVED_OBJECT,
 } from './constants';
 
-export { ConnectorTypes } from './types/domain';
-
-export {
-  getCasesFromAlertsUrl,
-  getCaseFindUserActionsUrl,
-  throwErrors,
-  CommentType,
-  ExternalReferenceStorageType,
-} from './api';
+export type { AttachmentAttributes } from './types/domain';
+export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
+export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
 export { StatusAll } from './ui/types';
 export { createUICapabilities } from './utils/capabilities';
 export { getApiTags } from './utils/api_tags';

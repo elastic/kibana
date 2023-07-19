@@ -6,7 +6,6 @@
  */
 
 import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
-import { CommentType } from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { APP_ID } from '../../../../../common';
@@ -55,7 +54,7 @@ export const updateCases = async ({
     }));
 
     const attachments = caseIDs.map(() => ({
-      type: CommentType.actions,
+      type: AttachmentType.actions,
       comment: createActionPayload.comment || '',
       actions: {
         targets,

@@ -11,7 +11,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-serve
 import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import { CommentType, decodeOrThrow } from '../../../../common/api';
+import { decodeOrThrow } from '../../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -29,7 +29,11 @@ import type {
 import { bulkDecodeSOAttributes } from '../../utils';
 import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
 import type { UserActionType } from '../../../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -103,7 +107,7 @@ export class UserActionFinder {
 
   private static buildActionFilter(): KueryNode | undefined {
     const filterForUserActionsExcludingComment = fromKueryExpression(
-      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${CommentType.user}`
+      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user}`
     );
 
     return filterForUserActionsExcludingComment;
@@ -119,7 +123,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.user],
+          filters: [AttachmentType.user],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -139,7 +143,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.alert],
+          filters: [AttachmentType.alert],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -159,7 +163,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.persistableState, CommentType.externalReference],
+          filters: [AttachmentType.persistableState, AttachmentType.externalReference],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,

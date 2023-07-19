@@ -12,10 +12,20 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type { ActionConnector, Case, ConfigurationAttributes } from '../../../common/types/domain';
-import { CaseRt, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
-import type { CommentRequestAlertType, CommentAttributes } from '../../../common/api';
-import { OWNER_FIELD, CommentType } from '../../../common/api';
+import type {
+  ActionConnector,
+  AlertAttachmentPayload,
+  AttachmentAttributes,
+  Case,
+  ConfigurationAttributes,
+} from '../../../common/types/domain';
+import {
+  CaseRt,
+  CaseStatuses,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../common/types/domain';
+import { OWNER_FIELD } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
@@ -53,9 +63,9 @@ const changeAlertsStatusToClose = async (
   const alertAttachments = (await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
-  })) as SavedObjectsFindResponse<CommentRequestAlertType>;
+  })) as SavedObjectsFindResponse<AlertAttachmentPayload>;
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
@@ -285,7 +295,7 @@ export const push = async (
           attributes: {
             ...origComment.attributes,
             ...updatedComment?.attributes,
-          } as CommentAttributes,
+          } as AttachmentAttributes,
           version: updatedComment?.version ?? origComment.version,
           references: origComment?.references ?? [],
         };

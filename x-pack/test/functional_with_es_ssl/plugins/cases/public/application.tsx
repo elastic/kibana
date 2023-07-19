@@ -19,7 +19,7 @@ import {
 import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -44,7 +44,7 @@ const permissions = {
   push: true,
 };
 
-const attachments = [{ type: CommentType.user as const, comment: 'test' }];
+const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
 
 const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const { cases } = props;

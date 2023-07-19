@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { BulkCreateAttachmentsRequest } from '../../../../common/types/api';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
-import type { BulkCreateCommentRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
@@ -26,7 +26,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
       const casesContext = await context.cases;
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
-      const attachments = request.body as BulkCreateCommentRequest;
+      const attachments = request.body as BulkCreateAttachmentsRequest;
 
       return response.ok({
         body: await casesClient.attachments.bulkCreate({ caseId, attachments }),

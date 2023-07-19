@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { BulkGetAttachmentsRequestRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import { BulkGetAttachmentsRequestRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../../common/api';
 
 import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';

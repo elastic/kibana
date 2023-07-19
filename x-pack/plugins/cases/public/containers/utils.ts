@@ -11,6 +11,14 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
+import {
+  AttachmentType,
+  CaseRt,
+  CasesRt,
+  ConfigurationRt,
+  ConfigurationsRt,
+  UserActionsRt,
+} from '../../common/types/domain';
 import type {
   CasePatchRequest,
   CaseResolveResponse,
@@ -25,16 +33,9 @@ import type {
   User,
   UserActions,
 } from '../../common/types/domain';
-import {
-  ConfigurationRt,
-  ConfigurationsRt,
-  UserActionsRt,
-  CaseRt,
-  CasesRt,
-} from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type { SingleCaseMetricsResponse } from '../../common/api';
-import { throwErrors, CommentType, SingleCaseMetricsResponseRt } from '../../common/api';
+import { throwErrors, SingleCaseMetricsResponseRt } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
@@ -113,7 +114,7 @@ export const createUpdateSuccessToaster = (
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === CommentType.alert
+    (comment) => comment.type === AttachmentType.alert
   );
 
   const toast: ToastInputFields = {

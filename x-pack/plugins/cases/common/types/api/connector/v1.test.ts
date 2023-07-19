@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FindActionConnectorResponseRt, GetCaseConnectorsResponseRt } from './v1';
+import {
+  ConnectorMappingResponseRt,
+  FindActionConnectorResponseRt,
+  GetCaseConnectorsResponseRt,
+} from './v1';
 
 describe('FindActionConnectorResponseRt', () => {
   const response = [
@@ -132,6 +136,68 @@ describe('GetCaseConnectorsResponseRt', () => {
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultReq,
+    });
+  });
+});
+
+describe('ConnectorMappingResponseRt', () => {
+  const mappings = [
+    {
+      action_type: 'overwrite',
+      source: 'title',
+      target: 'unknown',
+    },
+    {
+      action_type: 'append',
+      source: 'description',
+      target: 'not_mapped',
+    },
+  ];
+
+  describe('ConnectorMappingResponseRt', () => {
+    it('has expected attributes in response', () => {
+      const query = ConnectorMappingResponseRt.decode({ id: 'test', version: 'test', mappings });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { id: 'test', version: 'test', mappings },
+      });
+    });
+
+    it('removes foo:bar attributes from the response', () => {
+      const query = ConnectorMappingResponseRt.decode({
+        id: 'test',
+        version: 'test',
+        mappings: [
+          { ...mappings[0] },
+          {
+            action_type: 'append',
+            source: 'description',
+            target: 'not_mapped',
+            foo: 'bar',
+          },
+        ],
+        foo: 'bar',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { id: 'test', version: 'test', mappings },
+      });
+    });
+
+    it('removes foo:bar attributes from the mappings', () => {
+      const query = ConnectorMappingResponseRt.decode({
+        id: 'test',
+        version: 'test',
+        mappings,
+        foo: 'bar',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { id: 'test', version: 'test', mappings },
+      });
     });
   });
 });
