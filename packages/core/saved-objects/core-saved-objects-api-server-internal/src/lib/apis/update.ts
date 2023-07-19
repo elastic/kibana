@@ -137,10 +137,7 @@ export const performUpdate = async <T>(
         id
       );
     }
-    migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(
-      migrated,
-      authorizationResult?.typeMap
-    );
+    migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(migrated, undefined);
   }
   // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
 
@@ -149,20 +146,20 @@ export const performUpdate = async <T>(
   // `upsert` option set and document was not found -> we need to perform an upsert operation
   const shouldPerformUpsert = upsert && docNotFound;
 
+  let savedObjectNamespace: string | undefined;
+  let savedObjectNamespaces: string[] | undefined;
+
+  if (namespace && registry.isSingleNamespace(type)) {
+    savedObjectNamespace = namespace;
+  } else if (registry.isMultiNamespace(type)) {
+    savedObjectNamespaces = preflightDocNSResult.savedObjectNamespaces;
+  }
+
   // UPSERT CASE START
   if (shouldPerformUpsert) {
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
     // replace inners of conditional with helper function
-    let savedObjectNamespace: string | undefined;
-    let savedObjectNamespaces: string[] | undefined;
-
-    if (namespace && registry.isSingleNamespace(type)) {
-      savedObjectNamespace = namespace;
-    } else if (registry.isMultiNamespace(type)) {
-      savedObjectNamespaces = preflightDocNSResult.savedObjectNamespaces;
-    }
-
     const migratedUpsert = migrationHelper.migrateInputDocument({
       id,
       type,
@@ -248,6 +245,9 @@ export const performUpdate = async <T>(
       ...migrated!,
       id,
       type,
+      // need to override the redacted NS values from the decrypted/migrated document
+      namespace: savedObjectNamespace,
+      namespaces: savedObjectNamespaces,
       attributes: await encryptionHelper.optionallyEncryptAttributes(
         type,
         id,
