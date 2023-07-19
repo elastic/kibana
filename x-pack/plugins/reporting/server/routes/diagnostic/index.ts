@@ -12,7 +12,7 @@ import { registerDiagnoseScreenshot } from './screenshot';
 
 export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logger) => {
   registerDiagnoseBrowser(reporting, logger);
-  registerDiagnoseScreenshot(reporting, logger);
+  registerDiagnoseScreenshot(reporting, logger); // TODO remove
 };
 
 export interface DiagnosticResponse {

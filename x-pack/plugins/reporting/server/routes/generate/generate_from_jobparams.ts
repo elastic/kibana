@@ -28,6 +28,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
 
   const registerPostGenerationEndpoint = () => {
     const path = `${BASE_GENERATE}/{exportType}`;
+
     router.post(
       {
         path,

@@ -17,10 +17,9 @@ import { IlmPolicyManager } from '../../lib';
 import { deprecations } from '../../lib/deprecations';
 import { getCounters } from '../lib';
 
-export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
-  const { router } = reporting.getPluginSetupDeps();
-
-  const authzWrapper = <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> => {
+const getAuthzWrapper =
+  (reporting: ReportingCore, logger: Logger) =>
+  <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> => {
     return async (ctx, req, res) => {
       const { security } = reporting.getPluginSetupDeps();
       if (!security?.license.isEnabled()) {
@@ -55,6 +54,10 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       return handler(ctx, req, res);
     };
   };
+
+export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
+  const { router } = reporting.getPluginSetupDeps();
+  const authzWrapper = getAuthzWrapper(reporting, logger);
 
   router.get(
     { path: API_GET_ILM_POLICY_STATUS, validate: false },
