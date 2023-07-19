@@ -448,19 +448,35 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       it('400s when trying to fetch with invalid searchField', async () => {
-        await findCases({ supertest,  query: { searchFields: 'closed_by.username', search: 'some search string*' }, expectedHttpCode: 400 });
+        await findCases({
+          supertest,
+          query: { searchFields: 'closed_by.username', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when trying to fetch with invalid array of searchFields', async () => {
-        await findCases({ supertest,  query: { searchFields: ['closed_by.username', 'title'], search: 'some search string*' }, expectedHttpCode: 400 });
+        await findCases({
+          supertest,
+          query: { searchFields: ['closed_by.username', 'title'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when trying to fetch with invalid sortField', async () => {
-        await findCases({ supertest,  query: { sortField: 'foobar', search: 'some search string*' }, expectedHttpCode: 400 });
+        await findCases({
+          supertest,
+          query: { sortField: 'foobar', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when trying to fetch with rootSearchFields', async () => {
-        await findCases({ supertest,  query: { rootSearchFields: ['_id'], search: 'some search string*' }, expectedHttpCode: 400 });
+        await findCases({
+          supertest,
+          query: { rootSearchFields: ['_id'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
       });
 
       it(`400s when perPage > ${MAX_CASES_PER_PAGE} supplied`, async () => {
