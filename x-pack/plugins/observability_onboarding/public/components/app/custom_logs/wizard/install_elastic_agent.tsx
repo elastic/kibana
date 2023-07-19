@@ -337,7 +337,13 @@ export function InstallElasticAgent() {
                               external
                               href="https://www.elastic.co/guide/en/fleet/8.7/elastic-agent-installation.html"
                             >
-                              host requirements and other installation options
+                              {i18n.translate(
+                                'xpack.observability_onboarding.installElasticAgent.installStep.hostRequirements',
+                                {
+                                  defaultMessage:
+                                    'host requirements and other installation options',
+                                }
+                              )}
                             </EuiLink>
                           ),
                         }}
