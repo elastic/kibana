@@ -76,9 +76,6 @@ const parametrizedComponentFactories = {
       parent
     );
   },
-  node: function (name, parent) {
-    return new ListComponent(name, [], parent, false);
-  },
   name: function (name, parent) {
     switch (parent?.name) {
       case '_template':
