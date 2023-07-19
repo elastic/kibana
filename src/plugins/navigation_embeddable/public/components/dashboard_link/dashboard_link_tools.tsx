@@ -21,7 +21,7 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const response = (await findDashboardsService.findByIds([dashboardId]))[0];
   if (response.status === 'error') {
-    throw new Error('failure'); // TODO: better error handling
+    throw new Error(response.error.message);
   }
   return response;
 };

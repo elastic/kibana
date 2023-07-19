@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
+  EuiText,
   EuiIcon,
   EuiPanel,
+  EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
   EuiSkeletonTitle,
   DraggableProvidedDragHandleProps,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -42,6 +43,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
   parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
+  const [errorState, setErrorState] = useState<boolean>(false);
   const parentDashboardTitle = parentDashboard?.select((state) => state.explicitInput.title);
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
@@ -51,8 +53,14 @@ export const NavigationEmbeddablePanelEditorLink = ({
       if (parentDashboardId === link.destination) {
         label = parentDashboardTitle;
       } else {
-        const dashboard = await fetchDashboard(link.destination);
-        label = dashboard.attributes.title;
+        await fetchDashboard(link.destination)
+          .then((dashboard) => {
+            label = dashboard.attributes.title;
+          })
+          .catch((error) => {
+            setErrorState(true);
+            label = error.message;
+          });
       }
     }
     return label || link.destination;
@@ -72,7 +80,10 @@ export const NavigationEmbeddablePanelEditorLink = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={NavigationLinkInfo[link.type].icon} color="text" />
+          <EuiIcon
+            type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
+            color={errorState ? 'danger' : 'text'}
+          />
         </EuiFlexItem>
         <EuiFlexItem className="navEmbeddableLinkText">
           <EuiSkeletonTitle
@@ -80,7 +91,9 @@ export const NavigationEmbeddablePanelEditorLink = ({
             isLoading={linkLabelLoading}
             contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
           >
-            <div className="wrapText">{linkLabel}</div>
+            <EuiText size="s" className="wrapText" color={errorState ? 'danger' : 'text'}>
+              {linkLabel}
+            </EuiText>
           </EuiSkeletonTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

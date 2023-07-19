@@ -7,19 +7,20 @@
  */
 
 import classNames from 'classnames';
-import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import React, { useMemo, useState } from 'react';
 
-import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiListGroupItem, EuiText } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { fetchDashboard } from './dashboard_link_tools';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { NavigationEmbeddableLink } from '../../embeddable/types';
+import { DashboardItem, NavigationEmbeddableLink } from '../../embeddable/types';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();
+  const [errorState, setErrorState] = useState<boolean>(false);
 
   const dashboardContainer = navEmbeddable.parent as DashboardContainer;
   const parentDashboardTitle = dashboardContainer.select((state) => state.explicitInput.title);
@@ -32,7 +33,13 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
          * only fetch the dashboard if **absolutely** necessary; i.e. only if the dashboard link doesn't have
          * some custom label, and if it's not the current dashboard (if it is, use `dashboardContainer` instead)
          */
-        return await fetchDashboard(link.destination);
+        const dashboard: DashboardItem | Error = await fetchDashboard(link.destination).catch(
+          (error: Error) => {
+            setErrorState(true);
+            return error;
+          }
+        );
+        return dashboard;
       }
     }, [link, parentDashboardId]);
 
@@ -41,6 +48,8 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
       link.label ||
       (link.destination === parentDashboardId
         ? parentDashboardTitle
+        : destinationDashboard instanceof Error
+        ? destinationDashboard.message
         : destinationDashboard?.attributes.title)
     );
   }, [link, destinationDashboard, parentDashboardId, parentDashboardTitle]);
@@ -48,10 +57,12 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
   return (
     <EuiListGroupItem
       size="s"
+      isDisabled={errorState}
+      id={`navigationLink--${link.id}`}
+      iconType={errorState ? 'warning' : undefined}
       className={classNames('navigationLink', {
         navigationLinkCurrent: link.destination === parentDashboardId,
       })}
-      id={`navigationLink--${link.id}`}
       onClick={
         link.destination === parentDashboardId
           ? undefined
@@ -65,7 +76,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
             {DashboardLinkStrings.getLoadingDashboardLabel()}
           </EuiButtonEmpty>
         ) : (
-          linkLabel
+          <EuiText size="s">{linkLabel}</EuiText>
         )
       }
     />

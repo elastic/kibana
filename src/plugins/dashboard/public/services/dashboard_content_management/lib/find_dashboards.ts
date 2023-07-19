@@ -72,18 +72,16 @@ export async function findDashboardsByIds(
   ids: string[]
 ): Promise<FindDashboardsByIdResponse[]> {
   const findPromises = ids.map((id) =>
-    contentManagement.client.get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    })
+    contentManagement.client
+      .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+        contentTypeId: DASHBOARD_CONTENT_ID,
+        id,
+      })
+      .then((result) => ({ id, status: 'success', attributes: result.item.attributes }))
+      .catch((e) => ({ status: 'error', error: e.body, id }))
   );
   const results = await Promise.all(findPromises);
-
-  return results.map((result) => {
-    if (result.item.error) return { status: 'error', error: result.item.error, id: result.item.id };
-    const { attributes, id } = result.item;
-    return { id, status: 'success', attributes };
-  });
+  return results as FindDashboardsByIdResponse[];
 }
 
 export async function findDashboardIdByTitle(
