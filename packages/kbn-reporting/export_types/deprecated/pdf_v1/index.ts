@@ -7,4 +7,3 @@
  */
 
 export { PdfV1ExportType } from './printable_pdf';
-export type { TaskPayloadPDF } from './types';

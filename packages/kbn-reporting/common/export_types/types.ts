@@ -9,9 +9,52 @@
 import { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Writable } from 'stream';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { CancellationToken } from '../cancellation_token';
 import { BaseParams, BasePayload } from './base';
 import { TaskRunResult } from './metrics';
+
+interface BaseParamsPDF {
+  layout: LayoutParams;
+  relativeUrls: string[];
+  isDeprecated?: boolean;
+}
+
+// Job params: structure of incoming user request data, after being parsed from RISON
+
+/**
+ * @deprecated
+ */
+export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
+
+/**
+ * @deprecated
+ */
+export type JobAppParamsPDF = Omit<JobParamsPDFDeprecated, 'browserTimezone' | 'version'>;
+
+/**
+ * Structure of stored job data provided by create_job
+ */
+export interface TaskPayloadPDF extends BasePayload {
+  layout: LayoutParams;
+  forceNow?: string;
+  objects: Array<{ relativeUrl: string }>;
+}
+
+interface BaseParamsPNG {
+  layout: LayoutParams;
+  forceNow?: string;
+  relativeUrl: string;
+}
+
+// Job params: structure of incoming user request data
+/**
+ * @deprecated
+ */
+export type JobParamsPNGDeprecated = BaseParamsPNG & BaseParams;
+
+// Job payload: structure of stored job data provided by create_job
+export type TaskPayloadPNG = BaseParamsPNG & BasePayload;
 
 // standard type for create job function of any ExportType implementation
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (

@@ -22,6 +22,8 @@ import {
   PDF_JOB_TYPE,
   REPORTING_TRANSACTION_TYPE,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  JobParamsPDFDeprecated,
+  TaskPayloadPDF,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
@@ -30,7 +32,6 @@ import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxj
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { getFullUrls } from '@kbn/reporting-export-types-common';
 import { generatePdfObservable } from './lib/generate_pdf_v1';
-import { JobParamsPDFDeprecated, TaskPayloadPDF } from './types';
 
 export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayloadPDF> {
   id = 'printablePdf';

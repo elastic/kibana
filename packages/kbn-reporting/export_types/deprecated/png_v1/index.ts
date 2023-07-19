@@ -7,4 +7,3 @@
  */
 
 export { PngV1ExportType } from './png_v1';
-export type { TaskPayloadPNG } from './types';

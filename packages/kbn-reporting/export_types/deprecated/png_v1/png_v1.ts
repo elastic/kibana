@@ -37,9 +37,10 @@ import {
   PNG_JOB_TYPE,
   REPORTING_TRANSACTION_TYPE,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-} from '@kbn/reporting-common/constants';
+  JobParamsPNGDeprecated,
+  TaskPayloadPNG,
+} from '@kbn/reporting-common';
 import { getFullUrls, generatePngObservable } from '@kbn/reporting-export-types-common';
-import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 
 /**
  * @deprecated
