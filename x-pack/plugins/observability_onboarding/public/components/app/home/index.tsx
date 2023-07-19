@@ -127,7 +127,7 @@ export function Home() {
               }
               style={{
                 borderColor: euiTheme.colors.accent,
-                borderWidth: '2px',
+                borderWidth: 2,
               }}
               paddingSize="l"
               display="plain"
