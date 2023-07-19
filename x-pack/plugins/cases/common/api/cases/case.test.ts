@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { ConnectorTypes } from '../connectors';
 import {
   RelatedCaseInfoRt,
@@ -336,11 +337,10 @@ describe('Case', () => {
       page: '1',
       perPage: '10',
       search: 'search text',
-      searchFields: 'closed_by.username',
-      rootSearchFields: ['_id'],
+      searchFields: ['title', 'description'],
       to: '1w',
       sortOrder: 'desc',
-      sortField: 'created_at',
+      sortField: 'createdAt',
       owner: 'cases',
     };
 
@@ -359,6 +359,99 @@ describe('Case', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with description as searchFields', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'description' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, searchFields: 'description', page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with title as searchFields', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'title' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, searchFields: 'title', page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with updatedAt as sortField', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'updatedAt' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField: 'updatedAt', page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with severity as sortField', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'severity' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField: 'severity', page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with status as sortField', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'status' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField: 'status', page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with category as sortField', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'category' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField: 'category', page: 1, perPage: 10 },
+      });
+    });
+
+    it('succeeds with title as sortField', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'title' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField: 'title', page: 1, perPage: 10 },
+      });
+    });
+
+    it('removes rootSearchField when passed', () => {
+      expect(
+        PathReporter.report(
+          CasesFindRequestRt.decode({ ...defaultRequest, rootSearchField: ['foobar'] })
+        )
+      ).toContain('No errors!');
+    });
+
+    describe('errors', () => {
+      it('throws error when invalid searchField passed', () => {
+        expect(
+          PathReporter.report(
+            CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'foobar' })
+          )
+        ).not.toContain('No errors!');
+      });
+
+      it('throws error when invalid sortField passed', () => {
+        expect(
+          PathReporter.report(CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'foobar' }))
+        ).not.toContain('No errors!');
+      });
+
+      it('succeeds when valid parameters passed', () => {
+        expect(PathReporter.report(CasesFindRequestRt.decode(defaultRequest))).toContain(
+          'No errors!'
+        );
       });
     });
   });

@@ -369,18 +369,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(cases.total).to.be(1);
         });
 
-        it('should successfully find a case when using a valid uuid', async () => {
-          const caseWithId = await createCase(supertest, postCaseReq);
-
-          const cases = await findCases({
-            supertest,
-            query: { searchFields: ['title', 'description'], search: caseWithId.id },
-          });
-
-          expect(cases.total).to.be(1);
-          expect(cases.cases[0].id).to.equal(caseWithId.id);
-        });
-
         it('should successfully find a case with a valid uuid in title', async () => {
           const uuid = uuidv1();
           await createCase(supertest, { ...postCaseReq, title: uuid });
@@ -394,7 +382,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(cases.cases[0].title).to.equal(uuid);
         });
 
-        it('should successfully find a case with a valid uuid in title', async () => {
+        it('should successfully find a case with a valid uuid in description', async () => {
           const uuid = uuidv1();
           await createCase(supertest, { ...postCaseReq, description: uuid });
 
@@ -458,6 +446,22 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+
+      it('400s when trying to fetch with invalid searchField', async () => {
+        await findCases({ supertest,  query: { searchFields: 'closed_by.username', search: 'some search string*' }, expectedHttpCode: 400 });
+      });
+
+      it('400s when trying to fetch with invalid array of searchFields', async () => {
+        await findCases({ supertest,  query: { searchFields: ['closed_by.username', 'title'], search: 'some search string*' }, expectedHttpCode: 400 });
+      });
+
+      it('400s when trying to fetch with invalid sortField', async () => {
+        await findCases({ supertest,  query: { sortField: 'foobar', search: 'some search string*' }, expectedHttpCode: 400 });
+      });
+
+      it('400s when trying to fetch with rootSearchFields', async () => {
+        await findCases({ supertest,  query: { rootSearchFields: ['_id'], search: 'some search string*' }, expectedHttpCode: 400 });
+      });
 
       it(`400s when perPage > ${MAX_CASES_PER_PAGE} supplied`, async () => {
         await findCases({

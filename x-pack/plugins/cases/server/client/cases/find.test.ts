@@ -45,7 +45,7 @@ describe('find', () => {
       jest.clearAllMocks();
     });
 
-    it('search by uuid updates search term and adds rootSearchFields', async () => {
+    it('search by uuid updates search term', async () => {
       const search = uuidv1();
       const findRequest = createCasesClientMockFindRequest({ search });
 
@@ -55,23 +55,17 @@ describe('find', () => {
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
       expect(call.caseOptions.search).toBe(`"${search}" "cases:${search}"`);
-      expect(call.caseOptions).toHaveProperty('rootSearchFields');
-      expect(call.caseOptions.rootSearchFields).toStrictEqual(['_id']);
+    });
+  });
+
+  describe('errors', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    it('regular search term does not cause rootSearchFields to be appended', async () => {
-      const search = 'foobar';
-      const findRequest = createCasesClientMockFindRequest({ search });
-      await find(findRequest, clientArgs);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
-
-      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
-
-      expect(call.caseOptions.search).toBe(search);
-      expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
-    });
-
-    it('should not have foo:bar attribute in request payload', async () => {
+    it('when foo:bar attribute in request payload', async () => {
       const search = 'sample_text';
       const findRequest = createCasesClientMockFindRequest({ search });
       await expect(
@@ -81,13 +75,16 @@ describe('find', () => {
         `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
       );
     });
-  });
 
-  describe('errors', () => {
-    const clientArgs = createCasesClientMockArgs();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
+    it('when rootSearchFields attribute in request payload', async () => {
+      const search = 'sample_text';
+      const findRequest = createCasesClientMockFindRequest({ search });
+      await expect(
+        // @ts-expect-error foo is an invalid field
+        find({ ...findRequest, rootSearchFields: ['_id'] }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"rootSearchFields\\":[\\"_id\\"]}: Error: invalid keys \\"rootSearchFields,[\\"_id\\"]\\""`
+      );
     });
 
     it('invalid searchFields with array', async () => {
@@ -109,6 +106,17 @@ describe('find', () => {
 
       await expect(find(findRequest, clientArgs)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+
+    it('invalid sortField', async () => {
+      const sortField = 'foobar';
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ sortField });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "sortField"'
       );
     });
 

@@ -503,7 +503,7 @@ export const constructSearch = (
   search: string | undefined,
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
+): Pick<CasesFindRequest, 'search'> | undefined => {
   if (!search) {
     return undefined;
   }
@@ -517,7 +517,6 @@ export const constructSearch = (
 
     return {
       search: `"${search}" "${rawId}"`,
-      rootSearchFields: ['_id'],
     };
   }
 
