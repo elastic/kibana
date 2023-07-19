@@ -68,7 +68,6 @@ export const DOCKER_BASE_CMD = [
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
-export const DEFAULT_DOCKER_CMD = `${DOCKER_BASE_CMD.join(' ')} ${DOCKER_IMG}`;
 
 export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
 export const SERVERLESS_TAG = 'latest';

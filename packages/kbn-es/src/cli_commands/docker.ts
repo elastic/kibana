@@ -12,13 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import {
-  parseTimeoutToMs,
-  DEFAULT_DOCKER_CMD,
-  DOCKER_IMG,
-  DOCKER_REPO,
-  DOCKER_TAG,
-} from '../utils';
+import { DOCKER_IMG, DOCKER_REPO, DOCKER_TAG } from '../utils';
 import { Command } from './types';
 
 export const docker: Command = {
@@ -36,10 +30,10 @@ export const docker: Command = {
     Options:
 
       --tag               Image tag of ES to run from ${DOCKER_REPO} [default: ${DOCKER_TAG}]
-      --image             Full path to image of ES to run, has precedence over tag. [default: ${DOCKER_IMG}].
+      --image             Full path to image of ES to run, has precedence over tag. [default: ${DOCKER_IMG}]
       --password          Sets password for elastic user [default: ${password}]
-      -E                  Additional key=value settings to pass to Elasticsearch 
-      -D                  Single quoted command to pass to Docker [default: ${DEFAULT_DOCKER_CMD}]
+      -E                  Additional key=value settings to pass to Elasticsearch
+      -D                  Override Docker command
 
     Examples:
 
@@ -63,23 +57,16 @@ export const docker: Command = {
         dockerCmd: 'D',
       },
 
-      string: ['tag', 'D'],
+      string: ['tag', 'image', 'D'],
 
       default: defaults,
     });
 
-    const pullStartTime = Date.now();
-    reportTime(pullStartTime, 'pulled', {
-      success: true,
-      ...options,
-    });
-
-    const cluster = new Cluster({ ssl: options.ssl });
+    const cluster = new Cluster();
     await cluster.runDocker({
       reportTime,
       startTime: runStartTime,
       ...options,
-      readyTimeout: parseTimeoutToMs(options.readyTimeout),
     });
   },
 };

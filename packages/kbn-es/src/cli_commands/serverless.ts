@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import { parseTimeoutToMs, SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG } from '../utils';
+import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG } from '../utils';
 import { Command } from './types';
 
 export const serverless: Command = {
@@ -54,19 +54,11 @@ export const serverless: Command = {
       default: defaults,
     });
 
-    // TODO: FIX
-    // const pullStartTime = Date.now();
-    // reportTime(pullStartTime, 'pulled', {
-    //   success: true,
-    //   ...options,
-    // });
-
-    const cluster = new Cluster({ ssl: options.ssl });
+    const cluster = new Cluster();
     await cluster.runServerless({
       reportTime,
       startTime: runStartTime,
       ...options,
-      readyTimeout: parseTimeoutToMs(options.readyTimeout),
     });
   },
 };
