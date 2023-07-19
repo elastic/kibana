@@ -19,7 +19,8 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -30,7 +31,6 @@ import {
   seriesHasLessThen2DataPoints,
 } from './helpers';
 import { ErrorMessage } from './error_message';
-import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { VisSectionProps } from '../types';
 
@@ -46,7 +46,8 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  const isDarkMode = useIsDarkMode();
+  const chartTheme = useTimelineChartTheme();
+
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
@@ -135,7 +136,7 @@ export const ChartSectionVis = ({
           <Tooltip {...tooltipProps} />
           <Settings
             onBrushEnd={handleTimeChange}
-            theme={getChartTheme(isDarkMode)}
+            baseTheme={chartTheme.baseTheme}
             showLegend
             showLegendExtra
             legendPosition="right"
