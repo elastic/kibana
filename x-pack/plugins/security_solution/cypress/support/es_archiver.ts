@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// / <reference types="cypress" />
-
 import { EsArchiver } from '@kbn/es-archiver';
 import { KbnClient } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
