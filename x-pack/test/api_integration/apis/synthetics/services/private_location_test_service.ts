@@ -65,6 +65,7 @@ export class PrivateLocationTestService {
         lon: '',
       },
       concurrentMonitors: 1,
+      isServiceManaged: false,
     }));
 
     await server.savedObjects.create({
