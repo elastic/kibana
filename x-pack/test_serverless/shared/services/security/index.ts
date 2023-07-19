@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { securityServices } from './security';
+import { getServerlessSecurityKibanaRoleDefinitions } from './kibana_roles';
 
-export const services = {
-  security: securityServices,
+export const securityServices = {
+  getKibanaSecuritySolutionRoles: getServerlessSecurityKibanaRoleDefinitions,
 };
