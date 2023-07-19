@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
-import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import {

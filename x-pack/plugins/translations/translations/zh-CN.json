@@ -40153,7 +40153,6 @@
     "eventAnnotation.manualAnnotation.args.lineWidth": "标注线条的宽度",
     "eventAnnotation.manualAnnotation.args.textVisibility": "标注线条上标签的可见性",
     "eventAnnotation.manualAnnotation.args.time": "标注的时间戳",
-    "eventAnnotation.manualAnnotation.defaultAnnotationLabel": "事件",
     "eventAnnotation.manualAnnotation.description": "配置手动标注",
     "eventAnnotation.queryAnnotation.args.color": "线条的颜色",
     "eventAnnotation.queryAnnotation.args.field": "标注的附加字段",

@@ -4162,6 +4162,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
   version "0.0.0"
   uid ""
@@ -5770,7 +5778,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-ui-components@link:src/plugins/visualization_ui_components":
+"@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
   version "0.0.0"
   uid ""
 
