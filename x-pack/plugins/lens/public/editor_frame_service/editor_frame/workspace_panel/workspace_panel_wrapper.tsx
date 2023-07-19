@@ -30,6 +30,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectVisualizationState,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -54,7 +55,7 @@ export function VisualizationToolbar(props: {
   framePublicAPI: FramePublicAPI;
 }) {
   const dispatchLens = useLensDispatch();
-  const { visualization, datasourceStates } = useLensSelector((state) => state.lens);
+  const visualization = useLensSelector(selectVisualizationState);
   const { activeVisualization } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
@@ -68,7 +69,7 @@ export function VisualizationToolbar(props: {
         })
       );
     },
-    [datasourceStates, dispatchLens, activeVisualization]
+    [dispatchLens, activeVisualization]
   );
 
   const ToolbarComponent = props.activeVisualization?.ToolbarComponent;

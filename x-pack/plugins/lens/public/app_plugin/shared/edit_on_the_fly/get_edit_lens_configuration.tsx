@@ -50,19 +50,22 @@ type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => vo
 const updatingMiddleware =
   (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
     next(action);
-    if (
-      updateVisualizationState.match(action) ||
-      removeDimension.match(action) ||
-      removeOrClearLayer.match(action) ||
-      addLayer.match(action) ||
-      updateDatasourceState.match(action)
-    ) {
-      // we want to get the state after the store update, that's why we use setTimeout
-      setTimeout(() => {
-        const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
-        updater(datasourceStates[activeDatasourceId].state, visualization.state);
-      });
-    }
+    // just a comment to the reviewer - these are the places we were updating the state before so we can uncomment it,
+    // but I think we should sync on every update so I commented it to demonstrate the idea of how it replaces what we have,
+    // but I want to remove it
+    // if (
+    //   updateVisualizationState.match(action) ||
+    //   removeDimension.match(action) ||
+    //   removeOrClearLayer.match(action) ||
+    //   addLayer.match(action) ||
+    //   updateDatasourceState.match(action)
+    // ) {
+    // we want to get the state after the store update, that's why we use setTimeout
+    setTimeout(() => {
+      const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
+      updater(datasourceStates[activeDatasourceId].state, visualization.state);
+    });
+    // }
   };
 
 export function getEditLensConfiguration(

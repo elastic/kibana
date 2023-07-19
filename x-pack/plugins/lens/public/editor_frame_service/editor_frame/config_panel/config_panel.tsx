@@ -80,7 +80,7 @@ export function LayerPanels(
         })
       );
     },
-    [activeVisualization.id, datasourceStates, dispatchLens]
+    [activeVisualization.id, dispatchLens]
   );
   const updateDatasource = useMemo(
     () =>
@@ -105,7 +105,7 @@ export function LayerPanels(
           );
         }
       },
-    [dispatchLens, visualization.state, datasourceStates]
+    [dispatchLens, datasourceStates]
   );
   const updateDatasourceAsync = useMemo(
     () => (datasourceId: string | undefined, newState: unknown) => {
