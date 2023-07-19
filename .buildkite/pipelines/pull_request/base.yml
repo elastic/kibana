@@ -107,6 +107,9 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+    artifact_paths:
+      - "target/kibana-security-serverless/**/*"
+
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
