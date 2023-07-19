@@ -17,16 +17,12 @@ const { downloadSnapshot, installSnapshot, installSource, installArchive } = req
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
-  // parseEsDockerLog,
   parseEsLog,
   extractConfigFiles,
   NativeRealm,
   parseTimeoutToMs,
-  verifyDockerInstalled,
-  maybeCreateDockerNetwork,
-  DOCKER_BASE_CMD,
   runServerlessCluster,
-  getDockerImage,
+  runDockerContainer,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -567,24 +563,15 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Common initial setup for running Docker and Serverless
-   */
-  async setupDocker() {
-    if (this._process || this._outcome) {
-      throw new Error('ES has already been started');
-    }
-
-    await verifyDockerInstalled(this._log);
-    await maybeCreateDockerNetwork(this._log);
-  }
-
-  /**
    * Run an Elasticsearch Serverless Docker cluster
    *
    * @param {ServerlessOptions} options
    */
   async runServerless(options = {}) {
-    await this.setupDocker();
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
+
     await runServerlessCluster(this._log, options);
   }
 
@@ -594,17 +581,10 @@ exports.Cluster = class Cluster {
    * @param {DockerOptions} options
    */
   async runDocker(options = {}) {
-    await this.setupDocker();
-    // const dockerCmd = resolveDockerCmd(options);
-    const image = getDockerImage(options);
-    // TODO: add args
-    const dockerCmd = DOCKER_BASE_CMD.concat([], image);
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
 
-    this._log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-
-    this._process = execa('docker', dockerCmd, {
-      // inherit is required to show Java console output for pw, enrollment token, etc
-      stdio: ['ignore', 'inherit', 'inherit'],
-    });
+    await runDockerContainer(this._log, options);
   }
 };

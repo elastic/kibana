@@ -63,9 +63,6 @@ export const DOCKER_BASE_CMD = [
 
   '--env',
   'ES_JAVA_OPTS=-Xms1g -Xmx1g',
-
-  '--env',
-  'ELASTIC_PASSWORD=changeme',
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
@@ -169,7 +166,11 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   },
 ];
 
-export const resolveDockerImage = ({
+/**
+ *
+ * Determine the Docker image from CLI options and defaults
+ */
+const resolveDockerImage = ({
   tag,
   image,
   repo,
@@ -184,18 +185,10 @@ export const resolveDockerImage = ({
   return defaultImg;
 };
 
-export const resolveDockerCmd = (options: DockerOptions) => {
-  return options.dockerCmd
-    ? options.dockerCmd.split(' ')
-    : DOCKER_BASE_CMD.concat(
-        resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG })
-      );
-};
-
 /**
  * Verify that Docker is installed locally
  */
-export async function verifyDockerInstalled(log: ToolingLog) {
+async function verifyDockerInstalled(log: ToolingLog) {
   log.info(chalk.bold('Verifying Docker is installed.'));
 
   const { stdout } = await execa('docker', ['--version']).catch((error) => {
@@ -210,7 +203,7 @@ export async function verifyDockerInstalled(log: ToolingLog) {
 /**
  * Setup elastic Docker network if needed
  */
-export async function maybeCreateDockerNetwork(log: ToolingLog) {
+async function maybeCreateDockerNetwork(log: ToolingLog) {
   log.info(chalk.bold('Checking status of elastic Docker network.'));
   log.indent(4);
 
@@ -230,9 +223,18 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 }
 
 /**
+ *
+ * Common setup for Docker and Serverless containers
+ */
+async function setupDocker(log: ToolingLog) {
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
+}
+
+/**
  * Setup local volumes for Serverless ES
  */
-export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
+async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
   const volumePath = resolve(getDataPath(), 'stateless');
 
   log.info(chalk.bold(`Checking for local Serverless ES object store at ${volumePath}`));
@@ -269,10 +271,6 @@ function getServerlessImage(options: ServerlessOptions) {
   });
 }
 
-export function getDockerImage(options: DockerOptions) {
-  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
-}
-
 async function runServerlessEsNode(log: ToolingLog, { params, name, image }: ServerlessEsNodeArgs) {
   const dockerCmd = SHARED_SERVERLESS_PARAMS.concat(
     params,
@@ -297,6 +295,8 @@ async function runServerlessEsNode(log: ToolingLog, { params, name, image }: Ser
 }
 
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
+  await setupDocker(log);
+
   const volumeParentPath = await setupServerlessVolumes(log, options);
   const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
   const image = getServerlessImage(options);
@@ -311,4 +311,30 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
+}
+
+function getDockerImage(options: DockerOptions) {
+  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+}
+
+/**
+ * Resolve the command to run Elasticsearch Docker container
+ */
+const resolveDockerCmd = (options: DockerOptions) => {
+  return options.dockerCmd
+    ? options.dockerCmd.split(' ')
+    : DOCKER_BASE_CMD.concat(getDockerImage(options));
+};
+
+export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {
+  await setupDocker(log);
+
+  // TODO: add args
+  const dockerCmd = resolveDockerCmd(options);
+
+  log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
+  const { stdout } = await execa('docker', dockerCmd, {
+    // inherit is required to show Java console output for pw, enrollment token, etc
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
 }

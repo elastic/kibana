@@ -45,7 +45,7 @@ export const docker: Command = {
 
       es docker --tag master-SNAPSHOT-amd64
       es docker --image local/repo:tag
-      es docker -D 'start 4e79be040f6aca5c433f73faa60fe245791482c2a1abda9417a505ec552cb9a5' 
+      es docker -D 'start es01' 
     `;
   },
   run: async (defaults = {}) => {
