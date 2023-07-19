@@ -95,10 +95,6 @@ describe('Knowledge base', () => {
     expect(context).toEqual(expectedContext);
   }
 
-  function t(term) {
-    return { name: term, meta: 'type' };
-  }
-
   function i(term) {
     return { name: term, meta: 'index' };
   }
