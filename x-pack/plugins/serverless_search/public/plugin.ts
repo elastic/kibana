@@ -69,7 +69,7 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless, management, observabilityShared }: ServerlessSearchPluginStartDependencies
+    { serverless, management, observabilityShared, cloud }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless }));

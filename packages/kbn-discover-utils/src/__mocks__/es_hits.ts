@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const esHits = [
+export const esHitsMock = [
   {
     _index: 'i',
     _id: '1',
