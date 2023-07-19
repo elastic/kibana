@@ -178,7 +178,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and has authorization to manage endpoint security', () => {
       for (const eventFilterApiCall of eventFilterCalls) {
-
         it(`should error on [${eventFilterApiCall.method}] if more than one OS is set`, async () => {
           const body = eventFilterApiCall.getBody({ os_types: ['linux', 'windows'] });
 
