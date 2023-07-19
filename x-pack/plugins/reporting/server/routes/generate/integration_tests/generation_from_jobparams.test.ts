@@ -24,6 +24,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
 import { PdfExportType } from '../../../export_types/printable_pdf_v2';
+import { reportingMock } from '../../../mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -54,12 +55,7 @@ describe('POST /api/reporting/generate', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({
-        usesUiCapabilities: jest.fn(),
-        getSpaceId: jest.fn(),
-        getScreenshots: jest.fn(),
-        registerExportTypes: jest.fn(),
-      })
+      () => reportingMock.createStart()
     );
 
     const mockSetupDeps = createMockPluginSetup({

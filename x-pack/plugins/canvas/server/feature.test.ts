@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 import { getCanvasFeature } from './feature';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
+import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
 
 let mockReportingPlugin: ReportingStart;
 beforeEach(() => {
-  mockReportingPlugin = {
-    usesUiCapabilities: () => false,
-    registerExportTypes: () => {},
-    getSpaceId: jest.fn(),
-    getScreenshots: jest.fn(),
-  };
+  mockReportingPlugin = reportingMock.createStart();
 });
 
 it('Provides a feature declaration ', () => {

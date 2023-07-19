@@ -32,8 +32,6 @@ beforeEach(async () => {
 });
 
 test('Model of job status and status-by-pdf-app', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       status: { completed: 0, processing: 1, pending: 2, failed: 3 },
@@ -80,8 +78,6 @@ test('Model of job status and status-by-pdf-app', () => {
 });
 
 test('Model of jobTypes', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       PNG: {
@@ -208,8 +204,6 @@ test('Model of jobTypes', () => {
 });
 
 test('PNG counts, provided count of deprecated jobs explicitly', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       PNG: {
@@ -257,8 +251,6 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
 });
 
 test('Incorporate queue times', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       queue_times: {
@@ -281,8 +273,6 @@ test('Incorporate queue times', () => {
 });
 
 test('Incorporate execution times', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       PNGV2: {
@@ -316,8 +306,6 @@ test('Incorporate execution times', () => {
 });
 
 test('Incorporate metric stats', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       PNGV2: {
@@ -390,8 +378,6 @@ test('Incorporate metric stats', () => {
 });
 
 test('Incorporate error code stats', () => {
-  const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-
   const result = getExportStats(
     {
       PNGV2: {

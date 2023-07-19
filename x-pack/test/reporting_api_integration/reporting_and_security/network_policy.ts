@@ -26,9 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownLogs();
     });
 
-    xit('should fail job when page violates the network policy', async () => {
+    it('should fail job when page violates the network policy', async () => {
       const downloadPath = await reportingAPI.postJob(
-        `/api/reporting/generate/printablePdf?jobParams=(layout:(dimensions:(height:720,width:1080),id:preserve_layout, browserTimezone:'UTC'),objectType:'canvas%20workpad',relativeUrls:!(%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fworkpad-e7464259-0b75-4b8c-81c8-8422b15ff201%2Fpage%2F1),title:'My%20Canvas%20Workpad', browserTimezone:'UTC')`
+        `/api/reporting/generate/printablePdf?jobParams=(layout:(dimensions:(height:720,width:1080),id:preserve_layout),objectType:'canvas%20workpad',relativeUrls:!(%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fworkpad-e7464259-0b75-4b8c-81c8-8422b15ff201%2Fpage%2F1),title:'My%20Canvas%20Workpad')`
       );
 
       // Retry the download URL until a "failed" response status is returned
@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         body = (await supertest.get(downloadPath).expect(500)).body;
       });
 
-      expect(body.message).contain(
+      expect(body.message).to.match(
         /Reporting generation failed: ReportingError\(code: disallowed_outgoing_url_error\)/
       );
     });

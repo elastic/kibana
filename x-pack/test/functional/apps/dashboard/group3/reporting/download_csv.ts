@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe.skip('Default Saved Search Data', () => {
+    describe('Default Saved Search Data', () => {
       const dashboardAllDataHiddenTitles = 'Ecom Dashboard Hidden Panel Titles';
       const dashboardPeriodOf2DaysData = 'Ecom Dashboard - 3 Day Period';
 
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Filtered Saved Search', () => {
+    describe('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
       const from = 'Jun 20, 2019 @ 23:56:51.374';
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Field Formatters and Scripted Fields', () => {
+    describe('Field Formatters and Scripted Fields', () => {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
 
       before(async () => {
@@ -187,8 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
-      // Flaky - PR https://github.com/elastic/kibana/issues/150561
-      xit('Download CSV export of a saved search panel', async () => {
+      it('Download CSV export of a saved search panel', async () => {
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 

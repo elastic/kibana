@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate _id field is a big integer passes through the value without mutation 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource _id field is a big integer passes through the value without mutation 1`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",\\"message_type\\",timestamp
 202209071000000604,\\"test_elastic\\",\\"-\\",OP,\\"Jan 1, 2020 @ 11:00:00.000\\"
 202209071000000605,\\"test_elastic\\",\\"-\\",OP,\\"Jan 1, 2020 @ 11:00:00.000\\"
@@ -9,7 +9,7 @@ exports[`Reporting APIs CSV Generation from SearchSource Immediate _id field is 
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate date formatting With filters and timebased data, default to UTC 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource date formatting With filters and timebased data, default to UTC 1`] = `
 "\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 10:26:48.725\\",\\"74.214.76.90\\",jpg
 \\"Sep 20, 2015 @ 10:26:48.540\\",\\"146.86.123.109\\",jpg
@@ -73,7 +73,7 @@ exports[`Reporting APIs CSV Generation from SearchSource Immediate date formatti
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate date formatting With filters and timebased data, non-default timezone 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource date formatting With filters and timebased data, non-default timezone 1`] = `
 "\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 03:26:48.725\\",\\"74.214.76.90\\",jpg
 \\"Sep 20, 2015 @ 03:26:48.540\\",\\"146.86.123.109\\",jpg
@@ -137,28 +137,28 @@ exports[`Reporting APIs CSV Generation from SearchSource Immediate date formatti
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate nanosecond formatting Formatted date_nanos data, UTC timezone 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource nanosecond formatting Formatted date_nanos data, UTC timezone 1`] = `
 "date,message
 \\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\"
 \\"Jan 1, 2015 @ 12:10:30.000000000\\",\\"Hello 1\\"
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate nanosecond formatting Formatted date_nanos data, custom timezone (New York) 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource nanosecond formatting Formatted date_nanos data, custom timezone (New York) 1`] = `
 "date,message
 \\"Jan 1, 2015 @ 07:10:30.123456789\\",\\"Hello 2\\"
 \\"Jan 1, 2015 @ 07:10:30.000000000\\",\\"Hello 1\\"
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate non-timebased Handle _id and _index columns 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource non-timebased Handle _id and _index columns 1`] = `
 "date,message,\\"_id\\",\\"_index\\"
 \\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\",2,nanos
 \\"Jan 1, 2015 @ 12:10:30.000000000\\",\\"Hello 1\\",1,nanos
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate non-timebased With filters and non-timebased data 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource non-timebased With filters and non-timebased data 1`] = `
 "name,power
 \\"Jonelle-Jane Marth\\",1
 \\"Suzie-May Rishel\\",1
@@ -175,7 +175,7 @@ exports[`Reporting APIs CSV Generation from SearchSource Immediate non-timebased
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate unquoted values Exports CSV with all fields when using defaults 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource unquoted values Exports CSV with all fields when using defaults 1`] = `
 "_id,_index,_score,category,category.keyword,currency,customer_first_name,customer_first_name.keyword,customer_full_name,customer_full_name.keyword,customer_gender,customer_id,customer_last_name,customer_last_name.keyword,customer_phone,day_of_week,day_of_week_i,email,geoip.city_name,geoip.continent_name,geoip.country_iso_code,geoip.location,geoip.region_name,manufacturer,manufacturer.keyword,order_date,order_id,products._id,products._id.keyword,products.base_price,products.base_unit_price,products.category,products.category.keyword,products.created_on,products.discount_amount,products.discount_percentage,products.manufacturer,products.manufacturer.keyword,products.min_price,products.price,products.product_id,products.product_name,products.product_name.keyword,products.quantity,products.sku,products.tax_amount,products.taxful_price,products.taxless_price,products.unit_discount_amount,sku,taxful_total_price,taxless_total_price,total_quantity,total_unique_products,type,user
 9AMtOW0BH63Xcmy432DJ,ecommerce,-,Men's Clothing,Men's Clothing,EUR,Boris,Boris,Boris Bradley,Boris Bradley,MALE,36,Bradley,Bradley,(empty),Wednesday,2,boris@bradley-family.zzz,-,Europe,GB,POINT (-0.1 51.5),-,Microlutions, Elitelligence,Microlutions, Elitelligence,Jun 25, 2019 @ 00:00:00.000,568397,sold_product_568397_24419, sold_product_568397_20207,sold_product_568397_24419, sold_product_568397_20207,33, 28.984,33, 28.984,Men's Clothing, Men's Clothing,Men's Clothing, Men's Clothing,Dec 14, 2016 @ 00:00:00.000, Dec 14, 2016 @ 00:00:00.000,0, 0,0, 0,Microlutions, Elitelligence,Microlutions, Elitelligence,17.484, 13.922,33, 28.984,24,419, 20,207,Cargo trousers - oliv, Trousers - black,Cargo trousers - oliv, Trousers - black,1, 1,ZO0112101121, ZO0530405304,0, 0,33, 28.984,33, 28.984,0, 0,ZO0112101121, ZO0530405304,61.969,61.969,2,2,order,boris
 9QMtOW0BH63Xcmy432DJ,ecommerce,-,Men's Clothing,Men's Clothing,EUR,Oliver,Oliver,Oliver Hubbard,Oliver Hubbard,MALE,7,Hubbard,Hubbard,(empty),Wednesday,2,oliver@hubbard-family.zzz,-,Europe,GB,POINT (-0.1 51.5),-,Spritechnologies, Microlutions,Spritechnologies, Microlutions,Jun 25, 2019 @ 00:00:00.000,568044,sold_product_568044_12799, sold_product_568044_18008,sold_product_568044_12799, sold_product_568044_18008,14.992, 16.984,14.992, 16.984,Men's Clothing, Men's Clothing,Men's Clothing, Men's Clothing,Dec 14, 2016 @ 00:00:00.000, Dec 14, 2016 @ 00:00:00.000,0, 0,0, 0,Spritechnologies, Microlutions,Spritechnologies, Microlutions,6.898, 8.828,14.992, 16.984,12,799, 18,008,Undershirt - dark grey multicolor, Long sleeved top - purple,Undershirt - dark grey multicolor, Long sleeved top - purple,1, 1,ZO0630406304, ZO0120201202,0, 0,14.992, 16.984,14.992, 16.984,0, 0,ZO0630406304, ZO0120201202,31.984,31.984,2,2,order,oliver
@@ -185,7 +185,7 @@ jwMtOW0BH63Xcmy432HJ,ecommerce,-,Men's Clothing,Men's Clothing,EUR,Jackson,Jacks
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate unquoted values Exports CSV with almost all fields when using fieldsFromSource 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource unquoted values Exports CSV with almost all fields when using fieldsFromSource 1`] = `
 "_id,_index,_score,category,currency,customer_first_name,customer_full_name,customer_gender,customer_id,customer_last_name,customer_phone,day_of_week,day_of_week_i,email,geoip.city_name,geoip.continent_name,geoip.country_iso_code,geoip.location,geoip.region_name,manufacturer,order_date,order_id,products,products.created_on,sku,taxful_total_price,taxless_total_price,total_quantity,total_unique_products,type,user
 9AMtOW0BH63Xcmy432DJ,ecommerce,-,Men's Clothing,EUR,Boris,Boris Bradley,MALE,36,Bradley,-,Wednesday,2,boris@bradley-family.zzz,-,Europe,GB,POINT (-0.1 51.5),-,Microlutions, Elitelligence,Jun 25, 2019 @ 00:00:00.000,568397,{\\"_id\\":\\"sold_product_568397_24419\\",\\"base_price\\":32.99,\\"base_unit_price\\":32.99,\\"category\\":\\"Men's Clothing\\",\\"created_on\\":\\"2016-12-14T00:00:00+00:00\\",\\"discount_amount\\":0,\\"discount_percentage\\":0,\\"manufacturer\\":\\"Microlutions\\",\\"min_price\\":17.48,\\"price\\":32.99,\\"product_id\\":24419,\\"product_name\\":\\"Cargo trousers - oliv\\",\\"quantity\\":1,\\"sku\\":\\"ZO0112101121\\",\\"tax_amount\\":0,\\"taxful_price\\":32.99,\\"taxless_price\\":32.99,\\"unit_discount_amount\\":0}, {\\"_id\\":\\"sold_product_568397_20207\\",\\"base_price\\":28.99,\\"base_unit_price\\":28.99,\\"category\\":\\"Men's Clothing\\",\\"created_on\\":\\"2016-12-14T00:00:00+00:00\\",\\"discount_amount\\":0,\\"discount_percentage\\":0,\\"manufacturer\\":\\"Elitelligence\\",\\"min_price\\":13.92,\\"price\\":28.99,\\"product_id\\":20207,\\"product_name\\":\\"Trousers - black\\",\\"quantity\\":1,\\"sku\\":\\"ZO0530405304\\",\\"tax_amount\\":0,\\"taxful_price\\":28.99,\\"taxless_price\\":28.99,\\"unit_discount_amount\\":0},Dec 14, 2016 @ 00:00:00.000, Dec 14, 2016 @ 00:00:00.000,ZO0112101121, ZO0530405304,61.98,61.98,2,2,order,boris
 9QMtOW0BH63Xcmy432DJ,ecommerce,-,Men's Clothing,EUR,Oliver,Oliver Hubbard,MALE,7,Hubbard,-,Wednesday,2,oliver@hubbard-family.zzz,-,Europe,GB,POINT (-0.1 51.5),-,Spritechnologies, Microlutions,Jun 25, 2019 @ 00:00:00.000,568044,{\\"_id\\":\\"sold_product_568044_12799\\",\\"base_price\\":14.99,\\"base_unit_price\\":14.99,\\"category\\":\\"Men's Clothing\\",\\"created_on\\":\\"2016-12-14T00:00:00+00:00\\",\\"discount_amount\\":0,\\"discount_percentage\\":0,\\"manufacturer\\":\\"Spritechnologies\\",\\"min_price\\":6.9,\\"price\\":14.99,\\"product_id\\":12799,\\"product_name\\":\\"Undershirt - dark grey multicolor\\",\\"quantity\\":1,\\"sku\\":\\"ZO0630406304\\",\\"tax_amount\\":0,\\"taxful_price\\":14.99,\\"taxless_price\\":14.99,\\"unit_discount_amount\\":0}, {\\"_id\\":\\"sold_product_568044_18008\\",\\"base_price\\":16.99,\\"base_unit_price\\":16.99,\\"category\\":\\"Men's Clothing\\",\\"created_on\\":\\"2016-12-14T00:00:00+00:00\\",\\"discount_amount\\":0,\\"discount_percentage\\":0,\\"manufacturer\\":\\"Microlutions\\",\\"min_price\\":8.83,\\"price\\":16.99,\\"product_id\\":18008,\\"product_name\\":\\"Long sleeved top - purple\\",\\"quantity\\":1,\\"sku\\":\\"ZO0120201202\\",\\"tax_amount\\":0,\\"taxful_price\\":16.99,\\"taxless_price\\":16.99,\\"unit_discount_amount\\":0},Dec 14, 2016 @ 00:00:00.000, Dec 14, 2016 @ 00:00:00.000,ZO0630406304, ZO0120201202,31.98,31.98,2,2,order,oliver
@@ -194,7 +194,7 @@ OQMtOW0BH63Xcmy432HJ,ecommerce,-,Men's Clothing, Men's Accessories,EUR,Recip,Rec
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource Immediate validation Searches large amount of data, stops at Max Size Reached 1`] = `
+exports[`Reporting APIs CSV Generation from SearchSource validation Searches large amount of data, stops at Max Size Reached 1`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",category,\\"category.keyword\\",currency,\\"customer_first_name\\",\\"customer_first_name.keyword\\",\\"customer_full_name\\",\\"customer_full_name.keyword\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_last_name.keyword\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,\\"geoip.city_name\\",\\"geoip.continent_name\\",\\"geoip.country_iso_code\\",\\"geoip.location\\",\\"geoip.region_name\\",manufacturer,\\"manufacturer.keyword\\",\\"order_date\\",\\"order_id\\",\\"products._id\\",\\"products._id.keyword\\",\\"products.base_price\\",\\"products.base_unit_price\\",\\"products.category\\",\\"products.category.keyword\\",\\"products.created_on\\",\\"products.discount_amount\\",\\"products.discount_percentage\\",\\"products.manufacturer\\",\\"products.manufacturer.keyword\\",\\"products.min_price\\",\\"products.price\\",\\"products.product_id\\",\\"products.product_name\\",\\"products.product_name.keyword\\",\\"products.quantity\\",\\"products.sku\\",\\"products.tax_amount\\",\\"products.taxful_price\\",\\"products.taxless_price\\",\\"products.unit_discount_amount\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
 3AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",\\"Sultan Al Boone\\",MALE,19,Boone,Boone,\\"(empty)\\",Saturday,5,\\"sultan al@boone-family.zzz\\",\\"Abu Dhabi\\",Asia,AE,\\"POINT (54.4 24.5)\\",\\"Abu Dhabi\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Jul 12, 2019 @ 00:00:00.000\\",716724,\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0, 0, 0\\",\\"0, 0, 0, 0\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"42.375, 33, 10.344, 6.109\\",\\"80, 60, 21.984, 11.992\\",\\"23,975, 6,338, 14,116, 15,290\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"1, 1, 1, 1\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",\\"0, 0, 0, 0\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"0, 0, 0, 0\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",174,174,4,4,order,sultan
 9gMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",EUR,Pia,Pia,\\"Pia Richards\\",\\"Pia Richards\\",FEMALE,45,Richards,Richards,\\"(empty)\\",Saturday,5,\\"pia@richards-family.zzz\\",Cannes,Europe,FR,\\"POINT (7 43.6)\\",\\"Alpes-Maritimes\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591503,\\"sold_product_591503_14761, sold_product_591503_11632\\",\\"sold_product_591503_14761, sold_product_591503_11632\\",\\"20.984, 20.984\\",\\"20.984, 20.984\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Tigress Enterprises, Pyramidustries\\",\\"10.703, 9.867\\",\\"20.984, 20.984\\",\\"14,761, 11,632\\",\\"Classic heels - blue, Summer dress - coral/pink\\",\\"Classic heels - blue, Summer dress - coral/pink\\",\\"1, 1\\",\\"ZO0006400064, ZO0150601506\\",\\"0, 0\\",\\"20.984, 20.984\\",\\"20.984, 20.984\\",\\"0, 0\\",\\"ZO0006400064, ZO0150601506\\",\\"41.969\\",\\"41.969\\",2,2,order,pia
