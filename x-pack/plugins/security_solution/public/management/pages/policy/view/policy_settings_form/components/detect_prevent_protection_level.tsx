@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import type { EuiFlexItemProps } from '@elastic/eui';
-import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -31,12 +31,12 @@ const PREVENT_LABEL = i18n.translate('xpack.securitySolution.endpoint.policy.det
   defaultMessage: 'Prevent',
 });
 
-export type DetectPreventProtectionLavelProps = PolicyFormComponentCommonProps & {
+export type DetectPreventProtectionLevelProps = PolicyFormComponentCommonProps & {
   protection: PolicyProtection;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 };
 
-export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelProps>(
+export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLevelProps>(
   ({ policy, protection, osList, mode, onChange, 'data-test-subj': dataTestSubj }) => {
     const isEditMode = mode === 'edit';
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -127,10 +127,13 @@ const ProtectionRadio = React.memo(
     mode,
     'data-test-subj': dataTestSubj,
   }: ProtectionRadioProps) => {
-    const radioButtonId = useGeneratedHtmlId();
     const selected = policy.windows[protection].mode;
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const showEditableFormFields = mode === 'edit';
+
+    const radioId = useMemo(() => {
+      return `${osList.join('-')}-${protection}-${protectionMode}`;
+    }, [osList, protection, protectionMode]);
 
     const handleRadioChange = useCallback(() => {
       const newPayload = cloneDeep(policy);
@@ -172,7 +175,7 @@ const ProtectionRadio = React.memo(
     return (
       <EuiRadio
         label={label}
-        id={radioButtonId}
+        id={radioId}
         checked={selected === protectionMode}
         onChange={handleRadioChange}
         disabled={!showEditableFormFields || selected === ProtectionModes.off}
