@@ -25,7 +25,7 @@ export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 
 export function ProfilingAppPageTemplate({
   children,
-  tabs,
+  tabs = [],
   hideSearchBar = false,
   noDataConfig,
   restrictWidth = false,
@@ -34,7 +34,7 @@ export function ProfilingAppPageTemplate({
   }),
 }: {
   children: React.ReactElement;
-  tabs: EuiPageHeaderContentProps['tabs'];
+  tabs?: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
   noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;

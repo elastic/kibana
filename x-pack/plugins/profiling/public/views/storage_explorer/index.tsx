@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
+import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
 export function StorageExplorerView() {
-  return <div>storage-explorer</div>;
+  return (
+    <ProfilingAppPageTemplate>
+      <span>storage-explorer</span>
+    </ProfilingAppPageTemplate>
+  );
 }
