@@ -36,7 +36,7 @@ interface AccordionWaterfallProps {
   timelineMargins: Margins;
   onClickWaterfallItem: (
     item: IWaterfallSpanOrTransaction,
-    flyoutDetailTab: string
+    flyoutDetailTab: string,
   ) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
@@ -107,14 +107,14 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 
   const criticalPathSegmentsById = groupBy(
     criticalPath?.segments,
-    (segment) => segment.item.id
+    (segment) => segment.item.id,
   );
 
   let displayedColor = item.color;
 
   if (showCriticalPath) {
     children = children.filter(
-      (child) => criticalPathSegmentsById[child.id]?.length
+      (child) => criticalPathSegmentsById[child.id]?.length,
     );
     displayedColor = transparentize(0.5, item.color);
   }

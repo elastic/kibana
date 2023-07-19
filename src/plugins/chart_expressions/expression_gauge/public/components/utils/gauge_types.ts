@@ -10,11 +10,11 @@ import { GoalProps } from '@elastic/charts';
 import { GaugeShape, GaugeShapes } from '../../../common';
 
 export const getSubtypeByGaugeType = (type: GaugeShape): GoalProps['subtype'] =>
-  ((
-    {
+  (
+    ({
       [GaugeShapes.HORIZONTAL_BULLET]: 'horizontalBullet',
       [GaugeShapes.VERTICAL_BULLET]: 'verticalBullet',
       [GaugeShapes.ARC]: 'goal',
       [GaugeShapes.CIRCLE]: 'goal',
-    } as const
-  )[type]);
+    }) as const
+  )[type];

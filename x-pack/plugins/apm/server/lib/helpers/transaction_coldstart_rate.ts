@@ -22,7 +22,7 @@ type ColdstartAggregation = ReturnType<typeof getColdstartAggregation>;
 export const getTimeseriesAggregation = (
   start: number,
   end: number,
-  intervalString: string
+  intervalString: string,
 ) => ({
   date_histogram: {
     field: '@timestamp',
@@ -34,13 +34,13 @@ export const getTimeseriesAggregation = (
 });
 
 export function calculateTransactionColdstartRate(
-  coldstartStatesResponse: AggregationResultOf<ColdstartAggregation, {}>
+  coldstartStatesResponse: AggregationResultOf<ColdstartAggregation, {}>,
 ) {
   const coldstartStates = Object.fromEntries(
     coldstartStatesResponse.buckets.map(({ key, doc_count: count }) => [
       key === 1 ? 'true' : 'false',
       count,
-    ])
+    ]),
   );
 
   const coldstarts = coldstartStates.true ?? 0;
@@ -56,7 +56,7 @@ export function getTransactionColdstartRateTimeSeries(
       aggs: { coldstartStates: ColdstartAggregation };
     },
     {}
-  >['buckets']
+  >['buckets'],
 ) {
   return buckets.map((dateBucket) => {
     return {

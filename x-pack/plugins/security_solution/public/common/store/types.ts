@@ -150,7 +150,7 @@ type ImmutableReducersMapObject<S, A extends Action = Action> = {
  * https://github.com/reduxjs/reselect/pull/454
  */
 export type CreateStructuredSelector = <
-  SelectorMap extends { [key: string]: (...args: never[]) => unknown }
+  SelectorMap extends { [key: string]: (...args: never[]) => unknown },
 >(
   selectorMap: SelectorMap
 ) => (state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never) => {

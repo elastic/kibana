@@ -100,7 +100,7 @@ export function registerErrorCountRuleType({
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.ErrorCount,
-          ruleParams.groupBy
+          ruleParams.groupBy,
         );
 
         const config = await firstValueFrom(config$);
@@ -168,7 +168,7 @@ export function registerErrorCountRuleType({
                 obj[allGroupByFields[bucketIndex]] = bucketKey;
                 return obj;
               },
-              {} as Record<string, string>
+              {} as Record<string, string>,
             );
 
             const bucketKey = bucket.key;
@@ -183,7 +183,7 @@ export function registerErrorCountRuleType({
 
         await asyncForEach(
           errorCountResults.filter(
-            (result) => result.errorCount >= ruleParams.threshold
+            (result) => result.errorCount >= ruleParams.threshold,
           ),
           async (result) => {
             const { errorCount, sourceFields, groupByFields, bucketKey } =
@@ -214,12 +214,12 @@ export function registerErrorCountRuleType({
               groupByFields[SERVICE_NAME],
               getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
                 SERVICE_ENVIRONMENT
-              ]
+              ],
             );
             const viewInAppUrl = addSpaceIdToPath(
               basePath.publicBaseUrl,
               spaceId,
-              relativeViewInAppUrl
+              relativeViewInAppUrl,
             );
             const indexedStartedAt =
               getAlertStartedDate(alertId) ?? startedAt.toISOString();
@@ -229,7 +229,7 @@ export function registerErrorCountRuleType({
               spaceId,
               indexedStartedAt,
               alertsLocator,
-              basePath.publicBaseUrl
+              basePath.publicBaseUrl,
             );
             const groupByActionVariables =
               getGroupByActionVariables(groupByFields);
@@ -238,7 +238,7 @@ export function registerErrorCountRuleType({
               alertDetailsUrl,
               interval: formatDurationFromTimeUnitChar(
                 ruleParams.windowSize,
-                ruleParams.windowUnit as TimeUnitChar
+                ruleParams.windowUnit as TimeUnitChar,
               ),
               reason: alertReason,
               threshold: ruleParams.threshold,
@@ -248,12 +248,12 @@ export function registerErrorCountRuleType({
               viewInAppUrl,
               ...groupByActionVariables,
             });
-          }
+          },
         );
 
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
-    })
+    }),
   );
 }

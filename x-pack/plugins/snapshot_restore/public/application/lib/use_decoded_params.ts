@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import { attemptToURIDecode } from './attempt_to_uri_decode';
 
 export const useDecodedParams = <
-  Params extends { [K in keyof Params]?: string } = {}
+  Params extends { [K in keyof Params]?: string } = {},
 >(): Params => {
   const params = useParams<Record<string, string>>();
   const decodedParams = {} as Params;

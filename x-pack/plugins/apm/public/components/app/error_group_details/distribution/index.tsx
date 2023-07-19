@@ -53,7 +53,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
 
   const previousPeriodLabel = usePreviousPeriodLabel();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.ERROR_OCCURRENCES
+    ChartType.ERROR_OCCURRENCES,
   );
   const timeseries = [
     {

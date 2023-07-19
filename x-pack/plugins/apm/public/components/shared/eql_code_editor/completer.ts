@@ -26,11 +26,11 @@ export class EQLCodeEditorCompleter {
   private async getCompletionsAsync(
     session: IEditSession,
     position: { row: number; column: number },
-    prefix: string | undefined
+    prefix: string | undefined,
   ): Promise<EQLCodeEditorSuggestion[]> {
     const token = session.getTokenAt(
       position.row,
-      position.column
+      position.column,
     ) as Maybe<TokenInfo>;
     const tokensInLine = session.getTokens(position.row) as TokenInfo[];
 
@@ -39,7 +39,7 @@ export class EQLCodeEditorCompleter {
       options: {
         before?: string;
         after?: string;
-      } = {}
+      } = {},
     ) {
       const { after = ' ' } = options;
       let { before = ' ' } = options;
@@ -79,7 +79,7 @@ export class EQLCodeEditorCompleter {
       .reverse();
 
     const completedEqlToken = previousTokens.find((t) =>
-      t.type.startsWith('eql.')
+      t.type.startsWith('eql.'),
     );
 
     switch (completedEqlToken?.type) {
@@ -98,7 +98,7 @@ export class EQLCodeEditorCompleter {
           }),
           {
             after: '\n\t[ ',
-          }
+          },
         );
 
       case EQLToken.SequenceItemStart:
@@ -109,7 +109,7 @@ export class EQLCodeEditorCompleter {
             })),
             'any',
           ],
-          { after: ' where ' }
+          { after: ' where ' },
         );
 
       case EQLToken.EventType:
@@ -121,7 +121,7 @@ export class EQLCodeEditorCompleter {
           ...withWhitespace(
             await this.getExternalSuggestions({
               type: EQLCodeEditorSuggestionType.Field,
-            })
+            }),
           ),
           ...withWhitespace(['true', 'false'], { after: ' ]\n\t' }),
         ];
@@ -143,7 +143,7 @@ export class EQLCodeEditorCompleter {
             field,
             value: prefix ?? '',
           }),
-          { before: hasStartedValueLiteral ? '' : ' "', after: '" ' }
+          { before: hasStartedValueLiteral ? '' : ' "', after: '" ' },
         );
 
       case EQLToken.Value:
@@ -157,7 +157,7 @@ export class EQLCodeEditorCompleter {
   }
 
   private async getExternalSuggestions(
-    request: EQLCodeEditorSuggestionRequest
+    request: EQLCodeEditorSuggestionRequest,
   ): Promise<EQLCodeEditorSuggestion[]> {
     if (this.callback) {
       return this.callback(request);
@@ -170,7 +170,7 @@ export class EQLCodeEditorCompleter {
     session: IEditSession,
     position: { row: number; column: number },
     prefix: string | undefined,
-    cb: (err: Error | null, suggestions?: EQLCodeEditorSuggestion[]) => void
+    cb: (err: Error | null, suggestions?: EQLCodeEditorSuggestion[]) => void,
   ) {
     this.getCompletionsAsync(session, position, prefix)
       .then((suggestions) => {
@@ -183,7 +183,7 @@ export class EQLCodeEditorCompleter {
                 : { score: 1000, ...sugg };
 
             return suggestion;
-          })
+          }),
         );
       })
       .catch(cb);

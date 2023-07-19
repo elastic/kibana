@@ -69,7 +69,7 @@ export function TimeseriesChartWithContext({
   } = useAnyOfApmParams(
     '/services',
     '/dependencies/*',
-    '/services/{serviceName}'
+    '/services/{serviceName}',
   );
   const { core } = useApmPluginContext();
   const timeZone = getTimeZone(core.uiSettings);

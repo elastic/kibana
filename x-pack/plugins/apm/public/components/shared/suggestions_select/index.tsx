@@ -47,7 +47,7 @@ export function SuggestionsSelect({
     defaultOption = { label: defaultValue, value: defaultValue };
   }
   const [selectedOptions, setSelectedOptions] = useState(
-    defaultOption ? [defaultOption] : []
+    defaultOption ? [defaultOption] : [],
   );
 
   const [searchValue, setSearchValue] = useState('');
@@ -67,7 +67,7 @@ export function SuggestionsSelect({
       });
     },
     [fieldName, searchValue, start, end, serviceName],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const handleChange = useCallback(
@@ -82,18 +82,18 @@ export function SuggestionsSelect({
         onChange(
           changedOptions[0].value
             ? changedOptions[0].value.trim()
-            : changedOptions[0].value
+            : changedOptions[0].value,
         );
       }
     },
-    [onChange]
+    [onChange],
   );
 
   const handleCreateOption = useCallback(
     (value: string) => {
       handleChange([{ label: value, value }]);
     },
-    [handleChange]
+    [handleChange],
   );
 
   const terms = data?.terms ?? [];

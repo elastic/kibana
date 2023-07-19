@@ -29,20 +29,23 @@ export const setupCards = (
 ) =>
   activeProducts.size > 0
     ? getSections().reduce((acc, section) => {
-        const cardsInSections = section.cards?.reduce((accCards, card) => {
-          if (isCardActive(card, activeProducts)) {
-            const stepsDone: Set<StepId> = finishedSteps[card.id] ?? new Set();
-            const timeInMins = getCardTimeInMinutes(card, stepsDone);
-            const stepsLeft = getCardStepsLeft(card, stepsDone);
+        const cardsInSections = section.cards?.reduce(
+          (accCards, card) => {
+            if (isCardActive(card, activeProducts)) {
+              const stepsDone: Set<StepId> = finishedSteps[card.id] ?? new Set();
+              const timeInMins = getCardTimeInMinutes(card, stepsDone);
+              const stepsLeft = getCardStepsLeft(card, stepsDone);
 
-            accCards[card.id] = {
-              id: card.id,
-              timeInMins,
-              stepsLeft,
-            };
-          }
-          return accCards;
-        }, {} as Record<CardId, ActiveCard>);
+              accCards[card.id] = {
+                id: card.id,
+                timeInMins,
+                stepsLeft,
+              };
+            }
+            return accCards;
+          },
+          {} as Record<CardId, ActiveCard>
+        );
         if (cardsInSections) {
           acc[section.id] = cardsInSections;
         }

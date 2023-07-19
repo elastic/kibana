@@ -41,7 +41,7 @@ export function injectReferencesIntoActions(
 
 export function injectReferencesIntoParams<
   Params extends RuleTypeParams,
-  ExtractedParams extends RuleTypeParams
+  ExtractedParams extends RuleTypeParams,
 >(
   ruleId: string,
   ruleType: UntypedNormalizedRuleType,

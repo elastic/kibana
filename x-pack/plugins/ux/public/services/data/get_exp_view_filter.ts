@@ -16,12 +16,12 @@ import { UxUIFilters } from '../../../typings/ui_filters';
 
 export function getExploratoryViewFilter(
   uiFilters: UxUIFilters,
-  urlParams: UrlParams
+  urlParams: UrlParams,
 ) {
   const { searchTerm } = urlParams;
 
   const validFilters = uxLocalUIFilterNames.filter(
-    (name) => name in uiFilters && name !== 'serviceName'
+    (name) => name in uiFilters && name !== 'serviceName',
   );
 
   const filters: Record<string, UrlFilter> = {};

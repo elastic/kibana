@@ -124,7 +124,7 @@ export function ServiceOverviewInstancesChartAndTable({
                   : undefined,
             },
           },
-        }
+        },
       ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
@@ -152,7 +152,7 @@ export function ServiceOverviewInstancesChartAndTable({
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
-    ]
+    ],
   );
 
   const {
@@ -173,7 +173,7 @@ export function ServiceOverviewInstancesChartAndTable({
       memoryUsage: item.memoryUsage ?? 0,
     })),
     field,
-    direction
+    direction,
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
   const {
@@ -208,7 +208,7 @@ export function ServiceOverviewInstancesChartAndTable({
               numBuckets: 20,
               transactionType,
               serviceNodeIds: JSON.stringify(
-                currentPeriodOrderedItems.map((item) => item.serviceNodeName)
+                currentPeriodOrderedItems.map((item) => item.serviceNodeName),
               ),
               offset:
                 comparisonEnabled && isTimeComparison(offset)
@@ -216,13 +216,13 @@ export function ServiceOverviewInstancesChartAndTable({
                   : undefined,
             },
           },
-        }
+        },
       );
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   return (

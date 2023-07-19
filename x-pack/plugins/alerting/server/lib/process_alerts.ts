@@ -14,7 +14,7 @@ import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 > {
   alerts: Record<string, Alert<State, Context>>;
   existingAlerts: Record<string, Alert<State, Context>>;
@@ -29,7 +29,7 @@ interface ProcessAlertsResult<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
@@ -42,7 +42,7 @@ export function processAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   alerts,
   existingAlerts,
@@ -81,7 +81,7 @@ function processAlertsHelper<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
@@ -176,7 +176,7 @@ function processAlertsLimitReached<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   alerts: Record<string, Alert<State, Context>>,
   existingAlerts: Record<string, Alert<State, Context>>,
@@ -267,7 +267,7 @@ export function updateAlertFlappingHistory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,

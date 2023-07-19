@@ -93,7 +93,7 @@ function getLatencyTimeseries({
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.averageLabel',
-          { defaultMessage: 'Average' }
+          { defaultMessage: 'Average' },
         ),
         data: latencyTimeseries,
         legendValue: asDuration(overallAvgDuration),
@@ -106,7 +106,7 @@ function getLatencyTimeseries({
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.95thPercentileLabel',
-          { defaultMessage: '95th percentile' }
+          { defaultMessage: '95th percentile' },
         ),
         titleShort: '95th',
         data: latencyTimeseries,
@@ -119,7 +119,7 @@ function getLatencyTimeseries({
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.99thPercentileLabel',
-          { defaultMessage: '99th percentile' }
+          { defaultMessage: '99th percentile' },
         ),
         titleShort: '99th',
         data: latencyTimeseries,

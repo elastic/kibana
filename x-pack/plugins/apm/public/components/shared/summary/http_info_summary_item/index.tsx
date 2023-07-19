@@ -40,7 +40,7 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
     'xpack.apm.transactionDetails.requestMethodLabel',
     {
       defaultMessage: 'Request method',
-    }
+    },
   );
 
   return (

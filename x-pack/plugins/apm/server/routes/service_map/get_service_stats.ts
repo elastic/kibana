@@ -74,7 +74,7 @@ export async function getServiceStats({
 
   const response = await apmEventClient.search(
     'get_service_stats_for_service_map',
-    params
+    params,
   );
 
   return (

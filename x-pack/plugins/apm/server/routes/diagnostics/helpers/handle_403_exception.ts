@@ -8,7 +8,7 @@ import { errors } from '@elastic/elasticsearch';
 
 export async function handle403Exception<T>(
   promise: Promise<T>,
-  defaultValue: unknown
+  defaultValue: unknown,
 ) {
   try {
     return await promise;
@@ -22,7 +22,7 @@ export async function handle403Exception<T>(
     }
 
     console.error(
-      `Unhandled error: ${error.message} ${JSON.stringify(error)}}`
+      `Unhandled error: ${error.message} ${JSON.stringify(error)}}`,
     );
 
     throw error;

@@ -110,7 +110,7 @@ export async function getServiceAgent({
 
   const response = await apmEventClient.search(
     'get_service_agent_name',
-    params
+    params,
   );
   if (response.hits.total.value === 0) {
     return {};
@@ -120,7 +120,7 @@ export async function getServiceAgent({
     ._source as ServiceAgent;
   const serverlessType = getServerlessTypeFromCloudData(
     cloud?.provider,
-    cloud?.service?.name
+    cloud?.service?.name,
   );
 
   return {

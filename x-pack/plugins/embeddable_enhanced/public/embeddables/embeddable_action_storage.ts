@@ -28,7 +28,7 @@ export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
 
 export type EmbeddableWithDynamicActions<
   I extends EmbeddableWithDynamicActionsInput = EmbeddableWithDynamicActionsInput,
-  O extends EmbeddableOutput = EmbeddableOutput
+  O extends EmbeddableOutput = EmbeddableOutput,
 > = IEmbeddable<I, O>;
 
 export class EmbeddableActionStorage extends AbstractActionStorage {

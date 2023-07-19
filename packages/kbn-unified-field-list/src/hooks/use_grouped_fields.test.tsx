@@ -219,9 +219,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(
       Object.keys(fieldGroups!).map(
         (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${fieldGroups![
+            key as FieldsGroupNames
+          ]?.fieldCount}`
       )
     ).toStrictEqual([
       'SpecialFields-0-0',
@@ -242,9 +242,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(
       Object.keys(fieldGroups!).map(
         (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${fieldGroups![
+            key as FieldsGroupNames
+          ]?.fieldCount}`
       )
     ).toStrictEqual([
       'SpecialFields-0-0',
@@ -265,9 +265,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(
       Object.keys(fieldGroups!).map(
         (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${fieldGroups![
+            key as FieldsGroupNames
+          ]?.fieldCount}`
       )
     ).toStrictEqual([
       'SpecialFields-0-0',

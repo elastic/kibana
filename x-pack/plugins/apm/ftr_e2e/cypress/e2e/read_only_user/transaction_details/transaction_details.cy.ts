@@ -22,7 +22,7 @@ describe('Transaction details', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -37,23 +37,23 @@ describe('Transaction details', () => {
   it('shows transaction name and transaction charts', () => {
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
+      '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
     ).as('transactionLatencyRequest');
 
     cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
-      'transactionThroughputRequest'
+      'transactionThroughputRequest',
     );
 
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
+      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
     ).as('transactionFailureRateRequest');
 
     cy.visit(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
         transactionName: 'GET /api/product',
-      })}`
+      })}`,
     );
 
     cy.wait([
@@ -64,41 +64,41 @@ describe('Transaction details', () => {
       (
         latencyInterception,
         throughputInterception,
-        failureRateInterception
+        failureRateInterception,
       ) => {
         expect(latencyInterception.request.query.transactionName).to.be.eql(
-          'GET /api/product'
+          'GET /api/product',
         );
 
         expect(
           (
             latencyInterception.response
               ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>
-          ).currentPeriod.latencyTimeseries[0].y
+          ).currentPeriod.latencyTimeseries[0].y,
         ).to.eql(1000 * 1000);
 
         expect(throughputInterception.request.query.transactionName).to.be.eql(
-          'GET /api/product'
+          'GET /api/product',
         );
 
         expect(
           (
             throughputInterception.response
               ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>
-          ).currentPeriod[0].y
+          ).currentPeriod[0].y,
         ).to.eql(60);
 
         expect(failureRateInterception.request.query.transactionName).to.be.eql(
-          'GET /api/product'
+          'GET /api/product',
         );
 
         expect(
           (
             failureRateInterception.response
               ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>
-          ).currentPeriod.average
+          ).currentPeriod.average,
         ).to.eql(1);
-      }
+      },
     );
 
     cy.contains('h2', 'GET /api/product');
@@ -113,7 +113,7 @@ describe('Transaction details', () => {
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
         transactionName: 'GET 240rpm/75% 1000ms',
-      })}`
+      })}`,
     );
     cy.contains('Create SLO');
   });
@@ -123,7 +123,7 @@ describe('Transaction details', () => {
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
         transactionName: 'GET /api/product',
-      })}`
+      })}`,
     );
 
     cy.contains('Top 5 errors');
@@ -140,8 +140,8 @@ describe('Transaction details', () => {
           {
             ...timeRange,
             transactionName: 'GET /api/product',
-          }
-        )}`
+          },
+        )}`,
       );
 
       cy.getByTestSubj('pagination-button-last').click();

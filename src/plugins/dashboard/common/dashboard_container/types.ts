@@ -25,7 +25,9 @@ export interface DashboardPanelMap {
 }
 
 export interface DashboardPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  TEmbeddableInput extends
+    | EmbeddableInput
+    | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 > extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
   panelRefName?: string;

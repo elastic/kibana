@@ -11,14 +11,14 @@ describe('validateVersion', () => {
     ['foo', '123', '1.x.2', 'last', '#', '', '1.2', null].map((invalidInput) =>
       it(`${invalidInput}: is an invalid version`, () => {
         expect(validateVersion(invalidInput)).toBeFalsy();
-      })
+      }),
     );
   });
   describe('valid versions', () => {
     ['1.234.5', '1.2.3', '0.0.0', 'latest'].map((validVersion) =>
       it(`${validVersion}: is a valid version`, () => {
         expect(validateVersion(validVersion)).toBeTruthy();
-      })
+      }),
     );
   });
 });

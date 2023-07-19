@@ -56,7 +56,7 @@ export function validateServiceGroupKuery(kuery: string): {
   try {
     const kueryFields = getKueryFields([fromKueryExpression(kuery)]);
     const unsupportedKueryFields = kueryFields.filter(
-      (fieldName) => !isSupportedField(fieldName)
+      (fieldName) => !isSupportedField(fieldName),
     );
     if (unsupportedKueryFields.length === 0) {
       return { isValidFields: true, isValidSyntax: true };

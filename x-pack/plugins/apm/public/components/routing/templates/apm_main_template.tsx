@@ -75,11 +75,11 @@ export function ApmMainTemplate({
         return callApmApi('POST /internal/apm/data_view/static');
       }
     },
-    [application?.capabilities.savedObjectsManagement.edit]
+    [application?.capabilities.savedObjectsManagement.edit],
   );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
-    location.pathname.includes(path)
+    location.pathname.includes(path),
   );
 
   const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } =
@@ -89,7 +89,7 @@ export function ApmMainTemplate({
           return callApmApi('GET /internal/apm/fleet/has_apm_policies');
         }
       },
-      [shouldBypassNoDataScreen, data?.hasData]
+      [shouldBypassNoDataScreen, data?.hasData],
     );
 
   const isLoading =

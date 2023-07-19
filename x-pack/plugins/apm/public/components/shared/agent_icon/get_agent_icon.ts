@@ -91,7 +91,7 @@ export function getAgentIconKey(agentName: string) {
   // Remove "opentelemetry/" prefix
   const agentNameWithoutPrefix = lowercasedAgentName.replace(
     /^opentelemetry\//,
-    ''
+    '',
   );
 
   if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
@@ -106,7 +106,7 @@ export function getAgentIconKey(agentName: string) {
 
 export function getAgentIcon(
   agentName: string | undefined,
-  isDarkMode: boolean
+  isDarkMode: boolean,
 ) {
   const key = agentName && getAgentIconKey(agentName);
   if (!key) {

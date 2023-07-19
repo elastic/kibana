@@ -77,7 +77,7 @@ describe('convertToPercentileColumn', () => {
     [
       string,
       Parameters<typeof convertToPercentileColumn>,
-      Partial<PercentileColumnWithCommonMeta> | Partial<PercentileColumnWithExtendedMeta> | null
+      Partial<PercentileColumnWithCommonMeta> | Partial<PercentileColumnWithExtendedMeta> | null,
     ]
   >([
     ['null if value is undefined', [undefined, { series, metric, dataView }], null],
@@ -144,7 +144,7 @@ describe('convertToPercentileColumns', () => {
     [
       string,
       Parameters<typeof convertToPercentileColumns>,
-      Array<Partial<PercentileColumnWithExtendedMeta> | null> | null
+      Array<Partial<PercentileColumnWithExtendedMeta> | null> | null,
     ]
   >([
     ['null if values arr is empty', [{ series, metric, dataView }, {}], null],

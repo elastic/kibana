@@ -31,7 +31,7 @@ describe('services queries', () => {
         apmEventClient: mockApmEventClient,
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -45,7 +45,7 @@ describe('services queries', () => {
         searchAggregatedTransactions: false,
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -70,7 +70,7 @@ describe('services queries', () => {
             seed: 0,
           },
           apmAlertsClient: mockApmAlertsClient,
-        })
+        }),
     );
 
     const allParams = mock.spy.mock.calls.map((call) => call[1]);
@@ -80,7 +80,7 @@ describe('services queries', () => {
 
   it('fetches the agent status', async () => {
     mock = await inspectSearchParams(({ mockApmEventClient }) =>
-      hasHistoricalAgentData(mockApmEventClient)
+      hasHistoricalAgentData(mockApmEventClient),
     );
 
     expect(mock.params).toMatchSnapshot();

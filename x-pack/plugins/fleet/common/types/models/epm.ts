@@ -102,7 +102,7 @@ export type AllowedAssetTypes = [
   KibanaAssetType.dashboard,
   KibanaAssetType.search,
   KibanaAssetType.visualization,
-  ElasticsearchAssetType.transform
+  ElasticsearchAssetType.transform,
 ];
 
 // Defined as part of the removing public references to saved object schemas

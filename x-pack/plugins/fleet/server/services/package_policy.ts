@@ -1023,7 +1023,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             id: soPolicy.id,
             version: soPolicy.version,
             ...soPolicy.attributes,
-          } as PackagePolicy)
+          }) as PackagePolicy
       );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
@@ -2443,9 +2443,9 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             appContextService
               .getLogger()
               .debug(
-                `Rejecting package policy update due to dataset change, old val '${
-                  oldStream?.vars[DATASET_VAR_NAME]?.value
-                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
+                `Rejecting package policy update due to dataset change, old val '${oldStream?.vars[
+                  DATASET_VAR_NAME
+                ]?.value}, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {

@@ -106,25 +106,25 @@ export function registerAnomalyRuleType({
         const request = {} as KibanaRequest;
         const { mlAnomalySearch } = ml.mlSystemProvider(
           request,
-          savedObjectsClient
+          savedObjectsClient,
         );
         const anomalyDetectors = ml.anomalyDetectorsProvider(
           request,
-          savedObjectsClient
+          savedObjectsClient,
         );
 
         const mlJobs = await getMLJobs(
           anomalyDetectors,
-          ruleParams.environment
+          ruleParams.environment,
         );
 
         const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-          (option) => option.type === ruleParams.anomalySeverityType
+          (option) => option.type === ruleParams.anomalySeverityType,
         );
 
         if (!selectedOption) {
           throw new Error(
-            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`
+            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`,
           );
         }
 
@@ -139,7 +139,7 @@ export function registerAnomalyRuleType({
           datemath.parse('now-30m')!.valueOf(),
           datemath
             .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
-            ?.valueOf() || 0
+            ?.valueOf() || 0,
         );
 
         const jobIds = mlJobs.map((job) => job.jobId);
@@ -164,14 +164,14 @@ export function registerAnomalyRuleType({
                   ...termQuery(
                     'partition_field_value',
                     ruleParams.serviceName,
-                    { queryEmptyString: false }
+                    { queryEmptyString: false },
                   ),
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
                   ...termQuery(
                     'detector_index',
-                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency),
                   ),
                 ] as QueryDslQueryContainer[],
               },
@@ -221,7 +221,7 @@ export function registerAnomalyRuleType({
 
               if (!job) {
                 logger.warn(
-                  `Could not find matching job for job id ${latest.job_id}`
+                  `Could not find matching job for job id ${latest.job_id}`,
                 );
                 return undefined;
               }
@@ -236,7 +236,7 @@ export function registerAnomalyRuleType({
               };
             })
             .filter((anomaly) =>
-              anomaly ? anomaly.score >= threshold : false
+              anomaly ? anomaly.score >= threshold : false,
             ) ?? [];
 
         await asyncForEach(compact(anomalies), async (anomaly) => {
@@ -296,12 +296,12 @@ export function registerAnomalyRuleType({
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
+            transactionType,
           );
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
             spaceId,
-            relativeViewInAppUrl
+            relativeViewInAppUrl,
           );
           const indexedStartedAt =
             getAlertStartedDate(alertId) ?? startedAt.toISOString();
@@ -311,7 +311,7 @@ export function registerAnomalyRuleType({
             spaceId,
             indexedStartedAt,
             alertsLocator,
-            basePath.publicBaseUrl
+            basePath.publicBaseUrl,
           );
 
           alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
@@ -329,6 +329,6 @@ export function registerAnomalyRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
-    })
+    }),
   );
 }

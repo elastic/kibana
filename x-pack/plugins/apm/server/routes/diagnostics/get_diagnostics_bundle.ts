@@ -44,26 +44,26 @@ export async function getDiagnosticsBundle({
       esClient,
       apmIndices,
     }),
-    []
+    [],
   );
 
   const existingIndexTemplates = await handle403Exception(
     getExistingApmIndexTemplates({
       esClient,
     }),
-    []
+    [],
   );
 
   const dataStreams = await handle403Exception(
     getDataStreams({ esClient, apmIndices }),
-    []
+    [],
   );
   const nonDataStreamIndices = await handle403Exception(
     getNonDataStreamIndices({
       esClient,
       apmIndices,
     }),
-    []
+    [],
   );
 
   const { invalidIndices, validIndices, indices, ingestPipelines, fieldCaps } =
@@ -78,7 +78,7 @@ export async function getDiagnosticsBundle({
         indices: [],
         ingestPipelines: [],
         fieldCaps: {},
-      }
+      },
     );
 
   const apmEvents = await handle403Exception(
@@ -89,11 +89,11 @@ export async function getDiagnosticsBundle({
       end,
       kuery,
     }),
-    []
+    [],
   );
   const elasticsearchVersion = await handle403Exception(
     getElasticsearchVersion(esClient),
-    'N/A'
+    'N/A',
   );
 
   return {

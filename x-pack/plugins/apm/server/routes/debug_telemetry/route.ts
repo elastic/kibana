@@ -27,7 +27,7 @@ export const debugTelemetryRoute = createApmServerRoute({
 
     const apmTelemetryObject = await savedObjectsClient.get(
       APM_TELEMETRY_SAVED_OBJECT_TYPE,
-      APM_TELEMETRY_SAVED_OBJECT_ID
+      APM_TELEMETRY_SAVED_OBJECT_ID,
     );
 
     return apmTelemetryObject.attributes;

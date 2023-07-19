@@ -43,7 +43,7 @@ export function SelectLogs() {
         'xpack.observability_onboarding.selectLogs.chooseType',
         {
           defaultMessage: 'What logs do you want to collect?',
-        }
+        },
       )}
       panelFooter={
         <StepPanelFooter
@@ -66,7 +66,7 @@ export function SelectLogs() {
                 'xpack.observability_onboarding.selectLogs.streamLogFiles',
                 {
                   defaultMessage: 'Stream log files',
-                }
+                },
               )}
               iconType="desktop"
               onClick={() => {
@@ -77,7 +77,7 @@ export function SelectLogs() {
                 'xpack.observability_onboarding.selectLogs.streamLogFiles.description',
                 {
                   defaultMessage: 'Stream your log file or directory.',
-                }
+                },
               )}
             />
           </EuiFlexItem>
@@ -88,7 +88,7 @@ export function SelectLogs() {
             'xpack.observability_onboarding.selectLogs.networkStreamingLogs',
             {
               defaultMessage: 'Network streaming logs',
-            }
+            },
           )}
         >
           <EuiFlexGroup>
@@ -98,7 +98,7 @@ export function SelectLogs() {
                   'xpack.observability_onboarding.selectLogs.sysLog',
                   {
                     defaultMessage: 'TCP/UDP/Syslog',
-                  }
+                  },
                 )}
                 iconType="documents"
                 onClick={() => {}}
@@ -107,7 +107,7 @@ export function SelectLogs() {
                   {
                     defaultMessage:
                       'Stream logs over TCP or UDP ports or from your syslog server.',
-                  }
+                  },
                 )}
               />
             </EuiFlexItem>
@@ -117,7 +117,7 @@ export function SelectLogs() {
                   'xpack.observability_onboarding.selectLogs.httpEndpointLogs',
                   {
                     defaultMessage: 'HTTP Endpoint',
-                  }
+                  },
                 )}
                 iconType="documents"
                 onClick={() => {}}
@@ -126,7 +126,7 @@ export function SelectLogs() {
                   {
                     defaultMessage:
                       'Collect JSON data from listening HTTP port.',
-                  }
+                  },
                 )}
               />
             </EuiFlexItem>
@@ -138,7 +138,7 @@ export function SelectLogs() {
             'xpack.observability_onboarding.selectLogs.other',
             {
               defaultMessage: 'Other',
-            }
+            },
           )}
         >
           <EuiFlexGroup>
@@ -148,7 +148,7 @@ export function SelectLogs() {
                   'xpack.observability_onboarding.selectLogs.uploadLogFiles',
                   {
                     defaultMessage: 'Upload log files',
-                  }
+                  },
                 )}
                 iconType="exportAction"
                 onClick={() => {}}
@@ -157,7 +157,7 @@ export function SelectLogs() {
                   {
                     defaultMessage:
                       'Upload data from a CSV, TSV, JSON or other log file type for analysis.',
-                  }
+                  },
                 )}
               />
             </EuiFlexItem>
@@ -167,7 +167,7 @@ export function SelectLogs() {
                   'xpack.observability_onboarding.selectLogs.useOwnShipper',
                   {
                     defaultMessage: 'Get an API key',
-                  }
+                  },
                 )}
                 iconType="package"
                 onClick={() => {}}
@@ -176,7 +176,7 @@ export function SelectLogs() {
                   {
                     defaultMessage:
                       'Use your own shipper to collect logs data by generating an API key.',
-                  }
+                  },
                 )}
               />
             </EuiFlexItem>
@@ -194,7 +194,7 @@ export function SelectLogs() {
               'xpack.observability_onboarding.exploreOtherIntegrations',
               {
                 defaultMessage: 'Explore other integrations',
-              }
+              },
             )}
           </EuiLink>
         </LogsTypeSection>

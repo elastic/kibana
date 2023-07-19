@@ -53,7 +53,7 @@ export function useWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, transactionId]
+    [traceId, start, end, transactionId],
   );
 
   const waterfall = useMemo(() => getWaterfall(data), [data]);

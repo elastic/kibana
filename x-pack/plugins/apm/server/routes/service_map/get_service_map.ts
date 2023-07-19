@@ -88,9 +88,9 @@ async function getConnectionData({
               end,
               terminateAfter: config.serviceMapTerminateAfter,
               logger,
-            })
-          )
-        )
+            }),
+          ),
+        ),
     );
 
     logger.debug('Received chunk responses');
@@ -99,7 +99,7 @@ async function getConnectionData({
       return {
         connections: prev.connections.concat(current.connections),
         discoveredServices: prev.discoveredServices.concat(
-          current.discoveredServices
+          current.discoveredServices,
         ),
       };
     });
@@ -114,12 +114,12 @@ export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
 export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
 
 export function getServiceMap(
-  options: IEnvOptions & { maxNumberOfServices: number }
+  options: IEnvOptions & { maxNumberOfServices: number },
 ): Promise<TransformServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
     const anomaliesPromise = getServiceAnomalies(
-      options
+      options,
 
       // always catch error to avoid breaking service maps if there is a problem with ML
     ).catch((error) => {

@@ -8,7 +8,10 @@
 import { mergeWith } from 'lodash';
 
 export class EndpointDataLoadingError extends Error {
-  constructor(message: string, public meta?: unknown) {
+  constructor(
+    message: string,
+    public meta?: unknown
+  ) {
     super(message);
   }
 }

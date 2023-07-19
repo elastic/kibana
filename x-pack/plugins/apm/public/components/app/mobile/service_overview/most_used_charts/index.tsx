@@ -83,10 +83,10 @@ export function MostUsedCharts({
               transactionType,
             },
           },
-        }
+        },
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType],
   );
 
   const chartWidth = isLarge

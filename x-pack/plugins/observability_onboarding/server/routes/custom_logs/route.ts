@@ -30,7 +30,7 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(
-      client.asCurrentUser
+      client.asCurrentUser,
     );
 
     return { hasPrivileges };
@@ -74,7 +74,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     }),
   }),
   async handler(
-    resources
+    resources,
   ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
     const {
       context,
@@ -90,7 +90,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     } = await context.core;
     const { encoded: apiKeyEncoded } = await createShipperApiKey(
       client.asCurrentUser,
-      name
+      name,
     );
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
@@ -175,7 +175,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 
     if (!savedObservabilityOnboardingState) {
       throw Boom.notFound(
-        'Unable to report setup progress - onboarding session not found.'
+        'Unable to report setup progress - onboarding session not found.',
       );
     }
 
@@ -229,7 +229,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
 
     if (!savedObservabilityOnboardingState) {
       throw Boom.notFound(
-        'Unable to report setup progress - onboarding session not found.'
+        'Unable to report setup progress - onboarding session not found.',
       );
     }
 

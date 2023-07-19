@@ -22,7 +22,7 @@ export const createRawKibanaPrivileges = (
   featuresService.getKibanaFeatures.mockReturnValue(features);
 
   const licensingService = {
-    getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),
+    getFeatures: () => ({ allowSubFeaturePrivileges }) as SecurityLicenseFeatures,
     getType: () => 'basic' as const,
     hasAtLeast: (licenseType: LicenseType) => licenseType === 'basic',
   };

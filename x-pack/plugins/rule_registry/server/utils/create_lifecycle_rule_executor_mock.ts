@@ -21,7 +21,7 @@ export const createLifecycleRuleExecutorMock =
     State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
-    ActionGroupIds extends string = never
+    ActionGroupIds extends string = never,
   >(
     executor: LifecycleRuleExecutor<Params, State, InstanceState, InstanceContext, ActionGroupIds>
   ) =>

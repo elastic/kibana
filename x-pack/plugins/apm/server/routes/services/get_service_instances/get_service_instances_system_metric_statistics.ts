@@ -41,7 +41,7 @@ type ServiceInstanceSystemMetricStatistics<T> = T extends true
   : ServiceInstanceSystemMetricPrimaryStatistics;
 
 export async function getServiceInstancesSystemMetricStatistics<
-  T extends true | false
+  T extends true | false,
 >({
   environment,
   kuery,
@@ -82,7 +82,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   const cpuUsageFilter = { exists: { field: METRIC_PROCESS_CPU_PERCENT } };
 
   function withTimeseries<TParams extends AggregationOptionsByType['avg']>(
-    agg: TParams
+    agg: TParams,
   ) {
     return {
       ...(isComparisonSearch
@@ -164,7 +164,7 @@ export async function getServiceInstancesSystemMetricStatistics<
           },
         },
       },
-    }
+    },
   );
 
   return (
@@ -185,7 +185,7 @@ export async function getServiceInstancesSystemMetricStatistics<
                 (dateBucket) => ({
                   x: dateBucket.key,
                   y: dateBucket.avg.value,
-                })
+                }),
               )
             : serviceNodeBucket.cpu_usage.avg.value;
 
@@ -204,7 +204,7 @@ export async function getServiceInstancesSystemMetricStatistics<
           cpuUsage,
           memoryUsage,
         };
-      }
+      },
     ) as Array<ServiceInstanceSystemMetricStatistics<T>>) || []
   );
 }

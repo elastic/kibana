@@ -78,8 +78,8 @@ describe('ServiceMap', () => {
           />,
           {
             wrapper: createWrapper(null),
-          }
-        ).queryByTestId('ServiceMap')
+          },
+        ).queryByTestId('ServiceMap'),
       ).not.toBeInTheDocument();
     });
   });
@@ -96,8 +96,8 @@ describe('ServiceMap', () => {
           />,
           {
             wrapper: createWrapper(expiredLicense),
-          }
-        ).findAllByText(/Platinum/)
+          },
+        ).findAllByText(/Platinum/),
       ).toHaveLength(1);
     });
   });
@@ -121,8 +121,8 @@ describe('ServiceMap', () => {
             />,
             {
               wrapper: createWrapper(activeLicense),
-            }
-          ).findAllByText(/No services available/)
+            },
+          ).findAllByText(/No services available/),
         ).toHaveLength(1);
       });
     });

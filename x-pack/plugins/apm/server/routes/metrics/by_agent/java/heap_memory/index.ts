@@ -36,7 +36,7 @@ const series = {
       'xpack.apm.agentMetrics.java.heapMemorySeriesCommitted',
       {
         defaultMessage: 'Avg. committed',
-      }
+      },
     ),
     color: theme.euiColorVis1,
   },

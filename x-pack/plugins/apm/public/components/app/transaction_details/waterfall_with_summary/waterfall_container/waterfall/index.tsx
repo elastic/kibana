@@ -157,7 +157,7 @@ export function Waterfall({
               timelineMargins={timelineMargins}
               onClickWaterfallItem={(
                 item: IWaterfallItem,
-                flyoutDetailTab: string
+                flyoutDetailTab: string,
               ) => toggleFlyout({ history, item, flyoutDetailTab })}
               showCriticalPath={showCriticalPath}
               maxLevelOpen={

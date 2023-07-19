@@ -42,7 +42,7 @@ describe('DefaultEditorAgg component', () => {
       agg: {
         id: '1',
         brandNew: true,
-        getIndexPattern: () => ({} as DataView),
+        getIndexPattern: () => ({}) as DataView,
         schema: 'metric',
         title: 'Metrics',
         params: {},

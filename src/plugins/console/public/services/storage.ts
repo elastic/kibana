@@ -18,7 +18,10 @@ export enum StorageKeys {
 }
 
 export class Storage {
-  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
+  constructor(
+    private readonly engine: IStorageEngine,
+    private readonly prefix: string
+  ) {}
 
   encode(val: unknown) {
     return JSON.stringify(val);

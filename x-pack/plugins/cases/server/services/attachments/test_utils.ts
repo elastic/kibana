@@ -33,7 +33,7 @@ export const createErrorSO = () =>
     },
     references: [],
     // casting because this complains about attributes not being there
-  } as unknown as SavedObject<AttributesTypeUser>);
+  }) as unknown as SavedObject<AttributesTypeUser>;
 
 export const createUserAttachment = (attributes?: object): SavedObject<AttributesTypeUser> => {
   return {

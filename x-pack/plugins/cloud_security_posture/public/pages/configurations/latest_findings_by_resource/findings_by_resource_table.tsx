@@ -187,10 +187,10 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   },
 ];
 
-type BaseFindingColumnName = typeof baseColumns[number]['field'];
+type BaseFindingColumnName = (typeof baseColumns)[number]['field'];
 
 export const findingsByResourceColumns = Object.fromEntries(
   baseColumns.map((column) => [column.field, column])
-) as Record<BaseFindingColumnName, typeof baseColumns[number]>;
+) as Record<BaseFindingColumnName, (typeof baseColumns)[number]>;
 
 export const FindingsByResourceTable = React.memo(FindingsByResourceTableComponent);

@@ -79,7 +79,7 @@ describe('CustomLink', () => {
               <CustomLinkOverview />
             </LicenseContext.Provider>
           </IntlProvider>
-        </MockApmPluginContextWrapper>
+        </MockApmPluginContextWrapper>,
       );
       expectTextsInDocument(component, ['No links found.']);
     });
@@ -106,7 +106,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper value={mockContext}>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       const createButton = getByTestId('createButton') as HTMLButtonElement;
       expect(createButton.disabled).toBeFalsy();
@@ -120,7 +120,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper value={mockContext}>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
 
       expect(getAllByText('Edit').length).toEqual(2);
@@ -132,7 +132,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expectTextsInDocument(component, [
         'label 1',
@@ -150,7 +150,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper value={mockContext}>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expect(queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
@@ -180,7 +180,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper value={mockContext}>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expect(component.queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
@@ -234,7 +234,7 @@ describe('CustomLink', () => {
           fieldName: string,
           selectValue: string,
           addNewFilter: boolean,
-          optionsExpected: string[]
+          optionsExpected: string[],
         ) => {
           if (addNewFilter) {
             addFilterField(component, 1);
@@ -306,7 +306,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expectTextsInDocument(component, ['Start free 30-day trial']);
     });
@@ -326,7 +326,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expectTextsInDocument(component, ['Start free 30-day trial']);
     });
@@ -346,7 +346,7 @@ describe('CustomLink', () => {
           <MockApmPluginContextWrapper>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expectTextsInDocument(component, ['Start free 30-day trial']);
     });
@@ -368,7 +368,7 @@ describe('CustomLink', () => {
               <CustomLinkOverview />
             </MockApmPluginContextWrapper>
           </IntlProvider>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       expectTextsNotInDocument(component, ['Start free 30-day trial']);
     });
@@ -385,7 +385,7 @@ describe('CustomLink', () => {
               <CustomLinkOverview />
             </MockApmPluginContextWrapper>
           </IntlProvider>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
       const createButton = getByTestId('createButton') as HTMLButtonElement;
       expect(createButton.disabled).toBeTruthy();
@@ -401,7 +401,7 @@ describe('CustomLink', () => {
               <CustomLinkOverview />
             </MockApmPluginContextWrapper>
           </IntlProvider>
-        </LicenseContext.Provider>
+        </LicenseContext.Provider>,
       );
 
       expect(queryAllByText('Edit').length).toEqual(0);

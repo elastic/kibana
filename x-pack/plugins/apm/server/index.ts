@@ -20,7 +20,7 @@ const disabledOnServerless = schema.conditional(
   schema.boolean({
     defaultValue: false,
   }),
-  schema.oneOf([schema.literal(true)], { defaultValue: true })
+  schema.oneOf([schema.literal(true)], { defaultValue: true }),
 );
 
 const enabledOnServerless = schema.conditional(
@@ -29,7 +29,7 @@ const enabledOnServerless = schema.conditional(
   schema.boolean({
     defaultValue: true,
   }),
-  schema.oneOf([schema.literal(false)], { defaultValue: false })
+  schema.oneOf([schema.literal(false)], { defaultValue: false }),
 );
 
 // All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
@@ -56,7 +56,7 @@ const configSchema = schema.object({
       schema.literal(SearchAggregatedTransactionSetting.always),
       schema.literal(SearchAggregatedTransactionSetting.never),
     ],
-    { defaultValue: SearchAggregatedTransactionSetting.auto }
+    { defaultValue: SearchAggregatedTransactionSetting.auto },
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
@@ -81,13 +81,13 @@ const configSchema = schema.object({
     schema.contextRef('serverless'),
     true,
     schema.boolean({ defaultValue: false }),
-    schema.never()
+    schema.never(),
   ),
   managedServiceUrl: schema.conditional(
     schema.contextRef('serverless'),
     true,
     schema.string({ defaultValue: '' }),
-    schema.never()
+    schema.never(),
   ),
   featureFlags: schema.object({
     agentConfigurationAvailable: disabledOnServerless,
@@ -105,7 +105,7 @@ const configSchema = schema.object({
       true,
       schema.literal(true),
       schema.never(),
-      { defaultValue: schema.contextRef('serverless') }
+      { defaultValue: schema.contextRef('serverless') },
     ),
   }),
 });
@@ -129,7 +129,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     renameFromRoot(
       'apm_oss.transactionIndices',
       'xpack.apm.indices.transaction',
-      { level: 'warning' }
+      { level: 'warning' },
     ),
     renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span', {
       level: 'warning',
@@ -146,7 +146,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     renameFromRoot(
       'apm_oss.onboardingIndices',
       'xpack.apm.indices.onboarding',
-      { level: 'warning' }
+      { level: 'warning' },
     ),
     deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
     unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
@@ -154,12 +154,12 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     renameFromRoot(
       'xpack.apm.maxServiceEnvironments',
       `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
+      { level: 'warning' },
     ),
     renameFromRoot(
       'xpack.apm.maxServiceSelection',
       `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
+      { level: 'warning' },
     ),
   ],
   exposeToBrowser: {

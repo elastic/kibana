@@ -18,7 +18,9 @@ import {
 } from '../../../embeddables';
 
 export function useAddToDashboardActions<
-  T extends typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE | typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
+  T extends
+    | typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE
+    | typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
 >(
   type: T,
   getEmbeddableInput: () => Partial<

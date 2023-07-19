@@ -131,9 +131,8 @@ export async function getRuleActionErrors(
   return await Promise.all(
     actions.map(
       async (ruleAction: RuleAction) =>
-        (
-          await actionTypeRegistry.get(ruleAction.actionTypeId)?.validateParams(ruleAction.params)
-        ).errors
+        (await actionTypeRegistry.get(ruleAction.actionTypeId)?.validateParams(ruleAction.params))
+          .errors
     )
   );
 }

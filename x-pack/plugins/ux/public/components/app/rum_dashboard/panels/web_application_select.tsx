@@ -27,7 +27,7 @@ export function WebApplicationSelect() {
     },
     // `rangeId` works as a cache buster for ranges that never change, like `Today`
     [start, end, rangeId, dataViewTitle],
-    { name: 'UxApplicationServices' }
+    { name: 'UxApplicationServices' },
   );
 
   const rumServiceNames =

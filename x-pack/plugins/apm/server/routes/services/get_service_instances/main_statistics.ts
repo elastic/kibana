@@ -36,7 +36,7 @@ export type ServiceInstanceMainStatisticsResponse = Array<{
 }>;
 
 export async function getServiceInstancesMainStatistics(
-  params: Omit<ServiceInstanceMainStatisticsParams, 'size'>
+  params: Omit<ServiceInstanceMainStatisticsParams, 'size'>,
 ): Promise<ServiceInstanceMainStatisticsResponse> {
   return withApmSpan('get_service_instances_main_statistics', async () => {
     const paramsForSubQueries = {
@@ -57,7 +57,7 @@ export async function getServiceInstancesMainStatistics(
 
     const stats = joinByKey(
       [...transactionStats, ...systemMetricStats],
-      'serviceNodeName'
+      'serviceNodeName',
     );
 
     return stats;

@@ -37,7 +37,7 @@ export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
   const policyWithAgentConfigAndSourceMaps =
     getPackagePolicyWithAgentConfigurations(
       policyWithSourceMaps,
-      agentConfigurations
+      agentConfigurations,
     );
 
   return policyWithAgentConfigAndSourceMaps;

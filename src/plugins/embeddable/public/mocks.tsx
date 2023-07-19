@@ -51,7 +51,7 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
 export const mockRefOrValEmbeddable = <
   OriginalEmbeddableType,
   ValTypeInput extends EmbeddableInput = EmbeddableInput,
-  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 >(
   embeddable: IEmbeddable,
   options: {

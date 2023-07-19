@@ -25,35 +25,35 @@ const serviceLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.serviceLabel',
   {
     defaultMessage: 'Service',
-  }
+  },
 );
 
 const agentNameLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.agentNameLabel',
   {
     defaultMessage: 'Agent Name',
-  }
+  },
 );
 
 const instancesLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.intancesLabel',
   {
     defaultMessage: 'Instances',
-  }
+  },
 );
 
 const latestVersionLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.latestVersionLabel',
   {
     defaultMessage: 'Latest agent version',
-  }
+  },
 );
 
 const agentDocsLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.agentDocsUrlLabel',
   {
     defaultMessage: 'Agent documentation',
-  }
+  },
 );
 
 export function AgentContextualInformation({

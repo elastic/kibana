@@ -45,7 +45,7 @@ export function ErrorSampleCoPilotPrompt({
           coPilot={coPilot}
           title={i18n.translate(
             'xpack.apm.errorGroupCoPilotPrompt.explainErrorTitle',
-            { defaultMessage: "What's this error?" }
+            { defaultMessage: "What's this error?" },
           )}
           promptId={CoPilotPromptId.ApmExplainError}
           params={promptParams}

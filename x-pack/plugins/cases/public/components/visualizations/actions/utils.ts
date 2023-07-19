@@ -34,4 +34,4 @@ export const getLensCaseAttachment = ({
     persistableStateAttachmentState: { attributes, timeRange },
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
     type: CommentType.persistableState,
-  } as unknown as PersistableStateAttachmentWithoutOwner);
+  }) as unknown as PersistableStateAttachmentWithoutOwner;

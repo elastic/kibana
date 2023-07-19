@@ -75,10 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       describe('timeseries', () => {
         it('returns correct sum value', () => {
-          const sumValue = sumBy(
-            activeInstances?.timeseries?.filter((item) => item.y !== 0),
-            'y'
-          );
+          const sumValue = sumBy(activeInstances?.timeseries?.filter((item) => item.y !== 0), 'y');
           expect(sumValue).to.equal(numberOfTransactionsCreated);
         });
       });
@@ -109,10 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       describe('timeseries', () => {
         it('returns correct sum value', () => {
-          const sumValue = sumBy(
-            activeInstances?.timeseries?.filter((item) => item.y !== 0),
-            'y'
-          );
+          const sumValue = sumBy(activeInstances?.timeseries?.filter((item) => item.y !== 0), 'y');
           expect(sumValue).to.equal(numberOfTransactionsCreated);
         });
       });

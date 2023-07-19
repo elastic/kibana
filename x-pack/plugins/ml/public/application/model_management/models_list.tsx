@@ -219,10 +219,13 @@ export const ModelsList: FC<Props> = ({
         await fetchModelsStats(expandedItemsToRefresh);
 
         setItemIdToExpandedRowMap(
-          expandedItemsToRefresh.reduce((acc, item) => {
-            acc[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
-            return acc;
-          }, {} as Record<string, JSX.Element>)
+          expandedItemsToRefresh.reduce(
+            (acc, item) => {
+              acc[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
+              return acc;
+            },
+            {} as Record<string, JSX.Element>
+          )
         );
       }
     } catch (error) {

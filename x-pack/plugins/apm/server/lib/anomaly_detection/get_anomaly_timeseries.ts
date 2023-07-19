@@ -76,12 +76,12 @@ export async function getAnomalyTimeseries({
   // find the first job with valid running datafeed that matches the preferred environment
   const preferredBucketSpan = mlJobs.find(
     (j) =>
-      j.datafeedState !== undefined && j.environment === preferredEnvironment
+      j.datafeedState !== undefined && j.environment === preferredEnvironment,
   )?.bucketSpan;
 
   const minBucketSize =
     parseInterval(
-      preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`
+      preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`,
     )?.asSeconds() ?? FALLBACK_ML_BUCKET_SPAN * 60; // secs
 
   // Expected bounds (aka ML model plots) are stored as points in time, in intervals of the predefined bucket_span,
@@ -188,7 +188,7 @@ export async function getAnomalyTimeseries({
           },
         },
       },
-    }
+    },
   );
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);
@@ -227,7 +227,7 @@ export async function getAnomalyTimeseries({
               | number
               | null
               | undefined) ?? null,
-            divider
+            divider,
           ),
         })),
         bounds: bucket.timeseries.buckets.map((dateBucket) => {

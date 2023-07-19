@@ -27,7 +27,10 @@ const getNormal = Path.sep === '/' ? (path: string) => path : normalizePath;
  * the tool running analysis on the repository
  */
 export class RepoPath {
-  constructor(public readonly absolute: string, public readonly resolver: ImportResolver) {}
+  constructor(
+    public readonly absolute: string,
+    public readonly resolver: ImportResolver
+  ) {}
 
   private extname: string | undefined;
   /** Get the extention for this path */

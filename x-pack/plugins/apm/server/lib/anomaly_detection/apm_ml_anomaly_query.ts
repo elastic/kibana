@@ -47,7 +47,8 @@ export function apmMlAnomalyQuery({
           },
           ...termsQuery(
             'detector_index',
-            ...(detectorTypes?.map((type) => getApmMlDetectorIndex(type)) ?? [])
+            ...(detectorTypes?.map((type) => getApmMlDetectorIndex(type)) ??
+              []),
           ),
           ...termQuery('partition_field_value', serviceName),
           ...termQuery('by_field_value', transactionType),

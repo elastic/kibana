@@ -45,7 +45,7 @@ const label = i18n.translate(
   'xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label',
   {
     defaultMessage: 'HTTP requests',
-  }
+  },
 );
 
 export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
@@ -90,7 +90,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
       'xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label',
       {
         defaultMessage: 'HTTP requests per country',
-      }
+      },
     ),
     minZoom: 0,
     maxZoom: 2,
@@ -132,7 +132,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
       'xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label',
       {
         defaultMessage: 'HTTP requests per region',
-      }
+      },
     ),
     minZoom: 1,
     maxZoom: 24,

@@ -14,7 +14,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export async function getIndexTemplate(
   esClient: ElasticsearchClient,
-  params: IndicesGetIndexTemplateRequest
+  params: IndicesGetIndexTemplateRequest,
 ): Promise<IndicesGetIndexTemplateResponse> {
   try {
     return await esClient.indices.getIndexTemplate(params, {

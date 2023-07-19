@@ -117,7 +117,7 @@ export function MobileServiceOverview() {
                 'xpack.apm.serviceOverview.mobileCallOutTitle',
                 {
                   defaultMessage: 'Mobile APM',
-                }
+                },
               )}
               iconType="mobile"
             >
@@ -137,7 +137,7 @@ export function MobileServiceOverview() {
                           'xpack.apm.serviceOverview.mobileCallOutLink',
                           {
                             defaultMessage: 'Give feedback',
-                          }
+                          },
                         )}
                       </EuiLink>
                     ),
@@ -268,7 +268,7 @@ export function MobileServiceOverview() {
                       >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                          { defaultMessage: 'View dependencies' }
+                          { defaultMessage: 'View dependencies' },
                         )}
                       </EuiLink>
                     }

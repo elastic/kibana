@@ -25,7 +25,7 @@ import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 cytoscape.use(dagre);
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
-  undefined
+  undefined,
 );
 
 export interface CytoscapeProps {

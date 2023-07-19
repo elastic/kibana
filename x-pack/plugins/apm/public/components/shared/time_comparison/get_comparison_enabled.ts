@@ -15,7 +15,7 @@ export function getComparisonEnabled({
   urlComparisonEnabled?: boolean;
 }) {
   const isEnabledByDefault = core.uiSettings.get<boolean>(
-    enableComparisonByDefault
+    enableComparisonByDefault,
   );
 
   return urlComparisonEnabled ?? isEnabledByDefault;

@@ -33,7 +33,7 @@ type ElementOfArray<ArrayType extends readonly unknown[]> = ArrayType extends Ar
 
 export type PluginServiceRequiredServices<
   RequiredServices extends Array<keyof AvailableServices>,
-  AvailableServices
+  AvailableServices,
 > = {
   [K in ElementOfArray<RequiredServices>]: AvailableServices[K];
 };
@@ -49,7 +49,7 @@ export class PluginServiceProvider<
   Service extends {},
   StartParameters = {},
   Services = {},
-  RequiredServices extends Array<keyof Services> = []
+  RequiredServices extends Array<keyof Services> = [],
 > {
   private factory: PluginServiceFactory<
     Service,

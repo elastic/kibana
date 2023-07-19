@@ -111,9 +111,8 @@ export function syncUnifiedSearchState(
       const newRefreshInterval = (() => {
         // if there is an override refresh interval in the URL, dispatch that to the dashboard.
         const urlOverrideRefreshInterval =
-          kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(
-            GLOBAL_STATE_STORAGE_KEY
-          )?.refreshInterval;
+          kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)
+            ?.refreshInterval;
         if (urlOverrideRefreshInterval) return urlOverrideRefreshInterval;
 
         // if there is no url override refresh interval, check if this dashboard uses time restore, and restore to that.

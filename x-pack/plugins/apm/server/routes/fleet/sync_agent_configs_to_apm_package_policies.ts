@@ -45,14 +45,14 @@ export async function syncAgentConfigsToApmPackagePolicies({
       const { id, revision, updated_at, updated_by, ...packagePolicy } = item; // eslint-disable-line @typescript-eslint/naming-convention
       const updatedPackagePolicy = getPackagePolicyWithAgentConfigurations(
         packagePolicy,
-        agentConfigurations
+        agentConfigurations,
       );
       return fleetPluginStart.packagePolicyService.update(
         savedObjectsClient as unknown as SavedObjectsClientContract,
         esClient,
         id,
-        updatedPackagePolicy
+        updatedPackagePolicy,
       );
-    })
+    }),
   );
 }

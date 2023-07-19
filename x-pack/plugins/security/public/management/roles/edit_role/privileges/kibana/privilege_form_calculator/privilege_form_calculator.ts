@@ -15,7 +15,10 @@ import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
  * - <PrivilegeSpaceTable> and children
  */
 export class PrivilegeFormCalculator {
-  constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
+  constructor(
+    private readonly kibanaPrivileges: KibanaPrivileges,
+    private readonly role: Role
+  ) {}
 
   /**
    * Returns the assigned base privilege.

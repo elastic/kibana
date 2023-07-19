@@ -10,7 +10,7 @@ import { getTimeRangeSettings } from './default_date_settings';
 import { getMaybeDate } from '../components/formatted_date/maybe_date';
 
 export const normalizeTimeRange = <
-  T extends URLTimeRange | { to: string | number; from: string | number }
+  T extends URLTimeRange | { to: string | number; from: string | number },
 >(
   dateRange: T,
   uiSettings = true

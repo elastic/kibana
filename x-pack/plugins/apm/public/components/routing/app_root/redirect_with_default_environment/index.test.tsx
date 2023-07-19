@@ -23,7 +23,7 @@ describe('RedirectWithDefaultEnvironment', () => {
 
   function renderUrl(
     location: Pick<Location, 'pathname' | 'search'>,
-    defaultSetting: string
+    defaultSetting: string,
   ) {
     history.replace(location);
 
@@ -42,7 +42,7 @@ describe('RedirectWithDefaultEnvironment', () => {
         <RedirectWithDefaultEnvironment>
           <>Foo</>
         </RedirectWithDefaultEnvironment>
-      </RouterProvider>
+      </RouterProvider>,
     );
   }
 
@@ -52,7 +52,7 @@ describe('RedirectWithDefaultEnvironment', () => {
         pathname: '/services',
         search: location.search,
       },
-      ''
+      '',
     );
 
     await expect(element.findByText('Foo')).resolves.not.toBeUndefined();
@@ -67,11 +67,11 @@ describe('RedirectWithDefaultEnvironment', () => {
         pathname: '/services',
         search: location.search,
       },
-      ''
+      '',
     );
 
     expect(qs.parse(history.entries[0].search).environment).toEqual(
-      ENVIRONMENT_ALL.value
+      ENVIRONMENT_ALL.value,
     );
   });
 
@@ -81,11 +81,11 @@ describe('RedirectWithDefaultEnvironment', () => {
         pathname: '/services',
         search: location.search,
       },
-      'production'
+      'production',
     );
 
     expect(qs.parse(history.entries[0].search).environment).toEqual(
-      'production'
+      'production',
     );
   });
 
@@ -97,11 +97,11 @@ describe('RedirectWithDefaultEnvironment', () => {
           environment: 'development',
         }),
       },
-      'production'
+      'production',
     );
 
     expect(qs.parse(history.entries[0].search).environment).toEqual(
-      'development'
+      'development',
     );
   });
 
@@ -111,7 +111,7 @@ describe('RedirectWithDefaultEnvironment', () => {
         pathname: '/services/opbeans-java',
         search: location.search,
       },
-      ''
+      '',
     );
 
     expect(qs.parse(history.entries[0].search).environment).toBeUndefined();

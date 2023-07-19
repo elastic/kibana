@@ -87,7 +87,7 @@ export const defaultLegendColors = [
 
 export const formatToChartDataItem = ([key, value]: [
   string,
-  MatrixHistogramData[]
+  MatrixHistogramData[],
 ]): ChartSeriesData => ({
   key,
   value,

@@ -109,7 +109,7 @@ export function SchemaOverview({
             icon={<EuiIcon size="xxl" type="node" />}
             title={i18n.translate(
               'xpack.apm.settings.schema.migrate.classicIndices.title',
-              { defaultMessage: 'APM Server binary' }
+              { defaultMessage: 'APM Server binary' },
             )}
             display="subdued"
             description={i18n.translate(
@@ -117,7 +117,7 @@ export function SchemaOverview({
               {
                 defaultMessage:
                   'You are currently using APM Server binary. This legacy option is deprecated since version 7.16 and is being replaced by a managed APM Server in Elastic Agent from version 8.0.',
-              }
+              },
             )}
             footer={
               <div>
@@ -125,7 +125,7 @@ export function SchemaOverview({
                   <p>
                     {i18n.translate(
                       'xpack.apm.settings.schema.migrate.classicIndices.currentSetup',
-                      { defaultMessage: 'Current setup' }
+                      { defaultMessage: 'Current setup' },
                     )}
                   </p>
                 </EuiText>
@@ -142,14 +142,14 @@ export function SchemaOverview({
             }
             title={i18n.translate(
               'xpack.apm.settings.schema.migrate.dataStreams.title',
-              { defaultMessage: 'Elastic Agent' }
+              { defaultMessage: 'Elastic Agent' },
             )}
             description={i18n.translate(
               'xpack.apm.settings.schema.migrate.dataStreams.description',
               {
                 defaultMessage:
                   'Starting in version 8.0, APM Server is recommended to be managed by Elastic Agent. Elastic Agent can run on our hosted Elasticsearch Service, ECE, or be self-managed. Then, add the Elastic APM integration to continue ingesting APM data.',
-              }
+              },
             )}
             footer={
               <div>
@@ -169,7 +169,7 @@ export function SchemaOverview({
                   >
                     {i18n.translate(
                       'xpack.apm.settings.schema.migrate.dataStreams.buttonText',
-                      { defaultMessage: 'Switch to Elastic Agent' }
+                      { defaultMessage: 'Switch to Elastic Agent' },
                     )}
                   </EuiButton>
                 </EuiToolTip>
@@ -198,7 +198,7 @@ export function SchemaOverviewHeading() {
               <strong>
                 {i18n.translate(
                   'xpack.apm.settings.schema.descriptionText.irreversibleEmphasisText',
-                  { defaultMessage: 'irreversible' }
+                  { defaultMessage: 'irreversible' },
                 )}
               </strong>
             ),
@@ -206,7 +206,7 @@ export function SchemaOverviewHeading() {
               <strong>
                 {i18n.translate(
                   'xpack.apm.settings.schema.descriptionText.superuserEmphasisText',
-                  { defaultMessage: 'superuser' }
+                  { defaultMessage: 'superuser' },
                 )}
               </strong>
             ),
@@ -218,7 +218,7 @@ export function SchemaOverviewHeading() {
               >
                 {i18n.translate(
                   'xpack.apm.settings.schema.descriptionText.elasticAgentDocLinkText',
-                  { defaultMessage: 'Elastic Agent' }
+                  { defaultMessage: 'Elastic Agent' },
                 )}
               </EuiLink>
             ),
@@ -244,24 +244,24 @@ function getDisabledReason({
     reasons.push(
       i18n.translate(
         'xpack.apm.settings.schema.disabledReason.cloudApmMigrationEnabled',
-        { defaultMessage: 'Cloud migration is not enabled' }
-      )
+        { defaultMessage: 'Cloud migration is not enabled' },
+      ),
     );
   }
   if (hasRequiredRole && !hasCloudAgentPolicy) {
     reasons.push(
       i18n.translate(
         'xpack.apm.settings.schema.disabledReason.hasCloudAgentPolicy',
-        { defaultMessage: 'Cloud agent policy does not exist' }
-      )
+        { defaultMessage: 'Cloud agent policy does not exist' },
+      ),
     );
   }
   if (!hasRequiredRole) {
     reasons.push(
       i18n.translate(
         'xpack.apm.settings.schema.disabledReason.hasRequiredRole',
-        { defaultMessage: 'User does not have superuser role' }
-      )
+        { defaultMessage: 'User does not have superuser role' },
+      ),
     );
   }
   if (reasons.length) {

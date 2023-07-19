@@ -117,10 +117,13 @@ export const useConnectorSetup = ({
       clearTimeout(streamingTimeoutRef.current);
       return;
     }
-    streamingTimeoutRef.current = window.setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ block: 'end' });
-      return setCurrentMessageIndex(currentMessageIndex + 1);
-    }, conversation.messages[currentMessageIndex]?.presentation?.delay ?? 0);
+    streamingTimeoutRef.current = window.setTimeout(
+      () => {
+        bottomRef.current?.scrollIntoView({ block: 'end' });
+        return setCurrentMessageIndex(currentMessageIndex + 1);
+      },
+      conversation.messages[currentMessageIndex]?.presentation?.delay ?? 0
+    );
     return () => clearTimeout(streamingTimeoutRef.current);
   }, [conversation.messages, currentMessageIndex, lastConversationMessageIndex]);
 

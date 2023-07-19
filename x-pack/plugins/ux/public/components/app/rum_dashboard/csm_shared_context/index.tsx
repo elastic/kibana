@@ -28,7 +28,7 @@ const defaultContext: ContextType = {
   sharedData: { totalPageViews: 0 },
   setSharedData: (d) => {
     throw new Error(
-      'setSharedData was not initialized, set it when you invoke the context'
+      'setSharedData was not initialized, set it when you invoke the context',
     );
   },
 };

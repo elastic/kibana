@@ -21,7 +21,7 @@ async function fetchLegacyAPMIndices(repository: ISavedObjectsRepository) {
   try {
     const apmIndices = await repository.get<Partial<APMIndices>>(
       APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-      APM_INDEX_SETTINGS_SAVED_OBJECT_ID
+      APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
     );
     if (apmIndices.attributes.isSpaceAware) {
       // This has already been migrated to become space-aware
@@ -83,7 +83,7 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
           type: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
           initialNamespaces: [spaceId],
           attributes: savedObjectAttributes,
-        }))
+        })),
     );
   } catch (e) {
     logger.error('Failed to migrate legacy APM indices object: ' + e.message);

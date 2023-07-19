@@ -19,7 +19,7 @@ export function PermissionDenied() {
             'xpack.apm.storageExplorer.noPermissionToViewIndicesStatsTitle',
             {
               defaultMessage: 'You need permission to view index statistics',
-            }
+            },
           )}
         </h2>
       }
@@ -29,7 +29,7 @@ export function PermissionDenied() {
             'xpack.apm.storageExplorer.noPermissionToViewIndicesStatsDescription',
             {
               defaultMessage: 'Contact your system administrator',
-            }
+            },
           )}
         </p>
       }

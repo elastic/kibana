@@ -237,7 +237,7 @@ export interface AddVersionOpts<P, Q, B> {
  */
 export interface VersionedRoute<
   Method extends RouteMethod = RouteMethod,
-  Ctx extends RqCtx = RqCtx
+  Ctx extends RqCtx = RqCtx,
 > {
   /**
    * Add a new version of this route

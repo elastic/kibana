@@ -76,7 +76,7 @@ export async function getMobileMostUsedNCTCharts({
           },
         },
       },
-    }
+    },
   );
 
   return {
@@ -84,7 +84,7 @@ export async function getMobileMostUsedNCTCharts({
     options:
       mergeCountWithOther(
         response.aggregations?.netConnectionTypes?.buckets,
-        response.aggregations?.netConnectionTypes?.sum_other_doc_count
+        response.aggregations?.netConnectionTypes?.sum_other_doc_count,
       ) || [],
   };
 }

@@ -81,7 +81,7 @@ export const renderApp = ({
         pluginsStart={pluginsStart}
       />
     </KibanaThemeProvider>,
-    element
+    element,
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);

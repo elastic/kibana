@@ -44,20 +44,20 @@ export function getPreferredBucketSizeAndDataSource({
       (source) => EVENT_PREFERENCE.indexOf(source.documentType),
       (source) => intervalToSeconds(source.rollupInterval),
     ],
-    ['asc', 'desc']
+    ['asc', 'desc'],
   );
 
   if (sourcesInPreferredOrder.length > 0) {
     const preferredDocumentType = sourcesInPreferredOrder[0].documentType;
 
     const sourcesFromPreferredDocumentType = sourcesInPreferredOrder.filter(
-      (source) => source.documentType === preferredDocumentType
+      (source) => source.documentType === preferredDocumentType,
     );
 
     preferred =
       sourcesFromPreferredDocumentType.find((source) => {
         const rollupIntervalInSeconds = intervalToSeconds(
-          source.rollupInterval
+          source.rollupInterval,
         );
 
         return rollupIntervalInSeconds <= bucketSizeInSeconds;
@@ -79,7 +79,7 @@ export function getPreferredBucketSizeAndDataSource({
     source: preferred,
     bucketSizeInSeconds: Math.max(
       bucketSizeInSeconds,
-      intervalToSeconds(preferred.rollupInterval)
+      intervalToSeconds(preferred.rollupInterval),
     ),
   };
 }

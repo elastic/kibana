@@ -31,7 +31,7 @@ import { useAppToasts } from '../use_app_toasts';
 export const useEqlPreview = (): [
   boolean,
   (arg: EqlPreviewRequest) => void,
-  EqlPreviewResponse
+  EqlPreviewResponse,
 ] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);

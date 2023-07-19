@@ -13,7 +13,7 @@ import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlation
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: FailedTransactionsCorrelation['pValue'],
-  isFallbackResult?: boolean
+  isFallbackResult?: boolean,
 ): {
   impact: FailedTransactionsCorrelationsImpactThreshold;
   color: string;
@@ -50,7 +50,7 @@ export function getFailedTransactionsCorrelationImpactLabel(
 
 export function getLatencyCorrelationImpactLabel(
   correlation: FailedTransactionsCorrelation['pValue'],
-  isFallbackResult?: boolean
+  isFallbackResult?: boolean,
 ): {
   impact: FailedTransactionsCorrelationsImpactThreshold;
   color: string;

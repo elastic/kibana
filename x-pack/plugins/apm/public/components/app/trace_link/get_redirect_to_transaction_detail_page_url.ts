@@ -61,6 +61,6 @@ function roundToNearestMinute({
   return new Date(
     direction === 'down'
       ? Math.floor(ms / fiveMinutes) * fiveMinutes
-      : Math.ceil(ms / fiveMinutes) * fiveMinutes
+      : Math.ceil(ms / fiveMinutes) * fiveMinutes,
   ).toISOString();
 }

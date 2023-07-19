@@ -53,7 +53,7 @@ const tasks = new Listr(
             '--maxWorkers',
             4,
           ],
-          execaOpts
+          execaOpts,
         ),
     },
   ],
@@ -61,7 +61,7 @@ const tasks = new Listr(
     exitOnError: true,
     concurrent: false,
     renderer: process.env.CI ? 'verbose' : 'default',
-  }
+  },
 );
 
 tasks.run().catch((error) => {

@@ -59,7 +59,7 @@ export function getMenuSections({
       key: 'podLogs',
       label: i18n.translate(
         'xpack.apm.serviceOverview.instancesTable.actionMenus.podLogs',
-        { defaultMessage: 'Pod logs' }
+        { defaultMessage: 'Pod logs' },
       ),
       href: infraNodeLocator.getRedirectUrl({
         nodeId: podId!,
@@ -72,7 +72,7 @@ export function getMenuSections({
       key: 'podMetrics',
       label: i18n.translate(
         'xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics',
-        { defaultMessage: 'Pod metrics' }
+        { defaultMessage: 'Pod metrics' },
       ),
       href: getInfraHref({
         app: 'metrics',
@@ -89,7 +89,7 @@ export function getMenuSections({
       key: 'containerLogs',
       label: i18n.translate(
         'xpack.apm.serviceOverview.instancesTable.actionMenus.containerLogs',
-        { defaultMessage: 'Container logs' }
+        { defaultMessage: 'Container logs' },
       ),
       href: infraNodeLocator.getRedirectUrl({
         nodeId: containerId!,
@@ -102,7 +102,7 @@ export function getMenuSections({
       key: 'containerMetrics',
       label: i18n.translate(
         'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
-        { defaultMessage: 'Container metrics' }
+        { defaultMessage: 'Container metrics' },
       ),
       href: getInfraHref({
         app: 'metrics',
@@ -121,7 +121,7 @@ export function getMenuSections({
         'xpack.apm.serviceOverview.instancesTable.actionMenus.filterByInstance',
         {
           defaultMessage: 'Filter overview by instance',
-        }
+        },
       ),
       onClick: onFilterByInstanceClick,
       condition: true,
@@ -132,7 +132,7 @@ export function getMenuSections({
         'xpack.apm.serviceOverview.instancesTable.actionMenus.metrics',
         {
           defaultMessage: 'Metrics',
-        }
+        },
       ),
       href: metricsHref,
       condition: true,
@@ -147,14 +147,14 @@ export function getMenuSections({
           'xpack.apm.serviceOverview.instancesTable.actionMenus.pod.title',
           {
             defaultMessage: 'Pod details',
-          }
+          },
         ),
         subtitle: i18n.translate(
           'xpack.apm.serviceOverview.instancesTable.actionMenus.pod.subtitle',
           {
             defaultMessage:
               'View logs and metrics for this pod to get further details.',
-          }
+          },
         ),
         actions: podActions,
       },
@@ -164,14 +164,14 @@ export function getMenuSections({
           'xpack.apm.serviceOverview.instancesTable.actionMenus.container.title',
           {
             defaultMessage: 'Container details',
-          }
+          },
         ),
         subtitle: i18n.translate(
           'xpack.apm.serviceOverview.instancesTable.actionMenus.container.subtitle',
           {
             defaultMessage:
               'View logs and metrics for this container to get further details.',
-          }
+          },
         ),
         actions: containerActions,
       },

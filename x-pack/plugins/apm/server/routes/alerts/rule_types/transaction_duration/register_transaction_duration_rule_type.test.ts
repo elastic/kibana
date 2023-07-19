@@ -58,7 +58,7 @@ describe('registerTransactionDurationRuleType', () => {
     expect(scheduleActions).toHaveBeenCalledTimes(1);
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       alertDetailsUrl: expect.stringContaining(
-        'http://localhost:5601/eyr/app/observability/alerts/'
+        'http://localhost:5601/eyr/app/observability/alerts/',
       ),
       transactionName: 'GET /orders',
       environment: 'development',
@@ -128,7 +128,7 @@ describe('registerTransactionDurationRuleType', () => {
     expect(scheduleActions).toHaveBeenCalledTimes(1);
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       alertDetailsUrl: expect.stringContaining(
-        'http://localhost:5601/eyr/app/observability/alerts/'
+        'http://localhost:5601/eyr/app/observability/alerts/',
       ),
       environment: 'development',
       interval: `5 mins`,
@@ -194,7 +194,7 @@ describe('registerTransactionDurationRuleType', () => {
     expect(scheduleActions).toHaveBeenCalledTimes(1);
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       alertDetailsUrl: expect.stringContaining(
-        'http://localhost:5601/eyr/app/observability/alerts/'
+        'http://localhost:5601/eyr/app/observability/alerts/',
       ),
       environment: 'development',
       interval: `5 mins`,
@@ -268,7 +268,7 @@ describe('registerTransactionDurationRuleType', () => {
     expect(scheduleActions).toHaveBeenCalledTimes(1);
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       alertDetailsUrl: expect.stringContaining(
-        'http://localhost:5601/eyr/app/observability/alerts/'
+        'http://localhost:5601/eyr/app/observability/alerts/',
       ),
       environment: 'Not defined',
       interval: `5 mins`,

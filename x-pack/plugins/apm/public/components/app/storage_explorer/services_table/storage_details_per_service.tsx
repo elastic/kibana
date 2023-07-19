@@ -53,25 +53,25 @@ const ProcessorEventLabelMap = {
     'xpack.apm.storageExplorer.serviceDetails.transactions',
     {
       defaultMessage: 'Transactions',
-    }
+    },
   ),
   [ProcessorEvent.span]: i18n.translate(
     'xpack.apm.storageExplorer.serviceDetails.spans',
     {
       defaultMessage: 'Spans',
-    }
+    },
   ),
   [ProcessorEvent.metric]: i18n.translate(
     'xpack.apm.storageExplorer.serviceDetails.metrics',
     {
       defaultMessage: 'Metrics',
-    }
+    },
   ),
   [ProcessorEvent.error]: i18n.translate(
     'xpack.apm.storageExplorer.serviceDetails.errors',
     {
       defaultMessage: 'Errors',
-    }
+    },
   ),
 };
 
@@ -125,10 +125,10 @@ export function StorageDetailsPerService({
               kuery,
             },
           },
-        }
+        },
       );
     },
-    [indexLifecyclePhase, start, end, environment, kuery, serviceName]
+    [indexLifecyclePhase, start, end, environment, kuery, serviceName],
   );
 
   if (isPending(status)) {
@@ -148,7 +148,7 @@ export function StorageDetailsPerService({
       processorEventLabel: ProcessorEventLabelMap[processorEvent],
       docs,
       size,
-    })
+    }),
   );
 
   return (
@@ -163,7 +163,7 @@ export function StorageDetailsPerService({
                     'xpack.apm.storageExplorer.serviceDetails.title',
                     {
                       defaultMessage: 'Service storage details',
-                    }
+                    },
                   )}
                 </h4>
               </EuiTitle>
@@ -177,7 +177,7 @@ export function StorageDetailsPerService({
                   'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {
                     defaultMessage: 'Go to service overview',
-                  }
+                  },
                 )}
               </EuiLink>
             </EuiFlexItem>
@@ -261,7 +261,7 @@ export function StorageDetailsPerService({
                       </EuiFlexGrid>
                       <EuiSpacer />
                     </>
-                  )
+                  ),
                 )}
               </EuiPanel>
             </EuiFlexItem>

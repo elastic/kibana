@@ -56,7 +56,7 @@ describe('Service overview: Time Comparison', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -67,26 +67,26 @@ describe('Service overview: Time Comparison', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
+      '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
     ).as('latencyChartRequest');
     cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
-      'throughputChartRequest'
+      'throughputChartRequest',
     );
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
+      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
     ).as('errorRateChartRequest');
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*'
+      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*',
     ).as('transactionGroupsDetailedRequest');
     cy.intercept(
       'POST',
-      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*',
     ).as('errorGroupsDetailedRequest');
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*'
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*',
     ).as('instancesDetailedRequest');
     cy.loginAsViewerUser();
   });
@@ -118,7 +118,7 @@ describe('Service overview: Time Comparison', () => {
 
     cy.selectAbsoluteTimeRange(
       '2021-10-10T00:00:00.000Z',
-      '2021-10-20T00:00:00.000Z'
+      '2021-10-20T00:00:00.000Z',
     );
 
     cy.getByTestSubj('querySubmitButton').click();
@@ -126,11 +126,11 @@ describe('Service overview: Time Comparison', () => {
     cy.getByTestSubj('comparisonSelect').should('have.value', '864000000ms');
     cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
-      'Day before'
+      'Day before',
     );
     cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
-      'Week before'
+      'Week before',
     );
 
     cy.changeTimeRange('Today');
@@ -147,7 +147,7 @@ describe('Service overview: Time Comparison', () => {
     cy.getByTestSubj('comparisonSelect').should('contain.text', 'Week before');
     cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
-      'Day before'
+      'Day before',
     );
     cy.contains('Week before');
   });
@@ -160,7 +160,7 @@ describe('Service overview: Time Comparison', () => {
           rangeFrom: moment(end).subtract(15, 'minutes').toISOString(),
           rangeTo: end,
         },
-      })
+      }),
     );
     cy.contains('opbeans-java');
     cy.wait('@throughputChartRequest');
@@ -199,7 +199,7 @@ describe('Service overview: Time Comparison', () => {
           interceptions.map((interception) => {
             expect(interception.request.url).include(offset);
           });
-        }
+        },
       );
 
       cy.contains('opbeans-java');
@@ -213,7 +213,7 @@ describe('Service overview: Time Comparison', () => {
           interceptions.map((interception) => {
             expect(interception.request.url).not.include(offset);
           });
-        }
+        },
       );
     });
   });

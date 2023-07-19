@@ -103,7 +103,7 @@ export class AlertingPublicPlugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             AlertingPluginStart,
-            unknown
+            unknown,
           ];
 
           return renderApp({

@@ -68,10 +68,8 @@ export const createFilterInCellActionFactory = ({
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
-        const timelineFilterManager = getTimelineById(
-          store.getState(),
-          TimelineId.active
-        )?.filterManager;
+        const timelineFilterManager = getTimelineById(store.getState(), TimelineId.active)
+          ?.filterManager;
 
         addFilter({
           filterManager: timelineFilterManager,

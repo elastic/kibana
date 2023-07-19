@@ -32,7 +32,7 @@ export async function updateToV3({
 
   const activeV2Jobs = v2Jobs.filter(
     (job) =>
-      job.jobState === JOB_STATE.OPENED || job.jobState === JOB_STATE.OPENING
+      job.jobState === JOB_STATE.OPENED || job.jobState === JOB_STATE.OPENING,
   );
 
   const environments = uniq(v2Jobs.map((job) => job.environment));
@@ -51,9 +51,9 @@ export async function updateToV3({
             return esClient.ml.closeJob({
               job_id: job.jobId,
             });
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   }
 

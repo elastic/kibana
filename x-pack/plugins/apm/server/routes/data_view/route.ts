@@ -27,7 +27,7 @@ const staticDataViewRoute = createApmServerRoute({
       coreContext.savedObjects.client,
       coreContext.elasticsearch.client.asCurrentUser,
       request,
-      true
+      true,
     );
 
     const res = await createStaticDataView({

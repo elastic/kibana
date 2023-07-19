@@ -32,7 +32,7 @@ export function DatePicker({
   const { core, plugins } = useApmPluginContext();
 
   const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
-    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES,
   );
 
   const commonlyUsedRanges = timePickerQuickRanges.map(
@@ -40,7 +40,7 @@ export function DatePicker({
       start: from,
       end: to,
       label: display,
-    })
+    }),
   );
 
   function updateUrl(nextQuery: {

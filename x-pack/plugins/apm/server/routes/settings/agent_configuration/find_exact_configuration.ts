@@ -43,7 +43,7 @@ export async function findExactConfiguration({
   const [agentConfig, configsAppliedToAgentsThroughFleet] = await Promise.all([
     internalESClient.search<AgentConfiguration, typeof params>(
       'find_exact_agent_configuration',
-      params
+      params,
     ),
     getConfigsAppliedToAgentsThroughFleet(internalESClient),
   ]);

@@ -39,14 +39,14 @@ export type TimeSeries<
   TCoordinate extends { x: number } =
     | Coordinate
     | RectCoordinate
-    | BandCoordinate
+    | BandCoordinate,
 > = APMChartSpec<TCoordinate>;
 
 export interface APMChartSpec<
   TCoordinate extends { x: number } =
     | Coordinate
     | RectCoordinate
-    | BandCoordinate
+    | BandCoordinate,
 > {
   title: string;
   id?: string;

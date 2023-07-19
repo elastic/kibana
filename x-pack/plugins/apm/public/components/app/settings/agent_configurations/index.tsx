@@ -33,7 +33,7 @@ export function AgentConfigurations() {
     (callApmApi) =>
       callApmApi('GET /api/apm/settings/agent-configuration 2023-10-31'),
     [],
-    { preservePreviousData: false, showToastOnError: false }
+    { preservePreviousData: false, showToastOnError: false },
   );
 
   const hasConfigurations = !isEmpty(data.configurations);
@@ -46,7 +46,7 @@ export function AgentConfigurations() {
             <h2>
               {i18n.translate(
                 'xpack.apm.agentConfig.configurationsPanelTitle',
-                { defaultMessage: 'Configurations' }
+                { defaultMessage: 'Configurations' },
               )}
             </h2>
           </EuiTitle>
@@ -91,7 +91,7 @@ function CreateConfigurationButton() {
                 {
                   defaultMessage:
                     "Your user role doesn't have permissions to create agent configurations",
-                }
+                },
               )
             }
           >

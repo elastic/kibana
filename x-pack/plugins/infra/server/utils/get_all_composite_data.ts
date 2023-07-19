@@ -11,7 +11,7 @@ import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 export const getAllCompositeData = async <
   Aggregation = undefined,
   Bucket = {},
-  Options extends object = {}
+  Options extends object = {},
 >(
   esClientSearch: (
     options: Options

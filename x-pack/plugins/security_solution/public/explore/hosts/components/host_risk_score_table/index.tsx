@@ -60,7 +60,7 @@ interface HostRiskScoreTableProps {
 export type HostRiskScoreColumns = [
   Columns<RiskScoreItem[RiskScoreFields.hostName]>,
   Columns<RiskScoreItem[RiskScoreFields.hostRiskScore]>,
-  Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
+  Columns<RiskScoreItem[RiskScoreFields.hostRisk]>,
 ];
 
 const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({

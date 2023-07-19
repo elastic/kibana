@@ -25,7 +25,7 @@ import { SloCallout } from '../../shared/slo_callout';
 export function TransactionDetails() {
   const { path, query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
   const {
     transactionName,
@@ -60,13 +60,13 @@ export function TransactionDetails() {
         query,
       }),
     }),
-    [apmRouter, path, query, transactionName]
+    [apmRouter, path, query, transactionName],
   );
 
   const isServerless = isServerlessAgent(serverlessType);
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
-    false
+    false,
   );
 
   return (

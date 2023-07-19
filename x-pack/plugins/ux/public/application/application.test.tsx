@@ -131,7 +131,7 @@ export const mockApmPluginContextValue = {
 describe('renderUxApp', () => {
   it('has an error boundary for the UXAppRoot', async () => {
     const wrapper = mount(
-      <UXAppRoot {...(mockApmPluginContextValue as any)} />
+      <UXAppRoot {...(mockApmPluginContextValue as any)} />,
     );
 
     wrapper
@@ -141,7 +141,7 @@ describe('renderUxApp', () => {
     expect(wrapper.find(RumHome)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
     expect(wrapper.find(EuiErrorBoundary).text()).toMatch(
-      /Error: Oh no, an unexpected error!/
+      /Error: Oh no, an unexpected error!/,
     );
   });
 });

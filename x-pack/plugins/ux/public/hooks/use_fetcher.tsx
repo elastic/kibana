@@ -29,7 +29,7 @@ export interface FetcherResult<Data> {
 }
 
 function getDetailsFromErrorResponse(
-  error: IHttpFetchError<ResponseErrorBody>
+  error: IHttpFetchError<ResponseErrorBody>,
 ) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
@@ -46,7 +46,7 @@ function getDetailsFromErrorResponse(
 }
 
 const createAutoAbortedAPMClient = (
-  signal: AbortSignal
+  signal: AbortSignal,
 ): AutoAbortedAPMClient => {
   return ((endpoint, options) => {
     return callApmApi(endpoint, {
@@ -70,7 +70,7 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
-  } = {}
+  } = {},
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;

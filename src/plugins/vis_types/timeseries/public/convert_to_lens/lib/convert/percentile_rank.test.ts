@@ -85,7 +85,7 @@ describe('convertToPercentileRankColumn', () => {
         | Partial<PercentileRanksColumnWithCommonMeta>
         | Partial<PercentileRanksColumnWithExtendedMeta>
         | null
-      )
+      ),
     ]
   >([
     ['null if value is undefined', [undefined, series, metric, dataView], null],
@@ -152,7 +152,7 @@ describe('convertToPercentileRankColumns', () => {
     [
       string,
       Parameters<typeof convertToPercentileRankColumns>,
-      Array<Partial<PercentileRanksColumnWithExtendedMeta> | null> | null
+      Array<Partial<PercentileRanksColumnWithExtendedMeta> | null> | null,
     ]
   >([
     ['null if values arr is empty', [{ series, metric, dataView }, {}], null],

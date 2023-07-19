@@ -256,9 +256,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [AgentID],
@@ -275,9 +273,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           user_id: testUser.username,
@@ -293,9 +289,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ comment }),
@@ -314,9 +308,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           action_id: expect.any(String),
@@ -341,9 +333,7 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           timeout: 300,
@@ -362,9 +352,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [agentId],
@@ -379,9 +367,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -398,9 +384,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -417,9 +401,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -436,9 +418,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -455,9 +435,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -474,9 +452,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -493,9 +469,7 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -517,9 +491,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -552,9 +524,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -588,9 +558,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -626,9 +594,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -663,9 +629,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -698,9 +662,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -735,9 +697,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -773,9 +733,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -813,9 +771,7 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             signed: {

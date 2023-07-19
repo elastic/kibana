@@ -46,7 +46,7 @@ const listCustomLinksRoute = createApmServerRoute({
     query: filterOptionsRt,
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     customLinks: CustomLink[];
   }> => {

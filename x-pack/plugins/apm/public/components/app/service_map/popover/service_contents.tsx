@@ -46,7 +46,7 @@ export function ServiceContents({
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
   );
 
   if (
@@ -82,11 +82,11 @@ export function ServiceContents({
                     : undefined,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, serviceName, start, end, offset, comparisonEnabled]
+    [environment, serviceName, start, end, offset, comparisonEnabled],
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

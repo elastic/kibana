@@ -52,7 +52,7 @@ export function TransactionOverview() {
 
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
-    false
+    false,
   );
 
   return (

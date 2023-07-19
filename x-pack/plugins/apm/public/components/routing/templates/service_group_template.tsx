@@ -49,7 +49,7 @@ export function ServiceGroupTemplate({
         });
       }
     },
-    [serviceGroupId]
+    [serviceGroupId],
   );
 
   const serviceGroupName = data?.serviceGroup.groupName;
@@ -109,7 +109,7 @@ export function ServiceGroupTemplate({
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceGroupName, serviceGroupsLink]
+    [query, router, selectedTab, serviceGroupName, serviceGroupsLink],
   );
   return (
     <ApmMainTemplate
@@ -124,7 +124,7 @@ export function ServiceGroupTemplate({
                     <EuiIcon size="s" type="arrowLeft" />{' '}
                     {i18n.translate(
                       'xpack.apm.serviceGroups.breadcrumb.return',
-                      { defaultMessage: 'Return to service groups' }
+                      { defaultMessage: 'Return to service groups' },
                     )}
                   </>
                 ),

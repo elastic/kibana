@@ -52,7 +52,7 @@ export function useTabs({
       from: start,
       to: end,
     }),
-    [start, end]
+    [start, end],
   );
 
   const hostsFilter = useMemo(
@@ -68,7 +68,7 @@ export function useTabs({
         minimum_should_match: 1,
       },
     }),
-    [hostNames]
+    [hostNames],
   );
   const podsFilter = useMemo(
     () => ({
@@ -76,7 +76,7 @@ export function useTabs({
         filter: [{ terms: { [KUBERNETES_POD_NAME]: podNames } }],
       },
     }),
-    [podNames]
+    [podNames],
   );
   const containersFilter = useMemo(
     () => ({
@@ -84,7 +84,7 @@ export function useTabs({
         filter: [{ terms: { [CONTAINER_ID]: containerIds } }],
       },
     }),
-    [containerIds]
+    [containerIds],
   );
 
   const containerMetricsTable = (

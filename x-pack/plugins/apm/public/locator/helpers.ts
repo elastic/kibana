@@ -43,7 +43,7 @@ export function getPathForServiceDetail(
   }: TimePickerTimeDefaults & {
     isComparisonEnabledByDefault: boolean;
     defaultEnvironment: string;
-  }
+  },
 ) {
   const decodedPayload = APMLocatorPayloadValidator.decode(payload);
   if (!isRight(decodedPayload)) {

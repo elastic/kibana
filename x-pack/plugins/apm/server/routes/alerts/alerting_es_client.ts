@@ -13,7 +13,7 @@ export type APMEventESSearchRequestParams = ESSearchRequest & {
 };
 
 export async function alertingEsClient<
-  TParams extends APMEventESSearchRequestParams
+  TParams extends APMEventESSearchRequestParams,
 >({
   scopedClusterClient,
   params,

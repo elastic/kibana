@@ -32,7 +32,7 @@ export async function createApmSourceMap({
   serviceVersion: string;
 }) {
   const { contentEncoded, contentHash } = await getEncodedContent(
-    sourceMapContent
+    sourceMapContent,
   );
   const doc: ApmSourceMap = {
     fleet_id: fleetId,

@@ -51,7 +51,7 @@ export const getHostsColumns = (): [
   Columns<string>,
   Columns<string>,
   Columns<string>,
-  Columns<string>
+  Columns<string>,
 ] => [
   {
     field: 'node.host.name',
@@ -88,7 +88,7 @@ export const sortedHosts: [Columns<string>, Columns<string>, Columns<string>, Co
     Columns<string>,
     Columns<string>,
     Columns<string>,
-    Columns<string>
+    Columns<string>,
   ];
 
 export const rowItems: ItemsPerRow[] = [

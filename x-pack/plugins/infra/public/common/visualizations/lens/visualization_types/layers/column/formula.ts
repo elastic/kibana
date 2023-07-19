@@ -10,7 +10,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FormulaConfig, ChartColumn } from '../../../../types';
 
 export class FormulaColumn implements ChartColumn {
-  constructor(private formulaConfig: FormulaConfig, private formulaAPI: FormulaPublicApi) {}
+  constructor(
+    private formulaConfig: FormulaConfig,
+    private formulaAPI: FormulaPublicApi
+  ) {}
 
   getFormulaConfig(): FormulaConfig {
     return this.formulaConfig;

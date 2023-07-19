@@ -19,7 +19,7 @@ import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 
 jest.mock('../alerts_client');
 
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {

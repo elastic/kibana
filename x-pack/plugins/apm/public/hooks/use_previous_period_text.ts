@@ -13,7 +13,7 @@ import { getComparisonOptions } from '../components/shared/time_comparison/get_c
 
 const fallbackPreviousPeriodText = i18n.translate(
   'xpack.apm.chart.comparison.defaultPreviousPeriodLabel',
-  { defaultMessage: 'Previous period' }
+  { defaultMessage: 'Previous period' },
 );
 
 export const usePreviousPeriodLabel = () => {
@@ -23,7 +23,7 @@ export const usePreviousPeriodLabel = () => {
     '/services',
     '/dependencies/*',
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}/*'
+    '/mobile-services/{serviceName}/*',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -32,7 +32,7 @@ export const usePreviousPeriodLabel = () => {
     const timeComparisonOptions = getComparisonOptions({ start, end });
     const comparisonPeriodText =
       timeComparisonOptions.find(
-        (d) => d.value === offset || d.value.endsWith('ms')
+        (d) => d.value === offset || d.value.endsWith('ms'),
       )?.text ?? fallbackPreviousPeriodText;
     return comparisonPeriodText;
   }, [start, end, offset]);

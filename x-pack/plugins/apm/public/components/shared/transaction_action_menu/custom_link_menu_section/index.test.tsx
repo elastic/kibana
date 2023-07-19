@@ -46,7 +46,7 @@ describe('Custom links', () => {
 
     const component = render(
       <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     expectTextsInDocument(component, [
@@ -64,7 +64,7 @@ describe('Custom links', () => {
 
     const { getByTestId } = render(
       <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
   });
@@ -87,7 +87,7 @@ describe('Custom links', () => {
 
     const component = render(
       <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
     expectTextsNotInDocument(component, ['qux']);
@@ -111,7 +111,7 @@ describe('Custom links', () => {
 
     const component = render(
       <CustomLinkMenuSection transaction={transaction} />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     expect(component.getAllByRole('listitem').length).toEqual(3);
@@ -135,7 +135,7 @@ describe('Custom links', () => {
 
       const component = render(
         <CustomLinkMenuSection transaction={transaction} />,
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
 
       expectTextsInDocument(component, ['Create custom link']);
@@ -160,7 +160,7 @@ describe('Custom links', () => {
 
       const component = render(
         <CustomLinkMenuSection transaction={transaction} />,
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
       expectTextsInDocument(component, ['Create']);
       expectTextsNotInDocument(component, ['Create custom link']);

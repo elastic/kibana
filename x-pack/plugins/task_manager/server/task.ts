@@ -90,7 +90,7 @@ export interface FailedTaskResult {
 type IndirectParamsType = Record<string, unknown>;
 
 export interface LoadedIndirectParams<
-  IndirectParams extends IndirectParamsType = IndirectParamsType
+  IndirectParams extends IndirectParamsType = IndirectParamsType,
 > {
   [key: string]: unknown;
   indirectParams: IndirectParams;

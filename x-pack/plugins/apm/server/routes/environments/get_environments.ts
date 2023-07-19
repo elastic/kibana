@@ -75,7 +75,7 @@ export async function getEnvironments({
   const environmentsBuckets = aggs?.environments.buckets || [];
 
   const environments = environmentsBuckets.map(
-    (environmentBucket) => environmentBucket.key as string
+    (environmentBucket) => environmentBucket.key as string,
   );
 
   return environments as Environment[];

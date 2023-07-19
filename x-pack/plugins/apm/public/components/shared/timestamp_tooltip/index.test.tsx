@@ -41,7 +41,7 @@ describe('TimestampTooltip', () => {
     expect(
       shallow(<TimestampTooltip time={timestamp} />)
         .find('EuiToolTip')
-        .prop('content')
+        .prop('content'),
     ).toBe('Oct 10, 2019, 08:06:40.123 (UTC-7)');
   });
 
@@ -49,7 +49,7 @@ describe('TimestampTooltip', () => {
     expect(
       shallow(<TimestampTooltip time={timestamp} timeUnit="seconds" />)
         .find('EuiToolTip')
-        .prop('content')
+        .prop('content'),
     ).toBe('Oct 10, 2019, 08:06:40 (UTC-7)');
   });
 
@@ -57,7 +57,7 @@ describe('TimestampTooltip', () => {
     expect(
       shallow(<TimestampTooltip time={timestamp} timeUnit="minutes" />)
         .find('EuiToolTip')
-        .prop('content')
+        .prop('content'),
     ).toBe('Oct 10, 2019, 08:06 (UTC-7)');
   });
 });

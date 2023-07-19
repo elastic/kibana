@@ -40,7 +40,7 @@ describe('getServiceAnnotations', () => {
             setTimeout(() => {
               reject(new Error('BOOM'));
             }, 20);
-          })
+          }),
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
@@ -48,7 +48,7 @@ describe('getServiceAnnotations', () => {
           setTimeout(() => {
             resolve(storedAnnotations);
           }, 10);
-        })
+        }),
     );
 
     const annotations = await getServiceAnnotations({
@@ -76,7 +76,7 @@ describe('getServiceAnnotations', () => {
             setTimeout(() => {
               reject(new Error('BOOM'));
             }, 10);
-          })
+          }),
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
@@ -84,7 +84,7 @@ describe('getServiceAnnotations', () => {
           setTimeout(() => {
             resolve(storedAnnotations);
           }, 20);
-        })
+        }),
     );
 
     const annotations = await getServiceAnnotations({
@@ -112,7 +112,7 @@ describe('getServiceAnnotations', () => {
             setTimeout(() => {
               reject(new Error('BOOM'));
             }, 10);
-          })
+          }),
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
@@ -120,7 +120,7 @@ describe('getServiceAnnotations', () => {
           setTimeout(() => {
             resolve([] as Annotation[]);
           }, 20);
-        })
+        }),
     );
 
     expect(
@@ -134,7 +134,7 @@ describe('getServiceAnnotations', () => {
         logger: {} as Logger,
         annotationsClient: {} as ScopedAnnotationsClient,
         apmEventClient: {} as APMEventClient,
-      })
+      }),
     ).rejects.toThrow('BOOM');
   });
 
@@ -147,11 +147,11 @@ describe('getServiceAnnotations', () => {
             setTimeout(() => {
               reject(
                 new WrappedElasticsearchClientError(
-                  new errors.RequestAbortedError('foo')
-                )
+                  new errors.RequestAbortedError('foo'),
+                ),
               );
             }, 20);
-          })
+          }),
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
@@ -159,7 +159,7 @@ describe('getServiceAnnotations', () => {
           setTimeout(() => {
             resolve([] as Annotation[]);
           }, 10);
-        })
+        }),
     );
 
     const annotations = await getServiceAnnotations({
@@ -185,7 +185,7 @@ describe('getServiceAnnotations', () => {
             setTimeout(() => {
               reject(new Error('BOOM'));
             }, 20);
-          })
+          }),
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
@@ -193,7 +193,7 @@ describe('getServiceAnnotations', () => {
           setTimeout(() => {
             resolve([] as Annotation[]);
           }, 10);
-        })
+        }),
     );
 
     expect(
@@ -207,7 +207,7 @@ describe('getServiceAnnotations', () => {
         logger: {} as Logger,
         annotationsClient: {} as ScopedAnnotationsClient,
         apmEventClient: {} as APMEventClient,
-      })
+      }),
     ).rejects.toThrow('BOOM');
   });
 
@@ -219,16 +219,16 @@ describe('getServiceAnnotations', () => {
           new Promise((resolve, reject) => {
             reject(
               new WrappedElasticsearchClientError(
-                new errors.RequestAbortedError('foo')
-              )
+                new errors.RequestAbortedError('foo'),
+              ),
             );
-          })
+          }),
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
         new Promise((resolve) => {
           resolve(storedAnnotations);
-        })
+        }),
     );
 
     const annotations = await getServiceAnnotations({

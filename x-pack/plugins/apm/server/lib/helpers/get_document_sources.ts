@@ -174,7 +174,7 @@ export async function getDocumentSources({
   });
 
   const hasAnySourceDocBefore = checkedSources.some(
-    (source) => source.hasDocBefore
+    (source) => source.hasDocBefore,
   );
 
   const sourcesWithHasDocs = checkedSources.map((checkedSource) => {
@@ -219,7 +219,7 @@ export async function getDocumentSources({
                 eSource.rollupInterval === rollupInterval &&
                 eSource.checkSummaryFieldExists
               );
-            })?.hasDocs
+            })?.hasDocs,
           ),
       };
     });

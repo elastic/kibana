@@ -46,11 +46,11 @@ export function TraceLink() {
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [traceId, start, end]
+    [traceId, start, end],
   );
   if (traceId && status === FETCH_STATUS.SUCCESS) {
     const to = data.transaction

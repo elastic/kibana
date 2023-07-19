@@ -20,7 +20,7 @@ const MAP_SHAPES = {
   DIAMOND: 'diamond',
   TRIANGLE: 'triangle',
 } as const;
-type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
+type MapShapes = (typeof MAP_SHAPES)[keyof typeof MAP_SHAPES];
 
 function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
   const type = el.data('type');

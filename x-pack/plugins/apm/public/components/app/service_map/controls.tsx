@@ -43,7 +43,7 @@ const steps = 5;
 function doZoom(
   cy: cytoscape.Core | undefined,
   increment: number,
-  duration: number
+  duration: number,
 ) {
   if (cy) {
     const level = cy.zoom() + increment;
@@ -78,9 +78,9 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
       setDownloadUrl(
         elementsJson.length > 0 && debug
           ? `data:application/json;charset=utf-8,${encodeURIComponent(
-              JSON.stringify({ elements: elementsJson }, null, '  ')
+              JSON.stringify({ elements: elementsJson }, null, '  '),
             )}`
-          : undefined
+          : undefined,
       );
     };
 
@@ -110,7 +110,7 @@ export function Controls() {
   } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
   );
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);

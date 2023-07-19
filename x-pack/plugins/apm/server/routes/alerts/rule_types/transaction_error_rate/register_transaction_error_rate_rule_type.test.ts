@@ -118,10 +118,10 @@ describe('Transaction error rate alert', () => {
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo'
+      'foo_env-foo_type-foo',
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
+      'bar_env-bar_type-bar',
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -218,10 +218,10 @@ describe('Transaction error rate alert', () => {
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo_tx-name-foo'
+      'foo_env-foo_type-foo_tx-name-foo',
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar_tx-name-bar'
+      'bar_env-bar_type-bar_tx-name-bar',
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -314,10 +314,10 @@ describe('Transaction error rate alert', () => {
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo'
+      'foo_env-foo_type-foo',
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
+      'bar_env-bar_type-bar',
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -409,10 +409,10 @@ describe('Transaction error rate alert', () => {
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_ENVIRONMENT_NOT_DEFINED_type-foo'
+      'foo_ENVIRONMENT_NOT_DEFINED_type-foo',
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_ENVIRONMENT_NOT_DEFINED_type-bar'
+      'bar_ENVIRONMENT_NOT_DEFINED_type-bar',
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {

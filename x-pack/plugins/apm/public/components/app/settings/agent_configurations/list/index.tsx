@@ -46,13 +46,13 @@ export function AgentConfigurationList({
   const canSave = core.application.capabilities.apm.save;
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
-    null
+    null,
   );
 
   const apmRouter = useApmRouter();
 
   const createAgentConfigurationHref = apmRouter.link(
-    '/settings/agent-configuration/create'
+    '/settings/agent-configuration/create',
   );
 
   const emptyStatePrompt = (
@@ -62,7 +62,7 @@ export function AgentConfigurationList({
         <h2>
           {i18n.translate(
             'xpack.apm.agentConfig.configTable.emptyPromptTitle',
-            { defaultMessage: 'No configurations found.' }
+            { defaultMessage: 'No configurations found.' },
           )}
         </h2>
       }
@@ -75,7 +75,7 @@ export function AgentConfigurationList({
               {
                 defaultMessage:
                   "You don't have permissions to create agent configurations",
-              }
+              },
             )
           }
         >
@@ -88,7 +88,7 @@ export function AgentConfigurationList({
           >
             {i18n.translate(
               'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
-              { defaultMessage: 'Create configuration' }
+              { defaultMessage: 'Create configuration' },
             )}
           </EuiButton>
         </EuiToolTip>
@@ -107,7 +107,7 @@ export function AgentConfigurationList({
               {
                 defaultMessage:
                   'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.',
-              }
+              },
             )}
           </p>
         </>
@@ -136,11 +136,11 @@ export function AgentConfigurationList({
             appliedByAgent
               ? i18n.translate(
                   'xpack.apm.agentConfig.configTable.appliedTooltipMessage',
-                  { defaultMessage: 'Applied by at least one agent' }
+                  { defaultMessage: 'Applied by at least one agent' },
                 )
               : i18n.translate(
                   'xpack.apm.agentConfig.configTable.notAppliedTooltipMessage',
-                  { defaultMessage: 'Not yet applied by any agents' }
+                  { defaultMessage: 'Not yet applied by any agents' },
                 )
           }
         >
@@ -154,7 +154,7 @@ export function AgentConfigurationList({
       field: 'service.name',
       name: i18n.translate(
         'xpack.apm.agentConfig.configTable.serviceNameColumnLabel',
-        { defaultMessage: 'Service name' }
+        { defaultMessage: 'Service name' },
       ),
       sortable: true,
       render: (_, config: Config) => (
@@ -178,7 +178,7 @@ export function AgentConfigurationList({
       field: 'service.environment',
       name: i18n.translate(
         'xpack.apm.agentConfig.configTable.environmentColumnLabel',
-        { defaultMessage: 'Service environment' }
+        { defaultMessage: 'Service environment' },
       ),
       sortable: true,
       render: (_, { service }) => getOptionLabel(service.environment),
@@ -188,7 +188,7 @@ export function AgentConfigurationList({
       field: '@timestamp',
       name: i18n.translate(
         'xpack.apm.agentConfig.configTable.lastUpdatedColumnLabel',
-        { defaultMessage: 'Last updated' }
+        { defaultMessage: 'Last updated' },
       ),
       sortable: true,
       render: (_, item) => (

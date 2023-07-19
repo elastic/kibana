@@ -20,7 +20,7 @@ const List = euiStyled.ul`
   box-shadow: 0 ${({ theme }) =>
     `${theme.eui.euiSizeXS} ${theme.eui.euiSizeXL} ${tint(
       0.9,
-      theme.eui.euiColorFullShade
+      theme.eui.euiColorFullShade,
     )}`};
   position: absolute;
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
@@ -43,7 +43,7 @@ class Suggestions extends Component {
 
     const scrollTop = Math.max(
       Math.min(parent.scrollTop, child.offsetTop),
-      child.offsetTop + child.offsetHeight - parent.offsetHeight
+      child.offsetTop + child.offsetHeight - parent.offsetHeight,
     );
 
     parent.scrollTop = scrollTop;

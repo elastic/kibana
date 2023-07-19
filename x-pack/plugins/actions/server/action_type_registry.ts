@@ -108,7 +108,7 @@ export class ActionTypeRegistry {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
     if (this.has(actionType.id)) {
       throw new Error(
@@ -178,7 +178,7 @@ export class ActionTypeRegistry {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(id: string): ActionType<Config, Secrets, Params, ExecutorResultData> {
     if (!this.has(id)) {
       throw Boom.badRequest(

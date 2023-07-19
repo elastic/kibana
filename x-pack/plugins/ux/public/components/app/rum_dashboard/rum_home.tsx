@@ -46,7 +46,7 @@ export function RumHome() {
               {
                 defaultMessage:
                   'Enable RUM with the APM agent to collect user experience data.',
-              }
+              },
             ),
             href: http.basePath.prepend(`/app/home#/tutorial/apm`),
           },

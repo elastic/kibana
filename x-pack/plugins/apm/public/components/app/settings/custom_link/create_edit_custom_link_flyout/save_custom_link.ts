@@ -68,7 +68,7 @@ export async function saveCustomLink({
           values: {
             errorMessage: error.message,
           },
-        }
+        },
       ),
     });
   }

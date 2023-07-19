@@ -36,7 +36,7 @@ import { SettingFormRow } from './setting_form_row';
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v != null && v !== '')
+    Object.entries(obj).filter(([_, v]) => v != null && v !== ''),
   );
 }
 
@@ -102,7 +102,7 @@ export function SettingsPage({
       <EuiCallOut
         title={i18n.translate(
           'xpack.apm.agentConfig.settingsPage.notFound.title',
-          { defaultMessage: 'Sorry, there was an error' }
+          { defaultMessage: 'Sorry, there was an error' },
         )}
         color="danger"
         iconType="warning"
@@ -110,7 +110,7 @@ export function SettingsPage({
         <p>
           {i18n.translate(
             'xpack.apm.agentConfig.settingsPage.notFound.message',
-            { defaultMessage: 'The requested configuration does not exist' }
+            { defaultMessage: 'The requested configuration does not exist' },
           )}
         </p>
       </EuiCallOut>
@@ -140,7 +140,7 @@ export function SettingsPage({
                 title={isLoading ? '-' : getOptionLabel(newConfig.service.name)}
                 description={i18n.translate(
                   'xpack.apm.agentConfig.chooseService.service.name.label',
-                  { defaultMessage: 'Service name' }
+                  { defaultMessage: 'Service name' },
                 )}
               />
             </EuiFlexItem>
@@ -154,7 +154,7 @@ export function SettingsPage({
                 }
                 description={i18n.translate(
                   'xpack.apm.agentConfig.chooseService.service.environment.label',
-                  { defaultMessage: 'Environment' }
+                  { defaultMessage: 'Environment' },
                 )}
               />
             </EuiFlexItem>
@@ -167,7 +167,7 @@ export function SettingsPage({
                 >
                   {i18n.translate(
                     'xpack.apm.agentConfig.chooseService.editButton',
-                    { defaultMessage: 'Edit' }
+                    { defaultMessage: 'Edit' },
                   )}
                 </EuiButton>
               )}
@@ -197,7 +197,7 @@ export function SettingsPage({
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate(
             'xpack.apm.agentConfig.settingsPage.saveButton',
-            { defaultMessage: 'Save configuration' }
+            { defaultMessage: 'Save configuration' },
           )}
           unsavedChangesCount={unsavedChangesCount}
         />

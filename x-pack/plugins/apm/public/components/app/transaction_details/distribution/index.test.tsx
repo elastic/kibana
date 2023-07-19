@@ -94,7 +94,7 @@ describe('transaction_details/distribution', () => {
           }}
         />,
 
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
 
       await waitFor(() => {
@@ -131,7 +131,7 @@ describe('transaction_details/distribution', () => {
               error: undefined,
             }}
           />
-        </Wrapper>
+        </Wrapper>,
       );
 
       await waitFor(() => {

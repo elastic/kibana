@@ -38,7 +38,7 @@ function FormRow({
       return (
         <AdvancedOptions>
           {row.settings.map((advancedSetting) =>
-            getSettingFormRow(advancedSetting)
+            getSettingFormRow(advancedSetting),
           )}
         </AdvancedOptions>
       );
@@ -116,20 +116,20 @@ export function SettingsForm({ settingsSection, vars, onChange }: Props) {
                     'xpack.apm.fleet_integration.settings.platinumBadgeLabel',
                     {
                       defaultMessage: 'Platinum',
-                    }
+                    },
                   )}
                   title={i18n.translate(
                     'xpack.apm.fleet_integration.settings.platinumBadgeTooltipTitle',
                     {
                       defaultMessage: 'Platinum license required',
-                    }
+                    },
                   )}
                   tooltipContent={i18n.translate(
                     'xpack.apm.fleet_integration.settings.platinumBadgeTooltipDescription',
                     {
                       defaultMessage:
                         'Configurations are saved but ignored if your Kibana licence is not Platinum.',
-                    }
+                    },
                   )}
                 />
               )}
@@ -175,7 +175,7 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
               >
                 {i18n.translate(
                   'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
-                  { defaultMessage: 'Advanced options' }
+                  { defaultMessage: 'Advanced options' },
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>

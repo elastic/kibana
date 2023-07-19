@@ -22,9 +22,12 @@ jest.doMock('./utils', () => {
 
 const realActions = jest.requireActual('./actions');
 
-export const ActionMocks = Object.keys(realActions).reduce((mocks, key) => {
-  mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
-  return mocks;
-}, {} as Record<string, jest.MockedFunction<any>>);
+export const ActionMocks = Object.keys(realActions).reduce(
+  (mocks, key) => {
+    mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
+    return mocks;
+  },
+  {} as Record<string, jest.MockedFunction<any>>
+);
 
 jest.doMock('./actions', () => ActionMocks);

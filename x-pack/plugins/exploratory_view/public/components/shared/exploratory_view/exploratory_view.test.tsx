@@ -25,7 +25,7 @@ jest.spyOn(obsHooks, 'useGetUserCasesPermissions').mockImplementation(
   () =>
     ({
       useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
-    } as any)
+    }) as any
 );
 
 describe('ExploratoryView', () => {

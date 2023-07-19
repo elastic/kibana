@@ -21,7 +21,7 @@ import { ExpressionsInspectorAdapter } from '../util';
  */
 export interface ExecutionContext<
   InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableRecord = SerializableRecord
+  ExecutionContextSearch extends SerializableRecord = SerializableRecord,
 > {
   /**
    * Get search context of the expression.

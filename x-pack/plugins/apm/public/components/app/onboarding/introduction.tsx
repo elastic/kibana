@@ -40,7 +40,7 @@ export function Introduction({ isBeta, guideLink }: IntroductionProps) {
         'xpack.apm.onboarding.introduction.imageAltDescription',
         {
           defaultMessage: 'screenshot of primary dashboard.',
-        }
+        },
       )}
       url={previewImage}
     />,
@@ -57,7 +57,7 @@ It allows you to monitor the performance of thousands of applications in real ti
       values: {
         learnMoreLink: guideLink,
       },
-    }
+    },
   );
 
   return (

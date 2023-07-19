@@ -48,7 +48,7 @@ describe('getPercentageColumnFormulaColumn', () => {
       string,
       Parameters<typeof getPercentageColumnFormulaColumn>,
       () => void,
-      Partial<FormulaColumn> | null
+      Partial<FormulaColumn> | null,
     ]
   >([
     [

@@ -26,7 +26,7 @@ export type NonEmptyArray<T> = [T, ...T[]];
 export interface NodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   /**
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
@@ -43,7 +43,7 @@ export interface NodeProps<
 export interface NodePropsEnhanced<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends NodeProps<LinkId, Id, ChildrenId> {
   /**
    * This function correspond to the same "itemRender" function that can be passed to
@@ -88,7 +88,7 @@ export interface RecentlyAccessedDefinition extends RecentlyAccessedProps {
 export interface GroupDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends NodeDefinition<LinkId, Id, ChildrenId> {
   type: 'navGroup';
   /**
@@ -112,13 +112,13 @@ export interface GroupDefinition<
 export type RootNavigationItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = RecentlyAccessedDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
 
 export type ProjectNavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = Array<Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>>;
 
 /**

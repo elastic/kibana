@@ -22,7 +22,7 @@ export enum PalleteColors {
 
 export function getLayerStyle(
   fieldName: string,
-  color: PalleteColors
+  color: PalleteColors,
 ): VectorStyleDescriptor {
   return {
     type: 'VECTOR',

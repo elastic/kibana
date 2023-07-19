@@ -27,7 +27,7 @@ import type { CommandExecutionComponentProps } from '../../console';
 
 export interface ConsoleActionSubmitter<
   TActionOutputContent extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   /**
    * The ui to be returned to the console. This UI will display different states of the action,
@@ -42,7 +42,7 @@ export interface ConsoleActionSubmitter<
  */
 export interface CommandResponseActionApiState<
   TActionOutputContent extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   actionApiState?: {
     request: {
@@ -58,7 +58,7 @@ export interface CommandResponseActionApiState<
 export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TActionOutputContent extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > extends Pick<
     CommandExecutionComponentProps<
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,7 +100,7 @@ export interface UseConsoleActionSubmitterOptions<
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
   TActionOutputContent extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 >({
   actionCreator,
   actionRequestBody,

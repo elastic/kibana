@@ -318,15 +318,18 @@ export function Chart({
                     />
                   </EuiFlexItem>
                 )}
-                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
-                  <EuiFlexItem css={suggestionsSelectorItemCss}>
-                    <SuggestionSelector
-                      suggestions={allSuggestions}
-                      activeSuggestion={currentSuggestion}
-                      onSuggestionChange={onSuggestionSelectorChange}
-                    />
-                  </EuiFlexItem>
-                )}
+                {chartVisible &&
+                  currentSuggestion &&
+                  allSuggestions &&
+                  allSuggestions?.length > 1 && (
+                    <EuiFlexItem css={suggestionsSelectorItemCss}>
+                      <SuggestionSelector
+                        suggestions={allSuggestions}
+                        activeSuggestion={currentSuggestion}
+                        onSuggestionChange={onSuggestionSelectorChange}
+                      />
+                    </EuiFlexItem>
+                  )}
                 {canSaveVisualization && (
                   <>
                     <EuiFlexItem grow={false} css={chartToolButtonCss}>

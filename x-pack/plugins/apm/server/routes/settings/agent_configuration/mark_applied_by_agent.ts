@@ -30,6 +30,6 @@ export async function markAppliedByAgent({
 
   return internalESClient.index<AgentConfiguration>(
     'mark_configuration_applied_by_agent',
-    params
+    params,
   );
 }

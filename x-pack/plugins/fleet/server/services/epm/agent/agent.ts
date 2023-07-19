@@ -66,37 +66,40 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
 
 function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
   const yamlValues: { [k: string]: any } = {};
-  const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
-    // support variables with . like key.patterns
-    const keyParts = key.split('.');
-    const lastKeyPart = keyParts.pop();
+  const vars = Object.entries(variables).reduce(
+    (acc, [key, recordEntry]) => {
+      // support variables with . like key.patterns
+      const keyParts = key.split('.');
+      const lastKeyPart = keyParts.pop();
 
-    if (!lastKeyPart || !isValidKey(lastKeyPart)) {
-      throw new Error('Invalid key');
-    }
-
-    let varPart = acc;
-    for (const keyPart of keyParts) {
-      if (!isValidKey(keyPart)) {
+      if (!lastKeyPart || !isValidKey(lastKeyPart)) {
         throw new Error('Invalid key');
       }
-      if (!varPart[keyPart]) {
-        varPart[keyPart] = {};
-      }
-      varPart = varPart[keyPart];
-    }
 
-    if (recordEntry.type && recordEntry.type === 'yaml') {
-      const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
-    } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
-    } else {
-      varPart[lastKeyPart] = recordEntry.value;
-    }
-    return acc;
-  }, {} as { [k: string]: any });
+      let varPart = acc;
+      for (const keyPart of keyParts) {
+        if (!isValidKey(keyPart)) {
+          throw new Error('Invalid key');
+        }
+        if (!varPart[keyPart]) {
+          varPart[keyPart] = {};
+        }
+        varPart = varPart[keyPart];
+      }
+
+      if (recordEntry.type && recordEntry.type === 'yaml') {
+        const yamlKeyPlaceholder = `##${key}##`;
+        varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
+        yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+      } else if (recordEntry.value && recordEntry.value.isSecretRef) {
+        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      } else {
+        varPart[lastKeyPart] = recordEntry.value;
+      }
+      return acc;
+    },
+    {} as { [k: string]: any }
+  );
 
   return { vars, yamlValues };
 }

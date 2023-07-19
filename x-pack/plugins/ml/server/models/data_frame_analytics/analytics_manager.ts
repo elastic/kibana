@@ -36,7 +36,10 @@ export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
 
-  constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
+  constructor(
+    private _mlClient: MlClient,
+    private _client: IScopedClusterClient
+  ) {}
 
   private async initData() {
     const [models, jobs] = await Promise.all([

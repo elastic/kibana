@@ -69,7 +69,7 @@ describe('getIsUsingTransactionEvents', () => {
             apmEventClient: mockApmEventClient,
             kuery: '',
           }),
-        { config }
+        { config },
       );
       expect(mock.response).toBe(false);
     });
@@ -82,7 +82,7 @@ describe('getIsUsingTransactionEvents', () => {
             apmEventClient: mockApmEventClient,
             kuery: '',
           }),
-        { config }
+        { config },
       );
       expect(mock.spy).toHaveBeenCalledTimes(0);
     });
@@ -100,7 +100,7 @@ describe('getIsUsingTransactionEvents', () => {
             apmEventClient: mockApmEventClient,
             kuery: '',
           }),
-        { config }
+        { config },
       );
       expect(mock.response).toBe(false);
     });
@@ -124,7 +124,7 @@ describe('getIsUsingTransactionEvents', () => {
             }
             return mockResponseNoHits;
           },
-        }
+        },
       );
       expect(mock.spy).toHaveBeenCalledTimes(1);
       expect(mock.response).toBe(false);
@@ -149,7 +149,7 @@ describe('getIsUsingTransactionEvents', () => {
             }
             return mockResponseNoHits;
           },
-        }
+        },
       );
       expect(mock.spy).toHaveBeenCalledTimes(2);
       expect(mock.response).toBe(true);
@@ -163,7 +163,7 @@ describe('getIsUsingTransactionEvents', () => {
             apmEventClient: mockApmEventClient,
             kuery: '',
           }),
-        { config }
+        { config },
       );
       expect(mock.spy).toHaveBeenCalledTimes(0);
     });
@@ -176,7 +176,7 @@ describe('getIsUsingTransactionEvents', () => {
             apmEventClient: mockApmEventClient,
             kuery: 'proccessor.event: "transaction"',
           }),
-        { config }
+        { config },
       );
       expect(mock.spy).toHaveBeenCalledTimes(1);
       expect(mock.params).toMatchSnapshot();
@@ -207,7 +207,7 @@ describe('getIsUsingTransactionEvents', () => {
             }
             return mockResponseNoHits;
           },
-        }
+        },
       );
       expect(mock.spy).toHaveBeenCalledTimes(1);
       expect(mock.params).toMatchSnapshot();
@@ -232,7 +232,7 @@ describe('getIsUsingTransactionEvents', () => {
             }
             return mockResponseNoHits;
           },
-        }
+        },
       );
       expect(mock.spy).toHaveBeenCalledTimes(2);
       expect(mock.spy.mock.calls).toMatchSnapshot();
@@ -257,7 +257,7 @@ describe('getIsUsingTransactionEvents', () => {
             }
             return mockResponseNoHits;
           },
-        }
+        },
       );
       expect(mock.response).toBe(false);
     });
@@ -281,7 +281,7 @@ describe('getIsUsingTransactionEvents', () => {
             }
             return mockResponseNoHits;
           },
-        }
+        },
       );
       expect(mock.response).toBe(true);
     });
@@ -294,7 +294,7 @@ describe('getIsUsingTransactionEvents', () => {
             apmEventClient: mockApmEventClient,
             kuery: '',
           }),
-        { config, mockResponse: () => mockResponseNoHits }
+        { config, mockResponse: () => mockResponseNoHits },
       );
       expect(mock.response).toBe(false);
     });

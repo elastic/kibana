@@ -36,7 +36,7 @@ export function transformCoreWebVitalsResponse<T>(
     ReturnType<typeof coreWebVitalsQuery>,
     { restTotalHitsAsInt: false }
   >,
-  percentile = PERCENTILE_DEFAULT
+  percentile = PERCENTILE_DEFAULT,
 ): UXMetrics | undefined {
   if (!response) return response;
   const {
@@ -82,7 +82,7 @@ export function coreWebVitalsQuery(
   end: number,
   urlQuery?: string,
   uiFilters?: UxUIFilters,
-  percentile = PERCENTILE_DEFAULT
+  percentile = PERCENTILE_DEFAULT,
 ) {
   const setup: SetupUX = { uiFilters: uiFilters ?? {} };
 

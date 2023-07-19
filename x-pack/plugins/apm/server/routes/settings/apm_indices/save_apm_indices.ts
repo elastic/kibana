@@ -16,14 +16,14 @@ import { ApmIndicesConfig } from './get_apm_indices';
 
 export function saveApmIndices(
   savedObjectsClient: SavedObjectsClientContract,
-  apmIndices: Partial<ApmIndicesConfig>
+  apmIndices: Partial<ApmIndicesConfig>,
 ) {
   return withApmSpan('save_apm_indices', () =>
     savedObjectsClient.create<APMIndices>(
       APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
       { apmIndices: removeEmpty(apmIndices), isSpaceAware: true },
-      { id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID, overwrite: true }
-    )
+      { id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID, overwrite: true },
+    ),
   );
 }
 
@@ -32,8 +32,11 @@ function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
   return Object.entries(apmIndices)
     .map(([key, value]) => [key, value?.trim()])
     .filter(([_, value]) => !!value)
-    .reduce((obj, [key, value]) => {
-      obj[key] = value;
-      return obj;
-    }, {} as Record<string, unknown>);
+    .reduce(
+      (obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      },
+      {} as Record<string, unknown>,
+    );
 }

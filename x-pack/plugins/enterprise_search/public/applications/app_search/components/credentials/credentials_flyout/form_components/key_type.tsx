@@ -22,8 +22,8 @@ export const FormKeyType: React.FC = () => {
   const { activeApiToken, activeApiTokenExists } = useValues(CredentialsLogic);
 
   const tokenDescription = TOKEN_TYPE_DESCRIPTION[activeApiToken.type];
-  const tokenOptions = TOKEN_TYPE_INFO.filter((typeInfo) =>
-    myRole?.credentialTypes?.includes(typeInfo.value)
+  const tokenOptions = TOKEN_TYPE_INFO.filter(
+    (typeInfo) => myRole?.credentialTypes?.includes(typeInfo.value)
   );
 
   return (

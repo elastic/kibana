@@ -408,7 +408,9 @@ export async function getAggregatedCriticalPath({
   });
 
   logger.debug(
-    `Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`
+    `Retrieved critical path in ${Date.now() - now}ms, took: ${
+      response.took
+    }ms`,
   );
 
   if (!response.aggregations) {

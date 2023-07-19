@@ -60,7 +60,7 @@ export function registerRoutes({
               body: request.body,
               query: request.query,
             },
-            params ?? t.strict({})
+            params ?? t.strict({}),
           );
 
           const data = (await handler({
@@ -108,7 +108,7 @@ export function registerRoutes({
 
           return response.customError(opts);
         }
-      }
+      },
     );
   });
 }

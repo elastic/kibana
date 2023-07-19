@@ -61,7 +61,7 @@ export function AnomalyDetection() {
       {viewAddEnvironments ? (
         <AddEnvironments
           currentEnvironments={anomalyDetectionJobsData.jobs.map(
-            ({ environment }) => environment
+            ({ environment }) => environment,
           )}
           onCreateJobSuccess={() => {
             anomalyDetectionJobsRefetch();

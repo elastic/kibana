@@ -11,7 +11,7 @@ export function HeightRetainer(
   props: React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
-  >
+  >,
 ) {
   const containerElement = useRef<HTMLDivElement>(null);
   const minHeight = useRef<number>(0);

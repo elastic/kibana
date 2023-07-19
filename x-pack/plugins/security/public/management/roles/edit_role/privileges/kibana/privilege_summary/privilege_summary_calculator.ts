@@ -18,7 +18,10 @@ export interface EffectiveFeaturePrivileges {
   };
 }
 export class PrivilegeSummaryCalculator {
-  constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
+  constructor(
+    private readonly kibanaPrivileges: KibanaPrivileges,
+    private readonly role: Role
+  ) {}
 
   public getEffectiveFeaturePrivileges(entry: RoleKibanaPrivilege): EffectiveFeaturePrivileges {
     const assignedPrivileges = this.collectAssignedPrivileges(entry);

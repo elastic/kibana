@@ -57,12 +57,12 @@ export type UMKibanaRoute = UMRouteDefinition<
 
 export type SyntheticsRestApiRouteFactory<
   ClientContract = any,
-  QueryParams = Record<string, any>
+  QueryParams = Record<string, any>,
 > = () => SyntheticsRoute<ClientContract, QueryParams>;
 
 export type SyntheticsRoute<
   ClientContract = unknown,
-  QueryParams = Record<string, any>
+  QueryParams = Record<string, any>,
 > = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, QueryParams>>;
 
 export type SyntheticsRouteWrapper = (

@@ -181,7 +181,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   generateActionDetails<
     TOutputType extends object = object,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   >(
     overrides: DeepPartial<ActionDetails<TOutputType, TParameters>> = {}
   ): ActionDetails<TOutputType, TParameters> {

@@ -107,8 +107,8 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     // Prompt Contexts
     const selectedPromptContexts = useMemo(
       () =>
-        basePromptContexts.filter((bpc) =>
-          selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
+        basePromptContexts.filter(
+          (bpc) => selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
         ) ?? [],
       [basePromptContexts, selectedQuickPrompt?.categories]
     );

@@ -10,7 +10,10 @@
  * for the error.
  */
 export class EndpointError<MetaType = unknown> extends Error {
-  constructor(message: string, public readonly meta?: MetaType) {
+  constructor(
+    message: string,
+    public readonly meta?: MetaType
+  ) {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;

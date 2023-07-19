@@ -51,15 +51,18 @@ export const fetchAggIntervals = async (
     return {};
   }
 
-  const minMaxAggs = numericColumns.reduce((aggs, c) => {
-    const id = stringHash(c.fieldName);
-    aggs[id] = {
-      stats: {
-        field: c.fieldName,
-      },
-    };
-    return aggs;
-  }, {} as Record<string, object>);
+  const minMaxAggs = numericColumns.reduce(
+    (aggs, c) => {
+      const id = stringHash(c.fieldName);
+      aggs[id] = {
+        stats: {
+          field: c.fieldName,
+        },
+      };
+      return aggs;
+    },
+    {} as Record<string, object>
+  );
 
   const { wrap, unwrap } = createRandomSamplerWrapper({
     probability: randomSamplerProbability ?? 1,

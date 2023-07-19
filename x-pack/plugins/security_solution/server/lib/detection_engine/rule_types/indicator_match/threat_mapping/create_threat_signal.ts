@@ -120,9 +120,8 @@ export const createThreatSignal = async ({
     });
 
     ruleExecutionLogger.debug(
-      `${
-        threatFilter.query?.bool.should.length
-      } items have completed match checks and the total times to search were ${
+      `${threatFilter.query?.bool.should
+        .length} items have completed match checks and the total times to search were ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
       }ms`
     );

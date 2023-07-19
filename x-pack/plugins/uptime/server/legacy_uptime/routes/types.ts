@@ -72,7 +72,7 @@ export type UMRestApiRouteFactory<ClientContract = unknown> = (
 ) => UptimeRoute<ClientContract>;
 export type SyntheticsRestApiRouteFactory<
   ClientContract = any,
-  QueryParams = Record<string, any>
+  QueryParams = Record<string, any>,
 > = (libs: UMServerLibs) => SyntheticsRoute<ClientContract, QueryParams>;
 export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => SyntheticsStreamingRoute;
 
@@ -87,7 +87,7 @@ export type UMKibanaRouteWrapper = (
 
 export type SyntheticsRoute<
   ClientContract = unknown,
-  QueryParams = Record<string, any>
+  QueryParams = Record<string, any>,
 > = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, QueryParams>>;
 export type SyntheticsStreamingRoute = UMRouteDefinition<SyntheticsStreamingRouteHandler>;
 

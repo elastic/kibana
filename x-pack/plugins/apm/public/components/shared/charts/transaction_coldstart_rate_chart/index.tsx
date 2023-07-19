@@ -119,7 +119,7 @@ export function TransactionColdstartRateChart({
       offset,
       endpoint,
       comparisonEnabled,
-    ]
+    ],
   );
   const previousPeriodLabel = usePreviousPeriodLabel();
 

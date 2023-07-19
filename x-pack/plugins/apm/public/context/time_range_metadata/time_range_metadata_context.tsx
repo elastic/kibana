@@ -81,12 +81,12 @@ export function TimeRangeMetadataContextProvider({
 }) {
   const enableServiceTransactionMetrics = uiSettings.get<boolean>(
     apmEnableServiceMetrics,
-    true
+    true,
   );
 
   const enableContinuousRollups = uiSettings.get<boolean>(
     apmEnableContinuousRollups,
-    true
+    true,
   );
 
   const fetcherResult = useFetcher(
@@ -111,7 +111,7 @@ export function TimeRangeMetadataContextProvider({
       useSpanName,
       enableServiceTransactionMetrics,
       enableContinuousRollups,
-    ]
+    ],
   );
 
   return (

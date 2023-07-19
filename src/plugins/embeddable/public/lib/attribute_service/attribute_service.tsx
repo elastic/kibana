@@ -37,14 +37,14 @@ export interface GenericAttributes {
 }
 export interface AttributeServiceUnwrapResult<
   SavedObjectAttributes extends GenericAttributes,
-  MetaInfo extends unknown = unknown
+  MetaInfo extends unknown = unknown,
 > {
   attributes: SavedObjectAttributes;
   metaInfo?: MetaInfo;
 }
 export interface AttributeServiceOptions<
   SavedObjectAttributes extends GenericAttributes,
-  MetaInfo extends unknown = unknown
+  MetaInfo extends unknown = unknown,
 > {
   saveMethod: (
     attributes: SavedObjectAttributes,
@@ -62,7 +62,7 @@ export class AttributeService<
     [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
-  MetaInfo extends unknown = unknown
+  MetaInfo extends unknown = unknown,
 > {
   constructor(
     private type: string,

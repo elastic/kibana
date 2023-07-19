@@ -76,11 +76,11 @@ const apiRequestsToInterceptWithComparison = [
 ];
 
 const aliasNamesNoComparison = apiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
+  ({ aliasName }) => `@${aliasName}`,
 );
 
 const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
-  ({ aliasName }) => `@${aliasName}`
+  ({ aliasName }) => `@${aliasName}`,
 );
 
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
@@ -91,7 +91,7 @@ describe('Service Overview', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -127,7 +127,7 @@ describe('Service Overview', () => {
     it('persists transaction type selected when clicking on Transactions tab', () => {
       cy.intercept(
         'GET',
-        '/internal/apm/services/opbeans-node/transaction_types?*'
+        '/internal/apm/services/opbeans-node/transaction_types?*',
       ).as('transactionTypesRequest');
 
       cy.visitKibana(baseUrl);
@@ -136,24 +136,24 @@ describe('Service Overview', () => {
 
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'request'
+        'request',
       );
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'Worker'
+        'Worker',
       );
       cy.contains('Transactions').click();
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'Worker'
+        'Worker',
       );
     });
 
     it('persists transaction type selected when clicking on View Transactions link', () => {
       cy.intercept(
         'GET',
-        '/internal/apm/services/opbeans-node/transaction_types?*'
+        '/internal/apm/services/opbeans-node/transaction_types?*',
       ).as('transactionTypesRequest');
 
       cy.visitKibana(baseUrl);
@@ -161,18 +161,18 @@ describe('Service Overview', () => {
       cy.wait('@transactionTypesRequest');
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'request'
+        'request',
       );
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'Worker'
+        'Worker',
       );
 
       cy.contains('View transactions').click();
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'Worker'
+        'Worker',
       );
     });
   });
@@ -182,14 +182,14 @@ describe('Service Overview', () => {
       cy.loginAsViewerUser();
 
       cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
-        'agentRequest'
+        'agentRequest',
       );
 
       cy.visitKibana(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
           query: { rangeFrom: start, rangeTo: end },
-        })
+        }),
       );
 
       cy.contains('Overview');
@@ -223,7 +223,7 @@ describe('Service Overview', () => {
       cy.wait(aliasNames);
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
-        'suggestionsRequest'
+        'suggestionsRequest',
       );
 
       cy.getByTestSubj('environmentFilter').find('input').type('production', {
@@ -263,7 +263,7 @@ describe('Service Overview', () => {
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,
         value: `start=${encodeURIComponent(
-          new Date(timeStart).toISOString()
+          new Date(timeStart).toISOString(),
         )}&end=${encodeURIComponent(new Date(timeEnd).toISOString())}`,
       });
     });

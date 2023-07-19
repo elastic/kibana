@@ -75,7 +75,7 @@ export function SummaryStats() {
         },
       });
     },
-    [indexLifecyclePhase, environment, kuery, start, end]
+    [indexLifecyclePhase, environment, kuery, start, end],
   );
 
   const loading = isPending(status);
@@ -98,14 +98,14 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.totalSize',
                 {
                   defaultMessage: 'Total APM size',
-                }
+                },
               )}
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.totalSize.tooltip',
                 {
                   defaultMessage:
                     'Total storage size of all APM indices including replicas, ignoring the filter settings.',
-                }
+                },
               )}
               value={asDynamicBytes(data?.totalSize)}
               loading={loading}
@@ -116,14 +116,14 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.diskSpaceUsedPct',
                 {
                   defaultMessage: 'Relative disk space used',
-                }
+                },
               )}
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.diskSpaceUsedPct.tooltip',
                 {
                   defaultMessage:
                     'The percentage of the storage capacity that is currently used by all the APM indices compared to the max. storage capacity currently configured for Elasticsearch.',
-                }
+                },
               )}
               value={asPercent(data?.diskSpaceUsedPct, 1)}
               loading={loading}
@@ -134,14 +134,14 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.deltaInSize',
                 {
                   defaultMessage: 'Delta in APM size',
-                }
+                },
               )}
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.deltaInSize.tooltip',
                 {
                   defaultMessage:
                     'The estimated storage size used by the APM indices based on the filters selected.',
-                }
+                },
               )}
               value={asDynamicBytes(data?.estimatedIncrementalSize)}
               loading={loading}
@@ -152,7 +152,7 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.dailyDataGeneration',
                 {
                   defaultMessage: 'Daily data generation',
-                }
+                },
               )}
               value={asDynamicBytes(data?.dailyDataGeneration)}
               loading={loading}
@@ -163,7 +163,7 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.tracesPerMinute',
                 {
                   defaultMessage: 'Traces per minute',
-                }
+                },
               )}
               value={asTransactionRate(data?.tracesPerMinute)}
               loading={loading}
@@ -174,7 +174,7 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.numberOfServices',
                 {
                   defaultMessage: 'Number of services',
-                }
+                },
               )}
               value={(data?.numberOfServices ?? 0).toString()}
               loading={loading}
@@ -194,7 +194,7 @@ export function SummaryStats() {
                   'xpack.apm.storageExplorer.summary.serviceInventoryLink',
                   {
                     defaultMessage: 'Go to Service Inventory',
-                  }
+                  },
                 )}
               </EuiLink>
             </EuiFlexItem>
@@ -207,7 +207,7 @@ export function SummaryStats() {
                   'xpack.apm.storageExplorer.summary.indexManagementLink',
                   {
                     defaultMessage: 'Go to Index Management',
-                  }
+                  },
                 )}
               </EuiLink>
             </EuiFlexItem>

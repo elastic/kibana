@@ -43,7 +43,7 @@ const dismissButtonText = i18n.translate(
   'xpack.apm.storageExplorer.callout.dimissButton',
   {
     defaultMessage: 'Dismiss',
-  }
+  },
 );
 
 export function StorageExplorer() {
@@ -51,25 +51,25 @@ export function StorageExplorer() {
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage(
     'apm.storageExplorer.calloutDismissed',
-    CALLOUT_DISMISS_INITIAL_STATE
+    CALLOUT_DISMISS_INITIAL_STATE,
   );
 
   const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer/privileges');
     },
-    []
+    [],
   );
 
   const { data: isCrossClusterSearchData } = useFetcher(
     (callApmApi) => {
       if (!calloutDismissed.crossClusterSearch) {
         return callApmApi(
-          'GET /internal/apm/storage_explorer/is_cross_cluster_search'
+          'GET /internal/apm/storage_explorer/is_cross_cluster_search',
         );
       }
     },
-    [calloutDismissed]
+    [calloutDismissed],
   );
 
   const loading = hasPrivilegesStatus === FETCH_STATUS.LOADING;
@@ -113,7 +113,7 @@ export function StorageExplorer() {
             'xpack.apm.storageExplorer.longLoadingTimeCalloutTitle',
             {
               defaultMessage: 'Long loading time?',
-            }
+            },
           )}
           iconType="timeRefresh"
         >
@@ -131,7 +131,7 @@ export function StorageExplorer() {
                       'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
                       {
                         defaultMessage: 'Kibana advanced settings',
-                      }
+                      },
                     )}
                   </EuiLink>
                 ),
@@ -161,7 +161,7 @@ export function StorageExplorer() {
                 'xpack.apm.storageExplorer.crossClusterSearchCalloutTitle',
                 {
                   defaultMessage: 'Searching across clusters?',
-                }
+                },
               )}
               iconType="search"
             >
@@ -171,7 +171,7 @@ export function StorageExplorer() {
                   {
                     defaultMessage:
                       'While getting document count works with cross-cluster search, index statistics such as size are only displayed for data that are stored in this cluster.',
-                  }
+                  },
                 )}
               </p>
               <EuiButton

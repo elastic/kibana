@@ -33,7 +33,7 @@ export interface TimeRange {
 function useUxUiFilters(params: UrlParams): UxUIFilters {
   const localUiFilters = mapValues(
     pickKeys(params, ...uxLocalUIFilterNames),
-    (val) => (val ? val.split(',') : [])
+    (val) => (val ? val.split(',') : []),
   ) as Partial<Record<UxLocalUIFilterName, string[]>>;
 
   return useDeepObjectIdentity({
@@ -71,7 +71,7 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
           exactStart,
           exactEnd,
         }),
-      [location, start, end, rangeFrom, rangeTo, exactStart, exactEnd]
+      [location, start, end, rangeFrom, rangeTo, exactStart, exactEnd],
     );
 
     refUrlParams.current = urlParams;
@@ -99,7 +99,7 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />
     );
-  }
+  },
 );
 
 export { UrlParamsContext, UrlParamsProvider, useUxUiFilters };

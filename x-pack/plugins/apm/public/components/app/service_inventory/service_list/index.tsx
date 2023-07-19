@@ -97,7 +97,7 @@ export function getServiceColumns({
                     'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
                     {
                       defaultMessage: 'Active alerts',
-                    }
+                    },
                   )}
                 >
                   <EuiBadge
@@ -161,7 +161,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.environmentColumnLabel',
               {
                 defaultMessage: 'Environment',
-              }
+              },
             ),
             width: `${unit * 9}px`,
             sortable: true,
@@ -177,7 +177,7 @@ export function getServiceColumns({
             field: ServiceInventoryFieldName.TransactionType,
             name: i18n.translate(
               'xpack.apm.servicesTable.transactionColumnLabel',
-              { defaultMessage: 'Transaction type' }
+              { defaultMessage: 'Transaction type' },
             ),
             width: `${unit * 8}px`,
             sortable: true,
@@ -193,7 +193,7 @@ export function getServiceColumns({
       dataType: 'number',
       render: (_, { serviceName, latency }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.LATENCY_AVG
+          ChartType.LATENCY_AVG,
         );
         return (
           <ListMetric
@@ -220,7 +220,7 @@ export function getServiceColumns({
       dataType: 'number',
       render: (_, { serviceName, throughput }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.THROUGHPUT
+          ChartType.THROUGHPUT,
         );
 
         return (
@@ -249,7 +249,7 @@ export function getServiceColumns({
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.FAILED_TRANSACTION_RATE,
         );
         return (
           <ListMetric
@@ -287,7 +287,7 @@ interface Props {
   sortFn: (
     sortItems: ServiceListItem[],
     sortField: ServiceInventoryFieldName,
-    sortDirection: 'asc' | 'desc'
+    sortDirection: 'asc' | 'desc',
   ) => ServiceListItem[];
 
   serviceOverflowCount: number;
@@ -312,7 +312,7 @@ export function ServiceList({
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
-      transactionType && !isDefaultTransactionType(transactionType)
+      transactionType && !isDefaultTransactionType(transactionType),
   );
 
   const {
@@ -354,7 +354,7 @@ export function ServiceList({
       displayAlerts,
       link,
       serviceOverflowCount,
-    ]
+    ],
   );
 
   return (
@@ -378,7 +378,7 @@ export function ServiceList({
                 {
                   defaultMessage:
                     'Service metrics are aggregated on their transaction type, which can be request or page-load. If neither exists, metrics are aggregated on the top available transaction type.',
-                }
+                },
               )}
             >
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -388,7 +388,7 @@ export function ServiceList({
             <EuiText size="xs" color="subdued">
               {i18n.translate(
                 'xpack.apm.servicesTable.metricsExplanationLabel',
-                { defaultMessage: 'What are these metrics?' }
+                { defaultMessage: 'What are these metrics?' },
               )}
             </EuiText>
           </EuiFlexItem>
@@ -408,7 +408,7 @@ export function ServiceList({
             sortFn(
               itemsToSort,
               sortField as ServiceInventoryFieldName,
-              sortDirection
+              sortDirection,
             )
           }
         />

@@ -24,7 +24,7 @@ describe('Transactions Overview', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -41,7 +41,7 @@ describe('Transactions Overview', () => {
     cy.get('a:contains(Transactions)').should(
       'have.attr',
       'aria-selected',
-      'true'
+      'true',
     );
     // set skipFailures to true to not fail the test when there are accessibility failures
     checkA11y({ skipFailures: true });
@@ -51,17 +51,17 @@ describe('Transactions Overview', () => {
     cy.visitKibana(serviceTransactionsHref);
     cy.getByTestSubj('headerFilterTransactionType').should(
       'have.value',
-      'request'
+      'request',
     );
     cy.getByTestSubj('headerFilterTransactionType').select('Worker');
     cy.getByTestSubj('headerFilterTransactionType').should(
       'have.value',
-      'Worker'
+      'Worker',
     );
     cy.get('a[href*="/app/apm/services/opbeans-node/overview"]').click();
     cy.getByTestSubj('headerFilterTransactionType').should(
       'have.value',
-      'Worker'
+      'Worker',
     );
   });
 });

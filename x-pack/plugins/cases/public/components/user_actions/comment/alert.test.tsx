@@ -195,7 +195,7 @@ describe('rule getters', () => {
       [
         Record<string, unknown>,
         SnakeToCamelCase<CommentResponseAlertsType>,
-        Record<string, unknown>
+        Record<string, unknown>,
       ]
     >;
 

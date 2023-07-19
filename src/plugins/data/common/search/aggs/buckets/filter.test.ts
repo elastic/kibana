@@ -16,7 +16,7 @@ describe('Filter Agg', () => {
   let aggConfigs: AggConfigs;
 
   const depMocks = {
-    getConfig: <T>() => ({} as T),
+    getConfig: <T>() => ({}) as T,
     calculateBounds: () => {
       return {
         max: moment('2022-05-05T00:00:00.000Z'),

@@ -116,13 +116,13 @@ export const fetchSignificantCorrelations = async ({
           histogramRangeSteps: rangeSteps,
           totalDocCount,
           fieldValuePair,
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 
   const latencyCorrelations = fulfilled.filter(
-    (d) => d && 'histogram' in d
+    (d) => d && 'histogram' in d,
   ) as LatencyCorrelation[];
 
   let fallbackResult: LatencyCorrelation | undefined =

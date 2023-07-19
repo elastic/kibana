@@ -44,7 +44,7 @@ describe('getDerivedServiceAnnotations', () => {
                 restTotalHitsAsInt: false;
               }
             >,
-        }
+        },
       );
 
       expect(mock.response).toEqual([]);
@@ -72,7 +72,7 @@ describe('getDerivedServiceAnnotations', () => {
                 restTotalHitsAsInt: false;
               }
             >,
-        }
+        },
       );
 
       expect(mock.response).toEqual([]);
@@ -105,7 +105,7 @@ describe('getDerivedServiceAnnotations', () => {
                 restTotalHitsAsInt: false;
               }
             >,
-        }
+        },
       );
 
       expect(mock.spy.mock.calls.length).toBe(3);

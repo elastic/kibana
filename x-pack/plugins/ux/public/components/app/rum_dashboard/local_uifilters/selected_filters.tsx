@@ -58,8 +58,8 @@ export function SelectedFilters({
                   onChange(
                     name,
                     (uxUiFilters?.[name] as string[]).filter(
-                      (valT) => valT !== value
-                    )
+                      (valT) => valT !== value,
+                    ),
                   );
                 }}
                 invertFilter={({ negate }) => {

@@ -295,7 +295,7 @@ export interface ContentManagementCrudTypes<
   Attributes extends object,
   CreateOptions extends object,
   UpdateOptions extends object,
-  SearchOptions extends object
+  SearchOptions extends object,
 > {
   Attributes: Attributes;
   /**

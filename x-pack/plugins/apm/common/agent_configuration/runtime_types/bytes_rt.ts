@@ -52,9 +52,9 @@ export function getBytesRt({ min, max }: { min?: string; max?: string }) {
           return isValidAmount
             ? t.success(inputAsString)
             : t.failure(input, context, message);
-        }
+        },
       );
     },
-    t.identity
+    t.identity,
   );
 }

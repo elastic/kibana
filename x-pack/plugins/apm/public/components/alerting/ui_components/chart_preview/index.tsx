@@ -71,7 +71,7 @@ export function ChartPreview({
 
   const barSeries = useMemo(() => {
     return series.flatMap((serie) =>
-      serie.data.map((point) => ({ ...point, groupBy: serie.name }))
+      serie.data.map((point) => ({ ...point, groupBy: serie.name })),
     );
   }, [series]);
 
@@ -90,7 +90,7 @@ export function ChartPreview({
 
   const dateFormatter = useMemo(
     () => niceTimeFormatter([xMin, xMax]),
-    [xMin, xMax]
+    [xMin, xMax],
   );
 
   const lookback = timeSize * ALERT_PREVIEW_BUCKET_SIZE;

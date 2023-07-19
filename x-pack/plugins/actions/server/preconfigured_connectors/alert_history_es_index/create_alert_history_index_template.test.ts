@@ -11,7 +11,7 @@ import {
   getAlertHistoryIndexTemplate,
 } from './create_alert_history_index_template';
 
-type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
+type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 describe('createAlertHistoryIndexTemplate', () => {
   let logger: MockedLogger;

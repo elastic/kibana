@@ -13,17 +13,17 @@ const apmIndexConfigs = [
   ['metric', 'apm_oss.metricsIndices'],
 ] as const;
 
-type ApmIndexConfigs = typeof apmIndexConfigs[number][0];
+type ApmIndexConfigs = (typeof apmIndexConfigs)[number][0];
 type ApmIndicesSavedObjectAttributes = Partial<{
   [Property in ApmIndexConfigs]: string;
 }>;
-type DeprecatedApmIndexConfigPaths = typeof apmIndexConfigs[number][1];
+type DeprecatedApmIndexConfigPaths = (typeof apmIndexConfigs)[number][1];
 type DeprecatedApmIndicesSavedObjectAttributes = Partial<{
   [Property in DeprecatedApmIndexConfigPaths]: string;
 }>;
 
 export function updateApmOssIndexPaths(
-  attributes: DeprecatedApmIndicesSavedObjectAttributes
+  attributes: DeprecatedApmIndicesSavedObjectAttributes,
 ) {
   return apmIndexConfigs.reduce((attrs, [configPath, deprecatedConfigPath]) => {
     const indexConfig: string | undefined = attributes[deprecatedConfigPath];

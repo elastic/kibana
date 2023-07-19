@@ -63,7 +63,9 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
   if (certStatus === CERT_STATUS.TOO_OLD) {
     const ageThreshold = dss.settings?.certAgeThreshold;
 
-    const oldRelativeDate = moment(cert?.not_before).add(ageThreshold, 'days').fromNow();
+    const oldRelativeDate = moment(cert?.not_before)
+      .add(ageThreshold, 'days')
+      .fromNow();
 
     return (
       <EuiHealth color="danger">

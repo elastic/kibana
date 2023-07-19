@@ -10,7 +10,10 @@ import type { Moment } from 'moment';
 import { Interval } from './interval';
 
 export class Timerange {
-  constructor(private from: Date, private to: Date) {}
+  constructor(
+    private from: Date,
+    private to: Date
+  ) {}
 
   interval(interval: string) {
     return new Interval({ from: this.from, to: this.to, interval });

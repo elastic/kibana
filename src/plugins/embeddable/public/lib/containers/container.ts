@@ -46,7 +46,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export abstract class Container<
     TChildInput extends Partial<EmbeddableInput> = {},
     TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
-    TContainerOutput extends ContainerOutput = ContainerOutput
+    TContainerOutput extends ContainerOutput = ContainerOutput,
   >
   extends Embeddable<TContainerInput, TContainerOutput>
   implements IContainer<TChildInput, TContainerInput, TContainerOutput>
@@ -159,7 +159,7 @@ export abstract class Container<
   public async addNewEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>,
   >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
     const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
 
@@ -175,7 +175,7 @@ export abstract class Container<
   public async replaceEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>,
   >(id: string, newExplicitInput: Partial<EEI>, newType?: string) {
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
@@ -327,7 +327,7 @@ export abstract class Container<
 
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>,
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
@@ -399,7 +399,7 @@ export abstract class Container<
 
   protected async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>,
   >(type: string, panelState: PanelState) {
     this.updateInput({
       panels: {
@@ -416,7 +416,7 @@ export abstract class Container<
     TEmbeddable extends IEmbeddable<
       TEmbeddableInput,
       EmbeddableOutput
-    > = IEmbeddable<TEmbeddableInput>
+    > = IEmbeddable<TEmbeddableInput>,
   >(
     id: string,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,

@@ -45,7 +45,7 @@ describe('CustomLinkToolbar', () => {
       wrapper: Wrapper,
     });
     expect(
-      component.getByText('Custom links settings page')
+      component.getByText('Custom links settings page'),
     ).toBeInTheDocument();
     expectTextsInDocument(component, ['Create']);
   });
@@ -53,10 +53,10 @@ describe('CustomLinkToolbar', () => {
   it('renders without create button', () => {
     const component = render(
       <CustomLinkToolbar onClickCreate={jest.fn()} showCreateButton={false} />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
     expect(
-      component.getByText('Custom links settings page')
+      component.getByText('Custom links settings page'),
     ).toBeInTheDocument();
     expectTextsNotInDocument(component, ['Create']);
   });
@@ -65,7 +65,7 @@ describe('CustomLinkToolbar', () => {
     const handleCreateCustomLinkClickMock = jest.fn();
     const { getByText } = render(
       <CustomLinkToolbar onClickCreate={handleCreateCustomLinkClickMock} />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
     expect(handleCreateCustomLinkClickMock).not.toHaveBeenCalled();
     act(() => {

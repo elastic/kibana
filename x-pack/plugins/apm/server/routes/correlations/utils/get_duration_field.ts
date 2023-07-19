@@ -21,7 +21,7 @@ const {
 
 export function getDurationField(
   chartType: LatencyDistributionChartType,
-  searchMetrics: boolean
+  searchMetrics: boolean,
 ) {
   switch (chartType) {
     case transactionLatency:

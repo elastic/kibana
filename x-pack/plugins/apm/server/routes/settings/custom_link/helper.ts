@@ -24,7 +24,7 @@ export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
       ([key, value]: [string, string[]]) => ({
         key: key as FilterKey,
         value: isEmpty(value) ? '' : value.join(),
-      })
+      }),
     ),
   };
 }

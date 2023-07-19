@@ -30,7 +30,7 @@ export const core = {
 
 export const render = (
   component: React.ReactNode,
-  options: { customHistory: MemoryHistory }
+  options: { customHistory: MemoryHistory },
 ) => {
   const history = options?.customHistory ?? createMemoryHistory();
 
@@ -43,6 +43,6 @@ export const render = (
           <EuiThemeProvider>{component}</EuiThemeProvider>
         </UrlParamsProvider>
       </KibanaContextProvider>
-    </Router>
+    </Router>,
   );
 };

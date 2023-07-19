@@ -146,11 +146,11 @@ const mockAvailabilityAlertDocument = (monitor: GetMonitorAvailabilityResult) =>
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `Monitor "${monitorInfo.monitor.name || monitorInfo.monitor.id}" from ${
-        monitorInfo.observer?.geo?.name
-      } 35 days availability is ${(monitor.availabilityRatio! * 100).toFixed(
-        2
-      )}%. Alert when < 99.34%. Checked at ${checkedAt}.`,
+      [ALERT_REASON]: `Monitor "${
+        monitorInfo.monitor.name || monitorInfo.monitor.id
+      }" from ${monitorInfo.observer?.geo?.name} 35 days availability is ${(
+        monitor.availabilityRatio! * 100
+      ).toFixed(2)}%. Alert when < 99.34%. Checked at ${checkedAt}.`,
     },
     id: getInstanceId(monitorInfo, `${monitorInfo?.monitor.id}-${monitorInfo.observer?.geo?.name}`),
   };

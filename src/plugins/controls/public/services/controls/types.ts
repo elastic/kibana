@@ -22,7 +22,7 @@ export interface ControlsServiceType {
   getControlFactory: <
     I extends ControlInput = ControlInput,
     O extends ControlOutput = ControlOutput,
-    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
+    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>,
   >(
     type: string
   ) => EmbeddableFactory<I, O, E>;

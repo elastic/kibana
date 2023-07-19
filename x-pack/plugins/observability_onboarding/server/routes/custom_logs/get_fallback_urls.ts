@@ -17,7 +17,7 @@ export function getFallbackUrls(coreStart: CoreStart) {
 
 function getElasticsearchUrl(esClient: Client): string[] {
   const aliveConnections = esClient.connectionPool.connections.filter(
-    ({ status }) => status === 'alive'
+    ({ status }) => status === 'alive',
   );
   if (aliveConnections.length) {
     return aliveConnections.map(({ url }) => {

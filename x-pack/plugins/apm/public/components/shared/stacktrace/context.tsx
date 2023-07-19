@@ -99,7 +99,7 @@ function getStackframeLines(stackframe: StackframeWithLineContext) {
   const preLines = stackframe.context?.pre || [];
   const postLines = stackframe.context?.post || [];
   return [...preLines, line, ...postLines].map(
-    (x) => (x.endsWith('\n') ? x.slice(0, -1) : x) || ' '
+    (x) => (x.endsWith('\n') ? x.slice(0, -1) : x) || ' ',
   );
 }
 

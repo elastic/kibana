@@ -21,7 +21,7 @@ export type EQLCodeEditorSuggestionRequest =
   | { type: EQLCodeEditorSuggestionType.Value; field: string; value: string };
 
 export type EQLCodeEditorSuggestionCallback = (
-  request: EQLCodeEditorSuggestionRequest
+  request: EQLCodeEditorSuggestionRequest,
 ) => Promise<EQLCodeEditorSuggestion[]>;
 
 export type EQLCodeEditorProps = Omit<

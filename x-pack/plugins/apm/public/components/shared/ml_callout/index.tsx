@@ -19,7 +19,7 @@ import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
 import { LegacyAPMLink } from '../links/apm/apm_link';
 
 export function shouldDisplayMlCallout(
-  anomalyDetectionSetupState: AnomalyDetectionSetupState
+  anomalyDetectionSetupState: AnomalyDetectionSetupState,
 ) {
   return (
     anomalyDetectionSetupState === AnomalyDetectionSetupState.NoJobs ||
@@ -104,7 +104,7 @@ export function MLCallout({
       properties = {
         title: i18n.translate(
           'xpack.apm.mlCallout.updateAvailableCalloutTitle',
-          { defaultMessage: 'Updates available' }
+          { defaultMessage: 'Updates available' },
         ),
         text: i18n.translate('xpack.apm.mlCallout.updateAvailableCalloutText', {
           defaultMessage:
@@ -128,7 +128,7 @@ export function MLCallout({
               'xpack.apm.mlCallout.updateAvailableCalloutButtonText',
               {
                 defaultMessage: 'Update jobs',
-              }
+              },
             )}
           </EuiButton>
         ) : (
@@ -155,7 +155,7 @@ export function MLCallout({
           >
             {i18n.translate(
               'xpack.apm.settings.anomaly_detection.legacy_jobs.button',
-              { defaultMessage: 'Review jobs' }
+              { defaultMessage: 'Review jobs' },
             )}
           </EuiButton>
         ),

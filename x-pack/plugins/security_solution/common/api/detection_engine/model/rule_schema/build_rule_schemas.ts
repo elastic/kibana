@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 interface RuleFields<
   Required extends t.Props,
   Optional extends t.Props,
-  Defaultable extends t.Props
+  Defaultable extends t.Props,
 > {
   required: Required;
   optional: Optional;
@@ -31,7 +31,7 @@ export const buildRuleSchemas = <R extends t.Props, O extends t.Props, D extends
 const buildCreateRuleSchema = <
   Required extends t.Props,
   Optional extends t.Props,
-  Defaultable extends t.Props
+  Defaultable extends t.Props,
 >(
   requiredFields: Required,
   optionalFields: Optional,
@@ -47,7 +47,7 @@ const buildCreateRuleSchema = <
 const buildPatchRuleSchema = <
   Required extends t.Props,
   Optional extends t.Props,
-  Defaultable extends t.Props
+  Defaultable extends t.Props,
 >(
   requiredFields: Required,
   optionalFields: Optional,
@@ -74,7 +74,7 @@ export const orUndefined = <P extends t.Props>(props: P): OrUndefined<P> => {
 export const buildResponseRuleSchema = <
   Required extends t.Props,
   Optional extends t.Props,
-  Defaultable extends t.Props
+  Defaultable extends t.Props,
 >(
   requiredFields: Required,
   optionalFields: Optional,

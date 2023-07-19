@@ -86,7 +86,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
           'xpack.apm.serviceMap.avgTransDurationPopoverStat',
           {
             defaultMessage: 'Latency (avg.)',
-          }
+          },
         ),
         valueLabel: asDuration(currentPeriod?.transactionStats?.latency?.value),
         timeseries: currentPeriod?.transactionStats?.latency?.timeseries,
@@ -101,10 +101,10 @@ export function StatsList({ data, isLoading }: StatsListProps) {
           'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
           {
             defaultMessage: 'Throughput (avg.)',
-          }
+          },
         ),
         valueLabel: asTransactionRate(
-          currentPeriod?.transactionStats?.throughput?.value
+          currentPeriod?.transactionStats?.throughput?.value,
         ),
         timeseries: currentPeriod?.transactionStats?.throughput?.timeseries,
         previousPeriodTimeseries:
@@ -120,7 +120,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         valueLabel: asPercent(
           currentPeriod?.failedTransactionsRate?.value,
           1,
-          ''
+          '',
         ),
         timeseries: currentPeriod?.failedTransactionsRate?.timeseries,
         previousPeriodTimeseries:
@@ -128,7 +128,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         color: getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE)
           .currentPeriodColor,
         comparisonSeriesColor: getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.FAILED_TRANSACTION_RATE,
         ).previousPeriodColor,
       },
       {
@@ -147,7 +147,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
           'xpack.apm.serviceMap.avgMemoryUsagePopoverStat',
           {
             defaultMessage: 'Memory usage (avg.)',
-          }
+          },
         ),
         valueLabel: asPercent(currentPeriod?.memoryUsage?.value, 1, ''),
         timeseries: currentPeriod?.memoryUsage?.timeseries,
@@ -157,7 +157,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
           .previousPeriodColor,
       },
     ],
-    [currentPeriod, previousPeriod]
+    [currentPeriod, previousPeriod],
   );
 
   if (isLoading && !hasData) {
@@ -212,7 +212,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
               </EuiFlexGroup>
             </EuiFlexItem>
           );
-        }
+        },
       )}
     </EuiFlexGroup>
   );

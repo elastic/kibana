@@ -16,7 +16,7 @@ export async function getApmAlertsClient({
 }: APMRouteHandlerResources) {
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
-    request
+    request,
   );
   const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices([
     'apm',

@@ -23,7 +23,7 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 
 export const getOutcomeAggregation = (
-  documentType: ApmDocumentType
+  documentType: ApmDocumentType,
 ): {
   successful_or_failed:
     | { value_count: AggregationsValueCountAggregation }
@@ -80,7 +80,7 @@ export const getOutcomeAggregation = (
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
 export function calculateFailedTransactionRate(
-  outcomeResponse: AggregationResultOfMap<OutcomeAggregation, {}>
+  outcomeResponse: AggregationResultOfMap<OutcomeAggregation, {}>,
 ) {
   const successfulTransactions =
     'value' in outcomeResponse.successful
@@ -105,7 +105,7 @@ export function getFailedTransactionRateTimeSeries(
       aggs: OutcomeAggregation;
     },
     {}
-  >['buckets']
+  >['buckets'],
 ) {
   return buckets.map((dateBucket) => {
     return {

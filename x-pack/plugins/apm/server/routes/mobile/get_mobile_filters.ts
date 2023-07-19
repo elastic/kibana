@@ -102,28 +102,28 @@ export async function getMobileFilters({
       key: 'device',
       options:
         response.aggregations?.devices?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
     {
       key: 'osVersion',
       options:
         response.aggregations?.osVersions?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
     {
       key: 'appVersion',
       options:
         response.aggregations?.appVersions?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
     {
       key: 'netConnectionType',
       options:
         response.aggregations?.netConnectionTypes?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
   ];

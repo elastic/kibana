@@ -48,7 +48,9 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
     }
 
     &.globalFilterItem-isError {
-      box-shadow: 0 1px 1px -1px rgba(152, 162, 179, 0.2), 0 3px 2px -2px rgba(152, 162, 179, 0.2),
+      box-shadow:
+        0 1px 1px -1px rgba(152, 162, 179, 0.2),
+        0 3px 2px -2px rgba(152, 162, 179, 0.2),
         inset 0 0 0 1px #bd271e;
     }
   }

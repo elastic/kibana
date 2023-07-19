@@ -88,7 +88,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<MergedServiceTransactionGroupsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -142,7 +142,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
 
     const transactionGroupsWithAlerts = joinByKey(
       [...transactionGroups, ...serviceTransactionGroupsAlerts],
-      'name'
+      'name',
     );
 
     return {
@@ -182,7 +182,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<ServiceTransactionGroupDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

@@ -74,7 +74,7 @@ async function getApmIndices(kibanaClient: AxiosInstance) {
   }
 
   const res = await kibanaClient.get<Response>(
-    '/internal/apm/settings/apm-index-settings'
+    '/internal/apm/settings/apm-index-settings',
   );
 
   return Object.fromEntries(
@@ -82,8 +82,8 @@ async function getApmIndices(kibanaClient: AxiosInstance) {
       ({ configurationName, defaultValue, savedValue }) => [
         configurationName,
         savedValue ?? defaultValue,
-      ]
-    )
+      ],
+    ),
   ) as ApmIndicesConfig;
 }
 

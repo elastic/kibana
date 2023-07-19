@@ -27,7 +27,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
           'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
           {
             defaultMessage: 'No stack trace available.',
-          }
+          },
         )}
         hideSubheading
       />

@@ -19,7 +19,7 @@ export const QUERY_MODE = {
   INCLUDE: 'should',
   EXCLUDE: 'must_not',
 } as const;
-export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
+export type QueryMode = (typeof QUERY_MODE)[keyof typeof QUERY_MODE];
 
 export function useDiscoverLinks() {
   const {

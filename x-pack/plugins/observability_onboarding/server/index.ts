@@ -22,7 +22,7 @@ const configSchema = schema.object({
       true,
       schema.literal(true),
       schema.never(),
-      { defaultValue: schema.contextRef('serverless') }
+      { defaultValue: schema.contextRef('serverless') },
     ),
   }),
 });

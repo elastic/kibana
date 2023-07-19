@@ -30,7 +30,7 @@ import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 
 function hasValidTimeseries(
-  series?: Coordinate[] | null
+  series?: Coordinate[] | null,
 ): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
 }

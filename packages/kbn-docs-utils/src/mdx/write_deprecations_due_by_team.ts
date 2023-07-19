@@ -49,13 +49,16 @@ export async function writeDeprecationDueByTeam(
     .map((key) => {
       const groupedDeprecationReferences: {
         [key: string]: { api: ApiDeclaration; refs: ApiReference[] };
-      } = groupedByTeam[key].reduce((acc, deprecation) => {
-        if (acc[deprecation.deprecatedApi.id] === undefined) {
-          acc[deprecation.deprecatedApi.id] = { api: deprecation.deprecatedApi, refs: [] };
-        }
-        acc[deprecation.deprecatedApi.id].refs.push(deprecation.ref);
-        return acc;
-      }, {} as { [key: string]: { api: ApiDeclaration; refs: ApiReference[] } });
+      } = groupedByTeam[key].reduce(
+        (acc, deprecation) => {
+          if (acc[deprecation.deprecatedApi.id] === undefined) {
+            acc[deprecation.deprecatedApi.id] = { api: deprecation.deprecatedApi, refs: [] };
+          }
+          acc[deprecation.deprecatedApi.id].refs.push(deprecation.ref);
+          return acc;
+        },
+        {} as { [key: string]: { api: ApiDeclaration; refs: ApiReference[] } }
+      );
 
       return `
     ## ${key}

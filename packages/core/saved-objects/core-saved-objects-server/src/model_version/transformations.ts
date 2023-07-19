@@ -51,7 +51,7 @@ export interface SavedObjectModelTransformationResult<DocAttrs = unknown> {
  */
 export type SavedObjectModelTransformationFn<
   InputAttributes = unknown,
-  OutputAttributes = unknown
+  OutputAttributes = unknown,
 > = (
   document: SavedObjectModelTransformationDoc<InputAttributes>,
   context: SavedObjectModelTransformationContext
@@ -68,7 +68,7 @@ export type SavedObjectModelTransformationFn<
  */
 export interface SavedObjectModelBidirectionalTransformation<
   PreviousAttributes = unknown,
-  NewAttributes = unknown
+  NewAttributes = unknown,
 > {
   /**
    * The upward (previous=>next) transformation.
@@ -99,7 +99,7 @@ export interface SavedObjectModelDataBackfillResult<DocAttrs = unknown> {
  */
 export type SavedObjectModelDataBackfillFn<
   InputAttributes = unknown,
-  OutputAttributes = unknown
+  OutputAttributes = unknown,
 > = (
   document: SavedObjectModelTransformationDoc<InputAttributes>,
   context: SavedObjectModelTransformationContext
@@ -112,5 +112,5 @@ export type SavedObjectModelDataBackfillFn<
  */
 export type SavedObjectModelUnsafeTransformFn<
   InputAttributes = unknown,
-  OutputAttributes = unknown
+  OutputAttributes = unknown,
 > = SavedObjectModelTransformationFn<InputAttributes, OutputAttributes>;

@@ -175,20 +175,23 @@ export class UsageCountersService {
     counters: UsageCounters.v1.CounterMetric[]
   ): Record<string, UsageCounters.v1.CounterMetric> => {
     const date = moment.now();
-    return counters.reduce((acc, counter) => {
-      const { counterName, domainId, counterType } = counter;
-      const key = serializeCounterKey({ domainId, counterName, counterType, date });
-      const existingCounter = acc[key];
-      if (!existingCounter) {
-        acc[key] = counter;
+    return counters.reduce(
+      (acc, counter) => {
+        const { counterName, domainId, counterType } = counter;
+        const key = serializeCounterKey({ domainId, counterName, counterType, date });
+        const existingCounter = acc[key];
+        if (!existingCounter) {
+          acc[key] = counter;
+          return acc;
+        }
+        acc[key] = {
+          ...existingCounter,
+          ...counter,
+          incrementBy: existingCounter.incrementBy + counter.incrementBy,
+        };
         return acc;
-      }
-      acc[key] = {
-        ...existingCounter,
-        ...counter,
-        incrementBy: existingCounter.incrementBy + counter.incrementBy,
-      };
-      return acc;
-    }, {} as Record<string, UsageCounters.v1.CounterMetric>);
+      },
+      {} as Record<string, UsageCounters.v1.CounterMetric>
+    );
   };
 }

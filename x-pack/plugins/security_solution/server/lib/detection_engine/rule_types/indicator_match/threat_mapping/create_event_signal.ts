@@ -146,9 +146,8 @@ export const createEventSignal = async ({
     });
 
     ruleExecutionLogger.debug(
-      `${
-        threatFiltersFromEvents.query?.bool.should.length
-      } items have completed match checks and the total times to search were ${
+      `${threatFiltersFromEvents.query?.bool.should
+        .length} items have completed match checks and the total times to search were ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
       }ms`
     );

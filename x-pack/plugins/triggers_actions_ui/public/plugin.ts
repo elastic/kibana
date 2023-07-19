@@ -245,7 +245,7 @@ export class Plugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           PluginsStart,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./application/app');
@@ -294,7 +294,7 @@ export class Plugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           PluginsStart,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./application/connectors_app');

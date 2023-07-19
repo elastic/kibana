@@ -326,9 +326,8 @@ export class HeadlessChromiumDriverFactory {
         logger
           .get(`headless-browser-console:${line.type()}`)
           .debug(
-            `Message in browser console: { text: "${line.text()?.trim()}", url: ${
-              line.location()?.url
-            } }`
+            `Message in browser console: { text: "${line.text()?.trim()}", url: ${line.location()
+              ?.url} }`
           );
       })
     );

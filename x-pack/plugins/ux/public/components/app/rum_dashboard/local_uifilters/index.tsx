@@ -63,7 +63,7 @@ function LocalUIFilters() {
     clearValues,
   } = useLocalUIFilters({
     filterNames: uxLocalUIFilterNames.filter(
-      (name) => !['serviceName'].includes(name)
+      (name) => !['serviceName'].includes(name),
     ),
   });
 
@@ -120,7 +120,7 @@ function LocalUIFilters() {
                 excludedValue={
                   filters.find(
                     (ft) =>
-                      ft.name === getExcludedName(filterName) && ft.excluded
+                      ft.name === getExcludedName(filterName) && ft.excluded,
                   )?.value
                 }
                 asFilterButton={true}
@@ -128,7 +128,7 @@ function LocalUIFilters() {
                   setFilterValue(filterName, values || []);
                   setFilterValue(
                     getExcludedName(filterName),
-                    excludedValues || []
+                    excludedValues || [],
                   );
                 }}
                 filters={getFilters}

@@ -57,8 +57,7 @@ export interface StoryProvidersComponentProps {
 const securityLayout = {
   getPluginWrapper:
     (): FC =>
-    ({ children }) =>
-      <div>{children}</div>,
+    ({ children }) => <div>{children}</div>,
 };
 
 const defaultServices = {

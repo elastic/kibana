@@ -61,7 +61,7 @@ export function ResourceContents({ elementData }: ContentsProps) {
                 </EuiDescriptionListDescription>
               </ItemRow>
             </div>
-          )
+          ),
       )}
     </>
   );

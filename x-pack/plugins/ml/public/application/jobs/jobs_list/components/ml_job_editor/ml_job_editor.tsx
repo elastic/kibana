@@ -18,7 +18,7 @@ interface MlJobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
+  mode?: (typeof ML_EDITOR_MODE)[keyof typeof ML_EDITOR_MODE];
   readOnly?: boolean;
   onChange?: EuiCodeEditorProps['onChange'];
   'data-test-subj'?: string;

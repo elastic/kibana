@@ -26,7 +26,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.',
-      }
+      },
     ),
     excludeAgents: [
       'js-base',
@@ -53,7 +53,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting.",
-      }
+      },
     ),
     excludeAgents: [
       'js-base',
@@ -81,7 +81,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).\nFor transactions that are initiated by receiving a message from a message broker, the agent can capture the textual message body.',
-      }
+      },
     ),
     options: [
       { text: 'off', value: 'off' },
@@ -101,7 +101,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureBodyContentTypes.label',
       {
         defaultMessage: 'Capture Body Content Types',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.captureBodyContentTypes.description',
@@ -110,7 +110,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Configures which content types should be recorded.\n' +
           '\n' +
           'The defaults end with a wildcard so that content types like `text/plain; charset=utf-8` are captured as well.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet'],
   },
@@ -128,7 +128,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.',
-      }
+      },
     ),
     excludeAgents: [
       'js-base',
@@ -156,7 +156,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'WARNING: Setting this to `false` can lead to mapping conflicts as dots indicate nesting in Elasticsearch.\n' +
           'An example of when a conflict happens is two metrics with the name `foo` and `foo.bar`.\n' +
           'The first metric maps `foo` to a number and the second metric maps `foo` as an object.',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -169,7 +169,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.disableInstrumentations.label',
       {
         defaultMessage: 'Disable instrumentations',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.disableInstrumentations.description',
@@ -181,7 +181,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
           'and can be found under the following links: ' +
           '[Java](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-disable-instrumentations)',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -194,7 +194,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.label',
       {
         defaultMessage: 'Disable outgoing tracecontext headers',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.description',
@@ -203,7 +203,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Use this option to disable `tracecontext` headers injection to any outgoing communication.\n' +
           '\n' +
           'WARNING: Disabling `tracecontext` headers injection means that distributed tracing will not work on downstream services.',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -223,7 +223,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Exit spans are spans that represent a call to an external service, like a database. If such calls are very short, they are usually not relevant and can be ignored.\n' +
           '\n' +
           'NOTE: If a span propagates distributed tracing ids, it will not be ignored, even if it is shorter than the configured threshold. This is to ensure that no broken traces are recorded.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'nodejs', 'python'],
   },
@@ -243,7 +243,7 @@ export const generalSettings: RawSettingDefinition[] = [
           '\n' +
           'This property should be set to an array containing one or more strings.\n' +
           'When set, sends-to and receives-from the specified queues/topic will be ignored.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'nodejs'],
   },
@@ -263,7 +263,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Specifying whether and how the agent should automatically reformat application logs into ' +
           '[ECS-compatible JSON](https://www.elastic.co/guide/en/ecs-logging/overview/master/intro.html), ' +
           'suitable for ingestion into Elasticsearch for further Log analysis.',
-      }
+      },
     ),
     options: [
       { text: 'off', value: 'off' },
@@ -306,7 +306,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.mongodbCaptureStatementCommands.label',
       {
         defaultMessage: 'MongoDB capture statement commands',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.mongodbCaptureStatementCommands.description',
@@ -317,7 +317,7 @@ export const generalSettings: RawSettingDefinition[] = [
           '\n' +
           'This option supports the wildcard `*`, which matches zero or more characters. Examples: `/foo/*/bar/*/baz*`, `*foo*`. ' +
           'Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -350,7 +350,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'If a request to the APM Server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM Server times out.',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -363,7 +363,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.spanCompressionEnabled.label',
       {
         defaultMessage: 'Span compression enabled',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanCompressionEnabled.description',
@@ -371,7 +371,7 @@ export const generalSettings: RawSettingDefinition[] = [
         defaultMessage:
           'Setting this option to true will enable span compression feature.\n' +
           'Span compression reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that some information such as DB statements of all the compressed spans will not be collected.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'python'],
   },
@@ -385,14 +385,14 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.label',
       {
         defaultMessage: 'Span compression exact match max duration',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.description',
       {
         defaultMessage:
           'Consecutive spans that are exact match and that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'python'],
   },
@@ -405,14 +405,14 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.label',
       {
         defaultMessage: 'Span compression same kind max duration',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.description',
       {
         defaultMessage:
           'Consecutive spans to the same destination that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'python'],
   },
@@ -431,7 +431,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           '(Deprecated, use `span_stack_trace_min_duration` instead!) In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
-      }
+      },
     ),
     excludeAgents: [
       'js-base',
@@ -452,7 +452,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.spanStackTraceMinDuration.label',
       {
         defaultMessage: 'Span stack trace minimum duration',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanStackTraceMinDuration.description',
@@ -464,7 +464,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n' +
           '\n' +
           'To disable stack trace collection for spans completely, set the value to `-1ms`.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'nodejs', 'python'],
   },
@@ -482,7 +482,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.',
-      }
+      },
     ),
     includeAgents: ['java', 'dotnet', 'go', 'python'],
   },
@@ -496,7 +496,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.traceContinuationStrategy.label',
       {
         defaultMessage: 'Trace continuation strategy',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.traceContinuationStrategy.description',
@@ -515,7 +515,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Starting with Elastic Observability 8.2, span links are visible in trace views.\n' +
           '\n' +
           'This option is case-insensitive.',
-      }
+      },
     ),
     options: [
       { text: 'continue', value: 'continue' },
@@ -539,7 +539,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'Limits the amount of spans that are recorded per transaction.',
-      }
+      },
     ),
     excludeAgents: ['js-base', 'rum-js', 'android/java', 'iOS/swift'],
   },
@@ -557,7 +557,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.',
-      }
+      },
     ),
     excludeAgents: ['android/java', 'iOS/swift'],
   },
@@ -576,7 +576,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
-      }
+      },
     ),
     includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs', 'ruby'],
   },
@@ -595,7 +595,7 @@ export const generalSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'Used to restrict requests to certain URLs from being instrumented. This config accepts a comma-separated list of wildcard patterns of URL paths that should be ignored. When an incoming HTTP request is detected, its request path will be tested against each element in this list. For example, adding `/home/index` to this list would match and remove instrumentation from `http://localhost/home/index` as well as `http://whatever.com/home/index?value1=123`',
-      }
+      },
     ),
     includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby', 'go'],
   },
@@ -608,7 +608,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.transactionIgnoreUserAgents.label',
       {
         defaultMessage: 'Transaction ignore user agents',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.transactionIgnoreUserAgents.description',
@@ -619,7 +619,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'When an incoming HTTP request is detected,\n' +
           'the User-Agent from the request headers will be tested against each element in this list.\n' +
           'Example: `curl/*`, `*pingdom*`',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -632,7 +632,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.usePathAsTransactionName.label',
       {
         defaultMessage: 'Use path as transaction name',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.agentConfig.usePathAsTransactionName.description',
@@ -645,7 +645,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'you should be very careful when enabling this flag,\n' +
           'as it can lead to an explosion of transaction groups.\n' +
           'Take a look at the `transaction_name_groups` option on how to mitigate this problem by grouping URLs together.',
-      }
+      },
     ),
     includeAgents: ['java'],
   },
@@ -667,7 +667,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'the pattern `GET /user/*/cart` would consolidate transactions,\n' +
           'such as `GET /users/42/cart` and `GET /users/73/cart` into a single transaction name `GET /users/*/cart`,\n' +
           'hence reducing the transaction name cardinality.',
-      }
+      },
     ),
     includeAgents: ['java'],
   },

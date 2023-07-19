@@ -16,7 +16,7 @@ type RequiredParams = ESSearchRequest & {
 export type TypedSearch = ReturnType<typeof getTypedSearch>;
 export function getTypedSearch(esClient: ElasticsearchClient) {
   async function search<TDocument, TParams extends RequiredParams>(
-    opts: TParams
+    opts: TParams,
   ): Promise<InferSearchResponseOf<TDocument, TParams>> {
     return esClient.search<TDocument>(opts) as Promise<any>;
   }

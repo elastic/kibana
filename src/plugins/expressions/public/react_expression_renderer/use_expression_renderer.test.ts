@@ -104,10 +104,11 @@ describe('useExpressionRenderer', () => {
     expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
 
     const [[, , loaderParams]] = expressionLoaderSpy.mock.calls;
-    act(() =>
-      loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
-        done,
-      } as unknown as IInterpreterRenderHandlers)
+    act(
+      () =>
+        loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
+          done,
+        } as unknown as IInterpreterRenderHandlers)
     );
 
     expect(hook.result.current).toEqual({
@@ -126,10 +127,11 @@ describe('useExpressionRenderer', () => {
     expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
 
     const [[, , loaderParams]] = expressionLoaderSpy.mock.calls;
-    act(() =>
-      loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
-        done,
-      } as unknown as IInterpreterRenderHandlers)
+    act(
+      () =>
+        loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
+          done,
+        } as unknown as IInterpreterRenderHandlers)
     );
 
     expect(done).toHaveBeenCalled();
@@ -189,10 +191,11 @@ describe('useExpressionRenderer', () => {
     expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
 
     const [[, , loaderParams]] = expressionLoaderSpy.mock.calls;
-    act(() =>
-      loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
-        done: jest.fn(),
-      } as unknown as IInterpreterRenderHandlers)
+    act(
+      () =>
+        loaderParams?.onRenderError?.(document.createElement('div'), new Error('something'), {
+          done: jest.fn(),
+        } as unknown as IInterpreterRenderHandlers)
     );
     act(() => expressionLoader.render$.next(1));
 

@@ -95,7 +95,7 @@ describe('Search service', () => {
           id: 'test-inspector-123',
           description: '',
           ...base,
-        } as Required<IInspectorInfo>);
+        }) as Required<IInspectorInfo>;
 
       const getMockResponseWithShards = (mockShards: estypes.ShardStatistics) => ({
         json: {

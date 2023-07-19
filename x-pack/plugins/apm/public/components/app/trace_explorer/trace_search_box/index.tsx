@@ -110,7 +110,7 @@ export function TraceSearchBox({
                                 query: request.value,
                                 useTimeRange: true,
                                 method: 'terms_agg',
-                              }
+                              },
                             );
 
                           return suggestions.slice(0, 15);
@@ -144,7 +144,7 @@ export function TraceSearchBox({
                         'xpack.apm.traceExplorer.appName',
                         {
                           defaultMessage: 'APM',
-                        }
+                        },
                       )}
                       deps={{
                         unifiedSearch,

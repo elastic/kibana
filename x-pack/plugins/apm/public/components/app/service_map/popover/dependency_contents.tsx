@@ -40,7 +40,7 @@ export function DependencyContents({
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
   );
 
   const { offset, comparisonEnabled } = query;
@@ -68,7 +68,7 @@ export function DependencyContents({
         });
       }
     },
-    [environment, dependencyName, start, end, offset, comparisonEnabled]
+    [environment, dependencyName, start, end, offset, comparisonEnabled],
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

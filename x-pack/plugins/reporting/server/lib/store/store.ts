@@ -88,7 +88,10 @@ export class ReportingStore {
   private client?: ElasticsearchClient;
   private ilmPolicyManager?: IlmPolicyManager;
 
-  constructor(private reportingCore: ReportingCore, private logger: Logger) {
+  constructor(
+    private reportingCore: ReportingCore,
+    private logger: Logger
+  ) {
     const config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;

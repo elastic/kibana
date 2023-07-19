@@ -38,10 +38,10 @@ export function WaterfallFlyout({
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer/waterfall',
-    '/dependencies/operation'
+    '/dependencies/operation',
   );
   const currentItem = waterfall.items.find(
-    (item) => item.id === waterfallItemId
+    (item) => item.id === waterfallItemId,
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

@@ -185,21 +185,22 @@ export const createExceptionListItems = async ({
   listsClient: ExceptionListClient | null;
 }) => {
   return Promise.all(
-    items.map((item) =>
-      listsClient?.createExceptionListItem({
-        comments: item.comments,
-        description: item.description,
-        entries: item.entries,
-        expireTime: item.expire_time,
-        itemId: item.item_id,
-        listId: defaultList.list_id,
-        meta: item.meta,
-        name: item.name,
-        namespaceType: defaultList.namespace_type,
-        osTypes: item.os_types,
-        tags: item.tags,
-        type: item.type,
-      })
+    items.map(
+      (item) =>
+        listsClient?.createExceptionListItem({
+          comments: item.comments,
+          description: item.description,
+          entries: item.entries,
+          expireTime: item.expire_time,
+          itemId: item.item_id,
+          listId: defaultList.list_id,
+          meta: item.meta,
+          name: item.name,
+          namespaceType: defaultList.namespace_type,
+          osTypes: item.os_types,
+          tags: item.tags,
+          type: item.type,
+        })
     )
   );
 };

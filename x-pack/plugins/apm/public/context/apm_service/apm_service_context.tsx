@@ -51,7 +51,7 @@ export function ApmServiceContextProvider({
     query: { kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -146,7 +146,7 @@ export function getTransactionType({
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
   const currentTransactionType = transactionTypes.includes(
-    defaultTransactionType
+    defaultTransactionType,
   )
     ? defaultTransactionType
     : transactionTypes[0];

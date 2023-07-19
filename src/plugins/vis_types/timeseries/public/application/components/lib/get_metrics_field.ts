@@ -14,9 +14,8 @@ export const getMetricsField = (metrics: Metric[]) => {
   const selectedMetric = last(metrics);
 
   if (selectedMetric) {
-    const { isFieldRequired, isFieldFormattingDisabled } = getAggByPredicate(
-      selectedMetric.type
-    )?.meta;
+    const { isFieldRequired, isFieldFormattingDisabled } = getAggByPredicate(selectedMetric.type)
+      ?.meta;
 
     if (isFieldRequired && !isFieldFormattingDisabled) {
       return isBasicAgg(selectedMetric)

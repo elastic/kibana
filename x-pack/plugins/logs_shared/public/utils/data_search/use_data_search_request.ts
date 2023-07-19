@@ -37,7 +37,7 @@ export const useDataSearch = <
   RequestParams,
   Request extends IKibanaSearchRequest<RequestParams>,
   RawResponse,
-  Response
+  Response,
 >({
   getRequest,
   parseResponses,

@@ -32,7 +32,7 @@ export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload, agents: string[]) => Promise<ActionDetails>;
   createAction: <
     TOutputContent extends object = object,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   >(
     payload: CreateActionPayload,
     agents: string[],

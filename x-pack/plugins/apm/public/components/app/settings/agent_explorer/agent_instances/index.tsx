@@ -49,10 +49,10 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
               kuery,
             },
           },
-        }
+        },
       );
     },
-    [start, end, serviceName, environment, kuery]
+    [start, end, serviceName, environment, kuery],
   );
 }
 
@@ -89,7 +89,7 @@ export function AgentInstances({
                     'xpack.apm.agentExplorer.instancesFlyout.title',
                     {
                       defaultMessage: 'Agent Instances',
-                    }
+                    },
                   )}
                 </h4>
               </EuiTitle>

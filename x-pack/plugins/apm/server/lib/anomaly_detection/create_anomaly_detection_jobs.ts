@@ -44,7 +44,7 @@ export async function createAnomalyDetectionJobs({
   const uniqueMlJobEnvs = await getUniqueMlJobEnvs(
     mlClient,
     environments,
-    logger
+    logger,
   );
   if (uniqueMlJobEnvs.length === 0) {
     return [];
@@ -52,7 +52,7 @@ export async function createAnomalyDetectionJobs({
 
   return withApmSpan('create_anomaly_detection_jobs', async () => {
     logger.info(
-      `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
+      `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`,
     );
 
     const apmMetricIndex = indices.metric;
@@ -68,7 +68,7 @@ export async function createAnomalyDetectionJobs({
             esClient,
             environment,
             apmMetricIndex,
-          })
+          }),
         );
       } catch (e) {
         if (!e.id || !e.error) {
@@ -83,8 +83,8 @@ export async function createAnomalyDetectionJobs({
     if (failedJobs.length > 0) {
       throw new Error(
         `An error occurred while creating ML jobs: ${JSON.stringify(
-          failedJobs
-        )}`
+          failedJobs,
+        )}`,
       );
     }
 
@@ -150,7 +150,7 @@ async function createAnomalyDetectionJob({
 async function getUniqueMlJobEnvs(
   mlClient: MlClient,
   environments: Environment[],
-  logger: Logger
+  logger: Logger,
 ) {
   // skip creation of duplicate ML jobs
   const jobs = await getAnomalyDetectionJobs(mlClient);
@@ -159,12 +159,12 @@ async function getUniqueMlJobEnvs(
     .map(({ environment }) => environment);
 
   const requestedExistingMlJobEnvs = environments.filter((env) =>
-    existingMlJobEnvs.includes(env)
+    existingMlJobEnvs.includes(env),
   );
 
   if (requestedExistingMlJobEnvs.length) {
     logger.warn(
-      `Skipping creation of existing ML jobs for environments: [${requestedExistingMlJobEnvs}]}`
+      `Skipping creation of existing ML jobs for environments: [${requestedExistingMlJobEnvs}]}`,
     );
   }
 

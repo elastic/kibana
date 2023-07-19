@@ -94,7 +94,7 @@ export async function getServiceMetadataIcons({
 
   const response = await apmEventClient.search(
     'get_service_metadata_icons',
-    params
+    params,
   );
 
   if (response.hits.total.value === 0) {
@@ -118,7 +118,7 @@ export async function getServiceMetadataIcons({
 
   const serverlessType = getServerlessTypeFromCloudData(
     cloud?.provider,
-    cloud?.service?.name
+    cloud?.service?.name,
   );
 
   return {

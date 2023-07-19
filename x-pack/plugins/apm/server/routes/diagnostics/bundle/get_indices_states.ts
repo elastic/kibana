@@ -33,7 +33,7 @@ export async function getIndicesStates({
   const fieldCaps = await getFieldCaps({ esClient, apmIndices });
 
   const invalidFieldMappings = Object.values(
-    fieldCaps.fields[SERVICE_NAME] ?? {}
+    fieldCaps.fields[SERVICE_NAME] ?? {},
   ).filter(({ type }): boolean => type !== 'keyword');
 
   const items = indicesWithPipelineId.map(
@@ -48,8 +48,8 @@ export async function getIndicesStates({
           })
         : false;
 
-      const invalidFieldMapping = invalidFieldMappings.find((fieldMappings) =>
-        fieldMappings.indices?.includes(index)
+      const invalidFieldMapping = invalidFieldMappings.find(
+        (fieldMappings) => fieldMappings.indices?.includes(index),
       );
 
       const isValidFieldMappings = invalidFieldMapping === undefined;
@@ -70,7 +70,7 @@ export async function getIndicesStates({
         index,
         dataStream,
       };
-    }
+    },
   );
 
   const invalidIndices = items.filter((item) => !item.isValid);
@@ -81,7 +81,7 @@ export async function getIndicesStates({
 
 export function validateIngestPipelineName(
   dataStream: string | undefined,
-  ingestPipelineId: string | undefined
+  ingestPipelineId: string | undefined,
 ) {
   if (!dataStream || !ingestPipelineId) {
     return false;
@@ -91,6 +91,6 @@ export function validateIngestPipelineName(
   return indexTemplateNames.some(
     (indexTemplateName) =>
       dataStream.startsWith(indexTemplateName) &&
-      ingestPipelineId.startsWith(indexTemplateName)
+      ingestPipelineId.startsWith(indexTemplateName),
   );
 }

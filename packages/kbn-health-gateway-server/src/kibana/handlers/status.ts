@@ -49,7 +49,10 @@ export class StatusHandler {
     timeout: 504,
   };
 
-  constructor(private kibanaConfig: KibanaConfig, private logger: Logger) {
+  constructor(
+    private kibanaConfig: KibanaConfig,
+    private logger: Logger
+  ) {
     this.handler = this.handler.bind(this);
   }
 

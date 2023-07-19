@@ -37,11 +37,11 @@ const fetchTransaction = debounce(
       {
         signal: null,
         params: { query: convertFiltersToQuery(filters) },
-      }
+      },
     );
     callback(transaction);
   },
-  1000
+  1000,
 );
 
 const getTextColor = (value?: string) => (value ? 'default' : 'subdued');
@@ -121,7 +121,7 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
                 {
                   defaultMessage:
                     'Test your link with values from an example transaction document based on the filters above.',
-                }
+                },
               )}
             </EuiText>
           </EuiFlexItem>

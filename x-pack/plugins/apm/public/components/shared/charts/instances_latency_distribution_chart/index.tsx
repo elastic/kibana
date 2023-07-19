@@ -100,7 +100,7 @@ export function InstancesLatencyDistributionChart({
   // the x-axis domain is [0, maxThroughput].
   const maxThroughput = Math.max(...items.map((item) => item.throughput ?? 0));
   const maxComparisonThroughput = Math.max(
-    ...comparisonItems.map((item) => item.throughput ?? 0)
+    ...comparisonItems.map((item) => item.throughput ?? 0),
   );
   const xDomain = {
     min: 0,
@@ -137,7 +137,7 @@ export function InstancesLatencyDistributionChart({
             data={items}
             id={i18n.translate(
               'xpack.apm.instancesLatencyDistributionChartLegend',
-              { defaultMessage: 'Instances' }
+              { defaultMessage: 'Instances' },
             )}
             xAccessor={(item) => item.throughput}
             xScaleType={ScaleType.Linear}

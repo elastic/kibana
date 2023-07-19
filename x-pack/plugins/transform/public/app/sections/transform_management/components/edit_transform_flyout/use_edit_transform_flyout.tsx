@@ -605,7 +605,7 @@ type EditTransformHooks = typeof editTransformHooks;
 
 export const useEditTransformFlyout = <K extends EditTransformHookSelectors>(hookKey: K) => {
   return editTransformHooks[EDIT_TRANSFORM_HOOK_SELECTORS[hookKey]]() as ReturnType<
-    EditTransformHooks[typeof EDIT_TRANSFORM_HOOK_SELECTORS[K]]
+    EditTransformHooks[(typeof EDIT_TRANSFORM_HOOK_SELECTORS)[K]]
   >;
 };
 

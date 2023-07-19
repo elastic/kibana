@@ -79,7 +79,7 @@ async function getServiceTransactionGroupDetailedStatistics({
 
   const field = getDurationFieldForTransactions(
     documentType,
-    useDurationSummary
+    useDurationSummary,
   );
 
   const response = await apmEventClient.search(
@@ -133,7 +133,7 @@ async function getServiceTransactionGroupDetailedStatistics({
           },
         },
       },
-    }
+    },
   );
 
   const buckets = response.aggregations?.transaction_groups.buckets ?? [];
@@ -262,7 +262,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
           }),
         };
       }),
-      'transactionName'
+      'transactionName',
     ),
   };
 }

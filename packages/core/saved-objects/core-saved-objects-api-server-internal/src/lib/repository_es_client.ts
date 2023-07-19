@@ -26,7 +26,7 @@ const methods = [
   'updateByQuery',
 ] as const;
 
-type MethodName = typeof methods[number];
+type MethodName = (typeof methods)[number];
 
 export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName | 'transport'>;
 

@@ -16,7 +16,7 @@ import { PlotValues } from './plot_utils';
 // Remove any tick that is too close to topTraceDuration
 const getXAxisTickValues = (
   tickValues: number[],
-  topTraceDuration?: number
+  topTraceDuration?: number,
 ) => {
   if (topTraceDuration == null) {
     return tickValues;
@@ -50,7 +50,7 @@ export function TimelineAxis({
 
   const tickPositionsAndLabels = getXAxisTickValues(
     tickValues,
-    topTraceDuration
+    topTraceDuration,
   ).reduce<Array<{ position: number; label: string }>>((ticks, tick) => {
     const position = xScale(tick);
     return Number.isFinite(position)

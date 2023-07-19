@@ -19,7 +19,7 @@ describe('DiscoverTransactionLink component', () => {
     const transaction = mockTransaction as Transaction;
 
     expect(
-      shallow(<DiscoverTransactionLink transaction={transaction} />)
+      shallow(<DiscoverTransactionLink transaction={transaction} />),
     ).toMatchSnapshot();
   });
 });

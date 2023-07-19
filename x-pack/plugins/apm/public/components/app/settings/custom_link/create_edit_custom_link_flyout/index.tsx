@@ -51,7 +51,7 @@ export function CreateEditCustomLinkFlyout({
   const [label, setLabel] = useState(defaults?.label || '');
   const [url, setUrl] = useState(defaults?.url || '');
   const [filters, setFilters] = useState(
-    defaults?.filters?.length ? defaults.filters : filtersEmptyState
+    defaults?.filters?.length ? defaults.filters : filtersEmptyState,
   );
 
   const isFormValid = !!label && !!url;
@@ -59,7 +59,7 @@ export function CreateEditCustomLinkFlyout({
   const onSubmit = async (
     event:
       | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement>
+      | React.MouseEvent<HTMLButtonElement>,
   ) => {
     event.preventDefault();
     setIsSaving(true);
@@ -98,7 +98,7 @@ export function CreateEditCustomLinkFlyout({
                   'xpack.apm.settings.customLink.flyout.label.doc',
                   {
                     defaultMessage: 'documentation.',
-                  }
+                  },
                 )}
               />
             </p>

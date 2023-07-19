@@ -18,7 +18,7 @@ const navTreePresets = getPresets('all');
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > {
   preset?: NavigationGroupPreset;
   nodeDefinition?: NodeDefinition<LinkId, Id, ChildrenId>;
@@ -28,7 +28,7 @@ export interface Props<
 export function NavigationBucket<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >({ nodeDefinition: _nodeDefinition, defaultIsCollapsed, preset }: Props<LinkId, Id, ChildrenId>) {
   const nodeDefinition = preset
     ? (navTreePresets[preset] as NodeDefinition<LinkId, Id, ChildrenId>)

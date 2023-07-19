@@ -88,7 +88,7 @@ export function ServiceMapServiceDetail() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
@@ -157,7 +157,7 @@ export function ServiceMap({
       serviceGroupId,
       kuery,
       config.serviceMapEnabled,
-    ]
+    ],
   );
 
   const { ref, height } = useRefDimensions();

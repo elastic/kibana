@@ -38,7 +38,7 @@ export const actionCreateService = (
 ): ActionCreateService => {
   const createAction = async <
     TOutputContent extends object = object,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   >(
     payload: CreateActionPayload,
     agents: string[],

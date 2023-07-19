@@ -28,7 +28,7 @@ async function getFleetAgentByIds({
 
   return await fleetPluginStart.agentPolicyService.getByIds(
     savedObjectsClient,
-    policyIds
+    policyIds,
   );
 }
 

@@ -139,7 +139,7 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   value: ecs,
 }));
 
-type ECSSchemaOption = typeof ECSSchemaOptions[0];
+type ECSSchemaOption = (typeof ECSSchemaOptions)[0];
 
 interface ECSComboboxFieldProps {
   euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;

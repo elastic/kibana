@@ -25,5 +25,5 @@ export const floatRt = new t.Type<string, string, unknown>(
         : t.failure(input, context, 'Must be a number between 0.000 and 1');
     });
   },
-  t.identity
+  t.identity,
 );

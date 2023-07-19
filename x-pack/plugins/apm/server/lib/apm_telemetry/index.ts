@@ -76,7 +76,7 @@ export async function createApmTelemetry({
         ...dataTelemetry,
         kibanaVersion,
       },
-      { id: APM_TELEMETRY_SAVED_OBJECT_TYPE, overwrite: true }
+      { id: APM_TELEMETRY_SAVED_OBJECT_TYPE, overwrite: true },
     );
   };
 
@@ -88,7 +88,7 @@ export async function createApmTelemetry({
         const { kibanaVersion: storedKibanaVersion, ...data } = (
           await savedObjectsClient.get(
             APM_TELEMETRY_SAVED_OBJECT_TYPE,
-            APM_TELEMETRY_SAVED_OBJECT_ID
+            APM_TELEMETRY_SAVED_OBJECT_ID,
           )
         ).attributes as { kibanaVersion: string } & APMUsage;
 
@@ -126,13 +126,13 @@ export async function createApmTelemetry({
       const currentData = (
         await savedObjectsClient.get(
           APM_TELEMETRY_SAVED_OBJECT_TYPE,
-          APM_TELEMETRY_SAVED_OBJECT_ID
+          APM_TELEMETRY_SAVED_OBJECT_ID,
         )
       ).attributes as { kibanaVersion?: string };
 
       if (currentData.kibanaVersion !== kibanaVersion) {
         logger.debug(
-          `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
+          `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`,
         );
         await taskManagerStart.runSoon(APM_TELEMETRY_TASK_NAME);
       }

@@ -54,7 +54,7 @@ export function CustomLinkMenuSection({
         { key: 'transaction.name', value: transaction?.transaction.name },
         { key: 'transaction.type', value: transaction?.transaction.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
-    [transaction]
+    [transaction],
   );
 
   const { data, status, refetch } = useFetcher(
@@ -63,7 +63,7 @@ export function CustomLinkMenuSection({
         isCachable: false,
         params: { query: convertFiltersToQuery(filters) },
       }),
-    [filters]
+    [filters],
   );
 
   const customLinks = data?.customLinks ?? [];
@@ -97,7 +97,7 @@ export function CustomLinkMenuSection({
                 'xpack.apm.transactionActionMenu.customLink.section',
                 {
                   defaultMessage: 'Custom Links',
-                }
+                },
               )}
             </SectionTitle>
           </EuiFlexItem>
@@ -114,7 +114,7 @@ export function CustomLinkMenuSection({
             'xpack.apm.transactionActionMenu.customLink.subtitle',
             {
               defaultMessage: 'Links will open in a new window.',
-            }
+            },
           )}
         </SectionSubtitle>
         <CustomLinkList
@@ -204,11 +204,11 @@ function BottomSection({
               {showAllLinks
                 ? i18n.translate(
                     'xpack.apm.transactionActionMenu.customLink.showFewer',
-                    { defaultMessage: 'Show fewer' }
+                    { defaultMessage: 'Show fewer' },
                   )
                 : i18n.translate(
                     'xpack.apm.transactionActionMenu.customLink.showAll',
-                    { defaultMessage: 'Show all' }
+                    { defaultMessage: 'Show all' },
                   )}
             </EuiText>
           </EuiButtonEmpty>

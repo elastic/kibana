@@ -25,7 +25,7 @@ export const rails = `# config/elastic_apm.yml:
   'xpack.apm.onboarding.railsClient.createConfig.commands.defaultServiceName',
   {
     defaultMessage: 'Defaults to the name of your Rails app.',
-  }
+  },
 )}
 service_name: '<your-service-name>'
 

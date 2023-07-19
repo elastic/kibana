@@ -40,7 +40,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(
-    DEFAULT_SORT_DIRECTION
+    DEFAULT_SORT_DIRECTION,
   );
 
   const onTableChange = useCallback(
@@ -53,7 +53,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
       setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
       setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
     },
-    []
+    [],
   );
 
   const sort = useMemo(() => {
@@ -69,7 +69,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
       totalItemCount: items.length,
       hidePerPageOptions: true,
     }),
-    [pageIndex, pageSize, items.length]
+    [pageIndex, pageSize, items.length],
   );
 
   const renderedItems = useMemo(() => {
@@ -83,7 +83,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
       field: 'serviceName',
       name: i18n.translate(
         'xpack.apm.serviceGroups.selectServicesList.nameColumnLabel',
-        { defaultMessage: 'Name' }
+        { defaultMessage: 'Name' },
       ),
       sortable: true,
       render: (_, { serviceName, agentName }) => (
@@ -105,7 +105,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
       field: 'environments',
       name: i18n.translate(
         'xpack.apm.serviceGroups.selectServicesList.environmentColumnLabel',
-        { defaultMessage: 'Environments' }
+        { defaultMessage: 'Environments' },
       ),
       width: `${unit * 10}px`,
       sortable: true,
@@ -123,7 +123,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
         {
           defaultMessage:
             'No services available within the last 24 hours. You can still create the group and services that match your query will be added.',
-        }
+        },
       )}
       items={renderedItems}
       columns={columns}

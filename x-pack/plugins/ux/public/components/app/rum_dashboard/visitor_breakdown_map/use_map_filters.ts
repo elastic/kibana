@@ -51,7 +51,7 @@ const getMatchFilter = (field: string, value: string): Filter => {
 const getMultiMatchFilter = (
   field: string,
   values: string[],
-  negate = false
+  negate = false,
 ): Filter => {
   return {
     meta: {
@@ -133,7 +133,7 @@ export const useMapFilters = (): Filter[] => {
     }
     if (deviceExcluded) {
       filters.push(
-        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, true)
+        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, true),
       );
     }
     if (osExcluded) {
@@ -141,12 +141,16 @@ export const useMapFilters = (): Filter[] => {
     }
     if (locationExcluded) {
       filters.push(
-        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, true)
+        getMultiMatchFilter(
+          CLIENT_GEO_COUNTRY_ISO_CODE,
+          locationExcluded,
+          true,
+        ),
       );
     }
     if (transactionUrlExcluded) {
       filters.push(
-        getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, true)
+        getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, true),
       );
     }
     if (searchTerm) {

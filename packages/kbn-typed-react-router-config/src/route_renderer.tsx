@@ -16,12 +16,15 @@ export function RouteRenderer() {
   return matches
     .concat()
     .reverse()
-    .reduce((prev, match) => {
-      const { element } = match.route;
-      return (
-        <CurrentRouteContextProvider match={match} element={prev}>
-          {element}
-        </CurrentRouteContextProvider>
-      );
-    }, <></>);
+    .reduce(
+      (prev, match) => {
+        const { element } = match.route;
+        return (
+          <CurrentRouteContextProvider match={match} element={prev}>
+            {element}
+          </CurrentRouteContextProvider>
+        );
+      },
+      <></>
+    );
 }

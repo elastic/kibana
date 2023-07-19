@@ -88,7 +88,7 @@ const tracesByIdRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     traceItems: TraceItems;
     entryTransaction?: Transaction;
@@ -124,7 +124,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     transaction: Transaction;
   }> => {
@@ -151,7 +151,7 @@ const transactionByIdRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     transaction: Transaction;
   }> => {
@@ -193,7 +193,7 @@ const findTracesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     traceSamples: TraceSamplesResponse;
   }> => {
@@ -230,7 +230,7 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{ criticalPath: CriticalPathResponse | null }> => {
     const {
       params: {
@@ -294,7 +294,7 @@ const spanFromTraceByIdRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     span?: Span;
     parentTransaction?: Transaction;

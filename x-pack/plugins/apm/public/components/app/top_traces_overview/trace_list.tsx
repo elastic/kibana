@@ -53,7 +53,7 @@ export function getTraceListColumns({
       sortable: true,
       render: (
         _: string,
-        { serviceName, transactionName, transactionType }: TraceGroup
+        { serviceName, transactionName, transactionType }: TraceGroup,
       ) => (
         <EuiToolTip
           content={transactionName}
@@ -75,7 +75,7 @@ export function getTraceListColumns({
         'xpack.apm.tracesTable.originatingServiceColumnLabel',
         {
           defaultMessage: 'Originating service',
-        }
+        },
       ),
       sortable: true,
       render: (_: string, { serviceName, agentName, transactionType }) => (
@@ -121,7 +121,7 @@ export function getTraceListColumns({
             {
               defaultMessage:
                 'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            }
+            },
           )}
         >
           <>
@@ -159,7 +159,7 @@ export function TraceList({ response }: Props) {
 
   const traceListColumns = useMemo(
     () => getTraceListColumns({ query }),
-    [query]
+    [query],
   );
   return (
     <ManagedTable

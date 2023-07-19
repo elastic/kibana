@@ -145,8 +145,8 @@ export async function getSpanLinksDetails({
         spanLinks: spanLinksChunk,
         start,
         end,
-      })
-    )
+      }),
+    ),
   );
 
   const linkedSpans = chunkedResponses.flat();
@@ -208,6 +208,6 @@ export async function getSpanLinksDetails({
       return isEmpty(kuery)
         ? { traceId: item.trace.id, spanId: item.span.id }
         : undefined;
-    })
+    }),
   );
 }

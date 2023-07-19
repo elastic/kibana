@@ -28,7 +28,7 @@ export function ServiceGroupSaveButton() {
         });
       }
     },
-    [serviceGroup, isGroupEditMode]
+    [serviceGroup, isGroupEditMode],
   );
   const savedServiceGroup = data?.serviceGroup;
 

@@ -130,7 +130,7 @@ export function ErrorGroupDetails() {
       rangeTo,
       serviceGroup,
       serviceName,
-    ]
+    ],
   );
 
   const {
@@ -154,11 +154,11 @@ export function ErrorGroupDetails() {
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId]
+    [environment, kuery, serviceName, start, end, groupId],
   );
 
   const { errorDistributionData, status: errorDistributionStatus } =
@@ -171,7 +171,7 @@ export function ErrorGroupDetails() {
 
   useEffect(() => {
     const selectedSample = errorSamplesData?.errorSampleIds.find(
-      (sample) => sample === errorId
+      (sample) => sample === errorId,
     );
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
@@ -211,7 +211,7 @@ export function ErrorGroupDetails() {
                 'xpack.apm.errorGroupDetails.occurrencesChartLabel',
                 {
                   defaultMessage: 'Error occurrences',
-                }
+                },
               )}
             />
           </EuiPanel>

@@ -38,7 +38,7 @@ const suggestionsRoute = createApmServerRoute({
     });
     const coreContext = await context.core;
     const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
+      maxSuggestions,
     );
 
     if (!serviceName) {

@@ -66,7 +66,7 @@ export const useMatrixHistogram = ({
 }: MatrixHistogramQueryProps): [
   boolean,
   UseMatrixHistogramArgs,
-  (to: string, from: string) => void
+  (to: string, from: string) => void,
 ] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);

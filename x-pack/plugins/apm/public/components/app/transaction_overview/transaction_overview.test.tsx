@@ -86,7 +86,7 @@ function setup({
           </UrlParamsProvider>
         </MockApmPluginContextWrapper>
       </KibanaReactContext.Provider>
-    </IntlProvider>
+    </IntlProvider>,
   );
 }
 
@@ -117,7 +117,7 @@ describe('TransactionOverview', () => {
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'rangeFrom=now-15m&rangeTo=now&transactionType=firstType',
-        })
+        }),
       );
     });
   });

@@ -38,7 +38,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
             key: `${t.title}-${index}`,
             title: t.title,
             checked: undefined,
-          } as EuiSelectableOption)
+          }) as EuiSelectableOption
       ),
     ],
     []

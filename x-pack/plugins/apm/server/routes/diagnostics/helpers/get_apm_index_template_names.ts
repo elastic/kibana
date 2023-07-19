@@ -31,12 +31,12 @@ export function getApmIndexTemplateNames() {
 }
 
 export function getApmIndexTemplates(
-  existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
+  existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[],
 ) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
   const standardIndexTemplates = apmIndexTemplateNames.map((templateName) => {
     const matchingTemplate = existingIndexTemplates.find(
-      ({ name }) => name === templateName
+      ({ name }) => name === templateName,
     );
 
     return {
@@ -50,8 +50,8 @@ export function getApmIndexTemplates(
     .filter(
       (indexTemplate) =>
         standardIndexTemplates.some(
-          ({ name }) => name === indexTemplate.name
-        ) === false
+          ({ name }) => name === indexTemplate.name,
+        ) === false,
     )
     .map((indexTemplate) => ({
       name: indexTemplate.name,

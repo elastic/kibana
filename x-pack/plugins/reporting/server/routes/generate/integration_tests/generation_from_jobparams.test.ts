@@ -84,8 +84,8 @@ describe('POST /api/reporting/generate', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-      createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } } as any),
-      runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
+      createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } }) as any,
+      runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } }) as any,
     });
     mockReportingCore.getExportTypesRegistry = () => mockExportTypesRegistry;
 

@@ -45,7 +45,7 @@ const defaultProps: UrlPanelContentProps = {
           delete: async () => {
             throw new Error('not implemented');
           },
-        } as any),
+        }) as any,
     },
   } as any,
 };

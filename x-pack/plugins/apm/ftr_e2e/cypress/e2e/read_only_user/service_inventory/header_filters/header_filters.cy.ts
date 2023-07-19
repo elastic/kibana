@@ -26,7 +26,7 @@ describe('Service inventory - header filters', () => {
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
         specialServiceName,
-      })
+      }),
     );
     cy.dismissServiceGroupsTour();
   });

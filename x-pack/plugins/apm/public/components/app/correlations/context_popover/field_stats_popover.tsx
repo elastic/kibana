@@ -104,10 +104,10 @@ export function FieldStatsPopoverContent({
       setNeedToFetchIndividualStat(
         idxToHighlight === -1 &&
           fieldName !== undefined &&
-          fieldValue !== undefined
+          fieldValue !== undefined,
       );
     },
-    [fieldName, fieldValue]
+    [fieldName, fieldValue],
   );
 
   const params = useFetchParams();
@@ -126,11 +126,11 @@ export function FieldStatsPopoverContent({
                 samplerShardSize: '5000',
               },
             },
-          }
+          },
         );
       }
     },
-    [params, fieldName, fieldValue, needToFetchIndividualStat]
+    [params, fieldName, fieldValue, needToFetchIndividualStat],
   );
   const progressBarMax = fieldValueStats?.topValuesSampleSize;
   const formatter = dataView.getFormatterForField(field);
@@ -249,14 +249,14 @@ export function FieldStatsPopover({
       fieldFormats,
       charts,
     }),
-    [uiSettings, data, fieldFormats, charts]
+    [uiSettings, data, fieldFormats, charts],
   );
 
   const addFilter = useCallback(
     (
       popoverField: DataViewField | '_exists_',
       value: unknown,
-      type: '+' | '-'
+      type: '+' | '-',
     ) => {
       if (
         popoverField !== '_exists_' &&
@@ -269,7 +269,7 @@ export function FieldStatsPopover({
         });
       }
     },
-    [onAddFilter]
+    [onAddFilter],
   );
 
   const overrideFieldTopValueBar = useCallback(
@@ -281,7 +281,7 @@ export function FieldStatsPopover({
         ? HIGHLIGHTED_BUCKET_PROPS
         : {};
     },
-    [fieldValue]
+    [fieldValue],
   );
 
   if (!fieldFormats || !charts || !field || !dataView) return null;
@@ -292,7 +292,7 @@ export function FieldStatsPopover({
         'xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent',
         {
           defaultMessage: 'Show top 10 field values',
-        }
+        },
       )}
     >
       <EuiButtonIcon
@@ -304,7 +304,7 @@ export function FieldStatsPopover({
           'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
           {
             defaultMessage: 'Show top 10 field values',
-          }
+          },
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}
         style={{ marginLeft: theme.eui.euiSizeXS }}

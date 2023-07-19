@@ -88,7 +88,7 @@ export interface PanelState<E extends EmbeddableInput & { id: string } = { id: s
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
 
 export interface EmbeddableRegistryDefinition<
-  P extends EmbeddableStateWithType = EmbeddableStateWithType
+  P extends EmbeddableStateWithType = EmbeddableStateWithType,
 > extends PersistableStateDefinition<P> {
   id: string;
 }

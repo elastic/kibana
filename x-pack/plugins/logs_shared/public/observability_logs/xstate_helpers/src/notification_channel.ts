@@ -18,7 +18,7 @@ export interface NotificationChannel<TContext, TEvent extends EventObject, TSent
 export const createNotificationChannel = <
   TContext,
   TEvent extends EventObject,
-  TSentEvent
+  TSentEvent,
 >(): NotificationChannel<TContext, TEvent, TSentEvent> => {
   const eventsSubject = new ReplaySubject<TSentEvent>(1);
 

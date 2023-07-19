@@ -71,7 +71,7 @@ describe('Agent configuration', () => {
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
         serviceName: 'opbeans-node',
-      })
+      }),
     );
   });
 
@@ -87,7 +87,7 @@ describe('Agent configuration', () => {
   it('persists service enviroment when clicking on edit button', () => {
     cy.intercept(
       'GET',
-      '/api/apm/settings/agent-configuration/environments?*'
+      '/api/apm/settings/agent-configuration/environments?*',
     ).as('serviceEnvironmentApi');
     cy.contains('Create configuration').click();
     cy.getByTestSubj('serviceNameComboBox')
@@ -112,7 +112,7 @@ describe('Agent configuration', () => {
   it('displays All label when selecting all option', () => {
     cy.intercept(
       'GET',
-      '/api/apm/settings/agent-configuration/environments'
+      '/api/apm/settings/agent-configuration/environments',
     ).as('serviceEnvironmentApi');
     cy.contains('Create configuration').click();
     cy.getByTestSubj('serviceNameComboBox').click().type('All').type('{enter}');

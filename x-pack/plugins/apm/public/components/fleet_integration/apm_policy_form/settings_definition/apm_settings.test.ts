@@ -17,13 +17,13 @@ describe('apm_settings', () => {
           expect(
             isSettingsFormValid(settings, {
               [key]: { value: 0, type: 'integer' },
-            })
+            }),
           ).toBeFalsy();
 
           expect(
             isSettingsFormValid(settings, {
               [key]: { value: -1, type: 'integer' },
-            })
+            }),
           ).toBeFalsy();
         });
       });
@@ -33,7 +33,7 @@ describe('apm_settings', () => {
           expect(
             isSettingsFormValid(settings, {
               [key]: { value: -1, type: 'integer' },
-            })
+            }),
           ).toBeFalsy();
         });
       });
@@ -56,10 +56,10 @@ describe('apm_settings', () => {
             expect(
               isSettingsFormValid(settings, {
                 [key]: { value: '0ms', type: 'text' },
-              })
+              }),
             ).toBeFalsy();
           });
-        }
+        },
       );
     });
   });

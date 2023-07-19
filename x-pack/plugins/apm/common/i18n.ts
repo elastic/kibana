@@ -11,5 +11,5 @@ export const NOT_AVAILABLE_LABEL = i18n.translate(
   'xpack.apm.notAvailableLabel',
   {
     defaultMessage: 'N/A',
-  }
+  },
 );

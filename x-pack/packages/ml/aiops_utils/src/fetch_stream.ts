@@ -116,7 +116,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
           yield new Promise<
             [
               GeneratorError,
-              ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined
+              ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined,
             ]
           >((resolve) => {
             setTimeout(() => {

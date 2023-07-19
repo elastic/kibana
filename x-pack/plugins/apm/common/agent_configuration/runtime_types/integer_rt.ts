@@ -30,9 +30,9 @@ export function getIntegerRt({
           return isValid
             ? t.success(inputAsString)
             : t.failure(input, context, message);
-        }
+        },
       );
     },
-    t.identity
+    t.identity,
   );
 }

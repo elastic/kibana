@@ -6,7 +6,7 @@
  */
 
 export const UNINSTALL_COMMAND_TARGETS = ['agent', 'endpoint'] as const;
-export type UninstallCommandTarget = typeof UNINSTALL_COMMAND_TARGETS[number];
+export type UninstallCommandTarget = (typeof UNINSTALL_COMMAND_TARGETS)[number];
 
 export type PLATFORMS_FOR_UNINSTALL = 'linuxOrMac' | 'windows';
 

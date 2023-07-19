@@ -21,7 +21,7 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'custom',
 ] as const;
 
-type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
+type MetricExplorerAggregations = (typeof METRIC_EXPLORER_AGGREGATIONS)[number];
 
 const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
   Record<MetricExplorerAggregations, null>

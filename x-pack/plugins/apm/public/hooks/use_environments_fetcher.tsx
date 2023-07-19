@@ -52,7 +52,7 @@ export function useEnvironmentsFetcher({
         return { environments: response.terms };
       });
     },
-    [start, end, serviceName]
+    [start, end, serviceName],
   );
 
   return {

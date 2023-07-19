@@ -78,7 +78,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
                     : undefined,
               },
             },
-          }
+          },
         );
       }
     },
@@ -91,7 +91,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
       groupId,
       comparisonEnabled,
       offset,
-    ]
+    ],
   );
 
   const loading = isPending(status);
@@ -108,7 +108,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         'xpack.apm.errorGroupTopTransactions.column.transactionName',
         {
           defaultMessage: 'Transaction name',
-        }
+        },
       ),
       render: (_, { transactionName, transactionType }) => {
         return (
@@ -135,16 +135,16 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         'xpack.apm.errorGroupTopTransactions.column.occurrences',
         {
           defaultMessage: 'Error occurrences',
-        }
+        },
       ),
       align: RIGHT_ALIGNMENT,
       dataType: 'number',
       render: (
         _,
-        { occurrences, currentPeriodTimeseries, previousPeriodTimeseries }
+        { occurrences, currentPeriodTimeseries, previousPeriodTimeseries },
       ) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.ERROR_OCCURRENCES
+          ChartType.ERROR_OCCURRENCES,
         );
 
         return (
@@ -158,7 +158,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
                 values: {
                   occurrences: asInteger(occurrences),
                 },
-              }
+              },
             )}
             series={currentPeriodTimeseries}
             comparisonSeries={
@@ -193,7 +193,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
           status === FETCH_STATUS.FAILURE
             ? i18n.translate(
                 'xpack.apm.errorGroupTopTransactions.errorMessage',
-                { defaultMessage: 'Failed to fetch' }
+                { defaultMessage: 'Failed to fetch' },
               )
             : ''
         }

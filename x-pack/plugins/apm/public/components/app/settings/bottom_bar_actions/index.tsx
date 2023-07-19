@@ -62,7 +62,7 @@ export function BottomBarActions({
                   'xpack.apm.bottomBarActions.discardChangesButton',
                   {
                     defaultMessage: 'Discard changes',
-                  }
+                  },
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>

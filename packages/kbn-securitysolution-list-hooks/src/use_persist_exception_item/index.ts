@@ -23,7 +23,7 @@ interface PersistReturnExceptionItem {
 
 export type ReturnPersistExceptionItem = [
   PersistReturnExceptionItem,
-  Dispatch<CreateExceptionListItemSchema | UpdateExceptionListItemSchema | null>
+  Dispatch<CreateExceptionListItemSchema | UpdateExceptionListItemSchema | null>,
 ];
 
 // TODO: Add this to @kbn/securitysolution-list-hooks

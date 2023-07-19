@@ -9,7 +9,7 @@ import { asPercent } from '@kbn/observability-plugin/common';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 export const getAggsTypeFromRule = (
-  ruleAggType: string
+  ruleAggType: string,
 ): LatencyAggregationType => {
   if (ruleAggType === '95th') return LatencyAggregationType.p95;
   if (ruleAggType === '99th') return LatencyAggregationType.p99;

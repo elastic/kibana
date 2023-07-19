@@ -59,7 +59,7 @@ describe('APMLocatorDefinition', () => {
     });
 
     expect(location.path).toBe(
-      '/services/example-app/overview?comparisonEnabled=false&environment=development&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+      '/services/example-app/overview?comparisonEnabled=false&environment=development&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup=',
     );
   });
 
@@ -67,7 +67,7 @@ describe('APMLocatorDefinition', () => {
     const location = await locator.getLocation({ serviceName: undefined });
 
     expect(location.path).toBe(
-      '/services?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+      '/services?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&serviceGroup=',
     );
   });
 
@@ -81,7 +81,7 @@ describe('APMLocatorDefinition', () => {
     });
 
     expect(location.path).toBe(
-      '/services/example-app/transactions?comparisonEnabled=false&environment=prod&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+      '/services/example-app/transactions?comparisonEnabled=false&environment=prod&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup=',
     );
   });
 });

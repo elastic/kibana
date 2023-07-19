@@ -65,7 +65,7 @@ export const calculateAuto = {
     function near(bound, interval, target) {
       if (bound > target) return interval;
     },
-    true
+    true,
   ),
 
   lessThan: find(revRoundingRules, function lessThan(_bound, interval, target) {

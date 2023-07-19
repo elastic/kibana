@@ -150,8 +150,8 @@ export class DefaultAlertService {
   async getAlertActions(ruleType: DefaultRuleType) {
     const { actionConnectors, settings } = await this.getActionConnectors();
 
-    const defaultActions = (actionConnectors ?? []).filter((act) =>
-      settings?.defaultConnectors?.includes(act.id)
+    const defaultActions = (actionConnectors ?? []).filter(
+      (act) => settings?.defaultConnectors?.includes(act.id)
     );
 
     if (ruleType === SYNTHETICS_STATUS_RULE) {

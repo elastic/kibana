@@ -12,7 +12,8 @@ export const SEARCH_QUERY_LANGUAGE = {
   LUCENE: 'lucene',
 } as const;
 
-export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
+export type SearchQueryLanguage =
+  (typeof SEARCH_QUERY_LANGUAGE)[keyof typeof SEARCH_QUERY_LANGUAGE];
 
 export interface CombinedQuery {
   searchString: Query['query'];

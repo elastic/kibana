@@ -130,10 +130,13 @@ export function registerCollector(
           }>;
         };
       };
-      const countByResultType = aggResponse.count_by_result_type.buckets.reduce((acc, curr) => {
-        acc[curr.key] = curr.doc_count;
-        return acc;
-      }, {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type']);
+      const countByResultType = aggResponse.count_by_result_type.buckets.reduce(
+        (acc, curr) => {
+          acc[curr.key] = curr.doc_count;
+          return acc;
+        },
+        {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type']
+      );
 
       const jobsHealthRuleInstances = await esClient.search<{
         alert: {

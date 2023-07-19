@@ -81,7 +81,7 @@ function RedirectNodesToMetrics() {
 
 function RedirectNodeMetricsToMetricsDetails() {
   const { query, path } = useApmParams(
-    '/services/{serviceName}/nodes/{serviceNodeName}/metrics'
+    '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
   );
   const search = qs.stringify(query);
   return (

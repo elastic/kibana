@@ -14,7 +14,7 @@ describe('rum_settings - isRUMFormValid', () => {
         enable_rum: { value: true, type: 'bool' },
         rum_allow_origins: { value: ['*', 'foo', '1'], type: 'text' },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(true);
   });
@@ -29,7 +29,7 @@ describe('rum_settings - isRUMFormValid', () => {
           type: 'text',
         },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(false);
   });
@@ -44,7 +44,7 @@ describe('rum_settings - isRUMFormValid', () => {
           type: 'text',
         },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(true);
   });

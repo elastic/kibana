@@ -17,7 +17,7 @@ import { useNavigation } from './navigation';
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends NodeProps<LinkId, Id, ChildrenId> {
   element?: string;
   unstyled?: boolean;
@@ -30,7 +30,7 @@ function isReactElement(element: ReactNode): element is ReactElement {
 function NavigationItemComp<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >(props: Props<LinkId, Id, ChildrenId>) {
   const { cloudLinks } = useNavigationServices();
   const navigationContext = useNavigation();

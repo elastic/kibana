@@ -21,7 +21,7 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_co
  */
 export function createPanelState<
   TEmbeddableInput extends EmbeddableInput,
-  TPlacementMethodArgs extends IPanelPlacementArgs = IPanelPlacementArgs
+  TPlacementMethodArgs extends IPanelPlacementArgs = IPanelPlacementArgs,
 >(
   panelState: PanelState<TEmbeddableInput>,
   currentPanels: { [key: string]: DashboardPanelState },

@@ -55,7 +55,7 @@ export const appVersionTab = {
     'xpack.apm.mobile.transactions.overview.tabs.app.version',
     {
       defaultMessage: 'App version',
-    }
+    },
   ),
   component: AppVersionTab,
 };

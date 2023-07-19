@@ -56,7 +56,7 @@ export function useApmEditableSettings(settingsKeys: string[]) {
       return getEditableConfig({ settingsKeys, uiSettings });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uiSettings, settingsKeys, forceReloadSettings]
+    [uiSettings, settingsKeys, forceReloadSettings],
   );
 
   function handleFieldChange(key: string, fieldState: FieldState) {
@@ -83,7 +83,7 @@ export function useApmEditableSettings(settingsKeys: string[]) {
       try {
         setIsSaving(true);
         const arr = Object.entries(unsavedChanges).map(([key, fieldState]) =>
-          uiSettings.set(key, fieldState.value)
+          uiSettings.set(key, fieldState.value),
         );
 
         await Promise.all(arr);

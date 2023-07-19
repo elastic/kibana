@@ -26,14 +26,14 @@ const djangoAddAgentComment = i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
   {
     defaultMessage: 'Add the agent to installed apps',
-  }
+  },
 );
 
 const djangoTracingMiddlewareComment = i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
   {
     defaultMessage: 'Add our tracing middleware to send performance metrics',
-  }
+  },
 );
 
 export const djangoLineNumbers = {

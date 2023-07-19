@@ -15,13 +15,13 @@ export interface CorrelationsProgress {
 }
 
 export function getLatencyCorrelationsSortedByCorrelation(
-  latencyCorrelations: LatencyCorrelation[]
+  latencyCorrelations: LatencyCorrelation[],
 ) {
   return latencyCorrelations.sort((a, b) => b.correlation - a.correlation);
 }
 
 export function getFailedTransactionsCorrelationsSortedByScore(
-  failedTransactionsCorrelations: FailedTransactionsCorrelation[]
+  failedTransactionsCorrelations: FailedTransactionsCorrelation[],
 ) {
   return failedTransactionsCorrelations.sort((a, b) => b.score - a.score);
 }

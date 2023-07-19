@@ -33,12 +33,12 @@ export async function saveObservabilityOnboardingState({
       {
         state: observabilityOnboardingState.state,
         progress: { ...observabilityOnboardingState.progress },
-      }
+      },
     );
   } else {
     savedObject = await savedObjectsClient.create<ObservabilityOnboardingState>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-      observabilityOnboardingState
+      observabilityOnboardingState,
     );
   }
   const { id, updated_at: updatedAt } = savedObject;

@@ -356,10 +356,13 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
       const areFieldsValid = validationResult.every((res) => res.isValid);
 
-      const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
-        acc[field.path] = validationResult[i].isValid;
-        return acc;
-      }, {} as { [fieldPath: string]: boolean });
+      const validationResultByPath = fieldsToValidate.reduce(
+        (acc, field, i) => {
+          acc[field.path] = validationResult[i].isValid;
+          return acc;
+        },
+        {} as { [fieldPath: string]: boolean }
+      );
 
       // At this stage we have an updated field validation state inside the "validationResultByPath" object.
       // The fields object in "fieldsRefs.current" have not been updated yet with their new validation state

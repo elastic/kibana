@@ -22,7 +22,10 @@ export { FleetError as FleetError } from '../../common/errors';
 export class RegistryError extends FleetError {}
 export class RegistryConnectionError extends RegistryError {}
 export class RegistryResponseError extends RegistryError {
-  constructor(message?: string, public readonly status?: number) {
+  constructor(
+    message?: string,
+    public readonly status?: number
+  ) {
     super(message);
   }
 }

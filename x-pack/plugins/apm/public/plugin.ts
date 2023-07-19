@@ -140,7 +140,7 @@ const serviceGroupsTitle = i18n.translate(
   'xpack.apm.navigation.serviceGroupsTitle',
   {
     defaultMessage: 'Service groups',
-  }
+  },
 );
 
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
@@ -154,26 +154,26 @@ const dependenciesTitle = i18n.translate(
   'xpack.apm.navigation.dependenciesTitle',
   {
     defaultMessage: 'Dependencies',
-  }
+  },
 );
 
 const apmSettingsTitle = i18n.translate(
   'xpack.apm.navigation.apmSettingsTitle',
   {
     defaultMessage: 'Settings',
-  }
+  },
 );
 
 const apmStorageExplorerTitle = i18n.translate(
   'xpack.apm.navigation.apmStorageExplorerTitle',
   {
     defaultMessage: 'Storage Explorer',
-  }
+  },
 );
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
-    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>,
   ) {
     this.initializerContext = initializerContext;
   }
@@ -226,7 +226,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_dependency'
+                          'side_nav_dependency',
                         );
                       }
                     },
@@ -237,8 +237,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           }
 
           return [];
-        })
-      )
+        }),
+      ),
     );
 
     const getApmDataHelper = async () => {
@@ -269,23 +269,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       async () => {
         const { hasFleetApmIntegrations } = await getApmDataHelper();
         return hasFleetApmIntegrations();
-      }
+      },
     );
 
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
-      () => import('./tutorial/tutorial_fleet_instructions')
+      () => import('./tutorial/tutorial_fleet_instructions'),
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
-      () => import('./tutorial/config_agent')
+      () => import('./tutorial/config_agent'),
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
-      () => import('./tutorial/config_agent/rum_script')
+      () => import('./tutorial/config_agent/rum_script'),
     );
 
     pluginSetupDeps.uiActions.registerTrigger({
@@ -392,7 +392,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     registerApmRuleTypes(observabilityRuleTypeRegistry);
 
     const locator = plugins.share.url.locators.create(
-      new APMServiceDetailLocator(core.uiSettings)
+      new APMServiceDetailLocator(core.uiSettings),
     );
 
     return {

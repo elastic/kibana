@@ -21,7 +21,7 @@ const MISSING_CONFIGURATION = i18n.translate(
   {
     defaultMessage:
       'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.',
-  }
+  },
 );
 
 export interface AgentLatestVersionsResponse {
@@ -36,7 +36,7 @@ type AgentLatestVersions = Record<
 
 export const fetchAgentsLatestVersion = async (
   logger: Logger,
-  latestAgentVersionsUrl: string
+  latestAgentVersionsUrl: string,
 ): Promise<AgentLatestVersionsResponse> => {
   if (isEmpty(latestAgentVersionsUrl)) {
     throw Boom.notImplemented(MISSING_CONFIGURATION);
@@ -48,7 +48,7 @@ export const fetchAgentsLatestVersion = async (
     if (response.status !== 200) {
       throw new ErrorWithStatusCode(
         `${response.status} - ${await response.text()}`,
-        `${response.status}`
+        `${response.status}`,
       );
     }
 

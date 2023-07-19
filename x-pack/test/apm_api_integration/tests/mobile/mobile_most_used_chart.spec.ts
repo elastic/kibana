@@ -86,9 +86,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('should get the top 5 and the other option only', () => {
-        const deviceOptions = response.mostUsedCharts.find(
-          (chart) => chart.key === 'device'
-        )?.options;
+        const deviceOptions = response.mostUsedCharts.find((chart) => chart.key === 'device')
+          ?.options;
         expect(deviceOptions?.length).to.eql(6);
         expect(deviceOptions?.find((option) => option.key === 'other')).to.not.be(undefined);
       });

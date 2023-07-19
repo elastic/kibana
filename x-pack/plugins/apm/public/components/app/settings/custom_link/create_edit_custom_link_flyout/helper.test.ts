@@ -19,8 +19,8 @@ describe('Custom link helper', () => {
             { key: '', value: '' },
             { key: '', value: '' },
           ],
-          ''
-        )
+          '',
+        ),
       ).toEqual([
         { value: 'DEFAULT', text: 'Select field...' },
         { value: 'service.name', text: 'service.name' },
@@ -38,8 +38,8 @@ describe('Custom link helper', () => {
             { key: '', value: '' },
             { key: '', value: '' },
           ],
-          ''
-        )
+          '',
+        ),
       ).toEqual([
         { value: 'DEFAULT', text: 'Select field...' },
         { value: 'service.environment', text: 'service.environment' },
@@ -56,8 +56,8 @@ describe('Custom link helper', () => {
             { key: '', value: '' },
             { key: '', value: '' },
           ],
-          'transaction.name'
-        )
+          'transaction.name',
+        ),
       ).toEqual([
         { value: 'DEFAULT', text: 'Select field...' },
         { value: 'service.environment', text: 'service.environment' },
@@ -74,8 +74,8 @@ describe('Custom link helper', () => {
             { key: 'service.environment', value: 'baz' },
             { key: 'transaction.type', value: 'qux' },
           ],
-          ''
-        )
+          '',
+        ),
       ).toEqual([{ value: 'DEFAULT', text: 'Select field...' }]);
     });
   });
@@ -90,8 +90,8 @@ describe('Custom link helper', () => {
       expect(
         replaceTemplateVariables(
           'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
-          transaction
-        )
+          transaction,
+        ),
       ).toEqual({
         error: undefined,
         formattedUrl: 'https://elastic.co?service.name=foo&trace.id=123',
@@ -106,14 +106,14 @@ describe('Custom link helper', () => {
       };
       expect(
         replaceTemplateVariables(
-          'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}'
-        )
+          'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
+        ),
       ).toEqual(expectedResult);
       expect(
         replaceTemplateVariables(
           'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
-          {} as unknown as Transaction
-        )
+          {} as unknown as Transaction,
+        ),
       ).toEqual(expectedResult);
     });
 
@@ -121,8 +121,8 @@ describe('Custom link helper', () => {
       expect(
         replaceTemplateVariables(
           'https://elastic.co?service.name={{service.nam}}&trace.id={{trace.i}}',
-          transaction
-        )
+          transaction,
+        ),
       ).toEqual({
         error:
           "We couldn't find a value match for {{service.nam}}, {{trace.i}} in the example transaction document.",
@@ -134,8 +134,8 @@ describe('Custom link helper', () => {
       expect(
         replaceTemplateVariables(
           'https://elastic.co?service.name={{service.name}',
-          transaction
-        )
+          transaction,
+        ),
       ).toEqual({
         error:
           "We couldn't find an example transaction document due to invalid variable(s) defined.",

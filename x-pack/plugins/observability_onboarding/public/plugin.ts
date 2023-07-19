@@ -50,7 +50,7 @@ export class ObservabilityOnboardingPlugin
 
   public setup(
     core: CoreSetup,
-    plugins: ObservabilityOnboardingPluginSetupDeps
+    plugins: ObservabilityOnboardingPluginSetupDeps,
   ) {
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -97,6 +97,6 @@ export class ObservabilityOnboardingPlugin
   }
   public start(
     core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
+    plugins: ObservabilityOnboardingPluginStartDeps,
   ) {}
 }

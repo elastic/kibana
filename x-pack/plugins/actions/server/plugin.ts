@@ -113,14 +113,14 @@ export interface PluginSetupContract {
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
+    ExecutorResultData = void,
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
 
   registerSubActionConnectorType<
     Config extends ActionTypeConfig = ActionTypeConfig,
-    Secrets extends ActionTypeSecrets = ActionTypeSecrets
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
@@ -346,7 +346,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
         Params extends ActionTypeParams = ActionTypeParams,
-        ExecutorResultData = void
+        ExecutorResultData = void,
       >(
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
@@ -355,7 +355,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       registerSubActionConnectorType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
-        Secrets extends ActionTypeSecrets = ActionTypeSecrets
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets,
       >(
         connector: SubActionConnectorType<Config, Secrets>
       ) => {

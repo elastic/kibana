@@ -29,7 +29,10 @@ export interface ResourceInstaller {
 }
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger
+  ) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();

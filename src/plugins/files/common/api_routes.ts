@@ -20,7 +20,7 @@ export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
 export interface EndpointInputs<
   P extends Type<unknown> = Type<unknown>,
   Q extends Type<unknown> = Type<unknown>,
-  B extends Type<unknown> = Type<unknown>
+  B extends Type<unknown> = Type<unknown>,
 > {
   params?: P;
   query?: Q;
@@ -52,7 +52,7 @@ type Extends<X, Y> = X extends Y ? Y : unknown;
 export interface CreateRouteDefinition<
   Inputs extends EndpointInputs,
   R,
-  ClientMethod extends (arg: any) => Promise<any> = () => Promise<unknown>
+  ClientMethod extends (arg: any) => Promise<any> = () => Promise<unknown>,
 > {
   inputs: {
     params: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['params']>>>;

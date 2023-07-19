@@ -71,7 +71,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
               detectorType: ApmMlDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: false,
-            })?.environment
+            })?.environment,
           ).toBe(PROD);
         });
       });
@@ -88,7 +88,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
               detectorType: ApmMlDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: false,
-            })
+            }),
           ).toBeUndefined();
 
           expect(
@@ -97,7 +97,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
               detectorType: ApmMlDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: true,
-            })
+            }),
           ).toBeUndefined();
         });
       });

@@ -26,7 +26,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: 'now-1m',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
           end: '1971-01-01T00:00:00.000Z',
@@ -47,7 +47,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: '',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
@@ -71,7 +71,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: 'nope',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
@@ -93,7 +93,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: 'now-2m',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1969-12-31T23:58:00.000Z',
           end: '1970-01-01T00:00:00.000Z',

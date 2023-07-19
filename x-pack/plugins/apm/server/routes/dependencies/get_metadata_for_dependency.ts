@@ -52,7 +52,7 @@ export async function getMetadataForDependency({
           '@timestamp': 'desc',
         },
       },
-    }
+    },
   );
 
   const sample = maybe(sampleResponse.hits.hits[0])?._source;

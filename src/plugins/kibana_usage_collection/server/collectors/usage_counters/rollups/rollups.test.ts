@@ -32,7 +32,7 @@ const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
     updated_at: updatedAt.format(),
     version: 'WzI5LDFd',
     score: 0,
-  } as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>);
+  }) as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>;
 
 describe('isSavedObjectOlderThan', () => {
   it(`returns true if doc is older than x days`, () => {

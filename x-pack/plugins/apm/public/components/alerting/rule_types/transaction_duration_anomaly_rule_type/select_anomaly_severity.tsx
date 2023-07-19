@@ -16,7 +16,7 @@ import {
 
 export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {
   const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-    (option) => option.type === type
+    (option) => option.type === type,
   )!;
   return (
     <EuiHealth

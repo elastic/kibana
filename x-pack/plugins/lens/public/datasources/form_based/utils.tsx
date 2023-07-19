@@ -297,7 +297,7 @@ export function getShardFailuresWarningMessages(
                       label,
                     },
                   }),
-                } as UserMessage)
+                }) as UserMessage
             )
           );
         default:

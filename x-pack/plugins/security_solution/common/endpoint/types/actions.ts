@@ -96,7 +96,7 @@ export const ActivityLogItemTypes = {
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends object = object
+  TOutputContent extends object = object,
 > {
   action_id: string;
   data: EndpointActionData<TParameters, TOutputContent>;
@@ -191,7 +191,7 @@ export type EndpointActionDataParameterTypes =
 
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends object = object
+  TOutputContent extends object = object,
 > {
   command: ResponseActionsApiCommandNames;
   comment?: string;
@@ -335,7 +335,7 @@ export interface ActionDetailsAgentState {
 
 export interface ActionDetails<
   TOutputContent extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   /** The action id passed only if returnActionIdCommands contains the command */
   action?: string;
@@ -393,7 +393,7 @@ export interface ActionDetails<
 
 export interface ActionDetailsApiResponse<
   TOutputType extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   data: ActionDetails<TOutputType, TParameters>;
 }

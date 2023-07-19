@@ -44,10 +44,10 @@ export async function createCloudApmPackgePolicy({
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
-    APM_SERVER_SCHEMA_SAVED_OBJECT_ID
+    APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   );
   const apmServerSchema: Record<string, any> = JSON.parse(
-    (attributes as { schemaJson: string }).schemaJson
+    (attributes as { schemaJson: string }).schemaJson,
   );
   // Merges agent config and source maps with the new APM cloud package policy
   const apmPackagePolicyDefinition = await getApmPackagePolicyDefinition({
@@ -67,7 +67,7 @@ export async function createCloudApmPackgePolicy({
     savedObjectsClient,
     esClient,
     mergedAPMPackagePolicy,
-    { id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID, force: true, bumpRevision: true }
+    { id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID, force: true, bumpRevision: true },
   );
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create end`);
   return apmPackagePolicy;

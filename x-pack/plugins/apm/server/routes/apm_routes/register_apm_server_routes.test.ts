@@ -68,7 +68,7 @@ const initApi = (
       any,
       APMRouteCreateOptions
     >
-  >
+  >,
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
 
@@ -110,7 +110,7 @@ const initApi = (
         },
         ...request,
       },
-      responseMock
+      responseMock,
     );
 
     return result;

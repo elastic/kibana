@@ -18,14 +18,14 @@ type FleetAuthzRouterConfigParam = FleetAuthzRequirements | ((userAuthz: FleetAu
 
 type FleetAuthzRouteRegistrar<
   Method extends RouteMethod,
-  Context extends RequestHandlerContext = RequestHandlerContext
+  Context extends RequestHandlerContext = RequestHandlerContext,
 > = <P, Q, B>(
   route: FleetRouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
 export interface FleetAuthzRouteConfig<
-  T extends FleetAuthzRouterConfigParam = FleetAuthzRouterConfigParam
+  T extends FleetAuthzRouterConfigParam = FleetAuthzRouterConfigParam,
 > {
   fleetAuthz?: T;
 }
@@ -35,7 +35,7 @@ export type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<
 
 // Fleet router that allow to add required access when registering route
 export interface FleetAuthzRouter<
-  TContext extends FleetRequestHandlerContext = FleetRequestHandlerContext
+  TContext extends FleetRequestHandlerContext = FleetRequestHandlerContext,
 > extends IRouter<TContext> {
   get: FleetAuthzRouteRegistrar<'get', TContext>;
   delete: FleetAuthzRouteRegistrar<'delete', TContext>;

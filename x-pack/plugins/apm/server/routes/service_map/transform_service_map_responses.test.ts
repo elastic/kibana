@@ -80,7 +80,7 @@ describe('transformServiceMapResponses', () => {
     const { elements } = transformServiceMapResponses({ response });
 
     const connection = elements.find(
-      (element) => 'source' in element.data && 'target' in element.data
+      (element) => 'source' in element.data && 'target' in element.data,
     );
 
     expect(connection).toHaveProperty('data');
@@ -90,7 +90,7 @@ describe('transformServiceMapResponses', () => {
     }
 
     expect(
-      elements.find((element) => element.data.id === '>opbeans-node')
+      elements.find((element) => element.data.id === '>opbeans-node'),
     ).toBeUndefined();
   });
 
@@ -117,13 +117,13 @@ describe('transformServiceMapResponses', () => {
     expect(elements.length).toBe(5);
 
     const connections = elements.filter(
-      (element) => 'source' in element.data && 'target' in element.data
+      (element) => 'source' in element.data && 'target' in element.data,
     );
     expect(connections.length).toBe(2);
 
     const sendMessageConnection = connections.find(
       (element) =>
-        'source' in element.data && element.data.source === 'opbeans-java'
+        'source' in element.data && element.data.source === 'opbeans-java',
     );
 
     expect(sendMessageConnection).toHaveProperty('data');
@@ -132,13 +132,13 @@ describe('transformServiceMapResponses', () => {
     if (sendMessageConnection?.data && 'target' in sendMessageConnection.data) {
       expect(sendMessageConnection.data.target).toBe('>kafka/some-queue');
       expect(sendMessageConnection.data.id).toBe(
-        'opbeans-java~>kafka/some-queue'
+        'opbeans-java~>kafka/some-queue',
       );
     }
 
     const receiveMessageConnection = connections.find(
       (element) =>
-        'target' in element.data && element.data.target === 'opbeans-node'
+        'target' in element.data && element.data.target === 'opbeans-node',
     );
 
     expect(receiveMessageConnection).toHaveProperty('data');
@@ -150,7 +150,7 @@ describe('transformServiceMapResponses', () => {
     ) {
       expect(receiveMessageConnection.data.source).toBe('>kafka/some-queue');
       expect(receiveMessageConnection.data.id).toBe(
-        '>kafka/some-queue~opbeans-node'
+        '>kafka/some-queue~opbeans-node',
       );
     }
   });

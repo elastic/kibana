@@ -14,7 +14,7 @@ export const withEmbeddableSubscription = <
   I extends EmbeddableInput,
   O extends EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  ExtraProps = {}
+  ExtraProps = {},
 >(
   WrappedComponent: React.ComponentType<{ input: I; output: O; embeddable: E } & ExtraProps>
 ): React.ComponentType<{ embeddable: E } & ExtraProps> =>

@@ -48,7 +48,7 @@ const tabs = [
 export function TransactionDetailsTabs() {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
@@ -90,7 +90,7 @@ export function TransactionDetailsTabs() {
   useEffect(() => {
     const selectedSample = traceSamplesFetchResult.data?.traceSamples.find(
       (sample) =>
-        sample.transactionId === transactionId && sample.traceId === traceId
+        sample.transactionId === transactionId && sample.traceId === traceId,
     );
 
     if (
@@ -99,7 +99,7 @@ export function TransactionDetailsTabs() {
     ) {
       // selected sample was not found. select a new one:
       const preferredSample = maybe(
-        traceSamplesFetchResult.data?.traceSamples[0]
+        traceSamplesFetchResult.data?.traceSamples[0],
       );
 
       history.replace({

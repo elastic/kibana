@@ -21,7 +21,7 @@ describe('getNonEmptySections', () => {
             actions: [],
           },
         ],
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -55,7 +55,7 @@ describe('getNonEmptySections', () => {
             ],
           },
         ],
-      })
+      }),
     ).toEqual([
       [
         {

@@ -45,7 +45,7 @@ export function AnalyzeDataButton() {
     query: { rangeFrom, rangeTo, environment },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const basepath = services.http?.basePath.get();
@@ -74,7 +74,7 @@ export function AnalyzeDataButton() {
           },
         ],
       },
-      basepath
+      basepath,
     );
 
     return (

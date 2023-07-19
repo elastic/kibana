@@ -92,7 +92,7 @@ export function RuntimeAttachment({
               {
                 defaultMessage:
                   'You have unsaved changes. Click "Save integration" to sync changes to the integration.',
-              }
+              },
             )}
             color="warning"
             iconType="iInCircle"
@@ -106,7 +106,7 @@ export function RuntimeAttachment({
           <EuiSwitch
             label={i18n.translate(
               'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.enableRuntimeAttachement',
-              { defaultMessage: 'Enable runtime attachment' }
+              { defaultMessage: 'Enable runtime attachment' },
             )}
             checked={isEnabled}
             onChange={onToggleEnable}
@@ -131,7 +131,7 @@ export function RuntimeAttachment({
             <h3>
               {i18n.translate(
                 'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.discoveryRules',
-                { defaultMessage: 'Discovery rules' }
+                { defaultMessage: 'Discovery rules' },
               )}
             </h3>
           </EuiText>
@@ -154,7 +154,7 @@ export function RuntimeAttachment({
               >
                 {i18n.translate(
                   'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule',
-                  { defaultMessage: 'Add rule' }
+                  { defaultMessage: 'Add rule' },
                 )}
               </EuiButton>
             </EuiFlexItem>

@@ -33,11 +33,11 @@ const Swatch = euiStyled.div`
   flex: 1 1 auto;
   &:first-child {
     border-radius: ${(props) => props.theme.eui.euiBorderRadius} 0 0 ${(props) =>
-  props.theme.eui.euiBorderRadius};
+      props.theme.eui.euiBorderRadius};
   }
   &:last-child {
     border-radius: 0 ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
-  props.theme.eui.euiBorderRadius} 0;
+      props.theme.eui.euiBorderRadius} 0;
 `;
 
 const Swatches = euiStyled.div`

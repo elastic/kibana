@@ -27,7 +27,7 @@ const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
 export function registerApmRuleTypes(
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
 ) {
   observabilityRuleTypeRegistry.register({
     id: ApmRuleType.ErrorCount,
@@ -41,7 +41,7 @@ export function registerApmRuleTypes(
         link: getAlertUrlErrorCount(
           // TODO:fix SERVICE_NAME when we move it to initializeIndex
           String(fields[SERVICE_NAME]![0]),
-          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
         ),
       };
     },
@@ -64,7 +64,7 @@ export function registerApmRuleTypes(
       {
         defaultMessage:
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
-      }
+      },
     ),
     format: ({ fields }) => {
       return {
@@ -73,7 +73,7 @@ export function registerApmRuleTypes(
           // TODO:fix SERVICE_NAME when we move it to initializeIndex
           String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-          String(fields[TRANSACTION_TYPE]![0])
+          String(fields[TRANSACTION_TYPE]![0]),
         ),
       };
     },
@@ -82,13 +82,13 @@ export function registerApmRuleTypes(
       return `${docLinks.links.alerting.apmRules}`;
     },
     ruleParamsExpression: lazy(
-      () => import('./transaction_duration_rule_type')
+      () => import('./transaction_duration_rule_type'),
     ),
     validate: () => ({
       errors: [],
     }),
     alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
+      () => import('../ui_components/alert_details_app_section'),
     ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
@@ -101,7 +101,7 @@ export function registerApmRuleTypes(
       {
         defaultMessage:
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
-      }
+      },
     ),
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
@@ -109,7 +109,7 @@ export function registerApmRuleTypes(
         // TODO:fix SERVICE_NAME when we move it to initializeIndex
         String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE]![0])
+        String(fields[TRANSACTION_TYPE]![0]),
       ),
     }),
     iconClass: 'bell',
@@ -117,7 +117,7 @@ export function registerApmRuleTypes(
       return `${docLinks.links.alerting.apmRules}`;
     },
     ruleParamsExpression: lazy(
-      () => import('./transaction_error_rate_rule_type')
+      () => import('./transaction_error_rate_rule_type'),
     ),
     validate: () => ({
       errors: [],
@@ -138,7 +138,7 @@ export function registerApmRuleTypes(
         // TODO:fix SERVICE_NAME when we move it to initializeIndex
         String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE]![0])
+        String(fields[TRANSACTION_TYPE]![0]),
       ),
     }),
     iconClass: 'bell',
@@ -146,7 +146,7 @@ export function registerApmRuleTypes(
       return `${docLinks.links.alerting.apmRules}`;
     },
     ruleParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_rule_type')
+      () => import('./transaction_duration_anomaly_rule_type'),
     ),
     validate: () => ({
       errors: [],

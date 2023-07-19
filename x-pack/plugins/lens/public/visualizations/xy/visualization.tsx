@@ -808,7 +808,7 @@ export const getXyVisualization = ({
             displayLocations: [{ id: 'visualization' }],
             shortMessage,
             longMessage,
-          } as UserMessage)
+          }) as UserMessage
       )
     );
 

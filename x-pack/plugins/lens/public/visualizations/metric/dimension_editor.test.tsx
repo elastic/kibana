@@ -591,13 +591,13 @@ describe('dimension editor', () => {
           expect(
             getHarnessWithState(stateWOTrend, {
               hasDefaultTimeField: () => false,
-              getOperationForColumnId: (id) => ({} as OperationDescriptor),
+              getOperationForColumnId: (id) => ({}) as OperationDescriptor,
             } as DatasourcePublicAPI).isDisabled('trendline')
           ).toBeTruthy();
           expect(
             getHarnessWithState(stateWOTrend, {
               hasDefaultTimeField: () => true,
-              getOperationForColumnId: (id) => ({} as OperationDescriptor),
+              getOperationForColumnId: (id) => ({}) as OperationDescriptor,
             } as DatasourcePublicAPI).isDisabled('trendline')
           ).toBeFalsy();
         });
@@ -610,7 +610,7 @@ describe('dimension editor', () => {
             getOperationForColumnId: (id) =>
               ({
                 hasReducedTimeRange: id === stateWOTrend.metricAccessor,
-              } as OperationDescriptor),
+              }) as OperationDescriptor,
           } as DatasourcePublicAPI).isDisabled('trendline')
         ).toBeTruthy();
         expect(
@@ -619,7 +619,7 @@ describe('dimension editor', () => {
             getOperationForColumnId: (id) =>
               ({
                 hasReducedTimeRange: id === stateWOTrend.secondaryMetricAccessor,
-              } as OperationDescriptor),
+              }) as OperationDescriptor,
           } as DatasourcePublicAPI).isDisabled('trendline')
         ).toBeTruthy();
       });

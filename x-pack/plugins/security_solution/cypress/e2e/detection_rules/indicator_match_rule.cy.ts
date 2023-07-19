@@ -500,7 +500,9 @@ describe('indicator match', () => {
 
         cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
-        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity?.toLowerCase());
+        cy.get(ALERT_SEVERITY)
+          .first()
+          .should('have.text', rule.severity?.toLowerCase());
         cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.risk_score);
       });
 

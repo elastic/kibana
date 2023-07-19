@@ -95,12 +95,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               end,
             },
           },
-        }
+        },
       ).then((response) => {
         const currentPageErrorGroups = orderBy(
           response.errorGroups,
           field,
-          direction
+          direction,
         ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
         return {
@@ -125,7 +125,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
-    ]
+    ],
   );
 
   const { requestId, items, totalItems } = data;
@@ -154,18 +154,18 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               },
               body: {
                 groupIds: JSON.stringify(
-                  items.map(({ groupId: groupId }) => groupId).sort()
+                  items.map(({ groupId: groupId }) => groupId).sort(),
                 ),
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const errorGroupDetailedStatisticsLoading =
@@ -217,7 +217,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               status === FETCH_STATUS.FAILURE
                 ? i18n.translate(
                     'xpack.apm.serviceOverview.errorsTable.errorMessage',
-                    { defaultMessage: 'Failed to fetch' }
+                    { defaultMessage: 'Failed to fetch' },
                   )
                 : ''
             }
@@ -225,11 +225,11 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               status === FETCH_STATUS.LOADING
                 ? i18n.translate(
                     'xpack.apm.serviceOverview.errorsTable.loading',
-                    { defaultMessage: 'Loading...' }
+                    { defaultMessage: 'Loading...' },
                   )
                 : i18n.translate(
                     'xpack.apm.serviceOverview.errorsTable.noResults',
-                    { defaultMessage: 'No errors found' }
+                    { defaultMessage: 'No errors found' },
                   )
             }
             columns={columns}

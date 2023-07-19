@@ -13,7 +13,7 @@ export interface SourceDoc {
 }
 
 export function getServiceGroupFieldsAgg(
-  topHitsOpts: AggregationsTopHitsAggregation = {}
+  topHitsOpts: AggregationsTopHitsAggregation = {},
 ) {
   return {
     source_fields: {
@@ -47,7 +47,7 @@ export function getServiceGroupFields(bucket?: AggResultBucket) {
 
 export function flattenSourceDoc(
   val: SourceDoc | string,
-  path: string[] = []
+  path: string[] = [],
 ): Record<string, string> {
   if (typeof val !== 'object') {
     return { [path.join('.')]: val };

@@ -36,7 +36,7 @@ describe('Custom link API helper', () => {
           '@timestamp': 455,
           label: 'foo',
           url: 'bar',
-        })
+        }),
       ).toEqual({
         id: '123',
         '@timestamp': 455,
@@ -54,7 +54,7 @@ describe('Custom link API helper', () => {
           url: 'bar',
           'service.name': ['baz'],
           'transaction.name': ['quz', 'qux', 'quux'],
-        })
+        }),
       ).toEqual({
         id: '123',
         '@timestamp': 455,
@@ -75,7 +75,7 @@ describe('Custom link API helper', () => {
           url: 'bar',
           'service.name': [],
           'transaction.name': ['quz', 'qux', 'quux'],
-        })
+        }),
       ).toEqual({
         id: '123',
         '@timestamp': 455,
@@ -95,7 +95,7 @@ describe('Custom link API helper', () => {
         toESFormat({
           label: 'foo',
           url: 'bar',
-        })
+        }),
       ).toEqual({
         label: 'foo',
         url: 'bar',
@@ -110,7 +110,7 @@ describe('Custom link API helper', () => {
             { key: 'service.name', value: 'baz' },
             { key: 'transaction.name', value: 'quz,qux,quux' },
           ],
-        })
+        }),
       ).toEqual({
         label: 'foo',
         url: 'bar',
@@ -128,7 +128,7 @@ describe('Custom link API helper', () => {
             { key: 'service.name', value: '' },
             { key: 'transaction.name', value: 'quz,qux,quux' },
           ],
-        })
+        }),
       ).toEqual({
         label: 'foo',
         url: 'bar',

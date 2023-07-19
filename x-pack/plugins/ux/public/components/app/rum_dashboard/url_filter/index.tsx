@@ -31,11 +31,11 @@ export function URLFilter() {
             [nameExcluded]: excludedValue?.length
               ? excludedValue.join(',')
               : undefined,
-          })
+          }),
         ),
       });
     },
-    [history]
+    [history],
   );
 
   const updateSearchTerm = useCallback(
@@ -53,7 +53,7 @@ export function URLFilter() {
       };
       history.push(newLocation);
     },
-    [history]
+    [history],
   );
 
   return (

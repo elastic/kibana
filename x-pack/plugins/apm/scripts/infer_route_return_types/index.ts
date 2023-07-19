@@ -46,7 +46,7 @@ const changedFiles: SourceFile[] = [];
 files.forEach((file) => {
   file.getVariableDeclarations().forEach((declaration) => {
     const initializer = declaration.getInitializerIfKind(
-      SyntaxKind.CallExpression
+      SyntaxKind.CallExpression,
     );
 
     const argument = initializer?.getArguments()[0];
@@ -80,7 +80,7 @@ files.forEach((file) => {
 
       const txt = returnType.getText(
         fnDeclaration,
-        TypeFormatFlags.NoTruncation
+        TypeFormatFlags.NoTruncation,
       );
 
       fnDeclaration = fnDeclaration.setReturnType(txt);
@@ -105,12 +105,12 @@ files.forEach((file) => {
               ts.createStringLiteral(
                 `./${Path.relative(
                   Path.dirname(file.getFilePath()),
-                  literal.text
-                )}`
-              )
+                  literal.text,
+                )}`,
+              ),
             ),
             node.qualifier!,
-            node.typeArguments
+            node.typeArguments,
           );
         }
 

@@ -22,7 +22,7 @@ describe('Dependencies', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -48,8 +48,8 @@ describe('Dependencies', () => {
     it('has no detectable a11y violations on load', () => {
       cy.visitKibana(
         `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(
-          timeRange
-        )}`
+          timeRange,
+        )}`,
       );
       cy.contains('a[role="tab"]', 'Dependencies');
       // set skipFailures to true to not fail the test when there are accessibility failures
@@ -63,7 +63,7 @@ describe('Dependencies', () => {
         `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
           dependencyName: 'postgresql',
-        })}`
+        })}`,
       );
 
       cy.getByTestSubj('latencyChart');
@@ -80,7 +80,7 @@ describe('Dependencies', () => {
         `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
           dependencyName: 'postgresql',
-        })}`
+        })}`,
       );
       cy.contains('h1', 'postgresql');
       // set skipFailures to true to not fail the test when there are accessibility failures
@@ -92,8 +92,8 @@ describe('Dependencies', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
       cy.visitKibana(
         `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
-          timeRange
-        )}`
+          timeRange,
+        )}`,
       );
 
       cy.contains('a', 'postgresql').click({ force: true });
@@ -106,8 +106,8 @@ describe('Dependencies', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
       cy.visitKibana(
         `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
-          timeRange
-        )}`
+          timeRange,
+        )}`,
       );
 
       cy.contains('a[role="tab"]', 'Dependencies').click();

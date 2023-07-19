@@ -187,7 +187,7 @@ export function ServiceOverviewInstancesTable({
               status === FETCH_STATUS.FAILURE
                 ? i18n.translate(
                     'xpack.apm.serviceOverview.instancesTable.errorMessage',
-                    { defaultMessage: 'Failed to fetch' }
+                    { defaultMessage: 'Failed to fetch' },
                   )
                 : ''
             }

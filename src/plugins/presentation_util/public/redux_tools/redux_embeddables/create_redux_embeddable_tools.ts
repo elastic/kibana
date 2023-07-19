@@ -18,7 +18,8 @@ import { ReduxEmbeddableTools, ReduxEmbeddableState, ReduxEmbeddableSyncSettings
 
 export const createReduxEmbeddableTools = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>
+  ReducerType extends
+    ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>,
 >({
   reducers,
   embeddable,

@@ -64,7 +64,7 @@ const ResourceFindingsTableComponent = ({
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
-    ...Array<EuiBasicTableColumn<CspFinding>>
+    ...Array<EuiBasicTableColumn<CspFinding>>,
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: onOpenFlyout }),

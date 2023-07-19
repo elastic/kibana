@@ -95,7 +95,7 @@ function TemplateWithContext({
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceName, servicesLink]
+    [query, router, selectedTab, serviceName, servicesLink],
   );
 
   return (
@@ -146,7 +146,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
     plugins,
-    capabilities
+    capabilities,
   );
 
   const router = useApmRouter();
@@ -161,7 +161,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     'page',
     'pageSize',
     'sortField',
-    'sortDirection'
+    'sortDirection',
   );
 
   const tabs: Tab[] = [
@@ -185,7 +185,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         'xpack.apm.mobileServiceDetails.transactionsTabLabel',
         {
           defaultMessage: 'Transactions',
-        }
+        },
       ),
     },
     {
@@ -198,7 +198,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         'xpack.apm.mobileServiceDetails.serviceMapTabLabel',
         {
           defaultMessage: 'Service Map',
-        }
+        },
       ),
     },
     {

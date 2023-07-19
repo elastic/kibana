@@ -7,7 +7,7 @@
 
 export function mergeCountWithOther(
   buckets: Array<{ key: string | number; doc_count: number }> = [],
-  otherCount: number = 0
+  otherCount: number = 0,
 ) {
   const options = buckets.map(({ key, doc_count: docCount }) => ({
     key,

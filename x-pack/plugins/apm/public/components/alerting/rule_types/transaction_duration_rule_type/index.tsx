@@ -69,15 +69,15 @@ export interface RuleParams {
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
   [AggregationType.Avg]: i18n.translate(
     'xpack.apm.transactionDurationAlert.aggregationType.avg',
-    { defaultMessage: 'Average' }
+    { defaultMessage: 'Average' },
   ),
   [AggregationType.P95]: i18n.translate(
     'xpack.apm.transactionDurationAlert.aggregationType.95th',
-    { defaultMessage: '95th percentile' }
+    { defaultMessage: '95th percentile' },
   ),
   [AggregationType.P99]: i18n.translate(
     'xpack.apm.transactionDurationAlert.aggregationType.99th',
-    { defaultMessage: '99th percentile' }
+    { defaultMessage: '99th percentile' },
   ),
 };
 
@@ -107,7 +107,7 @@ export function TransactionDurationRuleType(props: Props) {
       windowSize: 5,
       windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
-    }
+    },
   );
 
   const { data, status } = useFetcher(
@@ -133,7 +133,7 @@ export function TransactionDurationRuleType(props: Props) {
                 groupBy: params.groupBy,
               },
             },
-          }
+          },
         );
       }
     },
@@ -146,7 +146,7 @@ export function TransactionDurationRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-    ]
+    ],
   );
 
   const latencyChartPreview = data?.latencyChartPreview;
@@ -183,7 +183,7 @@ export function TransactionDurationRuleType(props: Props) {
     (group: string[] | null) => {
       setRuleParams('groupBy', group ?? []);
     },
-    [setRuleParams]
+    [setRuleParams],
   );
 
   const fields = [
@@ -209,7 +209,7 @@ export function TransactionDurationRuleType(props: Props) {
       onChange={(value) =>
         setRuleParams(
           'environment',
-          value !== '' ? value : ENVIRONMENT_ALL.value
+          value !== '' ? value : ENVIRONMENT_ALL.value,
         )
       }
       serviceName={params.serviceName}
@@ -268,14 +268,14 @@ export function TransactionDurationRuleType(props: Props) {
           'xpack.apm.ruleFlyout.transactionDuration.createAlertPerText',
           {
             defaultMessage: 'Group alerts by',
-          }
+          },
         )}
         helpText={i18n.translate(
           'xpack.apm.ruleFlyout.transactionDuration.createAlertPerHelpText',
           {
             defaultMessage:
               'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
-          }
+          },
         )}
         fullWidth
         display="rowCompressed"

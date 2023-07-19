@@ -127,7 +127,7 @@ type NonEmptyArray<T> = [T, ...T[]];
 export interface NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > {
   /** Optional id, if not passed a "link" must be provided. */
   id?: Id;
@@ -166,7 +166,7 @@ export interface NodeDefinition<
 export type NodeDefinitionWithChildren<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenID extends string = Id
+  ChildrenID extends string = Id,
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };

@@ -10,7 +10,7 @@ export const RuleNotifyWhenTypeValues = [
   'onActiveAlert',
   'onThrottleInterval',
 ] as const;
-export type RuleNotifyWhenType = typeof RuleNotifyWhenTypeValues[number];
+export type RuleNotifyWhenType = (typeof RuleNotifyWhenTypeValues)[number];
 
 export enum RuleNotifyWhen {
   CHANGE = 'onActionGroupChange',

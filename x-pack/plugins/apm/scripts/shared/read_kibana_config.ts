@@ -20,8 +20,8 @@ export const readKibanaConfig = () => {
   const loadedKibanaConfig = (yaml.safeLoad(
     fs.readFileSync(
       fs.existsSync(kibanaDevConfig) ? kibanaDevConfig : kibanaConfig,
-      'utf8'
-    )
+      'utf8',
+    ),
   ) || {}) as {};
 
   const cliEsCredentials = pickBy(
@@ -30,7 +30,7 @@ export const readKibanaConfig = () => {
       'elasticsearch.password': process.env.ELASTICSEARCH_PASSWORD,
       'elasticsearch.hosts': process.env.ELASTICSEARCH_HOST,
     },
-    identity
+    identity,
   ) as {
     'elasticsearch.username'?: string;
     'elasticsearch.password'?: string;

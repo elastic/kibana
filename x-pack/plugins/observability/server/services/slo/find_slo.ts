@@ -22,7 +22,10 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindSLO {
-  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
+  constructor(
+    private repository: SLORepository,
+    private summaryClient: SummaryClient
+  ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);

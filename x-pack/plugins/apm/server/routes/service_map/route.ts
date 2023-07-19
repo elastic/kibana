@@ -169,7 +169,7 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<ServiceMapServiceDependencyInfoResponse> => {
     const { config, context, params } = resources;
 

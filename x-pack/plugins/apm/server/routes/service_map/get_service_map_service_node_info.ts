@@ -170,7 +170,7 @@ async function getTransactionStats({
   offsetInMs,
 }: TaskParameters): Promise<NodeStats['transactionStats']> {
   const durationField = getDurationFieldForTransactions(
-    searchAggregatedTransactions
+    searchAggregatedTransactions,
   );
 
   const params = {
@@ -185,7 +185,7 @@ async function getTransactionStats({
           filter: [
             ...filter,
             ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
+              searchAggregatedTransactions,
             ),
             {
               terms: {
@@ -213,12 +213,12 @@ async function getTransactionStats({
   };
   const response = await apmEventClient.search(
     'get_transaction_stats_for_service_map_node',
-    params
+    params,
   );
 
   const throughputValue = sumBy(
     response.aggregations?.timeseries.buckets,
-    'doc_count'
+    'doc_count',
   );
 
   return {
@@ -281,7 +281,7 @@ async function getCpuStats({
           },
         },
       },
-    }
+    },
   );
 
   return {
@@ -338,7 +338,7 @@ function getMemoryStats({
               },
             },
           },
-        }
+        },
       );
       return {
         value: response.aggregations?.avgMemoryUsage.value ?? null,

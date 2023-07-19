@@ -27,7 +27,7 @@ export function UpgradeAvailableCard({
         'xpack.apm.settings.schema.upgradeAvailable.title',
         {
           defaultMessage: 'APM integration upgrade available!',
-        }
+        },
       )}
       description={
         <FormattedMessage
@@ -41,7 +41,7 @@ export function UpgradeAvailableCard({
               >
                 {i18n.translate(
                   'xpack.apm.settings.schema.upgradeAvailable.upgradePackagePolicyLink',
-                  { defaultMessage: 'Upgrade your APM integration' }
+                  { defaultMessage: 'Upgrade your APM integration' },
                 )}
               </EuiLink>
             ),

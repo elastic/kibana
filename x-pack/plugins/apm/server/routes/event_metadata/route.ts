@@ -21,7 +21,7 @@ const eventMetadataRoute = createApmServerRoute({
     }),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
     const apmEventClient = await getApmEventClient(resources);
 

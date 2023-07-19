@@ -9,7 +9,7 @@ import { FC } from 'react';
 import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
 import { FILTERS } from './constants';
 
-export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
+export type FilterAggType = (typeof FILTERS)[keyof typeof FILTERS];
 
 type FilterAggForm<T> = FC<{
   /** Filter aggregation related configuration */

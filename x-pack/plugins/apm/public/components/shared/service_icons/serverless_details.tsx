@@ -36,7 +36,7 @@ export function ServerlessDetails({ serverless }: Props) {
           defaultMessage:
             '{functionNames, plural, =0 {Function name} one {Function name} other {Function names}} ',
           values: { functionNames: serverless.functionNames.length },
-        }
+        },
       ),
       description: (
         <ul>
@@ -58,7 +58,7 @@ export function ServerlessDetails({ serverless }: Props) {
           defaultMessage:
             '{triggerTypes, plural, =0 {Trigger type} one {Trigger type} other {Trigger types}} ',
           values: { triggerTypes: serverless.faasTriggerTypes.length },
-        }
+        },
       ),
       description: (
         <ul>
@@ -76,7 +76,7 @@ export function ServerlessDetails({ serverless }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.cloud.architecture',
-        { defaultMessage: 'Architecture' }
+        { defaultMessage: 'Architecture' },
       ),
       description: (
         <EuiBadge color="hollow">{serverless.hostArchitecture}</EuiBadge>

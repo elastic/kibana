@@ -31,7 +31,7 @@ export interface ESSearchOptions {
 export type ESSearchResponse<
   TDocument = unknown,
   TSearchRequest extends ESSearchRequest = ESSearchRequest,
-  TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
+  TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false },
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
 export type { InferSearchResponseOf, AggregationResultOf, AggregationResultOfMap, SearchHit };

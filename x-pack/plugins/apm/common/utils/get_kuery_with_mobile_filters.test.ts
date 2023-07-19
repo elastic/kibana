@@ -38,7 +38,7 @@ describe('getKueryWithMobileFilters', () => {
       kuery: '',
     });
     expect(result).toBe(
-      'device.model.identifier: foo and host.os.version: bar and service.version: 1.0 and network.connection.type: fooBar'
+      'device.model.identifier: foo and host.os.version: bar and service.version: 1.0 and network.connection.type: fooBar',
     );
   });
 
@@ -52,7 +52,7 @@ describe('getKueryWithMobileFilters', () => {
     });
 
     expect(result).toBe(
-      'foo.bar.test: test and device.model.identifier: foo and host.os.version: bar and service.version: 1.0 and network.connection.type: fooBar'
+      'foo.bar.test: test and device.model.identifier: foo and host.os.version: bar and service.version: 1.0 and network.connection.type: fooBar',
     );
   });
 
@@ -66,7 +66,7 @@ describe('getKueryWithMobileFilters', () => {
     });
 
     expect(result).toBe(
-      'foo.bar.test: test and device.model.identifier: foo\\>. and host.os.version: bar\\*\\* and service.version: 1.0\\(\\)\\: and network.connection.type: fooBar\\)45'
+      'foo.bar.test: test and device.model.identifier: foo\\>. and host.os.version: bar\\*\\* and service.version: 1.0\\(\\)\\: and network.connection.type: fooBar\\)45',
     );
   });
 });

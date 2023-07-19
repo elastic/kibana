@@ -43,7 +43,7 @@ const APM_INDEX_LABELS = [
     configurationName: 'onboarding',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
-      { defaultMessage: 'Onboarding Indices' }
+      { defaultMessage: 'Onboarding Indices' },
     ),
   },
   {
@@ -56,7 +56,7 @@ const APM_INDEX_LABELS = [
     configurationName: 'transaction',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
-      { defaultMessage: 'Transaction Indices' }
+      { defaultMessage: 'Transaction Indices' },
     ),
   },
   {
@@ -113,15 +113,15 @@ export function ApmIndices() {
           ...acc,
           [configurationName]: savedValue,
         }),
-        {}
-      )
+        {},
+      ),
     );
   }, [data]);
 
   const handleApplyChangesEvent = async (
     event:
       | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement>
+      | React.MouseEvent<HTMLButtonElement>,
   ) => {
     event.preventDefault();
     setIsSaving(true);
@@ -130,21 +130,21 @@ export function ApmIndices() {
       notifications.toasts.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.succeeded.title',
-          { defaultMessage: 'Indices applied' }
+          { defaultMessage: 'Indices applied' },
         ),
         text: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.succeeded.text',
           {
             defaultMessage:
               'The indices changes were successfully applied. These changes are reflected immediately in the APM UI',
-          }
+          },
         ),
       });
     } catch (error: any) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.title',
-          { defaultMessage: 'Indices could not be applied.' }
+          { defaultMessage: 'Indices could not be applied.' },
         ),
         text: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.text',
@@ -152,7 +152,7 @@ export function ApmIndices() {
             defaultMessage:
               'Something went wrong when applying indices. Error: {errorMessage}',
             values: { errorMessage: error.message },
-          }
+          },
         ),
       });
     }
@@ -160,7 +160,7 @@ export function ApmIndices() {
   };
 
   const handleChangeIndexConfigurationEvent = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = event.target;
     setApmIndices({
@@ -218,7 +218,7 @@ export function ApmIndices() {
             {APM_INDEX_LABELS.map(({ configurationName, label }) => {
               const matchedConfiguration = data.apmIndexSettings.find(
                 ({ configurationName: configName }) =>
-                  configName === configurationName
+                  configName === configurationName,
               );
               const defaultValue = matchedConfiguration
                 ? matchedConfiguration.defaultValue
@@ -237,7 +237,7 @@ export function ApmIndices() {
                         configurationName: `xpack.apm.indices.${configurationName}`,
                         defaultValue,
                       },
-                    }
+                    },
                   )}
                   fullWidth
                 >
@@ -262,7 +262,7 @@ export function ApmIndices() {
                 >
                   {i18n.translate(
                     'xpack.apm.settings.apmIndices.cancelButton',
-                    { defaultMessage: 'Cancel' }
+                    { defaultMessage: 'Cancel' },
                   )}
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -275,7 +275,7 @@ export function ApmIndices() {
                       {
                         defaultMessage:
                           "Your user role doesn't have permissions to change APM indices",
-                      }
+                      },
                     )
                   }
                 >
@@ -288,7 +288,7 @@ export function ApmIndices() {
                   >
                     {i18n.translate(
                       'xpack.apm.settings.apmIndices.applyButton',
-                      { defaultMessage: 'Apply changes' }
+                      { defaultMessage: 'Apply changes' },
                     )}
                   </EuiButton>
                 </EuiToolTip>

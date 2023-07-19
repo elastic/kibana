@@ -68,7 +68,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(getByTestId('loading')).toBeInTheDocument();
       expect(queryAllByTestId('service')).toHaveLength(0);
@@ -91,7 +91,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(queryAllByTestId('service')).toHaveLength(0);
@@ -116,7 +116,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();
@@ -142,7 +142,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(queryAllByTestId('cloud')).toHaveLength(0);
@@ -169,7 +169,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();
@@ -216,7 +216,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();
@@ -260,7 +260,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();
@@ -312,7 +312,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();
@@ -370,7 +370,7 @@ describe('ServiceIcons', () => {
               end="2021-08-20T10:15:00.000Z"
             />
           </EuiThemeProvider>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();

@@ -189,11 +189,14 @@ export function alertingServiceProvider(
     const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
-      ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
-          const formatter = fieldFormatsRegistry.deserialize(config);
-          acc[fieldName] = formatter.convert.bind(formatter);
-          return acc;
-        }, {} as Record<string, IFieldFormat['convert']>)
+      ? Object.entries(fieldFormatMap).reduce(
+          (acc, [fieldName, config]) => {
+            const formatter = fieldFormatsRegistry.deserialize(config);
+            acc[fieldName] = formatter.convert.bind(formatter);
+            return acc;
+          },
+          {} as Record<string, IFieldFormat['convert']>
+        )
       : {};
 
     return {

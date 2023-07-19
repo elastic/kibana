@@ -29,7 +29,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
           {
             defaultMessage: 'Created "{name}" key',
             values: { name },
-          }
+          },
         )}
         color="success"
         iconType="check"
@@ -40,7 +40,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
             {
               defaultMessage:
                 'Copy this key now. You will not be able to view it again.',
-            }
+            },
           )}
         </p>
         <EuiFieldText
@@ -51,7 +51,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
             'xpack.apm.settings.agentKeys.copyAgentKeyField.agentKeyLabel',
             {
               defaultMessage: 'APM agent key',
-            }
+            },
           )}
           prepend="Base64"
           append={
@@ -66,7 +66,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
                     'xpack.apm.settings.agentKeys.copyAgentKeyField.copyButton',
                     {
                       defaultMessage: 'Copy to clipboard',
-                    }
+                    },
                   )}
                 />
               )}

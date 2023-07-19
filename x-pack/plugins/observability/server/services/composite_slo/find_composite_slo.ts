@@ -26,7 +26,10 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindCompositeSLO {
-  constructor(private repository: CompositeSLORepository, private summaryClient: SummaryClient) {}
+  constructor(
+    private repository: CompositeSLORepository,
+    private summaryClient: SummaryClient
+  ) {}
 
   public async execute(params: FindCompositeSLOParams): Promise<FindCompositeSLOResponse> {
     const pagination: Pagination = toPagination(params);

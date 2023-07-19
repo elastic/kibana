@@ -104,11 +104,14 @@ export const incrementCounterInternal = async <T>(
     ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
     attributes: {
       ...(upsertAttributes ?? {}),
-      ...normalizedCounterFields.reduce((acc, counterField) => {
-        const { fieldName, incrementBy } = counterField;
-        acc[fieldName] = incrementBy;
-        return acc;
-      }, {} as Record<string, number>),
+      ...normalizedCounterFields.reduce(
+        (acc, counterField) => {
+          const { fieldName, incrementBy } = counterField;
+          acc[fieldName] = incrementBy;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
     },
     migrationVersion,
     typeMigrationVersion,

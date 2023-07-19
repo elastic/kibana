@@ -127,5 +127,5 @@ export const agentKeysRouteRepository = {
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.apiKeys.securityRequired',
-  { defaultMessage: 'Security plugin is required' }
+  { defaultMessage: 'Security plugin is required' },
 );

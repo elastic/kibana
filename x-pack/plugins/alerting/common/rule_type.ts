@@ -19,7 +19,7 @@ interface ActionVariable {
 }
 export interface RuleType<
   ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
-  RecoveryActionGroupId extends string = RecoveredActionGroupId
+  RecoveryActionGroupId extends string = RecoveredActionGroupId,
 > {
   id: string;
   name: string;

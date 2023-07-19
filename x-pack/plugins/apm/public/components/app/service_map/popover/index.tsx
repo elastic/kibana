@@ -41,7 +41,7 @@ function getContentsComponent(
   selectedElementData:
     | cytoscape.NodeDataDefinition
     | cytoscape.EdgeDataDefinition,
-  isTraceExplorerEnabled: boolean
+  isTraceExplorerEnabled: boolean,
 ) {
   if (
     selectedElementData.groupedConnections &&
@@ -178,7 +178,7 @@ export function Popover({
         });
       }
     },
-    [cy, selectedElementId, theme]
+    [cy, selectedElementId, theme],
   );
 
   const isAlreadyFocused = focusedServiceName === selectedElementId;
@@ -189,7 +189,7 @@ export function Popover({
 
   const ContentsComponent = getContentsComponent(
     selectedElementData,
-    isTraceExplorerEnabled
+    isTraceExplorerEnabled,
   );
 
   return (
@@ -218,7 +218,7 @@ export function Popover({
                     {
                       defaultMessage:
                         'The KQL filter is not applied in the displayed stats.',
-                    }
+                    },
                   )}
                 >
                   <EuiIcon tabIndex={0} type="iInCircle" />

@@ -44,18 +44,18 @@ export async function createAgentKey({
       body: {
         application: [application],
       },
-    }
+    },
   );
 
   if (!hasRequiredPrivileges) {
     const missingPrivileges = Object.entries(
-      userApplicationPrivileges.apm[resource]
+      userApplicationPrivileges.apm[resource],
     )
       .filter((x) => !x[1])
       .map((x) => x[0]);
 
     const error = `${username} is missing the following requested privilege(s): ${missingPrivileges.join(
-      ', '
+      ', ',
     )}.\
     You might try with the superuser, or add the missing APM application privileges to the role of the authenticated user, eg.:
     PUT /_security/role/my_role

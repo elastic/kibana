@@ -70,14 +70,14 @@ export async function getBuckets({
 
   const resp = await apmEventClient.search(
     'get_error_distribution_buckets',
-    params
+    params,
   );
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
     (bucket) => ({
       x: bucket.key,
       y: bucket.doc_count,
-    })
+    }),
   );
   return { buckets };
 }

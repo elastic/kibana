@@ -28,6 +28,6 @@ export async function getServiceGroups({
       id,
       updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
       ...attributes,
-    })
+    }),
   );
 }

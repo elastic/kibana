@@ -18,6 +18,6 @@ export async function deleteServiceGroup({
 }: Options) {
   return savedObjectsClient.delete(
     APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-    serviceGroupId
+    serviceGroupId,
   );
 }

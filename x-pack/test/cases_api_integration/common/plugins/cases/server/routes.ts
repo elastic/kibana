@@ -67,10 +67,13 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         const allTypes = externalReferenceAttachmentTypeRegistry.list();
 
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getExternalReferenceAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
+        const hashMap = allTypes.reduce(
+          (map, type) => {
+            map[type.id] = getExternalReferenceAttachmentTypeHash(type);
+            return map;
+          },
+          {} as Record<string, string>
+        );
 
         return response.ok({
           body: hashMap,
@@ -92,10 +95,13 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         const allTypes = persistableStateAttachmentTypeRegistry.list();
 
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getPersistableStateAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
+        const hashMap = allTypes.reduce(
+          (map, type) => {
+            map[type.id] = getPersistableStateAttachmentTypeHash(type);
+            return map;
+          },
+          {} as Record<string, string>
+        );
 
         return response.ok({
           body: hashMap,

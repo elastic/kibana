@@ -18,7 +18,7 @@ test('should sort groups by containing enabled rule types first and then by name
         name: string;
         checkEnabledResult: IsEnabledResult | IsDisabledResult;
         ruleTypeItem: RuleTypeModel;
-      }>
+      }>,
     ]
   > = [
     [

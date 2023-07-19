@@ -84,40 +84,43 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         let progress = 0;
 
         async function pushStreamUpdate() {
-          setTimeout(() => {
-            try {
-              progress++;
+          setTimeout(
+            () => {
+              try {
+                progress++;
 
-              if (progress > 100 || shouldStop) {
-                end();
-                return;
+                if (progress > 100 || shouldStop) {
+                  end();
+                  return;
+                }
+
+                push(updateProgressAction(progress));
+
+                const randomEntity = entities[Math.floor(Math.random() * entities.length)];
+                const randomAction = actions[Math.floor(Math.random() * actions.length)];
+
+                if (randomAction === 'add') {
+                  const randomCommits = Math.floor(Math.random() * 100);
+                  push(addToEntityAction(randomEntity, randomCommits));
+                } else if (randomAction === 'delete') {
+                  push(deleteEntityAction(randomEntity));
+                } else if (randomAction === 'throw-error') {
+                  // Throw an error. It should not crash Kibana!
+                  // It should be caught and logged to the Kibana server console.
+                  throw new Error('There was a (simulated) server side error!');
+                } else if (randomAction === 'emit-error') {
+                  // Emit an error as a stream action.
+                  push(errorAction('(Simulated) error pushed to the stream'));
+                  return;
+                }
+
+                pushStreamUpdate();
+              } catch (e) {
+                logger.error(e);
               }
-
-              push(updateProgressAction(progress));
-
-              const randomEntity = entities[Math.floor(Math.random() * entities.length)];
-              const randomAction = actions[Math.floor(Math.random() * actions.length)];
-
-              if (randomAction === 'add') {
-                const randomCommits = Math.floor(Math.random() * 100);
-                push(addToEntityAction(randomEntity, randomCommits));
-              } else if (randomAction === 'delete') {
-                push(deleteEntityAction(randomEntity));
-              } else if (randomAction === 'throw-error') {
-                // Throw an error. It should not crash Kibana!
-                // It should be caught and logged to the Kibana server console.
-                throw new Error('There was a (simulated) server side error!');
-              } else if (randomAction === 'emit-error') {
-                // Emit an error as a stream action.
-                push(errorAction('(Simulated) error pushed to the stream'));
-                return;
-              }
-
-              pushStreamUpdate();
-            } catch (e) {
-              logger.error(e);
-            }
-          }, Math.floor(Math.random() * maxTimeoutMs));
+            },
+            Math.floor(Math.random() * maxTimeoutMs)
+          );
         }
 
         // do not call this using `await` so it will run asynchronously while we return the stream already.

@@ -61,7 +61,7 @@ const mobileFiltersRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     mobileFilters: MobileFiltersResponse;
   }> => {
@@ -100,7 +100,7 @@ const mobileChartsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     mostUsedCharts: Array<{
       key: MobilePropertyType;
@@ -313,7 +313,7 @@ const mobileTermsByFieldRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     terms: MobileTermsByFieldResponse;
   }> => {

@@ -67,7 +67,7 @@ export function DiscoveryRule({
             {...providedDragHandleProps}
             aria-label={i18n.translate(
               'xpack.apm.fleetIntegration.apmAgent.discoveryRule.DragHandle',
-              { defaultMessage: 'Drag Handle' }
+              { defaultMessage: 'Drag Handle' },
             )}
           >
             <EuiIcon type="grab" />

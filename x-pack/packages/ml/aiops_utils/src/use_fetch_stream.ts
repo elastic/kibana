@@ -126,7 +126,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
  */
 export function useFetchStream<
   I extends UseFetchStreamCustomReducerParams,
-  BasePath extends string
+  BasePath extends string,
 >(
   endpoint: `${BasePath}${I['endpoint']}`,
   apiVersion: I['apiVersion'],

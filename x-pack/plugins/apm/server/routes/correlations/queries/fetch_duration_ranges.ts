@@ -53,7 +53,7 @@ export const fetchDurationRanges = async ({
       p.push({ from, to });
       return p;
     },
-    [{ to: 0 }] as Array<{ from?: number; to?: number }>
+    [{ to: 0 }] as Array<{ from?: number; to?: number }>,
   );
   if (ranges.length > 0) {
     ranges.push({ from: ranges[ranges.length - 1].to });
@@ -91,7 +91,7 @@ export const fetchDurationRanges = async ({
         doc_count: d.doc_count,
       }))
       .filter(
-        (d): d is { key: number; doc_count: number } => d.key !== undefined
+        (d): d is { key: number; doc_count: number } => d.key !== undefined,
       ) ?? [];
 
   return {

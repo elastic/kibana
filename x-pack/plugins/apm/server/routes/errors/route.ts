@@ -55,7 +55,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{ errorGroups: ErrorGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -98,7 +98,7 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     errorGroups: ErrorGroupMainStatisticsResponse;
   }> => {

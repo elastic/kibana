@@ -71,7 +71,7 @@ type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
-  TDocValueFields extends DocValueFields | undefined = undefined
+  TDocValueFields extends DocValueFields | undefined = undefined,
 > = Omit<estypes.SearchHit, '_source' | 'fields'> &
   (TSource extends false ? {} : { _source: TSource }) &
   (TFields extends Fields
@@ -89,7 +89,7 @@ type HitsOf<
   TOptions extends
     | { _source?: Source; fields?: Fields; docvalue_fields?: DocValueFields }
     | undefined,
-  TDocument extends unknown
+  TDocument extends unknown,
 > = Array<
   SearchHit<
     TOptions extends { _source: false } ? undefined : TDocument,
@@ -105,14 +105,14 @@ type TopLevelAggregationRequest = Pick<AggregationsAggregationContainer, 'aggs' 
 type MaybeKeyed<
   TAggregationContainer,
   TBucket,
-  TKeys extends string = string
+  TKeys extends string = string,
 > = TAggregationContainer extends Record<string, { keyed: true }>
   ? Record<TKeys, TBucket>
   : { buckets: TBucket[] };
 
 export type AggregateOf<
   TAggregationContainer extends AggregationsAggregationContainer,
-  TDocument
+  TDocument,
 > = ValuesType<
   Pick<
     Record<string, unknown> & {
@@ -593,7 +593,7 @@ type SubAggregateOf<TAggregationRequest, TDocument = unknown> = TAggregationRequ
 
 type SearchResponseOf<
   TAggregationRequest extends TopLevelAggregationRequest,
-  TDocument
+  TDocument,
 > = SubAggregateOf<TAggregationRequest, TDocument>;
 
 // if aggregation response cannot be inferred, fall back to unknown
@@ -606,7 +606,7 @@ export type InferSearchResponseOf<
   TSearchRequest extends
     | estypes.SearchRequest
     | (estypesWithoutBodyKey.SearchRequest & { body?: never }) = estypes.SearchRequest,
-  TOptions extends { restTotalHitsAsInt?: boolean } = {}
+  TOptions extends { restTotalHitsAsInt?: boolean } = {},
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest['body'] extends TopLevelAggregationRequest
     ? WrapAggregationResponse<SearchResponseOf<TSearchRequest['body'], TDocument>>

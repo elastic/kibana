@@ -36,7 +36,7 @@ export async function getServiceNamesFromTermsEnum({
       },
       size: maxNumberOfServices,
       field: SERVICE_NAME,
-    }
+    },
   );
 
   return response.terms;

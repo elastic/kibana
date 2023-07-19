@@ -50,7 +50,7 @@ describe('Create or Update Custom link', () => {
           'service.name': ['opbeans-java'],
           'transaction.type': ['Request'],
         },
-      }
+      },
     );
   });
   it('update a new custom link', () => {
@@ -72,7 +72,7 @@ describe('Create or Update Custom link', () => {
           'service.name': ['opbeans-java'],
           'transaction.type': ['Request'],
         },
-      }
+      },
     );
   });
 });

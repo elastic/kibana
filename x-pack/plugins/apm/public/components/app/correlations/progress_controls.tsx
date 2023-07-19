@@ -45,7 +45,7 @@ export function CorrelationsProgressControls({
             <EuiProgress
               aria-label={i18n.translate(
                 'xpack.apm.correlations.progressAriaLabel',
-                { defaultMessage: 'Progress' }
+                { defaultMessage: 'Progress' },
               )}
               value={Math.round(progress * 100)}
               max={100}

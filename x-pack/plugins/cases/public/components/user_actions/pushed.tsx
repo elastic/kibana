@@ -69,9 +69,9 @@ const getLabelTitle = (action: SnakeToCamelCase<PushedUserAction>, firstPush: bo
       responsive={false}
     >
       <EuiFlexItem data-test-subj="pushed-label">
-        {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
-          externalService?.connectorName
-        }`}
+        {`${
+          firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT
+        } ${externalService?.connectorName}`}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="pushed-value" href={externalService?.externalUrl} target="_blank">

@@ -25,7 +25,7 @@ export const dotnet = `{
       'xpack.apm.onboarding.dotnetClient.createConfig.commands.defaultServiceName',
       {
         defaultMessage: 'Default is the entry assembly of the application.',
-      }
+      },
     )}
     "ServiceName": "<your-service-name>",
     {{^secretToken}}

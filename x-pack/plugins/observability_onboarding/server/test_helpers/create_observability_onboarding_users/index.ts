@@ -46,7 +46,7 @@ export async function createObservabilityOnboardingUsers({
   }
 
   const observabilityOnboardingUsers = Object.values(
-    ObservabilityOnboardingUsername
+    ObservabilityOnboardingUsername,
   );
   await asyncForEach(observabilityOnboardingUsers, async (username) => {
     const user = users[username];
@@ -55,8 +55,8 @@ export async function createObservabilityOnboardingUsers({
     // create custom roles
     await Promise.all(
       customRoleNames.map(async (roleName) =>
-        createCustomRole({ elasticsearch, kibana, roleName })
-      )
+        createCustomRole({ elasticsearch, kibana, roleName }),
+      ),
     );
 
     // create user

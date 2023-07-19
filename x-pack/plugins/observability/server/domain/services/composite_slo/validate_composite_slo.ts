@@ -46,8 +46,8 @@ function assertSameBudgetingMethod(compositeSlo: CompositeSLO, sloList: SLO[]) {
         'Invalid timeslices objective. A timeslice window must be set and equal to all source SLO.'
       );
     }
-    const haveSameTimesliceWindow = sloList.every((slo) =>
-      slo.objective.timesliceWindow?.isEqual(compositeSlo.objective.timesliceWindow!)
+    const haveSameTimesliceWindow = sloList.every(
+      (slo) => slo.objective.timesliceWindow?.isEqual(compositeSlo.objective.timesliceWindow!)
     );
     if (!haveSameTimesliceWindow) {
       throw new IllegalArgumentError(

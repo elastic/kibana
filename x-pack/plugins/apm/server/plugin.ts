@@ -75,7 +75,7 @@ export class APMPlugin
 
   public setup(
     core: CoreSetup<APMPluginStartDependencies>,
-    plugins: APMPluginSetupDependencies
+    plugins: APMPluginSetupDependencies,
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
@@ -155,7 +155,7 @@ export class APMPlugin
     // care of rendering
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(
-        apmTutorialCustomIntegration
+        apmTutorialCustomIntegration,
       );
     } else {
       boundGetApmIndices().then((indices) => {
@@ -165,14 +165,14 @@ export class APMPlugin
             apmIndices: indices,
             cloud: plugins.cloud,
             isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-          })
+          }),
         );
       });
     }
 
     const telemetryUsageCounter =
       resourcePlugins.usageCollection?.setup.createUsageCounter(
-        APM_SERVER_FEATURE_ID
+        APM_SERVER_FEATURE_ID,
       );
 
     registerRoutes({
@@ -302,7 +302,7 @@ export class APMPlugin
       (e) => {
         logger.error('Failed to run migration making APM indices space aware');
         logger.error(e);
-      }
+      },
     );
   }
 

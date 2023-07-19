@@ -80,7 +80,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       windowSize: 5,
       windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
-    }
+    },
   );
 
   const { data, status } = useFetcher(
@@ -105,7 +105,7 @@ export function TransactionErrorRateRuleType(props: Props) {
                 groupBy: params.groupBy,
               },
             },
-          }
+          },
         );
       }
     },
@@ -117,14 +117,14 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-    ]
+    ],
   );
 
   const onGroupByChange = useCallback(
     (group: string[] | null) => {
       setRuleParams('groupBy', group ?? []);
     },
-    [setRuleParams]
+    [setRuleParams],
   );
 
   const fields = [
@@ -149,7 +149,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       onChange={(value) =>
         setRuleParams(
           'environment',
-          value !== '' ? value : ENVIRONMENT_ALL.value
+          value !== '' ? value : ENVIRONMENT_ALL.value,
         )
       }
       serviceName={params.serviceName}
@@ -210,14 +210,14 @@ export function TransactionErrorRateRuleType(props: Props) {
           'xpack.apm.ruleFlyout.errorRate.createAlertPerText',
           {
             defaultMessage: 'Group alerts by',
-          }
+          },
         )}
         helpText={i18n.translate(
           'xpack.apm.ruleFlyout.errorRate.createAlertPerHelpText',
           {
             defaultMessage:
               'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
-          }
+          },
         )}
         fullWidth
         display="rowCompressed"

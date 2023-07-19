@@ -55,7 +55,7 @@ export function StorageChart() {
         },
       });
     },
-    [indexLifecyclePhase, environment, kuery, start, end]
+    [indexLifecyclePhase, environment, kuery, start, end],
   );
 
   const storageTimeSeries: Array<TimeSeries<Coordinate>> =
@@ -72,7 +72,7 @@ export function StorageChart() {
     }) ?? [];
 
   const xValues = storageTimeSeries.flatMap(({ data: timeseriesData }) =>
-    timeseriesData.map(({ x }) => x)
+    timeseriesData.map(({ x }) => x),
   );
 
   const min = Math.min(...xValues);

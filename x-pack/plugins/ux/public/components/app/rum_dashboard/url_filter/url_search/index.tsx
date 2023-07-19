@@ -31,7 +31,7 @@ const formatOptions = (
   urlItems: URLItem[],
   includedUrls?: string[],
   excludedUrls?: string[],
-  percentile?: number
+  percentile?: number,
 ): UrlOption[] => {
   const percTitle = getPercentileLabel(percentile!);
 
@@ -58,22 +58,22 @@ const formatOptions = (
 const processItems = (items: UrlOption[]) => {
   const includedItems = map(
     items.filter(({ checked, isWildcard }) => checked === 'on' && !isWildcard),
-    'label'
+    'label',
   );
 
   const excludedItems = map(
     items.filter(({ checked, isWildcard }) => checked === 'off' && !isWildcard),
-    'label'
+    'label',
   );
 
   const includedWildcards = map(
     items.filter(({ checked, isWildcard }) => checked === 'on' && isWildcard),
-    'title'
+    'title',
   );
 
   const excludedWildcards = map(
     items.filter(({ checked, isWildcard }) => checked === 'off' && isWildcard),
-    'title'
+    'title',
   );
 
   return { includedItems, excludedItems, includedWildcards, excludedWildcards };
@@ -110,7 +110,7 @@ export function URLSearch({
       data?.items ?? [],
       transactionUrl,
       transactionUrlExcluded,
-      percentile
+      percentile,
     );
     const wildCardLabel = searchValue || searchTerm;
 
@@ -143,7 +143,7 @@ export function URLSearch({
           };
         }
         return item;
-      })
+      }),
     );
   };
 

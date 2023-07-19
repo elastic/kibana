@@ -20,7 +20,7 @@ export function getTLSSettings(): SettingsRow[] {
       key: TLS_ENABLED_KEY,
       rowTitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.tls.tlsEnabledTitle',
-        { defaultMessage: 'Enable TLS' }
+        { defaultMessage: 'Enable TLS' },
       ),
       type: 'boolean',
       settings: [
@@ -29,11 +29,11 @@ export function getTLSSettings(): SettingsRow[] {
           type: 'text',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsCertificateLabel',
-            { defaultMessage: 'File path to server certificate' }
+            { defaultMessage: 'File path to server certificate' },
           ),
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsCertificateTitle',
-            { defaultMessage: 'TLS certificate' }
+            { defaultMessage: 'TLS certificate' },
           ),
           labelAppend: REQUIRED_LABEL,
           required: true,
@@ -43,7 +43,7 @@ export function getTLSSettings(): SettingsRow[] {
           type: 'text',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsKeyLabel',
-            { defaultMessage: 'File path to server certificate key' }
+            { defaultMessage: 'File path to server certificate key' },
           ),
           labelAppend: REQUIRED_LABEL,
           required: true,
@@ -53,7 +53,7 @@ export function getTLSSettings(): SettingsRow[] {
           type: 'combo',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsSupportedProtocolsLabel',
-            { defaultMessage: 'Supported protocol versions' }
+            { defaultMessage: 'Supported protocol versions' },
           ),
           labelAppend: OPTIONAL_LABEL,
         },
@@ -62,11 +62,11 @@ export function getTLSSettings(): SettingsRow[] {
           type: 'combo',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsCipherSuitesLabel',
-            { defaultMessage: 'Cipher suites for TLS connections' }
+            { defaultMessage: 'Cipher suites for TLS connections' },
           ),
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsCipherSuitesHelpText',
-            { defaultMessage: 'Not configurable for TLS 1.3.' }
+            { defaultMessage: 'Not configurable for TLS 1.3.' },
           ),
           labelAppend: OPTIONAL_LABEL,
         },
@@ -75,7 +75,7 @@ export function getTLSSettings(): SettingsRow[] {
           type: 'combo',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tls.tlsCurveTypesLabel',
-            { defaultMessage: 'Curve types for ECDHE based cipher suites' }
+            { defaultMessage: 'Curve types for ECDHE based cipher suites' },
           ),
           labelAppend: OPTIONAL_LABEL,
         },
@@ -86,7 +86,7 @@ export function getTLSSettings(): SettingsRow[] {
 
 export function isTLSFormValid(
   newVars: PackagePolicyVars,
-  tlsSettings: SettingsRow[]
+  tlsSettings: SettingsRow[],
 ) {
   // only validates TLS when its flag is enabled
   return (

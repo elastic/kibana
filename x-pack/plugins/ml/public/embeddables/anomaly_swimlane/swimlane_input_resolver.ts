@@ -62,7 +62,7 @@ export function useSwimlaneInputResolver(
   (perPage: number) => void,
   TimeBuckets,
   boolean,
-  Error | null | undefined
+  Error | null | undefined,
 ] {
   const [{ uiSettings }, , { anomalyTimelineService, anomalyDetectorService }] = services;
 

@@ -92,7 +92,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         onInitializeGroup: (_, group) => group,
         onGroupNameChanged: (_, group) => group,
         onGroupSourcesSaved: (_, group) => group,
-        resetGroup: () => ({} as GroupDetails),
+        resetGroup: () => ({}) as GroupDetails,
       },
     ],
     dataLoading: [

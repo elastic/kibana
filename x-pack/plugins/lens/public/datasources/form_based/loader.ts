@@ -69,9 +69,8 @@ export function injectReferences(
 ) {
   const layers: Record<string, FormBasedLayer> = {};
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
-    const indexPatternId = references.find(
-      ({ name }) => name === getLayerReferenceName(layerId)
-    )?.id;
+    const indexPatternId = references.find(({ name }) => name === getLayerReferenceName(layerId))
+      ?.id;
 
     if (indexPatternId) {
       layers[layerId] = {

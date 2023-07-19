@@ -126,12 +126,15 @@ export const TrainedModelsApiLogic = kea<
         if (!modelsData) return null;
         if (!modelStatsData) return modelsData;
         const statsMap: Record<string, MlTrainedModelStats> =
-          modelStatsData.trained_model_stats.reduce((map, value) => {
-            if (value.model_id) {
-              map[value.model_id] = value;
-            }
-            return map;
-          }, {} as Record<string, MlTrainedModelStats>);
+          modelStatsData.trained_model_stats.reduce(
+            (map, value) => {
+              if (value.model_id) {
+                map[value.model_id] = value;
+              }
+              return map;
+            },
+            {} as Record<string, MlTrainedModelStats>
+          );
         return modelsData.map((modelConfig) => {
           const modelStats = statsMap[modelConfig.model_id];
           return {

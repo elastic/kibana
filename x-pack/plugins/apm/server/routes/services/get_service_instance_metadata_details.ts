@@ -71,7 +71,7 @@ export async function getServiceInstanceMetadataDetails({
             },
           },
         },
-      }
+      },
     );
 
     return maybe(response.hits.hits[0]?._source);
@@ -90,7 +90,7 @@ export async function getServiceInstanceMetadataDetails({
           size: 1,
           query: { bool: { filter } },
         },
-      }
+      },
     );
 
     return maybe(response.hits.hits[0]?._source);
@@ -113,7 +113,7 @@ export async function getServiceInstanceMetadataDetails({
             },
           },
         },
-      }
+      },
     );
     return maybe(response.hits.hits[0]?._source);
   }
@@ -134,7 +134,7 @@ export async function getServiceInstanceMetadataDetails({
     {},
     transactionMetricSample,
     transactionEventSample,
-    applicationMetricSample
+    applicationMetricSample,
   );
 
   const { agent, service, container, kubernetes, host, cloud } = sample;

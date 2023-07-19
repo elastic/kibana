@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const createNodeAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.nodeClient.install.title', {
@@ -44,14 +44,14 @@ This agent supports a variety of frameworks but can also be used with your custo
           babelEsModulesLink:
             '{config.docs.base_url}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createDjangoAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.djangoClient.install.title', {
@@ -72,7 +72,7 @@ export const createDjangoAgentInstructions = (
         defaultMessage:
           'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `SERVICE_NAME`.',
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -84,14 +84,14 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/python/current/django-support.html',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createFlaskAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.flaskClient.install.title', {
@@ -112,7 +112,7 @@ export const createFlaskAgentInstructions = (
         defaultMessage:
           'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `SERVICE_NAME`.',
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -124,14 +124,14 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/python/current/flask-support.html',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createRailsAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.railsClient.install.title', {
@@ -152,7 +152,7 @@ export const createRailsAgentInstructions = (
         defaultMessage:
           'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
         values: { configFile: '`config/elastic_apm.yml`' },
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -164,14 +164,14 @@ export const createRailsAgentInstructions = (
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/ruby/current/index.html',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createRackAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.rackClient.install.title', {
@@ -204,13 +204,13 @@ export const createRackAgentInstructions = (
       'xpack.apm.tutorial.rackClient.configure.commands.requiredComment',
       {
         defaultMessage: 'required',
-      }
+      },
     )}
     config_file: '' # ${i18n.translate(
       'xpack.apm.tutorial.rackClient.configure.commands.optionalComment',
       {
         defaultMessage: 'optional, defaults to config/elastic_apm.yml',
-      }
+      },
     )}
   )
 
@@ -227,7 +227,7 @@ export const createRackAgentInstructions = (
       {
         defaultMessage: 'Create a config file {configFile}:',
         values: { configFile: '`config/elastic_apm.yml`' },
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -239,7 +239,7 @@ export const createRackAgentInstructions = (
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/ruby/current/index.html',
         },
-      }
+      },
     ),
   },
 ];
@@ -250,7 +250,7 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
       'xpack.apm.tutorial.jsClient.enableRealUserMonitoring.title',
       {
         defaultMessage: 'Enable Real User Monitoring support in APM Server',
-      }
+      },
     ),
     textPre: i18n.translate(
       'xpack.apm.tutorial.jsClient.enableRealUserMonitoring.textPre',
@@ -262,7 +262,7 @@ for details on how to enable RUM support. When using the APM integration with Fl
           documentationLink:
             '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/configuration-rum.html',
         },
-      }
+      },
     ),
   },
   {
@@ -270,7 +270,7 @@ for details on how to enable RUM support. When using the APM integration with Fl
       'xpack.apm.tutorial.jsClient.installDependency.title',
       {
         defaultMessage: 'Set up the Agent as a dependency',
-      }
+      },
     ),
     textPre: i18n.translate(
       'xpack.apm.tutorial.jsClient.installDependency.textPre',
@@ -279,7 +279,7 @@ for details on how to enable RUM support. When using the APM integration with Fl
           'You can install the Agent as a dependency to your application with \
 `npm install @elastic/apm-rum --save`.\n\n\
 The Agent can then be initialized and configured in your application like this:',
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -292,7 +292,7 @@ See the [integration documentation]({docLink}) for more information.',
           docLink:
             '{config.docs.base_url}guide/en/apm/agent/rum-js/current/framework-integrations.html',
         },
-      }
+      },
     ),
   },
   {
@@ -318,7 +318,7 @@ and host the file on your Server/CDN before deploying to production.",
 
 export const createGoAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.goClient.install.title', {
@@ -381,14 +381,14 @@ guide to instrumenting Go source code.',
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createJavaAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.javaClient.download.title', {
@@ -409,7 +409,7 @@ Do **not** add the agent as a dependency to your application.',
       'xpack.apm.tutorial.javaClient.startApplication.title',
       {
         defaultMessage: 'Start your application with the javaagent flag',
-      }
+      },
     ),
     textPre: i18n.translate(
       'xpack.apm.tutorial.javaClient.startApplication.textPre',
@@ -422,7 +422,7 @@ Do **not** add the agent as a dependency to your application.',
 * Set the service environment\n \
 * Set the base package of your application',
         values: { customApmServerUrl: 'http://localhost:8200' },
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -435,14 +435,14 @@ usage.',
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/java/current/index.html',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createDotNetAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.dotNetClient.download.title', {
@@ -469,7 +469,7 @@ export const createDotNetAgentInstructions = (
             'https://www.nuget.org/packages/Elastic.Apm.EntityFrameworkCore',
           elasticApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm',
         },
-      }
+      },
     ),
   },
   {
@@ -477,7 +477,7 @@ export const createDotNetAgentInstructions = (
       'xpack.apm.tutorial.dotNetClient.configureApplication.title',
       {
         defaultMessage: 'Add the agent to the application',
-      }
+      },
     ),
     textPre: i18n.translate(
       'xpack.apm.tutorial.dotNetClient.configureApplication.textPre',
@@ -485,7 +485,7 @@ export const createDotNetAgentInstructions = (
         defaultMessage:
           'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
       method in the `Configure` method within the `Startup.cs` file.',
-      }
+      },
     ),
     commands: `public class Startup
 {curlyOpen}
@@ -502,7 +502,7 @@ export const createDotNetAgentInstructions = (
         defaultMessage:
           'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
       `IConfiguration` instance (e.g. from the `appsettings.json` file).',
-      }
+      },
     ),
   },
   {
@@ -510,7 +510,7 @@ export const createDotNetAgentInstructions = (
       'xpack.apm.tutorial.dotNetClient.configureAgent.title',
       {
         defaultMessage: 'Sample appsettings.json file:',
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -526,14 +526,14 @@ export const createDotNetAgentInstructions = (
           profilerLink:
             '{config.docs.base_url}guide/en/apm/agent/dotnet/current/setup-auto-instrumentation.html#setup-auto-instrumentation',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createPhpAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.phpClient.download.title', {
@@ -555,7 +555,7 @@ export const createPhpAgentInstructions = (
       'xpack.apm.tutorial.phpClient.installPackage.textPre',
       {
         defaultMessage: 'For example on Alpine Linux using APK package:',
-      }
+      },
     ),
     commands: ['apk add --allow-untrusted <package-file>.apk'],
     textPost: i18n.translate(
@@ -567,7 +567,7 @@ export const createPhpAgentInstructions = (
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/php/current/setup.html',
         },
-      }
+      },
     ),
   },
   {
@@ -579,7 +579,7 @@ export const createPhpAgentInstructions = (
       {
         defaultMessage:
           'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
-      }
+      },
     ),
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate(
@@ -591,14 +591,14 @@ export const createPhpAgentInstructions = (
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/php/current/configuration.html',
         },
-      }
+      },
     ),
   },
 ];
 
 export const createOpenTelemetryAgentInstructions = (
   apmServerUrl = '',
-  secretToken = ''
+  secretToken = '',
 ) => [
   {
     title: i18n.translate('xpack.apm.tutorial.otel.download.title', {

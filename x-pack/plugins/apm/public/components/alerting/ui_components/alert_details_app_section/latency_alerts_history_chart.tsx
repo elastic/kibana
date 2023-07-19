@@ -101,7 +101,7 @@ export function LatencyAlertsHistoryChart({
                   latencyAggregationType === LatencyAggregationType.avg,
               },
             },
-          }
+          },
         );
       }
     },
@@ -113,7 +113,7 @@ export function LatencyAlertsHistoryChart({
       start,
       transactionType,
       preferred,
-    ]
+    ],
   );
   const memoizedData = useMemo(
     () =>
@@ -124,7 +124,7 @@ export function LatencyAlertsHistoryChart({
       }),
     // It should only update when the data has changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data]
+    [data],
   );
 
   const { currentPeriod, previousPeriod } = memoizedData;
@@ -152,14 +152,14 @@ export function LatencyAlertsHistoryChart({
         'xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastTitle',
         {
           defaultMessage: 'Latency alerts history chart error',
-        }
+        },
       ),
       text: i18n.translate(
         'xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastDescription',
         {
           defaultMessage: `An error occurred when fetching latency alert history chart data for {serviceName}`,
           values: { serviceName },
-        }
+        },
       ),
     });
   }
@@ -209,7 +209,7 @@ export function LatencyAlertsHistoryChart({
                   'xpack.apm.latencyChartHistory.alertsTriggered',
                   {
                     defaultMessage: 'Alerts triggered',
-                  }
+                  },
                 )}
               </EuiText>
             </EuiFlexItem>
@@ -241,7 +241,7 @@ export function LatencyAlertsHistoryChart({
                 'xpack.apm.latencyChartHistory.avgTimeToRecover',
                 {
                   defaultMessage: 'Avg time to recover',
-                }
+                },
               )}
             </EuiText>
           </EuiFlexItem>
@@ -264,7 +264,7 @@ export function LatencyAlertsHistoryChart({
                     dataValue: annotation.key,
                     header: String(annotation.doc_count),
                     details: moment(annotation.key_as_string).format(
-                      'yyyy-MM-DD'
+                      'yyyy-MM-DD',
                     ),
                   };
                 }) || []

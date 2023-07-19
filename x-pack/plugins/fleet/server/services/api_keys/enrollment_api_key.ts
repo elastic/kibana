@@ -193,10 +193,11 @@ export async function generateEnrollmentAPIKey(
 
     if (
       keys.length > 0 &&
-      keys.some((k: EnrollmentAPIKey) =>
-        // Prevent false positives when the providedKeyName is a prefix of a token name that already exists
-        // After removing the providedKeyName and trimming whitespace, the only string left should be a uuid in parens.
-        k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
+      keys.some(
+        (k: EnrollmentAPIKey) =>
+          // Prevent false positives when the providedKeyName is a prefix of a token name that already exists
+          // After removing the providedKeyName and trimming whitespace, the only string left should be a uuid in parens.
+          k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
       )
     ) {
       throw new FleetError(

@@ -38,7 +38,7 @@ export function AgentLatestVersion({
           defaultMessage:
             'The latest version of {agentName} agent could not be fetched from the repository. Please contact your administrator to check the server logs.',
           values: { agentName },
-        }
+        },
       )}
     >
       <>{NOT_AVAILABLE_LABEL}</>

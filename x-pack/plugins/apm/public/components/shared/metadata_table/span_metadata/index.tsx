@@ -27,15 +27,15 @@ export function SpanMetadata({ spanId }: Props) {
               id: spanId,
             },
           },
-        }
+        },
       );
     },
-    [spanId]
+    [spanId],
   );
 
   const sections = useMemo(
     () => getSectionsFromFields(spanEvent?.metadata || {}),
-    [spanEvent?.metadata]
+    [spanEvent?.metadata],
   );
 
   return (

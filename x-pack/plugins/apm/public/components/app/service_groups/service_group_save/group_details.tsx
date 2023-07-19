@@ -42,10 +42,10 @@ export function GroupDetails({
 }: Props) {
   const [name, setName] = useState<string>(serviceGroup?.groupName || '');
   const [color, setColor, colorPickerErrors] = useColorPickerState(
-    serviceGroup?.color || '#5094C4'
+    serviceGroup?.color || '#5094C4',
   );
   const [description, setDescription] = useState<string | undefined>(
-    serviceGroup?.description
+    serviceGroup?.description,
   );
   useEffect(() => {
     if (serviceGroup) {
@@ -78,11 +78,11 @@ export function GroupDetails({
           {isEdit
             ? i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
-                { defaultMessage: 'Edit group' }
+                { defaultMessage: 'Edit group' },
               )
             : i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.create.title',
-                { defaultMessage: 'Create group' }
+                { defaultMessage: 'Create group' },
               )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -94,7 +94,7 @@ export function GroupDetails({
                 <EuiFormRow
                   label={i18n.translate(
                     'xpack.apm.serviceGroups.groupDetailsForm.name',
-                    { defaultMessage: 'Name' }
+                    { defaultMessage: 'Name' },
                   )}
                   isInvalid={isInvalidName}
                 >
@@ -112,7 +112,7 @@ export function GroupDetails({
                 <EuiFormRow
                   label={i18n.translate(
                     'xpack.apm.serviceGroups.groupDetailsForm.color',
-                    { defaultMessage: 'Color' }
+                    { defaultMessage: 'Color' },
                   )}
                   isInvalid={isInvalidColor}
                   error={
@@ -122,7 +122,7 @@ export function GroupDetails({
                           {
                             defaultMessage:
                               'Please provide a valid color value',
-                          }
+                          },
                         )
                       : undefined
                   }
@@ -137,13 +137,13 @@ export function GroupDetails({
               fullWidth
               label={i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.description',
-                { defaultMessage: 'Description' }
+                { defaultMessage: 'Description' },
               )}
               labelAppend={
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
                     'xpack.apm.serviceGroups.groupDetailsForm.description.optional',
-                    { defaultMessage: 'Optional' }
+                    { defaultMessage: 'Optional' },
                   )}
                 </EuiText>
               }
@@ -176,7 +176,7 @@ export function GroupDetails({
               >
                 {i18n.translate(
                   'xpack.apm.serviceGroups.groupDetailsForm.deleteGroup',
-                  { defaultMessage: 'Delete group' }
+                  { defaultMessage: 'Delete group' },
                 )}
               </EuiButton>
             </EuiFlexItem>
@@ -189,7 +189,7 @@ export function GroupDetails({
             >
               {i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.cancel',
-                { defaultMessage: 'Cancel' }
+                { defaultMessage: 'Cancel' },
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -211,7 +211,7 @@ export function GroupDetails({
             >
               {i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.selectServices',
-                { defaultMessage: 'Select services' }
+                { defaultMessage: 'Select services' },
               )}
             </EuiButton>
           </EuiFlexItem>

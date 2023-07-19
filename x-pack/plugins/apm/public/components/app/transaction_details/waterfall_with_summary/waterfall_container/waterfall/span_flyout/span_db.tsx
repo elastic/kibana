@@ -27,7 +27,7 @@ export function SpanDatabase({ spanDb }: Props) {
             'xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle',
             {
               defaultMessage: 'Database statement',
-            }
+            },
           )}
         </h3>
       </EuiTitle>

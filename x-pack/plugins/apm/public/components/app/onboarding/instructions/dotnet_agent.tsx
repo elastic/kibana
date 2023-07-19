@@ -19,7 +19,7 @@ import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createDotNetAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,
@@ -77,7 +77,7 @@ export const createDotNetAgentInstructions = (
         'xpack.apm.onboarding.dotNet.configureApplication.title',
         {
           defaultMessage: 'Add the agent to the application',
-        }
+        },
       ),
       children: (
         <>
@@ -88,7 +88,7 @@ export const createDotNetAgentInstructions = (
                 defaultMessage:
                   'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
       method in the `Configure` method within the `Startup.cs` file.',
-              }
+              },
             )}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -103,7 +103,7 @@ export const createDotNetAgentInstructions = (
                 defaultMessage:
                   'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
       `IConfiguration` instance (e.g. from the `appsettings.json` file).',
-              }
+              },
             )}
           </EuiMarkdownFormat>
         </>
@@ -114,7 +114,7 @@ export const createDotNetAgentInstructions = (
         'xpack.apm.onboarding.dotNet.configureAgent.title',
         {
           defaultMessage: 'Sample appsettings.json file:',
-        }
+        },
       ),
       children: (
         <>
@@ -149,7 +149,7 @@ export const createDotNetAgentInstructions = (
                   documentationLink: `${baseUrl}guide/en/apm/agent/dotnet/current/configuration.html`,
                   profilerLink: `${baseUrl}guide/en/apm/agent/dotnet/current/setup-auto-instrumentation.html#setup-auto-instrumentation`,
                 },
-              }
+              },
             )}
           </EuiMarkdownFormat>
         </>

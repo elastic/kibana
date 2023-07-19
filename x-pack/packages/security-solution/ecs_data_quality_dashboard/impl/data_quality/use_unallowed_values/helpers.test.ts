@@ -17,7 +17,7 @@ import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unall
 import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
 
 describe('helpers', () => {
-  let originalFetch: typeof global['fetch'];
+  let originalFetch: (typeof global)['fetch'];
 
   beforeAll(() => {
     originalFetch = global.fetch;

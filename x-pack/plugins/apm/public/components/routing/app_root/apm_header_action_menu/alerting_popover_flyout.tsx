@@ -22,22 +22,22 @@ const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
 });
 const transactionDurationLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionDuration',
-  { defaultMessage: 'Latency' }
+  { defaultMessage: 'Latency' },
 );
 const transactionErrorRateLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionErrorRate',
-  { defaultMessage: 'Failed transaction rate' }
+  { defaultMessage: 'Failed transaction rate' },
 );
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
   defaultMessage: ' Create error count rule',
 });
 const createThresholdAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createThresholdAlert',
-  { defaultMessage: 'Create threshold rule' }
+  { defaultMessage: 'Create threshold rule' },
 );
 const createAnomalyAlertAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createAnomalyAlert',
-  { defaultMessage: 'Create anomaly rule' }
+  { defaultMessage: 'Create anomaly rule' },
 );
 
 const CREATE_THRESHOLD_PANEL_ID = 'create_threshold_panel';
@@ -109,7 +109,7 @@ export function AlertingPopoverAndFlyout({
               {
                 name: i18n.translate(
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
-                  { defaultMessage: 'Manage rules' }
+                  { defaultMessage: 'Manage rules' },
                 ),
                 href: observability.useRulesLink().href,
                 icon: 'tableOfContents',

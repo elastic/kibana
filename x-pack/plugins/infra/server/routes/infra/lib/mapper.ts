@@ -63,7 +63,7 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): InfraAssetMeta
             ({
               name: key,
               value: normalizeValue(value),
-            } as InfraAssetMetadata)
+            }) as InfraAssetMetadata
         )
     : [];
 };

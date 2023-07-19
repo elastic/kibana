@@ -29,7 +29,7 @@ function getDashboardFile({ agentName }: MetricsDashboardProps) {
 }
 
 export async function getDashboardPanelMap(
-  props: MetricsDashboardProps
+  props: MetricsDashboardProps,
 ): Promise<DashboardPanelMap | undefined> {
   const dashboardFile = getDashboardFile(props);
   const panelsRawObj = !!dashboardFile
@@ -59,6 +59,6 @@ export async function getDashboardPanelMap(
         },
       },
     }),
-    {}
+    {},
   ) as DashboardPanelMap;
 }

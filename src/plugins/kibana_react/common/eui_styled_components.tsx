@@ -18,7 +18,7 @@ export interface EuiTheme {
 }
 
 const EuiThemeProvider = <
-  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
+  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme,
 >({
   darkMode = false,
   ...otherProps

@@ -59,7 +59,7 @@ export function SloCallout({
       },
       {
         replace: false,
-      }
+      },
     );
   };
 

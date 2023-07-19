@@ -44,7 +44,7 @@ export function AnomalyDetectionSetupLink() {
       'xpack.apm.anomalyDetectionSetup.jobFetchFailureText',
       {
         defaultMessage: 'Could not determine state of anomaly detection setup.',
-      }
+      },
     );
     icon = 'machineLearningApp';
   } else if (
@@ -64,7 +64,7 @@ export function AnomalyDetectionSetupLink() {
       {
         defaultMessage:
           'Updates available for existing anomaly detection jobs.',
-      }
+      },
     );
     icon = 'wrench';
   }
@@ -106,7 +106,7 @@ function getNoJobsMessage(
   state:
     | AnomalyDetectionSetupState.NoJobs
     | AnomalyDetectionSetupState.NoJobsForEnvironment,
-  environment: string
+  environment: string,
 ) {
   if (state === AnomalyDetectionSetupState.NoJobs) {
     return i18n.translate('xpack.apm.anomalyDetectionSetup.notEnabledText', {
@@ -119,11 +119,11 @@ function getNoJobsMessage(
     {
       defaultMessage: `Anomaly detection is not yet enabled for the environment "{currentEnvironment}". Click to continue setup.`,
       values: { currentEnvironment: getEnvironmentLabel(environment) },
-    }
+    },
   );
 }
 
 const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
   'xpack.apm.anomalyDetectionSetup.linkLabel',
-  { defaultMessage: `Anomaly detection` }
+  { defaultMessage: `Anomaly detection` },
 );

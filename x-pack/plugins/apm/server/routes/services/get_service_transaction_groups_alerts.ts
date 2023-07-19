@@ -85,7 +85,7 @@ export async function getServiceTranactionGroupsAlerts({
               should: [
                 ...termQuery(
                   ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
-                  RuleAggregationType[latencyAggregationType]
+                  RuleAggregationType[latencyAggregationType],
                 ),
                 {
                   bool: {

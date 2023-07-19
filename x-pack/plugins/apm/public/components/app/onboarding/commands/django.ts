@@ -25,7 +25,7 @@ export const django = `INSTALLED_APPS = (
     'xpack.apm.onboarding.djangoClient.configure.commands.addAgentComment',
     {
       defaultMessage: 'Add the agent to installed apps',
-    }
+    },
   )}
   'elasticapm.contrib.django',
   # ...
@@ -56,7 +56,7 @@ MIDDLEWARE = (
     'xpack.apm.onboarding.djangoClient.configure.commands.addTracingMiddlewareComment',
     {
       defaultMessage: 'Add our tracing middleware to send performance metrics',
-    }
+    },
   )}
   'elasticapm.contrib.django.middleware.TracingMiddleware',
   #...

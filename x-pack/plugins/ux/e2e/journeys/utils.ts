@@ -33,12 +33,12 @@ export async function loginToKibana({
     user?.username ?? 'elastic',
     {
       timeout: 60 * 1000,
-    }
+    },
   );
 
   await page.fill(
     '[data-test-subj=loginPassword]',
-    user?.password ?? 'changeme'
+    user?.password ?? 'changeme',
   );
 
   await page.click('[data-test-subj=loginSubmit]');
@@ -75,7 +75,7 @@ export const getQuerystring = (params: object) => {
   return Object.entries(params)
     .map(
       ([key, value]) =>
-        encodeURIComponent(key) + '=' + encodeURIComponent(value)
+        encodeURIComponent(key) + '=' + encodeURIComponent(value),
     )
     .join('&');
 };

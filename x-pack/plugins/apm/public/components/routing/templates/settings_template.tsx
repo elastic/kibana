@@ -44,13 +44,13 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const defaultEnvironment = useDefaultEnvironment();
 
   const agentConfigurationAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.AgentConfigurationAvailable
+    ApmFeatureFlagName.AgentConfigurationAvailable,
   );
   const migrationToFleetAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.MigrationToFleetAvailable
+    ApmFeatureFlagName.MigrationToFleetAvailable,
   );
   const indicesAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.ConfigurableIndicesAvailable
+    ApmFeatureFlagName.ConfigurableIndicesAvailable,
   );
 
   const tabs = getTabs({
@@ -99,7 +99,7 @@ function getTabs({
 
   const agentExplorerEnabled = core.uiSettings.get<boolean>(
     enableAgentExplorerView,
-    true
+    true,
   );
 
   const tabs: Tab[] = [

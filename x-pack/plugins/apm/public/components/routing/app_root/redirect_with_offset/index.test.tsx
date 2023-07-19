@@ -23,7 +23,7 @@ describe('RedirectWithOffset', () => {
 
   function renderUrl(
     location: Pick<Location, 'pathname' | 'hash' | 'search'>,
-    defaultSetting: boolean
+    defaultSetting: boolean,
   ) {
     history.replace(location);
 
@@ -47,14 +47,14 @@ describe('RedirectWithOffset', () => {
         <RedirectWithOffset>
           <>Foo</>
         </RedirectWithOffset>
-      </RouterProvider>
+      </RouterProvider>,
     );
   }
 
   it('eventually renders the child element', async () => {
     const element = renderUrl(
       { pathname: '/services', search: location.search, hash: '' },
-      false
+      false,
     );
 
     await expect(element.findByText('Foo')).resolves.not.toBeUndefined();
@@ -66,7 +66,7 @@ describe('RedirectWithOffset', () => {
   it('redirects with comparisonEnabled=false when comparison is disabled in advanced settings', async () => {
     renderUrl(
       { pathname: '/services', search: location.search, hash: '' },
-      false
+      false,
     );
 
     const query = qs.parse(history.entries[0].search);
@@ -76,7 +76,7 @@ describe('RedirectWithOffset', () => {
   it('redirects with comparisonEnabled=true when comparison is enabled in advanced settings', async () => {
     renderUrl(
       { pathname: '/services', search: location.search, hash: '' },
-      true
+      true,
     );
 
     const query = qs.parse(history.entries[0].search);
@@ -92,7 +92,7 @@ describe('RedirectWithOffset', () => {
         }),
         hash: '',
       },
-      true
+      true,
     );
 
     const query = qs.parse(history.entries[0].search);
@@ -108,7 +108,7 @@ describe('RedirectWithOffset', () => {
         }),
         hash: '',
       },
-      true
+      true,
     );
 
     const query = qs.parse(history.entries[0].search);
@@ -124,7 +124,7 @@ describe('RedirectWithOffset', () => {
         }),
         hash: '',
       },
-      true
+      true,
     );
 
     const query = qs.parse(history.entries[0].search);
@@ -140,7 +140,7 @@ describe('RedirectWithOffset', () => {
         }),
         hash: '',
       },
-      true
+      true,
     );
 
     const query = qs.parse(history.entries[0].search);
@@ -156,7 +156,7 @@ describe('RedirectWithOffset', () => {
         }),
         hash: 'services',
       },
-      true
+      true,
     );
 
     const query = qs.parse(history.entries[0].search);

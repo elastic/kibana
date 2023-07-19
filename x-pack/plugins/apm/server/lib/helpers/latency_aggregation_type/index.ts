@@ -9,7 +9,7 @@ import { LatencyAggregationType } from '../../../../common/latency_aggregation_t
 
 export function getLatencyAggregation(
   latencyAggregationType: LatencyAggregationType,
-  field: string
+  field: string,
 ) {
   return {
     latency: {

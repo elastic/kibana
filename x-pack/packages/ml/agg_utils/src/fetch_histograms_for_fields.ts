@@ -182,34 +182,37 @@ export const fetchHistogramsForFields = async (
     }, {} as NumericColumnStatsMap),
   };
 
-  const chartDataAggs = fields.reduce((aggs, field) => {
-    const id = stringHash(field.fieldName);
-    if (isNumericHistogramField(field)) {
-      if (aggIntervals[id] !== undefined) {
-        aggs[`${id}_histogram`] = {
-          histogram: {
+  const chartDataAggs = fields.reduce(
+    (aggs, field) => {
+      const id = stringHash(field.fieldName);
+      if (isNumericHistogramField(field)) {
+        if (aggIntervals[id] !== undefined) {
+          aggs[`${id}_histogram`] = {
+            histogram: {
+              field: field.fieldName,
+              interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
+            },
+          };
+        }
+      } else if (isOrdinalHistogramField(field)) {
+        if (field.type === KBN_FIELD_TYPES.STRING) {
+          aggs[`${id}_cardinality`] = {
+            cardinality: {
+              field: field.fieldName,
+            },
+          };
+        }
+        aggs[`${id}_terms`] = {
+          terms: {
             field: field.fieldName,
-            interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
+            size: MAX_CHART_COLUMNS,
           },
         };
       }
-    } else if (isOrdinalHistogramField(field)) {
-      if (field.type === KBN_FIELD_TYPES.STRING) {
-        aggs[`${id}_cardinality`] = {
-          cardinality: {
-            field: field.fieldName,
-          },
-        };
-      }
-      aggs[`${id}_terms`] = {
-        terms: {
-          field: field.fieldName,
-          size: MAX_CHART_COLUMNS,
-        },
-      };
-    }
-    return aggs;
-  }, {} as Record<string, ChartRequestAgg>);
+      return aggs;
+    },
+    {} as Record<string, ChartRequestAgg>
+  );
 
   if (Object.keys(chartDataAggs).length === 0) {
     return [];

@@ -25,10 +25,10 @@ export function EditAgentConfigurationRouteView() {
         'GET /api/apm/settings/agent-configuration/view 2023-10-31',
         {
           params: { query: { name, environment } },
-        }
+        },
       );
     },
-    [name, environment]
+    [name, environment],
   );
 
   return (

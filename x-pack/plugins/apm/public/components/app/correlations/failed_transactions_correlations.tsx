@@ -75,13 +75,13 @@ export function FailedTransactionsCorrelations({
 
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
-    progress.isRunning
+    progress.isRunning,
   );
 
   const history = useHistory();
   const [showStats, setShowStats] = useLocalStorage(
     'apmFailedTransactionsShowAdvancedStats',
-    false
+    false,
   );
 
   const toggleShowStats = useCallback(() => {
@@ -107,7 +107,7 @@ export function FailedTransactionsCorrelations({
       }
       onFilter();
     },
-    [onFilter, history, trackApmEvent]
+    [onFilter, history, trackApmEvent],
   );
 
   const failedTransactionsCorrelationsColumns: Array<
@@ -127,7 +127,7 @@ export function FailedTransactionsCorrelations({
                   {
                     defaultMessage:
                       'The chance of getting at least this amount of field name and value for failed transactions given its prevalence in successful transactions.',
-                  }
+                  },
                 )}
               >
                 <>
@@ -135,7 +135,7 @@ export function FailedTransactionsCorrelations({
                     'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
                     {
                       defaultMessage: 'p-value',
-                    }
+                    },
                   )}
                   <EuiIcon
                     size="s"
@@ -160,7 +160,7 @@ export function FailedTransactionsCorrelations({
                   {
                     defaultMessage:
                       'Percentage of time the term appear in failed transactions.',
-                  }
+                  },
                 )}
               >
                 <>
@@ -168,7 +168,7 @@ export function FailedTransactionsCorrelations({
                     'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
                     {
                       defaultMessage: 'Failure %',
-                    }
+                    },
                   )}
                   <EuiIcon
                     size="s"
@@ -193,7 +193,7 @@ export function FailedTransactionsCorrelations({
                   {
                     defaultMessage:
                       'Percentage of time the term appear in successful transactions.',
-                  }
+                  },
                 )}
               >
                 <>
@@ -201,7 +201,7 @@ export function FailedTransactionsCorrelations({
                     'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageLabel',
                     {
                       defaultMessage: 'Success %',
-                    }
+                    },
                   )}
                   <EuiIcon
                     size="s"
@@ -230,7 +230,7 @@ export function FailedTransactionsCorrelations({
               {
                 defaultMessage:
                   'The score [0-1] of an attribute; the greater the score, the more an attribute contributes to failed transactions.',
-              }
+              },
             )}
           >
             <>
@@ -238,7 +238,7 @@ export function FailedTransactionsCorrelations({
                 'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
                 {
                   defaultMessage: 'Score',
-                }
+                },
               )}
               <EuiIcon
                 size="s"
@@ -263,14 +263,14 @@ export function FailedTransactionsCorrelations({
               'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
               {
                 defaultMessage: 'Impact',
-              }
+              },
             )}
           </>
         ),
         render: (_, { pValue, isFallbackResult }) => {
           const label = getFailedTransactionsCorrelationImpactLabel(
             pValue,
-            isFallbackResult
+            isFallbackResult,
           );
           return label ? (
             <EuiBadge color={label.color}>{label.impact}</EuiBadge>
@@ -282,7 +282,7 @@ export function FailedTransactionsCorrelations({
         field: 'fieldName',
         name: i18n.translate(
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
-          { defaultMessage: 'Field name' }
+          { defaultMessage: 'Field name' },
         ),
         render: (_, { fieldName, fieldValue }) => (
           <>
@@ -300,7 +300,7 @@ export function FailedTransactionsCorrelations({
         field: 'fieldValue',
         name: i18n.translate(
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
-          { defaultMessage: 'Field value' }
+          { defaultMessage: 'Field value' },
         ),
         render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
         sortable: true,
@@ -312,11 +312,11 @@ export function FailedTransactionsCorrelations({
           {
             name: i18n.translate(
               'xpack.apm.correlations.correlationsTable.filterLabel',
-              { defaultMessage: 'Filter' }
+              { defaultMessage: 'Filter' },
             ),
             description: i18n.translate(
               'xpack.apm.correlations.correlationsTable.filterDescription',
-              { defaultMessage: 'Filter by value' }
+              { defaultMessage: 'Filter by value' },
             ),
             icon: 'plusInCircle',
             type: 'icon',
@@ -333,11 +333,11 @@ export function FailedTransactionsCorrelations({
           {
             name: i18n.translate(
               'xpack.apm.correlations.correlationsTable.excludeLabel',
-              { defaultMessage: 'Exclude' }
+              { defaultMessage: 'Exclude' },
             ),
             description: i18n.translate(
               'xpack.apm.correlations.correlationsTable.excludeDescription',
-              { defaultMessage: 'Filter out value' }
+              { defaultMessage: 'Filter out value' },
             ),
             icon: 'minusInCircle',
             type: 'icon',
@@ -364,7 +364,7 @@ export function FailedTransactionsCorrelations({
           {
             defaultMessage:
               'An error occurred performing correlations on failed transactions',
-          }
+          },
         ),
         text: progress.error,
       });
@@ -401,7 +401,7 @@ export function FailedTransactionsCorrelations({
       // So we want to sort by the normalized score here
       // which goes from 0 -> 1
       sortField === 'pValue' ? 'normalizedScore' : sortField,
-      sortDirection
+      sortDirection,
     );
   }, [
     response.failedTransactionsCorrelations,
@@ -423,13 +423,13 @@ export function FailedTransactionsCorrelations({
       return correlationTerms?.find(
         (h) =>
           h.fieldName === selectedSignificantTerm.fieldName &&
-          h.fieldValue === selectedSignificantTerm.fieldValue
+          h.fieldValue === selectedSignificantTerm.fieldValue,
       );
     } else if (pinnedSignificantTerm) {
       return correlationTerms.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
-          h.fieldValue === pinnedSignificantTerm.fieldValue
+          h.fieldValue === pinnedSignificantTerm.fieldValue,
       );
     }
     return correlationTerms[0];
@@ -466,7 +466,7 @@ export function FailedTransactionsCorrelations({
                 'xpack.apm.correlations.failedTransactions.panelTitle',
                 {
                   defaultMessage: 'Failed transactions latency distribution',
-                }
+                },
               )}
             </h5>
           </EuiTitle>
@@ -507,7 +507,7 @@ export function FailedTransactionsCorrelations({
               'xpack.apm.correlations.failedTransactions.tableTitle',
               {
                 defaultMessage: 'Correlations',
-              }
+              },
             )}
           </span>
         </EuiTitle>
@@ -523,7 +523,7 @@ export function FailedTransactionsCorrelations({
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsLabel',
               {
                 defaultMessage: 'Advanced statistics',
-              }
+              },
             )}
             checked={showStats}
             onChange={toggleShowStats}
@@ -539,7 +539,7 @@ export function FailedTransactionsCorrelations({
               {
                 defaultMessage:
                   'Enable additional statistical information for the correlation results.',
-              }
+              },
             )}
             type="questionInCircle"
           />

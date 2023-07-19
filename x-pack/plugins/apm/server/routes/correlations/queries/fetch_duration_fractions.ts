@@ -72,7 +72,7 @@ export const fetchDurationFractions = async ({
   return {
     fractions:
       aggregations?.latency_ranges.buckets.map(
-        (bucket) => bucket.doc_count / totalDocCount
+        (bucket) => bucket.doc_count / totalDocCount,
       ) ?? [],
     totalDocCount,
   };

@@ -36,7 +36,7 @@ function generateData() {
     .errors(
       instanceJava
         .error({ message: '[ResponseError] index_not_found_exception' })
-        .timestamp(50)
+        .timestamp(50),
     )
     .children(
       instanceJava
@@ -47,15 +47,15 @@ function generateData() {
         })
         .timestamp(50)
         .duration(900)
-        .success()
+        .success(),
     )
     .serialize();
   const spanEvent = events.find(
-    (event) => event['processor.event'] === ProcessorEvent.span
+    (event) => event['processor.event'] === ProcessorEvent.span,
   )!;
 
   const parentTransaction = events.find(
-    (event) => event['transaction.id'] === spanEvent['parent.id']
+    (event) => event['transaction.id'] === spanEvent['parent.id'],
   )!;
   return { events, spanEvent, parentTransaction };
 }
@@ -74,7 +74,7 @@ export default {
               span: dedot(data.spanEvent, {}) as Span,
               parentTransaction: dedot(
                 data.parentTransaction,
-                {}
+                {},
               ) as Transaction,
             };
           },

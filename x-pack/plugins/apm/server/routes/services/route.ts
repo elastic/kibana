@@ -183,7 +183,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<ServiceTransactionDetailedStatPeriodsResponse> => {
     const {
       params,
@@ -405,7 +405,10 @@ const serviceAnnotationsRoute = createApmServerRoute({
           ? withApmSpan(
               'get_scoped_annotations_client',
               (): Promise<undefined | ScopedAnnotationsClient> =>
-                observability.setup.getScopedAnnotationsClient(context, request)
+                observability.setup.getScopedAnnotationsClient(
+                  context,
+                  request,
+                ),
             )
           : undefined,
         getSearchTransactionsEvents({
@@ -415,7 +418,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
           end,
           kuery: '',
         }),
-      ]
+      ],
     );
 
     return getServiceAnnotations({
@@ -460,7 +463,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
     ]),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     _id: string;
     _index: string;
@@ -477,7 +480,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
       ? await withApmSpan(
           'get_scoped_annotations_client',
           (): Promise<undefined | ScopedAnnotationsClient> =>
-            observability.setup.getScopedAnnotationsClient(context, request)
+            observability.setup.getScopedAnnotationsClient(context, request),
         )
       : undefined;
 
@@ -502,7 +505,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
             name: path.serviceName,
           },
           tags: uniq(['apm'].concat(body.tags ?? [])),
-        })
+        }),
     );
   },
 });
@@ -527,7 +530,7 @@ const serviceThroughputRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     currentPeriod: ServiceThroughputResponse;
     previousPeriod: ServiceThroughputResponse;
@@ -606,7 +609,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     currentPeriod: ServiceInstanceMainStatisticsResponse;
     previousPeriod: ServiceInstanceMainStatisticsResponse;
@@ -688,7 +691,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<ServiceInstancesDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
@@ -742,7 +745,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<
     ServiceInstanceMetadataDetailsResponse &
       (ServiceInstanceContainerMetadataDetails | {})
@@ -796,7 +799,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   async handler(
-    resources
+    resources,
   ): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -829,7 +832,7 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     breakdown: ServiceDependenciesBreakdownResponse;
   }> => {
@@ -869,7 +872,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     allAnomalyTimeseries: ServiceAnomalyTimeseries[];
   }> => {

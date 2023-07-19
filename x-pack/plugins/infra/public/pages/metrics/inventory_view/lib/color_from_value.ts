@@ -74,14 +74,17 @@ export const calculateSteppedGradientColor = (
     return lastRule.color;
   }
 
-  return rules.reduce((color: string, rule) => {
-    const min = rule.value - 1 / steps;
-    const max = rule.value;
-    if (gte(normalizedValue, min) && lte(normalizedValue, max)) {
-      return rule.color;
-    }
-    return color;
-  }, first(rules)?.color ?? defaultColor);
+  return rules.reduce(
+    (color: string, rule) => {
+      const min = rule.value - 1 / steps;
+      const max = rule.value;
+      if (gte(normalizedValue, min) && lte(normalizedValue, max)) {
+        return rule.color;
+      }
+      return color;
+    },
+    first(rules)?.color ?? defaultColor
+  );
 };
 
 export const calculateStepColor = (

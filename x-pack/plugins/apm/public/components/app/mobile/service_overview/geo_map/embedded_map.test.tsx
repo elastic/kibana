@@ -47,10 +47,10 @@ describe('Embedded Map', () => {
             />
           </KibanaContextProvider>
         </MockApmPluginContextWrapper>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(
-      await findByTestId('serviceOverviewEmbeddedMap')
+      await findByTestId('serviceOverviewEmbeddedMap'),
     ).toBeInTheDocument();
 
     expect(mockSetLayerList).toHaveBeenCalledTimes(1);

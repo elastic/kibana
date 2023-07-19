@@ -24,7 +24,7 @@ export const API_ACTION_NAME = {
   RESET_GROUPS: 'reset_groups',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
-export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
+export type ApiActionName = (typeof API_ACTION_NAME)[keyof typeof API_ACTION_NAME];
 
 interface ApiActionAddSignificantTerms {
   type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS;

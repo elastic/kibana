@@ -22,7 +22,7 @@ describe('SelectAnomalySeverity', () => {
         onChange={() => {}}
         value={ML_ANOMALY_SEVERITY.CRITICAL}
       />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     // SR-only text 'Critical, is selected'
@@ -32,11 +32,11 @@ describe('SelectAnomalySeverity', () => {
     button.click();
 
     const options = await result.findAllByTestId(
-      'SelectAnomalySeverity option text'
+      'SelectAnomalySeverity option text',
     );
 
     expect(
-      options.map((option) => (option.firstChild as HTMLElement)?.innerHTML)
+      options.map((option) => (option.firstChild as HTMLElement)?.innerHTML),
     ).toEqual([
       'score critical ', // Trailing space is intentional here, to keep the i18n simple
       'score major and above',

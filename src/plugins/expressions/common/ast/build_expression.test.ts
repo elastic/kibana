@@ -366,8 +366,8 @@ describe('buildExpression()', () => {
         `miss | miss sub={miss} | miss sub={hit sub={miss sub={hit sub={hit}}}} sub={miss}`
       );
       const fns: ExpressionAstFunctionBuilder[] = exp.findFunction('hit');
-      const subexpressionArgs = fns.map((fn) =>
-        fn.getArgument('sub')?.map((arg) => isExpressionAstBuilder(arg))
+      const subexpressionArgs = fns.map(
+        (fn) => fn.getArgument('sub')?.map((arg) => isExpressionAstBuilder(arg))
       );
       expect(subexpressionArgs).toEqual([undefined, [true], [true]]);
     });

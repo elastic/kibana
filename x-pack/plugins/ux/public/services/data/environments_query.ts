@@ -17,7 +17,7 @@ import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_valu
 import { Environment } from '../../../common/environment_rt';
 
 export function transformEnvironmentsResponse<T>(
-  response?: ESSearchResponse<T, ReturnType<typeof getEnvironments>>
+  response?: ESSearchResponse<T, ReturnType<typeof getEnvironments>>,
 ) {
   if (!response) return response;
 
@@ -25,7 +25,7 @@ export function transformEnvironmentsResponse<T>(
   const environmentsBuckets = aggs?.environments.buckets || [];
 
   const environments = environmentsBuckets.map(
-    (environmentBucket) => environmentBucket.key as string
+    (environmentBucket) => environmentBucket.key as string,
   );
 
   return environments as Environment[];

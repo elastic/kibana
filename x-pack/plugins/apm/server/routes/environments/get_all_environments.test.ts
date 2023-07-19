@@ -25,7 +25,7 @@ describe('getAllEnvironments', () => {
         serviceName: 'test',
         apmEventClient: mockApmEventClient,
         size: 50,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -39,7 +39,7 @@ describe('getAllEnvironments', () => {
         serviceName: 'test',
         apmEventClient: mockApmEventClient,
         size: 50,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();

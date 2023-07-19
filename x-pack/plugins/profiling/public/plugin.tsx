@@ -95,7 +95,7 @@ export class ProfilingPlugin implements Plugin {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
-          unknown
+          unknown,
         ];
 
         const profilingFetchServices = getServices();

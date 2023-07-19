@@ -28,11 +28,11 @@ export function useServiceTransactionTypesFetcher({
               path: { serviceName },
               query: { start, end },
             },
-          }
+          },
         );
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end],
   );
 
   return { transactionTypes: data.transactionTypes, status };

@@ -11,7 +11,7 @@ export function ResettingHeightRetainer(
   props: React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
-  > & { reset?: boolean }
+  > & { reset?: boolean },
 ) {
   const { reset, ...containerProps } = props;
   const resetRef = useRef(reset);

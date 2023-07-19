@@ -128,7 +128,9 @@ export function PageTitle({ alert }: PageTitleProps) {
               `}
               size="s"
             >
-              {moment(alert.fields[TIMESTAMP]?.toString()).locale(i18n.getLocale()).fromNow()}
+              {moment(alert.fields[TIMESTAMP]?.toString())
+                .locale(i18n.getLocale())
+                .fromNow()}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>

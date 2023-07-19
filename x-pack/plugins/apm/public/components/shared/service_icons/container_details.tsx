@@ -34,7 +34,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.container.image.name',
-        { defaultMessage: 'Container images' }
+        { defaultMessage: 'Container images' },
       ),
       description: (
         <ul>
@@ -54,7 +54,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.container.os.label',
         {
           defaultMessage: 'OS',
-        }
+        },
       ),
       description: container.os,
     });
@@ -64,7 +64,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.deployments',
-        { defaultMessage: 'Deployments' }
+        { defaultMessage: 'Deployments' },
       ),
       description: (
         <ul>
@@ -82,7 +82,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.namespaces',
-        { defaultMessage: 'Namespaces' }
+        { defaultMessage: 'Namespaces' },
       ),
       description: (
         <ul>
@@ -100,7 +100,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.replicasets',
-        { defaultMessage: 'Replicasets' }
+        { defaultMessage: 'Replicasets' },
       ),
       description: (
         <ul>
@@ -118,7 +118,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.container.totalNumberInstancesLabel',
-        { defaultMessage: 'Total number of instances' }
+        { defaultMessage: 'Total number of instances' },
       ),
       description: asInteger(container.totalNumberInstances),
     });

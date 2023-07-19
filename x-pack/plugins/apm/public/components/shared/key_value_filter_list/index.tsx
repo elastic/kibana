@@ -107,7 +107,7 @@ export function KeyValueFilterList({
                           position="top"
                           content={i18n.translate(
                             'xpack.apm.keyValueFilterList.actionFilterLabel',
-                            { defaultMessage: 'Filter by value' }
+                            { defaultMessage: 'Filter by value' },
                           )}
                         >
                           <EuiIcon type="filter" color="text" size="m" />

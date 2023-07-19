@@ -28,7 +28,7 @@ Cypress.Commands.add(
       },
     });
     cy.visit('/');
-  }
+  },
 );
 
 Cypress.Commands.add('loginAsElastic', () => {
@@ -55,5 +55,5 @@ Cypress.Commands.add(
     cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
       timeout: 50000,
     });
-  }
+  },
 );

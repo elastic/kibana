@@ -78,7 +78,7 @@ export async function getTopDependencyOperations({
   });
 
   const field = getLatencyFieldForServiceDestinationStatistics(
-    searchServiceDestinationMetrics
+    searchServiceDestinationMetrics,
   );
 
   const aggs = {
@@ -114,7 +114,7 @@ export async function getTopDependencyOperations({
       apm: {
         events: [
           getProcessorEventForServiceDestinationStatistics(
-            searchServiceDestinationMetrics
+            searchServiceDestinationMetrics,
           ),
         ],
       },
@@ -129,7 +129,7 @@ export async function getTopDependencyOperations({
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
               ...getDocumentTypeFilterForServiceDestinationStatistics(
-                searchServiceDestinationMetrics
+                searchServiceDestinationMetrics,
               ),
             ],
           },
@@ -161,13 +161,13 @@ export async function getTopDependencyOperations({
           },
         },
       },
-    }
+    },
   );
 
   const getImpact = calculateImpactBuilder(
     response.aggregations?.operationName.buckets.map(
-      (bucket) => bucket.total_time.value
-    ) ?? []
+      (bucket) => bucket.total_time.value,
+    ) ?? [],
   );
 
   return (
@@ -242,7 +242,7 @@ export async function getTopDependencyOperations({
           impact: getImpact(bucket.total_time.value ?? 0),
           timeseries,
         };
-      }
+      },
     ) ?? []
   );
 }

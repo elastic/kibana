@@ -83,13 +83,13 @@ export function DependencyOperationDetailView() {
       kuery,
       sampleRangeFrom,
       sampleRangeTo,
-    ]
+    ],
   );
 
   const getSortedSamples: SortFunction<DependencySpan> = (
     items,
     localSortField,
-    localSortDirection
+    localSortDirection,
   ) => {
     return orderBy(items, localSortField, localSortDirection);
   };
@@ -99,7 +99,7 @@ export function DependencyOperationDetailView() {
       getSortedSamples(
         spanFetch.data?.spans ?? [],
         sortField,
-        sortDirection
+        sortDirection,
       ).map((span) => ({
         spanId: span.spanId,
         traceId: span.traceId,
@@ -147,7 +147,7 @@ export function DependencyOperationDetailView() {
         <DetailViewHeader
           backLabel={i18n.translate(
             'xpack.apm.dependecyOperationDetailView.header.backLinkLabel',
-            { defaultMessage: 'All operations' }
+            { defaultMessage: 'All operations' },
           )}
           backHref={router.link('/dependencies/operations', {
             query: queryWithoutSpanName,

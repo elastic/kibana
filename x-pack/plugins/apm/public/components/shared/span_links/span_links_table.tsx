@@ -36,7 +36,7 @@ export function SpanLinksTable({ items }: Props) {
     query: { rangeFrom, rangeTo, comparisonEnabled },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<
     string | undefined
@@ -165,7 +165,7 @@ export function SpanLinksTable({ items }: Props) {
                   >
                     {i18n.translate(
                       'xpack.apm.spanLinks.table.actions.goToTraceDetails',
-                      { defaultMessage: 'Go to trace' }
+                      { defaultMessage: 'Go to trace' },
                     )}
                   </EuiLink>
                 </EuiFlexItem>
@@ -183,7 +183,7 @@ export function SpanLinksTable({ items }: Props) {
                     >
                       {i18n.translate(
                         'xpack.apm.spanLinks.table.actions.copyParentTraceId',
-                        { defaultMessage: 'Copy parent trace id' }
+                        { defaultMessage: 'Copy parent trace id' },
                       )}
                     </EuiButtonEmpty>
                   )}
@@ -200,7 +200,7 @@ export function SpanLinksTable({ items }: Props) {
                   >
                     {i18n.translate(
                       'xpack.apm.spanLinks.table.actions.goToSpanDetails',
-                      { defaultMessage: 'Go to span details' }
+                      { defaultMessage: 'Go to span details' },
                     )}
                   </EuiLink>
                 </EuiFlexItem>
@@ -218,7 +218,7 @@ export function SpanLinksTable({ items }: Props) {
                     >
                       {i18n.translate(
                         'xpack.apm.spanLinks.table.actions.copySpanId',
-                        { defaultMessage: 'Copy span id' }
+                        { defaultMessage: 'Copy span id' },
                       )}
                     </EuiButtonEmpty>
                   )}

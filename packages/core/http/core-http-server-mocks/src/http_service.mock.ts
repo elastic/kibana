@@ -41,7 +41,7 @@ export type InternalHttpServicePrebootMock = jest.Mocked<
   Omit<InternalHttpServicePreboot, 'basePath'>
 > & { basePath: BasePathMocked };
 export type HttpServiceSetupMock<
-  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
+  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase,
 > = jest.Mocked<Omit<HttpServiceSetup<ContextType>, 'basePath' | 'createRouter'>> & {
   basePath: BasePathMocked;
   createRouter: jest.MockedFunction<() => RouterMock>;
@@ -168,7 +168,7 @@ const createInternalSetupContractMock = () => {
 };
 
 const createSetupContractMock = <
-  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
+  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase,
 >() => {
   const internalMock = createInternalSetupContractMock();
 

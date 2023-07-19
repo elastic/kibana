@@ -81,7 +81,7 @@ export const from = {
     return undefined;
   },
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
-  undefinedIfValue: (value: unknown) => (v: boolean) => v === value ? undefined : v,
+  undefinedIfValue: (value: unknown) => (v: boolean) => (v === value ? undefined : v),
   emptyStringToUndefined: (v: unknown) => (v === '' ? undefined : v),
   /**
    * Useful when serializing user input from a <textarea /> that we want to later JSON.stringify but keep the same as what

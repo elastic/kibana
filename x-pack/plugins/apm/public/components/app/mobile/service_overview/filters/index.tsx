@@ -76,7 +76,7 @@ export function MobileFilters() {
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const filters = { netConnectionType, device, osVersion, appVersion };
@@ -91,10 +91,10 @@ export function MobileFilters() {
             path: { serviceName },
             query: { start, end, environment, kuery, transactionType },
           },
-        }
+        },
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType],
   );
 
   function toSelectOptions(items?: string[]) {

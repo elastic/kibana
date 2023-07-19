@@ -9,7 +9,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ScopedClusterClient } from './scoped_cluster_client';
 
-const createEsClient = () => ({} as unknown as ElasticsearchClient);
+const createEsClient = () => ({}) as unknown as ElasticsearchClient;
 
 describe('ScopedClusterClient', () => {
   it('uses the internal client passed in the constructor', () => {

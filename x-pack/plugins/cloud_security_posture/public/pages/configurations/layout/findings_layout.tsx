@@ -202,7 +202,7 @@ const baseColumns = [
 
 export const baseFindingsColumns = Object.fromEntries(
   baseColumns.map((column) => [column.field, column])
-) as Record<typeof baseColumns[number]['field'], typeof baseColumns[number]>;
+) as Record<(typeof baseColumns)[number]['field'], (typeof baseColumns)[number]>;
 
 export const createColumnWithFilters = <T extends unknown>(
   column: EuiTableFieldDataColumnType<T>,

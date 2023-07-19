@@ -66,7 +66,7 @@ async function getTracesPerMinute({
         bool: {
           filter: [
             ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
+              searchAggregatedTransactions,
             ),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
@@ -74,7 +74,7 @@ async function getTracesPerMinute({
             ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
               ? termQuery(
                   TIER,
-                  indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                 )
               : []),
             isRootTransaction(searchAggregatedTransactions),
@@ -85,7 +85,7 @@ async function getTracesPerMinute({
         traces_count: {
           value_count: {
             field: getDurationFieldForTransactions(
-              searchAggregatedTransactions
+              searchAggregatedTransactions,
             ),
           },
         },
@@ -140,7 +140,7 @@ async function getMainSummaryStats({
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                   )
                 : []),
             ],

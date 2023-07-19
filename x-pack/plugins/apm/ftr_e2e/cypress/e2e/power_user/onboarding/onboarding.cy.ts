@@ -89,7 +89,7 @@ describe('APM Onboarding', () => {
     });
     it('when no data is present', () => {
       cy.intercept('GET', '/internal/apm/observability_overview/has_data').as(
-        'hasData'
+        'hasData',
       );
       cy.getByTestSubj('checkAgentStatus').click();
       cy.wait('@hasData');
@@ -101,10 +101,10 @@ describe('APM Onboarding', () => {
         generateData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
-        })
+        }),
       );
       cy.intercept('GET', '/internal/apm/observability_overview/has_data').as(
-        'hasData'
+        'hasData',
       );
       cy.getByTestSubj('checkAgentStatus').click();
       cy.wait('@hasData');
