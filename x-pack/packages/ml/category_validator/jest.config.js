@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export * from './jira';
-export * from './servicenow_itsm';
-export * from './servicenow_sir';
-export * from './resilient';
-export * from './mappings';
-export * from './swimlane';
-export * from './get_connectors';
-export * from './connector';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/category_validator'],
+};
