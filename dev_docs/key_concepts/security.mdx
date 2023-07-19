@@ -37,7 +37,7 @@ Adding an `access` tag to routes that leverage the Saved Objects Service would b
 
 ## The `kibana_system` user
 
-The Kibana server authenticates to Elasticsearch using the `elastic/kibana` [service account](https://www.elastic.co/guide/en/elasticsearch/reference/current/service-accounts.html#service-accounts-explanation). This service account has privileges that are equivilent to the `kibana_system` reserved role, whose descriptor is managed in the Elasticsearch repository ([source link](https://github.com/elastic/elasticsearch/blob/56633e0a2934b03090ab726c33e5289129c98bfe/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/store/ReservedRolesStore.java#L682)).
+The Kibana server authenticates to Elasticsearch using the `elastic/kibana` [service account](https://www.elastic.co/guide/en/elasticsearch/reference/current/service-accounts.html#service-accounts-explanation). This service account has privileges that are equivilent to the `kibana_system` reserved role, whose descriptor is managed in the Elasticsearch repository ([source link](https://github.com/elastic/elasticsearch/blob/430cde6909eae12e1a90ac2bff29b71cbf4af18b/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/store/KibanaOwnedReservedRoleDescriptors.java#L58)).
 The vast majority of features will not require changes to the `kibana_system` user privileges. Changes to these privileges must be carefully considered, as we do not want the `kibana_system` account to have access to user data.
 
 ### Guiding principals
