@@ -42,15 +42,23 @@ function isCypressJunitReport(parsedReport: any): parsedReport is t.TypeOf<typeo
 
   const valid: t.TypeOf<typeof CypressJunitReport> = decoded.right;
 
+  // TODO: explain why the first element in the array is different and why we care.
   for (let index = 0; index < valid.testsuites.testsuite.length; index++) {
     const testsuite = valid.testsuites.testsuite[index];
     if (index === 0) {
-      if (isLeft(CypressJunitRootTestSuite.decode(testsuite))) {
+      if (!CypressJunitRootTestSuite.is(testsuite)) {
         throw new Error('The first suite must be the Root Suite, which contains the spec file name.');
       }
     } else {
-      if (isLeft(CypressJunitTestSuite.decode(testsuite))) {
+      if (!CypressJunitTestSuite.is(testsuite)) {
         throw new Error('All testsuite elements except for the first one must have testcase elements');
+      } else {
+        for (const testcase of testsuite.testcase) {
+          if (testcase.$.classname.indexOf('·') !== -1) {
+            // TODO, explain what this means
+            throw new Error('This report has already been transformed');
+          }
+        }
       }
     }
   }
@@ -72,13 +80,16 @@ run(
       throw createFlagError('please provide a single --reportName flag');
     }
 
-    console.log('flags', flags);
-
-    console.log(await runTask({
+    const report = await transformedReport({
       path: flags.path,
       reportName: flags.reportName,
       rootDirectory: flags.rootDirectory
-    }));
+    });
+    if (flags.writeInPlace) {
+      await fs.writeFile(flags.path, report);
+    } else {
+      log.write(report);
+    }
     log.success('task complete');
   },
   {
@@ -87,7 +98,7 @@ run(
     `,
     flags: {
       string: ['path', 'rootDirectory', 'reportName'],
-      boolean: ['dryRun'],
+      boolean: ['writeInPlace'],
       help: `
         --path             Required, path to the file to operate on
         --rootDirectory    Required, path of the kibana repo
@@ -99,12 +110,10 @@ run(
 );
 
 
-async function runTask({ path, rootDirectory, reportName }: { path: string, rootDirectory: string, reportName: string }): Promise<string> {
+async function transformedReport({ path, rootDirectory, reportName }: { path: string, rootDirectory: string, reportName: string }): Promise<string> {
   const source = await fs.readFile(path, 'utf8');
   const result = await parseStringPromise(source /*, options */);
   if (isCypressJunitReport(result)) {
-    console.log(JSON.stringify(result, undefined, '\t'));
-    console.log('Done');
 
     const rootSuite = result.testsuites.testsuite[0];
 
@@ -125,6 +134,10 @@ async function runTask({ path, rootDirectory, reportName }: { path: string, root
 
       var builder = new Builder();
       return builder.buildObject(result);
+    } else {
+      throw new Error
     }
+  } else {
+    throw new Error
   }
 }
