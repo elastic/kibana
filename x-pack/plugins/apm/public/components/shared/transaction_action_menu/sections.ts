@@ -13,6 +13,7 @@ import moment from 'moment';
 import url from 'url';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
+import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
@@ -53,7 +54,7 @@ export const getSections = ({
   profilingLocators?: ProfilingLocators;
   rangeFrom: string;
   rangeTo: string;
-  environment: string;
+  environment: Environment;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
