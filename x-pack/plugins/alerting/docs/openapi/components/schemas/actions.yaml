@@ -1,12 +1,12 @@
 type: array
 default: []
-nullable: true
-items:
-  type: object
-  required:
+required:
   - group
   - id
   - params
+nullable: true
+items:
+  type: object
   properties:
     alerts_filter:
       type: object
