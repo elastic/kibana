@@ -22,7 +22,6 @@ import {
   EuiLink,
   useEuiTheme,
   EuiPopoverFooter,
-  EuiButton,
 } from '@elastic/eui';
 import type { EuiSelectableProps, ExclusiveUnion } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,10 +36,6 @@ const modifierKeyPrefix = isMac ? '⌘' : '^';
 
 const clearSelectionBtnCSS = css`
   height: auto;
-`;
-
-const saveBtnWrapperCSS = css`
-  width: 100%;
 `;
 
 interface Props {
@@ -172,10 +167,6 @@ export const TagFilterPanel: FC<Props> = ({
                   )}
                 </EuiTextColor>
               </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem css={saveBtnWrapperCSS}>
-              <EuiButton onClick={closePopover}>Save</EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem>
