@@ -7,21 +7,15 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-// Fixing up types here since some fields are marked as optional in `estypes` even though they are guaranteed to be present
-type ApiKeyFieldsThatAreWronglyTypedAsOptional =
-  | 'username'
-  | 'realm'
-  | 'creation'
-  | 'metadata'
-  | 'role_descriptors';
-type BaseApiKey = Pick<
-  Required<estypes.SecurityApiKey>,
-  ApiKeyFieldsThatAreWronglyTypedAsOptional
-> &
-  Omit<estypes.SecurityApiKey, ApiKeyFieldsThatAreWronglyTypedAsOptional>;
+/**
+ * Interface representing an API key the way it is returned by Elasticsearch GET endpoint.
+ */
+export type ApiKey = RestApiKey | CrossClusterApiKey;
 
 /**
  * Interface representing a REST API key the way it is returned by Elasticsearch GET endpoint.
+ *
+ * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
 export interface RestApiKey extends BaseApiKey {
   type: 'rest';
@@ -29,6 +23,8 @@ export interface RestApiKey extends BaseApiKey {
 
 /**
  * Interface representing a Cross-Cluster API key the way it is returned by Elasticsearch GET endpoint.
+ *
+ * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
 export interface CrossClusterApiKey extends BaseApiKey {
   type: 'cross_cluster';
@@ -41,12 +37,19 @@ export interface CrossClusterApiKey extends BaseApiKey {
 }
 
 /**
- * Interface representing an API key the way it is returned by Elasticsearch GET endpoint.
+ * Fixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.
+ *
+ * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
-export type ApiKey = RestApiKey | CrossClusterApiKey;
+interface BaseApiKey extends estypes.SecurityApiKey {
+  username: Required<estypes.SecurityApiKey>['username'];
+  realm: Required<estypes.SecurityApiKey>['realm'];
+  creation: Required<estypes.SecurityApiKey>['creation'];
+  metadata: Required<estypes.SecurityApiKey>['metadata'];
+  role_descriptors: Required<estypes.SecurityApiKey>['role_descriptors'];
+}
 
-export type ApiKeyRoleDescriptors = Record<string, estypes.SecurityRoleDescriptor>;
-
+// TODO: Remove this type when `@elastic/elasticsearch` has been updated.
 export interface CrossClusterApiKeyAccess {
   /**
    * A list of indices permission entries for cross-cluster search.
@@ -59,12 +62,16 @@ export interface CrossClusterApiKeyAccess {
   replication?: CrossClusterApiKeyReplication[];
 }
 
+// TODO: Remove this type when `@elastic/elasticsearch` has been updated.
 type CrossClusterApiKeySearch = Pick<
   estypes.SecurityIndicesPrivileges,
   'names' | 'field_security' | 'query' | 'allow_restricted_indices'
 >;
 
+// TODO: Remove this type when `@elastic/elasticsearch` has been updated.
 type CrossClusterApiKeyReplication = Pick<estypes.SecurityIndicesPrivileges, 'names'>;
+
+export type ApiKeyRoleDescriptors = Record<string, estypes.SecurityRoleDescriptor>;
 
 export interface ApiKeyToInvalidate {
   id: string;

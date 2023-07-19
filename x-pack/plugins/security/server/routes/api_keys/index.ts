@@ -26,6 +26,7 @@ export type {
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './update';
+export type { GetAPIKeysResult } from './get';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);

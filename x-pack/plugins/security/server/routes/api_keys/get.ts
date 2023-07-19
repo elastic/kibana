@@ -6,8 +6,19 @@
  */
 
 import type { RouteDefinitionParams } from '..';
+import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+
+/**
+ * Response of Kibana Get API keys endpoint.
+ */
+export interface GetAPIKeysResult {
+  apiKeys: ApiKey[];
+  canManageCrossClusterApiKeys: boolean;
+  canManageApiKeys: boolean;
+  canManageOwnApiKeys: boolean;
+}
 
 export function defineGetApiKeysRoutes({
   router,
@@ -16,7 +27,7 @@ export function defineGetApiKeysRoutes({
   router.get(
     {
       path: '/internal/security/api_key',
-      validate: {},
+      validate: false,
       options: {
         access: 'internal',
       },
@@ -62,8 +73,9 @@ export function defineGetApiKeysRoutes({
 
         const validKeys = apiResponse.api_keys.filter(({ invalidated }) => !invalidated);
 
-        return response.ok({
+        return response.ok<GetAPIKeysResult>({
           body: {
+            // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
             apiKeys: validKeys,
             canManageCrossClusterApiKeys,
             canManageApiKeys,

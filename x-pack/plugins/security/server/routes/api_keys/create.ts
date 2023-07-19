@@ -16,20 +16,24 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+/**
+ * Response of Kibana Create API key endpoint.
+ */
+export type CreateAPIKeyResult = estypes.SecurityCreateApiKeyResponse;
+
+/**
+ * Request body of Kibana Create API key endpoint.
+ */
 export type CreateAPIKeyParams =
   | CreateRestAPIKeyParams
   | CreateCrossClusterAPIKeyParams
   | CreateRestAPIKeyWithKibanaPrivilegesParams;
 
-/**
- * The return value when creating an API key in Elasticsearch. The API key returned by this API
- * can then be used by sending a request with a Authorization header with a value having the
- * prefix ApiKey `{token}` where token is id and api_key joined by a colon `{id}:{api_key}` and
- * then encoded to base64.
- */
-export type CreateAPIKeyResult = estypes.SecurityCreateApiKeyResponse;
-
 export type CreateRestAPIKeyParams = TypeOf<typeof restApiKeySchema>;
+export type CreateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
+export type CreateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
+  ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
+>;
 
 const restApiKeySchema = schema.object({
   type: schema.maybe(schema.literal('rest')),
@@ -40,8 +44,6 @@ const restApiKeySchema = schema.object({
   }),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
-
-export type CreateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
 
 const crossClusterApiKeySchema = restApiKeySchema.extends({
   type: schema.literal('cross_cluster'),
@@ -66,10 +68,6 @@ const crossClusterApiKeySchema = restApiKeySchema.extends({
     { unknowns: 'allow' }
   ),
 });
-
-export type CreateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
-  ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
->;
 
 const getRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]

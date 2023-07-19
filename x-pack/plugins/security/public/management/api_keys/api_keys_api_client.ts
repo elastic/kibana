@@ -7,10 +7,11 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
+import type { ApiKeyToInvalidate } from '../../../common/model';
 import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
+  GetAPIKeysResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from '../../../server/routes/api_keys';
@@ -22,20 +23,13 @@ export interface InvalidateApiKeysResponse {
   errors: any[];
 }
 
-export interface GetApiKeysResponse {
-  apiKeys: ApiKey[];
-  canManageCrossClusterApiKeys: boolean;
-  canManageApiKeys: boolean;
-  canManageOwnApiKeys: boolean;
-}
-
 const apiKeysUrl = '/internal/security/api_key';
 
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getApiKeys() {
-    return await this.http.get<GetApiKeysResponse>(apiKeysUrl);
+    return await this.http.get<GetAPIKeysResult>(apiKeysUrl);
   }
 
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {

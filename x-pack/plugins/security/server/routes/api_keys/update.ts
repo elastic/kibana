@@ -16,18 +16,24 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+/**
+ * Response of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyResult = estypes.SecurityUpdateApiKeyResponse;
+
+/**
+ * Request body of Kibana Update API key endpoint.
+ */
 export type UpdateAPIKeyParams =
   | UpdateRestAPIKeyParams
   | UpdateCrossClusterAPIKeyParams
   | UpdateRestAPIKeyWithKibanaPrivilegesParams;
 
-/**
- * The return value when update an API key in Elasticsearch. The value returned by this API
- * can is contains a `updated` boolean that corresponds to whether or not the API key was updated
- */
-export type UpdateAPIKeyResult = estypes.SecurityUpdateApiKeyResponse;
-
 export type UpdateRestAPIKeyParams = TypeOf<typeof restApiKeySchema>;
+export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
+export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
+  ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
+>;
 
 const restApiKeySchema = schema.object({
   type: schema.maybe(schema.literal('rest')),
@@ -37,8 +43,6 @@ const restApiKeySchema = schema.object({
   }),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
-
-export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
 
 const crossClusterApiKeySchema = restApiKeySchema.extends({
   type: schema.literal('cross_cluster'),
@@ -69,10 +73,6 @@ const crossClusterApiKeySchema = restApiKeySchema.extends({
     { unknowns: 'allow' }
   ),
 });
-
-export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
-  ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
->;
 
 const getRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
@@ -110,6 +110,9 @@ export function defineUpdateApiKeyRoutes({
           crossClusterApiKeySchema,
           bodySchemaWithKibanaPrivileges,
         ]),
+      },
+      options: {
+        access: 'internal',
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
