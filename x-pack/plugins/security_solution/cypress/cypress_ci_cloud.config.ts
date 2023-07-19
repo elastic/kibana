@@ -48,10 +48,10 @@ export default defineCypressConfig({
       ELASTICSEARCH_PASSWORD: 'changeme',
     },
     async setupNodeEvents(on, config) {
+      const esArchiverInstance = esArchiver(on, config);
+
       await cloudPlugin(on, config);
       let processes: Record<string, ChildProcess> = {};
-
-      const esArchiverInstance = esArchiver(on, config);
 
       on('before:spec', (spec) => {
         const isSkippedSpec = isSkipped(spec.absolute);

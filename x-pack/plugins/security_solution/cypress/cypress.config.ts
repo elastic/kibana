@@ -24,7 +24,7 @@ export default defineCypressConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
-      return esArchiver(on, config);
+      esArchiver(on, config);
     },
   },
 });
