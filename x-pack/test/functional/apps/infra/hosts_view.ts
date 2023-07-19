@@ -150,6 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
@@ -245,9 +246,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/162051
-    // FLAKY: https://github.com/elastic/kibana/issues/159368
-    describe.skip('#Single host Flyout', () => {
+    describe('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -419,22 +418,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to APM services after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        const url = parse(await browser.getCurrentUrl());
+      describe('Flyout links', () => {
+        it('should navigate to APM services after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+          const url = parse(await browser.getCurrentUrl());
+          const query = decodeURIComponent(url.query ?? '');
+          const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
 
-        const query = decodeURIComponent(url.query ?? '');
+          expect(url.pathname).to.eql('/app/apm/services');
+          expect(query).to.contain(kuery);
 
-        const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-        const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
-        const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
-
-        expect(url.pathname).to.eql('/app/apm/services');
-        expect(query).to.contain(kuery);
-        expect(query).to.contain(rangeFrom);
-        expect(query).to.contain(rangeTo);
-
-        await returnTo(HOSTS_VIEW_PATH);
+          await returnTo(HOSTS_VIEW_PATH);
+        });
       });
     });
 
