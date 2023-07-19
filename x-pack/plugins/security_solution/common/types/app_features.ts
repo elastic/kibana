@@ -11,13 +11,13 @@ export enum AppFeatureSecurityKey {
    */
   advancedInsights = 'advanced_insights',
   /**
-   * Enables Endpoint Response Actions like isolate host, trusted apps, blocklist, etc.
+   * Enables Endpoint essential add-on features
    */
-  endpointResponseActions = 'endpoint_response_actions',
+  endpointEssentials = 'endpoint_essentials',
   /**
-   * Enables Endpoint Exceptions like isolate host, trusted apps, blocklist, etc.
+   * Enables Endpoint Complete add-on features
    */
-  endpointExceptions = 'endpoint_exceptions',
+  endpointComplete = 'endpoint_complete',
 }
 
 export enum AppFeatureCasesKey {

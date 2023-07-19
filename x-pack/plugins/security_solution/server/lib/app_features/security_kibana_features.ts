@@ -124,10 +124,7 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [
-  SecuritySubFeatureId.hostIsolationExceptions,
-  SecuritySubFeatureId.hostIsolation,
-];
+): SecuritySubFeatureId[] => [];
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
@@ -141,6 +138,16 @@ export const getSecurityBaseKibanaSubFeatureIds = (
 export const getSecurityAppFeaturesConfig = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
 ): AppFeaturesSecurityConfig => {
+  // Feature IDs that are available in both Endpoint Essentials and Endpoint Complete
+  const endpointBaseFeatureIds: string[] = [
+    SecuritySubFeatureId.endpointList,
+    SecuritySubFeatureId.policyManagement,
+    SecuritySubFeatureId.trustedApplications,
+    SecuritySubFeatureId.hostIsolationExceptions,
+    SecuritySubFeatureId.blocklist,
+    SecuritySubFeatureId.eventFilters,
+  ];
+
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -155,12 +162,8 @@ export const getSecurityAppFeaturesConfig = (
       },
     },
 
-    [AppFeatureSecurityKey.endpointResponseActions]: {
-      subFeatureIds: [
-        SecuritySubFeatureId.processOperations,
-        SecuritySubFeatureId.fileOperations,
-        SecuritySubFeatureId.executeAction,
-      ],
+    [AppFeatureSecurityKey.endpointEssentials]: {
+      subFeatureIds: [...endpointBaseFeatureIds],
       subFeaturesPrivileges: [
         {
           id: 'host_isolation_all',
@@ -170,14 +173,14 @@ export const getSecurityAppFeaturesConfig = (
       ],
     },
 
-    [AppFeatureSecurityKey.endpointExceptions]: {
+    [AppFeatureSecurityKey.endpointComplete]: {
       subFeatureIds: [
-        SecuritySubFeatureId.trustedApplications,
-        SecuritySubFeatureId.blocklist,
-        SecuritySubFeatureId.eventFilters,
-        SecuritySubFeatureId.policyManagement,
-        SecuritySubFeatureId.endpointList,
+        ...endpointBaseFeatureIds,
+
         SecuritySubFeatureId.responseActionsHistory,
+        SecuritySubFeatureId.processOperations,
+        SecuritySubFeatureId.fileOperations,
+        SecuritySubFeatureId.executeAction,
       ],
       subFeaturesPrivileges: [
         {
