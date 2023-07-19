@@ -24,7 +24,12 @@ if (!global.hasOwnProperty('TextEncoder')) {
 
 // NOTE: We should evaluate removing this once we upgrade to Node 18 and find out if loaders.gl already fixed this usage
 // https://github.com/jsdom/jsdom/issues/2555
-const {  ReadableStreamPolyfill, BlobPolyfill, FileReaderPolyfill, FilePolyfill } = require('@loaders.gl/polyfills');
+const {
+  ReadableStreamPolyfill,
+  BlobPolyfill,
+  FileReaderPolyfill,
+  FilePolyfill,
+} = require('@loaders.gl/polyfills');
 global.ReadableStream = ReadableStreamPolyfill;
 global.Blob = BlobPolyfill;
 global.FileReader = FileReaderPolyfill;
