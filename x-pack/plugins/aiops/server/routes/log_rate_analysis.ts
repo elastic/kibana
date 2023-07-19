@@ -39,7 +39,7 @@ import {
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
 } from '../../common/api/log_rate_analysis';
-import type { AiopsApiEndpoint } from '../../common/api';
+import { AIOPS_API_ENDPOINT } from '../../common/api';
 
 import { PLUGIN_ID } from '../../common';
 
@@ -65,14 +65,14 @@ const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
 
 export const defineLogRateAnalysisRoute = (
   router: IRouter<DataRequestHandlerContext>,
-  path: AiopsApiEndpoint,
   license: AiopsLicense,
   logger: Logger,
   coreStart: CoreStart
 ) => {
   router.versioned
     .post({
-      path,
+      path: AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS,
+
       access: 'internal',
     })
     .addVersion(
