@@ -487,7 +487,10 @@ export function registerEncryptedSavedObjects(
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToEncrypt: new Set([
+      { key: 'ssl', dangerouslyExposeValue: true },
+      { key: 'password', dangerouslyExposeValue: true },
+    ]),
     attributesToExcludeFromAAD: new Set([
       'output_id',
       'name',
