@@ -107,9 +107,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete<void>(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`, {
-      asSystemRequest: true,
-    });
+    return await this.http.delete<void>(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`);
   }
 
   public async list(page = 0, jobIds: string[] = []) {
@@ -149,10 +147,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async getInfo(jobId: string) {
     const report: ReportApiJSON = await this.http.get(
-      `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/info/${jobId}`,
-      {
-        asSystemRequest: true,
-      }
+      `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/info/${jobId}`
     );
     return new Job(report);
   }
@@ -224,15 +219,11 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER, {
-      asSystemRequest: true,
-    });
+    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
   }
 
   public verifyScreenCapture() {
-    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT, {
-      asSystemRequest: true,
-    });
+    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT);
   }
 
   public migrateReportingIndicesIlmPolicy() {
