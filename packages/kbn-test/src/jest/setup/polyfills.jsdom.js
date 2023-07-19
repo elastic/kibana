@@ -23,15 +23,8 @@ if (!global.hasOwnProperty('TextEncoder')) {
 }
 
 // NOTE: We should evaluate removing this once we upgrade to Node 18 and find out if loaders.gl already fixed this usage
+// or instead check if we can use the official Blob implementation.
+// This is needed for x-pack/plugins/file_upload/public/importer/geo/geojson_importer/geojson_importer.test.js
+//
 // https://github.com/jsdom/jsdom/issues/2555
-const {
-  ReadableStreamPolyfill,
-  BlobPolyfill,
-  FileReaderPolyfill,
-  FilePolyfill,
-} = require('@loaders.gl/polyfills');
-global.ReadableStream = ReadableStreamPolyfill;
-global.Blob = BlobPolyfill;
-global.FileReader = FileReaderPolyfill;
-global.File = FilePolyfill;
-require('@loaders.gl/polyfills').installFilePolyfills();
+global.Blob = require('blob-polyfill').Blob;
