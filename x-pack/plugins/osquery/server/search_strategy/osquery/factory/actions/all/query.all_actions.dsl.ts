@@ -10,15 +10,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
-import type { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
+import type { ActionsRequestOptions } from '../../../../../../common/search_strategy';
 
 export const buildActionsQuery = ({
   filterQuery,
   sort,
   pagination: { cursorStart, querySize },
   componentTemplateExists,
-}: AgentsRequestOptions): ISearchRequestParams => {
+}: ActionsRequestOptions): ISearchRequestParams => {
   const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
