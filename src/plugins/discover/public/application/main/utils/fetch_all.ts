@@ -79,7 +79,7 @@ export function fetchAll(
         dataView,
         services,
         sort: getAppState().sort as SortOrder[],
-        datasetFilters: getInternalState().datasetFilters,
+        customFilters: getInternalState().customFilters,
       });
     }
 

@@ -66,7 +66,7 @@ const CustomDatasetFilters = ({ stateContainer, data }: CustomDatasetFiltersProp
 
     const filtersSubscription = controlGroupAPI.onFiltersPublished$.subscribe(
       async (newFilters) => {
-        stateContainer.internalState.transitions.setDatasetFilters(newFilters);
+        stateContainer.internalState.transitions.setCustomFilters(newFilters);
         stateContainer.actions.fetchData();
       }
     );

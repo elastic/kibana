@@ -73,7 +73,7 @@ describe('test fetchAll', () => {
         savedDataViews: [],
         adHocDataViews: [],
         expandedDoc: undefined,
-        datasetFilters: [],
+        customFilters: [],
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -270,7 +270,7 @@ describe('test fetchAll', () => {
         savedDataViews: [],
         adHocDataViews: [],
         expandedDoc: undefined,
-        datasetFilters: [],
+        customFilters: [],
       }),
     };
     fetchAll(subjects, false, deps);

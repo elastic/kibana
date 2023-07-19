@@ -23,12 +23,12 @@ export function updateVolatileSearchSource(
     dataView,
     services,
     sort,
-    datasetFilters,
+    customFilters,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
-    datasetFilters: Filter[];
+    customFilters: Filter[];
   }
 ) {
   const { uiSettings, data } = services;
@@ -40,7 +40,7 @@ export function updateVolatileSearchSource(
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
 
-  let filters = [...datasetFilters];
+  let filters = [...customFilters];
 
   if (dataView.type !== DataViewType.ROLLUP) {
     // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range

@@ -20,7 +20,7 @@ export interface InternalState {
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
-  datasetFilters: Filter[];
+  customFilters: Filter[];
 }
 
 interface InternalStateTransitions {
@@ -37,7 +37,7 @@ interface InternalStateTransitions {
   setExpandedDoc: (
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
-  setDatasetFilters: (state: InternalState) => (datasetFilters: Filter[]) => InternalState;
+  setCustomFilters: (state: InternalState) => (customFilters: Filter[]) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -55,7 +55,7 @@ export function getInternalStateContainer() {
       adHocDataViews: [],
       savedDataViews: [],
       expandedDoc: undefined,
-      datasetFilters: [],
+      customFilters: [],
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -101,9 +101,9 @@ export function getInternalStateContainer() {
         ...prevState,
         expandedDoc,
       }),
-      setDatasetFilters: (prevState: InternalState) => (datasetFilters: Filter[]) => ({
+      setCustomFilters: (prevState: InternalState) => (customFilters: Filter[]) => ({
         ...prevState,
-        datasetFilters,
+        customFilters,
       }),
     },
     {},
