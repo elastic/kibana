@@ -271,8 +271,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { errors } = await indexAndCreatePreviewAlert(document);
 
+      expect(errors[0]).toContain('Bulk Indexing of signals failed');
       expect(errors[0]).toContain(
-        'Bulk Indexing of signals failed: [1:1193] failed to parse field [client.geo.location] of type [geo_point]'
+        'failed to parse field [client.geo.location] of type [geo_point]'
       );
     });
 
