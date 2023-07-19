@@ -145,7 +145,7 @@ describe('Handle request to generate', () => {
       `);
     });
 
-    xtest('provides a default kibana version field for older POST URLs', async () => {
+    test('provides a default kibana version field for older POST URLs', async () => {
       // how do we handle the printable_pdf endpoint that isn't migrating to the class instance of export types?
       (mockJobParams as unknown as { version?: string }).version = undefined;
       const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
@@ -205,7 +205,7 @@ describe('Handle request to generate', () => {
     `);
   });
 
-  xtest('generates the download path', async () => {
+  test('generates the download path', async () => {
     const response = (await requestHandler.handleGenerateRequest(
       'csv_searchsource',
       mockJobParams,
@@ -224,7 +224,7 @@ describe('Handle request to generate', () => {
         "kibana_name": undefined,
         "max_attempts": undefined,
         "meta": Object {
-          "isDeprecated": undefined,
+          "isDeprecated": false,
           "layout": "preserve_layout",
           "objectType": "cool_object_type",
         },
@@ -233,6 +233,7 @@ describe('Handle request to generate', () => {
         "output": Object {},
         "payload": Object {
           "browserTimezone": "UTC",
+          "isDeprecated": false,
           "layout": Object {
             "id": "preserve_layout",
           },
