@@ -320,9 +320,6 @@ export const cli = () => {
               ci: process.env.CI,
             };
 
-            // eslint-disable-next-line no-console
-            console.log('OPTIONS', options);
-
             const shutdownEs = await pRetry(
               async () =>
                 runElasticsearch({
