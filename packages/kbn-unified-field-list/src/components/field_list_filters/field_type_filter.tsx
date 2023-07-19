@@ -149,7 +149,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   return (
     <EuiPopover
       id="unifiedFieldTypeFilter"
-      panelClassName="euiFilterGroup__popoverPanel"
+      panelProps={{ css: { width: euiTheme.base * 18 } }}
       panelPaddingSize="none"
       anchorPosition="rightUp"
       display="block"
