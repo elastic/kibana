@@ -18,7 +18,7 @@ import {
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../constants';
-import type { BenchmarkId, Score, IndexDetails, BaseCspSetupStatus } from '../types';
+import type { BenchmarkId, Score, BaseCspSetupStatus } from '../types';
 
 /**
  * @example
