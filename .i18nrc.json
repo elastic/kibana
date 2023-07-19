@@ -22,6 +22,7 @@
     "defaultNavigation": "packages/default-nav",
     "devTools": "src/plugins/dev_tools",
     "discover": "src/plugins/discover",
+    "discover-utils": "packages/kbn-discover-utils",
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
