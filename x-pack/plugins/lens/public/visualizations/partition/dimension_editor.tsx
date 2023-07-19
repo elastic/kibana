@@ -9,7 +9,7 @@ import './toolbar.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { PalettePicker } from '../../shared_components';
