@@ -14,10 +14,7 @@ import {
   EuiFlexItem,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiBadge,
-  EuiButtonIcon,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
@@ -33,6 +30,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-plugin/public/types';
 // import type { ControlColumnProps } from '../../../../../common/types';
+import type {
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '@kbn/securitysolution-data-table/common/types';
+import type { ExpandedDetailType } from '../../../../../common/types';
 import { RowRendererId } from '../../../../../common/api/timeline';
 import { Actions } from '../../../../common/components/header_actions/actions';
 
@@ -77,7 +79,6 @@ import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
 import { timelineBodySelector } from '../body/selectors';
-import { TgridTdCell } from '../body/data_driven_columns';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;
@@ -116,13 +117,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     height: 100%;
     display: flex;
     flex-direction: column;
-  }
-`;
-
-const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  &.euiFlyoutFooter {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0;`}
   }
 `;
 
@@ -171,11 +165,7 @@ interface OwnProps {
   timelineId: string;
 }
 
-const EMPTY_EVENTS: TimelineItem[] = [];
-
 export type Props = OwnProps & PropsFromRedux;
-
-// const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -208,7 +198,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    loading: loadingSourcerer,
+    loading: isSourcererLoading,
     indexPattern,
     runtimeMappings,
     // important to get selectedPatterns from useSourcererDataView
@@ -227,7 +217,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     if (sourcererDataView != null) {
       return new DataView({ spec: sourcererDataView, fieldFormats });
     } else {
-      return null;
+      return undefined;
     }
   }, [sourcererDataView, fieldFormats]);
 
@@ -238,7 +228,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const currentTimeline = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
-
   const { timeline: { excludedRowRendererIds } = timelineDefaults } = useSelector((state: State) =>
     timelineBodySelector(state, timelineId)
   );
@@ -277,21 +266,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     endDate: end,
   });
 
-  const isBlankTimeline: boolean =
-    isEmpty(dataProviders) &&
-    isEmpty(filters) &&
-    isEmpty(kqlQuery.query) &&
-    combinedQueries?.filterQuery === undefined;
-
   const canQueryTimeline = useMemo(
     () =>
       combinedQueries != null &&
-      loadingSourcerer != null &&
-      !loadingSourcerer &&
+      isSourcererLoading != null &&
+      !isSourcererLoading &&
       !isEmpty(start) &&
       !isEmpty(end) &&
       combinedQueries?.filterQuery !== undefined,
-    [combinedQueries, end, loadingSourcerer, start]
+    [combinedQueries, end, isSourcererLoading, start]
   );
 
   const defaultColumns = useMemo(() => {
@@ -319,22 +302,21 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [activeFilterManager, currentTimeline, dispatch, filterManager, timelineId, uiSettings]);
 
-  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      fields: getTimelineQueryFields(),
-      filterQuery: combinedQueries?.filterQuery,
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: kqlQuery.language,
-      limit: itemsPerPage,
-      runtimeMappings,
-      skip: !canQueryTimeline,
-      sort: timelineQuerySortField,
-      startDate: start,
-      timerangeKind,
-    });
+  const [isQueryLoading, { events, inspect, totalCount, refetch }] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    fields: getTimelineQueryFields(),
+    filterQuery: combinedQueries?.filterQuery,
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: kqlQuery.language,
+    limit: itemsPerPage,
+    runtimeMappings,
+    skip: !canQueryTimeline,
+    sort: timelineQuerySortField,
+    startDate: start,
+    timerangeKind,
+  });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
@@ -352,10 +334,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     dispatch(
       timelineActions.updateIsLoading({
         id: timelineId,
-        isLoading: isQueryLoading || loadingSourcerer,
+        isLoading: isQueryLoading || isSourcererLoading,
       })
     );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
+  }, [isSourcererLoading, timelineId, isQueryLoading, dispatch]);
 
   const isDatePickerDisabled = useMemo(() => {
     return (combinedQueries && combinedQueries.kqlError != null) || false;
@@ -367,6 +349,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         const _source = ecs as unknown as Record<string, unknown>;
         const hit = { _id, _index: String(_index), _source };
         return {
+          _id,
           id: _id,
           data,
           ecs,
@@ -377,6 +360,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         };
       }),
     [events, dataView]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+    },
+    [dispatch, timelineId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+    },
+    [dispatch, timelineId]
   );
 
   const noop = () => {};
@@ -391,34 +388,72 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           sort,
           timelineId: timelineId ?? 'timeline-1',
         },
-        rowCellRender: ({ rowIndex, colIndex, columnId }) => (
-          <Actions
-            ariaRowindex={rowIndex}
-            columnId={columnId}
-            data={discoverGridRows[rowIndex].data}
-            index={colIndex}
-            rowIndex={rowIndex}
-            setEventsDeleted={noop}
-            checked={false}
-            columnValues="test"
-            ecsData={discoverGridRows[rowIndex].ecs}
-            eventId={discoverGridRows[rowIndex].id}
-            eventIdToNoteIds={{}}
-            loadingEventIds={[]}
-            onEventDetailsPanelOpened={noop}
-            onRowSelected={noop}
-            onRuleChange={noop}
-            showCheckboxes={false}
-            showNotes={false}
-            timelineId={timelineId}
-            toggleShowNotes={noop}
-            refetch={noop}
-            setEventsLoading={noop}
-          />
-        ),
+        rowCellRender: ({ rowIndex, colIndex, columnId }) => {
+          const handleOnEventDetailPanelOpened = () => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const eventData = discoverGridRows[rowIndex];
+            const updatedExpandedDetail: ExpandedDetailType = {
+              panelView: 'eventDetail',
+              params: {
+                eventId: eventData._id,
+                indexName: eventData._index ?? '', // TODO: fix type error
+                refetch,
+              },
+            };
+
+            dispatch(
+              timelineActions.toggleDetailPanel({
+                ...updatedExpandedDetail,
+                tabType: TimelineTabs.query,
+                id: timelineId,
+              })
+            );
+
+            activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+          };
+
+          return (
+            <Actions
+              ariaRowindex={rowIndex}
+              columnId={columnId}
+              data={discoverGridRows[rowIndex].data}
+              index={colIndex}
+              rowIndex={rowIndex}
+              setEventsDeleted={setEventsDeleted}
+              checked={x.id ? Object.keys(currentTimeline.selectedEventIds).includes(x.id) : false}
+              columnValues={x.columnValues ?? ''} // TODO: Fix type error
+              ecsData={discoverGridRows[rowIndex].ecs}
+              eventId={discoverGridRows[rowIndex].id}
+              eventIdToNoteIds={currentTimeline.eventIdToNoteIds}
+              loadingEventIds={currentTimeline.loadingEventIds}
+              onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+              onRowSelected={x.onRowSelected ?? noop}
+              onRuleChange={noop} // TODO: get refreshRule
+              showCheckboxes={x.showCheckboxes ?? false}
+              showNotes={false} // TODO: Add note rendering
+              timelineId={timelineId}
+              toggleShowNotes={noop} // TODO: Add note rendering
+              refetch={refetch}
+              setEventsLoading={setEventsLoading}
+            />
+          );
+        },
         headerCellRender: HeaderActions,
       })),
-    [ACTION_BUTTON_COUNT, browserFields, discoverGridRows, sort, timelineId]
+    [
+      ACTION_BUTTON_COUNT,
+      browserFields,
+      currentTimeline.eventIdToNoteIds,
+      currentTimeline.loadingEventIds,
+      currentTimeline.selectedEventIds,
+      discoverGridRows,
+      dispatch,
+      refetch,
+      setEventsDeleted,
+      setEventsLoading,
+      sort,
+      timelineId,
+    ]
   );
 
   // Column visibility
@@ -426,11 +461,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   // Pagination
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+
   const onChangePage = useCallback((pageIndex) => {
-    setPagination((pagination) => ({ ...pagination, pageIndex }));
+    setPagination((paginationArg) => ({ ...paginationArg, pageIndex }));
   }, []);
   const onChangePageSize = useCallback((pageSize) => {
-    setPagination((pagination) => ({ ...pagination, pageSize }));
+    setPagination((paginationArg) => ({ ...paginationArg, pageSize }));
   }, []);
 
   // Sorting
@@ -445,7 +481,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
 
   const renderCustomGridBody: EuiDataGridProps['renderCustomGridBody'] = useCallback(
-    ({ Cell, visibleColumns, visibleRowData, setCustomGridBodyProps }) => {
+    ({ Cell, visibleColumns: visibleCols, visibleRowData, setCustomGridBodyProps }) => {
       // Ensure we're displaying correctly-paginated rows
       const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
 
@@ -470,7 +506,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       useEffect(() => {
         setCustomGridBodyProps({
           ref: bodyRef,
-          onScroll: () => console.debug('scrollTop:', bodyRef.current?.scrollTop),
         });
       }, [setCustomGridBodyProps]);
 
@@ -479,7 +514,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           {visibleRows.map((row, rowIndex) => (
             <div role="row" css={styles.row} key={rowIndex}>
               <div css={styles.rowCellsWrapper}>
-                {visibleColumns.map((column, colIndex) => {
+                {visibleCols.map((column, colIndex) => {
                   // Skip the row details cell - we'll render it manually outside of the flex wrapper
                   if (column.id.includes('timeline')) {
                     return (
@@ -490,22 +525,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                       />
                     );
                   }
+                  // Render the rest of the cells normally
                   if (column.id !== 'row-details') {
-                    // return (
-                    //   <TgridTdCell
-                    //     _id={discoverGridRows[rowIndex]._id}
-                    //     ariaRowindex={rowIndex}
-                    //     index={rowIndex}
-                    //     header={defaultHeaders.find(({ id }) => column.id === id)}
-                    //     data={discoverGridRows[rowIndex].data}
-                    //     ecsData={discoverGridRows[rowIndex].ecs}
-                    //     hasRowRenderers={true}
-                    //     notesCount={0}
-                    //     renderCellValue={renderCellValue}
-                    //     tabType={TimelineTabs.query}
-                    //     timelineId={timelineId}
-                    //   />
-                    // );
+                    // TODO: using renderCellValue to render the draggable cell. We need to fix the styling though
 
                     // return renderCellValue({
                     //   columnId: column.id,
@@ -534,9 +556,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   }
                 })}
               </div>
+              {/* TODO: This renders the last row which is our expandableRow and where we can put row rendering and notes */}
               <div css={styles.rowDetailsWrapper}>
                 <Cell
-                  colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
+                  colIndex={visibleCols.length - 1} // If the row is being shown, it should always be the last index
                   visibleRowIndex={rowIndex}
                 />
               </div>
@@ -559,6 +582,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
     return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
   }, [excludedRowRendererIds, rowRenderers]);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // The custom row details is actually a trailing control column cell with
@@ -570,7 +594,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
       // The header cell should be visually hidden, but available to screen readers
       width: 0,
-      headerCellRender: () => <>{'Row details'}</>,
+      headerCellRender: () => <></>,
       headerCellProps: { className: 'euiScreenReaderOnly' },
 
       // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
@@ -595,35 +619,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       },
     },
   ];
-
-  const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
-    {
-      id: 'actions',
-      width: 40,
-      headerCellRender: () => (
-        <EuiScreenReaderOnly>
-          <span>{'Actions'}</span>
-        </EuiScreenReaderOnly>
-      ),
-      rowCellRender: () => (
-        <EuiButtonIcon iconType="boxesHorizontal" aria-label="See row actions" />
-      ),
-    },
-  ];
-
-  const RenderFooterCellValue: EuiDataGridProps['renderFooterCellValue'] = ({
-    columnId,
-    setCellProps,
-  }) => {
-    const value = footerCellValues[columnId];
-
-    useEffect(() => {
-      // Turn off the cell expansion button if the footer cell is empty
-      if (!value) setCellProps({ isExpandable: false });
-    }, [value, setCellProps, columnId]);
-
-    return value || null;
-  };
 
   return (
     <>
@@ -688,7 +683,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
               className="timeline-flyout-body"
             >
-              <div ref={containerRef}>
+              <ScrollableFlexItem ref={containerRef}>
                 {dataView && (
                   <DiscoverGrid
                     columns={defaultColumns}
@@ -724,7 +719,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     onSetColumns={() => {
                       console.log('onSetColumns called');
                     }}
-                    renderFooterCellValue={RenderFooterCellValue}
                     rowCount={discoverGridRows.length}
                     sampleSize={0}
                     gridStyle={{ border: 'none', header: 'underline' }}
@@ -733,47 +727,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
                   />
                 )}
-                {/* <StatefulBody
-                activePage={pageInfo.activePage}
-                browserFields={browserFields}
-                data={isBlankTimeline ? EMPTY_EVENTS : events}
-                id={timelineId}
-                refetch={refetch}
-                renderCellValue={renderCellValue}
-                rowRenderers={rowRenderers}
-                sort={sort}
-                tabType={TimelineTabs.query}
-                totalPages={calculateTotalPages({
-                  itemsCount: totalCount,
-                  itemsPerPage,
-                })}
-                leadingControlColumns={leadingControlColumns}
-                trailingControlColumns={trailingControlColumns}
-              /> */}
-              </div>
+              </ScrollableFlexItem>
             </StyledEuiFlyoutBody>
-
-            {/* <StyledEuiFlyoutFooter
-              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
-              className="timeline-flyout-footer"
-            >
-              {!isBlankTimeline && (
-                <Footer
-                  activePage={pageInfo?.activePage ?? 0}
-                  data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
-                  id={timelineId}
-                  isLive={isLive}
-                  isLoading={isQueryLoading || loadingSourcerer}
-                  itemsCount={isBlankTimeline ? 0 : events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangePage={loadPage}
-                  totalCount={isBlankTimeline ? 0 : totalCount}
-                />
-              )}
-            </StyledEuiFlyoutFooter> */}
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
         {showExpandedDetails && (
@@ -783,6 +738,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <DetailsPanel
                 browserFields={browserFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                isFlyoutView
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
                 scopeId={timelineId}
