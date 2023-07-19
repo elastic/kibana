@@ -355,7 +355,7 @@ export class SyntheticsMonitorClient {
 
   async inspectMonitor(
     monitorObj: { monitor: MonitorFields; id: string },
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     hideParams: boolean,
     canSave: boolean

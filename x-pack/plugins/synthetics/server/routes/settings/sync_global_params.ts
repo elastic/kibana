@@ -28,7 +28,6 @@ export const syncParamsSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = ()
     await syntheticsMonitorClient.syncGlobalParams({
       request,
       spaceId,
-      savedObjectsClient,
       allPrivateLocations,
       encryptedSavedObjects: server.encryptedSavedObjects,
     });
