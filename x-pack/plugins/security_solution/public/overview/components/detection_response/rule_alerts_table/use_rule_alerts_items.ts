@@ -7,12 +7,12 @@
 
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 
 // Formatted item result
 export interface RuleAlertsItem {
@@ -110,11 +110,11 @@ const getRuleAlertsItemsFromAggs = (
   return buckets.map<RuleAlertsItem>((bucket) => {
     const lastAlert = bucket.lastRuleAlert.hits.hits[0].fields;
     return {
-      id: getFirstElement(lastAlert[KIBANA_RULE_ID]) ?? '',
+      id: firstNonNullValue(lastAlert[KIBANA_RULE_ID]) ?? '',
       alert_count: bucket.lastRuleAlert.hits.total.value,
-      name: getFirstElement(lastAlert[KIBANA_RULE_NAME]) ?? '',
-      last_alert_at: getFirstElement(lastAlert[TIMESTAMP]) ?? '',
-      severity: getFirstElement(lastAlert[KIBANA_ALERT_SEVERITY]) ?? 'low',
+      name: firstNonNullValue(lastAlert[KIBANA_RULE_NAME]) ?? '',
+      last_alert_at: firstNonNullValue(lastAlert[TIMESTAMP]) ?? '',
+      severity: firstNonNullValue(lastAlert[KIBANA_ALERT_SEVERITY]) ?? 'low',
     };
   });
 };

@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { getFirstElement } from '../../../../common/utils/data_retrieval';
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -212,7 +211,7 @@ const parseAlertCountByRuleItems = (
   const buckets = aggregations?.[ALERTS_BY_RULE_AGG].buckets ?? [];
   return buckets.map<AlertCountByRuleByStatusItem>((bucket) => {
     const uuid =
-      getFirstElement(bucket.ruleUuid.hits?.hits[0]?.fields['kibana.alert.rule.uuid']) || '';
+      firstNonNullValue(bucket.ruleUuid.hits?.hits[0]?.fields['kibana.alert.rule.uuid']) ?? '';
     return {
       ruleName: firstNonNullValue(bucket.key) ?? '-',
       count: bucket.doc_count,
