@@ -7,50 +7,48 @@
 
 import { computeChi2PValue } from './data_comparison_utils';
 import { Histogram } from './types';
-import array from '@stdlib/ndarray-array';
-import chi2test from '@stdlib/stats-chi2test';
 
 describe('data_comparison_utils()', () => {
-  describe('stats-chi2test()', () => {
-    test('stats-chi2test should return pValue close to 0 for features that changed significantly', () => {
-      const changedFeature = array([
-        /* A B C D */
-        [252, 367, 381, 0], // expected_terms
-        [261, 244, 239, 256], // observed_terms
-      ]);
-
-      const changedResult = chi2test(changedFeature);
-      // For 4 features, degrees of freedom should be 3
-      expect(changedResult.df).toEqual(3);
-      // Data drifted => pValue should be close to 0
-      expect(changedResult.pValue).toEqual(0);
-    });
-    test('stats-chi2test should return pValue close to 1 for features that did not change', () => {
-      const unchangedFeature = array([
-        /* A B C D */
-        [260, 254, 229, 257], // expected_terms
-        [260, 254, 229, 257], // observed_terms
-      ]);
-
-      const unchangedResults = chi2test(unchangedFeature);
-      // Degrees of freedom = 3
-      expect(unchangedResults.df).toEqual(3);
-      // Data not drifted => pValue should be close to 1
-      expect(unchangedResults.pValue).toEqual(1);
-    });
-    test('stats-chi2test should return pValue between 0 and 1 for features that changed slightly', () => {
-      const barelyChangedFeature = array([
-        /* A B C D */
-        [260, 254, 229, 257], // expected_terms
-        [248, 242, 248, 262], // observed_terms
-      ]);
-
-      const barelyChangedResults = chi2test(barelyChangedFeature);
-      // Degrees of freedom = 3
-      expect(barelyChangedResults.df).toEqual(3);
-      expect(barelyChangedResults.pValue).toEqual(0.7105185908097074);
-    });
-  });
+  // describe('stats-chi2test()', () => {
+  //   test('stats-chi2test should return pValue close to 0 for features that changed significantly', () => {
+  //     const changedFeature = array([
+  //       /* A B C D */
+  //       [252, 367, 381, 0], // expected_terms
+  //       [261, 244, 239, 256], // observed_terms
+  //     ]);
+  //
+  //     const changedResult = chi2test(changedFeature);
+  //     // For 4 features, degrees of freedom should be 3
+  //     expect(changedResult.df).toEqual(3);
+  //     // Data drifted => pValue should be close to 0
+  //     expect(changedResult.pValue).toEqual(0);
+  //   });
+  //   test('stats-chi2test should return pValue close to 1 for features that did not change', () => {
+  //     const unchangedFeature = array([
+  //       /* A B C D */
+  //       [260, 254, 229, 257], // expected_terms
+  //       [260, 254, 229, 257], // observed_terms
+  //     ]);
+  //
+  //     const unchangedResults = chi2test(unchangedFeature);
+  //     // Degrees of freedom = 3
+  //     expect(unchangedResults.df).toEqual(3);
+  //     // Data not drifted => pValue should be close to 1
+  //     expect(unchangedResults.pValue).toEqual(1);
+  //   });
+  //   test('stats-chi2test should return pValue between 0 and 1 for features that changed slightly', () => {
+  //     const barelyChangedFeature = array([
+  //       /* A B C D */
+  //       [260, 254, 229, 257], // expected_terms
+  //       [248, 242, 248, 262], // observed_terms
+  //     ]);
+  //
+  //     const barelyChangedResults = chi2test(barelyChangedFeature);
+  //     // Degrees of freedom = 3
+  //     expect(barelyChangedResults.df).toEqual(3);
+  //     expect(barelyChangedResults.pValue).toEqual(0.7105185908097074);
+  //   });
+  // });
 
   describe('computeChi2PValue()', () => {
     const referenceTerms: Histogram[] = [

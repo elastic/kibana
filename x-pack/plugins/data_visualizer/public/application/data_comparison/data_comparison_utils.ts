@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import array from '@stdlib/ndarray-array';
-import chi2test from '@stdlib/stats-chi2test';
+// @ts-expect-error
+import array from '@stdlib/esm/ndarray/array';
+// @ts-expect-error
+import chi2test from '@stdlib/esm/stats/chi2test';
 import { Histogram } from './types';
 
 /**
