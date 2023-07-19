@@ -6,7 +6,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { ConnectorTypes } from '../connectors';
+import { ConnectorTypes } from '../../types/domain/connector/v1';
 import {
   RelatedCaseInfoRt,
   SettingsRt,
