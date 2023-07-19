@@ -8,7 +8,7 @@
 import {
   GET_PREBUILT_RULES_STATUS_URL,
   GetPrebuiltRulesStatusResponseBody,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**

@@ -7,9 +7,9 @@
 
 import {
   PERFORM_RULE_UPGRADE_URL,
-  RuleVersionSpecifier,
   PerformRuleUpgradeResponseBody,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
+import { RuleVersionSpecifier } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/model/rule_versions/rule_version_specifier';
 import type SuperTest from 'supertest';
 
 /**
