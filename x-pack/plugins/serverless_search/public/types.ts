@@ -10,7 +10,6 @@ import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public'
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -27,7 +26,6 @@ export interface ServerlessSearchPluginSetupDependencies {
 export interface ServerlessSearchPluginStartDependencies {
   cloud: CloudStart;
   management: ManagementStart;
-  observabilityShared: ObservabilitySharedPluginStart;
   security: SecurityPluginStart;
   serverless: ServerlessPluginStart;
   share: SharePluginStart;

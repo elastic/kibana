@@ -20,7 +20,7 @@ export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 export type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
-export type { FormatFactory } from '@kbn/visualization-ui-components/public';
+export type { FormatFactory } from '@kbn/visualization-ui-components';
 
 export interface DateRange {
   fromDate: string;

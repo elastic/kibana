@@ -13,7 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AlertsPopover } from './open_alerts_popover';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const Context = ({ children }: { children: ReactNode }) => <>{children}</>;

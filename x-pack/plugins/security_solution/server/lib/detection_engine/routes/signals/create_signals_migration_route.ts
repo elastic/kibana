@@ -9,7 +9,7 @@ import { transformError, BadRequestError, getIndexAliases } from '@kbn/securitys
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
-import { createSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
+import { createSignalsMigrationSchema } from '../../../../../common/api/detection_engine/signals_migration';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 
