@@ -15,6 +15,27 @@ export function ProfilingHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
+        href={router.link('/storage-explorer', {
+          query: {
+            kuery: '',
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+          },
+        })}
+        color="text"
+      >
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="beaker" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
+              defaultMessage: 'Storage Explorer',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiHeaderLink>
+      <EuiHeaderLink
         href={router.link('/add-data-instructions', {
           query: { selectedTab: NoDataTabs.Kubernetes },
         })}

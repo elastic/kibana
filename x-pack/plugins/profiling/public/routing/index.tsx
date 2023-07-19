@@ -21,6 +21,7 @@ import { DifferentialTopNFunctionsView } from '../views/functions/differential_t
 import { TopNFunctionsView } from '../views/functions/topn';
 import { NoDataTabs, NoDataView } from '../views/no_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
+import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
 
 const routes = {
@@ -245,6 +246,9 @@ const routes = {
                 },
               },
             },
+          },
+          '/storage-explorer': {
+            element: <StorageExplorerView />,
           },
           '/': {
             element: <RedirectTo pathname="/stacktraces/threads" />,
