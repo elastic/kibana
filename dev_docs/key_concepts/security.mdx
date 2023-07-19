@@ -55,12 +55,11 @@ Therefore, Kibana should not have access to non-system indices which do not begi
 Kibana should also not have the ability to modify system/hidden indices for which it is not the owner.
 
 ##### Examples
-|Pattern|Allowed?|Notes|
+| Index Type | Allowed Permissions | Examples |
 |-------|--------|-----
-|`my-data`|No| User-defined data index.
-|`kibana-metrics`|No| User-defined data index.
-|`.security`|No| System index not owned by Kibana.
-|`.kibana*`|Yes| System indices owned by Kibana.
+| User-defined data index | none | `my-data`, `kibana-metrics` |
+| System index not owned by Kibana | `read` | `.security` |
+| System indices owned by Kibana | `all` | `.kibana*` |
 
 #### Decision tree
 <DocWhimsical id="kibana-system-privilege-decision-tree-VTTGaTtjs9SnpbRNSg2Ptp" title="Decision tree" />
