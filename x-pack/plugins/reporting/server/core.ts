@@ -39,7 +39,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, take } from 'rxjs/operators';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
@@ -200,16 +200,9 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    const reportingStart = this.getContract();
-    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
-
-    this.csvSearchSourceExport.start(exportTypeStartDeps);
-    this.csvV2ExportType.start(exportTypeStartDeps);
-    this.pdfExport.start(exportTypeStartDeps);
-    this.pdfV1Export.start(exportTypeStartDeps);
-    this.pngExport.start(exportTypeStartDeps);
-    this.pngV1Export.start(exportTypeStartDeps);
-
+    this.exportTypes.forEach((et) => {
+      et.start({ ...startDeps, reporting: this.getContract() });
+    });
     await this.assertKibanaIsAvailable();
 
     const { taskManager } = startDeps;
@@ -426,7 +419,7 @@ export class ReportingCore {
     options: PngScreenshotOptions | PdfScreenshotOptions
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      Rx.switchMap(({ screenshotting }) => {
+      switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>

@@ -28,9 +28,6 @@ import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
 import { CreateJobFn, ReportingStart, RunTaskFn } from '../../types';
 
-/**
- * @TODO move to be within @kbn-reporting-export-types
- */
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
@@ -50,7 +47,7 @@ export abstract class ExportType<
   SetupDepsType extends BaseExportTypeSetupDeps = BaseExportTypeSetupDeps,
   StartDepsType extends BaseExportTypeStartDeps = BaseExportTypeStartDeps
 > {
-  abstract id: string; // ID for exportTypesRegistry.get()
+  abstract id: string; // ID for exportTypesRegistry.getById()
   abstract name: string; // user-facing string
   abstract jobType: string; // for job params
 
