@@ -57,7 +57,7 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams, isDeprecated: false };
+    return { ...jobParams };
   };
 
   public runTask = async (
