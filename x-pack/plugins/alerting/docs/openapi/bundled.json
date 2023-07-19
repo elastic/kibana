@@ -3378,6 +3378,105 @@
           }
         }
       },
+      "params_index_threshold_rule": {
+        "type": "object",
+        "description": "The parameters for an index threshold rule.",
+        "required": [
+          "index",
+          "threshold",
+          "thresholdComparator",
+          "timeField",
+          "timeWindowSize",
+          "timeWindowUnit"
+        ],
+        "properties": {
+          "aggField": {
+            "description": "The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.\n",
+            "type": "string"
+          },
+          "aggType": {
+            "description": "The type of aggregation to perform.",
+            "type": "string",
+            "enum": [
+              "avg",
+              "count",
+              "max",
+              "min",
+              "sum"
+            ],
+            "default": "count"
+          },
+          "filterKuery": {
+            "description": "A KQL expression thats limits the scope of alerts.",
+            "type": "string"
+          },
+          "groupBy": {
+            "description": "Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.\n",
+            "type": "string",
+            "enum": [
+              "all",
+              "top"
+            ],
+            "default": "all"
+          },
+          "index": {
+            "description": "The indices to query.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "termField": {
+            "description": "This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.\n",
+            "type": "string"
+          },
+          "termSize": {
+            "description": "This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.\n",
+            "type": "integer"
+          },
+          "threshold": {
+            "description": "The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.\n",
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": 4000
+          },
+          "thresholdComparator": {
+            "description": "The comparison function for the threshold. For example, \"is above\", \"is above or equals\", \"is below\", \"is below or equals\", and \"is between\".",
+            "type": "string",
+            "enum": [
+              ">",
+              ">=",
+              "<",
+              "<=",
+              "between",
+              "notBetween"
+            ],
+            "example": ">"
+          },
+          "timeField": {
+            "description": "The field that is used to calculate the time window.",
+            "type": "string"
+          },
+          "timeWindowSize": {
+            "description": "The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.\n",
+            "type": "integer",
+            "example": 5
+          },
+          "timeWindowUnit": {
+            "description": "The type of units for the time window: seconds, minutes, hours, or days.\n",
+            "type": "string",
+            "enum": [
+              "s",
+              "m",
+              "h",
+              "d"
+            ],
+            "example": "m"
+          }
+        }
+      },
       "create_index_threshold_rule_request": {
         "title": "Create index threshold rule request",
         "description": "A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.",
@@ -3406,9 +3505,7 @@
             "$ref": "#/components/schemas/notify_when"
           },
           "params": {
-            "type": "object",
-            "description": "The parameters for an index threshold rule.",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/params_index_threshold_rule"
           },
           "rule_type_id": {
             "type": "string",
