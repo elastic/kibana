@@ -230,8 +230,11 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       } catch (e) {
         if (isNotFoundException(e)) {
           return createError({
-            errorCode: ErrorCode.ENGINE_NOT_FOUND,
-            message: 'Could not find engine',
+            errorCode: ErrorCode.SEARCH_APPLICATION_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.fetchSearchApplicationFieldCapabilities.error',
+              { defaultMessage: 'Could not find search application' }
+            ),
             response,
             statusCode: 404,
           });

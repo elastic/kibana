@@ -101,12 +101,14 @@ export function MachineLearningTestResourcesProvider(
       log.debug(` > Not found`);
     },
 
-    async getSavedObjectIdsByType(objectType: SavedObjectType): Promise<string[]> {
+    async getSavedObjectIdsByType(objectType: SavedObjectType, space?: string): Promise<string[]> {
       const savedObjectIds: string[] = [];
 
       log.debug(`Searching for '${objectType}' ...`);
       const { body: findResponse, status } = await supertest
-        .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
+        .get(
+          `${space ? `/s/${space}` : ''}/api/saved_objects/_find?type=${objectType}&per_page=10000`
+        )
         .set(getCommonRequestHeader('1'));
       mlApi.assertResponseStatusCode(200, status, findResponse);
 
@@ -514,17 +516,23 @@ export function MachineLearningTestResourcesProvider(
       await this.assertSavedObjectExistsById(id, SavedObjectType.DASHBOARD);
     },
 
-    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType) {
+    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType, space?: string) {
       const savedObjectId = `${jobType}-${jobId}`;
-      await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true);
+      await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true, space);
     },
 
-    async cleanMLSavedObjects() {
+    async cleanMLSavedObjects(additionalSpaces: string[] = []) {
+      // clean default space
       await this.cleanMLJobSavedObjects();
       await this.cleanMLTrainedModelsSavedObjects();
+
+      for (const space of additionalSpaces) {
+        await this.cleanMLJobSavedObjects(space);
+        await this.cleanMLTrainedModelsSavedObjects(space);
+      }
     },
 
-    async cleanMLJobSavedObjects() {
+    async cleanMLJobSavedObjects(space?: string) {
       log.debug('Deleting ML job saved objects ...');
       const savedObjectIds = await this.getSavedObjectIdsByType(SavedObjectType.ML_JOB);
       for (const id of savedObjectIds) {
@@ -533,10 +541,11 @@ export function MachineLearningTestResourcesProvider(
       log.debug('> ML job saved objects deleted.');
     },
 
-    async cleanMLTrainedModelsSavedObjects() {
+    async cleanMLTrainedModelsSavedObjects(space?: string) {
       log.debug('Deleting ML trained model saved objects ...');
       const savedObjectIds = await this.getSavedObjectIdsByType(
-        SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
+        SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+        space
       );
       for (const id of savedObjectIds) {
         if (mlApi.isInternalModelId(id)) {
@@ -546,7 +555,8 @@ export function MachineLearningTestResourcesProvider(
         await this.deleteSavedObjectById(
           id,
           SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-          true
+          true,
+          space
         );
       }
       log.debug('> ML trained model saved objects deleted.');

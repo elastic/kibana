@@ -10,9 +10,6 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 
 # Cloud links
 xpack.cloud.base_url: "https://cloud.elastic.co"
-xpack.cloud.profile_url: "/user/settings"
-xpack.cloud.billing_url: "/billing"
-xpack.cloud.organization_url: "/account"
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
@@ -35,6 +32,9 @@ xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
+
+# Disable index management actions from the UI
+xpack.index_management.enableIndexActions: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -71,6 +71,9 @@ xpack.spaces.allowFeatureVisibility: false
 
 # Disable Spaces Public HTTP API
 xpack.spaces.enablePublicApi: false
+
+# Only display console autocomplete suggestions for ES endpoints that are available in serverless
+console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]

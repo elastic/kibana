@@ -116,7 +116,7 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchprofiler: 67080
-  security: 65433
+  security: 81771
   securitySolution: 66738
   securitySolutionEss: 16573
   securitySolutionServerless: 40000
@@ -161,5 +161,4 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
-  visualizationUiComponents: 76424
   watcher: 43598
