@@ -16,7 +16,7 @@ import {
   EuiSwitch,
   EuiCode,
 } from '@elastic/eui';
-import { useDebouncedValue, TooltipWrapper } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue, TooltipWrapper } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
