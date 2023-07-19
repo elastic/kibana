@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { KibanaRequest } from '@kbn/core/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { CsvGenerator, CONTENT_TYPE_CSV } from '@kbn/generate-csv';
+import { CsvGenerator } from '@kbn/generate-csv';
 import { Writable } from 'stream';
 import {
   CSV_REPORT_TYPE_V2,
@@ -43,8 +43,8 @@ export class CsvV2ExportType extends ExportType<
   CsvV2ExportTypeStartDeps
 > {
   id = CSV_REPORT_TYPE_V2;
-  name = 'csv_v2';
-  jobType = CONTENT_TYPE_CSV;
+  name = CSV_REPORT_TYPE_V2;
+  jobType = CSV_REPORT_TYPE_V2;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [
@@ -58,8 +58,7 @@ export class CsvV2ExportType extends ExportType<
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('csv-export-v2');
+    this.logger = this.logger.get('csv-export-v2');
   }
 
   public createJob = async (

@@ -15,9 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
-import { VisualReportingSoftDisabledError } from '@kbn/reporting-common';
-
-import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { USES_HEADLESS_JOB_TYPES, VisualReportingSoftDisabledError } from '@kbn/reporting-common';
 
 import type { Job } from '../../lib/job';
 import { useKibana } from '../../shared_imports';
