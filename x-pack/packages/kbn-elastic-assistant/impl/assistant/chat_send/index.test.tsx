@@ -55,7 +55,7 @@ describe('ChatSend', () => {
     (useChatSend as jest.Mock).mockReturnValue(chatSend);
   });
   it('the prompt updates when the text area changes', async () => {
-    const { getByTestId, rerender } = render(<ChatSend {...testProps} />, {
+    const { getByTestId } = render(<ChatSend {...testProps} />, {
       wrapper: TestProviders,
     });
     const promptTextArea = getByTestId('prompt-textarea');
