@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       after(() => esArchiver.unload(archive));
 
-      xit('should pass the schema validations', () => {
+      it('should pass the schema validations', () => {
         const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
 
         // Merging root to monitoring because `kibana` may be passed in some cases for old collection methods reporting to a newer monitoring cluster

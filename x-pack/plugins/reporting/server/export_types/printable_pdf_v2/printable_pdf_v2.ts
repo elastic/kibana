@@ -46,8 +46,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('pdf-export-v2');
+    this.logger = this.logger.get('pdf-export-v2');
   }
 
   /**
