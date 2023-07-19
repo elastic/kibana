@@ -24,8 +24,12 @@ run(
     }
 
     for (const path of await globby(flags.pathPattern)) {
+
+      const source = await fs.readFile(path, 'utf8');
+      const reportJson = await parseStringPromise(source /*, options */);
+
       const maybeReport = await transformedReport({
-        path,
+        reportJson,
         reportName: flags.reportName,
         rootDirectory: flags.rootDirectory
       });
@@ -38,7 +42,7 @@ run(
           log.write(report);
         }
       } else {
-        log.error(maybeReport.error);
+        log.error(`Error while validating ${path}: ${maybeReport.error}`);
       }
     }
     log.success('task complete');
@@ -60,20 +64,18 @@ run(
   }
 );
 
-async function transformedReport({ path, rootDirectory, reportName }: { path: string, rootDirectory: string, reportName: string }): Promise<{ result: string } | { error: string }> {
-  const source = await fs.readFile(path, 'utf8');
-  const result = await parseStringPromise(source /*, options */);
-  const maybeValidationResult = validateCypressJunitReport(result);
+async function transformedReport({ reportJson, rootDirectory, reportName }: { reportJson: unknown, rootDirectory: string, reportName: string }): Promise<{ result: string } | { error: string }> {
+  const maybeValidationResult = validateCypressJunitReport(reportJson);
   if ('result' in maybeValidationResult) {
-    if (CypressJunitReport.is(result)) {
+    if (CypressJunitReport.is(reportJson)) {
 
-      const rootSuite = result.testsuites.testsuite[0];
+      const rootSuite = reportJson.testsuites.testsuite[0];
 
       if (CypressJunitRootTestSuite.is(rootSuite)) {
 
         const specFile = rootSuite.$.file;
 
-        for (const testsuite of result.testsuites.testsuite.slice(1)) {
+        for (const testsuite of reportJson.testsuites.testsuite.slice(1)) {
           if (CypressJunitTestSuite.is(testsuite)) {
             for (const testcase of testsuite.testcase) {
               testcase.$.name = `${testcase.$.name} ${testcase.$.classname}`;
@@ -85,7 +87,7 @@ async function transformedReport({ path, rootDirectory, reportName }: { path: st
         }
 
         var builder = new Builder();
-        return { result: builder.buildObject(result) };
+        return { result: builder.buildObject(reportJson) };
       } else {
         // this should be unreacheable as we've already validated the object with io-ts
         return { error: 'could not process report even though schema validation passed.' }
@@ -96,7 +98,7 @@ async function transformedReport({ path, rootDirectory, reportName }: { path: st
     }
   } else {
     // definitely an error
-    return { error: `Error while validating ${path}: ${maybeValidationResult.error}`};
+    return maybeValidationResult;
   }
 }
 
