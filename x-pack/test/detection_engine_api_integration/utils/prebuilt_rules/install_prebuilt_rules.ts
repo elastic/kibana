@@ -6,34 +6,40 @@
  */
 
 import {
-  InstallPrebuiltRulesAndTimelinesResponse,
-  PREBUILT_RULES_URL,
+  PERFORM_RULE_INSTALLATION_URL,
+  RuleVersionSpecifier,
+  PerformRuleInstallationResponseBody,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**
- * (LEGACY)
- * Installs all prebuilt rules and timelines available in Kibana. Rules are
+ * Installs available prebuilt rules in Kibana. Rules are
  * installed from the security-rule saved objects.
- * This is a legacy endpoint and has been replaced by:
- * POST /internal/detection_engine/prebuilt_rules/installation/_perform
  *
  * - No rules will be installed if there are no security-rule assets (e.g., the
  *   package is not installed or mocks are not created).
  *
- * - If some prebuilt rules are already installed, they will be upgraded in case
- *   there are newer versions of them in security-rule assets.
+ * - Pass in an array of rule version specifiers to install specific rules. Otherwise
+ *   all available rules will be installed.
  *
  * @param supertest SuperTest instance
+ * @param rules Array of rule version specifiers to install (optional)
  * @returns Install prebuilt rules response
  */
-export const installPrebuiltRulesAndTimelines = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
+export const installPrebuiltRules = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  rules?: RuleVersionSpecifier[]
+): Promise<PerformRuleInstallationResponseBody> => {
+  let payload = {};
+  if (rules) {
+    payload = { mode: 'SPECIFIC_RULES', rules };
+  } else {
+    payload = { mode: 'ALL_RULES' };
+  }
   const response = await supertest
-    .put(PREBUILT_RULES_URL)
+    .post(PERFORM_RULE_INSTALLATION_URL)
     .set('kbn-xsrf', 'true')
-    .send()
+    .send(payload)
     .expect(200);
 
   return response.body;
