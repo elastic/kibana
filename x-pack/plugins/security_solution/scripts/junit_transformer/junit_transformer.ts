@@ -9,6 +9,9 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import globby from 'globby';
 
 
+/**
+ * This script processes all junit reports matching a glob pattern. It reads each report, parses it into json, validates that it is a report from Cypress, then transforms the report to a form that can be processed by Kibana Operations workflows and the failed-test-reporter, it then optionally writes the report back, in xml format, to the original file path.
+ */
 run(
   async ({ flags, log }) => {
     if (typeof flags.pathPattern !== 'string' || flags.pathPattern.length === 0) {
@@ -25,86 +28,93 @@ run(
 
     for (const path of await globby(flags.pathPattern)) {
 
-      const source = await fs.readFile(path, 'utf8');
-      const reportJson = await parseStringPromise(source /*, options */);
+      // Read the file
+      const source: string = await fs.readFile(path, 'utf8');
 
-      const maybeReport = await transformedReport({
-        reportJson,
-        reportName: flags.reportName,
-        rootDirectory: flags.rootDirectory
-      });
-      if ('result' in maybeReport) {
-        const { result: report } = maybeReport;
-        log.success('transformed ' + path);
-        if (flags.writeInPlace) {
-          await fs.writeFile(path, report);
-        } else {
-          log.write(report);
-        }
+      // Parse it from XML to json
+      const unvalidatedReportJson: unknown = await parseStringPromise(source);
+
+      // Apply validation and return the validated report, or an error message
+      const maybeValidationResult: { result: CypressJunitReport } | { error : string } = validatedCypressJunitReport(unvalidatedReportJson);
+
+      if ('error' in maybeValidationResult) {
+        // If there is an error, continue trying to process other files.
+        log.error(`Error while validating ${path}: ${maybeValidationResult.error}`);
       } else {
-        log.error(`Error while validating ${path}: ${maybeReport.error}`);
+        const reportJson: CypressJunitReport = maybeValidationResult.result;
+        const reportString: string = await transformedReport({
+          reportJson,
+          reportName: flags.reportName,
+          rootDirectory: flags.rootDirectory
+        });
+
+        // If the writeInPlace flag was passed, overwrite the original file, otherwise log the output to stdout
+        if (flags.writeInPlace) {
+          await fs.writeFile(path, reportString);
+        } else {
+          log.write(reportString);
+        }
       }
     }
     log.success('task complete');
   },
   {
     description: `
-      Transform junit reports to match the style required by kibana operations flaky test triage workflows such as '/skip'.
+      Transform junit reports to match the style required by the Kibana Operations flaky test triage workflows such as '/skip'.
     `,
     flags: {
       string: ['pathPattern', 'rootDirectory', 'reportName'],
       boolean: ['writeInPlace'],
       help: `
         --pathPattern      Required, glob passed to globby to select files to operate on
-        --rootDirectory    Required, path of the kibana repo
+        --rootDirectory    Required, path of the kibana repo. Used to calcuate the file path of each spec file relative to the Kibana repo
         --reportName       Required, used as a prefix for the classname. Eventually shows up in the title of flaky test Github issues
         --writeInPlace     Defaults to false. If passed, rewrite the file in place with transformations. If false, the script will pass the transformed XML as a string to stdout
+
+      If an error is encountered when processing one file, the script will still attempt to process other files.
       `
     },
   }
 );
 
-async function transformedReport({ reportJson, rootDirectory, reportName }: { reportJson: unknown, rootDirectory: string, reportName: string }): Promise<{ result: string } | { error: string }> {
-  const maybeValidationResult = validateCypressJunitReport(reportJson);
-  if ('result' in maybeValidationResult) {
-    if (CypressJunitReport.is(reportJson)) {
+/**
+ * Updates the `name` and `classname` attributes of each testcase.
+ * `name` will have the value of `classname` appended to it. This makes sense because they each contain part of the bdd spec.
+ * `classname` is replaced with the file path, relative to the kibana project directory, and encoded (by replacing periods with a non-ascii character.) This is the format expected by the failed test reporter and the Kibana Operations flaky test triage workflows.
+ */
+async function transformedReport({ reportJson, rootDirectory, reportName }: { reportJson: CypressJunitReport, rootDirectory: string, reportName: string }): Promise<string> {
 
-      const rootSuite = reportJson.testsuites.testsuite[0];
+  // The first testsuite is the 'root' test suite and contains the file path to the spec
+  const rootSuite = reportJson.testsuites.testsuite[0];
 
-      if (CypressJunitRootTestSuite.is(rootSuite)) {
+  const specFile = rootSuite.$.file;
 
-        const specFile = rootSuite.$.file;
+  for (const testsuite of reportJson.testsuites.testsuite.slice(1)) {
+    if (CypressJunitTestSuite.is(testsuite)) {
+      for (const testcase of testsuite.testcase) {
 
-        for (const testsuite of reportJson.testsuites.testsuite.slice(1)) {
-          if (CypressJunitTestSuite.is(testsuite)) {
-            for (const testcase of testsuite.testcase) {
-              testcase.$.name = `${testcase.$.name} ${testcase.$.classname}`;
-              const projectRelativePath = relative(rootDirectory, specFile);
-              const encodedPath = projectRelativePath.replace(/\./g, '·');
-              testcase.$.classname = `${reportName}.${encodedPath}`;
-            }
-          }
-        }
+        // append the `classname` attribute to the `name` attribute
+        testcase.$.name = `${testcase.$.name} ${testcase.$.classname}`;
 
-        var builder = new Builder();
-        return { result: builder.buildObject(reportJson) };
-      } else {
-        // this should be unreacheable as we've already validated the object with io-ts
-        return { error: 'could not process report even though schema validation passed.' }
+        // calculate the path of the spec file relative to the kibana project directory
+        const projectRelativePath = relative(rootDirectory, specFile);
+
+        // encode the path by relacing dots with a non-ascii character
+        const encodedPath = projectRelativePath.replace(/\./g, '·');
+
+        // prepend the encoded path with a report name. This is for display purposes and shows up in the github issue. It is required. Store the value in the `classname` attribute.
+        testcase.$.classname = `${reportName}.${encodedPath}`;
       }
-    } else {
-      // this should be unreacheable as we've already validated the object with io-ts
-      return { error: 'could not process report even though schema validation passed.' }
     }
-  } else {
-    // definitely an error
-    return maybeValidationResult;
   }
+
+  var builder = new Builder();
+  // Return the report in an xml string
+  return builder.buildObject(reportJson);
 }
 
 /**
  * Test cases have a name, which is populated with part of the BDD test name, and classname, which is also populated with part of the BDD test name.
- *
  */
 const CypressJunitTestCase = t.type({
   $: t.type({
@@ -114,7 +124,7 @@ const CypressJunitTestCase = t.type({
 });
 
 /**
- * standard testsuites contain testcase elements, each representing a specific test execution.
+ * Standard testsuites contain testcase elements, each representing a specific test execution.
  */
 const CypressJunitTestSuite = t.type({
   testcase: t.array(CypressJunitTestCase)
@@ -130,8 +140,12 @@ const CypressJunitRootTestSuite = t.type({
   })
 })
 
-/** This type represents the Cypress-specific flavor of junit report */
-const CypressJunitReport = t.type({
+/** This type represents the Cypress-specific flavor of junit report. It is 'Loose', because it does not enforce the following rule:
+ * The first test suite must be the 'root' test suite, which has no test cases and has a 'file' attribute. All subsequent testsuite's must have testcases.
+ *
+ * See `CypressJunitReport` for a stricter type, which is returned from `validatedCypressJunitReport`
+ */
+const LooseCypressJunitReport = t.type({
   testsuites: t.type({
     /** The testsuite's created by the Cypress junit reporter are non-standard. The first testsuite has a name: 'Root Suite' and contains the path of the spec file, relative to where Cypress was invoked, in the 'file' attribute. Other testsuites are standard and relate to a 'describe' block. They contain 'testcase' elements.
      *
@@ -142,6 +156,15 @@ const CypressJunitReport = t.type({
 })
 
 /**
+ * Type representing a Cypress Junit report. Created by validatedCypressJunitReport. This is more specific than LooseCypressJunitReport.
+ */
+type CypressJunitReport = {
+  testsuites: {
+    testsuite: [t.TypeOf<typeof CypressJunitRootTestSuite>, ...t.TypeOf<typeof CypressJunitTestSuite>[]]
+  }
+}
+
+/**
  * Validate the JSON representation of the Junit XML.
  * If there are no errors, this returns `{ result: 'successs' }`, otherwise it returns an error, wrapped in `{ error: string }`.
  *
@@ -149,8 +172,8 @@ const CypressJunitReport = t.type({
  *
  * This also asserts that the junit report contains no '·' characters in the classname. This character is used by the kibana operations triage scripts, and the failed test reporter, to replace `.` characters in a path as part of its encoding scheme. If this character is found, we assume that the encoding has already taken place.
  */
-function validateCypressJunitReport(parsedReport: unknown): { result: 'success' } | { error: string} {
-  const decoded = CypressJunitReport.decode(parsedReport);
+function validatedCypressJunitReport(parsedReport: unknown): { result: CypressJunitReport } | { error: string } {
+  const decoded = LooseCypressJunitReport.decode(parsedReport);
 
   // Error text to append to each error message.
   const boilerplate: string = 'This script relies on this assumption. If your junit report is valid, then you must enhance this script in order to have support for it. If you are not trying to transform a Cypress junit report into a report that is compatible with Kibana Operations workflows, then you are running this script in error.';
@@ -159,29 +182,48 @@ function validateCypressJunitReport(parsedReport: unknown): { result: 'success' 
     return { error: `Could not validate data: ${PathReporter.report(decoded).join("\n")}. This script uses an io-ts schema to validate that parsed Junit reports match the expected schema. This script is only designed to process Junit reports generated by Cypress. ${boilerplate}` }
   }
 
-  const valid: t.TypeOf<typeof CypressJunitReport> = decoded.right;
+  // Used to store validation error messages from `predicate`.
+  const errorBox: { value: null | string } = { value: null };
 
-  // TODO: explain why the first element in the array is different and why we care.
-  for (let index = 0; index < valid.testsuites.testsuite.length; index++) {
-    const testsuite = valid.testsuites.testsuite[index];
+  // This predicate will narrow the type from LooseCypressJunitReport to CypressJunitReport
+  if (isCypressJunitReport(decoded.right, errorBox)) {
+    return { result: decoded.right };
+  } else {
+    if (errorBox.value === null) {
+      throw new Error('The predicate returned false without assigning predicate error.');
+    }
+    return { error: errorBox.value };
+  }
 
+  /*
+   * Narrows `report` to a CypressJunitReport, which is a type that has CypressJunitRootTestSuite as the first test suite and CypressJunitTestSuite as all subsequent test suites.
+   *
+   * This typescript predicate needs to log error messages to the console, but predicates can only return boolean types.
+   * Therefore this populates the `errorBox` parameter with an error message when returning false.
+   */
+  function isCypressJunitReport(report: t.TypeOf<typeof LooseCypressJunitReport>, errorBox: { value: null | string }): report is CypressJunitReport {
+    for (let index = 0; index < report.testsuites.testsuite.length; index++) {
+      const testsuite = report.testsuites.testsuite[index];
 
-    if (index === 0) {
-      if (!CypressJunitRootTestSuite.is(testsuite)) {
-        return { error: `The first suite must be the Root Suite, which contains the spec file name. ${boilerplate}` };
-      }
-    } else {
-      if (!CypressJunitTestSuite.is(testsuite)) {
-        return { error: `All testsuite elements except for the first one must have testcase elements. ${boilerplate}` };
+      if (index === 0) {
+        if (!CypressJunitRootTestSuite.is(testsuite)) {
+          errorBox.value = `The first suite must be the Root Suite, which contains the spec file name. ${boilerplate}`;
+          return false
+        }
       } else {
-        for (const testcase of testsuite.testcase) {
-          if (testcase.$.classname.indexOf('·') !== -1) {
-            return { error : `This report appears to have already been transformed because a '·' character was found in the classname. If your test intentionally includes this character as part of its name, remove it. This character is reserved for encoding file paths in the classname attribute. ${boilerplate}`};
+        if (!CypressJunitTestSuite.is(testsuite)) {
+          errorBox.value = `All testsuite elements except for the first one must have testcase elements. ${boilerplate}`;
+          return false
+        } else {
+          for (const testcase of testsuite.testcase) {
+            if (testcase.$.classname.indexOf('·') !== -1) {
+              errorBox.value = `This report appears to have already been transformed because a '·' character was found in the classname. If your test intentionally includes this character as part of its name, remove it. This character is reserved for encoding file paths in the classname attribute. ${boilerplate}`;
+              return false;
+            }
           }
         }
       }
     }
+    return true
   }
-
-  return { result: 'success' };
 }
