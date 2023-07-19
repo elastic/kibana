@@ -8,13 +8,11 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
-import { withSpan } from './helpers';
 
 export async function collectContainers({
   client,
   from,
   to,
-  transaction,
   sourceIndices,
   afterKey,
 }: CollectorOptions) {
@@ -62,36 +60,32 @@ export async function collectContainers({
 
   const esResponse = await client.search(dsl);
 
-  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
-    const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
-      const { fields = {} } = hit;
-      const containerId = fields['container.id'];
-      const podUid = fields['kubernetes.pod.uid'];
-      const nodeName = fields['kubernetes.node.name'];
+  const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+    const { fields = {} } = hit;
+    const containerId = fields['container.id'];
+    const podUid = fields['kubernetes.pod.uid'];
+    const nodeName = fields['kubernetes.node.name'];
 
-      const parentEan = podUid ? `pod:${podUid}` : `host:${fields['host.hostname']}`;
+    const parentEan = podUid ? `pod:${podUid}` : `host:${fields['host.hostname']}`;
 
-      const container: Asset = {
-        '@timestamp': new Date().toISOString(),
-        'asset.kind': 'container',
-        'asset.id': containerId,
-        'asset.ean': `container:${containerId}`,
-        'asset.parents': [parentEan],
-      };
+    const container: Asset = {
+      '@timestamp': new Date().toISOString(),
+      'asset.kind': 'container',
+      'asset.id': containerId,
+      'asset.ean': `container:${containerId}`,
+      'asset.parents': [parentEan],
+    };
 
-      if (nodeName) {
-        container['asset.references'] = [`host:${nodeName}`];
-      }
+    if (nodeName) {
+      container['asset.references'] = [`host:${nodeName}`];
+    }
 
-      acc.push(container);
+    acc.push(container);
 
-      return acc;
-    }, []);
+    return acc;
+  }, []);
 
-    const hitsLen = esResponse.hits.hits.length;
-    const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
-    return { assets, afterKey: next };
-  });
-
-  return result;
+  const hitsLen = esResponse.hits.hits.length;
+  const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
+  return { assets, afterKey: next };
 }

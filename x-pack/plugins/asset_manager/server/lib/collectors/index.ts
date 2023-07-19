@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Transaction } from 'elastic-apm-node';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AssetManagerConfig } from '../../types';
@@ -19,7 +18,6 @@ export interface CollectorOptions {
   client: ElasticsearchClient;
   from: number;
   to: number;
-  transaction?: Transaction | null;
   sourceIndices: AssetManagerConfig['sourceIndices'];
   afterKey?: estypes.SortResults;
 }
