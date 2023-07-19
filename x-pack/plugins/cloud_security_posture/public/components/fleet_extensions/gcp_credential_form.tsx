@@ -196,7 +196,7 @@ export const GcpCredentialsForm = ({
         <EuiSpacer size="l" />
         <EuiCallOut color="warning">
           <FormattedMessage
-            id="xpack.csp.awsIntegration.cloudFormationSetupStep.notSupported"
+            id="xpack.csp.gcpIntegration.gcpNotSupportedMessage"
             defaultMessage="CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP"
           />
         </EuiCallOut>
