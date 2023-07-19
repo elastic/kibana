@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

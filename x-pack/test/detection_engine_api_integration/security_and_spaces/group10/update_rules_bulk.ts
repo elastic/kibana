@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
   DETECTION_ENGINE_RULES_URL,
