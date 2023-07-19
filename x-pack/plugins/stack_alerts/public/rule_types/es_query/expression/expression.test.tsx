@@ -23,7 +23,6 @@ import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
 import { ISearchSource } from '@kbn/data-plugin/common';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act } from 'react-dom/test-utils';
@@ -96,7 +95,7 @@ const httpMock = httpServiceMock.createStartContract();
 const docLinksMock = docLinksServiceMock.createStartContract();
 export const uiSettingsMock = {
   get: jest.fn(),
-} as unknown as IUiSettingsClient;
+};
 
 const mockSearchResult = new Subject();
 const searchSourceFieldsMock = {
@@ -233,12 +232,28 @@ const setup = (
 };
 
 describe('EsQueryRuleTypeExpression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    uiSettingsMock.get.mockReturnValue(true);
+  });
+
   test('should render options by default', async () => {
     const wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_esQuery').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_esqlQuery').exists()).toBeTruthy();
+    expect(findTestSubject(wrapper, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
+  });
+
+  test('should hide ESQL option when not enabled', async () => {
+    uiSettingsMock.get.mockReturnValueOnce(false);
+    const wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
+    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
+    expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
+    expect(findTestSubject(wrapper, 'queryFormType_esQuery').exists()).toBeTruthy();
+    expect(findTestSubject(wrapper, 'queryFormType_esqlQuery').exists()).toBeFalsy();
     expect(findTestSubject(wrapper, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
   });
 
