@@ -21,3 +21,9 @@ if (!global.hasOwnProperty('TextEncoder')) {
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 }
+
+// https://github.com/jsdom/jsdom/issues/2555
+if (!global.hasOwnProperty('Blob')) {
+  const { Blob } = require('buffer');
+  global.Blob = Blob;
+}
