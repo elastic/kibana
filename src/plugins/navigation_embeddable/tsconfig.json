@@ -15,6 +15,7 @@
     "@kbn/config-schema",
     "@kbn/content-management-utils",
     "@kbn/content-management-plugin",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": ["target/**/*"]
 }

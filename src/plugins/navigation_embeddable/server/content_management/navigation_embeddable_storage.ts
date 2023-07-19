@@ -17,7 +17,7 @@ export class NavigationEmbeddableStorage extends SOContentStorage<NavigationEmbe
       savedObjectType: CONTENT_ID,
       cmServicesDefinition,
       enableMSearch: true,
-      allowedSavedObjectAttributes: ['title', 'description', 'links'],
+      allowedSavedObjectAttributes: ['id', 'title', 'description', 'links'],
     });
   }
 }

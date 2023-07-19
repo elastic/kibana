@@ -6,35 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
 import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
-import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from './external_link/external_link_component';
+import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
+import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const links = navEmbeddable.select((state) => state.output.links) ?? {};
 
+  const orderedLinks = useMemo(() => {
+    return memoizedGetOrderedLinkList(links);
+  }, [links]);
+
   /** TODO: Render this as a list **or** "tabs" as part of https://github.com/elastic/kibana/issues/154357 */
   return (
     <EuiPanel className="eui-yScroll">
-      {Object.keys(links).map((linkId) => {
+      {orderedLinks.map((link) => {
         return (
           <EuiPanel
-            id={`navigationLink--${linkId}`}
-            key={`${linkId}`}
+            id={`navigationLink--${link.id}`}
+            key={`${link.id}`}
             paddingSize="none"
             hasShadow={false}
           >
-            {links[linkId].type === DASHBOARD_LINK_TYPE ? (
-              <DashboardLinkComponent link={links[linkId]} />
+            {link.type === DASHBOARD_LINK_TYPE ? (
+              <DashboardLinkComponent link={link} />
             ) : (
-              <ExternalLinkComponent link={links[linkId]} />
+              <ExternalLinkComponent link={link} />
             )}
           </EuiPanel>
         );

@@ -7,7 +7,15 @@
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: any) {
-  describe('MetricsUI Endpoints', () => {
-    loadTestFile(require.resolve('./metric_threshold_rule'));
+  describe('Observability Rules', () => {
+    describe('MetricsUI Endpoints', () => {
+      loadTestFile(require.resolve('./metric_threshold_rule'));
+      loadTestFile(require.resolve('./threshold_rule'));
+      loadTestFile(require.resolve('./threshold_rule_data_view'));
+    });
+
+    describe('Synthetics', () => {
+      loadTestFile(require.resolve('./synthetics_rule'));
+    });
   });
 }

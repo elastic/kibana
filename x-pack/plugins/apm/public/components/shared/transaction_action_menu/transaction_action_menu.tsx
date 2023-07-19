@@ -7,17 +7,18 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import {
   ActionMenu,
   ActionMenuDivider,
+  getContextMenuItemsFromActions,
   Section,
   SectionLink,
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
-import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
+import { ProfilingLocators } from '@kbn/profiling-plugin/public';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -27,6 +28,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 
@@ -63,6 +65,9 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 
+  const { isProfilingPluginInitialized, profilingLocators } =
+    useProfilingPlugin();
+
   return (
     <>
       <ActionMenu
@@ -72,7 +77,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
         anchorPosition="downRight"
         button={
           <ActionMenuButton
-            isLoading={isLoading}
+            isLoading={isLoading || isProfilingPluginInitialized === undefined}
             onClick={() =>
               setIsActionPopoverOpen(
                 (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
@@ -81,14 +86,23 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           />
         }
       >
-        <ActionMenuSections transaction={transaction} />
+        <ActionMenuSections
+          transaction={transaction}
+          profilingLocators={profilingLocators}
+        />
         {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} />}
       </ActionMenu>
     </>
   );
 }
 
-function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
+function ActionMenuSections({
+  transaction,
+  profilingLocators,
+}: {
+  transaction?: Transaction;
+  profilingLocators?: ProfilingLocators;
+}) {
   const {
     core,
     uiActions,
@@ -108,6 +122,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
     apmRouter,
     infraLocators: locators,
     infraLinksAvailable,
+    profilingLocators,
   });
 
   const externalMenuItems = useAsync(() => {
@@ -156,6 +171,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
                       label={action.label}
                       href={action.href}
                       onClick={action.onClick}
+                      showNewBadge={action.showNewBadge}
                     />
                   ))}
                 </SectionLinks>

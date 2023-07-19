@@ -31,10 +31,11 @@ export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
 export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
 export interface NavigationEmbeddableLink {
+  id: string;
   type: NavigationLinkType;
   destination: string;
-  // order: number; TODO: Use this as part of https://github.com/elastic/kibana/issues/154361
   label?: string;
+  order: number;
 }
 
 export interface NavigationEmbeddableLinkList {

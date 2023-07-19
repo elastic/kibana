@@ -87,6 +87,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.billing_url",
+            "type": "string",
+            "tags": [],
+            "label": "billing_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.organization_url",
             "type": "string",
             "tags": [],
@@ -241,6 +255,22 @@
             "label": "profileUrl",
             "description": [
               "\nThe full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.billingUrl",
+            "type": "string",
+            "tags": [],
+            "label": "billingUrl",
+            "description": [
+              "\nThe full URL to the billing page on Elastic Cloud. Undefined if not running on Cloud."
             ],
             "signature": [
               "string | undefined"

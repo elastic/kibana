@@ -48,7 +48,6 @@ export interface TakeActionDropdownProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   ecsData?: Ecs;
   handleOnEventClosed: () => void;
-  indexName: string;
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddEventFilterClick: () => void;
@@ -65,7 +64,6 @@ export const TakeActionDropdown = React.memo(
     detailsData,
     ecsData,
     handleOnEventClosed,
-    indexName,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     onAddEventFilterClick,
@@ -180,7 +178,6 @@ export const TakeActionDropdown = React.memo(
       alertStatus: actionsData.alertStatus,
       closePopover: closePopoverAndFlyout,
       eventId: actionsData.eventId,
-      indexName,
       refetch,
       scopeId,
     });
@@ -188,7 +185,6 @@ export const TakeActionDropdown = React.memo(
     const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
       closePopover: closePopoverHandler,
       ecsRowData: ecsData ?? { _id: actionsData.eventId },
-      scopeId,
       refetch,
     });
 

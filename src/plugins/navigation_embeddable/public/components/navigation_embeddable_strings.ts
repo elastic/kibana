@@ -14,6 +14,18 @@ export const NavEmbeddableStrings = {
       i18n.translate('navigationEmbeddable.editor.addButtonLabel', {
         defaultMessage: 'Add link',
       }),
+    getUpdateButtonLabel: () =>
+      i18n.translate('navigationEmbeddable.editor.updateButtonLabel', {
+        defaultMessage: 'Update link',
+      }),
+    getEditLinkTitle: () =>
+      i18n.translate('navigationEmbeddable.editor.editLinkTitle', {
+        defaultMessage: 'Edit link',
+      }),
+    getDeleteLinkTitle: () =>
+      i18n.translate('navigationEmbeddable.editor.deleteLinkTitle', {
+        defaultMessage: 'Delete link',
+      }),
     getCancelButtonLabel: () =>
       i18n.translate('navigationEmbeddable.editor.cancelButtonLabel', {
         defaultMessage: 'Close',
@@ -21,11 +33,19 @@ export const NavEmbeddableStrings = {
     panelEditor: {
       getEmptyLinksMessage: () =>
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksMessage', {
-          defaultMessage: "You haven't added any links yet.",
+          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+        }),
+      getEmptyLinksTooltip: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.emptyLinksTooltip', {
+          defaultMessage: 'Add one or more links.',
         }),
       getCreateFlyoutTitle: () =>
         i18n.translate('navigationEmbeddable.panelEditor.createFlyoutTitle', {
           defaultMessage: 'Create links panel',
+        }),
+      getEditFlyoutTitle: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.editFlyoutTitle', {
+          defaultMessage: 'Edit links panel',
         }),
       getSaveButtonLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
@@ -34,6 +54,14 @@ export const NavEmbeddableStrings = {
       getTitleInputLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.titleInputLabel', {
           defaultMessage: 'Title',
+        }),
+      getLinkLoadingAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.linkEditor.linkLoadingAriaLabel', {
+          defaultMessage: 'Loading link',
+        }),
+      getDragHandleAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
+          defaultMessage: 'Link drag handle',
         }),
     },
     linkEditor: {
@@ -51,7 +79,7 @@ export const NavEmbeddableStrings = {
         }),
       getLinkTextLabel: () =>
         i18n.translate('navigationEmbeddable.linkEditor.linkTextLabel', {
-          defaultMessage: 'Text (optional)',
+          defaultMessage: 'Text',
         }),
       getLinkTextPlaceholder: () =>
         i18n.translate('navigationEmbeddable.linkEditor.linkTextPlaceholder', {

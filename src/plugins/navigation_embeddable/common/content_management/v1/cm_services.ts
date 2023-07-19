@@ -18,9 +18,11 @@ import {
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
 
 const navigationEmbeddableLinkSchema = schema.object({
+  id: schema.string(),
   type: schema.oneOf([schema.literal(DASHBOARD_LINK_TYPE), schema.literal(EXTERNAL_LINK_TYPE)]),
   destination: schema.string(),
   label: schema.maybe(schema.string()),
+  order: schema.number(),
 });
 
 const navigationEmbeddableAttributesSchema = schema.object(

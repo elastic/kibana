@@ -33,10 +33,12 @@ import {
   getApplicationRoute,
   getCaseViewPath,
   isSOError,
+  countUserAttachments,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import { mockCases, mockCaseComments } from '../mocks';
+import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
 
 interface CommentReference {
   ids: string[];
@@ -1330,6 +1332,24 @@ describe('common utils', () => {
 
     it('returns false if the SO is not an error', () => {
       expect(isSOError({})).toBe(false);
+    });
+  });
+
+  describe('countUserAttachments', () => {
+    it('returns 0 for an empty array', () => {
+      expect(countUserAttachments([])).toBe(0);
+    });
+
+    it('returns 1 when there is only 1 user attachment', () => {
+      const attachments = [createUserAttachment(), createAlertAttachment()];
+
+      expect(countUserAttachments(attachments)).toBe(1);
+    });
+
+    it('returns 0 when there is only alert attachments', () => {
+      const attachments = [createAlertAttachment()];
+
+      expect(countUserAttachments(attachments)).toBe(0);
     });
   });
 });

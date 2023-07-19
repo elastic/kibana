@@ -6,45 +6,53 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import React, { useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
+import useObservable from 'react-use/lib/useObservable';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiText,
-  EuiIcon,
   EuiForm,
+  EuiImage,
   EuiTitle,
   EuiPanel,
-  IconType,
   EuiSpacer,
   EuiButton,
+  EuiToolTip,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiDroppable,
+  EuiDraggable,
   EuiFlyoutBody,
+  EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSwitch,
   EuiFieldText,
+  EuiDragDropContext,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
+import { coreServices } from '../services/kibana_services';
 import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
   NavigationEmbeddableAttributes,
   NavigationEmbeddableLink,
+  NavigationEmbeddableLinkList,
 } from '../../common/content_management';
-import { NavigationLinkInfo } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
-import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
+
+import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
+import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
+import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
+
+import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
+import noLinksIllustrationLight from '../assets/empty_links_light.svg';
 
 import './navigation_embeddable.scss';
 
-export const NavigationEmbeddablePanelEditor = ({
+const NavigationEmbeddablePanelEditor = ({
   onSave,
   onClose,
   attributes,
@@ -53,107 +61,168 @@ export const NavigationEmbeddablePanelEditor = ({
 }: {
   onSave: (attributes: NavigationEmbeddableAttributes, useRefType: boolean) => void;
   onClose: () => void;
+  parentDashboard?: DashboardContainer;
   attributes?: NavigationEmbeddableAttributes;
   savedObjectId?: string;
-  parentDashboard?: DashboardContainer;
 }) => {
-  const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
-  const [links, setLinks] = useState(attributes?.links);
+  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
+  const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+
+  const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
   const [saveToLibrary, setSaveToLibrary] = useState(false);
   const [libraryTitle, setLibraryTitle] = useState<string | undefined>();
 
-  /**
-   * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
-   * panels and only fetching the dashboard saved objects when first loading this flyout.
-   *
-   * Will need to think this through and fix as part of the editing process - not worth holding this PR, since it's
-   * blocking so much other work :)
-   */
-  const { value: linkList } = useAsync(async () => {
-    if (!links || isEmpty(links)) return [];
+  useEffect(() => {
+    const initialLinks = attributes?.links;
+    if (!initialLinks) {
+      setOrderedLinks([]);
+      return;
+    }
+    setOrderedLinks(memoizedGetOrderedLinkList(initialLinks));
+  }, [attributes]);
 
-    const newLinks: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
-      Object.keys(links).map(async (panelId) => {
-        let label = links[panelId].label;
-        let icon = NavigationLinkInfo[EXTERNAL_LINK_TYPE].icon;
+  const onDragEnd = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index);
+        setOrderedLinks(newList);
+      }
+    },
+    [orderedLinks]
+  );
 
-        if (links[panelId].type === DASHBOARD_LINK_TYPE) {
-          icon = NavigationLinkInfo[DASHBOARD_LINK_TYPE].icon;
-          if (!label) {
-            const dashboard = await memoizedFetchDashboard(links[panelId].destination);
-            label = dashboard.attributes.title;
-          }
+  const addOrEditLink = useCallback(
+    async (linkToEdit?: NavigationEmbeddableLink) => {
+      const newLink = await openLinkEditorFlyout({
+        parentDashboard,
+        link: linkToEdit,
+        ref: editLinkFlyoutRef,
+      });
+      if (newLink) {
+        if (linkToEdit) {
+          setOrderedLinks(
+            orderedLinks.map((link) => {
+              if (link.id === linkToEdit.id) {
+                return { ...newLink, order: linkToEdit.order };
+              }
+              return link;
+            })
+          );
+        } else {
+          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length }]);
         }
+      }
+    },
+    [editLinkFlyoutRef, orderedLinks, parentDashboard]
+  );
 
-        return { id: panelId, label: label || links[panelId].destination, icon };
-      })
+  const deleteLink = useCallback(
+    (linkId: string) => {
+      setOrderedLinks(
+        orderedLinks.filter((link) => {
+          return link.id !== linkId;
+        })
+      );
+    },
+    [orderedLinks]
+  );
+
+  const saveButtonComponent = useMemo(() => {
+    const canSave = orderedLinks.length !== 0 && saveToLibrary ? Boolean(libraryTitle) : true;
+
+    const button = (
+      <EuiButton
+        disabled={!canSave}
+        onClick={() => {
+          const newLinks = orderedLinks.reduce((prev, link, i) => {
+            return { ...prev, [link.id]: { ...link, order: i } };
+          }, {} as NavigationEmbeddableLinkList);
+          const newAttributes = { ...attributes, title: libraryTitle, links: newLinks };
+          onSave(newAttributes, !Boolean(savedObjectId));
+        }}
+      >
+        {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
+      </EuiButton>
     );
-    return newLinks;
-  }, [links]);
 
-  const getIsByValueMode = () => !Boolean(savedObjectId || saveToLibrary);
+    return canSave ? (
+      button
+    ) : (
+      <EuiToolTip content={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}>
+        {button}
+      </EuiToolTip>
+    );
+  }, [onSave, orderedLinks, attributes, saveToLibrary, libraryTitle, savedObjectId]);
 
   return (
     <>
+      <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}</h2>
+          <h2>
+            {attributes?.links && Object.keys(attributes?.links).length > 0
+              ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
+              : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>
           <EuiFormRow>
             <>
-              {!links || Object.keys(links).length === 0 ? (
-                <EuiPanel hasBorder={true}>
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        onClick={() => setShowLinkEditorFlyout(true)}
-                        iconType="plusInCircle"
-                      >
-                        {NavEmbeddableStrings.editor.getAddButtonLabel()}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+              {orderedLinks.length === 0 ? (
+                <EuiPanel paddingSize="m" hasBorder={true}>
+                  <EuiEmptyPrompt
+                    paddingSize="none"
+                    hasShadow={false}
+                    color="plain"
+                    icon={
+                      <EuiImage
+                        alt="alt"
+                        size="s"
+                        src={isDarkTheme ? noLinksIllustrationDark : noLinksIllustrationLight}
+                      />
+                    }
+                    body={
+                      <>
+                        <EuiText size="s">
+                          {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
+                        </EuiText>
+                        <EuiSpacer size="m" />
+                        <EuiButton size="s" onClick={() => addOrEditLink()} iconType="plusInCircle">
+                          {NavEmbeddableStrings.editor.getAddButtonLabel()}
+                        </EuiButton>
+                      </>
+                    }
+                  />
                 </EuiPanel>
               ) : (
                 <>
-                  {linkList?.map((link) => {
-                    return (
-                      <div key={link.id}>
-                        <EuiPanel
-                          className="navEmbeddablePanelEditor"
-                          hasBorder
-                          hasShadow={false}
-                          paddingSize="s"
+                  <EuiDragDropContext onDragEnd={onDragEnd}>
+                    <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">
+                      {orderedLinks.map((link, idx) => (
+                        <EuiDraggable
+                          spacing="m"
+                          key={link.id}
+                          index={idx}
+                          draggableId={link.id}
+                          customDragHandle={true}
+                          hasInteractiveChildren={true}
                         >
-                          <EuiFlexGroup gutterSize="s" responsive={false} wrap={false}>
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type={link.icon} color="text" />
-                            </EuiFlexItem>
-                            <EuiFlexItem className="linkText">
-                              <div className="wrapText">{link.label}</div>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
-                        <EuiSpacer size="s" />
-                      </div>
-                    );
-                  })}
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="plusInCircle"
-                    onClick={() => setShowLinkEditorFlyout(true)}
-                  >
+                          {(provided) => (
+                            <NavigationEmbeddablePanelEditorLink
+                              link={link}
+                              parentDashboard={parentDashboard}
+                              editLink={() => addOrEditLink(link)}
+                              deleteLink={() => deleteLink(link.id)}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                          )}
+                        </EuiDraggable>
+                      ))}
+                    </EuiDroppable>
+                  </EuiDragDropContext>
+                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={() => addOrEditLink()}>
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
@@ -189,33 +258,13 @@ export const NavigationEmbeddablePanelEditor = ({
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              type="submit"
-              disabled={!links || isEmpty(links)}
-              onClick={() => {
-                const newAttributes = { ...attributes, title: libraryTitle, links };
-                onSave(newAttributes, !getIsByValueMode());
-                onClose();
-              }}
-            >
-              {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{saveButtonComponent}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-
-      {showLinkEditorFlyout && (
-        <NavigationEmbeddableLinkEditor
-          onClose={() => {
-            setShowLinkEditorFlyout(false);
-          }}
-          onSave={(newLink: NavigationEmbeddableLink) => {
-            setLinks({ ...links, [uuidv4()]: newLink });
-          }}
-          parentDashboard={parentDashboard}
-        />
-      )}
     </>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default NavigationEmbeddablePanelEditor;

@@ -133,7 +133,10 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
     ]);
   };
 
-  expect(alertsA.map(mapAlert)).to.eql(alertsB.map(mapAlert));
+  const sort = (alerts: any[]) =>
+    alerts.sort((a: any, b: any) => a.message.localeCompare(b.message));
+
+  expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -147,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
    * Specific api integration tests for threat matching rule type
    */
   // FLAKY: https://github.com/elastic/kibana/issues/155304
-  describe.skip('Threat match type rules', () => {
+  describe('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
@@ -513,8 +516,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('terms and match should have the same alerts with pagination', async () => {
       const termRule: ThreatMatchRuleCreateProps = createThreatMatchRule({
+        query: 'source.ip: 8.42.77.171', // narrow amount of alerts to 6
         override: {
-          items_per_search: 1,
+          items_per_search: 2,
           concurrent_searches: 1,
         },
       });
@@ -524,6 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
           items_per_search: 1,
           concurrent_searches: 1,
         },
+        query: 'source.ip: 8.42.77.171', // narrow amount of alerts to 6
         name: 'Math rule',
         rule_id: 'rule-2',
         threat_mapping: [

@@ -17,8 +17,8 @@ export const DashboardLinkEmbeddableStrings = {
     i18n.translate('navigationEmbeddable.dsahboardLink.description', {
       defaultMessage: 'Go to dashboard',
     }),
-  getSearchPlaceholder: () =>
-    i18n.translate('navigationEmbeddable.dashboardLink.editor.searchPlaceholder', {
+  getDashboardPickerPlaceholder: () =>
+    i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardComboBoxPlaceholder', {
       defaultMessage: 'Search for a dashboard',
     }),
   getDashboardPickerAriaLabel: () =>

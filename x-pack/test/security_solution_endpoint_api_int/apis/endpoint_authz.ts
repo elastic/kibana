@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   interface ApiCallsInterface {
     method: keyof Pick<typeof supertest, 'post' | 'get'>;
     path: string;
+    version?: string;
     body: Record<string, unknown> | undefined;
   }
 
@@ -48,10 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'get',
         path: ACTION_DETAILS_ROUTE,
         body: undefined,
+        version: '2023-10-31',
       },
       {
         method: 'get',
         path: `${ACTION_STATUS_ROUTE}?agent_ids=1,2`,
+        version: '2023-10-31',
         body: undefined,
       },
       {
@@ -81,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'get',
         path: BASE_ENDPOINT_ACTION_ROUTE,
         body: undefined,
+        version: '2023-10-31',
       },
     ];
 
@@ -89,11 +93,13 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: ISOLATE_HOST_ROUTE_V2,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
       {
         method: 'post',
         path: UNISOLATE_HOST_ROUTE_V2,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
     ];
 
@@ -102,16 +108,19 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: GET_PROCESSES_ROUTE,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
       {
         method: 'post',
         path: KILL_PROCESS_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        version: '2023-10-31',
       },
       {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        version: '2023-10-31',
       },
     ];
 
@@ -120,6 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: GET_FILE_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { path: '/opt/file/doc.txt' } },
+        version: '2023-10-31',
       },
     ];
 
@@ -127,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: EXECUTE_ROUTE,
+        version: '2023-10-31',
         body: { endpoint_ids: ['one'], parameters: { command: 'ls -la' } },
       },
     ];
@@ -135,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'get',
         path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
+        version: '2023-10-31',
         body: undefined,
       },
     ];
@@ -166,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
+            .set(apiListItem.version ? 'Elastic-Api-Version' : 'foo', '2023-10-31')
             .send(apiListItem.body)
             .expect(403, {
               statusCode: 403,

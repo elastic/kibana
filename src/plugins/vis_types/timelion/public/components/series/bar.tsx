@@ -47,7 +47,6 @@ export const BarSeriesComponent = ({ index, groupId, visData }: BarSeriesCompone
     xAccessor={0}
     yAccessors={[1]}
     data={visData._hide ? [] : visData.data}
-    sortIndex={index}
     enableHistogramMode={false}
     color={visData.color}
     stackAccessors={visData.stack ? [0] : undefined}

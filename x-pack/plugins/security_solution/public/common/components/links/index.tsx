@@ -587,7 +587,7 @@ interface LinkProps {
   href: string;
 }
 
-type GetSecuritySolutionProps = (
+export type GetSecuritySolutionProps = (
   params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
 ) => LinkProps;
 

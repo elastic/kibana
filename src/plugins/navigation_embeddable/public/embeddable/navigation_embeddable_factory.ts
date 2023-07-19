@@ -103,11 +103,9 @@ export class NavigationEmbeddableFactoryDefinition
   ): Promise<Omit<NavigationEmbeddableInput, 'id'>> {
     if (!parent) return {};
 
-    const { openEditorFlyout: createNavigationEmbeddable } = await import(
-      '../editor/open_editor_flyout'
-    );
+    const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
-    const input = await createNavigationEmbeddable(
+    const input = await openEditorFlyout(
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
     ).catch(() => {

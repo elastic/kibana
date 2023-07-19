@@ -9,12 +9,13 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
@@ -26,7 +27,7 @@ export interface ActionTypeRegistryOpts {
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export class ActionTypeRegistry {
@@ -35,7 +36,7 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
-  private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly licensing: LicensingPluginSetup;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
@@ -43,7 +44,7 @@ export class ActionTypeRegistry {
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
-    this.preconfiguredActions = constructorParams.preconfiguredActions;
+    this.inMemoryConnectors = constructorParams.inMemoryConnectors;
     this.licensing = constructorParams.licensing;
   }
 
@@ -78,7 +79,7 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled or it is a preconfigured action type.
+   * Returns true if action type is enabled or it is an in memory action type.
    */
   public isActionExecutable(
     actionId: string,
@@ -89,11 +90,16 @@ export class ActionTypeRegistry {
     return (
       actionTypeEnabled ||
       (!actionTypeEnabled &&
-        this.preconfiguredActions.find(
-          (preconfiguredAction) => preconfiguredAction.id === actionId
-        ) !== undefined)
+        this.inMemoryConnectors.find((inMemoryConnector) => inMemoryConnector.id === actionId) !==
+          undefined)
     );
   }
+
+  /**
+   * Returns true if the action type is a system action type
+   */
+  public isSystemActionType = (actionTypeId: string): boolean =>
+    Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
    * Registers an action type to the action type registry
@@ -153,6 +159,7 @@ export class ActionTypeRegistry {
         title: actionType.name,
         maxAttempts,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
+        indirectParamsSchema: rawConnectorSchema,
       },
     });
     // No need to notify usage on basic action types
@@ -202,6 +209,7 @@ export class ActionTypeRegistry {
         enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
+        isSystemActionType: !!actionType.isSystemActionType,
       }));
   }
 

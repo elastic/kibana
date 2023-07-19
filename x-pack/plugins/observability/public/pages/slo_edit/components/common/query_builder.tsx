@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiFormRow } from '@elastic/eui';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
-import { EuiFormRow } from '@elastic/eui';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { useKibana } from '../../../../utils/kibana_react';
+import { CreateSLOForm } from '../../types';
 
 export interface Props {
   dataTestSubj: string;
   indexPatternString: string | undefined;
   label: string;
-  name: FieldPath<CreateSLOInput>;
+  name: FieldPath<CreateSLOForm>;
   placeholder: string;
   required?: boolean;
   tooltip?: ReactNode;
@@ -35,7 +35,7 @@ export function QueryBuilder({
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
 
-  const { control, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   const { dataView } = useCreateDataView({ indexPatternString });
 
@@ -54,7 +54,6 @@ export function QueryBuilder({
       fullWidth
     >
       <Controller
-        shouldUnregister
         defaultValue=""
         name={name}
         control={control}

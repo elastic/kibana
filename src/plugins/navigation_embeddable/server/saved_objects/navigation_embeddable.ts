@@ -27,6 +27,7 @@ export const navigationEmbeddableSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
+      id: { type: 'text' },
       title: { type: 'text' },
       description: { type: 'text' },
       links: {

@@ -79,20 +79,26 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
 
     const isImage = embeddable.type === 'image';
+    const isNavigation = embeddable.type === 'navigation';
 
     return Boolean(
-      embeddable && hasTimeRange(embeddable) && !isInputControl && !isMarkdown && !isImage
+      embeddable &&
+        hasTimeRange(embeddable) &&
+        !isInputControl &&
+        !isMarkdown &&
+        !isImage &&
+        !isNavigation
     );
   }
 
   public getDisplayName({ embeddable }: CustomizePanelActionContext): string {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {
-      defaultMessage: 'Edit panel settings',
+      defaultMessage: 'Panel settings',
     });
   }
 
   public getIconType() {
-    return 'pencil';
+    return 'gear';
   }
 
   public async isCompatible({ embeddable }: CustomizePanelActionContext) {

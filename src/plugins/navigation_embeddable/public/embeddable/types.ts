@@ -15,7 +15,6 @@ import {
 
 import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
 import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
-import {} from '../../common/types';
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,

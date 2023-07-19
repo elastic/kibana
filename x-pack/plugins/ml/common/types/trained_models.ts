@@ -202,6 +202,7 @@ export interface AllocatedModel {
     throughput_last_minute: number;
     number_of_allocations: number;
     threads_per_allocation: number;
+    error_count?: number;
   };
 }
 
