@@ -918,7 +918,7 @@ export class SearchSource {
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
-    // For testing shard failure messages in UI, uncomment the next block
+    // For testing shard failure messages in UI, uncomment the next block and switch to `kibana*` data view
     // body.query = {
     //   error_query: {
     //     indices: [
