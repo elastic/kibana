@@ -427,7 +427,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
-|The plugin provides APIs and components for AIOps features, including the “Explain log rate spikes” UI, maintained by the ML team.
+|The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]

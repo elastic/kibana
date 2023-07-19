@@ -58,7 +58,7 @@ export interface HistogramField {
 
 /**
  * Significant term meta data for a field/value pair.
- * Note this is used as a custom type within Explain Log Rate Spikes
+ * Note this is used as a custom type within Log Rate Analysis
  * for a p-value based variant, not a generic significant terms
  * aggregation type.
  */
