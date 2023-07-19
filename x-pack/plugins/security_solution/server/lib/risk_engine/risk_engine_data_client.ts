@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -23,7 +24,8 @@ import {
   ilmPolicy,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
-import type { RiskScore } from './types';
+import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
+import { RiskEngineDataWriter } from './risk_engine_data_writer';
 
 interface InitializeRiskEngineResourcesOpts {
   namespace?: string;
@@ -33,16 +35,6 @@ interface RiskEngineDataClientOpts {
   logger: Logger;
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-}
-
-interface WriterBulkResponse {
-  errors: string[];
-  docs_written: number;
-  took: number;
-}
-
-interface Writer {
-  bulk: (scores: RiskScore[]) => Promise<WriterBulkResponse>;
 }
 
 export class RiskEngineDataClient {
@@ -58,34 +50,13 @@ export class RiskEngineDataClient {
     return this.writerCache.get(namespace) as Writer;
   }
 
-  private async initializeWriter(namespace: string): Promise<Writer> {
-    const writer: Writer = {
-      bulk: async (scores) => {
-        const index = getIndexPattern(namespace).alias;
-        const esClient = await this.options.elasticsearchClientPromise;
-
-        try {
-          const { errors, items, took } = await esClient.bulk({
-            body: scores.flatMap((score) => [{ create: { _index: index } }, score]),
-          });
-
-          return {
-            errors: errors ? items.map((item) => item.create?.error?.reason).filter(Boolean) : [],
-            docs_written: items.filter(
-              (item) => item.create?.status === 201 || item.create?.status === 200
-            ).length,
-            took,
-          };
-        } catch (e) {
-          this.options.logger.error(`Error writing risk scores: ${e.message}`);
-          return {
-            errors: [e.message],
-            docs_written: 0,
-            took: 0,
-          };
-        }
-      },
-    };
+  private async initializeWriter(namespace: string, index: string): Promise<Writer> {
+    const writer = new RiskEngineDataWriter({
+      esClient: await this.options.elasticsearchClientPromise,
+      namespace,
+      index,
+      logger: this.options.logger,
+    });
     this.writerCache.set(namespace, writer);
     return writer;
   }
@@ -165,7 +136,7 @@ export class RiskEngineDataClient {
         indexPatterns,
       });
 
-      this.initializeWriter(namespace);
+      await this.initializeWriter(namespace, indexPatterns.alias);
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
     }
