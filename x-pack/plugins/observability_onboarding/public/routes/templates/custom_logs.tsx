@@ -40,16 +40,20 @@ const TRANSITION_DURATION = 180;
 
 function AnimatedTransitionsWizard({ children }: Props) {
   const [transition, setTransition] = useState<TransitionState>('ready');
+  const [title, setTitle] = useState<string>();
   const TransitionComponent = useRef<ComponentType>(() => null);
 
   function onChangeStep({
     direction,
+    stepTitle,
     StepComponent,
   }: {
     direction: 'back' | 'next';
+    stepTitle?: string;
     StepComponent: ComponentType;
   }) {
     setTransition(direction);
+    setTitle(stepTitle);
     TransitionComponent.current = StepComponent;
     setTimeout(() => {
       setTransition('ready');
@@ -69,12 +73,14 @@ function AnimatedTransitionsWizard({ children }: Props) {
             data-test-subj="obltOnboardingStreamLogFilePageHeader"
           >
             <h1>
-              {i18n.translate(
-                'xpack.observability_onboarding.title.collectCustomLogs',
-                {
-                  defaultMessage: 'Stream log files to Elastic',
-                }
-              )}
+              {title
+                ? title
+                : i18n.translate(
+                    'xpack.observability_onboarding.title.collectCustomLogs',
+                    {
+                      defaultMessage: 'Stream log files to Elastic',
+                    }
+                  )}
             </h1>
           </EuiTitle>
         </EuiFlexItem>
