@@ -12,6 +12,7 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
@@ -58,7 +59,7 @@ export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
   private publicLocations: Locations;
-  private privateLocations: PrivateLocation[];
+  private privateLocations: PrivateLocationAttributes[];
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private monitors: ProjectMonitor[] = [];
