@@ -129,7 +129,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         props.initialTemplate.icon && (
           <IconRenderer
             icon={props.initialTemplate.icon}
-            className={'gphLegacyIcon gphLegacyIcon--list'}
+            className="gphLegacyIcon gphLegacyIcon--list"
           />
         )
       }

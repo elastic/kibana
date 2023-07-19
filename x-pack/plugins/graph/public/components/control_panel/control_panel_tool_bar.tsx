@@ -103,7 +103,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={redoButtonMsg}>
           <EuiButtonIcon
-            iconType={'editorRedo'}
+            iconType="editorRedo"
             size="xs"
             aria-label={redoButtonMsg}
             isDisabled={workspace.redoLog.length === 0}
@@ -115,7 +115,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={expandButtonMsg}>
           <EuiButtonIcon
-            iconType={'plus'}
+            iconType="plus"
             size="xs"
             aria-label={expandButtonMsg}
             isDisabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
@@ -127,7 +127,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={addLinksButtonMsg}>
           <EuiButtonIcon
-            iconType={'editorLink'}
+            iconType="link"
             size="xs"
             aria-label={addLinksButtonMsg}
             isDisabled={haveNodes}
@@ -140,7 +140,7 @@ export const ControlPanelToolBar = ({
         <EuiToolTip content={removeVerticesButtonMsg}>
           <EuiButtonIcon
             data-test-subj="graphRemoveSelection"
-            iconType={'trash'}
+            iconType="trash"
             size="xs"
             aria-label={removeVerticesButtonMsg}
             isDisabled={haveNodes}
@@ -152,7 +152,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={blocklistButtonMsg}>
           <EuiButtonIcon
-            iconType={'filterIgnore'}
+            iconType="eyeClosed"
             size="xs"
             aria-label={blocklistButtonMsg}
             isDisabled={workspace.selectedNodes.length === 0}
@@ -164,7 +164,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={customStyleButtonMsg}>
           <EuiButtonIcon
-            iconType={'brush'}
+            iconType="brush"
             size="xs"
             aria-label={customStyleButtonMsg}
             isDisabled={workspace.selectedNodes.length === 0}
@@ -176,7 +176,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={drillDownButtonMsg}>
           <EuiButtonIcon
-            iconType={'iInCircle'}
+            iconType="iInCircle"
             size="xs"
             aria-label={drillDownButtonMsg}
             isDisabled={haveNodes}
@@ -190,7 +190,7 @@ export const ControlPanelToolBar = ({
           <EuiToolTip content={runLayoutButtonMsg}>
             <EuiButtonIcon
               data-test-subj="graphResumeLayout"
-              iconType={'playFilled'}
+              iconType="playFilled"
               size="xs"
               aria-label={runLayoutButtonMsg}
               isDisabled={workspace.nodes.length === 0}
@@ -205,7 +205,7 @@ export const ControlPanelToolBar = ({
           <EuiToolTip content={pauseLayoutButtonMsg}>
             <EuiButtonIcon
               data-test-subj="graphPauseLayout"
-              iconType={'pause'}
+              iconType="pause"
               size="xs"
               aria-label={pauseLayoutButtonMsg}
               onClick={onPauseLayoutClick}

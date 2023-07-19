@@ -146,7 +146,7 @@ export function FieldEditor({
           }}
         >
           <IconRenderer
-            className={'gphFieldEditor__badgeIcon'}
+            className="gphFieldEditor__badgeIcon"
             icon={initialField.icon}
             color={color}
           />

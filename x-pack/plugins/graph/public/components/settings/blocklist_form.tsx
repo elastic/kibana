@@ -43,7 +43,7 @@ export function BlocklistForm({
               id="xpack.graph.blocklist.noEntriesDescription"
               defaultMessage="You don't have any blocked terms. Select vertices and click {stopSign} in the control panel on the right to block them. Documents that match blocked terms are no longer explored and relationships to them are hidden."
               values={{
-                stopSign: <EuiIcon type="filterIgnore" />,
+                stopSign: <EuiIcon type="eyeClosed" />,
               }}
             />
           }
@@ -56,7 +56,7 @@ export function BlocklistForm({
             {blocklistedNodes.map((node) => (
               <EuiListGroupItem
                 icon={
-                  <IconRenderer icon={node.icon} className={'gphLegacyIcon gphLegacyIcon--list'} />
+                  <IconRenderer icon={node.icon} className="gphLegacyIcon gphLegacyIcon--list" />
                 }
                 key={getListKey(node)}
                 label={node.label}

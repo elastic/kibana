@@ -44,7 +44,7 @@ export const MergeCandidates = ({
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        <EuiIcon type="editorLink" />{' '}
+        <EuiIcon type="link" />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {
           defaultMessage: 'Link summary',
         })}
@@ -103,7 +103,7 @@ export const MergeCandidates = ({
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg}>
                 <EuiButtonIcon
-                  iconType={'doubleArrowRight'}
+                  iconType="doubleArrowRight"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
                   aria-label={mergeTerm1ToTerm2ButtonMsg}
@@ -116,7 +116,7 @@ export const MergeCandidates = ({
 
               <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg}>
                 <EuiButtonIcon
-                  iconType={'doubleArrowLeft'}
+                  iconType="doubleArrowLeft"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v2 }}
                   aria-label={mergeTerm2ToTerm1ButtonMsg}
