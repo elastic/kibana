@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { useWizard } from '.';
 import { OptionalFormRow } from '../../../shared/optional_form_row';
@@ -37,6 +38,7 @@ import { BackButton } from './back_button';
 import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
+  const [datasetNameTouched, setDatasetNameTouched] = useState(false);
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
@@ -85,6 +87,13 @@ export function ConfigureLogs() {
       setDatasetName(getFilename(filepath));
     }
   }
+
+  const isDatasetNameInvalid = datasetNameTouched && isEmpty(datasetName);
+
+  const datasetNameError = i18n.translate(
+    'xpack.observability_onboarding.configureLogs.dataset.error',
+    { defaultMessage: 'A dataset name is required.' }
+  );
 
   return (
     <StepPanel
@@ -205,6 +214,8 @@ export function ConfigureLogs() {
                   "Pick a name for your logs. All lowercase, max 100 chars, special characters will be replaced with '_'.",
               }
             )}
+            isInvalid={isDatasetNameInvalid}
+            error={datasetNameError}
           >
             <EuiFieldText
               placeholder={i18n.translate(
@@ -217,6 +228,8 @@ export function ConfigureLogs() {
               onChange={(event) =>
                 setDatasetName(replaceSpecialChars(event.target.value))
               }
+              isInvalid={isDatasetNameInvalid}
+              onInput={() => setDatasetNameTouched(true)}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
