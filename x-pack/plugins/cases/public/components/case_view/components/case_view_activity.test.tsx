@@ -495,7 +495,8 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    describe('Reporter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152206
+    describe.skip('Reporter', () => {
       it('should render the reporter correctly', async () => {
         appMockRender = createAppMockRenderer();
         appMockRender.render(<CaseViewActivity {...caseProps} />);
