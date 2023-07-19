@@ -5074,8 +5074,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
+        // const migrationVersion = mockMigrationVersion;
+        // const coreMigrationVersion = '8.0.0';
         const test = async (references: unknown) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {

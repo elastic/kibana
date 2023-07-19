@@ -23,7 +23,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { merge } from 'lodash';
-import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
+import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { getCurrentTime, getSavedObjectFromSource } from './utils';
 import { ApiExecutionContext } from './types';
 import { isValidRequest, errorMap } from '../utils';
@@ -68,7 +68,7 @@ export const performUpdate = async <T>(
     references,
     upsert,
     refresh = DEFAULT_REFRESH_SETTING,
-    retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+    // retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
     migrationVersionCompatibility,
   } = options;
 

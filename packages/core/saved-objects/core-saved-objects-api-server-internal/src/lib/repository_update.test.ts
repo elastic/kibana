@@ -105,6 +105,8 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
   // ZDT IMPLEMENTATIONS
+
+  /*
   const mockMigrationVersion = { foo: '2.3.4' };
   const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => {
     const response = {
@@ -125,6 +127,8 @@ describe('SavedObjectsRepository', () => {
     };
     return response;
   };
+  */
+
   // ZDT IMPLEMENTATIONS: Using client.index || client.create to handle SOR.update REQUIRES refactoring
   // all these tests.
   describe('#update', () => {
@@ -382,8 +386,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
+        // const migrationVersion = mockMigrationVersion;
+        // const coreMigrationVersion = '8.0.0';
         const test = async (references: unknown) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
