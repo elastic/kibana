@@ -39,5 +39,5 @@ export const PUBLIC_ROUTES = {
    * Public endpoint used by Watcher and automated report downloads
    * jobId is added to the final path
    */
-  DOWNLOAD_PREFIX: prefixPublicPath + `/download`,
+  DOWNLOAD_PREFIX: prefixPublicPath + `/jobs/download`,
 };

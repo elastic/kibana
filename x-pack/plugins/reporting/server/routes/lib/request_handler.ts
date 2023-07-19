@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import type { ReportingCore } from '../..';
-import { INTERNAL_ROUTES } from '../../../common/constants';
+import { PUBLIC_ROUTES } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
@@ -18,11 +18,6 @@ import { Counters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
-};
-
-const getDownloadBaseUrl = (reporting: ReportingCore) => {
-  const { basePath } = reporting.getServerInfo();
-  return basePath + INTERNAL_ROUTES.JOBS.DOWNLOAD;
 };
 
 /**
@@ -140,16 +135,16 @@ export class RequestHandler {
     let report: Report | undefined;
     try {
       report = await this.enqueueJob(exportTypeId, jobParams);
+      const { basePath } = this.reporting.getServerInfo();
+      const publicDownloadPath = basePath + PUBLIC_ROUTES.DOWNLOAD_PREFIX;
 
       // return task manager's task information and the download URL
-      const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
-
       counters.usageCounter();
 
       return this.res.ok({
         headers: { 'content-type': 'application/json' },
         body: {
-          path: `${downloadBaseUrl}/${report._id}`,
+          path: `${publicDownloadPath}/${report._id}`,
           job: report.toApiJSON(),
         },
       });
