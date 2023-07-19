@@ -76,7 +76,7 @@ image::images/stepcurve.gif[An short video displaying the three new chart option
 [discrete]
 ==== Significance (significant terms)
 
-This new ranking method in the top values breakdown displays data by significance (significant terms). It permits us to get the terms that are important and likely the most critical for a given query. It’s a powerful way to find anomalies in your data with multiple use cases. Read more https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-significantterms-aggregation.html[here].
+This new ranking method in the top values breakdown displays data by significance (significant terms). It permits us to get the terms that are important and likely the most critical for a given query. It’s a powerful way to find anomalies in your data with multiple use cases. Read more {ref}/search-aggregations-bucket-significantterms-aggregation.html[here].
 This is not just based on the most popular terms in a set. When calculating significant terms, Elasticsearch looks for significant changes in popularity of a specific term between two sets of data. A foreground set (the data returned by a query) and a background set (the data in our indices). This is supported on all charts. 
 
 [role="screenshot"]
@@ -119,7 +119,7 @@ image::images/globalfilter.png[Example of the new global filter slider]
 
 [discrete]
 ==== Explain log rate spikes
-[Preview] The AIOps Explain Log Rate Spikes feature is now embeddable into other pages. This reusable component has been picked up by the Observability team and added the analysis to their log threshold alert details page. This is a new view introduced in 8.9. It is the starting point for troubleshooting log alerts. The log rate spike analysis helps find the reason behind a particular change possibly in millions of log events across multiple fields and values in seconds. Additionally, users can trigger the AI assistant from here to get remediation and troubleshooting suggestions.
+preview:[] The AIOps Explain Log Rate Spikes feature is now embeddable into other pages. This reusable component has been picked up by the Observability team and added the analysis to their log threshold alert details page. This is a new view introduced in 8.9. It is the starting point for troubleshooting log alerts. The log rate spike analysis helps find the reason behind a particular change possibly in millions of log events across multiple fields and values in seconds. Additionally, users can trigger the AI assistant from here to get remediation and troubleshooting suggestions.
 
 [role="screenshot"]
 image::images/logratespikes1.png[Example of the new log rates spikes dashboard]
