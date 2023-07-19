@@ -21,10 +21,6 @@ export const docker: Command = {
   help: (defaults: Record<string, any> = {}) => {
     const { password } = defaults;
 
-    // TODO: tests
-    // TODO: docs?
-    // TODO: setup pw
-    // TODO: Windows support?
     return dedent`
     Options:
 

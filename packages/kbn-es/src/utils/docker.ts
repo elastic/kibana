@@ -32,9 +32,10 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 interface ServerlessEsNodeArgs {
-  params: string[];
-  name: string;
+  esArgs?: Array<[string, string]>;
   image: string;
+  name: string;
+  params: string[];
 }
 
 const DOCKER_REGISTRY = 'docker.elastic.co';
@@ -84,16 +85,7 @@ const SHARED_SERVERLESS_PARAMS = [
   'elastic',
 
   '--env',
-  'ES_JAVA_OPTS=-Xms1g -Xmx1g',
-
-  '--env',
   'cluster.initial_master_nodes=es01,es02,es03',
-
-  '--env',
-  'xpack.security.enabled=false',
-
-  '--env',
-  'cluster.name=stateless',
 
   '--env',
   'stateless.enabled=true',
@@ -106,6 +98,15 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--env',
   'path.repo=/objectstore',
+];
+
+// only allow certain ES args to be overwrote by options
+const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
+  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
+
+  ['xpack.security.enabled', 'false'],
+
+  ['cluster.name', 'stateless'],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
@@ -123,10 +124,8 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
 
       '--env',
       'node.roles=["master","index"]',
-
-      '--env',
-      'xpack.searchable.snapshot.shared_cache.size=1gb',
     ],
+    esArgs: [['xpack.searchable.snapshot.shared_cache.size', '1gb']],
   },
   {
     name: 'es02',
@@ -142,10 +141,8 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
 
       '--env',
       'node.roles=["master","search"]',
-
-      '--env',
-      'xpack.searchable.snapshot.shared_cache.size=1gb',
     ],
+    esArgs: [['xpack.searchable.snapshot.shared_cache.size', '1gb']],
   },
   {
     name: 'es03',
@@ -229,6 +226,27 @@ async function setupDocker(log: ToolingLog) {
 }
 
 /**
+ * Override default esArgs with options.esArgs
+ */
+function resolveEsArgs(
+  defaultEsArgs: Array<[string, string]>,
+  options: ServerlessOptions | DockerOptions
+) {
+  const esArgs = new Map(defaultEsArgs);
+
+  if (options.esArgs) {
+    const args = typeof options.esArgs === 'string' ? [options.esArgs] : options.esArgs;
+
+    args.forEach((arg) => {
+      const [key, ...value] = arg.split('=');
+      esArgs.set(key.trim(), value.join('=').trim());
+    });
+  }
+
+  return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
+}
+
+/**
  * Setup local volumes for Serverless ES
  */
 async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
@@ -308,7 +326,13 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node) => {
-      await runServerlessEsNode(log, { ...node, image, params: node.params.concat(volumeCmd) });
+      const esArgs = resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options);
+
+      await runServerlessEsNode(log, {
+        ...node,
+        image,
+        params: node.params.concat(esArgs, volumeCmd),
+      });
       return node.name;
     })
   );
