@@ -124,7 +124,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
 };
 
 // FAILING: https://github.com/elastic/kibana/issues/155534
-describe.skip('The metric threshold alert type', () => {
+describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
