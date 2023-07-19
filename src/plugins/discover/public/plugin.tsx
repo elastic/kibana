@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BehaviorSubject, combineLatest, map, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
