@@ -26,7 +26,10 @@ export * from './selectors';
 
 export const {
   loadInitial,
+  initEmpty,
+  initExisting,
   navigateAway,
+  setExecutionContext,
   setState,
   enableAutoApply,
   disableAutoApply,
@@ -43,7 +46,6 @@ export const {
   switchAndCleanDatasource,
   updateIndexPatterns,
   setToggleFullscreen,
-  initEmpty,
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,

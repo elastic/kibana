@@ -141,6 +141,8 @@ export const getPreloadedState = ({
 };
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
+export const setExecutionContext = createAction<Partial<LensAppState>>('lens/setExecutionContext');
+export const initExisting = createAction<Partial<LensAppState>>('lens/initExisting');
 export const onActiveDataChange = createAction<{
   activeData: TableInspectorAdapter;
 }>('lens/onActiveDataChange');
@@ -268,7 +270,9 @@ export const registerLibraryAnnotationGroup = createAction<{
 }>('lens/registerLibraryAnnotationGroup');
 
 export const lensActions = {
+  initExisting,
   setState,
+  setExecutionContext,
   onActiveDataChange,
   setSaveable,
   enableAutoApply,
@@ -307,6 +311,18 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;
   return createReducer<LensAppState>(initialState, {
     [setState.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [setExecutionContext.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [initExisting.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
       return {
         ...state,
         ...payload,

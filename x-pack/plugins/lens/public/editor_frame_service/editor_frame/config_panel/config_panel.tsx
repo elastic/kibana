@@ -13,7 +13,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { isEqual } from 'lodash';
+
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import {
   changeIndexPattern,
@@ -86,18 +86,12 @@ export function LayerPanels(
     () =>
       (datasourceId: string | undefined, newState: unknown, dontSyncLinkedDimensions?: boolean) => {
         if (datasourceId) {
-          const newDatasourceState =
-            typeof newState === 'function'
-              ? newState(datasourceStates[datasourceId].state)
-              : newState;
-
-          if (isEqual(newDatasourceState, datasourceStates[datasourceId].state)) {
-            return;
-          }
-
           dispatchLens(
             updateDatasourceState({
-              newDatasourceState,
+              newDatasourceState:
+                typeof newState === 'function'
+                  ? newState(datasourceStates[datasourceId].state)
+                  : newState,
               datasourceId,
               clearStagedPreview: false,
               dontSyncLinkedDimensions,

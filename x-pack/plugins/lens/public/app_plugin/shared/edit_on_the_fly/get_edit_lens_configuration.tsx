@@ -18,11 +18,9 @@ import {
   makeConfigureStore,
   LensRootStore,
   loadInitial,
-  updateVisualizationState,
-  removeDimension,
-  removeOrClearLayer,
-  addLayer,
-  updateDatasourceState,
+  setExecutionContext,
+  initExisting,
+  initEmpty,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -50,22 +48,16 @@ type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => vo
 const updatingMiddleware =
   (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
     next(action);
-    // just a comment to the reviewer - these are the places we were updating the state before so we can uncomment it,
-    // but I think we should sync on every update so I commented it to demonstrate the idea of how it replaces what we have,
-    // but I want to remove it
-    // if (
-    //   updateVisualizationState.match(action) ||
-    //   removeDimension.match(action) ||
-    //   removeOrClearLayer.match(action) ||
-    //   addLayer.match(action) ||
-    //   updateDatasourceState.match(action)
-    // ) {
-    // we want to get the state after the store update, that's why we use setTimeout
-    setTimeout(() => {
+    // do not update on initializing actions to not trigger loop updates
+    if (
+      !initExisting.match(action) &&
+      !initEmpty.match(action) &&
+      !loadInitial.match(action) &&
+      !setExecutionContext.match(action)
+    ) {
       const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
       updater(datasourceStates[activeDatasourceId].state, visualization.state);
-    });
-    // }
+    }
   };
 
 export function getEditLensConfiguration(

@@ -7,7 +7,7 @@
 
 import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { onActiveDataChange } from '.';
+import { onActiveDataChange, updateDatasourceState } from '.';
 
 /** cancels updates to the store that don't change the state */
 export const optimizingMiddleware = () => (store: MiddlewareAPI) => {
@@ -17,6 +17,14 @@ export const optimizingMiddleware = () => (store: MiddlewareAPI) => {
         return;
       }
     }
+    if (updateDatasourceState.match(action)) {
+      const { datasourceId, newDatasourceState } = action.payload;
+      const { datasourceStates } = store.getState().lens;
+      if (isEqual(datasourceStates[datasourceId].state, newDatasourceState)) {
+        return;
+      }
+    }
+
     next(action);
   };
 };

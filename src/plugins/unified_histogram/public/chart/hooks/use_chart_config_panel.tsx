@@ -49,7 +49,9 @@ export function useChartConfigPanel({
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       } as Suggestion;
-      onSuggestionChange?.(updatedSuggestion);
+      if (!isEqual(updatedSuggestion, currentSuggestion)) {
+        onSuggestionChange?.(updatedSuggestion);
+      }
     },
     [currentSuggestion, onSuggestionChange]
   );
