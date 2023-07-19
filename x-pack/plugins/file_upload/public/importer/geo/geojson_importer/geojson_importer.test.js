@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ReadableStreamPolyfill, BlobPolyfill, FileReaderPolyfill, FilePolyfill } from '@loaders.gl/polyfills';
+import {
+  ReadableStreamPolyfill,
+  BlobPolyfill,
+  FileReaderPolyfill,
+  FilePolyfill,
+} from '@loaders.gl/polyfills';
 import { GeoJsonImporter } from './geojson_importer';
 
 (function () {
