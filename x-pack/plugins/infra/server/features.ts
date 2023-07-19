@@ -28,7 +28,12 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+  alerting: [
+    METRIC_THRESHOLD_ALERT_TYPE_ID,
+    METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+    '.es-query',
+    'observability.rules.threshold',
+  ],
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
@@ -40,10 +45,20 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
         alert: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
       },
       management: {
@@ -61,10 +76,20 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
         alert: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
       },
       management: {
