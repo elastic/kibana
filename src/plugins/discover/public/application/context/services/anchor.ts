@@ -17,7 +17,6 @@ import type { DiscoverServices } from '../../../build_services';
 import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 
-
 export async function fetchAnchor(
   anchorId: string,
   dataView: DataView,
