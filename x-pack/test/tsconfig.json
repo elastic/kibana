@@ -137,6 +137,7 @@
     "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin",
     "@kbn/reporting-export-types-pdf",
-    "@kbn/reporting-export-types-csv"
+    "@kbn/reporting-export-types-csv",
+    "@kbn/reporting-export-types-deprecated"
   ]
 }
