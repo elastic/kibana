@@ -14,6 +14,7 @@ import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   getRedirectAppPath,
   INTERNAL_ROUTES,
+  PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import {
@@ -42,7 +43,7 @@ export interface DiagnoseResponse {
 interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
-  getReportingJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+  getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
   createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
@@ -160,29 +161,29 @@ export class ReportingAPIClient implements IReportingAPI {
     return reports.map((report) => new Job(report));
   }
 
-  public getReportingJobPath(exportType: string, jobParams: BaseParams) {
+  /**
+   * Returns a string for the public API endpoint used to automate the generation of reports
+   */
+  public getReportingPublicJobPath(exportType: string, jobParams: BaseParams) {
     const params = stringify({
       jobParams: rison.encode(jobParams),
     });
-    return `${this.http.basePath.prepend(
-      INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX
-    )}/${exportType}?${params}`;
+    return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
   }
 
+  /**
+   * Calls the internal API to generate a report job on-demand
+   */
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
       `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/${exportType}`,
       {
         method: 'POST',
-        body: JSON.stringify({
-          jobParams: jobParamsRison,
-        }),
+        body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-
     add(resp.job.id);
-
     return new Job(resp.job);
   }
 

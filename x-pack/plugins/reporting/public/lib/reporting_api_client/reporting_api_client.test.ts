@@ -174,7 +174,7 @@ describe('ReportingAPIClient', () => {
   describe('getReportingJobPath', () => {
     it('should generate a job path', () => {
       expect(
-        apiClient.getReportingJobPath('pdf', {
+        apiClient.getReportingPublicJobPath('pdf', {
           browserTimezone: 'UTC',
           objectType: 'something',
           title: 'some title',
