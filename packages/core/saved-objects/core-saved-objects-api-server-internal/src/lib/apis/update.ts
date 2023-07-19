@@ -22,7 +22,6 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { merge } from 'lodash';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { getCurrentTime, getSavedObjectFromSource } from './utils';
 import { ApiExecutionContext } from './types';
@@ -242,7 +241,8 @@ export const performUpdate = async <T>(
   // UPDATE CASE START:
   // Doc already exists, we use both the attributes from the main request body and any extra ones from upsert. We need to ignore duplicate attribute fields if given in both attributes and upsert
   // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
-  const updatedAttributes = merge(migrated!.attributes, attributes);
+  // const updatedAttributes = merge(migrated!.attributes, attributes);
+  const updatedAttributes = { ...migrated!.attributes, ...attributes };
   if (
     (registry.isMultiNamespace(type) &&
       preflightDocNSResult.checkResult === 'found_in_namespace') ||
