@@ -151,15 +151,15 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiText>
                       <EuiSpacer />
                       <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
-                        {`${
+                        {`connectors:
+  -
+    connector_id: "${index.connector.id}"
+    service_type: "${index.connector.service_type || 'changeme'}"${
                           apiKeyData?.encoded
-                            ? `elasticsearch:
-  api_key: "${apiKeyData?.encoded}"
-`
+                            ? `
+    api_key: "${apiKeyData?.encoded}"`
                             : ''
-                        }connector_id: "${index.connector.id}"
-service_type: "${index.connector.service_type || 'changeme'}"
-`}
+                        }`}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
