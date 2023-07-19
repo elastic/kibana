@@ -38,7 +38,6 @@ interface ServerlessEsNodeArgs {
   params: string[];
 }
 
-// TODO verify docker image
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
 const DOCKER_BASE_CMD = [
@@ -173,6 +172,12 @@ const resolveDockerImage = ({
   defaultImg,
 }: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) => {
   if (image) {
+    if (!image.includes(DOCKER_REGISTRY)) {
+      throw createCliError(
+        `Only verified images from ${DOCKER_REGISTRY} are currently allowed.\nIf you require this functionality in @kbn/es please contact the Kibana Operations Team.`
+      );
+    }
+
     return image;
   } else if (tag) {
     return `${repo}:${tag}`;
