@@ -52,12 +52,20 @@ export const NavEmbeddableStrings = {
           defaultMessage: 'Save',
         }),
       getLinkLoadingAriaLabel: () =>
-        i18n.translate('navigationEmbeddable.linkEditor.linkLoadingAriaLabel', {
+        i18n.translate('navigationEmbeddable.panelEditor.linkLoadingAriaLabel', {
           defaultMessage: 'Loading link',
         }),
       getDragHandleAriaLabel: () =>
-        i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
+        i18n.translate('navigationEmbeddable.panelEditor.dragHandleAriaLabel', {
           defaultMessage: 'Link drag handle',
+        }),
+      getLayoutSettingsTitle: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.layoutSettingsTitle', {
+          defaultMessage: 'Layout',
+        }),
+      getLayoutSettingsLegend: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.layoutSettingsLegend', {
+          defaultMessage: 'Choose how to display your links.',
         }),
     },
     linkEditor: {

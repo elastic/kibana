@@ -148,7 +148,7 @@ const NavigationEmbeddablePanelEditor = ({
   const layoutOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
     return ([NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
       return {
-        iconType: NavigationLayoutInfo[type].icon,
+        // iconType: NavigationLayoutInfo[type].icon,
         id: type,
         label: NavigationLayoutInfo[type].displayName,
       };
@@ -173,7 +173,7 @@ const NavigationEmbeddablePanelEditor = ({
             <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
           ) : (
             <>
-              <EuiFormRow>
+              <EuiFormRow label="Links">
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">
@@ -204,15 +204,15 @@ const NavigationEmbeddablePanelEditor = ({
                   </EuiButtonEmpty>
                 </>
               </EuiFormRow>
-              <EuiFormRow label="Layout">
+              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
                 <EuiButtonGroup
-                  legend={''}
-                  buttonSize="compressed"
                   options={layoutOptions}
+                  buttonSize="compressed"
                   idSelected={currentLayout}
                   onChange={(id) => {
                     setCurrentLayout(id as NavigationLayoutType);
                   }}
+                  legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
                 />
               </EuiFormRow>
             </>
