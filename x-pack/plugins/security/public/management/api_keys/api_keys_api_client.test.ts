@@ -10,19 +10,6 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { APIKeysAPIClient } from './api_keys_api_client';
 
 describe('APIKeysAPIClient', () => {
-  it('checkPrivileges() queries correct endpoint', async () => {
-    const httpMock = httpServiceMock.createStartContract();
-
-    const mockResponse = Symbol('mockResponse');
-    httpMock.get.mockResolvedValue(mockResponse);
-
-    const apiClient = new APIKeysAPIClient(httpMock);
-
-    await expect(apiClient.checkPrivileges()).resolves.toBe(mockResponse);
-    expect(httpMock.get).toHaveBeenCalledTimes(1);
-    expect(httpMock.get).toHaveBeenCalledWith('/internal/security/api_key/privileges');
-  });
-
   it('getApiKeys() queries correct endpoint', async () => {
     const httpMock = httpServiceMock.createStartContract();
 
@@ -33,23 +20,8 @@ describe('APIKeysAPIClient', () => {
 
     await expect(apiClient.getApiKeys()).resolves.toBe(mockResponse);
     expect(httpMock.get).toHaveBeenCalledTimes(1);
-    expect(httpMock.get).toHaveBeenCalledWith('/internal/security/api_key', {
-      query: { isAdmin: false },
-    });
+    expect(httpMock.get).toHaveBeenCalledWith('/internal/security/api_key');
     httpMock.get.mockClear();
-
-    await expect(apiClient.getApiKeys(false)).resolves.toBe(mockResponse);
-    expect(httpMock.get).toHaveBeenCalledTimes(1);
-    expect(httpMock.get).toHaveBeenCalledWith('/internal/security/api_key', {
-      query: { isAdmin: false },
-    });
-    httpMock.get.mockClear();
-
-    await expect(apiClient.getApiKeys(true)).resolves.toBe(mockResponse);
-    expect(httpMock.get).toHaveBeenCalledTimes(1);
-    expect(httpMock.get).toHaveBeenCalledWith('/internal/security/api_key', {
-      query: { isAdmin: true },
-    });
   });
 
   it('invalidateApiKeys() queries correct endpoint', async () => {

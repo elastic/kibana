@@ -16,8 +16,6 @@ import {
   EuiHealth,
   EuiInMemoryTable,
   EuiLink,
-  EuiSearchBar,
-  EuiSearchBarFilters,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -446,79 +444,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   if (typeFilters.length > 1) {
     filters.push({
       type: 'custom_component',
-      component: ({ query, onChange }) => {
-        if (!onChange) {
-          return null;
-        }
-
-        return (
-          <>
-            {typeFilters.includes('rest') ? (
-              <EuiFilterButton
-                iconType="user"
-                iconSide="left"
-                hasActiveFilters={query.hasSimpleFieldClause('type', 'rest')}
-                onClick={() =>
-                  onChange(
-                    query.hasSimpleFieldClause('type', 'rest')
-                      ? query.removeSimpleFieldClauses('type')
-                      : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'rest')
-                  )
-                }
-                withNext={typeFilters.includes('cross_cluster') || typeFilters.includes('managed')}
-              >
-                <FormattedMessage
-                  id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-                  defaultMessage="Personal"
-                />
-              </EuiFilterButton>
-            ) : null}
-            {typeFilters.includes('cross_cluster') ? (
-              <EuiFilterButton
-                iconType="cluster"
-                iconSide="left"
-                hasActiveFilters={query.hasSimpleFieldClause('type', 'cross_cluster')}
-                onClick={() =>
-                  onChange(
-                    query.hasSimpleFieldClause('type', 'cross_cluster')
-                      ? query.removeSimpleFieldClauses('type')
-                      : query
-                          .removeSimpleFieldClauses('type')
-                          .addSimpleFieldValue('type', 'cross_cluster')
-                  )
-                }
-                withNext={typeFilters.includes('managed')}
-              >
-                <FormattedMessage
-                  id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-                  defaultMessage="Cross-Cluster"
-                />
-              </EuiFilterButton>
-            ) : null}
-            {typeFilters.includes('managed') ? (
-              <EuiFilterButton
-                iconType="gear"
-                iconSide="left"
-                hasActiveFilters={query.hasSimpleFieldClause('type', 'managed')}
-                onClick={() =>
-                  onChange(
-                    query.hasSimpleFieldClause('type', 'managed')
-                      ? query.removeSimpleFieldClauses('type')
-                      : query
-                          .removeSimpleFieldClauses('type')
-                          .addSimpleFieldValue('type', 'managed')
-                  )
-                }
-              >
-                <FormattedMessage
-                  id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
-                  defaultMessage="Managed"
-                />
-              </EuiFilterButton>
-            ) : null}
-          </>
-        );
-      },
+      component: ({ query, onChange }) => (
+        <TypesFilterButton types={typeFilters} query={query} onChange={onChange} />
+      ),
     });
   }
 
@@ -526,7 +454,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <UserFilterButton usernames={usernameFilters} query={query} onChange={onChange} />
+        <UsersFilterButton usernames={usernameFilters} query={query} onChange={onChange} />
       ),
     });
   }
@@ -605,13 +533,95 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   );
 };
 
-export interface UserFilterButtonProps {
+export interface TypesFilterButtonProps {
+  query: Query;
+  onChange?: (query: Query) => void;
+  types: string[];
+}
+
+export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
+  query,
+  onChange,
+  types,
+}) => {
+  if (!onChange) {
+    return null;
+  }
+
+  return (
+    <>
+      {types.includes('rest') ? (
+        <EuiFilterButton
+          iconType="user"
+          iconSide="left"
+          hasActiveFilters={query.hasSimpleFieldClause('type', 'rest')}
+          onClick={() =>
+            onChange(
+              query.hasSimpleFieldClause('type', 'rest')
+                ? query.removeSimpleFieldClauses('type')
+                : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'rest')
+            )
+          }
+          withNext={types.includes('cross_cluster') || types.includes('managed')}
+        >
+          <FormattedMessage
+            id="xpack.security.accountManagement.apiKeyBadge.restTitle"
+            defaultMessage="Personal"
+          />
+        </EuiFilterButton>
+      ) : null}
+      {types.includes('cross_cluster') ? (
+        <EuiFilterButton
+          iconType="cluster"
+          iconSide="left"
+          hasActiveFilters={query.hasSimpleFieldClause('type', 'cross_cluster')}
+          onClick={() =>
+            onChange(
+              query.hasSimpleFieldClause('type', 'cross_cluster')
+                ? query.removeSimpleFieldClauses('type')
+                : query
+                    .removeSimpleFieldClauses('type')
+                    .addSimpleFieldValue('type', 'cross_cluster')
+            )
+          }
+          withNext={types.includes('managed')}
+        >
+          <FormattedMessage
+            id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
+            defaultMessage="Cross-Cluster"
+          />
+        </EuiFilterButton>
+      ) : null}
+      {types.includes('managed') ? (
+        <EuiFilterButton
+          iconType="gear"
+          iconSide="left"
+          hasActiveFilters={query.hasSimpleFieldClause('type', 'managed')}
+          onClick={() =>
+            onChange(
+              query.hasSimpleFieldClause('type', 'managed')
+                ? query.removeSimpleFieldClauses('type')
+                : query.removeSimpleFieldClauses('type').addSimpleFieldValue('type', 'managed')
+            )
+          }
+        >
+          <FormattedMessage
+            id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
+            defaultMessage="Managed"
+          />
+        </EuiFilterButton>
+      ) : null}
+    </>
+  );
+};
+
+export interface UsersFilterButtonProps {
   query: Query;
   onChange?: (query: Query) => void;
   usernames: string[];
 }
 
-export const UserFilterButton: FunctionComponent<UserFilterButtonProps> = ({
+export const UsersFilterButton: FunctionComponent<UsersFilterButtonProps> = ({
   query,
   onChange,
   usernames,
