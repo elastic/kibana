@@ -6,8 +6,23 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseConnectorRt } from './connector';
-import { CaseExternalServiceBasicRt } from '../cases';
+import { CaseExternalServiceBasicRt } from '../../../api';
+import { CaseConnectorRt, ConnectorMappingsRt } from '../../domain/connector/v1';
+
+const ActionConnectorResultRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    actionTypeId: rt.string,
+    name: rt.string,
+    isDeprecated: rt.boolean,
+    isPreconfigured: rt.boolean,
+    isSystemAction: rt.boolean,
+    referencedByCount: rt.number,
+  }),
+  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
+]);
+
+export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
 const PushDetailsRt = rt.strict({
   latestUserActionPushDate: rt.string,
@@ -37,5 +52,12 @@ export const GetCaseConnectorsResponseRt = rt.record(
   ])
 );
 
+export const ConnectorMappingResponseRt = rt.strict({
+  id: rt.string,
+  version: rt.string,
+  mappings: ConnectorMappingsRt,
+});
+
+export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;
 export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;
 export type GetCaseConnectorsPushDetails = rt.TypeOf<typeof PushDetailsRt>;

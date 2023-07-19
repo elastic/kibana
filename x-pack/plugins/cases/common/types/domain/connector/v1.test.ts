@@ -10,8 +10,9 @@ import {
   CaseUserActionConnectorRt,
   CaseConnectorRt,
   ConnectorTypes,
-  FindActionConnectorResponseRt,
-} from './connector';
+  ConnectorMappingsAttributesRt,
+  ConnectorMappingsRt,
+} from './v1';
 
 describe('Connector', () => {
   describe('ConnectorTypeFieldsRt', () => {
@@ -149,50 +150,93 @@ describe('Connector', () => {
     });
   });
 
-  describe('FindActionConnectorResponseRt', () => {
-    const response = [
+  describe('mappings', () => {
+    const mappings = [
       {
-        id: 'test',
-        actionTypeId: '.test',
-        name: 'My connector',
-        isDeprecated: false,
-        isPreconfigured: false,
-        referencedByCount: 0,
-        config: { foo: 'bar' },
-        isMissingSecrets: false,
-        isSystemAction: false,
+        action_type: 'overwrite',
+        source: 'title',
+        target: 'unknown',
       },
       {
-        id: 'test-2',
-        actionTypeId: '.test',
-        name: 'My connector 2',
-        isDeprecated: false,
-        isPreconfigured: false,
-        isSystemAction: false,
-        referencedByCount: 0,
+        action_type: 'append',
+        source: 'description',
+        target: 'not_mapped',
       },
     ];
 
-    it('has expected attributes in request', () => {
-      const query = FindActionConnectorResponseRt.decode(response);
+    const attributes = {
+      mappings: [
+        {
+          action_type: 'overwrite',
+          source: 'title',
+          target: 'unknown',
+        },
+        {
+          action_type: 'append',
+          source: 'description',
+          target: 'not_mapped',
+        },
+      ],
+      owner: 'cases',
+    };
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: response,
+    describe('ConnectorMappingsRt', () => {
+      it('has expected attributes in request', () => {
+        const query = ConnectorMappingsRt.decode(mappings);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: mappings,
+        });
+      });
+
+      it('removes foo:bar attributes from mappings', () => {
+        const query = ConnectorMappingsRt.decode([
+          { ...mappings[0] },
+          {
+            action_type: 'append',
+            source: 'description',
+            target: 'not_mapped',
+            foo: 'bar',
+          },
+        ]);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: mappings,
+        });
       });
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = FindActionConnectorResponseRt.decode([
-        {
-          ...response[0],
-          foo: 'bar',
-        },
-      ]);
+    describe('ConnectorMappingsAttributesRt', () => {
+      it('has expected attributes in request', () => {
+        const query = ConnectorMappingsAttributesRt.decode(attributes);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: [response[0]],
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: attributes,
+        });
+      });
+
+      it('removes foo:bar attributes from request', () => {
+        const query = ConnectorMappingsAttributesRt.decode({ ...attributes, foo: 'bar' });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: attributes,
+        });
+      });
+
+      it('removes foo:bar attributes from mappings', () => {
+        const query = ConnectorMappingsAttributesRt.decode({
+          ...attributes,
+          mappings: [{ ...attributes.mappings[0], foo: 'bar' }],
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...attributes, mappings: [{ ...attributes.mappings[0] }] },
+        });
       });
     });
   });

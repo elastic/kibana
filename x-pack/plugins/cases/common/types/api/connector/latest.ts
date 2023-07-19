@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export * from './jira';
-export * from './servicenow_itsm';
-export * from './servicenow_sir';
-export * from './resilient';
-export * from './mappings';
-export * from './swimlane';
-export * from './get_connectors';
-export * from './connector';
+export * from './v1';

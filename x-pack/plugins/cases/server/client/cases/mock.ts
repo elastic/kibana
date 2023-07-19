@@ -6,9 +6,9 @@
  */
 
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
-import { UserActionActions } from '../../../common/types/domain';
+import { ConnectorTypes, UserActionActions } from '../../../common/types/domain';
 import type { Comment, CommentResponseAlertsType } from '../../../common/api';
-import { CommentType, ConnectorTypes, ExternalReferenceStorageType } from '../../../common/api';
+import { CommentType, ExternalReferenceStorageType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export const updateUser = {

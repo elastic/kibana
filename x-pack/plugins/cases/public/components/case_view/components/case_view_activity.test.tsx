@@ -19,7 +19,6 @@ import {
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
-import { ConnectorTypes } from '../../../../common/api/connectors';
 import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
@@ -37,7 +36,7 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { UserActionTypes } from '../../../../common/types/domain';
+import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');

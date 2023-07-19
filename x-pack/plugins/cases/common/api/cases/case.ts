@@ -10,7 +10,6 @@ import * as rt from 'io-ts';
 import { UserRt } from '../user';
 import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
 import {
   limitedArraySchema,
@@ -32,6 +31,7 @@ import {
   MAX_BULK_GET_CASES,
   MAX_CASES_PER_PAGE,
 } from '../../constants';
+import { CaseConnectorRt } from '../../types/domain/connector/v1';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
