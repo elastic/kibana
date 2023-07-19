@@ -75,9 +75,6 @@ disabled:
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
 
-  # Asset Manager configs, in tech preview, will move to enabled after more stability introduced
-  - x-pack/test/api_integration/apis/asset_manager/config.ts
-
   # Serverless base config files
   - x-pack/test_serverless/api_integration/config.base.ts
   - x-pack/test_serverless/functional/config.base.ts
@@ -179,6 +176,7 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
+  - x-pack/test/api_integration/apis/asset_manager/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
