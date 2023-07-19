@@ -13,6 +13,7 @@ import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { CancellationToken } from '../cancellation_token';
 import { BaseParams, BasePayload } from './base';
 import { TaskRunResult } from './metrics';
+import { ReportingStart } from '../constants';
 
 interface BaseParamsPDF {
   layout: LayoutParams;
@@ -71,9 +72,8 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
   stream: Writable
 ) => Promise<TaskRunResult>;
 
-// @TODO ReportingStart is imported from reporting-plugin/server
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: any | null;
+  reporting: ReportingStart | null;
 }>;
 
 export interface LocatorParams<P extends SerializableRecord = SerializableRecord> {

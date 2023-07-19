@@ -9,6 +9,7 @@ import { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { BasePayload } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/export_types';
+export type { JobId } from '@kbn/reporting-common/export_types';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
 export type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png/types';

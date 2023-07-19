@@ -14,7 +14,7 @@ import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
 import { LocatorParams } from '../../common/types';
 
 import { ReportingAPIClient } from '../lib/reporting_api_client';

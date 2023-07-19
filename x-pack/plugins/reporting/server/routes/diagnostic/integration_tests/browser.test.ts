@@ -16,8 +16,8 @@ import {
   createMockPluginSetup,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseBrowser } from '../browser';
+import { ReportingRequestHandlerContext } from '@kbn/reporting-common';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

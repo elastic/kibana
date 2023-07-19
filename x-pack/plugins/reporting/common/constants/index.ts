@@ -6,6 +6,7 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv';
+import * as jobTypes from './job_types';
 
 // Routes
 export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
@@ -41,6 +42,12 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'image/png',
   'text/plain',
 ];
+
+type JobTypeDeclaration = typeof jobTypes;
+export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
+
+export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
+  'xpack.reporting.jobCompletionNotifications';
 
 // Statuses
 export enum JOB_STATUSES {
@@ -81,3 +88,7 @@ export const getRedirectAppPath = () => {
 // hacky endpoint: download CSV without queueing a report
 // FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
+
+// Test Subjects
+export const REPORT_TABLE_ID = 'reportJobListing';
+export const REPORT_TABLE_ROW_ID = 'reportJobRow';

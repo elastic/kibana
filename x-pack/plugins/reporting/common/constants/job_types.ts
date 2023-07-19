@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './v1';
+export const CSV_JOB_TYPE = 'csv_searchsource';
+
+export const PDF_JOB_TYPE = 'printable_pdf';
+export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
+
+export const PNG_JOB_TYPE = 'PNG';
+export const PNG_JOB_TYPE_V2 = 'PNGV2';

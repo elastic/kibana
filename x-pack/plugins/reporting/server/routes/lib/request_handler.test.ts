@@ -16,7 +16,6 @@ import { ReportingCore } from '../..';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
 jest.mock('./crypto', () => ({
@@ -85,7 +84,6 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,
@@ -130,11 +128,11 @@ describe('Handle request to generate', () => {
           "timeout": undefined,
         }
       `);
-      const { forceNow, ...snapPayload } = payload as TaskPayloadPDF;
+      // removing headers because these change everytime in request_hander.ts
+      const { forceNow, headers, ...snapPayload } = payload as TaskPayloadPDF;
       expect(snapPayload).toMatchInlineSnapshot(`
         Object {
           "browserTimezone": "UTC",
-          "headers": "i/h9OmpALs1GD7EEuauLeOSwhalFPa/A0mp/7HhzhAIiLCVKeFx4pafdouEooup+8mwW07XdIiJazylZZgLO3nVl9klTECCC3Xcg3rVlF8VN+QcfNM8w8GFprhvIq9NjPaMwDrhhtlFS",
           "isDeprecated": true,
           "layout": Object {
             "id": "preserve_layout",

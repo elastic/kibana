@@ -55,3 +55,18 @@ export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 export const getRedirectAppPath = () => {
   return '/app/reportingRedirect';
 };
+
+/*
+ * this type is used for the ReportingRequestHandlerContext without having to have the ExportTypeRegistry type that is embedded
+ * in the reporting plugin
+ */
+export interface ReportingSetup {
+  /**
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   */
+  usesUiCapabilities: () => boolean;
+  // vs reporting-plugin where this is tied to export type registry
+  registerExportTypes: () => void;
+}
+
+export type ReportingStart = ReportingSetup;
