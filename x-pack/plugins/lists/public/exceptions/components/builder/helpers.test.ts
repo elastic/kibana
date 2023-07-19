@@ -303,10 +303,7 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-        );
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [getEndpointField('file.Ext.code_signature.status')],
           id: '1234',

@@ -301,7 +301,7 @@ export const getUpdatedEntriesOnDelete = (
  */
 export const getFilteredIndexPatterns = (
   patterns: DataViewBase,
-  item: FormattedBuilderEntry,
+  item: FormattedBuilderEntry
 ): DataViewBase => {
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
