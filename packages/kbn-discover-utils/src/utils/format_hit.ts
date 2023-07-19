@@ -10,7 +10,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '../types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '../types';
 import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<SearchHit, FormattedHit>();
@@ -28,7 +28,7 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
 export function formatHit(
   hit: DataTableRecord,
   dataView: DataView,
-  shouldShowFieldHandler: (fieldName: string) => boolean,
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
@@ -78,7 +78,7 @@ export function formatHit(
       : [
           ...pairs.slice(0, maxEntries),
           [
-            i18n.translate('discover-utils.formatHit.moreFields', {
+            i18n.translate('discover.formatHit.moreFields', {
               defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
               values: { count: pairs.length - maxEntries },
             }),

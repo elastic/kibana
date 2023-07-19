@@ -21,7 +21,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
@@ -36,7 +40,7 @@ export const getRenderCellValueFn =
     dataView: DataView,
     rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
-    shouldShowFieldHandler: (fieldName: string) => boolean,
+    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
     maxDocFieldsDisplayed: number,
     closePopover: () => void
   ) =>
@@ -239,7 +243,7 @@ function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
   dataView: DataView,
-  shouldShowFieldHandler: (fieldName: string) => boolean
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first

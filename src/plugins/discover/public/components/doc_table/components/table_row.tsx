@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
@@ -36,7 +40,7 @@ export interface TableRowProps {
   rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
-  shouldShowFieldHandler: (fieldName: string) => boolean;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
   DocViewer: React.ComponentType<DocViewRenderProps>;
