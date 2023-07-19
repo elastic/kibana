@@ -288,7 +288,7 @@ export function FormatSelector(props: FormatSelectorProps) {
           />
           {currentFormat && selectedFormat ? (
             <>
-              {currentFormat?.id === 'duration' && true ? (
+              {currentFormat?.id === 'duration' && false ? (
                 <>
                   <EuiSpacer size="s" />
                   <DurationControlDelimitedInput
@@ -301,7 +301,7 @@ export function FormatSelector(props: FormatSelectorProps) {
                   />
                 </>
               ) : null}
-              {currentFormat?.id === 'duration' && false ? (
+              {currentFormat?.id === 'duration' && true ? (
                 <>
                   <EuiSpacer size="s" />
                   <DurationRowInputs
