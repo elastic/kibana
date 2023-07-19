@@ -96,6 +96,9 @@ describe('Security Plugin', () => {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
           },
+          "hooks": Object {
+            "useUpdateUserProfile": [Function],
+          },
           "navControlService": Object {
             "addUserMenuLinks": [Function],
             "getUserMenuLinks$": [Function],
@@ -110,6 +113,18 @@ describe('Security Plugin', () => {
             "bulkGet": [Function],
             "getCurrent": [Function],
             "suggest": [Function],
+            "update": [Function],
+            "userProfile$": Observable {
+              "source": BehaviorSubject {
+                "_value": null,
+                "closed": false,
+                "currentObservers": null,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+            },
           },
         }
       `);

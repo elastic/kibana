@@ -48,13 +48,19 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
       data,
       share,
       uiSettings,
+      dashboardService,
       mlServices: { mlApiServices },
     },
   } = useMlFromLensKibanaContext();
 
   const quickJobCreator = useMemo(
     () =>
-      new QuickGeoJobCreator(uiSettings, data.query.timefilter.timefilter, share, mlApiServices),
+      new QuickGeoJobCreator(
+        uiSettings,
+        data.query.timefilter.timefilter,
+        dashboardService,
+        mlApiServices
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
   );

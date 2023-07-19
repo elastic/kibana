@@ -50,6 +50,11 @@ export interface NodePropsEnhanced<
    * the EuiSideNavItemType (see navigation_section_ui.tsx)
    */
   renderItem?: () => ReactElement;
+  /**
+   * Forces the node to be active. This is used to force a collapisble nav group to be open
+   * even if the URL does not match any of the nodes in the group.
+   */
+  isActive?: boolean;
 }
 
 /**
@@ -86,7 +91,15 @@ export interface GroupDefinition<
   ChildrenId extends string = Id
 > extends NodeDefinition<LinkId, Id, ChildrenId> {
   type: 'navGroup';
-  /** Flag to indicate if the group is initially collapsed or not. */
+  /**
+   * Flag to indicate if the group is initially collapsed or not.
+   *
+   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
+   *
+   * `false`: the group will be opened event if none of its children nodes matches the current URL.
+   *
+   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
+   */
   defaultIsCollapsed?: boolean;
   preset?: NavigationGroupPreset;
 }

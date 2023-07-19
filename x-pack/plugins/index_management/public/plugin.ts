@@ -38,6 +38,7 @@ export class IndexMgmtUIPlugin {
   ): IndexManagementPluginSetup {
     const {
       ui: { enabled: isIndexManagementUiEnabled },
+      enableIndexActions,
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
@@ -55,7 +56,8 @@ export class IndexMgmtUIPlugin {
             params,
             this.extensionsService,
             Boolean(fleet),
-            kibanaVersion
+            kibanaVersion,
+            enableIndexActions
           );
         },
       });

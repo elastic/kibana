@@ -27,11 +27,10 @@ export const useGetFieldsByIssueType = ({ http, connector, issueType }: Props) =
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<Fields>, ServerError>(
     connectorsQueriesKeys.jiraGetFieldsByIssueType(connector?.id ?? '', issueType ?? ''),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       return getFieldsByIssueType({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
         id: issueType ?? '',
       });

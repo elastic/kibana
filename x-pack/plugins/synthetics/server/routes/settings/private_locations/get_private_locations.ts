@@ -7,8 +7,8 @@
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';

@@ -9,30 +9,16 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CategoryFormField } from './category_form_field';
 import { categories } from '../../containers/mock';
-import { EuiButton } from '@elastic/eui';
 import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
+import { FormTestComponent } from '../../common/test_utils';
 
 describe('Category', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
-
-  const FormComponent: React.FC<{ category?: string | null }> = ({ children, category }) => {
-    const defaultValue = category !== undefined ? { defaultValue: { category } } : {};
-
-    const { form } = useForm({ onSubmit, ...defaultValue });
-
-    return (
-      <Form form={form}>
-        {children}
-        <EuiButton onClick={() => form.submit()}>{'Submit'}</EuiButton>
-      </Form>
-    );
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,9 +27,9 @@ describe('Category', () => {
 
   it('renders the category field correctly', () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
@@ -51,9 +37,9 @@ describe('Category', () => {
 
   it('can submit without setting a category', async () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
@@ -67,9 +53,9 @@ describe('Category', () => {
 
   it('can submit with category a string as default value', async () => {
     appMockRender.render(
-      <FormComponent category={categories[0]}>
+      <FormTestComponent formDefaultValue={{ category: categories[0] }} onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
@@ -83,9 +69,9 @@ describe('Category', () => {
 
   it('can submit with category with null as default value', async () => {
     appMockRender.render(
-      <FormComponent category={null}>
+      <FormTestComponent formDefaultValue={{ category: null }} onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
@@ -99,9 +85,9 @@ describe('Category', () => {
 
   it('cannot submit if the category is an empty string', async () => {
     appMockRender.render(
-      <FormComponent category={''}>
+      <FormTestComponent formDefaultValue={{ category: '' }} onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
@@ -120,9 +106,9 @@ describe('Category', () => {
     const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
 
     appMockRender.render(
-      <FormComponent category={category}>
+      <FormTestComponent formDefaultValue={{ category }} onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
@@ -134,14 +120,18 @@ describe('Category', () => {
       expect(onSubmit).toBeCalledWith({}, false);
     });
 
-    expect(screen.getByText('The length of the category is too long. The maximum length is 50.'));
+    expect(
+      screen.getByText(
+        'The length of the category is too long. The maximum length is 50 characters.'
+      )
+    );
   });
 
   it('can set a category from existing ones', async () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
@@ -155,9 +145,9 @@ describe('Category', () => {
 
   it('can set a new category', async () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
@@ -171,9 +161,9 @@ describe('Category', () => {
 
   it('cannot set an empty category', async () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     userEvent.type(screen.getByRole('combobox'), ' {enter}');
@@ -186,11 +176,11 @@ describe('Category', () => {
     });
   });
 
-  it('setting an empty and clear it do not produce an error', async () => {
+  it('setting an empty category and clear it do not produce an error', async () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     userEvent.type(screen.getByRole('combobox'), ' {enter}');
@@ -212,9 +202,9 @@ describe('Category', () => {
 
   it('disables the component correctly when it is loading', () => {
     appMockRender.render(
-      <FormComponent>
+      <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={true} availableCategories={categories} />
-      </FormComponent>
+      </FormTestComponent>
     );
 
     expect(screen.getByRole('combobox')).toBeDisabled();

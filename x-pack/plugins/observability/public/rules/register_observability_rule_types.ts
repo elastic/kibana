@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
+import { SLO_ID_FIELD } from '../../common/field_names/slo';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import {
@@ -16,8 +17,8 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
-import { validateMetricThreshold } from '../pages/threshold/components/validation';
-import { formatReason } from '../pages/threshold/rule_data_formatters';
+import { validateMetricThreshold } from '../components/threshold/components/validation';
+import { formatReason } from '../components/threshold/rule_data_formatters';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(
   'xpack.observability.slo.rules.burnRate.defaultActionMessage',
@@ -52,6 +53,27 @@ const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   }
 );
 
+const thresholdDefaultActionMessage = i18n.translate(
+  'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const thresholdDefaultRecoveryMessage = i18n.translate(
+  'xpack.observability.threshold.rule.alerting.threshold.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
@@ -69,7 +91,7 @@ export const registerObservabilityRuleTypes = (
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return 'https://www.elastic.co/guide/en/observability/current/slo-burn-rate-alert.html';
+      return `${docLinks.links.observability.sloBurnRateRule}`;
     },
     ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
     validate: validateBurnRateRule,
@@ -77,35 +99,29 @@ export const registerObservabilityRuleTypes = (
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
   });
+
   if (config.unsafe.thresholdRule.enabled) {
     observabilityRuleTypeRegistry.register({
       id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
       description: i18n.translate(
         'xpack.observability.threshold.rule.alertFlyout.alertDescription',
         {
-          defaultMessage: 'Alert when threshold breached.',
+          defaultMessage:
+            'Alert when any Observability data type reaches or exceeds a given value.',
         }
       ),
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.links.observability.metricsThreshold}`;
+        return `${docLinks.links.observability.threshold}`;
       },
-      ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
+      ruleParamsExpression: lazy(() => import('../components/threshold/threshold_rule_expression')),
       validate: validateMetricThreshold,
-      defaultActionMessage: i18n.translate(
-        'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
-        {
-          defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
-
-  Reason:
-  \\{\\{context.reason\\}\\}
-  `,
-        }
-      ),
+      defaultActionMessage: thresholdDefaultActionMessage,
+      defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
       requiresAppContext: false,
       format: formatReason,
       alertDetailsAppSection: lazy(
-        () => import('../pages/threshold/components/alert_details_app_section')
+        () => import('../components/threshold/components/alert_details_app_section')
       ),
     });
   }

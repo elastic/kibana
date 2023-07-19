@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -53,7 +54,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
       getFallbackUrls(coreStart).kibanaUrl; // falls back to local network binding
     const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
-    const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
+    const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
 
     return {
       apiEndpoint,
@@ -72,7 +73,9 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       state: t.record(t.string, t.unknown),
     }),
   }),
-  async handler(resources): Promise<{ apiKeyEncoded: string; id: string }> {
+  async handler(
+    resources
+  ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
     const {
       context,
       params: {
@@ -94,31 +97,69 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
 
     const { id } = await saveObservabilityOnboardingState({
       savedObjectsClient,
-      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
+      observabilityOnboardingState: {
+        state: state as ObservabilityOnboardingState['state'],
+        progress: {},
+      },
     });
 
-    return { apiKeyEncoded, id };
+    return { apiKeyEncoded, onboardingId: id };
+  },
+});
+
+const updateOnboardingStateRoute = createObservabilityOnboardingServerRoute({
+  endpoint:
+    'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+  options: { tags: [] },
+  params: t.type({
+    path: t.type({
+      onboardingId: t.string,
+    }),
+    body: t.type({
+      state: t.record(t.string, t.unknown),
+    }),
+  }),
+  async handler(resources): Promise<{ onboardingId: string }> {
+    const {
+      params: {
+        path: { onboardingId },
+        body: { state },
+      },
+      core,
+      request,
+    } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const { id } = await saveObservabilityOnboardingState({
+      savedObjectsClient,
+      savedObjectId: onboardingId,
+      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
+    });
+    return { onboardingId: id };
   },
 });
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'GET /api/observability_onboarding/custom_logs/{id}/step/{name} 2023-05-24',
+    'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
   options: { tags: [] },
   params: t.type({
     path: t.type({
       id: t.string,
       name: t.string,
     }),
-    query: t.type({
-      status: t.string,
-    }),
+    body: t.intersection([
+      t.type({
+        status: t.string,
+      }),
+      t.partial({ message: t.string }),
+    ]),
   }),
-  async handler(resources): Promise<object> {
+  async handler(resources) {
     const {
       params: {
         path: { id, name },
-        query: { status },
+        body: { status, message },
       },
       core,
     } = resources;
@@ -133,10 +174,9 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       });
 
     if (!savedObservabilityOnboardingState) {
-      return {
-        message:
-          'Unable to report setup progress - onboarding session not found.',
-      };
+      throw Boom.notFound(
+        'Unable to report setup progress - onboarding session not found.'
+      );
     }
 
     const {
@@ -152,64 +192,72 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         ...observabilityOnboardingState,
         progress: {
           ...observabilityOnboardingState.progress,
-          [name]: status,
+          [name]: { status, message },
         },
       },
     });
-    return { name, status };
+    return { name, status, message };
   },
 });
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability_onboarding/custom_logs/{id}/progress',
+  endpoint:
+    'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
   options: { tags: [] },
   params: t.type({
     path: t.type({
-      id: t.string,
+      onboardingId: t.string,
     }),
   }),
-  async handler(resources): Promise<{ progress: Record<string, string> }> {
+  async handler(resources): Promise<{
+    progress: Record<string, { status: string; message?: string }>;
+  }> {
     const {
       params: {
-        path: { id },
+        path: { onboardingId },
       },
       core,
       request,
     } = resources;
     const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const savedObservabilityOnboardingState =
-      (await getObservabilityOnboardingState({
+      await getObservabilityOnboardingState({
         savedObjectsClient,
-        savedObjectId: id,
-      })) || null;
+        savedObjectId: onboardingId,
+      });
+
+    if (!savedObservabilityOnboardingState) {
+      throw Boom.notFound(
+        'Unable to report setup progress - onboarding session not found.'
+      );
+    }
+
     const progress = { ...savedObservabilityOnboardingState?.progress };
 
     const esClient =
       coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-    if (savedObservabilityOnboardingState) {
-      const {
-        state: { datasetName: dataset, namespace },
-      } = savedObservabilityOnboardingState;
-      if (progress['ea-status'] === 'complete') {
-        try {
-          const hasLogs = await getHasLogs({
-            dataset,
-            namespace,
-            esClient,
-          });
-          if (hasLogs) {
-            progress['logs-ingest'] = 'complete';
-          } else {
-            progress['logs-ingest'] = 'loading';
-          }
-        } catch (error) {
-          progress['logs-ingest'] = 'warning';
+
+    const {
+      state: { datasetName: dataset, namespace },
+    } = savedObservabilityOnboardingState;
+    if (progress['ea-status']?.status === 'complete') {
+      try {
+        const hasLogs = await getHasLogs({
+          dataset,
+          namespace,
+          esClient,
+        });
+        if (hasLogs) {
+          progress['logs-ingest'] = { status: 'complete' };
+        } else {
+          progress['logs-ingest'] = { status: 'loading' };
         }
-      } else {
-        progress['logs-ingest'] = 'incomplete';
+      } catch (error) {
+        progress['logs-ingest'] = { status: 'warning', message: error.message };
       }
+    } else {
+      progress['logs-ingest'] = { status: 'incomplete' };
     }
 
     return { progress };
@@ -220,6 +268,7 @@ export const customLogsRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createApiKeyRoute,
+  ...updateOnboardingStateRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,
 };

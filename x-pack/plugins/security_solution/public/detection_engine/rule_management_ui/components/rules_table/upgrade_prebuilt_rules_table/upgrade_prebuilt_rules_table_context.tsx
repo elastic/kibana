@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-// import { isEqual } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformUpgradeAllRules,
@@ -18,6 +21,9 @@ import {
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
+import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
+
+import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -48,6 +54,11 @@ export interface UpgradePrebuiltRulesTableState {
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
+  /**
+   * Is true when installing security_detection_rules
+   * package in background
+   */
+  isUpgradingSecurityPackages: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -90,11 +101,12 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
-
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
     filter: '',
     tags: [],
   });
+
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
     data: { rules, stats: { tags } } = {
@@ -114,6 +126,19 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
 
+  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
+  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
+  const [isUpgradeModalVisible, showUpgradeModal, hideUpgradeModal] = useBoolState(false);
+  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
+  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
+
+  const [confirmUpgrade, handleUpgradeConfirm, handleUpgradeCancel] = useAsyncConfirmation({
+    onInit: showUpgradeModal,
+    onFinish: hideUpgradeModal,
+  });
+
+  const shouldConfirmUpgrade = legacyJobsInstalled.length > 0;
+
   const upgradeOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
       const rule = rules.find((r) => r.rule_id === ruleId);
@@ -121,6 +146,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
       setLoadingRules((prev) => [...prev, ruleId]);
       try {
+        if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
+          return;
+        }
         await upgradeSpecificRulesRequest([
           {
             rule_id: ruleId,
@@ -132,7 +160,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
       }
     },
-    [rules, upgradeSpecificRulesRequest]
+    [confirmUpgrade, rules, shouldConfirmUpgrade, upgradeSpecificRulesRequest]
   );
 
   const upgradeSelectedRules = useCallback(async () => {
@@ -143,23 +171,29 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     }));
     setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
     try {
+      if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
+        return;
+      }
       await upgradeSpecificRulesRequest(rulesToUpgrade);
     } finally {
       setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
       setSelectedRules([]);
     }
-  }, [selectedRules, upgradeSpecificRulesRequest]);
+  }, [confirmUpgrade, selectedRules, shouldConfirmUpgrade, upgradeSpecificRulesRequest]);
 
   const upgradeAllRules = useCallback(async () => {
     // Unselect all rules so that the table doesn't show the "bulk actions" bar
     setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
     try {
+      if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
+        return;
+      }
       await upgradeAllRulesRequest();
     } finally {
       setLoadingRules([]);
       setSelectedRules([]);
     }
-  }, [rules, upgradeAllRulesRequest]);
+  }, [confirmUpgrade, rules, shouldConfirmUpgrade, upgradeAllRulesRequest]);
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(
     () => ({
@@ -170,7 +204,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       setFilterOptions,
       selectRules: setSelectedRules,
     }),
-    [refetch, upgradeAllRules, upgradeOneRule, upgradeSelectedRules]
+    [refetch, upgradeOneRule, upgradeSelectedRules, upgradeAllRules]
   );
 
   const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
@@ -183,8 +217,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         filterOptions,
         tags,
         isFetched,
-        isLoading,
+        isLoading: isLoading && loadingJobs,
         isRefetching,
+        isUpgradingSecurityPackages,
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
@@ -198,7 +233,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     tags,
     isFetched,
     isLoading,
+    loadingJobs,
     isRefetching,
+    isUpgradingSecurityPackages,
     selectedRules,
     loadingRules,
     dataUpdatedAt,
@@ -207,6 +244,13 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
+      {isUpgradeModalVisible && (
+        <MlJobUpgradeModal
+          jobs={legacyJobsInstalled}
+          onCancel={handleUpgradeCancel}
+          onConfirm={handleUpgradeConfirm}
+        />
+      )}
       {children}
     </UpgradePrebuiltRulesTableContext.Provider>
   );

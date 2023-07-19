@@ -13,6 +13,7 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { rawRuleSchema } from './raw_rule_schema';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -61,6 +62,7 @@ export interface RegistryRuleType
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
+    | 'fieldsForAAD'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -289,9 +291,14 @@ export class RuleTypeRegistry {
             RecoveryActionGroupId | RecoveredActionGroupId,
             AlertData
           >(normalizedRuleType, context, this.inMemoryMetrics),
+        paramsSchema: schema.object({
+          alertId: schema.string(),
+          spaceId: schema.string(),
+          consumer: schema.maybe(schema.string()),
+        }),
+        indirectParamsSchema: rawRuleSchema,
       },
     });
-
     if (this.alertsService && ruleType.alerts) {
       this.alertsService.register(ruleType.alerts);
     }
@@ -372,6 +379,7 @@ export class RuleTypeRegistry {
             doesSetRecoveryContext,
             alerts,
             getSummarizedAlerts,
+            fieldsForAAD,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -392,6 +400,7 @@ export class RuleTypeRegistry {
             minimumLicenseRequired
           ).isValid,
           hasGetSummarizedAlerts: !!getSummarizedAlerts,
+          hasFieldsForAAD: Boolean(fieldsForAAD),
           ...(alerts ? { alerts } : {}),
         })
       )

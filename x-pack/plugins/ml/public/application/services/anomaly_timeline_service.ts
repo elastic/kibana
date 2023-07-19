@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -16,14 +16,14 @@ import {
   TimeBucketsInterval,
   TimeRangeBounds,
 } from '../util/time_buckets';
-import {
+import type {
   ExplorerJob,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
-import { MlResultsService } from './results_service';
+import type { MlResultsService } from './results_service';
 
 /**
  * Service for retrieving anomaly swim lanes data.

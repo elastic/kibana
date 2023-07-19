@@ -9,8 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -18,7 +19,6 @@ import {
   SyntheticsMonitor,
   ConfigKey,
 } from '../../../common/runtime_types';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';

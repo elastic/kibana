@@ -14,14 +14,11 @@ import {
   EuiFlexItem,
   EuiSkeletonRectangle,
   EuiSpacer,
-  EuiStep,
   EuiSteps,
   EuiStepsProps,
-  EuiSubSteps,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
 import { flatten, zip } from 'lodash';
@@ -35,15 +32,16 @@ import {
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
+import { BackButton } from './back_button';
+import { StepStatus } from './step_status';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
   const { navigateToKibanaUrl } = useKibanaNavigation();
-  const { goBack, goToStep, getState, setState, CurrentStep } = useWizard();
+  const { goBack, goToStep, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
-  const [onboardingId, setOnboardingId] = useState('');
 
   function onInspect() {
     goToStep('inspect');
@@ -52,18 +50,16 @@ export function InstallElasticAgent() {
     navigateToKibanaUrl('/app/logs/stream');
   }
 
-  function onBack() {
-    goBack();
-  }
-
   function onAutoDownloadConfig() {
-    const { autoDownloadConfig, ...state } = getState();
-    setState({ ...state, autoDownloadConfig: !autoDownloadConfig });
+    setState((state) => ({
+      ...state,
+      autoDownloadConfig: !state.autoDownloadConfig,
+    }));
   }
 
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent) {
+      if (!hasAlreadySavedFlow(getState())) {
         return callApi(
           'GET /internal/observability_onboarding/custom_logs/privileges'
         );
@@ -73,11 +69,9 @@ export function InstallElasticAgent() {
   );
 
   const { data: setup } = useFetcher((callApi) => {
-    if (CurrentStep === InstallElasticAgent) {
-      return callApi(
-        'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
-      );
-    }
+    return callApi(
+      'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+    );
   }, []);
 
   const {
@@ -86,22 +80,26 @@ export function InstallElasticAgent() {
     error,
   } = useFetcher(
     (callApi) => {
-      if (
-        CurrentStep === InstallElasticAgent &&
-        monitoringRole?.hasPrivileges
-      ) {
+      const {
+        datasetName,
+        serviceName,
+        namespace,
+        customConfigurations,
+        logFilePaths,
+      } = getState();
+      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/save',
           {
             params: {
               body: {
-                name: wizardState.datasetName,
+                name: datasetName,
                 state: {
-                  datasetName: wizardState.datasetName,
-                  serviceName: wizardState.serviceName,
-                  namespace: wizardState.namespace,
-                  customConfigurations: wizardState.customConfigurations,
-                  logFilePaths: wizardState.logFilePaths,
+                  datasetName,
+                  serviceName,
+                  namespace,
+                  customConfigurations,
+                  logFilePaths,
                 },
               },
             },
@@ -112,34 +110,61 @@ export function InstallElasticAgent() {
     [monitoringRole?.hasPrivileges]
   );
 
+  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
+    const {
+      onboardingId,
+      datasetName,
+      serviceName,
+      namespace,
+      customConfigurations,
+      logFilePaths,
+    } = getState();
+    if (onboardingId) {
+      return callApi(
+        'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+        {
+          params: {
+            path: { onboardingId },
+            body: {
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
+              },
+            },
+          },
+        }
+      );
+    }
+  }, []);
+
+  const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
+
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent) {
-        const options = {
-          headers: {
-            authorization: `ApiKey ${installShipperSetup?.apiKeyEncoded}`,
-          },
-          params: {
-            query: { id: installShipperSetup?.id ?? '' },
-          },
-        };
-
+      if (apiKeyEncoded && onboardingId) {
         return callApi(
-          'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
-          installShipperSetup?.apiKeyEncoded
-            ? options
-            : { params: options.params }
+          'GET /internal/observability_onboarding/elastic_agent/config',
+          {
+            headers: { authorization: `ApiKey ${apiKeyEncoded}` },
+            params: { query: { onboardingId } },
+          }
         );
       }
     },
-    [installShipperSetup?.apiKeyEncoded]
+    [
+      apiKeyEncoded,
+      onboardingId,
+      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+    ]
   );
 
   useEffect(() => {
-    setOnboardingId(installShipperSetup?.id ?? '');
-  }, [installShipperSetup?.id]);
-
-  const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
+    setState((state) => ({ ...state, onboardingId, apiKeyEncoded }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingId, apiKeyEncoded]);
 
   const {
     data: progressData,
@@ -147,10 +172,10 @@ export function InstallElasticAgent() {
     refetch: refetchProgress,
   } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && onboardingId) {
+      if (onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/{id}/progress',
-          { params: { path: { id: onboardingId } } }
+          'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+          { params: { path: { onboardingId } } }
         );
       }
     },
@@ -165,16 +190,14 @@ export function InstallElasticAgent() {
         refetchProgress();
       }, 2000);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progressSucceded]);
+  }, [progressSucceded, refetchProgress]);
 
   const getStep = useCallback(
     ({ id, incompleteTitle, loadingTitle, completedTitle }) => {
       const progress = progressData?.progress;
       if (progress) {
-        const stepStatus = progress[
-          id
-        ] as EuiStepsProps['steps'][number]['status'];
+        const stepStatus = progress?.[id]
+          ?.status as EuiStepsProps['steps'][number]['status'];
         const title =
           stepStatus === 'loading'
             ? loadingTitle
@@ -185,6 +208,7 @@ export function InstallElasticAgent() {
           title,
           children: null,
           status: stepStatus ?? ('incomplete' as const),
+          message: progress?.[id]?.message,
         };
       }
       return {
@@ -197,7 +221,8 @@ export function InstallElasticAgent() {
   );
 
   const isInstallStarted = progressData?.progress['ea-download'] !== undefined;
-  const isInstallCompleted = progressData?.progress['ea-status'] === 'complete';
+  const isInstallCompleted =
+    progressData?.progress?.['ea-status']?.status === 'complete';
 
   const autoDownloadConfigStep = getStep({
     id: 'ea-config',
@@ -227,11 +252,7 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
-              {i18n.translate('xpack.observability_onboarding.steps.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onInspect}>
@@ -272,7 +293,14 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        {monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
+        {apiKeyEncoded && onboardingId ? (
+          <ApiKeyBanner
+            payload={{ apiKeyEncoded, onboardingId }}
+            hasPrivileges
+            status={FETCH_STATUS.SUCCESS}
+          />
+        ) : (
+          monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
           monitoringRoleStatus !== FETCH_STATUS.LOADING && (
             <ApiKeyBanner
               payload={installShipperSetup}
@@ -280,7 +308,8 @@ export function InstallElasticAgent() {
               status={installShipperSetupStatus}
               error={error}
             />
-          )}
+          )
+        )}
         <EuiSpacer size="m" />
         <EuiSteps
           steps={[
@@ -367,13 +396,14 @@ export function InstallElasticAgent() {
                     checked={wizardState.autoDownloadConfig}
                     onChange={onAutoDownloadConfig}
                     disabled={
-                      isInstallStarted || !monitoringRole?.hasPrivileges
+                      isInstallStarted ||
+                      (monitoringRole && !monitoringRole?.hasPrivileges)
                     }
                   />
                   {isInstallStarted && (
                     <>
                       <EuiSpacer size="m" />
-                      <EuiSubSteps>
+                      <EuiFlexGroup direction="column" gutterSize="m">
                         {[
                           {
                             id: 'ea-download',
@@ -442,36 +472,26 @@ export function InstallElasticAgent() {
                             ),
                           },
                         ].map((step, index) => {
-                          const { title, status } = getStep(step);
+                          const { title, status, message } = getStep(step);
                           return (
-                            <EuiStep
-                              key={step.id}
-                              titleSize="xs"
-                              step={index + 1}
-                              title={title}
+                            <StepStatus
                               status={status}
-                              children={null}
-                              css={css({
-                                '> .euiStep__content': {
-                                  paddingBottom: 0,
-                                },
-                              })}
+                              title={title}
+                              message={message}
                             />
                           );
                         })}
-                      </EuiSubSteps>
+                      </EuiFlexGroup>
                     </>
                   )}
                 </>
               ),
             },
             {
-              title: wizardState.autoDownloadConfig
-                ? autoDownloadConfigStep.title
-                : i18n.translate(
-                    'xpack.observability_onboarding.installElasticAgent.progress.eaConfig.incompleteTitle',
-                    { defaultMessage: 'Configure the agent' }
-                  ),
+              title: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.configureStep.title',
+                { defaultMessage: 'Configure the Elastic agent' }
+              ),
               status:
                 yamlConfigStatus === FETCH_STATUS.LOADING
                   ? 'loading'
@@ -543,6 +563,14 @@ export function InstallElasticAgent() {
                       { defaultMessage: 'Download config file' }
                     )}
                   </EuiButton>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup direction="column">
+                    <StepStatus
+                      status={autoDownloadConfigStep.status}
+                      title={autoDownloadConfigStep.title}
+                      message={autoDownloadConfigStep.message}
+                    />
+                  </EuiFlexGroup>
                 </>
               ),
             },
@@ -608,4 +636,9 @@ function getInstallShipperCommand({
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {
   const str = flatten(zip(parts, args)).join('');
   return str.replace(/\s+/g, ' ').trim();
+}
+
+type WizardState = ReturnType<ReturnType<typeof useWizard>['getState']>;
+function hasAlreadySavedFlow({ apiKeyEncoded, onboardingId }: WizardState) {
+  return Boolean(apiKeyEncoded && onboardingId);
 }

@@ -20,6 +20,7 @@ import {
   HttpStart,
   NotificationsStart,
   ApplicationStart,
+  AnalyticsServiceStart,
 } from '@kbn/core/public';
 import {
   FilterManager,
@@ -48,6 +49,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
@@ -65,6 +67,7 @@ export interface HistoryLocationState {
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
+  analytics: AnalyticsServiceStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -72,7 +75,7 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: () => History<HistoryLocationState>;
-  theme: ChartsPluginStart['theme'];
+  theme: CoreStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -103,6 +106,7 @@ export interface DiscoverServices {
   savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
 }
 
 export const buildServices = memoize(function (
@@ -119,13 +123,14 @@ export const buildServices = memoize(function (
   return {
     application: core.application,
     addBasePath: core.http.basePath.prepend,
+    analytics: core.analytics,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
     data: plugins.data,
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
-    theme: plugins.charts.theme,
+    theme: core.theme,
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
@@ -159,5 +164,6 @@ export const buildServices = memoize(function (
     savedSearch: plugins.savedSearch,
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
+    uiActions: plugins.uiActions,
   };
 });

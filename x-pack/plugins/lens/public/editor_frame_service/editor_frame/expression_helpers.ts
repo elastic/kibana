@@ -80,7 +80,9 @@ export function buildExpression({
   dateRange: DateRange;
   nowInstant: Date;
 }): Ast | null {
-  if (visualization === null) {
+  // if an unregistered visualization is passed in the SO
+  // then this will be set as "undefined". Relax the check to catch both
+  if (visualization == null) {
     return null;
   }
 

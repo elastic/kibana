@@ -25,7 +25,7 @@ describe('CertificateList', () => {
         page={page}
         sort={sort}
         onChange={jest.fn()}
-        certificates={{ loading: false, total: 0, certs: [] }}
+        certificates={{ isLoading: false, total: 0, certs: [] }}
       />
     );
 
@@ -48,7 +48,7 @@ describe('CertificateList', () => {
         sort={sort}
         onChange={jest.fn()}
         certificates={{
-          loading: false,
+          isLoading: false,
           total: 1,
           certs: [
             {
@@ -65,6 +65,7 @@ describe('CertificateList', () => {
               not_after: '2015-04-12T23:59:59.000Z',
               not_before: '2015-04-09T00:00:00.000Z',
               common_name: '*.badssl.com',
+              configId: 'uptime-advanced-http-tls',
             },
           ],
         }}

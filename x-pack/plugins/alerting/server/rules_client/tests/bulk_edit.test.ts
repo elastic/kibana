@@ -161,6 +161,7 @@ describe('bulkEdit()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isSystemAction: false,
         isDeprecated: false,
       },
     ]);

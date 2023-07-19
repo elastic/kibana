@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Embeddable } from '@kbn/lens-plugin/public';
 import type * as H from 'history';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -31,14 +29,6 @@ export interface CasesUIActionProps {
   storage: Storage;
 }
 
-export interface EmbeddableInput {
-  attributes: TypedLensByValueInput['attributes'];
-  id: string;
-  timeRange: TimeRange;
-}
-
-export type DashboardVisualizationEmbeddable = IEmbeddable<EmbeddableInput>;
-
 export type ActionContext = ActionExecutionContext<{
-  embeddable: DashboardVisualizationEmbeddable;
+  embeddable: Embeddable;
 }>;

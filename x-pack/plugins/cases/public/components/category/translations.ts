@@ -19,3 +19,14 @@ export const EMPTY_CATEGORY_VALIDATION_MSG = i18n.translate(
     defaultMessage: 'Empty category is not allowed',
   }
 );
+
+export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.removeCategory', {
+  defaultMessage: 'Remove category',
+});
+
+export const REMOVE_CATEGORY_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.removeCategoryAriaLabel',
+  {
+    defaultMessage: 'click to remove category',
+  }
+);

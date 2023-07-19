@@ -13,7 +13,7 @@ import {
   MatcherFunction,
   RenderOptions,
 } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 
 import { merge, mergeWith } from 'lodash';

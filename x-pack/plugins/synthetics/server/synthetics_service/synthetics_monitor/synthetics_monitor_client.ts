@@ -11,10 +11,10 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { RouteContext } from '../../routes/types';
+import { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { RouteContext } from '../../legacy_uptime/routes';
 import { normalizeSecrets } from '../utils';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import {
   PrivateConfig,
   SyntheticsPrivateLocation,
@@ -39,7 +39,7 @@ export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
   public privateLocationAPI: SyntheticsPrivateLocation;
 
-  constructor(syntheticsService: SyntheticsService, server: UptimeServerSetup) {
+  constructor(syntheticsService: SyntheticsService, server: SyntheticsServerSetup) {
     this.syntheticsService = syntheticsService;
     this.privateLocationAPI = new SyntheticsPrivateLocation(server);
   }
@@ -357,9 +357,7 @@ export class SyntheticsMonitorClient {
 
   async inspectMonitor(
     monitorObj: { monitor: MonitorFields; id: string },
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract,
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: PrivateLocation[],
     spaceId: string,
     hideParams: boolean,
     canSave: boolean

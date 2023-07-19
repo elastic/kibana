@@ -39,8 +39,11 @@ const defaultConfig: ConfigSchema = {
     thresholdRule: { enabled: false },
   },
   compositeSlo: { enabled: false },
-  coPilot: {
+  aiAssistant: {
     enabled: false,
+    feedback: {
+      enabled: false,
+    },
   },
 };
 

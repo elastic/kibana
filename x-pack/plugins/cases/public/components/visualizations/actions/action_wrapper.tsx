@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { useIsDarkTheme } from '../../../common/use_is_dark_theme';

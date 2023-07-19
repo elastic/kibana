@@ -13,6 +13,7 @@ import { appContextService } from '../app_context';
 import type {
   Agent,
   AgentAction,
+  AgentActionType,
   NewAgentAction,
   FleetServerAgentAction,
 } from '../../../common/types/models';
@@ -30,6 +31,8 @@ import { bulkUpdateAgents } from './crud';
 const ONE_MONTH_IN_MS = 2592000000;
 
 export const NO_EXPIRATION = 'NONE';
+
+const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
 
 export async function createAgentAction(
   esClient: ElasticsearchClient,
@@ -53,6 +56,15 @@ export async function createAgentAction(
     total: newAgentAction.total,
     traceparent: apm.currentTraceparent,
   };
+
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (SIGNED_ACTIONS.has(newAgentAction.type) && messageSigningService) {
+    const signedBody = await messageSigningService.sign(body);
+    body.signed = {
+      data: signedBody.data.toString('base64'),
+      signature: signedBody.signature,
+    };
+  }
 
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
@@ -88,30 +100,41 @@ export async function bulkCreateAgentActions(
     return [];
   }
 
+  const messageSigningService = appContextService.getMessageSigningService();
   await esClient.bulk({
     index: AGENT_ACTIONS_INDEX,
-    body: actions.flatMap((action) => {
-      const body: FleetServerAgentAction = {
-        '@timestamp': new Date().toISOString(),
-        expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
-        start_time: action.start_time,
-        rollout_duration_seconds: action.rollout_duration_seconds,
-        agents: action.agents,
-        action_id: action.id,
-        data: action.data,
-        type: action.type,
-        traceparent: apm.currentTraceparent,
-      };
+    body: await Promise.all(
+      actions.flatMap(async (action) => {
+        const body: FleetServerAgentAction = {
+          '@timestamp': new Date().toISOString(),
+          expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+          start_time: action.start_time,
+          rollout_duration_seconds: action.rollout_duration_seconds,
+          agents: action.agents,
+          action_id: action.id,
+          data: action.data,
+          type: action.type,
+          traceparent: apm.currentTraceparent,
+        };
 
-      return [
-        {
-          create: {
-            _id: action.id,
+        if (SIGNED_ACTIONS.has(action.type) && messageSigningService) {
+          const signedBody = await messageSigningService.sign(body);
+          body.signed = {
+            data: signedBody.data.toString('base64'),
+            signature: signedBody.signature,
+          };
+        }
+
+        return [
+          {
+            create: {
+              _id: action.id,
+            },
           },
-        },
-        body,
-      ];
-    }),
+          body,
+        ];
+      })
+    ),
   });
 
   for (const action of actions) {

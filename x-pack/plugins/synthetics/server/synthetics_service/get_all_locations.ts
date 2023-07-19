@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SyntheticsServerSetup } from '../types';
 import { getPrivateLocations } from './get_private_locations';
 import { getServiceLocations } from './get_service_locations';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
 export async function getAllLocations({
   syntheticsMonitorClient,
   savedObjectsClient,
   server,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
@@ -37,7 +37,7 @@ export async function getAllLocations({
 }
 
 const getServicePublicLocations = async (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
   if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {

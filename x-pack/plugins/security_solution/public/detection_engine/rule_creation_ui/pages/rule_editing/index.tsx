@@ -24,7 +24,8 @@ import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
-import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
+import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
+import type { RuleUpdateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -60,11 +61,11 @@ import {
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useRuleForms, useRuleIndexPattern } from '../form';
+import { CustomHeaderPageMemo } from '..';
 
 const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   const [, dispatchToaster] = useStateToaster();
@@ -89,9 +90,10 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
-  const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
+  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -107,6 +109,16 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     };
     fetchDataViews();
   }, [dataServices.dataViews]);
+
+  const backOptions = useMemo(
+    () => ({
+      path: getRuleDetailsUrl(ruleId ?? ''),
+      text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
+      pageId: SecurityPageName.rules,
+      dataTestSubj: 'ruleEditBackToRuleDetails',
+    }),
+    [rule?.name, ruleId]
+  );
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -131,6 +143,20 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     aboutStepDefault: aboutRuleData,
     scheduleStepDefault: scheduleRuleData,
     actionsStepDefault: ruleActionsData,
+  });
+
+  const isPreviewDisabled = getIsRulePreviewDisabled({
+    ruleType: defineStepData.ruleType,
+    isQueryBarValid,
+    isThreatQueryBarValid,
+    index: defineStepData.index,
+    dataViewId: defineStepData.dataViewId,
+    dataSourceType: defineStepData.dataSourceType,
+    threatIndex: defineStepData.threatIndex,
+    threatMapping: defineStepData.threatMapping,
+    machineLearningJobId: defineStepData.machineLearningJobId,
+    queryBar: defineStepData.queryBar,
+    newTermsFields: defineStepData.newTermsFields,
   });
 
   const loading = userInfoLoading || listsConfigLoading;
@@ -200,7 +226,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   kibanaDataViews={dataViewOptions}
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
-                  onPreviewDisabledStateChange={setIsPreviewDisabled}
                   defaultSavedQuery={savedQuery}
                   form={defineStepForm}
                   optionsSelected={eqlOptionsSelected}
@@ -209,6 +234,17 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   indexPattern={indexPattern}
                   isIndexPatternLoading={isIndexPatternLoading}
                   browserFields={browserFields}
+                  isQueryBarValid={isQueryBarValid}
+                  setIsQueryBarValid={setIsQueryBarValid}
+                  setIsThreatQueryBarValid={setIsThreatQueryBarValid}
+                  ruleType={defineStepData.ruleType}
+                  index={defineStepData.index}
+                  threatIndex={defineStepData.threatIndex}
+                  groupByFields={defineStepData.groupByFields}
+                  dataSourceType={defineStepData.dataSourceType}
+                  shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
+                  queryBarTitle={defineStepData.queryBar.title}
+                  queryBarSavedId={defineStepData.queryBar.saved_id}
                 />
               )}
               <EuiSpacer />
@@ -233,8 +269,12 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                 <StepAboutRule
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={aboutStepData}
-                  defineRuleData={defineStepData}
+                  isActive={activeStep === RuleStep.aboutRule}
+                  ruleType={defineStepData.ruleType}
+                  machineLearningJobId={defineStepData.machineLearningJobId}
+                  index={defineStepData.index}
+                  dataViewId={defineStepData.dataViewId}
+                  timestampOverride={aboutStepData.timestampOverride}
                   form={aboutStepForm}
                   key="aboutStep"
                 />
@@ -318,8 +358,9 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       indexPattern,
       isIndexPatternLoading,
       browserFields,
-      aboutStepData,
+      isQueryBarValid,
       defineStepData,
+      aboutStepData,
       aboutStepForm,
       scheduleStepData,
       scheduleStepForm,
@@ -440,29 +481,14 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      <HeaderPage
-                        backOptions={{
-                          path: getRuleDetailsUrl(ruleId ?? ''),
-                          text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-                          pageId: SecurityPageName.rules,
-                          dataTestSubj: 'ruleEditBackToRuleDetails',
-                        }}
+                      <CustomHeaderPageMemo
+                        backOptions={backOptions}
                         isLoading={isLoading}
                         title={i18n.PAGE_TITLE}
-                      >
-                        <EuiButton
-                          data-test-subj="preview-container"
-                          isSelected={isRulePreviewVisible}
-                          fill={isRulePreviewVisible}
-                          iconType="visBarVerticalStacked"
-                          onClick={() => {
-                            collapseFn.current?.();
-                            setIsRulePreviewVisible((isVisible) => !isVisible);
-                          }}
-                        >
-                          {ruleI18n.RULE_PREVIEW_TITLE}
-                        </EuiButton>
-                      </HeaderPage>
+                        isRulePreviewVisible={isRulePreviewVisible}
+                        setIsRulePreviewVisible={setIsRulePreviewVisible}
+                        togglePanel={togglePanel}
+                      />
                       {invalidSteps.length > 0 && (
                         <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
                           <FormattedMessage
