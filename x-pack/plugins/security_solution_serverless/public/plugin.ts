@@ -53,7 +53,7 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
-    setServerlessNavigation(services);
+    setServerlessNavigation(services, this.config);
 
     return {};
   }

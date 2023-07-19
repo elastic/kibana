@@ -7,10 +7,11 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { productTypes } from '../common/config';
+import { developerConfigSchema, productTypes } from '../common/config';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  developer: developerConfigSchema,
   productTypes,
 });
 export type ServerlessSecurityConfig = TypeOf<typeof configSchema>;
@@ -18,6 +19,7 @@ export type ServerlessSecurityConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ServerlessSecurityConfig> = {
   exposeToBrowser: {
     productTypes: true,
+    developer: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
