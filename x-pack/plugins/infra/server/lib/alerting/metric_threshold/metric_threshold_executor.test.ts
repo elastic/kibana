@@ -1901,6 +1901,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   logs: {
     app_target: 'logs-ui',
   },
+  enabled: true,
   sources,
 });
 
