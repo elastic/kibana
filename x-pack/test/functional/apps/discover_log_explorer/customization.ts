@@ -4,11 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'timePicker',
+    'dashboard',
+    'navigationalSearch',
+  ]);
   const testSubjects = getService('testSubjects');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -55,6 +63,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.existOrFail('openInspectorButton');
         await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it('should add a searchable deep link to the profile page', async () => {
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.navigationalSearch.searchFor('discover log explorer');
+
+        const results = await PageObjects.navigationalSearch.getDisplayedResults();
+        expect(results[0].label).to.eql('Discover / Logs Explorer');
       });
     });
   });

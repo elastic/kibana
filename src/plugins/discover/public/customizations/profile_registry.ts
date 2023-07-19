@@ -28,10 +28,7 @@ export const createProfileRegistry = (): DiscoverProfileRegistry => {
     },
     getContributedAppState$() {
       return profiles$.pipe(
-        map((profilesList) => {
-          const mergedDeepLinks = profilesList.flatMap((profile) => profile.deepLinks ?? []);
-          return getUniqueDeepLinks(mergedDeepLinks);
-        }),
+        map((profilesList) => profilesList.flatMap((profile) => profile.deepLinks ?? [])),
         map((profilesDeepLinks) => (app) => ({
           deepLinks: getUniqueDeepLinks([...(app.deepLinks ?? []), ...profilesDeepLinks]),
         }))

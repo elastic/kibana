@@ -35,7 +35,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // TODO: test something oblt project specific instead of generic discover
       // navigate to discover
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover:log-explorer' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover:log-explorer' });
@@ -80,7 +79,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
-      // TODO: test something oblt project specific instead of generic discover
       await svlCommonNavigation.search.searchFor('discover log explorer');
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
