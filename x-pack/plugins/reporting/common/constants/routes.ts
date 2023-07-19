@@ -40,4 +40,9 @@ export const PUBLIC_ROUTES = {
    * jobId is added to the final path
    */
   DOWNLOAD_PREFIX: prefixPublicPath + `/jobs/download`,
+  /**
+   * Public endpoint potentially used to delete a report after download in automation
+   * jobId is added to the final path
+   */
+  DELETE_PREFIX: prefixPublicPath + `/jobs/delete`,
 };
