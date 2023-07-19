@@ -15,7 +15,7 @@ export const useCreateCloudFormationUrl = ({
   cloudFormationTemplateUrl,
 }: {
   enrollmentAPIKey: string | undefined;
-  cloudFormationTemplateUrl: string;
+  cloudFormationTemplateUrl: string | undefined;
 }) => {
   const { data, isLoading } = useGetSettings();
 
