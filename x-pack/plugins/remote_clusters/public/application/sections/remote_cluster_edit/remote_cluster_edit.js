@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiCallOut,
-  EuiEmptyPrompt,
+  EuiPageTemplate,
   EuiPageSection,
   EuiPageBody,
   EuiSpacer,
@@ -96,21 +96,21 @@ export class RemoteClusterEdit extends Component {
 
     if (isLoading) {
       return (
-        <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
           <SectionLoading>
             <FormattedMessage
               id="xpack.remoteClusters.edit.loadingLabel"
               defaultMessage="Loading remote cluster…"
             />
           </SectionLoading>
-        </EuiPageSection>
+        </EuiPageTemplate>
       );
     }
 
     if (!cluster) {
       return (
-        <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
-          <EuiEmptyPrompt
+        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+          <EuiPageTemplate.EmptyPrompt
             iconType="warning"
             title={
               <h2>
@@ -143,7 +143,7 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageSection>
+        </EuiPageTemplate>
       );
     }
 
@@ -151,8 +151,8 @@ export class RemoteClusterEdit extends Component {
 
     if (isConfiguredByNode) {
       return (
-        <EuiPageSection verticalPosition="center" horizontalPosition="center" color="primary">
-          <EuiEmptyPrompt
+        <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+          <EuiPageTemplate.EmptyPrompt
             iconType="iInCircle"
             title={
               <h2>
@@ -180,7 +180,7 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageSection>
+        </EuiPageTemplate>
       );
     }
 

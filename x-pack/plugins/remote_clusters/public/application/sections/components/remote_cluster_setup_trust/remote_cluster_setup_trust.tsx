@@ -106,14 +106,14 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-                  defaultMessage="Documentation"
+                  defaultMessage="Read more"
                 />
               </EuiButtonEmpty>
             </EuiCard>
           </EuiFlexItem>
         )}
 
-        <EuiFlexItem style={{ maxWidth: canUseAPIKeyTrustModel ? CARD_MAX_WIDTH : '100%' }}>
+        <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
           <EuiCard title={i18nTexts.certTitle} paddingSize="l">
             <EuiText size="s">
               <p>{i18nTexts.certDescription}</p>
@@ -127,7 +127,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
             >
               <FormattedMessage
                 id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-                defaultMessage="Documentation"
+                defaultMessage="Read more"
               />
             </EuiButtonEmpty>
           </EuiCard>

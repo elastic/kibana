@@ -501,20 +501,20 @@ export class RemoteClusterForm extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
           title={
-            <h3 id={this.generateId(ERROR_TITLE_ID)}>
+            <span id={this.generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
                 defaultMessage="Fix errors before continuing."
               />
-            </h3>
+            </span>
           }
           color="danger"
-          iconType="cross"
+          iconType="error"
         />
         <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
+        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
       </Fragment>
     );
   };
@@ -527,6 +527,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     return (
       <Fragment>
         {this.renderSaveErrorFeedback()}
+        {this.renderErrors()}
 
         <EuiForm data-test-subj="remoteClusterForm">
           <EuiDescribedFormGroup
@@ -586,8 +587,6 @@ export class RemoteClusterForm extends Component<Props, State> {
 
           {this.renderSkipUnavailable()}
         </EuiForm>
-
-        {this.renderErrors()}
 
         <EuiSpacer size="l" />
 

@@ -19,6 +19,8 @@ import {
   EuiPageSection,
   EuiPageBody,
   EuiPageTemplate,
+  EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 
 import { remoteClustersUrl } from '../../services/documentation';
@@ -179,6 +181,24 @@ export class RemoteClusterList extends Component {
                 defaultMessage="Add a remote cluster"
               />
             </EuiButton>
+          }
+          footer={
+            <>
+              <EuiTitle size="xxs">
+                <span>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusters.emptyState.docsDescription"
+                    defaultMessage="Want to learn more?"
+                  />
+                </span>
+              </EuiTitle>{' '}
+              <EuiLink href={remoteClustersUrl} target="_blank">
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusters.emptyState.docsLink"
+                  defaultMessage="Read documentation"
+                />
+              </EuiLink>
+            </>
           }
         />
       </EuiPageTemplate>
