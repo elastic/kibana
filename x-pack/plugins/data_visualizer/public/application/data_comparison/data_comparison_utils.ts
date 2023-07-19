@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-// @ts-expect-error
-import array from '@stdlib/esm/ndarray/array';
-// @ts-expect-error
-import chi2test from '@stdlib/esm/stats/chi2test';
+import chi2test from '@stdlib/stats-chi2test';
 import { Histogram } from './types';
 
 /**
@@ -42,11 +39,11 @@ export const computeChi2PValue = (
     orderedDriftedDocCount.push(driftedTerm?.doc_count ?? 0);
   });
 
-  const table = array([
+  const table = [
     /* A B C D */
     orderedBaselineDocCount, // expected_terms
     orderedDriftedDocCount, // observed_terms
-  ]);
+  ];
   const result = chi2test(table);
   return result.pValue;
 };
