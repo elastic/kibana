@@ -7,13 +7,11 @@
 
 import * as rt from 'io-ts';
 
-import type { ActionType } from '@kbn/actions-plugin/common';
+import type { ActionType as ConnectorActionType } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
 
-export * from './mappings.v1';
-
 export type ActionConnector = ActionResult;
-export type ActionTypeConnector = ActionType;
+export type ActionTypeConnector = ConnectorActionType;
 
 export enum ConnectorTypes {
   casesWebhook = '.cases-webhook',
@@ -159,6 +157,43 @@ export const CaseConnectorRt = rt.intersection([
   CaseUserActionConnectorRt,
 ]);
 
+/**
+ * Mappings
+ */
+
+const ConnectorMappingActionTypeRt = rt.union([
+  rt.literal('append'),
+  rt.literal('nothing'),
+  rt.literal('overwrite'),
+]);
+
+const ConnectorMappingSourceRt = rt.union([
+  rt.literal('title'),
+  rt.literal('description'),
+  rt.literal('comments'),
+  rt.literal('tags'),
+]);
+
+const ConnectorMappingTargetRt = rt.union([rt.string, rt.literal('not_mapped')]);
+
+const ConnectorMappingRt = rt.strict({
+  action_type: ConnectorMappingActionTypeRt,
+  source: ConnectorMappingSourceRt,
+  target: ConnectorMappingTargetRt,
+});
+
+export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
+
+export const ConnectorMappingsAttributesRt = rt.strict({
+  mappings: ConnectorMappingsRt,
+  owner: rt.string,
+});
+
+export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
+export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
+export type ConnectorMappingActionType = rt.TypeOf<typeof ConnectorMappingActionTypeRt>;
+export type ConnectorMappingSource = rt.TypeOf<typeof ConnectorMappingSourceRt>;
+export type ConnectorMappingTarget = rt.TypeOf<typeof ConnectorMappingTargetRt>;
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;

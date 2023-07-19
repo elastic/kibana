@@ -12,9 +12,9 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   ActionConnector,
-  CaseField,
+  ConnectorMappingSource,
   ConnectorMappings,
-  ThirdPartyField,
+  ConnectorMappingTarget,
 } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
@@ -213,13 +213,13 @@ export const createIncident = async ({
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
-  caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
+  caseFields: Record<Exclude<ConnectorMappingSource, 'comments' | 'tags'>, unknown>,
   mapping: ConnectorMappings
-): Record<ThirdPartyField, unknown> => {
-  const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
+): Record<ConnectorMappingTarget, unknown> => {
+  const mappedCaseFields: Record<ConnectorMappingTarget, unknown> = {};
 
   for (const caseFieldKey of Object.keys(caseFields) as Array<
-    Exclude<CaseField, 'comments' | 'tags'>
+    Exclude<ConnectorMappingSource, 'comments' | 'tags'>
   >) {
     const mapDefinition = mapping.find(
       (mappingEntry) => mappingEntry.source === caseFieldKey && mappingEntry.target !== 'not_mapped'

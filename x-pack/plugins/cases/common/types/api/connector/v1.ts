@@ -7,9 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseExternalServiceBasicRt } from '../../../api';
-import { CaseConnectorRt } from '../../domain/connector/v1';
-
-export * from './mappings.v1';
+import { CaseConnectorRt, ConnectorMappingsRt } from '../../domain/connector/v1';
 
 const ActionConnectorResultRt = rt.intersection([
   rt.strict({
@@ -54,5 +52,12 @@ export const GetCaseConnectorsResponseRt = rt.record(
   ])
 );
 
+export const ConnectorMappingResponseRt = rt.strict({
+  id: rt.string,
+  version: rt.string,
+  mappings: ConnectorMappingsRt,
+});
+
+export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;
 export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;
 export type GetCaseConnectorsPushDetails = rt.TypeOf<typeof PushDetailsRt>;
