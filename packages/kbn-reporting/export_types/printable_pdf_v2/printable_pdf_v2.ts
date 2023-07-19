@@ -95,7 +95,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
+      mergeMap(async () => await decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers: Headers) => {
         const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);

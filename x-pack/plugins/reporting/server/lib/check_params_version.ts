@@ -9,8 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import { BaseParams } from '@kbn/reporting-common';
 import { UNVERSIONED_VERSION } from '../../common/constants';
 
-export function checkParamsVersion(jobParams: BaseParams, logger: Logger) {
-  if (jobParams.version) {
+export function checkParamsVersion(jobParams: BaseParams, logger: Logger): string {
+  if (jobParams.version && jobParams.version !== 'unknown') {
     logger.debug(`Using reporting job params v${jobParams.version}`);
     return jobParams.version;
   }

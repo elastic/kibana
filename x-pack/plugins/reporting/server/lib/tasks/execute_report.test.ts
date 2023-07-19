@@ -6,13 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import { ExportType, KibanaShuttingDownError } from '@kbn/reporting-common';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportingConfigType } from '../../config';
-import type { ExportType } from '../../export_types/common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
 

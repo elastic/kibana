@@ -65,7 +65,6 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
     this.logger = this.logger.get('png-export-v1');
   }
 
-  // PR 161712 needs these out of reporting
   public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
     return this.startDeps.screenshotting.getScreenshots({
       ...options,

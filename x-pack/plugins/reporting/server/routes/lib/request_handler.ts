@@ -136,6 +136,7 @@ export class RequestHandler {
     let report: Report | undefined;
     try {
       report = await this.enqueueJob(exportTypeId, jobParams);
+
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
       counters.usageCounter();

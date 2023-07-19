@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ExportType } from '@kbn/reporting-common';
 import { isString } from 'lodash';
-import { ExportType } from '../export_types/common';
 
 type GetCallbackFn = (item: ExportType) => boolean;
 

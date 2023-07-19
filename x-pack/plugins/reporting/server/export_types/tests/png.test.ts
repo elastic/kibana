@@ -8,13 +8,13 @@
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { CancellationToken } from '@kbn/reporting-common';
+import { CancellationToken, TaskPayloadPNG } from '@kbn/reporting-common';
 import { cryptoFactory } from '@kbn/reporting-common';
-import { PngV1ExportType, TaskPayloadPNG } from '@kbn/reporting-export-types-deprecated';
+import { PngV1ExportType } from '@kbn/reporting-export-types-deprecated';
 import { createMockConfigSchema } from '../../test_helpers';
 import { generatePngObservable } from '@kbn/reporting-export-types-common';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-jest.mock('../common/generate_png');
+jest.mock('@kbn/reporting-export-types-common/generate_png');
 
 let content: string;
 let mockPngExportType: PngV1ExportType;

@@ -12,6 +12,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { ExportType, ReportingRequestHandlerContext } from '@kbn/reporting-common';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
@@ -24,9 +25,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobInfoRoutes } from '../jobs';
-import { ExportType } from '../../../export_types/common';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

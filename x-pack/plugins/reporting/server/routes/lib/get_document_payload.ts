@@ -6,11 +6,10 @@
  */
 
 import { ResponseHeaders } from '@kbn/core-http-server';
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-common';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED, ExportType } from '@kbn/reporting-common';
 import { Stream } from 'stream';
 import { ReportingCore } from '../..';
 import { ReportApiJSON } from '../../../common/types';
-import { ExportType } from '../../export_types/common';
 import { getContentStream, statuses } from '../../lib';
 import { jobsQueryFactory } from './jobs_query';
 

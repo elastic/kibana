@@ -10,18 +10,16 @@ import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { ReportingCore } from '../..';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '@kbn/reporting-common';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { generatePngObservable } from '../common';
+import { generatePngObservable } from '@kbn/reporting-export-types-common';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png/types';
+import { createMockConfigSchema } from '../../test_helpers';
 
-jest.mock('../common/generate_png');
+jest.mock('@kbn/reporting-export-types-common/generate_png');
 
 let content: string;
-let mockReportingCore: ReportingCore;
 let mockPngExportType: PngExportType;
 let stream: jest.Mocked<Writable>;
 
@@ -51,7 +49,6 @@ beforeEach(async () => {
     },
   });
 
-  mockReportingCore = await createMockReportingCore(configType);
   const context = coreMock.createPluginInitializerContext(configType);
 
   const mockCoreSetup = coreMock.createSetup();
