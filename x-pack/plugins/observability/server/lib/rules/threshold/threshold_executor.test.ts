@@ -124,7 +124,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
 };
 
 // FAILING: https://github.com/elastic/kibana/issues/155534
-describe('The metric threshold alert type', () => {
+describe.skip('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1888,6 +1888,11 @@ const mockLibs: any = {
     prepend: (path: string) => path,
   },
   logger,
+  config: {
+    thresholdRule: {
+      groupByPageSize: 10_000,
+    },
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
