@@ -7,10 +7,7 @@
  */
 
 import { ReactElement } from 'react';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { SearchInput } from '..';
-import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../build_services';
 import { discoverServiceMock } from '../__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
@@ -52,7 +49,6 @@ const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMock
 
 describe('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;
-  let filterManagerMock: jest.Mocked<FilterManager>;
   let servicesMock: jest.Mocked<DiscoverServices>;
 
   let executeTriggerActions: jest.Mock;
@@ -68,21 +64,15 @@ describe('saved search embeddable', () => {
       searchSource,
       viewMode: viewModeMockValue,
     };
-
-    const url = getSavedSearchUrl(savedSearchMock.id);
-    const editUrl = `/app/discover${url}`;
-    const indexPatterns = [dataViewMock];
+    executeTriggerActions = jest.fn();
     const savedSearchEmbeddableConfig: SearchEmbeddableConfig = {
-      savedSearch: savedSearchMock,
-      editUrl,
-      editPath: url,
       editable: true,
-      indexPatterns,
-      filterManager: filterManagerMock,
       services: servicesMock,
+      executeTriggerActions,
     };
     const searchInput: SearchInput = {
       id: 'mock-embeddable-id',
+      savedObjectId: savedSearchMock.id,
       timeRange: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
@@ -91,14 +81,7 @@ describe('saved search embeddable', () => {
     if (customTitle) {
       searchInput.title = customTitle;
     }
-
-    executeTriggerActions = jest.fn();
-
-    const embeddable = new SavedSearchEmbeddable(
-      savedSearchEmbeddableConfig,
-      searchInput,
-      executeTriggerActions
-    );
+    const embeddable = new SavedSearchEmbeddable(savedSearchEmbeddableConfig, searchInput);
 
     // this helps to trigger reload
     // eslint-disable-next-line dot-notation
@@ -111,7 +94,6 @@ describe('saved search embeddable', () => {
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
-    filterManagerMock = createFilterManagerMock();
 
     showFieldStatisticsMockValue = false;
     viewModeMockValue = VIEW_MODE.DOCUMENT_LEVEL;

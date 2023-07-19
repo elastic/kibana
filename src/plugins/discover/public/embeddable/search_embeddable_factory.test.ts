@@ -21,6 +21,7 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 
 const input = {
   id: 'mock-embeddable-id',
+  savedObjectId: 'mock-saved-object-id',
   timeRange: { from: 'now-15m', to: 'now' },
   columns: ['message', 'extension'],
   rowHeight: 30,
