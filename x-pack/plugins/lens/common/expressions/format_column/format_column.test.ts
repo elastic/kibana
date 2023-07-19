@@ -366,19 +366,23 @@ describe('format_column', () => {
       suffix: ' on Earth',
     });
     expect(result.columns[0].meta).toEqual({
-      id: 'suffix',
+      type: 'number',
       params: {
-        suffixString: ' on Earth',
-        id: 'duration',
+        id: 'suffix',
         params: {
-          pattern: '',
+          suffixString: ' on Earth',
+          id: 'duration',
           formatOverride: true,
-          inputFormat: 'seconds',
-          outputFormat: 'asHours',
-          outputPrecision: 2,
-          useShortSuffix: true,
-          showSuffix: true,
-          includeSpaceWithSuffix: true,
+          params: {
+            pattern: '',
+            formatOverride: true,
+            inputFormat: 'seconds',
+            outputFormat: 'asHours',
+            outputPrecision: 2,
+            useShortSuffix: true,
+            showSuffix: true,
+            includeSpaceWithSuffix: true,
+          },
         },
       },
     });
