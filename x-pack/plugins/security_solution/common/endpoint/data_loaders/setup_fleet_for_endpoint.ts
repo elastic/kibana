@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
-
 import type { AxiosResponse } from 'axios';
 import type { KbnClient } from '@kbn/test';
 import type {
@@ -80,16 +78,8 @@ export const setupFleetForEndpoint = async (
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
 
     if (!setupResponse.data.isInitialized) {
-      log.error(setupResponse.data);
-      const err = new Error('Initializing the ingest manager failed, existing');
-
-      usageRecord.finish = new Date().toISOString();
-      usageRecord.status = 'failure';
-      usageRecord.error = err.message;
-      Error.captureStackTrace(usageRecord);
-      dumpUsage(log);
-
-      throw err;
+      log.error(new Error(JSON.stringify(setupResponse.data, null, 2)));
+      throw new Error('Initializing the ingest manager failed, existing');
     }
   } catch (error) {
     log.error(error);
@@ -113,7 +103,7 @@ export const setupFleetForEndpoint = async (
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
 
     if (!setupResponse.data.isInitialized) {
-      log.error(setupResponse);
+      log.error(new Error(JSON.stringify(setupResponse, null, 2)));
       throw new Error('Initializing Fleet failed');
     }
   } catch (error) {
@@ -168,57 +158,38 @@ export const installOrUpgradeEndpointFleetPackage = async (
   };
   addUsageRecord('installOrUpgradeEndpointFleetPackage()', usageRecord);
 
-  const installEndpointPackageResp = (await kbnClient
-    .request({
-      path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      method: 'POST',
-      body: {
-        packages: ['endpoint'],
-      },
-      query: {
-        prerelease: true,
-      },
-    })
-    .catch((error) => {
-      logger.error(error);
+  const updatePackages = async () => {
+    const installEndpointPackageResp = (await kbnClient
+      .request({
+        path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
+        method: 'POST',
+        body: {
+          packages: ['endpoint'],
+        },
+        query: {
+          prerelease: true,
+        },
+      })
+      .catch((error) => {
+        logger.error(error);
 
-      usageRecord.finish = new Date().toISOString();
-      usageRecord.status = 'failure';
-      usageRecord.error = error.message;
-      Error.captureStackTrace(usageRecord);
-      dumpUsage(logger);
+        usageRecord.finish = new Date().toISOString();
+        usageRecord.status = 'failure';
+        usageRecord.error = error.message;
+        Error.captureStackTrace(usageRecord);
+        dumpUsage(logger);
 
-      throw error;
-    })
-    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
+        throw error;
+      })
+      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
 
-  logger.debug(`Fleet bulk install response:`, installEndpointPackageResp);
+    logger.debug(`Fleet bulk install response:`, installEndpointPackageResp);
 
-  const bulkResp = installEndpointPackageResp.data.items;
+    const bulkResp = installEndpointPackageResp.data.items;
 
-  if (bulkResp.length <= 0) {
-    const error = new EndpointDataLoadingError(
-      'Installing the Endpoint package failed, response was empty, existing',
-      bulkResp
-    );
-
-    usageRecord.finish = new Date().toISOString();
-    usageRecord.status = 'failure';
-    usageRecord.error = error.message;
-    Error.captureStackTrace(usageRecord);
-    dumpUsage(logger);
-
-    throw error;
-  }
-
-  const installResponse = bulkResp[0];
-
-  logger.info(installResponse);
-
-  if (isFleetBulkInstallError(installResponse)) {
-    if (installResponse.error instanceof Error) {
+    if (bulkResp.length <= 0) {
       const error = new EndpointDataLoadingError(
-        `Installing the Endpoint package failed: ${installResponse.error.message}, exiting`,
+        'Installing the Endpoint package failed, response was empty, existing',
         bulkResp
       );
 
@@ -231,42 +202,65 @@ export const installOrUpgradeEndpointFleetPackage = async (
       throw error;
     }
 
-    // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
-    if (installResponse.statusCode !== 409) {
-      // when `no_shard_available_action_exception` errors re-run install or upgrade after a delay
-      if (isNoShardAvailableActionExceptionError(installResponse)) {
-        logger.warning(
-          `Known transient failure detected: no_shard_available_action_exception. Retrying...`
+    const installResponse = bulkResp[0];
+
+    logger.info(installResponse);
+
+    if (isFleetBulkInstallError(installResponse)) {
+      if (installResponse.error instanceof Error) {
+        const error = new EndpointDataLoadingError(
+          `Installing the Endpoint package failed: ${installResponse.error.message}, exiting`,
+          bulkResp
         );
 
-        await retryInstallOrUpgradeEndpointFleetPackage(() => {
-          return installOrUpgradeEndpointFleetPackage(kbnClient, logger);
-        }, logger).catch((error) => {
-          usageRecord.finish = new Date().toISOString();
-          usageRecord.status = 'failure';
-          usageRecord.error = error.message;
-          Error.captureStackTrace(usageRecord);
-          dumpUsage(logger);
+        usageRecord.finish = new Date().toISOString();
+        usageRecord.status = 'failure';
+        usageRecord.error = error.message;
+        Error.captureStackTrace(usageRecord);
+        dumpUsage(logger);
 
-          throw error;
-        });
+        throw error;
       }
 
-      usageRecord.finish = new Date().toISOString();
-      usageRecord.status = 'failure';
-      usageRecord.error = installResponse.error;
-      Error.captureStackTrace(usageRecord);
-      dumpUsage(logger);
+      // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
+      if (installResponse.statusCode !== 409) {
+        // // when `no_shard_available_action_exception` errors re-run install or upgrade after a delay
+        // if (isNoShardAvailableActionExceptionError(installResponse)) {
+        //   logger.warning(
+        //     `Known transient failure detected: no_shard_available_action_exception. Retrying...`
+        //   );
+        //
+        //   await retryInstallOrUpgradeEndpointFleetPackage(() => {
+        //     return installOrUpgradeEndpointFleetPackage(kbnClient, logger);
+        //   }, logger).catch((error) => {
+        //     usageRecord.finish = new Date().toISOString();
+        //     usageRecord.status = 'failure';
+        //     usageRecord.error = error.message;
+        //     Error.captureStackTrace(usageRecord);
+        //     dumpUsage(logger);
+        //
+        //     throw error;
+        //   });
+        // }
 
-      throw new EndpointDataLoadingError(installResponse.error, bulkResp);
+        usageRecord.finish = new Date().toISOString();
+        usageRecord.status = 'failure';
+        usageRecord.error = installResponse.error;
+        Error.captureStackTrace(usageRecord);
+        dumpUsage(logger);
+
+        throw new EndpointDataLoadingError(installResponse.error, bulkResp);
+      }
     }
-  }
 
-  usageRecord.finish = new Date().toISOString();
-  usageRecord.status = 'success';
-  dumpUsage(logger);
+    usageRecord.finish = new Date().toISOString();
+    usageRecord.status = 'success';
+    dumpUsage(logger);
 
-  return bulkResp[0] as BulkInstallPackageInfo;
+    return bulkResp[0] as BulkInstallPackageInfo;
+  };
+
+  return retryInstallOrUpgradeEndpointFleetPackage(updatePackages, logger);
 };
 
 function isFleetBulkInstallError(
@@ -283,12 +277,12 @@ function isNoShardAvailableActionExceptionError(error: IBulkInstallPackageHTTPEr
 
 // retry logic for install or upgrade of endpoint package
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS = 3;
+const MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS = 5;
 
 const retryInstallOrUpgradeEndpointFleetPackage = async <T>(
   callback: () => Promise<T>,
   logger: ToolingLog
-): Promise<T | undefined> => {
+): Promise<T> => {
   const log = logger.withType('retryInstallOrUpgradeEndpointFleetPackage');
   let attempt = 1;
   let responsePromise: Promise<T>;
@@ -302,9 +296,8 @@ const retryInstallOrUpgradeEndpointFleetPackage = async <T>(
     );
 
     try {
-      responsePromise = callback();
-      await responsePromise;
-      return responsePromise; // since we got this far, we know that API returned success. Return it
+      responsePromise = callback(); // store promise so that if it fails and no more attempts, we return the last failure
+      return await responsePromise;
     } catch (err) {
       log.info(
         `retryInstallOrUpgradeEndpointFleetPackage(): attempt ${thisAttempt} failed with:`,
