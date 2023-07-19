@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiAvatarSize } from '@elastic/eui/src/components/avatar/avatar';
 
 export interface AssistantAvatarProps {
-  size: EuiAvatarSize;
+  size: keyof typeof sizeMap;
 }
 
 export const sizeMap = {
