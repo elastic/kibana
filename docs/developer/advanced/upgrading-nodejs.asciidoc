@@ -37,8 +37,6 @@ Due to Node.js 16 coming to an https://nodejs.org/en/blog/announcements/nodejs16
 To keep support for these older platforms, we're bundling the Linux distributable of {kib} with a https://github.com/elastic/kibana-custom-nodejs-builds[custom build of Node.js] with extended backwards compatibility.
 The only difference between the offical Node.js build and our custom build, is the version of `glibc` that it's compiled against.
 
-For details, see https://github.com/elastic/kibana-custom-nodejs-builds.
-
 === Backporting
 
 The following rules are not set in stone.
