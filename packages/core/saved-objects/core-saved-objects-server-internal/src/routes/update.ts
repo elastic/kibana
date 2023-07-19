@@ -66,7 +66,7 @@ export const registerUpdateRoute = (
         version,
         references,
         upsert,
-        migrationVersionCompatibility: 'compatible' as const,
+        migrationVersionCompatibility: 'raw' as const,
       };
 
       const usageStatsClient = coreUsageData.getClient();

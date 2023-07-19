@@ -23,10 +23,10 @@ export {
   type IPreflightCheckHelper,
   type PreflightCheckNamespacesParams,
   type PreflightCheckNamespacesResult,
-  type PreflightGetDocForUpdateParams,
-  type PreflightGetDocForUpdateResult,
-  type PreflightCheckNamespacesForUpdateParams,
-  type PreflightCheckNamespacesForUpdateResult,
+  type PreflightDocParams,
+  type PreflightDocResult,
+  type PreflightNSParams,
+  type PreflightNSResult,
 } from './preflight_check';
 
 export interface RepositoryHelpers {

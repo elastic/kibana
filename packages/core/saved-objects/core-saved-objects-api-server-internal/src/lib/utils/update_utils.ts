@@ -8,10 +8,7 @@
 
 import { SavedObjectsErrorHelpers, DecoratedError } from '@kbn/core-saved-objects-server';
 import { Logger } from 'elastic-apm-node';
-import {
-  PreflightCheckNamespacesForUpdateResult,
-  PreflightGetDocForUpdateResult,
-} from '../apis/helpers';
+import { PreflightNSResult, PreflightDocResult } from '../apis/helpers';
 
 /**
  * Downward compatible update control flow helpers
@@ -102,8 +99,8 @@ export interface CanPerformUpdateParams<T = unknown> {
   id: string;
   namespace?: string;
   upsert: T | undefined;
-  preflightCheckNamespacesForUpdateResult: PreflightCheckNamespacesForUpdateResult;
-  preflightGetDocForUpdateResult: PreflightGetDocForUpdateResult;
+  preflightCheckNamespacesForUpdateResult: PreflightNSResult;
+  preflightGetDocForUpdateResult: PreflightDocResult;
 }
 export const canPerformUpdate = (params: CanPerformUpdateParams) => {
   const {
@@ -132,26 +129,4 @@ export const canPerformUpdate = (params: CanPerformUpdateParams) => {
       SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)
     );
   }
-};
-export interface CanUpsertDocParams {
-  useUpsert: boolean;
-  preflightGetDocForUpdateResult: PreflightGetDocForUpdateResult;
-  preflightCheckNamespacesForUpdateResult: PreflightCheckNamespacesForUpdateResult;
-}
-export const canUpsertDoc = ({
-  useUpsert,
-  preflightGetDocForUpdateResult,
-  preflightCheckNamespacesForUpdateResult,
-}: CanUpsertDocParams) => {
-  let result = false;
-  if (
-    (useUpsert &&
-      preflightGetDocForUpdateResult &&
-      preflightGetDocForUpdateResult.checkDocFound === 'not_found') ||
-    (preflightCheckNamespacesForUpdateResult &&
-      preflightCheckNamespacesForUpdateResult.checkResult === 'not_found')
-  ) {
-    result = true;
-  }
-  return result;
 };

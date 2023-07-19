@@ -164,8 +164,7 @@ rawDocSource
     type,
     id,
     namespace,
-    migrationVersionCompatibility,
-  }: PreflightGetDocForUpdateParams): Promise<PreflightGetDocForUpdateResult> {
+  }: PreflightDocParams): Promise<PreflightDocResult> {
     const response = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this.serializer.generateRawId(namespace, type, id),
@@ -201,7 +200,7 @@ rawDocSource
     namespace,
     initialNamespaces,
     preflightDocResult,
-  }: PreflightCheckNamespacesForUpdateParams): Promise<PreflightCheckNamespacesForUpdateResult> {
+  }: PreflightNSParams): Promise<PreflightNSResult> {
     const { checkDocFound, rawDocSource } = preflightDocResult;
     if (!this.registry.isMultiNamespace(type)) {
       return {
@@ -275,7 +274,7 @@ export interface PreflightCheckNamespacesParams {
 /**
  * @internal
  */
-export interface PreflightCheckNamespacesForUpdateParams {
+export interface PreflightNSParams {
   /** The object type to fetch */
   type: string;
   /** The object ID to fetch */
@@ -285,12 +284,12 @@ export interface PreflightCheckNamespacesForUpdateParams {
   /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
   initialNamespaces?: string[];
   /** Optional; for a pre-fetched object */
-  preflightDocResult: PreflightGetDocForUpdateResult;
+  preflightDocResult: PreflightDocResult;
 }
 /**
  * @internal
  */
-export interface PreflightCheckNamespacesForUpdateResult {
+export interface PreflightNSResult {
   /** If the object exists, and whether or not it exists in the current space */
   checkResult?: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
   /**
@@ -322,7 +321,7 @@ export interface PreflightCheckNamespacesResult {
 /**
  * @internal
  */
-export interface PreflightGetDocForUpdateParams {
+export interface PreflightDocParams {
   /** The object type to fetch */
   type: string;
   /** The object ID to fetch */
@@ -336,9 +335,9 @@ export interface PreflightGetDocForUpdateParams {
 /**
  * @internal
  */
-export interface PreflightGetDocForUpdateResult {
+export interface PreflightDocResult {
   /** If the object exists, and whether or not it exists in the current space */
-  checkDocFound: 'not_found' | 'found' | 'unknown';
+  checkDocFound: 'not_found' | 'found';
   /** The source of the raw document, if the object already exists in the server's version (unsafe to use) */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
 }
