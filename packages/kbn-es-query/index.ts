@@ -40,13 +40,7 @@ export type {
   CombinedFilter,
 } from './src/filters';
 
-export type {
-  DslQuery,
-  FunctionTypeBuildNode,
-  KueryNode,
-  KueryParseOptions,
-  KueryQueryOptions,
-} from './src/kuery';
+export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
 
 export {
   buildEsQuery,
@@ -117,6 +111,7 @@ export {
 export {
   KQLSyntaxError,
   fromKueryExpression,
+  toKqlExpression,
   nodeBuilder,
   nodeTypes,
   toElasticsearchQuery,

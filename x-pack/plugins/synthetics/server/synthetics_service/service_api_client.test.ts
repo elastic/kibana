@@ -109,8 +109,6 @@ describe('checkAccountAccessStatus', () => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
   });
 
-  afterEach(() => jest.restoreAllMocks());
-
   it('includes a header with the kibana version', async () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
@@ -150,8 +148,6 @@ describe('callAPI', () => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
     jest.clearAllMocks();
   });
-
-  afterEach(() => jest.restoreAllMocks());
 
   const logger = loggerMock.create();
 
