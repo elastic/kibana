@@ -52,8 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     [MULTI_METRIC_JOB_CONFIG.job_id]: { reset: true, task: 'cannot be predicted' },
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/160370
-  describe.skip('reset_jobs', function () {
+  describe('reset_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
