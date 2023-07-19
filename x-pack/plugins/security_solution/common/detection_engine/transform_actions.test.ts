@@ -13,9 +13,12 @@ import {
   transformRuleToAlertResponseAction,
   transformAlertToRuleResponseAction,
 } from './transform_actions';
-import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
-import type { NormalizedRuleAction } from './rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../api/detection_engine/model/rule_response_actions';
+import { RESPONSE_ACTION_TYPES } from '../api/detection_engine/model/rule_response_actions';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 describe('transform_actions', () => {

@@ -16,7 +16,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
-import { dataViewMock } from '../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
