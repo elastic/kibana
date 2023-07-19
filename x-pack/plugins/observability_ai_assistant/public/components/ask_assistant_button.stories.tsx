@@ -43,7 +43,6 @@ const Template: ComponentStory<typeof Component> = (props: AskAssistantButtonPro
 
 const defaultProps = {
   fill: true,
-  iconOnly: false,
   size: 'm' as EuiButtonSize,
   variant: 'basic' as const,
 };
