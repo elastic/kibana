@@ -242,6 +242,7 @@ export const performUpdate = async <T>(
   // UPDATE CASE START:
   // Doc already exists, we use both the attributes from the main request body and any extra ones from upsert. We need to ignore duplicate attribute fields if given in both attributes and upsert
   // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
+  const updatedAttributes = merge(migrated!.attributes, attributes);
   if (
     (registry.isMultiNamespace(type) &&
       preflightDocNSResult.checkResult === 'found_in_namespace') ||
@@ -251,9 +252,12 @@ export const performUpdate = async <T>(
       ...migrated!,
       id,
       type,
-      attributes: await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, {
-        ...merge(migrated!.attributes, attributes),
-      }),
+      attributes: await encryptionHelper.optionallyEncryptAttributes(
+        type,
+        id,
+        namespace,
+        updatedAttributes
+      ),
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
