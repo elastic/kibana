@@ -24,21 +24,21 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async ({ uptimeEsClient, request, response }): Promise<SyntheticsJourneyApiResponse> => {
     const { checkGroup } = request.params;
 
-    const [result, details] = await Promise.all([
-      await getJourneySteps({
+    const [steps, details] = await Promise.all([
+      getJourneySteps({
         uptimeEsClient,
         checkGroup,
       }),
-      await getJourneyDetails({
+      getJourneyDetails({
         uptimeEsClient,
         checkGroup,
       }),
     ]);
 
     return {
-      checkGroup,
-      steps: result,
+      steps,
       details,
+      checkGroup,
     };
   },
 });
