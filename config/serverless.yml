@@ -10,9 +10,6 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 
 # Cloud links
 xpack.cloud.base_url: "https://cloud.elastic.co"
-xpack.cloud.profile_url: "/user/settings"
-xpack.cloud.billing_url: "/billing"
-xpack.cloud.organization_url: "/account"
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
@@ -71,6 +68,9 @@ server.versioned.strictClientVersionCheck: false
 # Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
+
+# Only display console autocomplete suggestions for ES endpoints that are available in serverless
+console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
