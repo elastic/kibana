@@ -4468,25 +4468,17 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>The parameters for an index threshold rule.</div>
     <div class="field-items">
       <div class="param">aggField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the numeric field that is used in the aggregation. This property is required when <code>aggType</code> is <code>avg</code>, <code>max</code>, <code>min</code> or <code>sum</code>. </div>
-<div class="param">aggType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of aggregation to perform. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">avg</div><div class="param-enum">count</div><div class="param-enum">max</div><div class="param-enum">min</div><div class="param-enum">sum</div>
+<div class="param">aggType (optional)</div><div class="param-desc"><span class="param-type"><a href="#aggtype">aggtype</a></span>  </div>
 <div class="param">filterKuery (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A KQL expression thats limits the scope of alerts. </div>
-<div class="param">groupBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Indicates whether the aggregation is applied over all documents (<code>all</code>) or split into groups (<code>top</code>) using a grouping field (<code>termField</code>). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to <code>termSize</code> number of groups) are checked. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">all</div><div class="param-enum">top</div>
+<div class="param">groupBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#groupby">groupby</a></span>  </div>
 <div class="param">index </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The indices to query. </div>
 <div class="param">termField (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> This property is required when <code>groupBy</code> is <code>top</code>. The name of the field that is used for grouping the aggregation. </div>
 <div class="param">termSize (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> This property is required when <code>groupBy</code> is <code>top</code>. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields. </div>
 <div class="param">threshold </div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> The threshold value that is used with the <code>thresholdComparator</code>. If the <code>thresholdComparator</code> is <code>between</code> or <code>notBetween</code>, you must specify the boundary values. </div>
-<div class="param">thresholdComparator </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The comparison function for the threshold. For example, &quot;is above&quot;, &quot;is above or equals&quot;, &quot;is below&quot;, &quot;is below or equals&quot;, and &quot;is between&quot;. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">></div><div class="param-enum">>=</div><div class="param-enum"><</div><div class="param-enum"><=</div><div class="param-enum">between</div><div class="param-enum">notBetween</div>
+<div class="param">thresholdComparator </div><div class="param-desc"><span class="param-type"><a href="#thresholdcomparator">thresholdcomparator</a></span>  </div>
 <div class="param">timeField </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The field that is used to calculate the time window. </div>
 <div class="param">timeWindowSize </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The size of the time window (in <code>timeWindowUnit</code> units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection. </div>
-<div class="param">timeWindowUnit </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of units for the time window: seconds, minutes, hours, or days. </div>
-        <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">s</div><div class="param-enum">m</div><div class="param-enum">h</div><div class="param-enum">d</div>
+<div class="param">timeWindowUnit </div><div class="param-desc"><span class="param-type"><a href="#timewindowunit">timewindowunit</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
