@@ -18,6 +18,16 @@ import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
 
+const mockUseCasesContext = jest.fn().mockReturnValue({
+  permissions: {
+    connectors: true,
+  },
+});
+
+jest.mock('../cases_context/use_cases_context', () => ({
+  useCasesContext: () => mockUseCasesContext(),
+}));
+
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   let appMockRender: AppMockRenderer;
@@ -154,6 +164,20 @@ describe('Connectors', () => {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(<Connectors {...props} />);
+    expect(
+      result.getByTestId('configure-case-connector-permissions-error-msg')
+    ).toBeInTheDocument();
+    expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+  });
+
+  it('shows the actions permission message if the user does not have access to case connector', async () => {
+    mockUseCasesContext.mockReturnValue({
+      permissions: {
+        connectors: false,
+      },
+    });
 
     const result = appMockRender.render(<Connectors {...props} />);
     expect(

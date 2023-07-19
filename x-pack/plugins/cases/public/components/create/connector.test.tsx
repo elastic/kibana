@@ -31,6 +31,16 @@ jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../containers/configure/use_configure');
 
+const mockUseCasesContext = jest.fn().mockReturnValue({
+  permissions: {
+    connectors: true,
+  },
+});
+
+jest.mock('../cases_context/use_cases_context', () => ({
+  useCasesContext: () => mockUseCasesContext(),
+}));
+
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
@@ -181,6 +191,22 @@ describe('Connector', () => {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
+        <Connector {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+    expect(result.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
+    expect(result.queryByTestId('caseConnectors')).toBe(null);
+  });
+
+  it('shows the actions permission message if the user does not have access to case connector', async () => {
+    mockUseCasesContext.mockReturnValue({
+      permissions: {
+        connectors: false,
+      },
+    });
 
     const result = appMockRender.render(
       <MockHookWrapperComponent>

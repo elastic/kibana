@@ -9,9 +9,23 @@ import type { CasesCapabilities, CasesPermissions } from '../../containers/types
 
 export const allCasesPermissions = () => buildCasesPermissions();
 export const noCasesPermissions = () =>
-  buildCasesPermissions({ read: false, create: false, update: false, delete: false, push: false });
+  buildCasesPermissions({
+    read: false,
+    create: false,
+    update: false,
+    delete: false,
+    push: false,
+    connectors: false,
+  });
 export const readCasesPermissions = () =>
-  buildCasesPermissions({ read: true, create: false, update: false, delete: false, push: false });
+  buildCasesPermissions({
+    read: true,
+    create: false,
+    update: false,
+    delete: false,
+    push: false,
+    connectors: true,
+  });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
 export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
 export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
@@ -26,6 +40,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
   const update = overrides.update ?? true;
   const deletePermissions = overrides.delete ?? true;
   const push = overrides.push ?? true;
+  const connectors = overrides.connectors ?? true;
   const all = create && read && update && deletePermissions && push;
 
   return {
@@ -35,6 +50,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     update,
     delete: deletePermissions,
     push,
+    connectors,
   };
 };
 
@@ -46,6 +62,7 @@ export const noCasesCapabilities = () =>
     update_cases: false,
     delete_cases: false,
     push_cases: false,
+    cases_connector: false,
   });
 export const readCasesCapabilities = () =>
   buildCasesCapabilities({
@@ -53,6 +70,7 @@ export const readCasesCapabilities = () =>
     update_cases: false,
     delete_cases: false,
     push_cases: false,
+    cases_connector: true,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({
@@ -67,5 +85,6 @@ export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) =
     update_cases: overrides?.update_cases ?? true,
     delete_cases: overrides?.delete_cases ?? true,
     push_cases: overrides?.push_cases ?? true,
+    cases_connector: overrides?.cases_connector ?? true,
   };
 };

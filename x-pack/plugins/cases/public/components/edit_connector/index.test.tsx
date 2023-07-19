@@ -17,6 +17,7 @@ import {
   readCasesPermissions,
   noPushCasesPermissions,
   TestProviders,
+  allCasesPermissions,
 } from '../../common/mock';
 import { basicCase, connectorsMock } from '../../containers/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
@@ -31,6 +32,8 @@ const defaultProps: EditConnectorProps = {
   caseConnectors,
   onSubmit,
 };
+
+const noConnectorsPermission = { ...allCasesPermissions(), connectors: false };
 
 describe('EditConnector ', () => {
   let appMockRender: AppMockRenderer;
@@ -274,6 +277,17 @@ describe('EditConnector ', () => {
     });
   });
 
+  it('does not show the callout if the user does not have access to cases connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    await waitFor(() => {
+      expect(result.getByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
+      expect(result.queryByTestId('push-callouts')).toBe(null);
+    });
+  });
+
   it('does not show the connectors previewer if the user does not have read access to actions', async () => {
     const props = { ...defaultProps, connectors: [] };
     appMockRender.coreStart.application.capabilities = {
@@ -285,12 +299,28 @@ describe('EditConnector ', () => {
     expect(result.queryByTestId('connector-fields-preview')).not.toBeInTheDocument();
   });
 
+  it('does not show the connectors previewer if the user does not have access to cases connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    expect(result.queryByTestId('connector-fields-preview')).not.toBeInTheDocument();
+  });
+
   it('does not show the connectors form if the user does not have read access to actions', async () => {
     const props = { ...defaultProps, connectors: [] };
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    expect(result.queryByTestId('edit-connector-fields-form-flex-item')).not.toBeInTheDocument();
+  });
+
+  it('does not show the connectors form if the user does not have access to cases connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
 
     const result = appMockRender.render(<EditConnector {...props} />);
     expect(result.queryByTestId('edit-connector-fields-form-flex-item')).not.toBeInTheDocument();
@@ -317,12 +347,35 @@ describe('EditConnector ', () => {
     });
   });
 
+  it('does not show the push button if the user does not have access to cases actions', async () => {
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+
+    const result = appMockRender.render(<EditConnector {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('push-to-external-service')).toBe(null);
+    });
+  });
+
   it('does not show the edit connectors pencil if the user does not have read access to actions', async () => {
     const props = { ...defaultProps, connectors: [] };
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    appMockRender.render(<EditConnector {...props} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connector-edit-header')).toBeInTheDocument();
+      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not show the edit connectors pencil if the user does not have access to case connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({
+      permissions: noConnectorsPermission,
+    });
 
     appMockRender.render(<EditConnector {...props} />);
 
