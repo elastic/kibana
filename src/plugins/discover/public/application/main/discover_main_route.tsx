@@ -145,15 +145,11 @@ export function DiscoverMainRoute({
       }
       try {
         await stateContainer.actions.loadDataViewList();
-        // reset appState in case a saved search with id is loaded and the url is empty
-        // so the saved search is loaded in a clean state
-        // else it might be updated by the previous app state
-        const useAppState = !stateContainer.appState.isEmptyURL();
+
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
           savedSearchId,
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
-          useAppState,
         });
         if (mode === 'standalone') {
           if (currentSavedSearch?.id) {

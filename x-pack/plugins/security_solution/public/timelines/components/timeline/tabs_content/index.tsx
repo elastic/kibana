@@ -19,7 +19,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,

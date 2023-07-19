@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ".storybook/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*",
+    ".storybook/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
@@ -57,8 +63,9 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
+    "@kbn/discover-utils"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

@@ -7,11 +7,11 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { GetRuleHealthResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleHealthResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GetRuleHealthRequestBody,
   GET_RULE_HEALTH_URL,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
