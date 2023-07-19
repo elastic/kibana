@@ -215,14 +215,12 @@ export class SyntheticsMonitorClient {
   async syncGlobalParams({
     request,
     spaceId,
-    savedObjectsClient,
     allPrivateLocations,
     encryptedSavedObjects,
   }: {
     spaceId: string;
     request: KibanaRequest;
     allPrivateLocations: PrivateLocationAttributes[];
-    savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =

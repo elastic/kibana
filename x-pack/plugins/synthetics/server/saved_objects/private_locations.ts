@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from '@kbn/core/server';
-import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
+import { privateLocationsSavedObjectName } from '../../common/saved_objects/private_locations';
 export const privateLocationsSavedObjectId = 'synthetics-privates-locations-singleton';
 
 export const PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE: SavedObjectsType = {

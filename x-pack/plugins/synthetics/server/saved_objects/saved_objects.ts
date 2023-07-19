@@ -17,12 +17,6 @@ import {
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
 import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
-import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../constants/settings';
-import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
-import { ConfigKey } from '../../../../common/runtime_types';
-import { UMSavedObjectsQueryFn } from '../adapters';
-import { UptimeConfig } from '../../../../common/config';
-import { settingsObjectId, umDynamicSettings } from './uptime_settings';
 import { privateLocationsSavedObject } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
@@ -44,7 +38,6 @@ export const registerUptimeSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) => {
-  savedObjectsService.registerType(umDynamicSettings);
   savedObjectsService.registerType(PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
   savedObjectsService.registerType(privateLocationsSavedObject);
 
