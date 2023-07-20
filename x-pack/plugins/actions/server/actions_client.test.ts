@@ -2980,7 +2980,7 @@ describe('execute()', () => {
         additionalPrivileges: ['test/create'],
       });
 
-      expect(getKibanaPrivileges).toHaveBeenCalledWith({ metadata: { foo: 'bar' } });
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
 

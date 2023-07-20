@@ -779,7 +779,7 @@ describe('actionTypeRegistry', () => {
       expect(result).toEqual([]);
     });
 
-    it('should pass the metadata correctly', () => {
+    it('should pass the params correctly', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
 
@@ -799,7 +799,7 @@ describe('actionTypeRegistry', () => {
       });
 
       registry.getSystemActionKibanaPrivileges('.cases', { foo: 'bar' });
-      expect(getKibanaPrivileges).toHaveBeenCalledWith({ metadata: { foo: 'bar' } });
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
 });

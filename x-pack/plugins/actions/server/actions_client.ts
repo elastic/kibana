@@ -718,7 +718,7 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
-  private getSystemActionKibanaPrivileges(connectorId: string, metadata?: Record<string, unknown>) {
+  private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === connectorId
     );
@@ -726,7 +726,7 @@ export class ActionsClient {
     const additionalPrivileges = inMemoryConnector?.isSystemAction
       ? this.actionTypeRegistry.getSystemActionKibanaPrivileges(
           inMemoryConnector.actionTypeId,
-          metadata
+          params
         )
       : [];
 

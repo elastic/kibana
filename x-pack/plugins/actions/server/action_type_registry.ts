@@ -104,9 +104,9 @@ export class ActionTypeRegistry {
   /**
    * Returns the kibana privileges of a system action type
    */
-  public getSystemActionKibanaPrivileges(
+  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
-    metadata?: Record<string, unknown>
+    params?: Params
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
@@ -114,7 +114,7 @@ export class ActionTypeRegistry {
       return [];
     }
 
-    return actionType?.getKibanaPrivileges?.({ metadata }) ?? [];
+    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
   }
 
   /**

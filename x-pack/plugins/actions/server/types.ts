@@ -162,7 +162,7 @@ export interface ActionType<
    * It only works with system actions and only when executing an action.
    * For all other scenarios they will be ignored
    */
-  getKibanaPrivileges?: (args?: { metadata?: Record<string, unknown> }) => string[];
+  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
