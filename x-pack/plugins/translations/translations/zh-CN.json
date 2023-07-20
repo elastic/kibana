@@ -2227,7 +2227,7 @@
     "discover.showingDefaultDataViewWarningDescription": "正在显示默认数据视图：“{loadedDataViewTitle}”（{loadedDataViewId}）",
     "discover.showingSavedDataViewWarningDescription": "正在显示已保存数据视图：“{ownDataViewTitle}”（{ownDataViewId}）",
     "discover.singleDocRoute.errorMessage": "没有与 ID {dataViewId} 相匹配的数据视图",
-    "discover.utils.formatHit.moreFields": "及另外 {count} 个{count, plural, other {字段}}",
+    "discover.formatHit.moreFields": "及另外 {count} 个{count, plural, other {字段}}",
     "discover.valueIsNotConfiguredDataViewIDWarningTitle": "{stateVal} 不是配置的数据视图 ID",
     "discover.advancedSettings.context.defaultSizeText": "要在上下文视图中显示的周围条目数目",
     "discover.advancedSettings.context.defaultSizeTitle": "上下文大小",
