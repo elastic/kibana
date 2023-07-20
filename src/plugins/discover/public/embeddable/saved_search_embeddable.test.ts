@@ -13,13 +13,14 @@ import { discoverServiceMock } from '../__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { VIEW_MODE } from '../../common/constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { act } from 'react-dom/test-utils';
 
 let discoverComponent: ReactWrapper;
 
@@ -33,17 +34,31 @@ jest.mock('react-dom', () => {
   };
 });
 
-const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+
 function getSearchResponse(nrOfHits: number) {
-  const hits = new Array(nrOfHits).map((idx) => ({ id: idx }));
-  return of({
+  const hits = new Array(nrOfHits).fill(null).map((_, idx) => ({ id: idx }));
+  return {
     rawResponse: {
       hits: { hits, total: nrOfHits },
     },
     isPartial: false,
     isRunning: false,
-  });
+  };
 }
+
+const createSearchFnMock = (nrOfHits: number) => {
+  let resolveSearch = () => {};
+  const search = jest.fn(() => {
+    return new Observable((subscriber) => {
+      resolveSearch = () => {
+        subscriber.next(getSearchResponse(nrOfHits));
+        subscriber.complete();
+      };
+    });
+  });
+  return { search, resolveSearch: () => resolveSearch() };
+};
 
 const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
@@ -65,6 +80,9 @@ describe('saved search embeddable', () => {
       viewMode: viewModeMockValue,
     };
     executeTriggerActions = jest.fn();
+    jest
+      .spyOn(servicesMock.savedSearch.byValue, 'toSavedSearch')
+      .mockReturnValue(Promise.resolve(savedSearchMock));
     const savedSearchEmbeddableConfig: SearchEmbeddableConfig = {
       editable: true,
       services: servicesMock,
@@ -116,17 +134,17 @@ describe('saved search embeddable', () => {
     const { embeddable } = createEmbeddable();
     jest.spyOn(embeddable, 'updateOutput');
 
+    await waitOneTick();
+    expect(render).toHaveBeenCalledTimes(0);
     embeddable.render(mountpoint);
     expect(render).toHaveBeenCalledTimes(1);
-    await waitOneTick();
-    expect(render).toHaveBeenCalledTimes(2);
 
     const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
 
     searchProps.onAddColumn!('bytes');
     await waitOneTick();
     expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
-    expect(render).toHaveBeenCalledTimes(4); // twice per an update to show and then hide a loading indicator
+    expect(render).toHaveBeenCalledTimes(3); // twice per an update to show and then hide a loading indicator
 
     searchProps.onRemoveColumn!('bytes');
     await waitOneTick();
@@ -157,9 +175,11 @@ describe('saved search embeddable', () => {
 
   it('should render saved search embeddable when successfully loading data', async () => {
     // mock return data
-    const search = jest.fn().mockReturnValue(getSearchResponse(1));
+    const { search, resolveSearch } = createSearchFnMock(1);
     const { embeddable } = createEmbeddable(search);
     jest.spyOn(embeddable, 'updateOutput');
+
+    await waitOneTick();
 
     // check that loading state
     const loadingOutput = embeddable.getOutput();
@@ -171,6 +191,7 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(1);
 
     // wait for data fetching
+    resolveSearch();
     await waitOneTick();
     expect(render).toHaveBeenCalledTimes(2);
 
@@ -183,9 +204,11 @@ describe('saved search embeddable', () => {
 
   it('should render saved search embeddable when empty data is returned', async () => {
     // mock return data
-    const search = jest.fn().mockReturnValue(getSearchResponse(0));
+    const { search, resolveSearch } = createSearchFnMock(0);
     const { embeddable } = createEmbeddable(search);
     jest.spyOn(embeddable, 'updateOutput');
+
+    await waitOneTick();
 
     // check that loading state
     const loadingOutput = embeddable.getOutput();
@@ -197,6 +220,7 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(1);
 
     // wait for data fetching
+    resolveSearch();
     await waitOneTick();
     expect(render).toHaveBeenCalledTimes(2);
 
@@ -211,8 +235,11 @@ describe('saved search embeddable', () => {
     showFieldStatisticsMockValue = true;
     viewModeMockValue = VIEW_MODE.AGGREGATED_LEVEL;
 
-    const { embeddable } = createEmbeddable();
+    const { search, resolveSearch } = createSearchFnMock(1);
+    const { embeddable } = createEmbeddable(search);
     jest.spyOn(embeddable, 'updateOutput');
+
+    await waitOneTick();
 
     // check that loading state
     const loadingOutput = embeddable.getOutput();
@@ -224,6 +251,7 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(1);
 
     // wait for data fetching
+    resolveSearch();
     await waitOneTick();
     expect(render).toHaveBeenCalledTimes(2);
 
@@ -243,7 +271,7 @@ describe('saved search embeddable', () => {
     // wait for data fetching
     await waitOneTick();
 
-    expect((embeddable.updateOutput as jest.Mock).mock.calls[1][0].error.message).toBe(
+    expect((embeddable.updateOutput as jest.Mock).mock.calls[2][0].error.message).toBe(
       'Fetch error'
     );
     // check that loading state
@@ -256,7 +284,7 @@ describe('saved search embeddable', () => {
   it('should not fetch data if only a new input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable, searchInput } = createEmbeddable(search);
-
+    await waitOneTick();
     embeddable.render(mountpoint);
     // wait for data fetching
     await waitOneTick();
@@ -266,9 +294,11 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(search).toHaveBeenCalledTimes(1);
   });
+
   it('should not reload when the input title doesnt change', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable(search, 'custom title');
+    await waitOneTick();
     embeddable.reload = jest.fn();
     embeddable.render(mountpoint);
     // wait for data fetching
@@ -283,6 +313,7 @@ describe('saved search embeddable', () => {
   it('should reload when a different input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable(search, 'custom title');
+    await waitOneTick();
     embeddable.reload = jest.fn();
     embeddable.render(mountpoint);
 
@@ -297,6 +328,7 @@ describe('saved search embeddable', () => {
   it('should not reload and fetch when a input title matches the saved search title', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable(search);
+    await waitOneTick();
     embeddable.reload = jest.fn();
     embeddable.render(mountpoint);
     await waitOneTick();
