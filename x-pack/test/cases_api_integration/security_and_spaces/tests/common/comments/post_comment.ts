@@ -16,7 +16,7 @@ import {
   CaseStatuses,
   ExternalReferenceSOAttachmentPayload,
   AlertAttachmentPayload,
-} from '@kbn/cases-plugin/common/api';
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,

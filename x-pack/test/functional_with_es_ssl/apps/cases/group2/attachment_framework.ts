@@ -11,11 +11,11 @@ import {
   ExternalReferenceStorageType,
   AttachmentType,
   Case,
-  AttachmentRequest,
-  ExternalReferenceAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
-} from '@kbn/cases-plugin/common/api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
+import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
@@ -492,7 +492,7 @@ const getLensState = (dataViewId: string) => ({
   },
 });
 
-const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayloadRt => ({
+const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayload => ({
   type: AttachmentType.externalReference,
   externalReferenceId: 'my-id',
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
@@ -501,9 +501,7 @@ const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayloadRt 
   owner: 'cases',
 });
 
-const getPersistableStateAttachment = (
-  dataViewId: string
-): PersistableStateAttachmentPayloadRt => ({
+const getPersistableStateAttachment = (dataViewId: string): PersistableStateAttachmentPayload => ({
   type: AttachmentType.persistableState,
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: getLensState(dataViewId),

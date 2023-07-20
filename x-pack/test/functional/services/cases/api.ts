@@ -6,7 +6,8 @@
  */
 
 import pMap from 'p-map';
-import { CasePostRequest, Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,

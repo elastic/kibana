@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { AttachmentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,

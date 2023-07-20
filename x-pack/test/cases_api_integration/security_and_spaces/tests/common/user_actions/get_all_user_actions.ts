@@ -13,9 +13,10 @@ import {
   CaseStatuses,
   UserCommentAttachmentPayload,
   AttachmentType,
-  getCaseUserActionUrl,
-} from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+  CreateCaseUserAction,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {

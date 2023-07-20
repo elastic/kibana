@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AttachmentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
