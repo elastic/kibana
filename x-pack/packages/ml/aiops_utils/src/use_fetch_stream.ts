@@ -16,6 +16,8 @@ import {
   ReducerState,
 } from 'react';
 
+import type { HttpSetup } from '@kbn/core/public';
+
 import { fetchStream } from './fetch_stream';
 import { stringReducer, StringReducer } from './string_reducer';
 
@@ -27,6 +29,11 @@ import { stringReducer, StringReducer } from './string_reducer';
  * @typedef {UseFetchStreamCustomReducerParams}
  */
 export interface UseFetchStreamCustomReducerParams {
+  /**
+   * Kibana HTTP client
+   * @type {HttpSetup}
+   */
+  http: HttpSetup;
   /**
    * API endpoint
    * @type {string}
@@ -53,6 +60,11 @@ export interface UseFetchStreamCustomReducerParams {
  * Custom hook type definition of the base params for a string base stream without a custom reducer.
  */
 export interface UseFetchStreamParamsDefault {
+  /**
+   * Kibana HTTP client
+   * @type {HttpSetup}
+   */
+  http: HttpSetup;
   /**
    * API endpoint
    * @type {string}
@@ -100,12 +112,14 @@ interface UseFetchStreamReturnType<Data, Action> {
  * @export
  * @template I
  * @template BasePath
+ * @param {I['http']} http - Kibana HTTP client.
  * @param {`${I['endpoint']}`} endpoint - API endpoint including Kibana base path.
  * @param {I['apiVersion']} apiVersion - API version.
  * @param {I['body']} body - API request body.
  * @returns {UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>} - An object with streaming data and methods to act on the stream.
  */
 export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+  http: I['http'],
   endpoint: `${BasePath}${I['endpoint']}`,
   apiVersion: I['apiVersion'],
   body: I['body']
@@ -118,6 +132,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
  * @export
  * @template I
  * @template BasePath
+ * @param {I['http']} http - Kibana HTTP client.
  * @param {`${I['endpoint']}`} endpoint - API endpoint including Kibana base path.
  * @param {I['apiVersion']} apiVersion - API version.
  * @param {I['body']} body - API request body.
@@ -128,6 +143,7 @@ export function useFetchStream<
   I extends UseFetchStreamCustomReducerParams,
   BasePath extends string
 >(
+  http: I['http'],
   endpoint: `${BasePath}${I['endpoint']}`,
   apiVersion: I['apiVersion'],
   body: I['body'],
@@ -148,6 +164,7 @@ export function useFetchStream<
 /**
  * Custom hook to receive streaming data.
  *
+ * @param http - Kibana HTTP client.
  * @param endpoint - API endpoint including Kibana base path.
  * @param apiVersion - API version.
  * @param body - API request body.
@@ -155,6 +172,7 @@ export function useFetchStream<
  * @returns An object with streaming data and methods to act on the stream.
  */
 export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+  http: I['http'],
   endpoint: `${BasePath}${I['endpoint']}`,
   apiVersion: string,
   body: I['body'],
@@ -201,7 +219,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
     for await (const [fetchStreamError, actions] of fetchStream<
       UseFetchStreamCustomReducerParams,
       BasePath
-    >(endpoint, apiVersion, abortCtrl, body, options !== undefined)) {
+    >(http, endpoint, apiVersion, abortCtrl, body, options !== undefined)) {
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
       } else if (actions.length > 0) {

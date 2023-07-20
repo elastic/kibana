@@ -7,7 +7,7 @@
 
 import type { ReducerAction } from 'react';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { HttpSetup } from '@kbn/core/public';
 
 import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
@@ -39,6 +39,7 @@ type GeneratorError = string | null;
  *                       inspired by node's recommended error convention for callbacks.
  */
 export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+  http: HttpSetup,
   endpoint: `${BasePath}${I['endpoint']}`,
   apiVersion: string,
   abortCtrl: React.MutableRefObject<AbortController>,
@@ -48,23 +49,25 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
 ): AsyncGenerator<
   [GeneratorError, ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined]
 > {
-  let stream: Response;
+  let stream: Readonly<Response> | undefined;
 
   try {
-    stream = await fetch(endpoint, {
+    const response = await http.post(endpoint, {
       signal: abortCtrl.current.signal,
-      method: 'POST',
-      headers: {
-        // This refers to the format of the request body,
-        // not the response, which will be a uint8array Buffer.
-        'Content-Type': 'application/json',
-        [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
-        'kbn-xsrf': 'stream',
-      },
+      version: apiVersion,
+      asResponse: true,
+      rawResponse: true,
       ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
     });
+
+    stream = response.response;
   } catch (error) {
     yield [error.toString(), undefined];
+    return;
+  }
+
+  if (!stream) {
+    yield [`Error: Response was undefined`, undefined];
     return;
   }
 

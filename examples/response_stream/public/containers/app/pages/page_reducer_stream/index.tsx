@@ -50,6 +50,7 @@ export const PageReducerStream: FC = () => {
     ApiReducerStream,
     typeof basePath
   >(
+    http,
     `${basePath}/internal/response_stream/reducer_stream`,
     '1',
     { compressResponse, simulateErrors },
