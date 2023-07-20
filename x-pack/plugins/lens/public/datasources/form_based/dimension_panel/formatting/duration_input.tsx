@@ -6,12 +6,7 @@
  */
 
 import { EuiComboBox, EuiSpacer } from '@elastic/eui';
-import {
-  DEFAULT_DURATION_INPUT_FORMAT,
-  DEFAULT_DURATION_OUTPUT_FORMAT,
-  DURATION_INPUT_FORMATS,
-  DURATION_OUTPUT_FORMATS,
-} from '@kbn/field-formats-plugin/common';
+import { DURATION_INPUT_FORMATS, DURATION_OUTPUT_FORMATS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -41,7 +36,6 @@ function getSelectedOption(
   const option = list.find(({ value }) => inputValue === value);
   return option ? [option] : [];
 }
-
 
 export const DurationRowInputs = ({
   testSubjLayout,
