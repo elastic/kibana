@@ -215,7 +215,21 @@ const createServerlessSearchSideNavComponent =
             <Navigation.Item id="item1" title="Item 1" />
             <Navigation.Item id="item2" title="Item 2" />
             <Navigation.Item id="item3" title="Item 3" />
-          </Navigation.Group id="group1" title="Group 1">
+          </Navigation.Group>
+          
+          <div>
+            <p>Any other section you might need</p>
+          </div>
+
+          <Navigation.Group id="group2" title="Group 2">
+            <Navigation.Item id="item1">
+              <EuiText color="blue">Title can also be a React node</EuiText>
+            </Navigation.Item>
+
+            <Navigation.Group id="nestedGroup" title="Group can be nested">
+              <Navigation.Item id="item1" title="Item 1" />
+            </Navigation.Group>
+          </Navigation.Group>
         </Navigation>
       </NavigationKibanaProvider>
     );
