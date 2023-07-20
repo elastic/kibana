@@ -11,6 +11,7 @@ import { isValidVariableName } from './utils';
 describe('utils', () => {
   describe('isValidVariableName', () => {
     it('returns `false` to `null`', () => {
+      // @ts-ignore passing a wrong type intentionally
       expect(isValidVariableName(null)).toBe(false);
     });
 
@@ -23,10 +24,12 @@ describe('utils', () => {
     });
 
     it('returns `false` to integer zero', () => {
+      // @ts-ignore passing a wrong type intentionally
       expect(isValidVariableName(0)).toBe(false);
     });
 
     it('returns `false` to float zero', () => {
+      // @ts-ignore passing a wrong type intentionally
       expect(isValidVariableName(0.0)).toBe(false);
     });
 
