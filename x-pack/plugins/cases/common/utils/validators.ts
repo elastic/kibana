@@ -32,13 +32,11 @@ export const validateMaxUserActions = async ({
     caseIds: [caseId],
   });
 
-  result?.aggregations?.references.caseUserActions.buckets.forEach(
-    ({ key, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
-      if (key === caseId && totalUserActions + userActionsToAdd > MAX_USER_ACTIONS_PER_CASE) {
-        throw Boom.badRequest(
-          `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
-        );
-      }
-    }
-  );
+  const totalUserActions = result[caseId] ?? 0;
+
+  if (totalUserActions + userActionsToAdd > MAX_USER_ACTIONS_PER_CASE) {
+    throw Boom.badRequest(
+      `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+    );
+  }
 };

@@ -657,7 +657,7 @@ export class CaseUserActionService {
     caseIds,
   }: {
     caseIds: string[];
-  }): Promise<SavedObjectsFindResponse<unknown, MultipleCasesUserActionsTotalAggsResult>> {
+  }): Promise<Record<string, number>> {
     const response = await this.context.unsecuredSavedObjectsClient.find<
       unknown,
       MultipleCasesUserActionsTotalAggsResult
@@ -671,7 +671,15 @@ export class CaseUserActionService {
       aggs: CaseUserActionService.buildMultipleCasesUserActionsTotalAgg(caseIds.length),
     });
 
-    return response;
+    const result: Record<string, number> = {};
+
+    response?.aggregations?.references.caseUserActions.buckets.forEach(
+      ({ key, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
+        result[key] = totalUserActions;
+      }
+    );
+
+    return result;
   }
 
   private static buildMultipleCasesUserActionsTotalAgg(

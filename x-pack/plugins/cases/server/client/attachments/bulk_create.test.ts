@@ -21,20 +21,6 @@ describe('bulkCreate', () => {
   const clientArgs = createCasesClientMockArgs();
   const userActionService = createUserActionServiceMock();
 
-  userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-    saved_objects: [],
-    total: 0,
-    page: 1,
-    per_page: 1,
-    aggregations: {
-      references: {
-        caseUserActions: {
-          buckets: [{ key: caseId, doc_count: 0 }],
-        },
-      },
-    },
-  });
-
   clientArgs.services.userActionService = userActionService;
 
   beforeEach(() => {
@@ -58,22 +44,13 @@ describe('bulkCreate', () => {
 
   it(`throws error when the case user actions become > ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-      saved_objects: [],
-      total: 0,
-      page: 1,
-      per_page: 1,
-      aggregations: {
-        references: {
-          caseUserActions: {
-            buckets: [{ key: caseId, doc_count: MAX_USER_ACTIONS_PER_CASE - 1 }],
-          },
-        },
-      },
+      [caseId]: MAX_USER_ACTIONS_PER_CASE - 1,
     });
+
     await expect(
       bulkCreate({ attachments: [comment, comment], caseId }, clientArgs)
     ).rejects.toThrow(
-      `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
     );
   });
 

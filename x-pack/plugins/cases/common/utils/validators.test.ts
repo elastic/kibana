@@ -38,17 +38,7 @@ describe('validators', () => {
     const userActionService = createUserActionServiceMock();
 
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-      saved_objects: [],
-      total: 0,
-      page: 1,
-      per_page: 1,
-      aggregations: {
-        references: {
-          caseUserActions: {
-            buckets: [{ key: caseId, doc_count: MAX_USER_ACTIONS_PER_CASE - 1 }],
-          },
-        },
-      },
+      [caseId]: MAX_USER_ACTIONS_PER_CASE - 1,
     });
 
     it('does not throw if the limit is not reached', async () => {
@@ -61,7 +51,7 @@ describe('validators', () => {
       await expect(
         validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 2 })
       ).rejects.toThrow(
-        `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
     });
   });
