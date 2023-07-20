@@ -54,7 +54,8 @@ describe('SharePlugin', () => {
           expect.objectContaining({
             getShareMenuItems: expect.any(Function),
           }),
-          undefined
+          undefined,
+          undefined, // hideEmbed - undefined because its not provided in configuration
         );
         expect(start.toggleShareContextMenu).toBeDefined();
       });
@@ -73,7 +74,26 @@ describe('SharePlugin', () => {
           expect.objectContaining({
             getShareMenuItems: expect.any(Function),
           }),
-          anonymousAccessServiceProvider
+          anonymousAccessServiceProvider,
+          undefined,  // hideEmbed - undefined because its not provided in configuration
+        );
+        expect(start.toggleShareContextMenu).toBeDefined();
+      });
+
+      test('passes hideEmbed config to share menu manager', async () => {
+        const coreSetup = coreMock.createSetup();
+        const service = new SharePlugin(coreMock.createPluginInitializerContext({ hideEmbed: true }));
+        await service.setup(coreSetup);
+        const start = await service.start({} as CoreStart);
+        expect(registryMock.start).toHaveBeenCalled();
+        expect(managerMock.start).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            getShareMenuItems: expect.any(Function),
+          }),
+          undefined,
+          true,  // hideEmbed - true because its set in configuration as 'true'
         );
         expect(start.toggleShareContextMenu).toBeDefined();
       });
