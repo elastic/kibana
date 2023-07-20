@@ -10,7 +10,6 @@ import {
   Case,
   CasesFindResponse,
   Comment,
-  ConnectorTypes,
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentType,
@@ -25,6 +24,7 @@ import {
   FileAttachmentMetadata,
 } from '@kbn/cases-plugin/common/api';
 import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
