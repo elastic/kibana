@@ -9,6 +9,7 @@
 import './index.scss';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { SharePublicConfig } from '../config';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
@@ -65,7 +66,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext<SharePublicConfig>) {}
 
   public setup(core: CoreSetup): SharePluginSetup {
     const { http } = core;
@@ -120,11 +121,13 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   }
 
   public start(core: CoreStart): SharePluginStart {
+    const { hideEmbed } = this.initializerContext.config.get<SharePublicConfig>();
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
       this.shareMenuRegistry.start(),
-      this.anonymousAccessServiceProvider
+      this.anonymousAccessServiceProvider,
+      hideEmbed,
     );
 
     return {

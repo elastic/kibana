@@ -7,6 +7,7 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
+import { SharePublicConfig } from '../config';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
@@ -31,6 +32,6 @@ import { SharePlugin } from './plugin';
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
 
-export function plugin(ctx: PluginInitializerContext) {
+export function plugin(ctx: PluginInitializerContext<SharePublicConfig>) {
   return new SharePlugin(ctx);
 }
