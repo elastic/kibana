@@ -44,7 +44,7 @@ To learn more, check out cases in the {observability-guide}/create-cases.html[{o
 
 [discrete]
 ==== Wildcard search in dashboard controls
-Dashboard now supports searching for strings that are found within the values shown in a control. Previously, it was required for the string to be located at the start of the value in order to be found. However this is a more expensive option then just searching for the prefix, so it’s disabled by default. To enable it in Dashboard select Edit control > Options list settings > Contains. 
+**Dashboard** now supports searching for strings that are found within the values shown in a control. Previously, it was required for the string to be located at the start of the value in order to be found. However this is a more expensive option then just searching for the prefix, so it’s disabled by default. To enable it in **Dashboard** select Edit control > Options list settings > Contains. 
 
 [role="screenshot"]
 image::images/wildcard-search.png[Example of new string search]
