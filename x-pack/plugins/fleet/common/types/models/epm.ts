@@ -633,6 +633,9 @@ export interface TemplateMapEntry {
       }
     | {
         settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
+      }
+    | {
+        lifecycle?: any;
       };
 }
 
