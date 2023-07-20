@@ -17,19 +17,21 @@ import type {
   Configuration,
   ConfigurationAttributes,
   Configurations,
+  ConnectorMappings,
 } from '../../../common/types/domain';
 import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
+  ConnectorMappingResponse,
   GetConfigurationFindRequest,
 } from '../../../common/types/api';
 import {
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
   GetConfigurationFindRequestRt,
+  FindActionConnectorResponseRt,
 } from '../../../common/types/api';
-import type { ConnectorMappings, ConnectorMappingResponse } from '../../../common/api';
-import { FindActionConnectorResponseRt, decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,

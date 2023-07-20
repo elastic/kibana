@@ -19,7 +19,6 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
   e2e: {
-    baseUrl: 'http://localhost:5620/app/security/get_started',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     supportFile: './support/e2e.js',
