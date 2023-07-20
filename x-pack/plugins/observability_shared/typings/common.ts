@@ -15,4 +15,5 @@ export type ObservabilityApp =
   | 'observability-overview'
   | 'stack_monitoring'
   | 'ux'
-  | 'fleet';
+  | 'fleet'
+  | 'profiling';
