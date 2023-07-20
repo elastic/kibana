@@ -122,13 +122,6 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   service_id: keyword,
   num_service_nodes: long,
   num_transaction_types: long,
-  num_environments: {
-    ...long,
-    _meta: {
-      description:
-        'Total number of unique environments in transaction events within the last hour',
-    },
-  },
   timed_out: { type: 'boolean' },
   cloud: {
     availability_zones: { type: 'array', items: { type: 'keyword' } },

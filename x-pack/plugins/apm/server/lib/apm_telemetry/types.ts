@@ -29,7 +29,6 @@ export interface APMPerService {
   timed_out: boolean;
   num_service_nodes: number;
   num_transaction_types: number;
-  num_environments: number;
   cloud: {
     availability_zones: string[];
     regions: string[];

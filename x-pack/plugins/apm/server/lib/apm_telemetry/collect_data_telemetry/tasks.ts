@@ -1310,11 +1310,6 @@ export const tasks: TelemetryTask[] = [
                         field: TRANSACTION_TYPE,
                       },
                     },
-                    service_environments: {
-                      cardinality: {
-                        field: SERVICE_ENVIRONMENT,
-                      },
-                    },
                     top_metrics: {
                       top_metrics: {
                         sort: '_score',
@@ -1402,7 +1397,6 @@ export const tasks: TelemetryTask[] = [
             timed_out: response.timed_out,
             num_service_nodes: envBucket.instances.value ?? 1,
             num_transaction_types: envBucket.transaction_types.value ?? 0,
-            num_environments: envBucket.service_environments.value ?? 0,
             cloud: {
               availability_zones:
                 envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
