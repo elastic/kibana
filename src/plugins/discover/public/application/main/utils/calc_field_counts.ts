@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 /**
  * This function is calculating stats of the available fields, for usage in sidebar and sharing

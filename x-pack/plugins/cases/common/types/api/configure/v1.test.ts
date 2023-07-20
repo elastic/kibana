@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../api';
+import { ConnectorTypes } from '../../domain/connector/v1';
 import {
   CaseConfigureRequestParamsRt,
   ConfigurationPatchRequestRt,
