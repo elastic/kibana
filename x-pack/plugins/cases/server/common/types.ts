@@ -35,6 +35,7 @@ type FindOptions = Pick<
   | 'searchFields'
   | 'sortField'
   | 'sortOrder'
+  | 'rootSearchFields'
 >;
 
 export type SavedObjectFindOptionsKueryNode = FindOptions & {
