@@ -21,8 +21,8 @@ interface EsSummaryDocument {
   errorBudgetRemaining: number;
   errorBudgetInitial: number;
   errorBudgetEstimated: boolean;
-  status: number;
-  statusLabel: Status;
+  statusCode: number;
+  status: Status;
 }
 
 export interface Paginated<T> {
@@ -94,7 +94,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               isEstimated: doc._source!.errorBudgetEstimated,
             },
             sliValue: doc._source!.sliValue,
-            status: doc._source!.statusLabel,
+            status: doc._source!.status,
           },
         })),
       };

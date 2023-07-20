@@ -106,10 +106,10 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
         errorBudgetEstimated: {
           type: 'boolean',
         },
-        status: {
+        statusCode: {
           type: 'byte',
         },
-        statusLabel: {
+        status: {
           type: 'keyword',
           ignore_above: 32,
         },

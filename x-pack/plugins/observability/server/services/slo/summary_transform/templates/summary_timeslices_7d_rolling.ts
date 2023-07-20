@@ -113,7 +113,7 @@ export const SUMMARY_TIMESLICES_7D_ROLLING: TransformPutTransformRequest = {
           script: '1 - params.errorBudgetConsummed',
         },
       },
-      status: {
+      statusCode: {
         bucket_script: {
           buckets_path: {
             sliValue: 'sliValue',

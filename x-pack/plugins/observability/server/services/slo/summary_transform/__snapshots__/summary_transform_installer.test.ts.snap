@@ -61,7 +61,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -275,7 +275,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -489,7 +489,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -718,7 +718,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -960,7 +960,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",

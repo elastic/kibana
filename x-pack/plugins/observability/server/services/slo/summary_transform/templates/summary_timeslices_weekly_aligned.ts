@@ -128,7 +128,7 @@ export const SUMMARY_TIMESLICES_WEEKLY_ALIGNED: TransformPutTransformRequest = {
           script: '1 - params.errorBudgetConsumed',
         },
       },
-      status: {
+      statusCode: {
         bucket_script: {
           buckets_path: {
             sliValue: 'sliValue',

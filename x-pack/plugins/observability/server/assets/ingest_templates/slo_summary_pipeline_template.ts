@@ -20,33 +20,33 @@ export const getSLOSummaryPipelineTemplate = (id: string) => ({
     },
     {
       set: {
-        description: "if 'status == 0', set statusLabel to NO_DATA",
-        if: 'ctx.status == 0',
-        field: 'statusLabel',
+        description: "if 'statusCode == 0', set status to NO_DATA",
+        if: 'ctx.statusCode == 0',
+        field: 'status',
         value: 'NO_DATA',
       },
     },
     {
       set: {
-        description: "if 'status == 1', set statusLabel to VIOLATED",
-        if: 'ctx.status == 1',
-        field: 'statusLabel',
+        description: "if 'statusCode == 1', set statusLabel to VIOLATED",
+        if: 'ctx.statusCode == 1',
+        field: 'status',
         value: 'VIOLATED',
       },
     },
     {
       set: {
-        description: "if 'status == 2', set statusLabel to DEGRADING",
-        if: 'ctx.status == 2',
-        field: 'statusLabel',
+        description: "if 'statusCode == 2', set status to DEGRADING",
+        if: 'ctx.statusCode == 2',
+        field: 'status',
         value: 'DEGRADING',
       },
     },
     {
       set: {
-        description: "if 'status == 4', set statusLabel to HEALTHY",
-        if: 'ctx.status == 4',
-        field: 'statusLabel',
+        description: "if 'statusCode == 4', set status to HEALTHY",
+        if: 'ctx.statusCode == 4',
+        field: 'status',
         value: 'HEALTHY',
       },
     },
