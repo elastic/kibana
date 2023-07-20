@@ -70,8 +70,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
     <EuiPanel
       hasBorder
       hasShadow={false}
-      className="navEmbeddableLinkPanel"
-      color={errorState ? 'danger' : 'plain'}
+      className={`navEmbeddableLinkPanel ${errorState ? 'linkError' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -90,7 +89,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
-                  color={errorState ? 'danger' : 'text'}
+                  color={errorState ? 'warning' : 'text'}
                 />
               </EuiFlexItem>
 
@@ -100,7 +99,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
                   isLoading={linkLabelLoading}
                   contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
                 >
-                  <EuiText size="s" color={errorState ? 'danger' : 'text'} className="wrapText">
+                  <EuiText size="s" color={'text'} className="wrapText">
                     {linkLabel}
                   </EuiText>
                 </EuiSkeletonTitle>

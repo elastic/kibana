@@ -53,6 +53,11 @@
 .navEmbeddableLinkPanel {
   padding: $euiSizeXS $euiSizeS;
 
+  &.linkError {
+    border: 1px solid transparentize($euiColorWarningText, 0.7);
+    color: $euiColorWarningText;
+  }
+
   .navEmbeddable_hoverActions {
     opacity: 0;
     visibility: hidden;
