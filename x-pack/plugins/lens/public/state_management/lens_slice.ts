@@ -1123,8 +1123,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               .includes(target.layerId)
         ) || [];
 
+      let newDatasourceState;
+
       if (layerDatasource && layerDatasourceId) {
-        const newState = layerDatasource?.onDrop({
+        newDatasourceState = layerDatasource?.onDrop({
           state: state.datasourceStates[layerDatasourceId].state,
           source,
           target: {
@@ -1137,15 +1139,15 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           dropType,
           indexPatterns: framePublicAPI.dataViews.indexPatterns,
         });
-        if (!newState) {
+        if (!newDatasourceState) {
           return;
         }
-        state.datasourceStates[layerDatasourceId].state = newState;
+        state.datasourceStates[layerDatasourceId].state = newDatasourceState;
       }
 
       activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
 
-      const newVisState = (activeVisualization.onDrop || onDropForVisualization)?.(
+      const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
         {
           prevState: state.visualization.state,
           frame: framePublicAPI,
@@ -1156,9 +1158,17 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         },
         activeVisualization
       );
+      state.visualization.state = newVisualizationState;
 
-      state.visualization.state = newVisState;
-      state.stagedPreview = undefined;
+      if (layerDatasourceId) {
+        const {
+          datasourceState: syncedDatasourceState,
+          visualizationState: syncedVisualizationState,
+        } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
+
+        state.datasourceStates[layerDatasourceId].state = syncedDatasourceState;
+        state.visualization.state = syncedVisualizationState;
+      }
     },
     [setLayerDefaultDimension.type]: (
       state,
