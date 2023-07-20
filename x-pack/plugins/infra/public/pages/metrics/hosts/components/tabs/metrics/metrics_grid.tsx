@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef } from 'react';
+import React from 'react';
 
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { IntersectionListProvider } from '../../../../../../hooks/use_intersection_list';
 import { hostLensFormulas, type XYLayerOptions } from '../../../../../../common/visualizations';
-import { HostMetricsDocsLink } from '../../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
+import { HostMetricsDocsLink } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
@@ -209,20 +208,17 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
 ];
 
 export const MetricsGrid = React.memo(() => {
-  const rootRef = useRef<HTMLDivElement>(null);
   return (
-    <div ref={rootRef}>
+    <>
       <HostMetricsDocsLink />
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-        <IntersectionListProvider threshold={0.25} root={rootRef.current}>
-          {CHARTS_IN_ORDER.map((chartProp, index) => (
-            <EuiFlexItem key={index} grow={false}>
-              <MetricChart {...chartProp} />
-            </EuiFlexItem>
-          ))}
-        </IntersectionListProvider>
+        {CHARTS_IN_ORDER.map((chartProp, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <MetricChart {...chartProp} />
+          </EuiFlexItem>
+        ))}
       </EuiFlexGrid>
-    </div>
+    </>
   );
 });

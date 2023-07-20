@@ -13,7 +13,7 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
-import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
+import { TooltipContent } from '../../../../../components/lens';
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   id: `metric-hostCount`,

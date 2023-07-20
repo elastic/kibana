@@ -9,7 +9,7 @@ import React, { HTMLAttributes } from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HOST_METRICS_DOC_HREF } from '../constants';
+import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
 
 interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
   description: string;

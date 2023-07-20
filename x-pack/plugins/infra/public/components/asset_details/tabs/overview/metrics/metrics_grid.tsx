@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef } from 'react';
+import React from 'react';
 
 import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IntersectionListProvider } from '../../../../../hooks/use_intersection_list';
-import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
+import { HostMetricsDocsLink } from '../../../../lens';
 import { MetricChart, type MetricChartProps } from './metric_chart';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 
@@ -262,7 +261,6 @@ export interface MetricsGridProps {
 
 export const MetricsGrid = React.memo(
   ({ nodeName, metricsDataView, logsDataView, timeRange }: MetricsGridProps) => {
-    const rootRef = useRef<HTMLDivElement>(null);
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
@@ -276,24 +274,20 @@ export const MetricsGrid = React.memo(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div ref={rootRef}>
-            <HostMetricsDocsLink />
-            <EuiSpacer size="s" />
-            <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
-              <IntersectionListProvider threshold={0.25}>
-                {CHARTS_IN_ORDER.map(({ dataViewType, ...chartProp }, index) => (
-                  <EuiFlexItem key={index} grow={false}>
-                    <MetricChart
-                      nodeName={nodeName}
-                      dataView={dataViewType === 'metrics' ? metricsDataView : logsDataView}
-                      timeRange={timeRange}
-                      {...chartProp}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </IntersectionListProvider>
-            </EuiFlexGrid>
-          </div>
+          <HostMetricsDocsLink />
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
+            {CHARTS_IN_ORDER.map(({ dataViewType, ...chartProp }, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                <MetricChart
+                  nodeName={nodeName}
+                  dataView={dataViewType === 'metrics' ? metricsDataView : logsDataView}
+                  timeRange={timeRange}
+                  {...chartProp}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
