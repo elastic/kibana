@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import type {
   SyntheticsPrivateLocationsAttributes,
   PrivateLocationAttributes,
 } from '../../../runtime_types/private_locations';
+import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const toClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
@@ -27,8 +28,8 @@ export const toClientContract = (
         false,
       tags: location.tags,
       geo: {
-        lat: location.geo?.lat ? Number(location.geo.lat) : null,
-        lon: location.geo?.lon ? Number(location.geo.lon) : null,
+        lat: location.geo?.lat ? String(location.geo.lat) : null,
+        lon: location.geo?.lon ? String(location.geo.lon) : null,
       },
     })),
   };

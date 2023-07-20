@@ -29,7 +29,6 @@ import {
   Locations,
   SyntheticsMonitor,
   MonitorFields,
-  PrivateLocation,
 } from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
@@ -181,7 +180,7 @@ export class ProjectMonitorFormatter {
   }: {
     monitor: ProjectMonitor;
     publicLocations: Locations;
-    privateLocations: PrivateLocation[];
+    privateLocations: PrivateLocationAttributes[];
   }) => {
     try {
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({

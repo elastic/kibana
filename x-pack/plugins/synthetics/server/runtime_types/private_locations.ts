@@ -17,7 +17,10 @@ export const PrivateLocationAttributesCodec = t.intersection([
   }),
   t.partial({
     tags: t.array(t.string),
-    geo: t.interface({ lat: t.union([t.null, t.number]), lon: t.union([t.null, t.number]) }),
+    geo: t.interface({
+      lat: t.union([t.null, t.number, t.string]),
+      lon: t.union([t.null, t.number, t.string]),
+    }),
   }),
 ]);
 
