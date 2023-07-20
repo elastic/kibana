@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Toast } from '@kbn/core-notifications-browser';
+import React, { ReactNode } from 'react';
+
 import { EuiNotificationBadge } from '@elastic/eui';
-import React from 'react';
+import { Toast } from '@kbn/core-notifications-browser';
+import { MountPoint } from '@kbn/core-mount-utils-browser';
 
 export interface DeduplicateResult {
   toasts: Toast[];
@@ -27,11 +29,15 @@ export function deduplicateToasts(allToasts: Toast[]): DeduplicateResult {
   const distinctToasts: Toast[] = [];
   const idToToasts: Record<string, Toast[]> = {};
   for (const toastGroup of Object.values(toastGroups)) {
-    idToToasts[toastGroup[0].id] = toastGroup;
+    const firstElement = toastGroup[0];
+    idToToasts[firstElement.id] = toastGroup;
     if (toastGroup.length === 1) {
-      distinctToasts.push(toastGroup[0]);
+      distinctToasts.push(firstElement);
     } else {
-      distinctToasts.push(mergeToasts(toastGroup));
+      distinctToasts.push({
+        ...firstElement,
+        title: <TitleWithBadge title={firstElement.title} counter={toastGroup.length} />,
+      });
     }
   }
 
@@ -75,17 +81,28 @@ function groupByKey(allToasts: Toast[]) {
   return toastGroups;
 }
 
-function mergeToasts(toasts: Toast[]): Toast {
-  const firstElement = toasts[0];
-  return {
-    ...firstElement,
-    title: (
-      <>
-        {firstElement.title}{' '}
-        <EuiNotificationBadge color="subdued" className="eui-alignTop">
-          {toasts.length}
-        </EuiNotificationBadge>
-      </>
-    ),
-  };
+interface TitleWithBadgeProps {
+  title: MountPoint | ReactNode;
+  counter: number;
+}
+
+export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
+  const hostRef = React.useRef<HTMLSpanElement>(null);
+  const hostElement = <span ref={hostRef} />;
+  const renderedTitle = title instanceof Function ? hostElement : <span>{title}</span>;
+
+  React.useEffect(() => {
+    if (title instanceof Function && hostRef.current) {
+      return title(hostRef.current);
+    }
+  }, [title]);
+
+  return (
+    <React.Fragment>
+      {renderedTitle}{' '}
+      <EuiNotificationBadge color="subdued" className="eui-alignTop">
+        {counter}
+      </EuiNotificationBadge>
+    </React.Fragment>
+  );
 }
