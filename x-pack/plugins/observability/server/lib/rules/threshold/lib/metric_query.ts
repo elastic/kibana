@@ -162,7 +162,10 @@ export const getElasticsearchMetricQuery = (
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
   const excludesList = ['host.cpu', 'host.disk', 'host.network'];
-  if (!containerContextAgg) includesList.push('container.*');
+  if (!containerContextAgg) {
+    includesList.push(...containerIncludesList);
+    excludesList.push(...containerExcludesList);
+  }
 
   const additionalContextAgg = hasAdditionalContext(groupBy, validGroupByForContext)
     ? {
