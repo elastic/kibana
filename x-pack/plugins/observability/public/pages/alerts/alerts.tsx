@@ -58,7 +58,7 @@ function InternalAlertsPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
-    replace: true,
+    replace: false,
   });
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
