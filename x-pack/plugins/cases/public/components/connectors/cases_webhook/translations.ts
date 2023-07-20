@@ -18,5 +18,5 @@ export const CREATE_COMMENT_WARNING_DESC = (connectorName: string) =>
   i18n.translate('xpack.cases.connectors.card.createCommentWarningDesc', {
     values: { connectorName },
     defaultMessage:
-      'Configure the Create Attachment URL and Create Attachment Objects fields for the {connectorName} connector to share comments externally.',
+      'Configure the Create Comment URL and Create Comment Objects fields for the {connectorName} connector to share comments externally.',
   });

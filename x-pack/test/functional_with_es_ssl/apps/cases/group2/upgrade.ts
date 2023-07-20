@@ -131,7 +131,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         const secondComment = comments[1];
 
-        expect(await secondComment.getVisibleText()).equal(`Attachment with a lens embeddable`);
+        expect(await secondComment.getVisibleText()).equal(`Comment with a lens embeddable`);
       });
 
       it('shows the lens embendable', async () => {
