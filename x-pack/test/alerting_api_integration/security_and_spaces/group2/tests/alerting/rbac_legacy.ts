@@ -56,7 +56,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
     ),
   };
 
-  describe('alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/159123
+  // FLAKY: https://github.com/elastic/kibana/issues/15912
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 

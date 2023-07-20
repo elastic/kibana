@@ -198,7 +198,10 @@ describe('create()', () => {
         },
       });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('create', 'my-action-type');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'create',
+        actionTypeId: 'my-action-type',
+      });
     });
 
     test('throws when user is not authorised to create this type of action', async () => {
@@ -242,7 +245,10 @@ describe('create()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to create a "my-action-type" action]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('create', 'my-action-type');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'create',
+        actionTypeId: 'my-action-type',
+      });
     });
   });
 
@@ -847,7 +853,7 @@ describe('get()', () => {
 
       await actionsClient.get({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('ensures user is authorised to get preconfigured type of action', async () => {
@@ -885,7 +891,7 @@ describe('get()', () => {
 
       await actionsClient.get({ id: 'testPreconfigured' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('ensures user is authorised to get a system action', async () => {
@@ -919,7 +925,7 @@ describe('get()', () => {
 
       await actionsClient.get({ id: 'system-connector-.cases' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to get the type of action', async () => {
@@ -943,7 +949,7 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "my-action-type" action]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to get preconfigured of action', async () => {
@@ -987,7 +993,7 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "my-action-type" action]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to get a system action', async () => {
@@ -1029,7 +1035,7 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "system-connector-.cases" action]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -1270,7 +1276,7 @@ describe('getAll()', () => {
 
     test('ensures user is authorised to get the type of action', async () => {
       await getAllOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1282,7 +1288,7 @@ describe('getAll()', () => {
         `[Error: Unauthorized to get all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -1521,7 +1527,7 @@ describe('getBulk()', () => {
 
     test('ensures user is authorised to get the type of action', async () => {
       await getBulkOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1533,7 +1539,7 @@ describe('getBulk()', () => {
         `[Error: Unauthorized to get all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -1762,7 +1768,7 @@ describe('getOAuthAccessToken()', () => {
           },
         },
       });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1786,7 +1792,7 @@ describe('getOAuthAccessToken()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to update actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
   });
 
@@ -1809,7 +1815,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use http or https]`);
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
   });
 
   test('throws when tokenUrl does not contain hostname', async () => {
@@ -1831,7 +1837,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: Token URL must contain hostname]`);
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
   });
 
   test('throws when tokenUrl is not in allowed hosts', async () => {
@@ -1857,7 +1863,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: URI not allowed]`);
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       `https://testurl.service-now.com/oauth_token.do`
     );
@@ -2003,7 +2009,7 @@ describe('delete()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'delete' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2015,7 +2021,7 @@ describe('delete()', () => {
         `[Error: Unauthorized to delete all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'delete' });
     });
 
     test(`deletes any existing authorization tokens`, async () => {
@@ -2205,7 +2211,7 @@ describe('update()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to update actions', async () => {
       await updateOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2217,7 +2223,7 @@ describe('update()', () => {
         `[Error: Unauthorized to update all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
 
     test(`deletes any existing authorization tokens`, async () => {
@@ -2737,7 +2743,10 @@ describe('execute()', () => {
         },
         source: asHttpRequestExecutionSource(request),
       });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2758,7 +2767,10 @@ describe('execute()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
     });
 
     test('tracks legacy RBAC', async () => {
@@ -2775,6 +2787,200 @@ describe('execute()', () => {
       });
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
+      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+    });
+
+    test('ensures that system actions privileges are being authorized correctly', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges: () => ['test/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'system-connector-.cases',
+        params: {},
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: ['test/create'],
+      });
+    });
+
+    test('does not authorize kibana privileges for non system actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: 'my-action-type',
+            secrets: {
+              test: 'test1',
+            },
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges: () => ['test/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'testPreconfigured',
+        params: {},
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
+    });
+
+    test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges,
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'system-connector-.cases',
+        params: { foo: 'bar' },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: ['test/create'],
+      });
+
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
 
@@ -2888,7 +3094,9 @@ describe('enqueueExecution()', () => {
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
       });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2910,7 +3118,9 @@ describe('enqueueExecution()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('tracks legacy RBAC', async () => {
@@ -2973,7 +3183,9 @@ describe('bulkEnqueueExecution()', () => {
           source: asHttpRequestExecutionSource(request),
         },
       ]);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -3005,7 +3217,9 @@ describe('bulkEnqueueExecution()', () => {
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('tracks legacy RBAC', async () => {
@@ -3341,7 +3555,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access logs', async () => {
@@ -3354,7 +3568,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         `[Error: Unauthorized to access logs]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -3396,7 +3610,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
@@ -3409,7 +3623,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         `[Error: Unauthorized to access kpi]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 

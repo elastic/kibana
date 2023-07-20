@@ -170,6 +170,7 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {});
+  cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*', {});
 };
 
 /**
@@ -198,6 +199,6 @@ export const createAndInstallMockedPrebuiltRules = ({
     createNewRuleAsset({ rule });
   });
   if (installToKibana) {
-    installAllPrebuiltRulesRequest();
+    return installAllPrebuiltRulesRequest();
   }
 };
