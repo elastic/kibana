@@ -206,7 +206,7 @@ export class ActionsClient {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
-      await this.authorization.ensureAuthorized('create', actionTypeId);
+      await this.authorization.ensureAuthorized({ operation: 'create', actionTypeId });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -295,7 +295,7 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     try {
-      await this.authorization.ensureAuthorized('update');
+      await this.authorization.ensureAuthorized({ operation: 'update' });
 
       const foundInMemoryConnector = this.inMemoryConnectors.find(
         (connector) => connector.id === id
@@ -405,7 +405,7 @@ export class ActionsClient {
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -472,7 +472,7 @@ export class ActionsClient {
     FindActionResult[]
   > {
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -524,7 +524,7 @@ export class ActionsClient {
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       ids.forEach((id) =>
         this.auditLogger?.log(
@@ -598,7 +598,7 @@ export class ActionsClient {
     configurationUtilities: ActionsConfigurationUtilities
   ) {
     // Verify that user has edit access
-    await this.authorization.ensureAuthorized('update');
+    await this.authorization.ensureAuthorized({ operation: 'update' });
 
     // Verify that token url is allowed by allowed hosts config
     try {
@@ -689,7 +689,7 @@ export class ActionsClient {
    */
   public async delete({ id }: { id: string }) {
     try {
-      await this.authorization.ensureAuthorized('delete');
+      await this.authorization.ensureAuthorized({ operation: 'delete' });
 
       const foundInMemoryConnector = this.inMemoryConnectors.find(
         (connector) => connector.id === id
@@ -747,6 +747,21 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
+  private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
+    const inMemoryConnector = this.inMemoryConnectors.find(
+      (connector) => connector.id === connectorId
+    );
+
+    const additionalPrivileges = inMemoryConnector?.isSystemAction
+      ? this.actionTypeRegistry.getSystemActionKibanaPrivileges(
+          inMemoryConnector.actionTypeId,
+          params
+        )
+      : [];
+
+    return additionalPrivileges;
+  }
+
   public async execute({
     actionId,
     params,
@@ -759,7 +774,8 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized('execute');
+      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
+      await this.authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
@@ -780,7 +796,13 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized('execute');
+      /**
+       * For scheduled executions the additional authorization check
+       * for system actions (kibana privileges) will be performed
+       * inside the ActionExecutor at execution time
+       */
+
+      await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
       trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
     }
@@ -794,12 +816,18 @@ export class ActionsClient {
         sources.push(option.source);
       }
     });
+
     const authCounts = await getBulkAuthorizationModeBySource(
       this.unsecuredSavedObjectsClient,
       sources
     );
     if (authCounts[AuthorizationMode.RBAC] > 0) {
-      await this.authorization.ensureAuthorized('execute');
+      /**
+       * For scheduled executions the additional authorization check
+       * for system actions (kibana privileges) will be performed
+       * inside the ActionExecutor at execution time
+       */
+      await this.authorization.ensureAuthorized({ operation: 'execute' });
     }
     if (authCounts[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
@@ -817,7 +845,7 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized('execute');
+      await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
       trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.usageCounter);
     }
@@ -873,7 +901,7 @@ export class ActionsClient {
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -933,7 +961,7 @@ export class ActionsClient {
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
