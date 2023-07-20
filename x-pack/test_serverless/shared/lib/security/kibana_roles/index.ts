@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { getServerlessSecurityKibanaRoleDefinitions } from './kibana_roles';
+export * from './kibana_roles';
+export * from './role_loader';

@@ -39,7 +39,7 @@ const roleDefinitions = loadYaml(
   readFileSync(path.join(__dirname, 'project_controller_security_roles.yml'), 'utf8')
 ) as YamlRoleDefinitions;
 
-type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
+export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
 export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurityRoles => {
   const definitions = cloneDeep(roleDefinitions);
