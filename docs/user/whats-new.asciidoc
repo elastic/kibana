@@ -85,7 +85,7 @@ image::images/significant-terms.png[Example of a donut chart organized by signif
 [discrete]
 ==== Tag cloud
 
-You can now create a word cloud in Lens using Tag cloud, which is currently in technical preview. When creating new visualizations, select Tag cloud in the visualization type dropdown. From the available fields drag and drop the desired field into the workspace to visualize keywords. 
+You can now create a word cloud in **Lens** using Tag cloud, which is currently in technical preview. When creating new visualizations, select **Tag cloud** in the visualization type dropdown. From the available fields drag and drop the desired field into the workspace to visualize keywords. 
  
 [role="screenshot"]
 image::images/tagcloud.png[Example of a tag cloud, width=70%]
