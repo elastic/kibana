@@ -4001,6 +4001,13 @@
                   "type": "long"
                 }
               }
+            },
+            "environments": {
+              "properties": {
+                "1d": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -4244,6 +4251,9 @@
                 "type": "long"
               },
               "num_transaction_types": {
+                "type": "long"
+              },
+              "num_environments": {
                 "type": "long"
               },
               "timed_out": {

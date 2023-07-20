@@ -937,6 +937,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "type": "long"
                             }
                           }
+                        },
+                        "environments": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
                         }
                       }
                     },
@@ -1175,6 +1182,9 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           "type": "long"
                         },
                         "num_transaction_types": {
+                          "type": "long"
+                        },
+                        "num_environments": {
                           "type": "long"
                         },
                         "timed_out": {

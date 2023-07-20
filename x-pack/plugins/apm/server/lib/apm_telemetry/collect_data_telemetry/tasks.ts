@@ -799,6 +799,29 @@ export const tasks: TelemetryTask[] = [
         })
       ).aggregations?.service_name.value;
 
+      const environmentsCount = (
+        await telemetryClient.search({
+          index: [indices.transaction, indices.error, indices.metric],
+          body: {
+            track_total_hits: false,
+            size: 0,
+            timeout,
+            query: {
+              bool: {
+                filter: [range1d],
+              },
+            },
+            aggs: {
+              service_environments: {
+                cardinality: {
+                  field: SERVICE_ENVIRONMENT,
+                },
+              },
+            },
+          },
+        })
+      ).aggregations?.service_environments.value;
+
       return {
         counts: {
           max_error_groups_per_service: {
@@ -812,6 +835,9 @@ export const tasks: TelemetryTask[] = [
           },
           services: {
             '1d': servicesCount || 0,
+          },
+          environments: {
+            '1d': environmentsCount || 0,
           },
         },
       };
@@ -1284,6 +1310,11 @@ export const tasks: TelemetryTask[] = [
                         field: TRANSACTION_TYPE,
                       },
                     },
+                    service_environments: {
+                      cardinality: {
+                        field: SERVICE_ENVIRONMENT,
+                      },
+                    },
                     top_metrics: {
                       top_metrics: {
                         sort: '_score',
@@ -1371,6 +1402,7 @@ export const tasks: TelemetryTask[] = [
             timed_out: response.timed_out,
             num_service_nodes: envBucket.instances.value ?? 1,
             num_transaction_types: envBucket.transaction_types.value ?? 0,
+            num_environments: envBucket.service_environments.value ?? 0,
             cloud: {
               availability_zones:
                 envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(

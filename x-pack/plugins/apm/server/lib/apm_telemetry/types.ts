@@ -29,6 +29,7 @@ export interface APMPerService {
   timed_out: boolean;
   num_service_nodes: number;
   num_transaction_types: number;
+  num_environments: number;
   cloud: {
     availability_zones: string[];
     regions: string[];
@@ -108,6 +109,7 @@ export interface APMUsage {
     max_error_groups_per_service: TimeframeMap;
     traces: TimeframeMap;
     services: TimeframeMap;
+    environments: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
