@@ -64,7 +64,7 @@ describe('APIKeysAPIClient', () => {
     httpMock.post.mockResolvedValue(mockResponse);
 
     const apiClient = new APIKeysAPIClient(httpMock);
-    const mockAPIKeys = { name: 'name', expiration: '7d' };
+    const mockAPIKeys = { name: 'name', expiration: '7d' } as any;
 
     await expect(apiClient.createApiKey(mockAPIKeys)).resolves.toBe(mockResponse);
     expect(httpMock.post).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ describe('APIKeysAPIClient', () => {
     httpMock.put.mockResolvedValue(mockResponse);
 
     const apiClient = new APIKeysAPIClient(httpMock);
-    const mockApiKeyUpdate = { id: 'test_id', metadata: {}, roles_descriptor: {} };
+    const mockApiKeyUpdate = { id: 'test_id', metadata: {}, roles_descriptor: {} } as any;
 
     await expect(apiClient.updateApiKey(mockApiKeyUpdate)).resolves.toBe(mockResponse);
     expect(httpMock.put).toHaveBeenCalledTimes(1);

@@ -14,7 +14,6 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../api_keys_management_app';
-import { apiKeysAPIClientMock } from '../index.mock';
 import { APIKeysGridPage } from './api_keys_grid_page';
 
 /*
@@ -35,7 +34,6 @@ describe('APIKeysGridPage', () => {
 
   let coreStart: ReturnType<typeof coreMock.createStart>;
   const theme$ = themeServiceMock.createTheme$();
-  const apiClientMock = apiKeysAPIClientMock.create();
   const { authc } = securityMock.createSetup();
 
   beforeEach(() => {
