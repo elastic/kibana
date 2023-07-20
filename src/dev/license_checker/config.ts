@@ -69,6 +69,7 @@ export const LICENSE_ALLOWED = [
   'Python-2.0',
   '(Apache-2.0 AND MIT)',
   'BlueOak-1.0.0',
+  '(Apache-2.0 AND BSD-3-Clause)',
 ];
 
 // The following list only applies to licenses that
