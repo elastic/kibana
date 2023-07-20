@@ -6,8 +6,8 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 
-export function mapSavedObjectToMonitor(so: SavedObject<EncryptedSyntheticsMonitor>) {
+export function mapSavedObjectToMonitor(so: SavedObject<EncryptedSyntheticsMonitorAttributes>) {
   return Object.assign(so.attributes, { created_at: so.created_at, updated_at: so.updated_at });
 }

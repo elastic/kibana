@@ -20,6 +20,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -82,6 +83,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -148,6 +150,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -210,6 +213,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -272,6 +276,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -338,6 +343,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -400,6 +406,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -462,6 +469,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -528,6 +536,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -598,6 +607,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -660,6 +670,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -726,6 +737,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -796,6 +808,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -862,6 +875,7 @@ Object {
     "packageInfo": Object {
       "branch": Any<String>,
       "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
