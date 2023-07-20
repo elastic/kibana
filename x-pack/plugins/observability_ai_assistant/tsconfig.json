@@ -21,7 +21,8 @@
     "@kbn/config-schema",
     "@kbn/security-plugin",
     "@kbn/i18n",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/kibana-react-plugin"
   ],
   "exclude": [
     "target/**/*",
