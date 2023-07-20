@@ -17,6 +17,7 @@ export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
       options: {
         authRequired: false,
         tags: ['api'],
+        access: 'public',
       },
       validate: false,
     },
