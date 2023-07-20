@@ -135,6 +135,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: 'test.system-action-kibana-privileges',
+                  id: 'system-connector-test.system-action-kibana-privileges',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'System action: test.system-action-kibana-privileges',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
                   is_system_action: false,
@@ -304,6 +313,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: 'test.system-action-kibana-privileges',
+                  id: 'system-connector-test.system-action-kibana-privileges',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'System action: test.system-action-kibana-privileges',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
                   is_system_action: false,
@@ -433,6 +451,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_preconfigured: false,
                   is_system_action: true,
                   name: 'System action: test.system-action',
+                  referenced_by_count: 0,
+                },
+                {
+                  connector_type_id: 'test.system-action-kibana-privileges',
+                  id: 'system-connector-test.system-action-kibana-privileges',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'System action: test.system-action-kibana-privileges',
                   referenced_by_count: 0,
                 },
                 {
