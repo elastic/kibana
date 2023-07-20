@@ -15,7 +15,7 @@ import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { buildDataTableRecord } from '../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

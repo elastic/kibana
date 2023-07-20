@@ -9,13 +9,14 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
+import { toTimestampRange } from '../../utils';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -23,7 +24,7 @@ export interface MetadataSearchUrlState {
 }
 
 export interface MetadataProps {
-  currentTimeRange: MetricsTimeInput;
+  dateRange: TimeRange;
   nodeName: string;
   nodeType: InventoryItemType;
   showActionsColumn?: boolean;
@@ -33,7 +34,7 @@ export interface MetadataProps {
 
 export const Metadata = ({
   nodeName,
-  currentTimeRange,
+  dateRange,
   nodeType,
   search,
   showActionsColumn = false,
@@ -45,7 +46,13 @@ export const Metadata = ({
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
-  } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadata(
+    nodeName,
+    nodeType,
+    inventoryModel.requiredMetrics,
+    sourceId,
+    toTimestampRange(dateRange)
+  );
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
