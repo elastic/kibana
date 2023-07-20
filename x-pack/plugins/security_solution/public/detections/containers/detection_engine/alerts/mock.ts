@@ -164,6 +164,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               id: '2df3a613-f5a8-4b55-bf6a-487fc820b842',
               rule_id: '82b2b065-a2ee-49fc-9d6d-781a75c3d280',
               false_positives: [],
+              custom_highlighted_fields: [],
               meta: {
                 from: '1m',
               },
@@ -399,6 +400,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               id: '2df3a613-f5a8-4b55-bf6a-487fc820b842',
               rule_id: '82b2b065-a2ee-49fc-9d6d-781a75c3d280',
               false_positives: [],
+              custom_highlighted_fields: [],
               meta: {
                 from: '1m',
               },
@@ -600,6 +602,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               id: '2df3a613-f5a8-4b55-bf6a-487fc820b842',
               rule_id: '82b2b065-a2ee-49fc-9d6d-781a75c3d280',
               false_positives: [],
+              custom_highlighted_fields: [],
               meta: {
                 from: '1m',
               },
@@ -799,6 +802,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               id: '2df3a613-f5a8-4b55-bf6a-487fc820b842',
               rule_id: '82b2b065-a2ee-49fc-9d6d-781a75c3d280',
               false_positives: [],
+              custom_highlighted_fields: [],
               meta: {
                 from: '1m',
               },
@@ -1084,6 +1088,7 @@ export const alertsMock8x: AlertSearchResponse<unknown, unknown> = {
               kibana_siem_app_url: 'http://localhost:5601/kbn/app/security',
             },
             false_positives: ['fp'],
+            custom_highlighted_fields: ['chf'],
             threat: [
               {
                 framework: 'MITRE ATT&CK',
@@ -1153,6 +1158,7 @@ export const alertsMock8x: AlertSearchResponse<unknown, unknown> = {
           'kibana.alert.rule.risk_score': 37,
           'kibana.alert.rule.author': ['author'],
           'kibana.alert.rule.false_positives': ['fp'],
+          'kibana.alert.rule.custom_highlighted_fields': ['chf'],
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.original_event.sequence': 20,

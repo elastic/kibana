@@ -47,6 +47,7 @@ export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
         description: ['24/7'],
         enabled: [true],
         false_positives: ['test-1'],
+        custom_highlighted_fields: ['test.field1'],
         filters: [],
         from: ['now-300s'],
         id: ['b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],

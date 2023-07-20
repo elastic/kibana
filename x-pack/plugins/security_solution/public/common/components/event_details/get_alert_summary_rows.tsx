@@ -6,7 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE, ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS } from '@kbn/rule-data-utils';
 
 import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
@@ -34,6 +34,8 @@ import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
+
+import { useCustomHighlightedFields } from './custom_highlighted_fields';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -216,6 +218,15 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
+ */
+function getFieldsByCustoms(customs: EventSummaryField[]): EventSummaryField[] {
+  return customs;
+}
+
+/**
   This function is exported because it is used in the Exception Component to
   populate the conditions with the Highlighted Fields. Additionally, the new 
   Alert Summary Flyout also requires access to these fields.
@@ -229,16 +240,19 @@ export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  eventSummaryCustoms,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  eventSummaryCustoms: EventSummaryField[];
 }): EventSummaryField[] {
   const fields = [
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
     ...getFieldsByRuleType(eventRuleType),
+    ...getFieldsByCustoms(eventSummaryCustoms),
   ];
 
   // Filter all fields by their id to make sure there are no duplicates
@@ -302,10 +316,19 @@ export const getSummaryRows = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
+  const customRuleHighlightedFieldsField = find({ category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS }, data);
+  const customRuleHighlightedFields = customRuleHighlightedFieldsField?.originalValue;
+    
+  const customHighlightedFields = [...useCustomHighlightedFields(), ...customRuleHighlightedFields ?? []];
+  const eventSummaryCustoms: EventSummaryField[] = customHighlightedFields.map(
+    (custom: string) => ({'id': custom})
+  );
+
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
+    eventSummaryCustoms,
   });
 
   return data != null

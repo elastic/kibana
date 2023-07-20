@@ -16,6 +16,9 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
+export const ADD_CUSTOM_HIGHLIGHTED_FIELD_BTN =
+  '[data-test-subj="detectionEngineStepAboutRuleCustomHighlightedFields"] .euiButtonEmpty__text';
+
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
@@ -105,6 +108,9 @@ export const INVESTIGATION_NOTES_TEXTAREA =
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
+
+export const CUSTOM_HIGHLIGHTED_FIELDS_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleCustomHighlightedFields"] input';
 
 export const LOOK_BACK_INTERVAL =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';

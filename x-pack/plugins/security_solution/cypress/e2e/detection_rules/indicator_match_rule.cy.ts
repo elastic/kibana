@@ -35,6 +35,7 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  CUSTOM_HIGHLIGHTED_FIELDS_DETAILS,
   INDEX_PATTERNS_DETAILS,
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
@@ -112,6 +113,7 @@ describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().references?.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().false_positives?.join('');
+    const expectedCustomHighlightedFields = getNewThreatIndicatorRule().custom_highlighted_fields?.join('');
     const expectedTags = getNewThreatIndicatorRule().tags?.join('');
     const mitreAttack = getNewThreatIndicatorRule().threat;
     const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
@@ -462,6 +464,7 @@ describe('indicator match', () => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
           getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+          getDetails(CUSTOM_HIGHLIGHTED_FIELDS_DETAILS).should('have.text', expectedCustomHighlightedFields);
           getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
             expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
           });

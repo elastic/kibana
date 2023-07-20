@@ -44,6 +44,7 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   description: 'Detecting root and admin users',
   enabled: true,
   false_positives: [],
+  custom_highlighted_fields: [],
   from: 'now-6m',
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   immutable: false,

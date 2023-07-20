@@ -25,6 +25,7 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  CUSTOM_HIGHLIGHTED_FIELDS_DETAILS,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -68,6 +69,7 @@ describe('New Terms rules', () => {
     const rule = getNewTermsRule();
     const expectedUrls = rule.references?.join('');
     const expectedFalsePositives = rule.false_positives?.join('');
+    const expectedCustomHighlightedFields = rule.custom_highlighted_fields?.join('');
     const expectedTags = rule.tags?.join('');
     const mitreAttack = rule.threat;
     const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
@@ -106,6 +108,7 @@ describe('New Terms rules', () => {
           expect(removeExternalLinkText(details.text())).equal(expectedUrls);
         });
         getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+        getDetails(CUSTOM_HIGHLIGHTED_FIELDS_DETAILS).should('have.text', expectedCustomHighlightedFields);
         getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
           expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
         });

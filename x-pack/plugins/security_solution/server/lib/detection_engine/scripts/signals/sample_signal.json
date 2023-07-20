@@ -130,6 +130,7 @@
       "id": "8d9bb7f1-9d8a-4f13-ae18-ccaf4ff61893",
       "rule_id": "rule-1",
       "false_positives": [],
+      "custom_highlighted_fields": [],
       "max_signals": 100,
       "risk_score": 1,
       "description": "Detecting root and admin users",

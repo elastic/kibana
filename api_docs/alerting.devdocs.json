@@ -4871,8 +4871,6 @@
           "MuteOptions",
           ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
-          ">>; getSpaceId: () => string | undefined; getAuthorization: () => ",
-          {
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
@@ -5457,6 +5455,41 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.getRuleTagsAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "getRuleTagsAggregation",
+        "description": [],
+        "signature": [
+          "(params?: GetRuleTagsAggregationParams | undefined) => Record<string, ",
+          "AggregationsAggregationContainer",
+          ">"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getRuleTagsAggregation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "GetRuleTagsAggregationParams | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

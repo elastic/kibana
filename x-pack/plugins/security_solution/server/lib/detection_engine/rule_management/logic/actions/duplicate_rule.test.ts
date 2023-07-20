@@ -28,6 +28,7 @@ describe('duplicateRule', () => {
       description: 'Some description.',
       ruleId: 'some ruleId',
       falsePositives: [],
+      customHighlightedFields: [],
       from: 'now-360s',
       immutable: false,
       license: '',

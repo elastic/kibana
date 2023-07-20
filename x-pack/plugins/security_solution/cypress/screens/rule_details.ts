@@ -47,6 +47,8 @@ export const EXCEPTIONS_ITEM_CONTAINER = '[data-test-subj="exceptionsContainer"]
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
+export const CUSTOM_HIGHLIGHTED_FIELDS_DETAILS = 'Custom highlighted field examples';
+
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';

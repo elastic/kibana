@@ -324,6 +324,7 @@ export const getMockRuleSearchResponse = (
             falsePositives: [
               'Deletion of diagnostic settings may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Diagnostic settings deletion from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
             ],
+            customHighlightedFields: ['custom.field1', 'custom.field2'],
             from: 'now-25m',
             immutable,
             query:

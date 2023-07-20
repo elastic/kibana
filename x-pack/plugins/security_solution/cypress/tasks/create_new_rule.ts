@@ -24,6 +24,7 @@ import {
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
+  ADD_CUSTOM_HIGHLIGHTED_FIELD_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
   ANOMALY_THRESHOLD_INPUT,
@@ -40,6 +41,7 @@ import {
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
+  CUSTOM_HIGHLIGHTED_FIELDS_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
@@ -167,6 +169,10 @@ export const fillAboutRule = (rule: RuleCreateProps) => {
     fillFalsePositiveExamples(rule.false_positives);
   }
 
+  if (rule.custom_highlighted_fields) {
+    fillCustomHighlightedFieldExamples(rule.custom_highlighted_fields);
+  }
+
   if (rule.threat) {
     fillMitre(rule.threat);
   }
@@ -247,6 +253,17 @@ export const fillFalsePositiveExamples = (falsePositives: string[] = ruleFields.
   });
   return falsePositives;
 };
+
+export const fillCustomHighlightedFieldExamples = (customHighlightedFields: string[] = ruleFields.customHighlightedFields) => {
+  customHighlightedFields.forEach((customHighlightedField, index) => {
+    cy.get(CUSTOM_HIGHLIGHTED_FIELDS_INPUT)
+      .eq(index)
+      .clear({ force: true })
+      .type(customHighlightedField, { force: true });
+    cy.get(ADD_CUSTOM_HIGHLIGHTED_FIELD_BTN).click({ force: true });
+  });
+  return customHighlightedFields;
+};    
 
 export const importSavedQuery = (timelineId: string) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
@@ -342,6 +359,9 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   }
   if (rule.false_positives) {
     fillFalsePositiveExamples(rule.false_positives);
+  }
+  if (rule.custom_highlighted_fields) {
+    fillCustomHighlightedFieldExamples(rule.custom_highlighted_fields);
   }
   if (rule.threat) {
     fillMitre(rule.threat);

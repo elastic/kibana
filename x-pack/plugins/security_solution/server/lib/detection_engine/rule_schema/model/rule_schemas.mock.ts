@@ -30,6 +30,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     ruleId: 'rule-1',
     description: 'Detecting root and admin users',
     falsePositives: [],
+    customHighlightedFields: [],
     immutable: false,
     from: 'now-6m',
     to: 'now',

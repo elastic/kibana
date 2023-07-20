@@ -913,6 +913,7 @@ export const racFieldMappings: Record<string, string> = {
   'signal.rule.timestamp_override': `${ALERT_RULE_PARAMETERS}.timestampOverride`,
   'signal.rule.author': `${ALERT_RULE_PARAMETERS}.author`,
   'signal.rule.false_positives': `${ALERT_RULE_PARAMETERS}.falsePositives`,
+  'signal.rule.custom_highlighted_fields': `${ALERT_RULE_PARAMETERS}.customHighlightedFields`,
   'signal.rule.from': `${ALERT_RULE_PARAMETERS}.from`,
   'signal.rule.rule_id': `${ALERT_RULE_PARAMETERS}.ruleId`,
   'signal.rule.max_signals': `${ALERT_RULE_PARAMETERS}.maxSignals`,

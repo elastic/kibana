@@ -709,6 +709,9 @@ describe('successful migrations', () => {
           falsePositives: [
             "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations.",
           ],
+          customHighlightedFields: [
+            "This rule displays custom highlighted fields in the alert's details view pane.",
+          ],
           from: 'now-6m',
           immutable: true,
           query:
@@ -758,6 +761,9 @@ describe('successful migrations', () => {
             falsePositives: [
               "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations.",
             ],
+            customHighlightedFields: [
+              "This rule displays custom highlighted fields in the alert's details view pane.",
+            ],
             from: 'now-6m',
             immutable: true,
             query:
@@ -804,6 +810,9 @@ describe('successful migrations', () => {
           index: ['packetbeat-*'],
           falsePositives: [
             "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations.",
+          ],
+          customHighlightedFields: [
+            "This rule displays custom highlighted fields in the alert's details view pane.",
           ],
           from: 'now-6m',
           immutable: true,

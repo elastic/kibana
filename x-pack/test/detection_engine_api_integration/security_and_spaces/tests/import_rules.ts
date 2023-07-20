@@ -50,6 +50,7 @@ const getImportRuleBuffer = (connectorId: string) => {
     meta: { from: '1m', kibana_siem_app_url: 'http://0.0.0.0:5601/s/7/app/security' },
     author: [],
     false_positives: [],
+    custom_higlighted_fields: [],
     from: 'now-360s',
     rule_id: 'aa525d7c-8948-439f-b32d-27e00c750246',
     max_signals: 100,

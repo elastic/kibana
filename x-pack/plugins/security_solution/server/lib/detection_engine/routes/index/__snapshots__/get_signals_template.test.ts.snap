@@ -148,6 +148,10 @@ Object {
       "path": "signal.rule.created_by",
       "type": "alias",
     },
+    "kibana.alert.rule.custom_highlighted_fields": Object {
+      "path": "signal.rule.custom_highlighted_fields",
+      "type": "alias",
+    },
     "kibana.alert.rule.description": Object {
       "path": "signal.rule.description",
       "type": "alias",
@@ -681,6 +685,10 @@ Object {
     },
     "kibana.alert.rule.created_by": Object {
       "path": "signal.rule.created_by",
+      "type": "alias",
+    },
+    "kibana.alert.rule.custom_highlighted_fields": Object {
+      "path": "signal.rule.custom_highlighted_fields",
       "type": "alias",
     },
     "kibana.alert.rule.description": Object {
@@ -2893,6 +2901,10 @@ Object {
           "path": "signal.rule.created_by",
           "type": "alias",
         },
+        "kibana.alert.rule.custom_highlighted_fields": Object {
+          "path": "signal.rule.custom_highlighted_fields",
+          "type": "alias",
+        },
         "kibana.alert.rule.description": Object {
           "path": "signal.rule.description",
           "type": "alias",
@@ -4683,6 +4695,9 @@ Object {
                   "type": "date",
                 },
                 "created_by": Object {
+                  "type": "keyword",
+                },
+                "custom_highlighted_fields": Object {
                   "type": "keyword",
                 },
                 "description": Object {

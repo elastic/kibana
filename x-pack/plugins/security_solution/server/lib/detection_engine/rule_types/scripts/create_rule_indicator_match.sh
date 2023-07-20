@@ -25,6 +25,7 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      "description": "Indicator Match Rule",
      "exceptionsList": [],
      "falsePositives": [],
+     "customHighlightedFields": [],
      "from": "now-300s",
      "query": "*:*",
      "immutable": false,

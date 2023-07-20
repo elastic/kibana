@@ -321,6 +321,7 @@ describe('public helpers getField', () => {
         },
         author: [],
         false_positives: [],
+        custom_higlighted_fields: [],
         from: 'now-300s',
         rule_id: 'b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea',
         max_signals: 100,

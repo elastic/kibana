@@ -237,6 +237,7 @@ describe('Events Details Helpers', () => {
             threat_index: ['filebeat-*'],
             setup: '',
             false_positives: [],
+            custom_highlighted_fields: [],
             threat: [],
             to: 'now',
           },
@@ -465,6 +466,13 @@ describe('Events Details Helpers', () => {
         {
           category: 'kibana',
           field: 'kibana.alert.rule.parameters.false_positives',
+          isObjectArray: false,
+          originalValue: [],
+          values: [],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.custom_highlighted_fields',
           isObjectArray: false,
           originalValue: [],
           values: [],

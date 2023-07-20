@@ -20,6 +20,7 @@ import type {
   InvestigationGuide,
   RuleDescription,
   RuleFalsePositiveArray,
+  RuleCustomHighlightedFieldArray,
   RuleQuery,
   RuleName,
   RuleReferenceArray,
@@ -29,6 +30,7 @@ import type {
 interface RuleFields {
   defaultIndexPatterns: IndexPatternArray;
   falsePositives: RuleFalsePositiveArray;
+  customHighlightedFields: RuleCustomHighlightedFieldArray
   investigationGuide: InvestigationGuide;
   referenceUrls: RuleReferenceArray;
   riskScore: RiskScore;
@@ -57,6 +59,7 @@ export const ruleFields: RuleFields = {
     '-*elastic-cloud-logs-*',
   ],
   falsePositives: ['False1', 'False2'],
+  customHighlightedFields: ['custom.field1', 'custom.field2'],
   investigationGuide: '# test markdown',
   referenceUrls: ['http://example.com/', 'https://example.com/'],
   riskScore: 17,

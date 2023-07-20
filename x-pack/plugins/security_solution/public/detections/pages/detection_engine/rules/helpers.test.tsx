@@ -131,6 +131,7 @@ describe('rule helpers', () => {
         author: [],
         description: '24/7',
         falsePositives: ['test'],
+        customHighlightedFields: ['test.field1', 'test.field2'],
         isAssociatedToEndpointList: false,
         isBuildingBlock: false,
         license: 'Elastic License',

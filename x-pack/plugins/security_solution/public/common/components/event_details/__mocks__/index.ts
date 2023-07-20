@@ -392,6 +392,7 @@ export const generateAlertDetailsDataMock = () => [
   { category: 'kibana', field: 'kibana.alert.rule.actions', values: [], originalValue: [] },
   { category: 'kibana', field: 'kibana.alert.rule.author', values: [], originalValue: [] },
   { category: 'kibana', field: 'kibana.alert.rule.false_positives', values: [], originalValue: [] },
+  { category: 'kibana', field: 'kibana.alert.rule.custom_highlighted_fields', values: [], originalValue: [] },
   { category: 'kibana', field: 'kibana.alert.rule.meta.from', values: ['1m'], originalValue: '1m' },
   {
     category: 'kibana',

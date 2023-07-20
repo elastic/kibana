@@ -33,6 +33,7 @@ describe('schedule_throttle_notification_actions', () => {
       immutable: false,
       license: '',
       falsePositives: ['false positive 1', 'false positive 2'],
+      customHighlightedFields: ['custom.field1', 'custom.field2'],
       query: 'user.name: root or user.name: admin',
       language: 'kuery',
       savedId: 'savedId-123',

@@ -1702,6 +1702,9 @@ const getAlertsIndexMappings = (): IndexMappings => {
                       created_by: {
                         type: 'keyword',
                       },
+                      custom_highlighted_fields: {
+                        type: 'keyword',
+                      },
                       description: {
                         type: 'keyword',
                       },
@@ -3237,6 +3240,10 @@ const getAlertsIndexMappings = (): IndexMappings => {
                   },
                   created_by: {
                     path: 'kibana.alert.rule.created_by',
+                    type: 'alias',
+                  },
+                  custom_highlighted_fields: {
+                    path: 'kibana.alert.rule.custom_highlighted_fields',
                     type: 'alias',
                   },
                   description: {

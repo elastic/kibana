@@ -60,6 +60,7 @@ export const mockRule = (id: string): Rule => ({
   description: '24/7',
   enabled: true,
   false_positives: [],
+  custom_highlighted_fields: [],
   filters: [],
   from: 'now-300s',
   id,
@@ -103,6 +104,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   description: '24/7',
   enabled: true,
   false_positives: ['test'],
+  custom_highlighted_fields: ['test.field'],
   filters: [
     {
       $state: {
@@ -191,6 +193,7 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   references: ['www.test.co'],
   falsePositives: ['test'],
+  customHighlightedFields: ['test.field'],
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',

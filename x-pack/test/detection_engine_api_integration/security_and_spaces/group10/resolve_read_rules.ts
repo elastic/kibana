@@ -74,6 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
                 description: 'test',
                 ruleId: '82747bb8-bae0-4b59-8119-7f65ac564e14',
                 falsePositives: [],
+                customHighlightedFields: [],
                 from: 'now-3615s',
                 immutable: false,
                 license: '',

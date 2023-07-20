@@ -155,9 +155,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { appClientFactory, appFeatures, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
+    const customHighlightedFields = config.customHighlightedFields;
 
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings, experimentalFeatures);
+    initUiSettings(core.uiSettings, experimentalFeatures, customHighlightedFields);
     appFeatures.init(plugins.features);
 
     this.ruleMonitoringService.setup(core, plugins);

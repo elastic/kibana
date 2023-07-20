@@ -48,6 +48,7 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  CUSTOM_HIGHLIGHTED_FIELDS_DETAILS,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -82,6 +83,7 @@ import {
   createAndEnableRule,
   expandAdvancedSettings,
   fillAboutRule,
+  fillCustomHighlightedFieldExamples,
   fillDescription,
   fillFalsePositiveExamples,
   fillFrom,
@@ -141,6 +143,7 @@ describe('Custom query rules', () => {
       expandAdvancedSettings();
       fillReferenceUrls();
       fillFalsePositiveExamples();
+      fillCustomHighlightedFieldExamples();
       fillThreat();
       fillThreatTechnique();
       fillThreatSubtechnique();
@@ -193,6 +196,7 @@ describe('Custom query rules', () => {
           expect(removeExternalLinkText(details.text())).equal(ruleFields.referenceUrls.join(''));
         });
         getDetails(FALSE_POSITIVES_DETAILS).should('have.text', ruleFields.falsePositives.join(''));
+        getDetails(CUSTOM_HIGHLIGHTED_FIELDS_DETAILS).should('have.text', ruleFields.customHighlightedFields.join(''));
         getDetails(TAGS_DETAILS).should('have.text', ruleFields.ruleTags.join(''));
       });
       cy.get(THREAT_TACTIC).should(

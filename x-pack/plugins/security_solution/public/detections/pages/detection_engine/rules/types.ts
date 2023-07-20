@@ -89,6 +89,7 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
+  customHighlightedFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
@@ -231,6 +232,7 @@ export interface AboutStepRuleJson {
   risk_score_mapping: RiskScoreMapping;
   references: string[];
   false_positives: string[];
+  custom_highlighted_fields: string[];
   rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: Threats;

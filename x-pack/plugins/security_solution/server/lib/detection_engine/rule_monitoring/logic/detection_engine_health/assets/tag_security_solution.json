@@ -1,9 +1,0 @@
-{
-  "type": "tag",
-  "id": "security-solution-<spaceId>",
-  "managed": true,
-  "coreMigrationVersion": "8.8.0",
-  "typeMigrationVersion": "8.0.0",
-  "attributes": { "name": "Security Solution", "description": "", "color": "#D36086" },
-  "references": []
-}

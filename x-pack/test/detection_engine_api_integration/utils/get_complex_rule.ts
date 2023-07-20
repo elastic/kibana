@@ -20,6 +20,7 @@ export const getComplexRule = (ruleId = 'rule-1'): RuleCreateProps => ({
     'https://www.example.com/some-article-about-a-false-positive',
     'some text string about why another condition could be a false positive',
   ],
+  custom_highlighted_fields: ['custom.field1', 'custom.field2'],
   risk_score: 1,
   risk_score_mapping: [],
   rule_id: ruleId,

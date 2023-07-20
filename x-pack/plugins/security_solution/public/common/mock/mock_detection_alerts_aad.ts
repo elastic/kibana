@@ -47,6 +47,7 @@ export const mockAADEcsDataWithAlert: Ecs = {
         description: ['24/7'],
         enabled: [true],
         false_positives: ['test-1'],
+        custom_highlighted_fields: ['test.field1'],
         parameters: {
           filters: [
             {

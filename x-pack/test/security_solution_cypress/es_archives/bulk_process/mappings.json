@@ -1539,6 +1539,9 @@
                     "created_by": {
                       "type": "keyword"
                     },
+                    "custom_highlighted_fields": {
+                      "type": "keyword"
+                    },
                     "description": {
                       "type": "keyword"
                     },
@@ -3071,6 +3074,10 @@
                 "created_by": {
                   "type": "alias",
                   "path": "kibana.alert.rule.created_by"
+                },
+                "custom_highlighted_fields": {
+                  "type": "alias",
+                  "path": "kibana.alert.rule.custom_highlighted_fields"
                 },
                 "description": {
                   "type": "alias",

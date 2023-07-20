@@ -1715,6 +1715,10 @@
                       "path": "signal.rule.created_by",
                       "type": "alias"
                     },
+                    "custom_highlighted_fields": {
+                      "path": "signal.rule.custom_highlighted_fields",
+                      "type": "alias"
+                    },
                     "description": {
                       "path": "signal.rule.description",
                       "type": "alias"
@@ -3406,6 +3410,9 @@
                   "type": "date"
                 },
                 "created_by": {
+                  "type": "keyword"
+                },
+                "custom_highlighted_fields": {
                   "type": "keyword"
                 },
                 "description": {

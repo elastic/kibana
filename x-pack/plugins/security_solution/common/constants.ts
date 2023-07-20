@@ -229,6 +229,13 @@ export const INCLUDE_INDEX_PATTERN = [
   'traces-apm*',
   'winlogbeat-*',
 ];
+
+/** This Kibana Advanced Setting shows custom highlighted fields in the event details view */
+export const CUSTOM_HIGHLIGHTED_FIELD_SETTING = 'securitySolution:customHighlightedField' as const;
+
+/** The default value for custom highlighted fields */
+export const CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT = [];
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
 export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
 

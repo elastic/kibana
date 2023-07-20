@@ -257,6 +257,7 @@ const mockRule = {
   actions: [],
   enabled: false,
   false_positives: [],
+  custom_highlighted_fields: [],
   max_signals: 100,
   tags: [],
   threat: [],

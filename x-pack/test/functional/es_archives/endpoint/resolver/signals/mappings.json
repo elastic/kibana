@@ -2407,6 +2407,9 @@
                 "created_by": {
                   "type": "keyword"
                 },
+                "custom_highlighted_fields": {
+                  "type": "keyword"
+                },
                 "description": {
                   "type": "keyword"
                 },

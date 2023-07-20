@@ -31,6 +31,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.rule.exceptions_list': true,
   'kibana.alert.rule.execution.uuid': true,
   'kibana.alert.rule.false_positives': true,
+  'kibana.alert.rule.custom_highlighted_fields': true,
   'kibana.alert.rule.from': true,
   'kibana.alert.rule.immutable': true,
   'kibana.alert.rule.interval': true,

@@ -227,6 +227,16 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <UseField
+              path="customHighlightedFields"
+              component={AddItem}
+              componentProps={{
+                addText: I18n.ADD_CUSTOM_HIGHLIGHTED_FIELD,
+                idAria: 'detectionEngineStepAboutRuleCustomHighlightedFields',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepAboutRuleCustomHighlightedFields',
+              }}
+            />
+            <UseField
               path="threat"
               component={AddMitreAttackThreat}
               componentProps={{

@@ -25,6 +25,7 @@ import {
   ANOMALY_SCORE_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  CUSTOM_HIGHLIGHTED_FIELDS_DETAILS,
   removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
   // MACHINE_LEARNING_JOB_STATUS,
@@ -57,6 +58,7 @@ import { RULE_CREATION } from '../../urls/navigation';
 describe('Detection rules, machine learning', () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
+  const expectedCustomHighlightedFields = (getMachineLearningRule().custom_highlighted_fields ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
   const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().threat ?? []);
   const expectedNumberOfRules = 1;
@@ -98,6 +100,7 @@ describe('Detection rules, machine learning', () => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+      getDetails(CUSTOM_HIGHLIGHTED_FIELDS_DETAILS).should('have.text', expectedCustomHighlightedFields);
       getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
         expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
       });

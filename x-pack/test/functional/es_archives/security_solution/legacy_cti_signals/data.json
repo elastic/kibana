@@ -117,6 +117,8 @@
           ],
           "created_at": "2021-08-04T04:14:51.576Z",
           "created_by": "elastic",
+          "custom_highlighted_fields": [
+          ],
           "description": "These should match a dummy indicator in filebeat.",
           "enabled": true,
           "exceptions_list": [
@@ -361,6 +363,8 @@
           ],
           "created_at": "2021-08-04T04:14:51.576Z",
           "created_by": "elastic",
+          "custom_highlighted_fields": [
+          ],
           "description": "These should match a dummy indicator in filebeat.",
           "enabled": true,
           "exceptions_list": [

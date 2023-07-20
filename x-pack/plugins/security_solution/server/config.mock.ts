@@ -20,6 +20,7 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportExportSize: 10000,
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
+    customHighlightedFields: [],
     packagerTaskInterval: '60s',
     packagerTaskPackagePolicyUpdateBatchSize: 10,
     prebuiltRulesPackageVersion: '',

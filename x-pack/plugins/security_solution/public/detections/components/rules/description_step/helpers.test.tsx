@@ -377,6 +377,29 @@ describe('helpers', () => {
     });
   });
 
+  describe('buildUnorderedListArrayDescription', () => {
+    test('returns empty array if "values" is empty array', () => {
+      const result: ListItems[] = buildUnorderedListArrayDescription(
+        'Test label',
+        'customHighlightedFields',
+        []
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    test('returns ListItem with corresponding number of valid values items', () => {
+      const result: ListItems[] = buildUnorderedListArrayDescription(
+        'Test label',
+        'customHighlightedFields',
+        ['', 'custom.field1', 'custom.field2']
+      );
+      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+
+      expect(result[0].title).toEqual('Test label');
+      expect(wrapper.find('[data-test-subj="unorderedListArrayDescriptionItem"]')).toHaveLength(2);
+    });
+  });
+
   describe('buildStringArrayDescription', () => {
     test('returns empty array if "values" is empty array', () => {
       const result: ListItems[] = buildStringArrayDescription('Test label', 'tags', []);

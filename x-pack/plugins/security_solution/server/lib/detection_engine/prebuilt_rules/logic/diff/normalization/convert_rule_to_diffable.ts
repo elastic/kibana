@@ -118,6 +118,7 @@ const extractDiffableCommonFields = (
     // About -> Advanced settings
     references: rule.references ?? [],
     false_positives: rule.false_positives ?? [],
+    custom_highlighted_fields: rule.custom_highlighted_fields ?? [],
     threat: rule.threat ?? [],
     note: rule.note ?? '',
     setup: rule.setup ?? '',

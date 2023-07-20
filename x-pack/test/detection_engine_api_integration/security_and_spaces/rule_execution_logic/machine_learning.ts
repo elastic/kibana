@@ -127,6 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_RULE_PARAMETERS]: {
             anomaly_threshold: 30,
             author: [],
+            custom_highlighted_fields: [],
             description: 'Test ML rule description',
             exceptions_list: [],
             false_positives: [],

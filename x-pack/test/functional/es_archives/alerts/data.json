@@ -683,6 +683,9 @@
               "falsePositives":[
                  
               ],
+              "customHighlightedFields":[
+                 
+              ],
               "from":"now-36000060s",
               "immutable":false,
               "license":"",
@@ -774,6 +777,9 @@
               "description":"disabled 7.16.1 query rule",
               "ruleId":"364e3fed-6328-416b-bb85-c08265088f41",
               "falsePositives":[
+                 
+              ],
+              "customHighlightedFields":[
                  
               ],
               "from":"now-36000060s",
@@ -960,6 +966,9 @@
               ],
               "description":"remove interns tags mock rule",
               "falsePositives":[
+                 
+              ],
+              "customHighlightedFields":[
                  
               ],
               "from":"now-36000060s",

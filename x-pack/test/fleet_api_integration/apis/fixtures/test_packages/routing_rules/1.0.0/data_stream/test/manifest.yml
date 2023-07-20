@@ -1,6 +1,0 @@
-title: Test Dataset
-dataset: routing_rules.test
-type: logs
-elasticsearch:
-  dynamic_dataset: true
-  dynamic_namespace: true

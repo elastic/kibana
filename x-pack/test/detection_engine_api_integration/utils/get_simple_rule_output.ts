@@ -21,6 +21,7 @@ export const getMockSharedResponseSchema = (
   description: 'Simple Rule Query',
   enabled,
   false_positives: [],
+  custom_highlighted_fields: [],
   from: 'now-6m',
   immutable: false,
   interval: '5m',

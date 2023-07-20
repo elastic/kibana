@@ -44,6 +44,7 @@ export const updateRules = async ({
       description: ruleUpdate.description,
       ruleId: existingRule.params.ruleId,
       falsePositives: ruleUpdate.false_positives ?? [],
+      customHighlightedFields: ruleUpdate.custom_highlighted_fields ?? [],
       from: ruleUpdate.from ?? 'now-6m',
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
