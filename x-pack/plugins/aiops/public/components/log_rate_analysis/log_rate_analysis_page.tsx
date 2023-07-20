@@ -7,9 +7,6 @@
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
 
-// @ts-expect-error
-import chi2test from '@stdlib/esm/stats/chi2test';
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
@@ -31,6 +28,9 @@ import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_r
 import { PageHeader } from '../page_header';
 
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
+
+import chi2test from './chi2test';
+
 interface Props {
   stickyHistogram?: boolean;
 }

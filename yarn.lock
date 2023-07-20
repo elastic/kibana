@@ -6896,10 +6896,6 @@
     "@types/node" ">=8.9.0"
     axios "^0.21.1"
 
-"@stdlib/esm@^0.0.3":
-  version "0.0.3"
-  resolved "https://codeload.github.com/stdlib-js/esm/tar.gz/e40d9dc228b49c18a94973ffdfdf4d64e1698d1b"
-
 "@storybook/addon-a11y@^6.5.16":
   version "6.5.16"
   resolved "https://registry.yarnpkg.com/@storybook/addon-a11y/-/addon-a11y-6.5.16.tgz#9288a6c1d111fa4ec501d213100ffff91757d3fc"
