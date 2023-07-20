@@ -41,17 +41,6 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      return response.customError({
-        statusCode: 400,
-        body: {
-          message: i18n.translate(
-            'xpack.remoteClusters.addRemoteCluster.unknownRemoteClusterErrorMessage',
-            {
-              defaultMessage: 'Unable to add cluster, no response returned from ES.',
-            }
-          ),
-        },
-      });
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { name } = request.body;
