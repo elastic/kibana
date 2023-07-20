@@ -528,7 +528,7 @@ endpoint_operations_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-    - privileges:
+      privileges:
         - read
         - write
         - manage
@@ -572,5 +572,5 @@ endpoint_operations_manager:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"

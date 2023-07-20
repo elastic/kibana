@@ -11,7 +11,7 @@ import * as path from 'path';
 import { cloneDeep } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 
-type ServerlessRoleName =
+export type ServerlessRoleName =
   | 't1_analyst'
   | 't2_analyst'
   | 't3_analyst'

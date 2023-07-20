@@ -9,19 +9,32 @@
 
 import { KbnClient } from '@kbn/test';
 import { Role } from '@kbn/security-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
+import { inspect } from 'util';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
 } from './kibana_roles';
 
-interface LoadedRoleAndUser {
+export interface LoadedRoleAndUser {
   role: string;
   username: string;
   password: string;
 }
 
 export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, Role>> {
-  constructor(private readonly kbnClient: KbnClient, private readonly roles: R) {}
+  protected readonly logPromiseError: (error: Error) => never;
+
+  constructor(
+    protected readonly kbnClient: KbnClient,
+    protected readonly logger: ToolingLog,
+    protected readonly roles: R
+  ) {
+    this.logPromiseError = (error) => {
+      this.logger.error(inspect(error, { depth: 5 }));
+      throw error;
+    };
+  }
 
   async load(name: keyof R): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
@@ -40,11 +53,13 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
   private async createRole(role: Role): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
-    await this.kbnClient.request({
-      method: 'PUT',
-      path: `/api/security/role/${name}?createOnly=true`,
-      body: roleDefinition,
-    });
+    await this.kbnClient
+      .request({
+        method: 'PUT',
+        path: `/api/security/role/${roleName}?createOnly=true`,
+        body: roleDefinition,
+      })
+      .catch(this.logPromiseError);
   }
 
   private async createUser(
@@ -52,22 +67,24 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     password: string,
     roles: string[] = []
   ): Promise<void> {
-    await this.kbnClient.request({
-      method: 'POST',
-      path: `/internal/security/users/${username}`,
-      body: {
-        username,
-        password,
-        roles,
-        full_name: username,
-        email: '',
-      },
-    });
+    await this.kbnClient
+      .request({
+        method: 'POST',
+        path: `/internal/security/users/${username}`,
+        body: {
+          username,
+          password,
+          roles,
+          full_name: username,
+          email: '',
+        },
+      })
+      .catch(this.logPromiseError);
   }
 }
 
 export class SecurityRoleAndUserLoader extends RoleAndUserLoader<ServerlessSecurityRoles> {
-  constructor(kbnClient: KbnClient) {
-    super(kbnClient, getServerlessSecurityKibanaRoleDefinitions());
+  constructor(kbnClient: KbnClient, logger: ToolingLog) {
+    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions());
   }
 }
