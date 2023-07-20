@@ -5,10 +5,29 @@
  * 2.0.
  */
 
+import { CRITICAL_VALUES_TABLE, SIGNIFICANCE_LEVELS } from './constants';
 import { Histogram } from './types';
 
 const criticalTableLookup = (chi2Statistic: number, df: number) => {
   if (df < 1) return 1;
+  if (!Number.isInteger(df)) throw Error('Degrees of freedom must be a valid integer');
+
+  // Get the row index
+  const rowIndex: number = df - 1;
+
+  // Get the column index
+  let minDiff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][0] - chi2Statistic);
+  let columnIndex: number = 0;
+  for (let j = 1; j < CRITICAL_VALUES_TABLE[rowIndex].length; j++) {
+    const diff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][j] - chi2Statistic);
+    if (diff < minDiff) {
+      minDiff = diff;
+      columnIndex = j;
+    }
+  }
+
+  const significanceLevel: number = SIGNIFICANCE_LEVELS[columnIndex];
+  return significanceLevel;
 };
 
 /**
@@ -45,4 +64,19 @@ export const computeChi2PValue = (
   });
 
   return criticalTableLookup(chiSquared, degreesOfFreedom);
+};
+
+/**
+ * formatSignificanceLevel
+ * @param significanceLevel
+ */
+export const formatSignificanceLevel = (significanceLevel: number) => {
+  if (typeof significanceLevel !== 'number' || isNaN(significanceLevel)) return '';
+  if (significanceLevel < 1e-6) {
+    return '< 0.000001';
+  } else if (significanceLevel < 0.01) {
+    return significanceLevel.toExponential(0);
+  } else {
+    return significanceLevel.toFixed(2);
+  }
 };
