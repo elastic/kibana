@@ -41,6 +41,13 @@ export const SYSTEM_PROMPT_PROMPT = i18n.translate(
   }
 );
 
+export const SYSTEM_PROMPT_PROMPT_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.settings.promptPlaceholder',
+  {
+    defaultMessage: 'Enter a System Prompt',
+  }
+);
+
 export const SYSTEM_PROMPT_DEFAULT_CONVERSATIONS = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.settings.defaultConversationsLabel',
   {
