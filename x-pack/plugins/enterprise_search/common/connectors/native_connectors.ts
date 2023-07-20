@@ -1652,14 +1652,19 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
-      fetch_users_by_site: {
-        default_value: false,
-        depends_on: [{ field: 'use_document_level_security', value: true }],
+      fetch_drive_item_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteLabel',
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsLabel',
           {
-            defaultMessage: 'Discover users by site membership',
+            defaultMessage: 'Fetch drive item permissions',
           }
         ),
         options: [],
@@ -1667,16 +1672,47 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteTooltip',
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsTooltip',
           {
             defaultMessage:
-              'When syncing only a small subset of sites, it can be more efficient to only fetch users who have access to those sites. This becomes increasingly inefficient the more sites (and the more users) concerned.',
+              'Enable this option to fetch drive item specific permissions. This setting can increase sync time.',
           }
         ),
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
-        value: false,
+        value: true,
+      },
+      fetch_unique_page_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique page permissions',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique page permissions. This setting can increase sync time. If this setting is disabled a page will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
       },
     },
     features: {

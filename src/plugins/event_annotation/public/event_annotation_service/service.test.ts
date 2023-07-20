@@ -10,15 +10,19 @@ import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
 import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { EventAnnotationConfig, EventAnnotationGroupAttributes } from '../../common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';
-import { EventAnnotationServiceType } from './types';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import { EventAnnotationGroupSavedObjectAttributes } from '../../common';
 
-type AnnotationGroupSavedObject = SimpleSavedObject<EventAnnotationGroupAttributes>;
+// TODO - I think applying this saved object type is no longer correct - since we migrated to content management,
+// there is no longer a single interchange format. Instead, the tests should use the operation-specific
+// CM types such as EventAnnotationGroupUpdateOut and EventAnnotationGroupCreateOut.
+type AnnotationGroupSavedObject = SimpleSavedObject<EventAnnotationGroupSavedObjectAttributes>;
 
 const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = {
   nonExistingGroup: {
-    attributes: {} as EventAnnotationGroupAttributes,
+    attributes: {} as EventAnnotationGroupSavedObjectAttributes,
     references: [],
     id: 'nonExistingGroup',
     error: {
@@ -69,7 +73,7 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
       dataViewSpec: {
         id: 'my-id',
       },
-    } as Partial<EventAnnotationGroupAttributes>,
+    } as Partial<EventAnnotationGroupSavedObjectAttributes>,
     id: 'multiAnnotations',
     type: 'event-annotation-group',
     references: [],
@@ -625,7 +629,7 @@ describe('Event Annotation Service', () => {
           annotations: [],
           dataViewSpec: undefined,
           ignoreGlobalFilters: false,
-        } as EventAnnotationGroupAttributes,
+        } as EventAnnotationGroupSavedObjectAttributes,
         options: {
           references: [
             {

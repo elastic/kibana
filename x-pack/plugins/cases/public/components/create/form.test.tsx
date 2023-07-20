@@ -11,7 +11,7 @@ import { act, render, within, fireEvent } from '@testing-library/react';
 import { waitFor } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
