@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { IdentifierType } from '../../../common/risk_engine';
+import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import type { IIndexPatternString } from './utils/create_datastream';
 
 export const ilmPolicy = {
@@ -23,66 +25,104 @@ export const ilmPolicy = {
   },
 };
 
+const commonRiskFields: FieldMap = {
+  identifier_field: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  identifier_value: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  calculated_level: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  calculated_score: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  calculated_score_norm: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  category_1_score: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  risk_inputs: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'risk_inputs.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'risk_inputs.index': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'risk_inputs.risk_category': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'risk_inputs.risk_description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'risk_inputs.risk_score': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'risk_inputs.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  notes: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+};
+
+const buildIdentityRiskFields = (identifierType: IdentifierType): FieldMap =>
+  Object.keys(commonRiskFields).reduce((fieldMap, key) => {
+    const identifierKey = `${identifierType}.risk.${key}`;
+    fieldMap[identifierKey] = commonRiskFields[key];
+    return fieldMap;
+  }, {} as FieldMap);
+
 export const riskFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
     array: false,
     required: false,
   },
-  identifierField: {
-    type: 'keyword',
+  'host.risk': {
+    type: 'object',
     array: false,
     required: false,
   },
-  identifierValue: {
-    type: 'keyword',
+  ...buildIdentityRiskFields(RiskScoreEntity.host),
+  'user.risk': {
+    type: 'object',
     array: false,
     required: false,
   },
-  level: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  totalScore: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
-  totalScoreNormalized: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
-  alertsScore: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
-  otherScore: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
-  riskiestInputs: {
-    type: 'nested',
-    required: false,
-  },
-  'riskiestInputs.id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'riskiestInputs.index': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'riskiestInputs.riskScore': {
-    type: 'float',
-    array: false,
-    required: false,
-  },
+  ...buildIdentityRiskFields(RiskScoreEntity.user),
 } as const;
 
 export const ilmPolicyName = '.risk-score-ilm-policy';
