@@ -7,6 +7,8 @@
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
 
+import chi2test from '@stdlib/stats-chi2test';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
@@ -35,6 +37,14 @@ interface Props {
 export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
+
+  console.log(
+    'chi2test',
+    chi2test([
+      [20, 30],
+      [30, 20],
+    ])
+  );
 
   const { currentSelectedSignificantTerm, currentSelectedGroup } =
     useLogRateAnalysisResultsTableRowContext();
