@@ -50,7 +50,6 @@ export default defineCypressConfig({
     async setupNodeEvents(on, config) {
       const esArchiverInstance = esArchiver(on, config);
 
-      await cloudPlugin(on, config);
       let processes: Record<string, ChildProcess> = {};
 
       on('before:spec', (spec) => {
@@ -108,7 +107,7 @@ export default defineCypressConfig({
         });
       });
 
-      return config;
+      return cloudPlugin(on, config);
     },
   },
 });
