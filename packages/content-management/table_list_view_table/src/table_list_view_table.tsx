@@ -576,7 +576,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'inspect',
+          icon: 'iInCircle',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,
