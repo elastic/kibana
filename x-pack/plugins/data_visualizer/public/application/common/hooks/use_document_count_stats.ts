@@ -20,6 +20,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { each, get } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import useObservable from 'react-use/lib/useObservable';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { displayError } from '../util/display_error';
 
@@ -174,7 +175,7 @@ export interface DocumentStatsSearchStrategyParams {
 export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
   lastRefresh: number,
-  randomSampler?: RandomSampler
+  randomSampler: RandomSampler
 ): DocumentStats {
   const {
     data,
@@ -189,11 +190,17 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   });
 
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
+  const samplingProbability = useObservable(
+    randomSampler.getProbability$(),
+    randomSampler.getProbability()
+  );
 
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
 
-    const cacheKey = stringHash(`${JSON.stringify(searchParams)}`);
+    const cacheKey = stringHash(
+      `${JSON.stringify(searchParams)}-${randomSampler.getProbability()}`
+    );
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
@@ -263,14 +270,15 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data?.search, documentStatsCache, searchParams, toasts, randomSampler]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.search, documentStatsCache, searchParams, toasts, samplingProbability]);
 
   useEffect(
     function getDocumentCountData() {
       fetchDocumentCountData();
       return () => abortCtrl.current.abort();
     },
-    [fetchDocumentCountData, lastRefresh]
+    [fetchDocumentCountData, lastRefresh, samplingProbability]
   );
 
   // Clear the document count stats cache when the outer page (date picker/search bar) triggers a refresh.

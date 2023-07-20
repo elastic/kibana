@@ -37,6 +37,7 @@ interface DataComparisonViewProps {
   runAnalysisDisabled?: boolean;
   onReset: () => void;
   lastRefresh: number;
+  forceRefresh: () => void;
   randomSampler: RandomSampler;
 }
 // Data drift view
@@ -49,6 +50,7 @@ export const DataComparisonView = ({
   onReset,
   isBrushCleared,
   lastRefresh,
+  forceRefresh,
   randomSampler,
 }: DataComparisonViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
@@ -66,7 +68,7 @@ export const DataComparisonView = ({
     | undefined
   >();
 
-  const updateFieldsAndTime = useCallback(() => {
+  const onRefresh = useCallback(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
     const mergedFields: DataComparisonField[] = [];
     if (dataView) {
@@ -105,7 +107,11 @@ export const DataComparisonView = ({
           }
         : {}),
     });
-  }, [dataView, windowParameters]);
+    if (forceRefresh) {
+      forceRefresh();
+    }
+  }, [dataView, windowParameters, forceRefresh]);
+
   const { result, cancelRequest } = useFetchDataComparisonResult({
     ...fetchInfo,
     lastRefresh,
@@ -114,11 +120,6 @@ export const DataComparisonView = ({
     searchQueryLanguage,
     searchQuery,
   });
-
-  const onCancel = () => {
-    cancelRequest();
-    onReset();
-  };
 
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
@@ -183,8 +184,8 @@ export const DataComparisonView = ({
         progress={result.loaded}
         progressMessage={result.progressMessage ?? ''}
         isRunning={result.loaded > 0 && result.loaded < 1}
-        onRefresh={updateFieldsAndTime}
-        onCancel={onCancel}
+        onRefresh={onRefresh}
+        onCancel={cancelRequest}
         shouldRerunAnalysis={shouldRerunAnalysis}
         runAnalysisDisabled={!dataView || !windowParameters}
       >

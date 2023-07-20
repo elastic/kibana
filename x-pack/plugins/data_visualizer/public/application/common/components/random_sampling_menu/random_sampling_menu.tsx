@@ -21,6 +21,7 @@ import {
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import {
+  MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
   RANDOM_SAMPLER_SELECT_OPTIONS,
   RandomSamplerOption,
@@ -49,12 +50,26 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
   );
 
   const randomSamplerPreference = useObservable(randomSampler.getMode$(), randomSampler.getMode());
+
   const setRandomSamplerPreference = useCallback(
-    (mode: RandomSamplerOption) => {
-      randomSampler.setMode(mode);
+    (nextPref: RandomSamplerOption) => {
+      if (nextPref === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
+        // By default, when switching to manual, restore previously chosen probability
+        // else, default to 0.001%
+        const savedRandomSamplerProbability = randomSampler.getProbability();
+        randomSampler.setProbability(
+          savedRandomSamplerProbability &&
+            savedRandomSamplerProbability > 0 &&
+            savedRandomSamplerProbability <= 0.5
+            ? savedRandomSamplerProbability
+            : MIN_SAMPLER_PROBABILITY
+        );
+      }
+      randomSampler.setMode(nextPref);
       reload();
     },
-    [randomSampler, reload]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setSamplingProbability, randomSampler]
   );
 
   const { calloutInfoMessage, buttonText } = useMemo(() => {

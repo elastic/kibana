@@ -512,9 +512,12 @@ export const fetchInParallelChunks = async <
     chunk(fields, 30).map((chunkedFields: DataComparisonField[]) => asyncFetchFn(chunkedFields))
   );
 
-  const mergedResults = results.filter(isFulfilled).map((r) => {
-    return unwrap(r?.value.aggregations);
-  });
+  const mergedResults = results
+    .filter(isFulfilled)
+    .filter((r) => r.value)
+    .map((r) => {
+      return unwrap(r?.value.aggregations);
+    });
 
   if (mergedResults.length === 0) {
     const error = results.find(isRejected);
@@ -533,6 +536,13 @@ export const fetchInParallelChunks = async <
     {}
   );
   return baselineResponseAggs;
+};
+
+const initialState = {
+  data: undefined,
+  status: FETCH_STATUS.NOT_INITIATED,
+  error: undefined,
+  errorBody: undefined,
 };
 export const useFetchDataComparisonResult = (
   {
@@ -555,12 +565,7 @@ export const useFetchDataComparisonResult = (
   } = { lastRefresh: 0 }
 ) => {
   const dataSearch = useDataSearch();
-  const [result, setResult] = useState<Result<Feature[]>>({
-    data: undefined,
-    status: FETCH_STATUS.NOT_INITIATED,
-    error: undefined,
-    errorBody: undefined,
-  });
+  const [result, setResult] = useState<Result<Feature[]>>(initialState);
   const [loaded, setLoaded] = useState<number>(0);
   const [progressMessage, setProgressMessage] = useState<string | undefined>();
   const abortController = useRef(new AbortController());
@@ -568,6 +573,9 @@ export const useFetchDataComparisonResult = (
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
     abortController.current = new AbortController();
+    setResult(initialState);
+    setProgressMessage(undefined);
+    setLoaded(0);
   }, []);
 
   useEffect(

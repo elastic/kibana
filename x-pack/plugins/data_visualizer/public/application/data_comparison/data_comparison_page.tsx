@@ -383,6 +383,7 @@ export const DataComparisonPage: FC = () => {
                   searchQueryLanguage={searchQueryLanguage}
                   lastRefresh={lastRefresh}
                   randomSampler={randomSampler}
+                  forceRefresh={forceRefresh}
                 />
               )}
             </EuiPanel>
