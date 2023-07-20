@@ -18,6 +18,7 @@ import type { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import type { SavedSearchEmbeddable } from './saved_search_embeddable';
 import type { DiscoverServices } from '../build_services';
+import { inject, extract } from '../../common/embeddable';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -35,6 +36,8 @@ export class SearchEmbeddableFactory
     type: 'search',
     getIconForSavedObject: () => 'discoverApp',
   };
+  public readonly inject = inject;
+  public readonly extract = extract;
 
   constructor(
     private getStartServices: () => Promise<StartServices>,
