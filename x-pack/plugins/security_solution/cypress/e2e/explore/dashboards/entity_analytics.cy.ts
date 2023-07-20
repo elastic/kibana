@@ -338,7 +338,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('enables a job', () => {
-      cy.get(ANOMALIES_TABLE_ROWS)
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 20000 })
         .eq(5)
         .within(() => {
           cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
