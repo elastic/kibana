@@ -23,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../hooks/use_kibana';
 import { AssistantAvatar } from '../assistant_avatar';
 import { InsightMissingCredentials } from './insight_missing_credentials';
 import { InsightError } from './insight_error';

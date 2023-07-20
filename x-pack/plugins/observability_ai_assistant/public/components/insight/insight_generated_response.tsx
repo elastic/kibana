@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Feedback, FeedbackButtons } from '../feedback_buttons';
-import { useStreamingText } from './use_streaming_words';
+import { useStreamingText } from '../../hooks/use_streaming_words';
 interface InsightGeneratedResponseProps {
   answer: string;
   onClickFeedback: (feedback: Feedback) => void;
