@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type {
-  ConfigurationPatchRequest,
-  ConfigurationRequest,
-  ActionConnector,
-  ActionTypeConnector,
-} from '../../../../common/api';
+import type { ActionConnector, ActionTypeConnector } from '../../../../common/types/domain';
 
 import type { ApiProps } from '../../types';
 import type { CaseConfigure } from '../types';
 import { caseConfigurationCamelCaseResponseMock } from '../mock';
 import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
+import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../../common/types/api';
 
 export const getSupportedActionConnectors = async ({
   signal,

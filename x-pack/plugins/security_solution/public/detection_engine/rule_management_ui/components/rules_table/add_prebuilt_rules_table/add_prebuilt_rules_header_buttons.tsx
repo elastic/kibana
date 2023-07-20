@@ -7,26 +7,34 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { useUserData } from '../../../../../detections/components/user_info';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules },
+    state: { rules, selectedRules, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
+  const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
+  const canUserEditRules = canUserCRUD && !isUserDataLoading;
 
   const isRulesAvailableForInstall = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleInstalling = loadingRules.length > 0;
+  const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayInstallSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={installSelectedRules} disabled={isRuleInstalling}>
+          <EuiButton
+            onClick={installSelectedRules}
+            disabled={!canUserEditRules || isRequestInProgress}
+            data-test-subj="installSelectedRulesButton"
+          >
             {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
             {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
           </EuiButton>
@@ -38,7 +46,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={!isRulesAvailableForInstall || isRuleInstalling}
+          disabled={!canUserEditRules || !isRulesAvailableForInstall || isRequestInProgress}
         >
           {i18n.INSTALL_ALL}
           {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}

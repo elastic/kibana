@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { GeoJobFlyout } from './flyout';
 import { createFlyout } from '../common/create_flyout';
@@ -17,7 +18,8 @@ export async function showMapVisToADJobFlyout(
   embeddable: MapEmbeddable,
   coreStart: CoreStart,
   share: SharePluginStart,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  dashboardService: DashboardStart
 ): Promise<void> {
-  return createFlyout(GeoJobFlyout, embeddable, coreStart, share, data);
+  return createFlyout(GeoJobFlyout, embeddable, coreStart, share, data, dashboardService);
 }

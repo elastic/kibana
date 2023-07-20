@@ -12,15 +12,15 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import type { ActionConnector, ConfigurationAttributes } from '../../../common/types/domain';
+import { UserActionTypes } from '../../../common/types/domain';
 import type {
-  ActionConnector,
   Case,
   ExternalServiceResponse,
-  ConfigurationAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
-import { CaseRt, CaseStatuses, ActionTypes, OWNER_FIELD, CommentType } from '../../../common/api';
+import { CaseRt, CaseStatuses, OWNER_FIELD, CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
@@ -35,7 +35,6 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import type { ICaseResponse } from '../typedoc_interfaces';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
@@ -253,7 +252,7 @@ export const push = async (
 
     if (shouldMarkAsClosed) {
       await userActionService.creator.createUserAction({
-        type: ActionTypes.status,
+        type: UserActionTypes.status,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -267,7 +266,7 @@ export const push = async (
     }
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.pushed,
+      type: UserActionTypes.pushed,
       payload: { externalService },
       user,
       caseId,
@@ -304,7 +303,7 @@ export const push = async (
 };
 
 const getProfiles = async (
-  caseInfo: ICaseResponse,
+  caseInfo: Case,
   securityStartPlugin: SecurityPluginStart
 ): Promise<Map<string, UserProfile> | undefined> => {
   const uids = new Set([

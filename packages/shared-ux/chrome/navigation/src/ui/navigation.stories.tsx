@@ -28,7 +28,7 @@ import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
-import type { ChromeNavigationViewModel, NavigationServices } from '../../types';
+import type { NavigationServices } from '../../types';
 import { Navigation } from './components';
 import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
 import { getPresets } from './nav_tree_presets';
@@ -171,7 +171,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
   ],
 };
 
-export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const SimpleObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),
@@ -286,7 +286,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
   },
 };
 
-export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const ComplexObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),
@@ -308,7 +308,7 @@ export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & Naviga
   );
 };
 
-export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),
@@ -363,8 +363,20 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
           <Navigation.Group preset="ml" />
 
           <Navigation.Footer>
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
+            <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+            <Navigation.Group
+              id="project_settings_project_nav"
+              title="Project settings"
+              breadcrumbStatus="hidden"
+              icon="gear"
+            >
+              <Navigation.Group id="settings">
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation.Group>
           </Navigation.Footer>
         </Navigation>
       </NavigationProvider>
@@ -372,7 +384,7 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
   );
 };
 
-export const MinimalUI = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const MinimalUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),
@@ -434,7 +446,7 @@ export default {
   component: WithUIComponents,
 } as ComponentMeta<typeof WithUIComponents>;
 
-export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const CreativeUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
     navLinks$: of([...navLinksMock, ...deepLinks]),

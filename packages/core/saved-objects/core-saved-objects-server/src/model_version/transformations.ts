@@ -81,6 +81,15 @@ export interface SavedObjectModelBidirectionalTransformation<
 }
 
 /**
+ * Return type for the {@link SavedObjectModelTransformationFn | transformation functions}
+ *
+ * @public
+ */
+export interface SavedObjectModelDataBackfillResult<DocAttrs = unknown> {
+  attributes: Partial<DocAttrs>;
+}
+
+/**
  * A data backfill function associated with a {@link SavedObjectsModelDataBackfillChange | data backfill} change.
  *
  * @remark Such transformation functions should only be used to backfill newly introduced fields.
@@ -89,6 +98,19 @@ export interface SavedObjectModelBidirectionalTransformation<
  * @public
  */
 export type SavedObjectModelDataBackfillFn<
+  InputAttributes = unknown,
+  OutputAttributes = unknown
+> = (
+  document: SavedObjectModelTransformationDoc<InputAttributes>,
+  context: SavedObjectModelTransformationContext
+) => SavedObjectModelDataBackfillResult<OutputAttributes>;
+
+/**
+ * A data transformation function associated with a {@link SavedObjectsModelUnsafeTransformChange | unsafe transform} change.
+ *
+ * @public
+ */
+export type SavedObjectModelUnsafeTransformFn<
   InputAttributes = unknown,
   OutputAttributes = unknown
 > = SavedObjectModelTransformationFn<InputAttributes, OutputAttributes>;

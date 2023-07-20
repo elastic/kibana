@@ -10,8 +10,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord } from '../types';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
@@ -31,10 +32,11 @@ export function useEsDocSearch({
 }: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
-  const { data, uiSettings } = useDiscoverServices();
+  const { data, uiSettings, analytics } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const requestData = useCallback(async () => {
+    const singleDocFetchingStartTime = window.performance.now();
     try {
       const result = await lastValueFrom(
         data.search.search({
@@ -63,7 +65,15 @@ export function useEsDocSearch({
         setStatus(ElasticRequestState.Error);
       }
     }
-  }, [id, index, dataView, data.search, useNewFieldsApi, requestSource]);
+
+    if (analytics) {
+      const singleDocFetchingDuration = window.performance.now() - singleDocFetchingStartTime;
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'discoverSingleDocFetch',
+        duration: singleDocFetchingDuration,
+      });
+    }
+  }, [analytics, data.search, dataView, id, index, useNewFieldsApi, requestSource]);
 
   useEffect(() => {
     if (textBasedHits) {

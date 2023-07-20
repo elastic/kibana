@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { CertResult, SyntheticsParamSO } from '../../../../../common/runtime_types';
+import { CertResult, SyntheticsParams } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
 import { getCertsListAction } from './actions';
 
@@ -15,7 +15,7 @@ export interface CertsListState {
   data?: CertResult;
   error: IHttpSerializedFetchError | null;
   isSaving?: boolean;
-  savedData?: SyntheticsParamSO;
+  savedData?: SyntheticsParams;
 }
 
 const initialState: CertsListState = {

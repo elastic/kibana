@@ -6,7 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateSLOInput, TimeWindow } from '@kbn/slo-schema';
+import {
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  BudgetingMethod,
+  HistogramIndicator,
+  IndicatorType,
+  KQLCustomIndicator,
+  MetricCustomIndicator,
+  TimeWindow,
+} from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -14,10 +23,12 @@ import {
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
+  INDICATOR_HISTOGRAM,
 } from '../../utils/slo/labels';
+import { CreateSLOForm } from './types';
 
 export const SLI_OPTIONS: Array<{
-  value: CreateSLOInput['indicator']['type'];
+  value: IndicatorType;
   text: string;
 }> = [
   {
@@ -27,6 +38,10 @@ export const SLI_OPTIONS: Array<{
   {
     value: 'sli.metric.custom',
     text: INDICATOR_CUSTOM_METRIC,
+  },
+  {
+    value: 'sli.histogram.custom',
+    text: INDICATOR_HISTOGRAM,
   },
   {
     value: 'sli.apm.transactionDuration',
@@ -87,19 +102,74 @@ export const ROLLING_TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   }),
 }));
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
-  name: '',
-  description: '',
-  indicator: {
-    type: 'sli.kql.custom',
-    params: {
-      index: '',
-      filter: '',
-      good: '',
-      total: '',
-      timestampField: '',
+export const CUSTOM_KQL_DEFAULT_VALUES: KQLCustomIndicator = {
+  type: 'sli.kql.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: '',
+    total: '',
+    timestampField: '',
+  },
+};
+
+export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
+  type: 'sli.metric.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    total: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    timestampField: '',
+  },
+};
+
+export const HISTOGRAM_DEFAULT_VALUES: HistogramIndicator = {
+  type: 'sli.histogram.custom' as const,
+  params: {
+    index: '',
+    timestampField: '',
+    filter: '',
+    good: {
+      field: '',
+      aggregation: 'value_count' as const,
+    },
+    total: {
+      field: '',
+      aggregation: 'value_count' as const,
     },
   },
+};
+
+export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicator = {
+  type: 'sli.apm.transactionDuration' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    threshold: 250,
+    filter: '',
+    index: '',
+  },
+};
+
+export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator = {
+  type: 'sli.apm.transactionErrorRate' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    filter: '',
+    index: '',
+  },
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
+  name: '',
+  description: '',
+  indicator: CUSTOM_KQL_DEFAULT_VALUES,
   timeWindow: {
     duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',
@@ -111,19 +181,10 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   },
 };
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
+export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   name: '',
   description: '',
-  indicator: {
-    type: 'sli.metric.custom',
-    params: {
-      index: '',
-      filter: '',
-      good: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
-      total: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
-      timestampField: '',
-    },
-  },
+  indicator: CUSTOM_METRIC_DEFAULT_VALUES,
   timeWindow: {
     duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',

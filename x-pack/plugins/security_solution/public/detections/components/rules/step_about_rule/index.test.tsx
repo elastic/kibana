@@ -93,9 +93,13 @@ describe('StepAboutRuleComponent', () => {
 
     return (
       <StepAboutRule
-        defaultValues={stepAboutDefaultValue}
-        defineRuleData={defineStepDefault}
+        ruleType={defineStepDefault.ruleType}
+        machineLearningJobId={defineStepDefault.machineLearningJobId}
+        index={defineStepDefault.index}
+        dataViewId={defineStepDefault.dataViewId}
+        timestampOverride={stepAboutDefaultValue.timestampOverride}
         isLoading={false}
+        isActive={true}
         form={aboutStepForm}
       />
     );

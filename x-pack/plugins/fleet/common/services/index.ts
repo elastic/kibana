@@ -63,4 +63,18 @@ export {
 export { getAllowedOutputTypeForPolicy } from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
-export { policyHasFleetServer, policyHasAPMIntegration } from './agent_policies_helpers';
+export {
+  policyHasFleetServer,
+  policyHasAPMIntegration,
+  policyHasSyntheticsIntegration,
+} from './agent_policies_helpers';
+
+export {
+  generateNewAgentPolicyWithDefaults,
+  agentPolicyWithoutPaidFeatures,
+} from './generate_new_agent_policy';
+
+export {
+  isAgentPolicyValidForLicense,
+  unsetAgentPolicyAccordingToLicenseLevel,
+} from './agent_policy_config';

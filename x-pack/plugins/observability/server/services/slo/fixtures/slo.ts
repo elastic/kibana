@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
+import { sloSchema, CreateSLOParams, HistogramIndicator } from '@kbn/slo-schema';
 
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import {
@@ -71,7 +71,7 @@ export const createKQLCustomIndicator = (
 
 export const createMetricCustomIndicator = (
   params: Partial<MetricCustomIndicator['params']> = {}
-): Indicator => ({
+): MetricCustomIndicator => ({
   type: 'sli.metric.custom',
   params: {
     index: 'my-index*',
@@ -86,6 +86,30 @@ export const createMetricCustomIndicator = (
     total: {
       metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
       equation: 'A',
+    },
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createHistogramIndicator = (
+  params: Partial<HistogramIndicator['params']> = {}
+): HistogramIndicator => ({
+  type: 'sli.histogram.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      field: 'latency',
+      aggregation: 'range',
+      from: 0,
+      to: 100,
+      filter: '',
+    },
+    total: {
+      field: 'latency',
+      aggregation: 'value_count',
+      filter: '',
     },
     timestampField: 'log_timestamp',
     ...params,

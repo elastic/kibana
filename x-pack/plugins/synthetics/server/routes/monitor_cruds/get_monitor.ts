@@ -6,22 +6,22 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
 import { mapSavedObjectToMonitor } from './helper';
+import { getSyntheticsMonitor } from '../../legacy_uptime/lib/requests/get_monitor';
 
-export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
   validate: {
@@ -44,7 +44,10 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
 
       if (!decrypted) {
         return mapSavedObjectToMonitor(
-          await savedObjectsClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId)
+          await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+            syntheticsMonitorType,
+            monitorId
+          )
         );
       } else {
         // only user with write permissions can decrypt the monitor
@@ -56,7 +59,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
 
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
 
-        return libs.requests.getSyntheticsMonitor({
+        return getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
           savedObjectsClient,
@@ -123,9 +126,9 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   },
 });
 
-function getOverviewConfigsPerLocation(
-  attributes: EncryptedSyntheticsMonitor,
-  queriedLocations: string | string[] | undefined
+export function getOverviewConfigsPerLocation(
+  attributes: EncryptedSyntheticsMonitorAttributes,
+  queriedLocations?: string | string[]
 ) {
   const id = attributes[ConfigKey.MONITOR_QUERY_ID];
   const configId = attributes[ConfigKey.CONFIG_ID];
@@ -149,6 +152,7 @@ function getOverviewConfigsPerLocation(
     configId,
     location,
     name: attributes[ConfigKey.NAME],
+    schedule: attributes[ConfigKey.SCHEDULE].number,
     tags: attributes[ConfigKey.TAGS],
     isEnabled: attributes[ConfigKey.ENABLED],
     type: attributes[ConfigKey.MONITOR_TYPE],
