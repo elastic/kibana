@@ -198,7 +198,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             <EuiButton
               {...reactRouterNavigate(this.props.history, '/create')}
               fill
-              iconType="plusInCircleFilled"
+              iconType="plusInCircle"
               data-test-subj="apiKeysCreatePromptButton"
               href={'/'}
             >
