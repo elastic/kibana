@@ -13,9 +13,9 @@ export const journey = new Journey({
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
-  .step('Go to Transforms', async ({ page, kbnUrl }) => {
+  .step('Go to Transforms', async ({ page, kbnUrl, auth }) => {
     await page.goto(kbnUrl.get(`app/management/data/transform`));
-    await waitForChrome(page);
+    await waitForChrome(page, { isServerless: auth.isServerless() });
     await page.waitForSelector(subj('transformCreateFirstButton'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
