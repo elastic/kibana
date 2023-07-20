@@ -22,6 +22,8 @@ interface FilterPopoverProps {
   onSelectedOptionsChanged: (value: string[]) => void;
   options: string[];
   optionsEmptyLabel?: string;
+  optionsMaxLEngth?: number;
+  optionsMaxLengthLabel?: string;
   selectedOptions: string[];
 }
 
@@ -56,6 +58,8 @@ export const FilterPopoverComponent = ({
   options,
   optionsEmptyLabel,
   selectedOptions,
+  optionsMaxLEngth,
+  optionsMaxLengthLabel,
 }: FilterPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -64,6 +68,8 @@ export const FilterPopoverComponent = ({
     (option) => onSelectedOptionsChanged(toggleSelectedGroup(option, selectedOptions)),
     [selectedOptions, onSelectedOptionsChanged]
   );
+
+  console.log('filter popover', selectedOptions.length);
 
   return (
     <EuiPopover
@@ -87,10 +93,20 @@ export const FilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
+    {optionsMaxLEngth && optionsMaxLengthLabel && selectedOptions.length >= optionsMaxLEngth && (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={true}>
+            <EuiPanel color='warning'>
+              <EuiText color='warning'>{optionsMaxLengthLabel}</EuiText>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <ScrollableDiv>
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
+            disabled={selectedOptions.length >= 5 && !selectedOptions.includes(option)}
             data-test-subj={`options-filter-popover-item-${option}`}
             key={`${index}-${option}`}
             onClick={toggleSelectedGroupCb.bind(null, option)}

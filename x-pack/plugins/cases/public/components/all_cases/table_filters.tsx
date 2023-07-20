@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
+import {  MAX_TAGS_FILTER_LENGTH } from '../../../common/constants';
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import type { FilterOptions } from '../../containers/types';
@@ -227,6 +228,10 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedTags}
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
+            // optionsMaxLEngth={MAX_TAGS_FILTER_LENGTH}
+            // optionsMaxLengthLabel={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tag')}
+            optionsMaxLEngth={5}
+            optionsMaxLengthLabel={i18n.MAX_SELECTED_FILTER(5, 'tag')}
           />
           <FilterPopover
             buttonLabel={i18n.CATEGORIES}
