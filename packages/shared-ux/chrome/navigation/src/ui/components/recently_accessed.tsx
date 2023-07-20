@@ -18,6 +18,10 @@ import { navigationStyles as styles } from '../../styles';
 import { getI18nStrings } from '../i18n_strings';
 
 export interface Props {
+  /**
+   * Optional observable for recently accessed items. If not provided, the
+   * recently items from the Chrome service will be used.
+   */
   recentlyAccessed$?: Observable<RecentItem[]>;
   /**
    * If true, the recently accessed list will be collapsed by default.
