@@ -7,9 +7,12 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
+import { subj } from '@kbn/test-subj-selector';
 
-export async function waitForChrome(page: Page) {
-  return page.waitForSelector('.headerGlobalNav', { state: 'attached' });
+export async function waitForChrome(page: Page, { isServerless = true }) {
+  return page.waitForSelector(isServerless ? subj('kibanaProjectHeader') : '.headerGlobalNav', {
+    state: 'attached',
+  });
 }
 
 export async function waitForVisualizations(page: Page, log: ToolingLog, visCount: number) {

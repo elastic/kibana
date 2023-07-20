@@ -44,5 +44,5 @@ export const journey = new Journey({
   await page.type(subj('loginPassword'), auth.getPassword(), { delay: inputDelays.TYPING });
   await page.click(subj('loginSubmit'), { delay: inputDelays.MOUSE_CLICK });
 
-  await waitForChrome(page);
+  await waitForChrome(page, { isServerless: auth.isServerless() });
 });

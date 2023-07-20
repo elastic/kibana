@@ -6,6 +6,7 @@
  */
 
 import { Journey } from '@kbn/journeys';
+import { subj } from '@kbn/test-subj-selector';
 import { v4 as uuidv4 } from 'uuid';
 
 export const journey = new Journey({
@@ -38,9 +39,13 @@ export const journey = new Journey({
       delay: inputDelays.TYPING,
     });
     await page.click('[data-test-subj="confirmSaveSavedObjectButton"]');
-    await page.locator('[data-test-subj="saveDashboardSuccess"]');
+    await page.waitForSelector('[data-test-subj="saveDashboardSuccess"]');
   })
-  .step('Return to dashboard list', async ({ page }) => {
-    await page.click('[data-test-subj="breadcrumb dashboardListingBreadcrumb first"]');
+  .step('Return to dashboard list', async ({ page, auth }) => {
+    if (auth.isServerless()) {
+      await page.click(subj('nav-item-search_project_nav.explore.dashboards'));
+    } else {
+      await page.click('[data-test-subj="breadcrumb dashboardListingBreadcrumb first"]');
+    }
     await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
   });
