@@ -19,7 +19,7 @@ import { formatSecrets } from '../../../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   PrivateLocation,
   ServiceLocationErrors,
@@ -44,13 +44,14 @@ export const createNewSavedObjectMonitorBulk = async ({
     }),
   }));
 
-  const result = await soClient.bulkCreate<EncryptedSyntheticsMonitor>(newMonitors);
+  const result = await soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(newMonitors);
   return result.saved_objects;
 };
 
-type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitor>;
+type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
-type CreatedMonitors = SavedObjectsBulkResponse<EncryptedSyntheticsMonitor>['saved_objects'];
+type CreatedMonitors =
+  SavedObjectsBulkResponse<EncryptedSyntheticsMonitorAttributes>['saved_objects'];
 
 export const syncNewMonitorBulk = async ({
   routeContext,
@@ -169,7 +170,7 @@ const rollBackNewMonitorBulk = async (
 
 const sendNewMonitorTelemetry = (
   server: SyntheticsServerSetup,
-  monitors: Array<SavedObject<EncryptedSyntheticsMonitor>>,
+  monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
   errors?: ServiceLocationErrors | null
 ) => {
   for (const monitor of monitors) {

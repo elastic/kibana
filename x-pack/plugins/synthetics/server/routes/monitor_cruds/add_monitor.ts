@@ -25,7 +25,7 @@ import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   PrivateLocation,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -120,7 +120,7 @@ export const createNewSavedObjectMonitor = async ({
   savedObjectsClient: SavedObjectsClientContract;
   normalizedMonitor: SyntheticsMonitor;
 }) => {
-  return await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+  return await savedObjectsClient.create<EncryptedSyntheticsMonitorAttributes>(
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
@@ -176,7 +176,7 @@ export const syncNewMonitor = async ({
   const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
 
-  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
   const monitorWithNamespace = hydrateMonitorFields({
     normalizedMonitor,
     routeContext,
@@ -249,7 +249,7 @@ export const deleteMonitorIfCreated = async ({
 }) => {
   const { server, savedObjectsClient } = routeContext;
   try {
-    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
       syntheticsMonitorType,
       newMonitorId
     );
