@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { TASK_TYPE_PREFIX } from './usage_reporting_task';
-import { MeteringCallbackInput, MetringTaskProperties, UsageRecord } from '../types';
+import { TASK_TYPE_PREFIX } from '../task_manager/usage_reporting_task';
+import { MeteringCallbackInput, UsageRecord } from '../types';
 import {
   CSPM_POLICY_TEMPLATE,
   CSP_LATEST_FINDINGS_DATA_VIEW,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { cspmMetringTaskProperties } from './metering_tasks_configs';
 
 // Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
 const MAX_BUCKETS = 60 * 1000;
 
 const CSPM_CYCLE_SCAN_FREQUENT = '24h';
+const CSPM_METRING_TASK_NAME = 'cspm-usage-report';
+const CSPM_BUCKET_TYPE_NAME = 'cspm-resource';
 
 export interface ResourcesStats {
   benchmarks: {
@@ -45,13 +48,18 @@ interface ResourceIdBucket {
 
 export const cspmMetringCallback = async ({
   esClient,
+  cloudSetup,
   logger,
-  lastSuccessfulReport,
+  taskId,
 }: MeteringCallbackInput): Promise<UsageRecord[]> => {
   try {
     const response = await esClient.search<unknown, ResourcesStats>(
       getFindingsByResourceAggQuery()
     );
+    const projectId = cloudSetup?.serverless?.projectId;
+    if (!projectId) {
+      throw new Error('no project id found');
+    }
 
     const cspmBenchmarks = response.aggregations?.benchmarks.buckets;
 
@@ -71,37 +79,27 @@ export const cspmMetringCallback = async ({
       : new Date().toLocaleString();
 
     const usageRecords = {
-      id: TASK_TYPE_PREFIX + ':cspm-usage-report',
+      id: TASK_TYPE_PREFIX + ':' + CSPM_METRING_TASK_NAME,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toLocaleString(),
       usage: {
-        type: 'cspm-resource',
+        type: CSPM_BUCKET_TYPE_NAME,
         quantity: sumResources,
-        period_seconds: 60 * 60, // equal to task interval
-        // cause: '', // implement if product require that. (suggestion: installed benchmarks)
+        period_seconds: cspmMetringTaskProperties.periodSeconds,
       },
-      // TODO: how to fetch instance details
       source: {
-        id: 'FOO',
-        instance_group_id: '',
+        id: taskId,
+        instance_group_id: projectId,
       },
     };
 
     logger.debug(`Fetched CSPM metring data`);
+
     return [usageRecords];
   } catch (err) {
     logger.error(`Failed to fetch CSPM metering data ${err}`);
     return [];
   }
-};
-
-export const cspmMetringTaskProperties: MetringTaskProperties = {
-  taskType: TASK_TYPE_PREFIX + ':cspm-usage-reporting-task',
-  taskTitle: 'Security Solution - CSPM Metring Periodic Tasks',
-  meteringCallback: cspmMetringCallback,
-  // interval: '3600s',
-  interval: '30s', // for debugging
-  version: '1',
 };
 
 export const getFindingsByResourceAggQuery = () => ({

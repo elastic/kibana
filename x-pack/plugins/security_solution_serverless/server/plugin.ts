@@ -16,7 +16,7 @@ import type {
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
-import { cspmMetringTaskProperties } from './task_manager/cspm_metring_task';
+import { cspmMetringTaskProperties } from './cloud_security/metering_tasks_configs';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -50,8 +50,10 @@ export class SecuritySolutionServerlessPlugin
       core: _coreSetup,
       logFactory: this.initializerContext.logger,
       taskManager: pluginsSetup.taskManager,
+      cloudSetup: pluginsSetup.cloudSetup,
       taskType: cspmMetringTaskProperties.taskType,
       taskTitle: cspmMetringTaskProperties.taskTitle,
+      version: cspmMetringTaskProperties.version,
       meteringCallback: cspmMetringTaskProperties.meteringCallback,
     });
 
@@ -61,9 +63,7 @@ export class SecuritySolutionServerlessPlugin
   public start(_coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
     this.cspmUsageReportingTask?.start({
       taskManager: pluginsSetup.taskManager,
-      taskType: cspmMetringTaskProperties.taskType,
       interval: cspmMetringTaskProperties.interval,
-      version: cspmMetringTaskProperties.version,
     });
     return {};
   }

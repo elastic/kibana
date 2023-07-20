@@ -10,6 +10,7 @@ import { usageReportingService } from '../common/services';
 import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type {
   MeteringCallback,
@@ -24,13 +25,30 @@ const TIMEOUT = '1m';
 export const VERSION = '1.0.0';
 
 export class SecurityUsageReportingTask {
-  private logger: Logger;
   private wasStarted: boolean = false;
+  private cloudSetup: CloudSetup;
+  private taskType: string;
+  private taskId: string;
+  private version: string;
+  private logger: Logger;
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
-    const { core, logFactory, taskManager, taskType, taskTitle, meteringCallback } = setupContract;
+    const {
+      core,
+      logFactory,
+      taskManager,
+      cloudSetup,
+      taskType,
+      taskTitle,
+      version,
+      meteringCallback,
+    } = setupContract;
 
-    this.logger = logFactory.get(this.getTaskId(taskType));
+    this.cloudSetup = cloudSetup;
+    this.taskType = taskType;
+    this.version = version;
+    this.taskId = this.getTaskId(taskType, version);
+    this.logger = logFactory.get(this.taskId);
 
     try {
       taskManager.registerTaskDefinitions({
@@ -54,12 +72,7 @@ export class SecurityUsageReportingTask {
     }
   }
 
-  public start = async ({
-    taskManager,
-    taskType,
-    interval,
-    version,
-  }: SecurityMetadataTaskStartContract) => {
+  public start = async ({ taskManager, interval }: SecurityMetadataTaskStartContract) => {
     if (!taskManager) {
       return;
     }
@@ -68,8 +81,8 @@ export class SecurityUsageReportingTask {
 
     try {
       await taskManager.ensureScheduled({
-        id: this.getTaskId(taskType),
-        taskType,
+        id: this.taskId,
+        taskType: this.taskType,
         scope: SCOPE,
         schedule: {
           interval,
@@ -77,7 +90,7 @@ export class SecurityUsageReportingTask {
         state: {
           lastSuccessfulReport: null,
         },
-        params: { version },
+        params: { version: this.version },
       });
     } catch (e) {
       this.logger.debug(`Error scheduling task, received ${e.message}`);
@@ -94,7 +107,7 @@ export class SecurityUsageReportingTask {
       return;
     }
     // Check that this task is current
-    if (taskInstance.id !== this.getTaskId(taskInstance.taskType)) {
+    if (taskInstance.id !== this.taskId) {
       // old task, die
       throwUnrecoverableError(new Error('Outdated task version'));
     }
@@ -106,7 +119,9 @@ export class SecurityUsageReportingTask {
 
     const usageRecords = await meteringCallback({
       esClient,
+      cloudSetup: this.cloudSetup,
       logger: this.logger,
+      taskId: this.taskId,
       lastSuccessfulReport,
     });
     this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
@@ -126,7 +141,7 @@ export class SecurityUsageReportingTask {
     return { state };
   };
 
-  private getTaskId = (taskType: string): string => {
-    return `${taskType}:${VERSION}`;
+  private getTaskId = (taskType: string, version: string): string => {
+    return `${taskType}:${version}`;
   };
 }

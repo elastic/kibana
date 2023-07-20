@@ -15,6 +15,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -31,6 +32,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   features: PluginSetupContract;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
+  cloudSetup: CloudSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
@@ -67,16 +69,16 @@ export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
   taskManager: TaskManagerSetupContract;
+  cloudSetup: CloudSetup;
   taskType: string;
   taskTitle: string;
+  version: string;
   meteringCallback: MeteringCallback;
 }
 
 export interface SecurityMetadataTaskStartContract {
-  taskType: string;
-  interval: string;
-  version: string;
   taskManager: TaskManagerStartContract;
+  interval: string;
 }
 
 export type MeteringCallback = (
@@ -85,7 +87,9 @@ export type MeteringCallback = (
 
 export interface MeteringCallbackInput {
   esClient: ElasticsearchClient;
+  cloudSetup: CloudSetup;
   logger: Logger;
+  taskId: string;
   lastSuccessfulReport: Date;
 }
 export interface MetringTaskProperties {
@@ -93,5 +97,6 @@ export interface MetringTaskProperties {
   taskTitle: string;
   meteringCallback: MeteringCallback;
   interval: string;
+  periodSeconds: number;
   version: string;
 }
