@@ -22,6 +22,7 @@ import type {
   CaseSeverity,
   CommentRequestExternalReferenceType,
   CasesFindRequest,
+  CasesFindRequestSortFields,
 } from '../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
@@ -475,22 +476,21 @@ enum SortFieldCase {
   category = 'category',
 }
 
-export const convertSortField = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (
+  sortField: CasesFindRequestSortFields | undefined
+): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
     case 'createdAt':
-    case 'created_at':
       return SortFieldCase.createdAt;
     case 'closedAt':
-    case 'closed_at':
       return SortFieldCase.closedAt;
     case 'title':
       return SortFieldCase.title;
     case 'severity':
       return SortFieldCase.severity;
     case 'updatedAt':
-    case 'updated_at':
       return SortFieldCase.updatedAt;
     case 'category':
       return SortFieldCase.category;
