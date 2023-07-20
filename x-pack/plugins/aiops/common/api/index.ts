@@ -13,6 +13,7 @@ import { streamReducer } from './stream_reducer';
 
 export const API_ENDPOINT = {
   EXPLAIN_LOG_RATE_SPIKES: '/internal/aiops/explain_log_rate_spikes',
+  CATEGORIZATION_FIELD_EXAMPLES: '/internal/aiops/categorization_field_validation',
 } as const;
 
 export interface ApiExplainLogRateSpikes {

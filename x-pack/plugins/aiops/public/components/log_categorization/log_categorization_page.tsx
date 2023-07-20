@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 
+import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -45,6 +46,8 @@ import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
+import { useValidateFieldRequest } from './use_validate_category_field';
+import { FieldValidationCallout } from './category_validation_callout';
 
 const BAR_TARGET = 20;
 
@@ -55,6 +58,7 @@ export const LogCategorizationPage: FC = () => {
   const { dataView, savedSearch } = useDataSource();
 
   const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
+  const { runValidateFieldRequest } = useValidateFieldRequest();
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
     getDefaultAiOpsListState()
@@ -71,6 +75,9 @@ export const LogCategorizationPage: FC = () => {
     categories: Category[];
     sparkLines: SparkLinesPerCategory;
   } | null>(null);
+  const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
+    null
+  );
 
   useEffect(() => {
     if (savedSearch) {
@@ -183,13 +190,30 @@ export const LogCategorizationPage: FC = () => {
   const loadCategories = useCallback(async () => {
     setLoading(true);
     setData(null);
-    const { title: index, timeFieldName: timeField } = dataView;
+    setFieldValidationResult(null);
+
+    const { getIndexPattern, timeFieldName: timeField } = dataView;
+    const index = getIndexPattern();
 
     if (selectedField === undefined || timeField === undefined) {
       return;
     }
 
     cancelRequest();
+
+    const result = await runValidateFieldRequest(
+      index,
+      selectedField,
+      timeField,
+      earliest,
+      latest,
+      {
+        bool: {
+          must: [searchQuery],
+        },
+      }
+    );
+    setFieldValidationResult(result);
 
     try {
       const resp = await runCategorizeRequest(
@@ -213,13 +237,14 @@ export const LogCategorizationPage: FC = () => {
 
     setLoading(false);
   }, [
-    selectedField,
     dataView,
-    searchQuery,
+    selectedField,
+    cancelRequest,
+    runValidateFieldRequest,
     earliest,
     latest,
+    searchQuery,
     runCategorizeRequest,
-    cancelRequest,
     intervalMs,
     toasts,
   ]);
@@ -300,6 +325,8 @@ export const LogCategorizationPage: FC = () => {
           <EuiSpacer />
         </>
       ) : null}
+
+      <FieldValidationCallout validationResults={fieldValidationResult} />
 
       {loading === true ? <EuiSkeletonText lines={10} /> : null}
 

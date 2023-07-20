@@ -11,6 +11,7 @@ export type {
   CategoryFieldExample,
   FieldExampleCheck,
   Token,
+  FieldValidationResults,
 } from './common/types/categories';
 export {
   CATEGORY_EXAMPLES_ERROR_LIMIT,

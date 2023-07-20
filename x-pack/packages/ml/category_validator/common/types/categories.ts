@@ -79,3 +79,10 @@ export interface FieldExampleCheck {
    */
   message: string;
 }
+
+export interface FieldValidationResults {
+  examples: CategoryFieldExample[];
+  sampleSize: number;
+  overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
+  validationChecks: FieldExampleCheck[];
+}

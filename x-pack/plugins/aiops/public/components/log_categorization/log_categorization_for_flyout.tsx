@@ -21,6 +21,7 @@ import {
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import { usePageUrlState } from '@kbn/ml-url-state';
+import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import { useCategorizeRequest } from './use_categorize_request';
@@ -32,11 +33,13 @@ import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
+import { useValidateFieldRequest } from './use_validate_category_field';
 import {
   type AiOpsPageUrlState,
   getDefaultAiOpsListState,
   isFullAiOpsListState,
 } from '../../application/utils/url_state';
+import { FieldValidationCallout } from './category_validation_callout';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -60,6 +63,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
   } = useAiopsAppContext();
+
+  const { runValidateFieldRequest } = useValidateFieldRequest();
   const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
@@ -80,6 +85,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     categories: Category[];
     sparkLines: SparkLinesPerCategory;
   } | null>(null);
+  const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
+    null
+  );
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -109,7 +117,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
 
   const loadCategories = useCallback(async () => {
-    const { title: index, timeFieldName: timeField } = dataView;
+    const { getIndexPattern, timeFieldName: timeField } = dataView;
+    const index = getIndexPattern();
 
     if (selectedField === undefined || timeField === undefined) {
       return;
@@ -119,6 +128,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
     setLoading(true);
     setData(null);
+    setFieldValidationResult(null);
+
+    const result = await runValidateFieldRequest(
+      index,
+      selectedField.name,
+      timeField,
+      earliest,
+      latest,
+      {
+        bool: {
+          must: [searchQuery],
+        },
+      }
+    );
+    setFieldValidationResult(result);
 
     try {
       const { categories, sparkLinesPerCategory: sparkLines } = await runCategorizeRequest(
@@ -149,10 +173,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     dataView,
     selectedField,
     cancelRequest,
-    runCategorizeRequest,
+    runValidateFieldRequest,
     earliest,
     latest,
     searchQuery,
+    runCategorizeRequest,
     intervalMs,
     toasts,
   ]);
@@ -217,6 +242,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+        <FieldValidationCallout validationResults={fieldValidationResult} />
+
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
         <InformationText
