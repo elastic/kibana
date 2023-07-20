@@ -313,7 +313,8 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
-  describe('filter activity', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152202
+  describe.skip('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
