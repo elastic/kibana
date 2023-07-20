@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
@@ -18,13 +18,26 @@ const SETUP_TRUST = 2;
 interface Props {
   saveRemoteClusterConfig: (config: Cluster) => void;
   onCancel: () => void;
-  addClusterError: boolean;
+  addClusterError: { message: string } | undefined;
   isSaving: boolean;
 }
 
-export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel, isSaving }: Props) => {
+export const RemoteClusterWizard = ({
+  saveRemoteClusterConfig,
+  onCancel,
+  isSaving,
+  addClusterError,
+}: Props) => {
   const [formState, setFormState] = useState<Cluster>();
   const [currentStep, setCurrentStep] = useState(CONFIGURE_CONNECTION);
+
+  // If there was an error saving the cluster, we need
+  // to send the user back to the first step.
+  useEffect(() => {
+    if (addClusterError) {
+      setCurrentStep(CONFIGURE_CONNECTION);
+    }
+  }, [addClusterError, setCurrentStep]);
 
   const stepDefinitions = useMemo(
     () => [
@@ -70,7 +83,11 @@ export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel, isSavin
         state when moving to the next step.
       */}
       <div style={{ display: currentStep === CONFIGURE_CONNECTION ? 'block' : 'none' }}>
-        <RemoteClusterForm save={completeConfigStep} cancel={onCancel} />
+        <RemoteClusterForm
+          save={completeConfigStep}
+          cancel={onCancel}
+          saveError={addClusterError}
+        />
       </div>
 
       {currentStep === SETUP_TRUST && (
