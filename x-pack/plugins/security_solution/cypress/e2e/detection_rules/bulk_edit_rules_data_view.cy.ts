@@ -44,8 +44,6 @@ import {
   getNewTermsRule,
 } from '../../objects/rule';
 
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-
 const DATA_VIEW_ID = 'auditbeat';
 
 const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
@@ -59,7 +57,7 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     login();
 
     postDataView(DATA_VIEW_ID);
@@ -188,7 +186,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
 
     postDataView(DATA_VIEW_ID);
 
