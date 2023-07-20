@@ -40,7 +40,6 @@ export const useAgentGroups = () => {
         data.search.search<AgentsRequestOptions, AgentsStrategyResponse>(
           {
             kuery: `policy_id: ( ${policiesQuery} )`,
-            filterQuery: {},
             factoryQueryType: OsqueryQueries.agents,
             pagination: generateTablePaginationOptions(0, 9000),
             sort: {

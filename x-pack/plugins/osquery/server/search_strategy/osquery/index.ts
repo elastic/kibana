@@ -41,7 +41,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         mergeMap((exists) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
-            filterQuery: request.filterQuery,
+            ...('filterQuery' in request ? { filterQuery: request.filterQuery } : {}),
             ...('kuery' in request ? { kuery: request.kuery } : {}),
             ...('aggregations' in request ? { aggregations: request.aggregations } : {}),
             ...('pagination' in request ? { pagination: request.pagination } : {}),
@@ -55,9 +55,10 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             componentTemplateExists: exists,
           } as StrategyRequestType<T>);
           // use internal user for searching .fleet* indices
-          es = dsl.index?.includes('fleet')
-            ? data.search.searchAsInternalUser
-            : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          es =
+            dsl.index?.includes('fleet') || dsl.index?.includes('logs-osquery_manager.action')
+              ? data.search.searchAsInternalUser
+              : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
           return es.search(
             {

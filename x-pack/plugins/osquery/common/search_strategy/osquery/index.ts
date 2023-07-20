@@ -36,7 +36,7 @@ export enum OsqueryQueries {
 export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
-  filterQuery: ESQuery | string | undefined;
+  filterQuery?: ESQuery | string | undefined;
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
