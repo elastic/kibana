@@ -4,6 +4,20 @@
 
 Welcome to the documentation for the serverless project navigation. We've exposed the tools to assist teams in building the navigation for their serverless projects.
 
+- [Serverless project navigation](#serverless-project-navigation)
+  - [Left Side Navigation](#left-side-navigation)
+    - [Navigation Tree Definition](#navigation-tree-definition)
+      - [Example](#example)
+      - [Navigation tree API](#navigation-tree-api)
+        - [`NavigationTreeDefinition`](#navigationtreedefinition)
+        - [`GroupDefinition`](#groupdefinition)
+        - [`RecentlyAccessedDefinition`](#recentlyaccesseddefinition)
+    - [React components](#react-components)
+      - [`unstyled`](#unstyled)
+  - [Breadcrumbs](#breadcrumbs)
+  - [Toolbar](#toolbar)
+  - [Search bar](#search-bar)
+
 ### Building Blocks
 
 The serverless navigation is composed of several key building blocks that work together to form a comprehensive navigation system. These building blocks include:
@@ -138,9 +152,9 @@ const createServerlessSearchSideNavComponent =
 serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
 ```
 
-### API
+#### Navigation tree API
 
-#### `NavigationTreeDefinition`
+##### `NavigationTreeDefinition`
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -154,7 +168,7 @@ The `RootNavigationItemDefinition` is one of:
 - `GroupDefinition`
 - `RecentlyAccessedDefinition`
 
-#### `GroupDefinition`
+##### `GroupDefinition`
 
 The `GroupDefinition` interface represents a group of items in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
 
@@ -173,10 +187,88 @@ The `GroupDefinition` interface represents a group of items in the side navigati
 | `getIsActive` | `function` | Optional function to control the active state. This function is called whenever the location changes. |
 | `breadcrumbStatus` | `'hidden' | 'visible'` | An optional flag to indicate if the breadcrumb should be hidden when this node is active. The default value is `'visible'`. |
 
-#### `RecentlyAccessedDefinition`
+##### `RecentlyAccessedDefinition`
 
 | Property | Type | Description |
 | --- | --- | --- |
 | `type` | `'recentlyAccessed'` | Indicates that this item represents the recently accessed section. |
 | `recentlyAccessed$` | `Observable<RecentItem[]>` | An optional observable for recently accessed items. If not provided, the recently accessed items from the Chrome service will be used. |
 | `defaultIsCollapsed` | `boolean` | If set to `true`, the recently accessed list will be collapsed by default. The default value is `false`. |
+
+### React components
+
+If you need other navigation sections in your navigation you will need to use our React components. They have the same properties as seen above with the exception of the `unstyled` prop that we will detail below.
+
+```ts
+import { NavigationKibanaProvider, Navigation } from '@kbn/shared-ux-chrome-navigation';
+
+const createServerlessSearchSideNavComponent =
+  (
+    core: CoreStart,
+    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
+  ) =>
+  () => {
+    return (
+      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
+        <Navigation>
+          <Navigation.Group id="group1" title="Group 1" defaultIsCollapsed={false}>
+            <Navigation.Item id="item1" title="Item 1" />
+            <Navigation.Item id="item2" title="Item 2" />
+            <Navigation.Item id="item3" title="Item 3" />
+          </Navigation.Group id="group1" title="Group 1">
+        </Navigation>
+      </NavigationKibanaProvider>
+    );
+  };
+```
+
+And as with the tree definition above you will have to set the navigation component on the `serverless` plugin.
+
+```ts
+// plugin.ts (public) "start()"
+serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
+```
+
+#### `unstyled`
+
+If you want to completely customize your UI and just need to declare you navigation tree you can pass the `unstyled` property to your `<Navigation />`.
+
+```ts
+/**
+ * This JSX will correctly declare your tree structure but will not have any UI applied.
+ Tree generated:
+[{
+  id: 'my-group',
+  title: "My Group,
+  children: [{
+    id: 'item-1',
+    title: 'Item 1',
+  }, {
+    id: 'item-2',
+    title: 'Item 2',
+  }]
+}]
+ */
+<Navigation unstyled>
+  <Navigation.Group id="my-group" title="My group">
+    <Navigation.Item id="item-1" title="Item 1">
+      <div>Your custom UI</div>
+    </Navigation.Item>
+    <Navigation.Item id="item-2" title="Item 2">
+      <div>Your custom UI</div>
+    </Navigation.Item>
+  </Navigation.Group>
+</Navigation>
+```
+
+## Breadcrumbs
+
+TODO
+
+## Toolbar
+
+TODO
+
+## Search bar
+
+TODO
