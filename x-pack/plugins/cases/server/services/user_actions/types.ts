@@ -296,7 +296,7 @@ export interface BuildUserActionsDictParams {
   user: User;
 }
 
-export type UserActionsDict = Map<string, UserActionEvent[]>;
+export type UserActionsDict = Record<string, UserActionEvent[]>;
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];

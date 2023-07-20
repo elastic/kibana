@@ -89,19 +89,19 @@ async function throwIfMaxUserActionsReached({
     return;
   }
 
-  const result = await userActionService.getMultipleCasesUserActionsTotal({
+  const currentTotals = await userActionService.getMultipleCasesUserActionsTotal({
     caseIds: Object.keys(userActionsDict),
   });
 
-  result.aggregations?.references.caseUserActions.buckets.forEach(
-    ({ key: caseId, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
-      if (totalUserActions + userActionsDict[caseId].length > MAX_USER_ACTIONS_PER_CASE) {
-        throw Boom.badRequest(
-          `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
-        );
-      }
+  Object.keys(currentTotals).forEach((caseId) => {
+    const totalToAdd = userActionsDict?.[caseId].length ?? 0;
+
+    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+      throw Boom.badRequest(
+        `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      );
     }
-  );
+  });
 }
 
 /**
@@ -407,7 +407,7 @@ export const update = async (
       user,
     });
 
-    throwIfMaxUserActionsReached({ userActionsDict, userActionService });
+    await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });

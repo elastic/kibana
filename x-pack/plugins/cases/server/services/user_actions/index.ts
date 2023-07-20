@@ -691,7 +691,7 @@ export class CaseUserActionService {
           path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
         },
         aggregations: {
-          caseIds: {
+          caseUserActions: {
             terms: {
               field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
               size: idsLength,
