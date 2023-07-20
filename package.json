@@ -1382,6 +1382,7 @@
     "babel-plugin-styled-components": "^2.0.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "backport": "^8.9.7",
+    "blob-polyfill": "^7.0.20220408",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
     "chromedriver": "^114.0.2",
