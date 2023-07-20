@@ -8,7 +8,11 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspRuleTemplate } from '../../../common/schemas';
-import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import {
+  CNVM_POLICY_TEMPLATE,
+  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  VULN_MGMT_POLICY_TEMPLATE,
+} from '../../../common/constants';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -101,7 +105,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
       const cspContext = await context.csp;
 
       try {
-        const cspPackagePolicies = await getCspPackagePolicies(
+        const packagePolicies = await getCspPackagePolicies(
           cspContext.soClient,
           cspContext.packagePolicyService,
           CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -109,9 +113,15 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
           POSTURE_TYPE_ALL
         );
 
+        const cspPackagePolicies = packagePolicies.items.filter(
+          (item: PackagePolicy) =>
+            item.vars?.type?.value !== VULN_MGMT_POLICY_TEMPLATE &&
+            item.vars?.type?.value !== CNVM_POLICY_TEMPLATE
+        );
+
         const agentPolicies = await getCspAgentPolicies(
           cspContext.soClient,
-          cspPackagePolicies.items,
+          cspPackagePolicies,
           cspContext.agentPolicyService
         );
 
@@ -125,12 +135,13 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
           cspContext.soClient,
           agentPolicies,
           agentStatusesByAgentPolicyId,
-          cspPackagePolicies.items
+          cspPackagePolicies
         );
 
         return response.ok({
           body: {
-            ...cspPackagePolicies,
+            ...packagePolicies,
+            total: cspPackagePolicies.length,
             items: benchmarks,
           },
         });
