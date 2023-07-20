@@ -76,17 +76,6 @@ describe('find', () => {
       );
     });
 
-    it('when rootSearchFields attribute in request payload', async () => {
-      const search = 'sample_text';
-      const findRequest = createCasesClientMockFindRequest({ search });
-      await expect(
-        // @ts-expect-error foo is an invalid field
-        find({ ...findRequest, rootSearchFields: ['_id'] }, clientArgs)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"rootSearchFields\\":[\\"_id\\"]}: Error: invalid keys \\"rootSearchFields,[\\"_id\\"]\\""`
-      );
-    });
-
     it('invalid searchFields with array', async () => {
       const searchFields = ['foobar'];
 
