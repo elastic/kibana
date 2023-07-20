@@ -10,12 +10,7 @@ import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
-import {
-  cleanKibana,
-  deleteAlertsAndRules,
-  waitForPageToBeLoaded,
-  waitForTableToLoad,
-} from '../../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, waitForPageToBeLoaded } from '../../../tasks/common';
 import {
   ANOMALIES_TABLE,
   ANOMALIES_TABLE_ROWS,
@@ -323,7 +318,6 @@ describe('Entity Analytics Dashboard', () => {
 
     it('renders table with pagination', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
-      waitForTableToLoad();
 
       // Increase default timeout because anomalies table takes a while to load
       cy.get(ANOMALIES_TABLE_ROWS, { timeout: 20000 }).should('have.length', 10);
@@ -338,7 +332,11 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('enables a job', () => {
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 20000 })
+      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies');
+      cy.wait('@anomalies', { timeout: 10000 });
+      cy.wait('@anomalies', { timeout: 10000 });
+
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 30000 })
         .eq(5)
         .within(() => {
           cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
