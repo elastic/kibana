@@ -35,14 +35,22 @@ export function defineGetApiKeysRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;
+        const authenticationService = getAuthenticationService();
 
         const [{ cluster: clusterPrivileges }, areApiKeysEnabled, areCrossClusterApiKeysEnabled] =
           await Promise.all([
             esClient.asCurrentUser.security.hasPrivileges({
-              body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+              body: {
+                cluster: [
+                  'manage_security',
+                  'read_security',
+                  'manage_api_key',
+                  'manage_own_api_key',
+                ],
+              },
             }),
-            getAuthenticationService().apiKeys.areAPIKeysEnabled(),
-            getAuthenticationService().apiKeys.areCrossClusterAPIKeysEnabled(),
+            authenticationService.apiKeys.areAPIKeysEnabled(),
+            authenticationService.apiKeys.areCrossClusterAPIKeysEnabled(),
           ]);
 
         if (!areApiKeysEnabled) {
@@ -54,17 +62,8 @@ export function defineGetApiKeysRoutes({
           });
         }
 
-        const canManageCrossClusterApiKeys =
-          clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled;
-        const canManageApiKeys =
-          clusterPrivileges.manage_security || clusterPrivileges.manage_api_key;
-        const canManageOwnApiKeys =
-          clusterPrivileges.manage_security ||
-          clusterPrivileges.manage_api_key ||
-          clusterPrivileges.manage_own_api_key;
-
         const apiResponse = await esClient.asCurrentUser.security.getApiKey({
-          owner: !canManageApiKeys,
+          owner: !clusterPrivileges.manage_api_key && !clusterPrivileges.read_security,
         });
 
         const validKeys = apiResponse.api_keys.filter(({ invalidated }) => !invalidated);
@@ -73,9 +72,10 @@ export function defineGetApiKeysRoutes({
           body: {
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
             apiKeys: validKeys,
-            canManageCrossClusterApiKeys,
-            canManageApiKeys,
-            canManageOwnApiKeys,
+            canManageCrossClusterApiKeys:
+              clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
+            canManageApiKeys: clusterPrivileges.manage_api_key,
+            canManageOwnApiKeys: clusterPrivileges.manage_own_api_key,
           },
         });
       } catch (error) {

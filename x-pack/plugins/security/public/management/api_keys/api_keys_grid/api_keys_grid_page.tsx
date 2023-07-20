@@ -44,7 +44,6 @@ import { APIKeysAPIClient } from '../api_keys_api_client';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
-import { PermissionDenied } from './permission_denied';
 
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
@@ -83,10 +82,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
         </EuiButton>
       </ApiKeysEmptyPrompt>
     );
-  }
-
-  if (!state.value.canManageOwnApiKeys) {
-    return <PermissionDenied />;
   }
 
   return (

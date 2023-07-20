@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
@@ -42,8 +43,9 @@ describe('Get API Keys route', () => {
     esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
       cluster: {
         manage_security: true,
-        manage_api_key: false,
-        manage_own_api_key: false,
+        read_security: true,
+        manage_api_key: true,
+        manage_own_api_key: true,
       },
     } as any);
 
@@ -83,13 +85,30 @@ describe('Get API Keys route', () => {
     });
   });
 
+  it('should forward error from Elasticsearch GET API keys endpoint', async () => {
+    const error = Boom.forbidden('test not acceptable message');
+    esClientMock.asCurrentUser.security.getApiKey.mockResponseImplementation(() => {
+      throw error;
+    });
+
+    const response = await routeHandler(
+      mockContext,
+      httpServerMock.createKibanaRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.payload).toEqual(error);
+  });
+
   describe('when user has `manage_security` permission', () => {
     beforeEach(() => {
       esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
         cluster: {
           manage_security: true,
-          manage_api_key: false,
-          manage_own_api_key: false,
+          read_security: true,
+          manage_api_key: true,
+          manage_own_api_key: true,
         },
       } as any);
     });
@@ -128,7 +147,7 @@ describe('Get API Keys route', () => {
       );
     });
 
-    it('should request list of API keys irregardless of owner', async () => {
+    it('should request list of all Elasticsearch API keys', async () => {
       await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
 
       expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: false });
@@ -140,8 +159,9 @@ describe('Get API Keys route', () => {
       esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
         cluster: {
           manage_security: false,
+          read_security: false,
           manage_api_key: true,
-          manage_own_api_key: false,
+          manage_own_api_key: true,
         },
       } as any);
     });
@@ -162,7 +182,42 @@ describe('Get API Keys route', () => {
       );
     });
 
-    it('should request list of API keys irregardless of owner', async () => {
+    it('should request list of all Elasticsearch API keys', async () => {
+      await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
+
+      expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: false });
+    });
+  });
+
+  describe('when user has `read_security` permission', () => {
+    beforeEach(() => {
+      esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
+        cluster: {
+          manage_security: false,
+          read_security: true,
+          manage_api_key: false,
+          manage_own_api_key: false,
+        },
+      } as any);
+    });
+
+    it('should calculate user privileges correctly ', async () => {
+      const response = await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.payload).toEqual(
+        expect.objectContaining({
+          canManageCrossClusterApiKeys: false,
+          canManageApiKeys: false,
+          canManageOwnApiKeys: false,
+        })
+      );
+    });
+
+    it('should request list of all Elasticsearch API keys', async () => {
       await routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
 
       expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: false });
@@ -174,6 +229,7 @@ describe('Get API Keys route', () => {
       esClientMock.asCurrentUser.security.hasPrivileges.mockResponse({
         cluster: {
           manage_security: false,
+          read_security: false,
           manage_api_key: false,
           manage_own_api_key: true,
         },
@@ -194,7 +250,6 @@ describe('Get API Keys route', () => {
           canManageOwnApiKeys: true,
         })
       );
-      expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({ owner: true });
     });
 
     it('should only request list of API keys owned by the user', async () => {
