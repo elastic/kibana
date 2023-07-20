@@ -58,7 +58,7 @@ Morbi dapibus sapien lacus, vitae suscipit ex egestas pharetra. In velit eros, f
           <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="sparkles" size="s" onClick={onClickRegenerate}>
-                {i18n.translate('xpack.obsAiAssistant.insight.response.regenerate', {
+                {i18n.translate('xpack.observabilityAiAssistant.insight.response.regenerate', {
                   defaultMessage: 'Regenerate',
                 })}
               </EuiButtonEmpty>
@@ -66,7 +66,7 @@ Morbi dapibus sapien lacus, vitae suscipit ex egestas pharetra. In velit eros, f
 
             <EuiFlexItem grow={false}>
               <EuiButton fill iconType="discuss" size="s" onClick={onClickStartChat}>
-                {i18n.translate('xpack.obsAiAssistant.insight.response.startChat', {
+                {i18n.translate('xpack.observabilityAiAssistant.insight.response.startChat', {
                   defaultMessage: 'Start chat',
                 })}
               </EuiButton>

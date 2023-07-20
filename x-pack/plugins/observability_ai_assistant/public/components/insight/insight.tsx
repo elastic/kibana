@@ -88,7 +88,7 @@ export function Insight({
 
               <EuiText size="xs" css={{ color: euiTheme.colors.subduedText }}>
                 <strong>
-                  {i18n.translate('xpack.obsAiAssistant.insight.generatedAt', {
+                  {i18n.translate('xpack.observabilityAiAssistant.insight.generatedAt', {
                     defaultMessage: 'Generated at',
                   })}{' '}
                   {moment(date).format(dateFormat)}
@@ -102,7 +102,7 @@ export function Insight({
             anchorPosition="downLeft"
             button={
               <EuiButtonIcon
-                aria-label={i18n.translate('xpack.obsAiAssistant.insight.actions', {
+                aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.actions', {
                   defaultMessage: 'Actions',
                 })}
                 color="text"

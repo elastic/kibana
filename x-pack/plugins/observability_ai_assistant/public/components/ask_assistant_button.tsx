@@ -46,9 +46,12 @@ export function AskAssistantButton({
   variant,
   onClick,
 }: AskAssistantButtonProps) {
-  const buttonLabel = i18n.translate('xpack.obsAiAssistant.askAssistantButton.buttonLabel', {
-    defaultMessage: 'Ask Assistant',
-  });
+  const buttonLabel = i18n.translate(
+    'xpack.observabilityAiAssistant.askAssistantButton.buttonLabel',
+    {
+      defaultMessage: 'Ask Assistant',
+    }
+  );
 
   switch (variant) {
     case 'basic':
@@ -69,12 +72,15 @@ export function AskAssistantButton({
       return (
         <EuiToolTip
           position="top"
-          title={i18n.translate('xpack.obsAiAssistant.askAssistantButton.popoverTitle', {
+          title={i18n.translate('xpack.observabilityAiAssistant.askAssistantButton.popoverTitle', {
             defaultMessage: 'Elastic Assistant',
           })}
-          content={i18n.translate('xpack.obsAiAssistant.askAssistantButton.popoverContent', {
-            defaultMessage: 'Get insights into your data with the Elastic Assistant',
-          })}
+          content={i18n.translate(
+            'xpack.observabilityAiAssistant.askAssistantButton.popoverContent',
+            {
+              defaultMessage: 'Get insights into your data with the Elastic Assistant',
+            }
+          )}
         >
           <EuiButtonIcon
             iconType="sparkles"
