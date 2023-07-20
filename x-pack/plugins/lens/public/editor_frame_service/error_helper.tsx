@@ -8,8 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { isEsError } from '@kbn/data-plugin/public';
 import type { IEsError, Reason } from '@kbn/data-plugin/public';
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { RemovableUserMessage } from '../types';
 
 type ErrorCause = Required<IEsError>['attributes'];
 
@@ -37,6 +41,13 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
     return e.body?.attributes?.error?.caused_by !== undefined;
   }
   return false;
+};
+
+const isTSDBError = (e: ReasonDescription): boolean => {
+  return (
+    e.type === 'illegal_argument_exception' &&
+    /\]\[counter\] is not supported for aggregation/.test(e.reason)
+  );
 };
 
 // what happens for runtime field used on indexpatterns not accessible to the user?
@@ -101,8 +112,11 @@ function getErrorSources(e: Error) {
   return [];
 }
 
-export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | null): string[] {
-  const errorMessages = [];
+export function getOriginalRequestErrorMessages(
+  error: ExpressionRenderError | null,
+  docLinks: CoreStart['docLinks']
+): RemovableUserMessage[] {
+  const errorMessages: Array<string | { short: string; long: React.ReactNode }> = [];
   if (error && 'original' in error && error.original) {
     if (isEsAggError(error.original)) {
       if (isNetworkError(error.original)) {
@@ -130,6 +144,34 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
               },
             })
           );
+        } else if (isTSDBError(rootError)) {
+          const [fieldName, _type, _isCounter, opUsed] = rootError.reason.match(/\[(\w)*\]/g)!;
+          const shortMessage = i18n.translate(
+            'xpack.lens.editorFrame.expressionTSDBDetailedMessage',
+            {
+              defaultMessage:
+                'The field {field} of Time series type [counter] has been used with the unsupported operation {op}.',
+              values: {
+                field: fieldName,
+                op: opUsed,
+              },
+            }
+          );
+          const message = (
+            <>
+              <p className="eui-textBreakWord">{shortMessage}</p>
+              <EuiLink href={docLinks.links.fleet.datastreamsTSDSMetrics} external target="_blank">
+                {i18n.translate('xpack.lens.editorFrame.expressionTSDBCounterInfo', {
+                  defaultMessage:
+                    'See more about Time series field types and [counter] supported aggregations',
+                })}
+              </EuiLink>
+            </>
+          );
+          errorMessages.push({
+            short: shortMessage,
+            long: message,
+          });
         } else {
           errorMessages.push(
             i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
@@ -144,9 +186,16 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
       }
     }
   } else if (error?.message) {
-    errorMessages.push(error?.message);
+    errorMessages.push(error.message);
   }
-  return errorMessages;
+  return errorMessages.map((message) => ({
+    uniqueId: typeof message === 'string' ? message : message.short,
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+    longMessage: typeof message === 'string' ? '' : message.long,
+    shortMessage: typeof message === 'string' ? message : message.short,
+    fixableInEditor: false,
+  }));
 }
 
 // NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
