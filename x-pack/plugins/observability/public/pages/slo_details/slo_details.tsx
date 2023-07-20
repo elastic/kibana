@@ -23,7 +23,7 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
@@ -39,11 +39,8 @@ export function SloDetailsPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
-
   const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
-
   const isCloningOrDeleting = Boolean(useIsMutating());
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));

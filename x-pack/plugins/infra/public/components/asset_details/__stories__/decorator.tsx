@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { JSXElementConstructor, ReactElement } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   KibanaContextProvider,
@@ -18,6 +18,9 @@ import { useParameter } from '@storybook/addons';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/data-plugin/public';
+import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
+import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
+import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
@@ -66,6 +69,20 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         return Promise.resolve([]);
       },
     },
+    uiSettings: {
+      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+    },
+    triggersActionsUi: {
+      getAlertSummaryWidget: AlertSummaryWidget as (
+        props: AlertSummaryWidgetProps
+      ) => ReactElement<AlertSummaryWidgetProps, string | JSXElementConstructor<any>>,
+    },
+    charts: {
+      theme: {
+        useChartsTheme: () => ({} as Theme),
+        useChartsBaseTheme: () => ({} as Theme),
+      },
+    },
     settings: {
       client: {
         get$: (key: string) => of(getSettings(key)),
@@ -92,6 +109,10 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
             } as unknown as LocatorPublic<any>),
         },
       },
+    },
+    lens: {
+      navigateToPrefilledEditor: () => {},
+      stateHelperApi: () => new Promise(() => {}),
     },
   };
 

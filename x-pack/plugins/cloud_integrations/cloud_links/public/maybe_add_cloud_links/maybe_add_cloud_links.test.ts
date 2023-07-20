@@ -18,6 +18,8 @@ describe('maybeAddCloudLinks', () => {
       security,
       chrome: coreMock.createStart().chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
+      docLinks: coreMock.createStart().docLinks,
+      uiSettingsClient: coreMock.createStart().uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -29,11 +31,13 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
     );
-    const chrome = coreMock.createStart().chrome;
+    const { chrome, docLinks, uiSettings } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      docLinks,
+      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -55,15 +59,114 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "profile-url",
             "iconType": "user",
-            "label": "Edit profile",
+            "label": "Profile",
             "order": 100,
             "setAsProfile": true,
           },
           Object {
+            "href": "billing-url",
+            "iconType": "visGauge",
+            "label": "Billing",
+            "order": 200,
+          },
+          Object {
             "href": "organization-url",
             "iconType": "gear",
-            "label": "Account & Billing",
-            "order": 200,
+            "label": "Organization",
+            "order": 300,
+          },
+          Object {
+            "content": <ThemDarkModeToggle
+              security={
+                Object {
+                  "authc": Object {
+                    "areAPIKeysEnabled": [MockFunction],
+                    "getCurrentUser": [MockFunction] {
+                      "calls": Array [
+                        Array [],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": Promise {},
+                        },
+                      ],
+                    },
+                  },
+                  "hooks": Object {
+                    "useUpdateUserProfile": [MockFunction],
+                  },
+                  "navControlService": Object {
+                    "addUserMenuLinks": [MockFunction] {
+                      "calls": Array [
+                        [Circular],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": undefined,
+                        },
+                      ],
+                    },
+                    "getUserMenuLinks$": [MockFunction],
+                  },
+                  "uiApi": Object {
+                    "components": Object {
+                      "getChangePassword": [MockFunction],
+                      "getPersonalInfo": [MockFunction],
+                    },
+                  },
+                  "userProfiles": Object {
+                    "bulkGet": [MockFunction],
+                    "getCurrent": [MockFunction],
+                    "suggest": [MockFunction],
+                    "update": [MockFunction],
+                    "userProfile$": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                }
+              }
+              uiSettingsClient={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
+            />,
+            "href": "",
+            "iconType": "",
+            "label": "",
+            "order": 400,
+          },
+        ],
+      ]
+    `);
+
+    expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
+    expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "href": "https://www.elastic.co/guide/en/index.html",
+            "title": "Documentation",
+          },
+          Object {
+            "href": "https://www.elastic.co/support",
+            "title": "Support",
+          },
+          Object {
+            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
+            "title": "Give feedback",
           },
         ],
       ]
@@ -73,11 +176,13 @@ describe('maybeAddCloudLinks', () => {
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
-    const chrome = coreMock.createStart().chrome;
+    const { chrome, docLinks, uiSettings } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      docLinks,
+      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -99,15 +204,113 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "profile-url",
             "iconType": "user",
-            "label": "Edit profile",
+            "label": "Profile",
             "order": 100,
             "setAsProfile": true,
           },
           Object {
+            "href": "billing-url",
+            "iconType": "visGauge",
+            "label": "Billing",
+            "order": 200,
+          },
+          Object {
             "href": "organization-url",
             "iconType": "gear",
-            "label": "Account & Billing",
-            "order": 200,
+            "label": "Organization",
+            "order": 300,
+          },
+          Object {
+            "content": <ThemDarkModeToggle
+              security={
+                Object {
+                  "authc": Object {
+                    "areAPIKeysEnabled": [MockFunction],
+                    "getCurrentUser": [MockFunction] {
+                      "calls": Array [
+                        Array [],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": Promise {},
+                        },
+                      ],
+                    },
+                  },
+                  "hooks": Object {
+                    "useUpdateUserProfile": [MockFunction],
+                  },
+                  "navControlService": Object {
+                    "addUserMenuLinks": [MockFunction] {
+                      "calls": Array [
+                        [Circular],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": undefined,
+                        },
+                      ],
+                    },
+                    "getUserMenuLinks$": [MockFunction],
+                  },
+                  "uiApi": Object {
+                    "components": Object {
+                      "getChangePassword": [MockFunction],
+                      "getPersonalInfo": [MockFunction],
+                    },
+                  },
+                  "userProfiles": Object {
+                    "bulkGet": [MockFunction],
+                    "getCurrent": [MockFunction],
+                    "suggest": [MockFunction],
+                    "update": [MockFunction],
+                    "userProfile$": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                }
+              }
+              uiSettingsClient={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
+            />,
+            "href": "",
+            "iconType": "",
+            "label": "",
+            "order": 400,
+          },
+        ],
+      ]
+    `);
+    expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
+    expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "href": "https://www.elastic.co/guide/en/index.html",
+            "title": "Documentation",
+          },
+          Object {
+            "href": "https://www.elastic.co/support",
+            "title": "Support",
+          },
+          Object {
+            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
+            "title": "Give feedback",
           },
         ],
       ]
@@ -119,16 +322,19 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: false })
     );
-    const chrome = coreMock.createStart().chrome;
+    const { chrome, docLinks, uiSettings } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      docLinks,
+      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
     expect(security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
     expect(chrome.setCustomNavLink).not.toHaveBeenCalled();
     expect(security.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
+    expect(chrome.setHelpMenuLinks).not.toHaveBeenCalledTimes(1);
   });
 });

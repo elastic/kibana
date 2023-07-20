@@ -21,8 +21,10 @@ describe('duration formatters', () => {
       expect(asDuration(0)).toEqual('0 μs');
       expect(asDuration(1)).toEqual('1 μs');
       expect(asDuration(toMicroseconds(1, 'milliseconds'))).toEqual('1,000 μs');
-      expect(asDuration(toMicroseconds(1000, 'milliseconds'))).toEqual('1,000 ms');
-      expect(asDuration(toMicroseconds(10000, 'milliseconds'))).toEqual('10,000 ms');
+      expect(asDuration(toMicroseconds(999, 'milliseconds'))).toEqual('999 ms');
+      expect(asDuration(toMicroseconds(4600, 'milliseconds'))).toEqual('4.6 s');
+      expect(asDuration(toMicroseconds(5999, 'milliseconds'))).toEqual('6.0 s');
+      expect(asDuration(toMicroseconds(10000, 'milliseconds'))).toEqual('10 s');
       expect(asDuration(toMicroseconds(20, 'seconds'))).toEqual('20 s');
       expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('600 s');
       expect(asDuration(toMicroseconds(11, 'minutes'))).toEqual('11 min');

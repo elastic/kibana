@@ -13,6 +13,7 @@ import {
   Heatmap,
   GeometryValue,
   XYChartSeriesIdentifier,
+  Tooltip,
 } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -287,7 +288,7 @@ describe('HeatmapComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('hides the legend if the showTooltip is false', async () => {
@@ -296,7 +297,7 @@ describe('HeatmapComponent', function () {
       args: { ...wrapperProps.args, showTooltip: false },
     } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('not renders the component if no value accessor is given', () => {

@@ -10,12 +10,12 @@ import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
 import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
+import { SyntheticsServerSetup } from '../types';
 
 jest.mock('axios', () => jest.fn());
 
@@ -68,7 +68,7 @@ describe('SyntheticsService', () => {
 
   const logger = loggerMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: {
@@ -85,7 +85,7 @@ describe('SyntheticsService', () => {
     coreStart: mockCoreStart,
     encryptedSavedObjects: mockEncryptedSO(),
     savedObjectsClient: savedObjectsClientMock.create()!,
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   const getMockedService = (locationsNum: number = 1) => {
     const locations = times(locationsNum).map((n) => {
@@ -143,8 +143,6 @@ describe('SyntheticsService', () => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
     jest.clearAllMocks();
   });
-
-  afterEach(() => jest.restoreAllMocks());
 
   it('setup properly', async () => {
     const service = new SyntheticsService(serverMock);

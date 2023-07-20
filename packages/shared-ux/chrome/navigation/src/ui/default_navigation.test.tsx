@@ -8,23 +8,32 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { type Observable, of, BehaviorSubject } from 'rxjs';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 
 import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ProjectNavigationTreeDefinition, RootNavigationItemDefinition } from './types';
-import {
-  defaultAnalyticsNavGroup,
-  defaultDevtoolsNavGroup,
-  defaultManagementNavGroup,
-  defaultMlNavGroup,
-} from '../../mocks/src/default_navigation.test.helpers';
 import { navLinksMock } from '../../mocks/src/navlinks';
+import { act } from 'react-dom/test-utils';
+
+// There is a 100ms debounce to update project navigation tree
+const SET_NAVIGATION_DELAY = 100;
 
 describe('<DefaultNavigation />', () => {
   const services = getServicesMock();
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   describe('builds custom navigation tree', () => {
     test('render reference UI and build the navigation tree', async () => {
@@ -77,71 +86,125 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
-      expect(await findByTestId('nav-item-group1.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.item2')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A.group1A_1')).toBeVisible();
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
+      expect(await findByTestId(/nav-item-group1.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1/)).toBeVisible();
 
       // Click the last group to expand and show the last depth
-      (await findByTestId('nav-item-group1.group1A.group1A_1')).click();
+      (await findByTestId(/nav-item-group1.group1A.group1A_1/)).click();
 
-      expect(await findByTestId('nav-item-group1.group1A.group1A_1.item1')).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toEqual({
-        navigationTree: [
-          {
-            id: 'group1',
-            path: ['group1'],
-            title: '',
-            children: [
-              {
-                id: 'item1',
-                title: 'Item 1',
-                href: 'http://foo',
-                path: ['group1', 'item1'],
+      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": undefined,
+                "deepLink": undefined,
+                "href": "http://foo",
+                "id": "item1",
+                "isActive": false,
+                "path": Array [
+                  "group1",
+                  "item1",
+                ],
+                "renderItem": undefined,
+                "title": "Item 1",
               },
-              {
-                id: 'item2',
-                title: 'Item 2',
-                href: 'http://foo',
-                path: ['group1', 'item2'],
+              Object {
+                "children": undefined,
+                "deepLink": undefined,
+                "href": "http://foo",
+                "id": "item2",
+                "isActive": false,
+                "path": Array [
+                  "group1",
+                  "item2",
+                ],
+                "renderItem": undefined,
+                "title": "Item 2",
               },
-              {
-                id: 'group1A',
-                title: 'Group1A',
-                path: ['group1', 'group1A'],
-                children: [
-                  {
-                    id: 'item1',
-                    title: 'Group 1A Item 1',
-                    href: 'http://foo',
-                    path: ['group1', 'group1A', 'item1'],
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": undefined,
+                    "href": "http://foo",
+                    "id": "item1",
+                    "isActive": false,
+                    "path": Array [
+                      "group1",
+                      "group1A",
+                      "item1",
+                    ],
+                    "renderItem": undefined,
+                    "title": "Group 1A Item 1",
                   },
-                  {
-                    id: 'group1A_1',
-                    title: 'Group1A_1',
-                    path: ['group1', 'group1A', 'group1A_1'],
-                    children: [
-                      {
-                        id: 'item1',
-                        title: 'Group 1A_1 Item 1',
-                        href: 'http://foo',
-                        path: ['group1', 'group1A', 'group1A_1', 'item1'],
+                  Object {
+                    "children": Array [
+                      Object {
+                        "children": undefined,
+                        "deepLink": undefined,
+                        "href": "http://foo",
+                        "id": "item1",
+                        "isActive": false,
+                        "path": Array [
+                          "group1",
+                          "group1A",
+                          "group1A_1",
+                          "item1",
+                        ],
+                        "renderItem": undefined,
+                        "title": "Group 1A_1 Item 1",
                       },
                     ],
+                    "deepLink": undefined,
+                    "href": undefined,
+                    "id": "group1A_1",
+                    "isActive": false,
+                    "path": Array [
+                      "group1",
+                      "group1A",
+                      "group1A_1",
+                    ],
+                    "title": "Group1A_1",
                   },
                 ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1A",
+                "isActive": false,
+                "path": Array [
+                  "group1",
+                  "group1A",
+                ],
+                "title": "Group1A",
               },
             ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "group1",
+            "isActive": false,
+            "path": Array [
+              "group1",
+            ],
+            "title": "",
+            "type": "navGroup",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test('should read the title from deeplink', async () => {
@@ -196,53 +259,85 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toEqual({
-        navigationTree: [
-          {
-            id: 'root',
-            path: ['root'],
-            title: '',
-            children: [
-              {
-                id: 'group1',
-                path: ['root', 'group1'],
-                title: '',
-                children: [
-                  {
-                    id: 'item1',
-                    path: ['root', 'group1', 'item1'],
-                    title: 'Title from deeplink',
-                    deepLink: {
-                      id: 'item1',
-                      title: 'Title from deeplink',
-                      baseUrl: '',
-                      url: '',
-                      href: '',
+      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
                     },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "renderItem": undefined,
+                    "title": "Title from deeplink",
                   },
-                  {
-                    id: 'item2',
-                    title: 'Overwrite deeplink title',
-                    path: ['root', 'group1', 'item2'],
-                    deepLink: {
-                      id: 'item1',
-                      title: 'Title from deeplink',
-                      baseUrl: '',
-                      url: '',
-                      href: '',
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
                     },
+                    "href": undefined,
+                    "id": "item2",
+                    "isActive": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item2",
+                    ],
+                    "renderItem": undefined,
+                    "title": "Overwrite deeplink title",
                   },
                 ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": false,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "title": "",
               },
             ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": false,
+            "path": Array [
+              "root",
+            ],
+            "title": "",
+            "type": "navGroup",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test('should allow href for absolute links', async () => {
@@ -273,35 +368,59 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toEqual({
-        navigationTree: [
-          {
-            id: 'root',
-            path: ['root'],
-            title: '',
-            children: [
-              {
-                id: 'group1',
-                path: ['root', 'group1'],
-                title: '',
-                children: [
-                  {
-                    id: 'item1',
-                    path: ['root', 'group1', 'item1'],
-                    title: 'Absolute link',
-                    href: 'https://example.com',
+      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": undefined,
+                    "href": "https://example.com",
+                    "id": "item1",
+                    "isActive": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "renderItem": undefined,
+                    "title": "Absolute link",
                   },
                 ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": false,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "title": "",
               },
             ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": false,
+            "path": Array [
+              "root",
+            ],
+            "title": "",
+            "type": "navGroup",
           },
-        ],
-      });
+        ]
+      `);
     });
 
     test('should throw if href is not an absolute links', async () => {
@@ -365,9 +484,143 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
       expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
+      );
+    });
+
+    test('should set the active node', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+        {
+          id: 'item2',
+          title: 'Item 2',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const navigationBody: RootNavigationItemDefinition[] = [
+        {
+          type: 'navGroup',
+          id: 'group1',
+          children: [
+            {
+              link: 'item1' as any,
+              title: 'Item 1',
+            },
+            {
+              link: 'item2' as any,
+              title: 'Item 2',
+            },
+          ],
+        },
+      ];
+
+      const activeNodes$ = new BehaviorSubject([
+        [
+          {
+            id: 'group1',
+            title: 'Group 1',
+            path: ['group1'],
+          },
+          {
+            id: 'item1',
+            title: 'Item 1',
+            path: ['group1', 'item1'],
+          },
+        ],
+      ]);
+
+      const getActiveNodes$ = () => activeNodes$;
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} navLinks$={navLinks$} activeNodes$={getActiveNodes$()}>
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
+        </NavigationProvider>
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
+      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+      expect(await findByTestId(/nav-item-group1.item2/)).not.toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+    });
+
+    test('should override the history behaviour to set the active node', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const navigationBody: RootNavigationItemDefinition[] = [
+        {
+          type: 'navGroup',
+          id: 'group1',
+          children: [
+            {
+              link: 'item1' as any,
+              title: 'Item 1',
+              getIsActive: () => true,
+            },
+          ],
+        },
+      ];
+
+      const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([[]]);
+      const getActiveNodes$ = () => activeNodes$;
+
+      const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
+        nav.navigationTree.forEach((node) => {
+          if (node.children) {
+            node.children.forEach((child) => {
+              if (child.getIsActive) {
+                activeNodes$.next([[child]]);
+              }
+            });
+          }
+        });
+      };
+
+      const { findByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          activeNodes$={getActiveNodes$()}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
+        </NavigationProvider>
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
+      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
+        'euiSideNavItemButton-isSelected'
       );
     });
   });
@@ -424,6 +677,10 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -434,54 +691,31 @@ describe('<DefaultNavigation />', () => {
       });
 
       // The project navigation tree passed
-      expect(navTreeGenerated.navigationTree[0]).toEqual({
-        id: 'group1',
-        title: 'Group 1',
-        path: ['group1'],
-        children: [
-          {
-            id: 'item1',
-            title: 'Item 1',
-            path: ['group1', 'item1'],
-          },
-          {
-            id: 'item2',
-            path: ['group1', 'item2'],
-            title: 'Title from deeplink!',
-            deepLink: {
-              id: 'item2',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
-          },
-          {
-            id: 'item3',
-            title: 'Deeplink title overriden',
-            path: ['group1', 'item3'],
-            deepLink: {
-              id: 'item2',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
-          },
-        ],
+      expect(navTreeGenerated.navigationTree).toMatchSnapshot();
+    });
+
+    describe('cloud links', () => {
+      test('render the cloud link', async () => {
+        const { findByTestId } = render(
+          <NavigationProvider {...services}>
+            <DefaultNavigation projectNavigationTree={[]} />
+          </NavigationProvider>
+        );
+
+        expect(
+          await (
+            await findByTestId(
+              /nav-item-project_settings_project_nav.settings.cloudLinkUserAndRoles/
+            )
+          ).textContent
+        ).toBe('Mock Users & RolesExternal link');
+
+        expect(
+          await (
+            await findByTestId(/nav-item-project_settings_project_nav.settings.cloudLinkBilling/)
+          ).textContent
+        ).toBe('Mock Billing & SubscriptionsExternal link');
       });
-
-      // The default navigation tree for analytics
-      expect(navTreeGenerated.navigationTree[1]).toEqual(defaultAnalyticsNavGroup);
-
-      // The default navigation tree for ml
-      expect(navTreeGenerated.navigationTree[2]).toEqual(defaultMlNavGroup);
-
-      // The default navigation tree for devtools+
-      expect(navTreeGenerated.navigationTree[3]).toEqual(defaultDevtoolsNavGroup);
-
-      // The default navigation tree for management
-      expect(navTreeGenerated.navigationTree[4]).toEqual(defaultManagementNavGroup);
     });
   });
 });

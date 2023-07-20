@@ -8,12 +8,12 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { useFetchIndices } from '../../../../hooks/use_fetch_indices';
+import { CreateSLOForm } from '../../types';
 
 interface Option {
   label: string;
@@ -21,7 +21,7 @@ interface Option {
 }
 
 export function IndexSelection() {
-  const { control, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [dataViewOptions, setDataViewOptions] = useState<Option[]>([]);
@@ -35,8 +35,10 @@ export function IndexSelection() {
   });
 
   useEffect(() => {
-    setDataViewOptions(createDataViewOptions(dataViews));
-  }, [dataViews, dataViews.length]);
+    if (dataViews.length > 0) {
+      setDataViewOptions(createDataViewOptions(dataViews));
+    }
+  }, [dataViews]);
 
   useEffect(() => {
     if (indices.length === 0) {
@@ -67,7 +69,7 @@ export function IndexSelection() {
         ],
       });
     }
-  }, [searchValue, indices, indices.length]);
+  }, [indices.length, searchValue]);
 
   const onDataViewSearchChange = useMemo(
     () => debounce((value: string) => setSearchValue(value), 300),
@@ -95,7 +97,6 @@ export function IndexSelection() {
       isInvalid={getFieldState('indicator.params.index').invalid}
     >
       <Controller
-        shouldUnregister
         defaultValue=""
         name="indicator.params.index"
         control={control}
@@ -155,20 +156,19 @@ function createDataViewLabel(dataView: DataView) {
 
 function createDataViewOptions(dataViews: DataView[]): Option[] {
   const options = [];
-  if (dataViews.length > 0) {
-    options.push({
-      label: i18n.translate(
-        'xpack.observability.slo.sloEdit.customKql.indexSelection.dataViewOptionsLabel',
-        { defaultMessage: 'Select an existing Data View' }
-      ),
-      options: dataViews
-        .map((view) => ({
-          label: createDataViewLabel(view),
-          value: view.getIndexPattern(),
-        }))
-        .sort((a, b) => String(a.label).localeCompare(b.label)),
-    });
-  }
+
+  options.push({
+    label: i18n.translate(
+      'xpack.observability.slo.sloEdit.customKql.indexSelection.dataViewOptionsLabel',
+      { defaultMessage: 'Select an existing Data View' }
+    ),
+    options: dataViews
+      .map((view) => ({
+        label: createDataViewLabel(view),
+        value: view.getIndexPattern(),
+      }))
+      .sort((a, b) => String(a.label).localeCompare(b.label)),
+  });
 
   return options;
 }

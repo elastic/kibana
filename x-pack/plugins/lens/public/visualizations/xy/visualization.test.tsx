@@ -40,7 +40,7 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
@@ -50,7 +50,11 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { getAnnotationsLayers } from './visualization_helpers';
+import {
+  getAnnotationsLayers,
+  isAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+} from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
@@ -3240,6 +3244,59 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#cloneLayer', () => {
+    it('should turned cloned by-reference annotation groups into by-value', () => {
+      const state = exampleState();
+      const layer: XYByValueAnnotationLayerConfig = {
+        layerId: 'layer-id',
+        layerType: 'annotations',
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+
+      state.layers = [
+        {
+          ...layer,
+          annotationGroupId: 'some-group-id',
+          __lastSaved: {
+            ...layer,
+            title: '',
+            description: '',
+            tags: [],
+          },
+        },
+      ];
+
+      const newLayerId = 'new-layer-id';
+
+      const stateWithClonedLayer = xyVisualization.cloneLayer!(
+        state,
+        layer.layerId,
+        newLayerId,
+        new Map()
+      );
+
+      expect(
+        isAnnotationsLayer(stateWithClonedLayer.layers[0]) &&
+          isByReferenceAnnotationsLayer(stateWithClonedLayer.layers[0])
+      ).toBe(true);
+      expect(
+        isAnnotationsLayer(stateWithClonedLayer.layers[1]) &&
+          isByReferenceAnnotationsLayer(stateWithClonedLayer.layers[1])
+      ).toBe(false);
+    });
+  });
+
   describe('#getUniqueLabels', () => {
     it('creates unique labels for single annotations layer with repeating labels', async () => {
       const annotationLayer: XYAnnotationLayerConfig = {
@@ -3576,7 +3633,7 @@ describe('xy_visualization', () => {
   describe('getSupportedActionsForLayer', () => {
     it('should return no actions for a data layer', () => {
       expect(
-        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn(), jest.fn())
       ).toHaveLength(0);
     });
 
@@ -3598,6 +3655,7 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [annotationLayer],
             },
+            jest.fn(),
             jest.fn()
           )
         ).toEqual([]);
@@ -3631,6 +3689,7 @@ describe('xy_visualization', () => {
                 layers: [annotationLayer],
               },
               jest.fn(),
+              jest.fn(),
               true
             )
           ).toMatchInlineSnapshot(`
@@ -3638,7 +3697,7 @@ describe('xy_visualization', () => {
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
                 "description": "Saves annotation group as separate saved object",
-                "displayName": "Save annotation group",
+                "displayName": "Save to library",
                 "execute": [Function],
                 "icon": "save",
                 "isCompatible": true,
@@ -3679,6 +3738,7 @@ describe('xy_visualization', () => {
                   layers: [annotationLayer],
                 },
                 jest.fn(),
+                jest.fn(),
                 false
               )
               .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
@@ -3700,6 +3760,7 @@ describe('xy_visualization', () => {
                     },
                   ],
                 },
+                jest.fn(),
                 jest.fn(),
                 false
               )
@@ -3897,6 +3958,54 @@ describe('xy_visualization', () => {
           annotationGroups
         )
       ).not.toThrowError();
+    });
+  });
+
+  describe('#getCustomRemoveLayerText', () => {
+    it('should NOT return custom text for the remove layer button if not by-reference', () => {
+      expect(xyVisualization.getCustomRemoveLayerText!('first', exampleState())).toBeUndefined();
+    });
+
+    it('should return custom text for the remove layer button if by-reference', () => {
+      const layerId = 'layer-id';
+
+      const commonProps = {
+        layerId,
+        layerType: 'annotations' as const,
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+
+      const layer: XYByReferenceAnnotationLayerConfig = {
+        ...commonProps,
+        annotationGroupId: 'some-group-id',
+        __lastSaved: {
+          ...commonProps,
+          title: 'My saved object title',
+          description: 'some description',
+          tags: [],
+        },
+      };
+      expect(
+        xyVisualization.getCustomRemoveLayerText!(layerId, {
+          ...exampleState(),
+          layers: [layer],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "title": "Delete \\"My saved object title\\"",
+        }
+      `);
     });
   });
 });

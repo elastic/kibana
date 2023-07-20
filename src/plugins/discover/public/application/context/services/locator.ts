@@ -71,7 +71,7 @@ export class DiscoverContextAppLocatorDefinition
       path = addProfile(path, params.profile);
     }
 
-    path = `${path}context/${dataViewId}/${rowId}`;
+    path = `${path}context/${dataViewId}/${encodeURIComponent(rowId)}`;
 
     if (Object.keys(queryState).length) {
       path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);

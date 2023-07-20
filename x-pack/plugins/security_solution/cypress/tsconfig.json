@@ -36,6 +36,10 @@
     "@kbn/cases-plugin",
     "@kbn/data-plugin",
     "@kbn/core-http-common",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/es-archiver",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin",
   ]
 }

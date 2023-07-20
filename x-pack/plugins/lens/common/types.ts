@@ -17,10 +17,10 @@ import { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
-export type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+export type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
-export type { FormatFactory } from '@kbn/visualization-ui-components/public';
+export type { FormatFactory } from '@kbn/visualization-ui-components';
 
 export interface DateRange {
   fromDate: string;
@@ -35,7 +35,7 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
-export type SortingHint = 'version';
+export type SortingHint = string;
 
 export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
