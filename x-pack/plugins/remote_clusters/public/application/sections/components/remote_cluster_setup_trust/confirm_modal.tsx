@@ -56,7 +56,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
           <p>
             <FormattedMessage
               id="xpack.remoteClusters.clusterWizard.trustStep.body"
-              defaultMessage="Have you setup an authentication mechanism to securely connect your remote cluster?"
+              defaultMessage="Have you setup trust to connect to your remote cluster?"
             />
           </p>
         </EuiText>

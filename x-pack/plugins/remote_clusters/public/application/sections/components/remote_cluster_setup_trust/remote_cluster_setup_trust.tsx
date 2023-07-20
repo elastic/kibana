@@ -35,7 +35,7 @@ const i18nTexts = {
     'xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.description',
     {
       defaultMessage:
-        'Set up your authentication mechanism with API Keys to connect to your remote cluster.',
+        'Set up your authentication mechanism with API keys to connect to your remote cluster.',
     }
   ),
   certTitle: i18n.translate('xpack.remoteClusters.clusterWizard.trustStep.setupWithCert.title', {
@@ -76,7 +76,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
         <p>
           <FormattedMessage
             id="xpack.remoteClusters.clusterWizard.trustStep.title"
-            defaultMessage="To establish trust between this deployment and your newly created remote cluster, {br} choose one of the two options below."
+            defaultMessage="To establish trust between this deployment and your remote cluster, {br} choose one of the following options."
             values={{
               br: <br />,
             }}
