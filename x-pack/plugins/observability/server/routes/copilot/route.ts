@@ -92,7 +92,11 @@ const trackRoute = createObservabilityServerRoute({
   handler: async (resources): Promise<void> => {
     const { params, config } = resources;
 
-    if (!config.aiAssistant?.enabled) {
+    if (
+      !config.aiAssistant?.enabled ||
+      !config.aiAssistant.feedback.enabled ||
+      !config.aiAssistant.feedback.url
+    ) {
       throw Boom.notImplemented();
     }
 

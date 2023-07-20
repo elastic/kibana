@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord } from '../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { formatFieldValue } from './format_value';
 import { type ShouldShowFieldInTableHandler } from './get_should_show_field_handler';
 

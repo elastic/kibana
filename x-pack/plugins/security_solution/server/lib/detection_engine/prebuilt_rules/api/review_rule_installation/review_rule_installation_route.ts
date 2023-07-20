@@ -6,12 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
+import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleInstallationResponseBody,
   RuleInstallationInfoForReview,
   RuleInstallationStatsForReview,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertRuleToDiffable } from '../../logic/diff/normalization/convert_rule_to_diffable';

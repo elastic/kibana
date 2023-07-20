@@ -12,6 +12,7 @@ import {
   LOADING_INDICATOR,
   LOADING_INDICATOR_HIDDEN,
 } from '../screens/security_header';
+import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 
 const primaryButton = 0;
 
@@ -279,4 +280,9 @@ export const waitForPageToBeLoaded = () => {
 export const waitForWelcomePanelToBeLoaded = () => {
   cy.get(KIBANA_LOADING_ICON).should('exist');
   cy.get(KIBANA_LOADING_ICON).should('not.exist');
+};
+
+export const waitForTableToLoad = () => {
+  cy.get(EUI_BASIC_TABLE_LOADING).should('exist');
+  cy.get(EUI_BASIC_TABLE_LOADING).should('not.exist');
 };
