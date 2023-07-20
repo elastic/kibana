@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoverageOverviewRuleActivity } from '../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type {
   CoverageOverviewResponse,
   CoverageOverviewRuleAttributes,
-} from '../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
+} from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import {
   subtechniques,
   tactics,
@@ -44,7 +44,7 @@ export function buildCoverageOverviewDashboardModel(
 
   return {
     mitreTactics,
-    unmappedRules: buildUnmapedRules(apiResponse),
+    unmappedRules: buildUnmappedRules(apiResponse),
     metrics: calcMetrics(apiResponse.rules_data),
   };
 }
@@ -67,7 +67,7 @@ function calcMetrics(
   return metrics;
 }
 
-function buildUnmapedRules(
+function buildUnmappedRules(
   apiResponse: CoverageOverviewResponse
 ): CoverageOverviewDashboard['unmappedRules'] {
   const unmappedRules: CoverageOverviewDashboard['unmappedRules'] = {

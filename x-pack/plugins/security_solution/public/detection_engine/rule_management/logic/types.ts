@@ -31,7 +31,6 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import type { CoverageOverviewFilter } from '../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type { WarningSchema } from '../../../../common/api/detection_engine';
 import { RuleExecutionSummary } from '../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
@@ -76,7 +75,10 @@ import {
   TimestampOverrideFallbackDisabled,
 } from '../../../../common/api/detection_engine/model/rule_schema';
 
-import type { PatchRuleRequestBody } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  CoverageOverviewFilter,
+  PatchRuleRequestBody,
+} from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleCreateProps,

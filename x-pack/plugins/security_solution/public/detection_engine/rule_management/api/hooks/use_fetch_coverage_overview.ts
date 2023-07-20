@@ -8,8 +8,8 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
-import type { CoverageOverviewFilter } from '../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import type { CoverageOverviewFilter } from '../../../../../common/api/detection_engine';
+import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../common/api/detection_engine';
 import { fetchCoverageOverview } from '../api';
 import { buildCoverageOverviewDashboardModel } from '../../logic/coverage_overview/build_coverage_overview_dashboard_model';
 import type { CoverageOverviewDashboard } from '../../model/coverage_overview/dashboard';

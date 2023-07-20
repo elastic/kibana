@@ -16,7 +16,6 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import type { CoverageOverviewResponse } from '../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
 import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
 import type {
   UpgradeSpecificRulesRequest,
@@ -27,7 +26,10 @@ import type {
   ReviewRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
-import type { GetRuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  CoverageOverviewResponse,
+  GetRuleManagementFiltersResponse,
+} from '../../../../common/api/detection_engine/rule_management';
 import {
   RULE_MANAGEMENT_FILTERS_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
