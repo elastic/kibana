@@ -114,19 +114,22 @@ export const EsQueryExpression: React.FC<
     setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
   };
 
-  const getRuntimeFields = () => {
-    let runtimeMappings;
-    try {
-      runtimeMappings = get(JSON.parse(xJson), 'runtime_mappings');
-    } catch (e) {
-      // ignore error
-    }
-    if (runtimeMappings) {
-      const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
-      setRuntimeFields(currentRuntimeFields);
-      setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
-    }
-  };
+  const getRuntimeFields = useCallback(
+    (xjson: string) => {
+      let runtimeMappings;
+      try {
+        runtimeMappings = get(JSON.parse(xjson), 'runtime_mappings');
+      } catch (e) {
+        // ignore error
+      }
+      if (runtimeMappings) {
+        const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
+        setRuntimeFields(currentRuntimeFields);
+        setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
+      }
+    },
+    [esFields]
+  );
 
   const onTestQuery = useCallback(async () => {
     const isGroupAgg = isGroupAggregation(termField);
@@ -190,6 +193,15 @@ export const EsQueryExpression: React.FC<
     threshold,
     thresholdComparator,
   ]);
+
+  const onChange = useCallback(
+    (xjson: string) => {
+      setXJson(xjson);
+      setParam('esQuery', convertToJson(xjson));
+      getRuntimeFields(xjson);
+    },
+    [convertToJson, getRuntimeFields, setParam, setXJson]
+  );
 
   return (
     <Fragment>
@@ -267,10 +279,10 @@ export const EsQueryExpression: React.FC<
           width="100%"
           height="200px"
           value={xJson}
-          onChange={(xjson: string) => {
-            setXJson(xjson);
-            setParam('esQuery', convertToJson(xjson));
-            getRuntimeFields();
+          onChange={onChange}
+          editorDidMount={(editor) => {
+            // captures changes on copy/paste
+            editor.onDidPaste(() => onChange(editor.getValue()));
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
