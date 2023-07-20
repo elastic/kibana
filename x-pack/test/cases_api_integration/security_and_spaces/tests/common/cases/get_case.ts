@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { UserCommentAttachmentAttributes, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
+import { getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,

@@ -6,6 +6,8 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { AlertAggs, EventLogTypeStatusAggs } from '../../types';
 import type { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';

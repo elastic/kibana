@@ -17,10 +17,9 @@ import {
 import {
   UserCommentAttachmentAttributes,
   CaseAttributes,
-  CasePostRequest,
   CaseStatuses,
   CaseSeverity,
-} from '@kbn/cases-plugin/common/api';
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
@@ -32,6 +31,7 @@ import {
   CreateCaseUserAction,
   PushedUserAction,
 } from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest } from '@kbn/cases-plugin/common';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,

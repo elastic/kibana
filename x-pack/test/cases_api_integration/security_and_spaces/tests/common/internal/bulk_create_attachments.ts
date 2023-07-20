@@ -9,13 +9,10 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import {
-  BulkCreateCommentRequest,
-  Case,
-  CaseStatuses,
-  CommentRequestExternalReferenceSOType,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
+import { CaseStatuses } from '@kbn/cases-components';
+import { Case, AttachmentType } from '@kbn/cases-plugin/common';
+import { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -81,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validateCommentsIgnoringOrder = (
     comments: Case['comments'],
-    attachments: BulkCreateCommentRequest
+    attachments: BulkCreateAttachmentsRequest
   ) => {
     expect(comments?.length).to.eql(attachments.length);
 
@@ -181,9 +178,9 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const firstFileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
           const secondFileAttachment =
-            caseWithAttachments.comments![1] as CommentRequestExternalReferenceSOType;
+            caseWithAttachments.comments![1] as ExternalReferenceSOAttachmentPayload;
 
           expect(caseWithAttachments.totalComment).to.be(2);
           expect(firstFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
@@ -367,7 +364,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('400s when attempting to add more than 100 attachments', async () => {
         const comment = {
-          type: CommentType.user,
+          type: AttachmentType.user,
           comment: 'test',
           owner: 'securitySolutionFixture',
         };
@@ -393,12 +390,12 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: [
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
               comment: 'test',
               owner: 'securitySolutionFixture',
             },
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
               comment: 'test',
               owner: 'observabilityFixture',
             },
@@ -414,7 +411,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: [
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
               comment: 'test',
               owner: 'securitySolutionFixture',
             },
@@ -434,13 +431,13 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: [
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
               comment: 'test',
               owner: 'securitySolutionFixture',
             },
             // @ts-expect-error
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
             },
           ],
           expectedHttpCode: 400,
@@ -455,7 +452,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: 'case-id',
           params: [
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
               comment: longComment,
               owner: 'securitySolutionFixture',
             },
@@ -473,12 +470,12 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: [
               {
-                type: CommentType.user,
+                type: AttachmentType.user,
                 comment: 'test',
                 owner: 'securitySolutionFixture',
               },
               {
-                type: CommentType.user,
+                type: AttachmentType.user,
                 [attribute]: attribute,
                 comment: 'a comment',
                 owner: 'securitySolutionFixture',
@@ -493,7 +490,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const allRequestAttributes = {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           index: 'test-index',
           alertId: 'test-id',
           rule: {
@@ -510,7 +507,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: [
               {
-                type: CommentType.user,
+                type: AttachmentType.user,
                 comment: 'test',
                 owner: 'securitySolutionFixture',
               },
@@ -531,12 +528,12 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: [
               {
-                type: CommentType.user,
+                type: AttachmentType.user,
                 comment: 'test',
                 owner: 'securitySolutionFixture',
               },
               {
-                type: CommentType.alert,
+                type: AttachmentType.alert,
                 [attribute]: attribute,
                 alertId: 'test-id',
                 index: 'test-index',
@@ -558,7 +555,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: 'not-exists',
           params: [
             {
-              type: CommentType.user,
+              type: AttachmentType.user,
               comment: 'test',
               owner: 'securitySolutionFixture',
             },
@@ -587,7 +584,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: [
             {
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               alertId: 'test-id',
               index: 'test-index',
               rule: {
@@ -754,7 +751,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'securitySolutionFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             })),
             expectedHttpCode,
             auth,
@@ -1057,7 +1054,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     name: 'name',
                   },
                   owner: 'observabilityFixture',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                 },
               ],
             });
@@ -1101,7 +1098,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   name: 'name',
                 },
                 owner: 'observabilityFixture',
-                type: CommentType.alert,
+                type: AttachmentType.alert,
               },
             ],
           });
@@ -1136,7 +1133,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   name: 'name',
                 },
                 owner: 'securitySolutionFixture',
-                type: CommentType.alert,
+                type: AttachmentType.alert,
               },
             ],
             expectedHttpCode: 400,
@@ -1167,7 +1164,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   name: 'name',
                 },
                 owner: 'observabilityFixture',
-                type: CommentType.alert,
+                type: AttachmentType.alert,
               },
             ],
             auth: { user: obsOnlyReadAlerts, space: 'space1' },
@@ -1199,7 +1196,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   name: 'name',
                 },
                 owner: 'observabilityFixture',
-                type: CommentType.alert,
+                type: AttachmentType.alert,
               },
             ],
             auth: { user: obsSec, space: 'space1' },
@@ -1210,11 +1207,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alert format', () => {
-      type AlertComment = CommentType.alert;
+      type AlertComment = AttachmentType.alert;
 
       for (const [alertId, index, type] of [
-        ['1', ['index1', 'index2'], CommentType.alert],
-        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], AttachmentType.alert],
+        [['1', '2'], 'index', AttachmentType.alert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -1234,13 +1231,13 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCommentAlertReq,
             alertId: '1',
             index: ['index1'],
-            type: CommentType.alert as const,
+            type: AttachmentType.alert as const,
           },
           {
             ...postCommentAlertReq,
             alertId: ['1', '2'],
             index: ['index', 'other-index'],
-            type: CommentType.alert as const,
+            type: AttachmentType.alert as const,
           },
         ];
 

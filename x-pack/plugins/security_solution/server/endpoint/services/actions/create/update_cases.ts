@@ -6,6 +6,7 @@
  */
 
 import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { APP_ID } from '../../../../../common';
