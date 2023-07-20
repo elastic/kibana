@@ -15,7 +15,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { AGENTS_SETUP_API_ROUTES, EPM_API_ROUTES, SETUP_API_ROUTE } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
-import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
+import { EndpointDataLoadingError, retryOnError, wrapErrorAndRejectPromise } from './utils';
 
 export interface SetupFleetForEndpointResponse {
   endpointPackage: BulkInstallPackageInfo;
@@ -204,7 +204,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
     return bulkResp[0] as BulkInstallPackageInfo;
   };
 
-  return retryInstallOrUpgradeEndpointFleetPackage(updatePackages, logger)
+  return retryOnError(updatePackages, ['no_shard_available_action_exception'], logger, 5, 10000)
     .then((result) => {
       usageRecord.finish = new Date().toISOString();
       usageRecord.status = 'success';
@@ -228,50 +228,3 @@ function isFleetBulkInstallError(
 ): installResponse is IBulkInstallPackageHTTPError {
   return 'error' in installResponse && installResponse.error !== undefined;
 }
-
-function isNoShardAvailableActionExceptionError(error: Error): boolean {
-  return error.message.includes('no_shard_available_action_exception');
-}
-
-// retry logic for install or upgrade of endpoint package
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS = 5;
-
-const retryInstallOrUpgradeEndpointFleetPackage = async <T>(
-  callback: () => Promise<T>,
-  logger: ToolingLog
-): Promise<T> => {
-  const log = logger.withType('retryInstallOrUpgradeEndpointFleetPackage');
-  let attempt = 1;
-  let responsePromise: Promise<T>;
-
-  while (attempt <= MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS) {
-    const thisAttempt = attempt;
-    attempt++;
-
-    log.info(
-      `retryInstallOrUpgradeEndpointFleetPackage(): attempt ${thisAttempt} started at: ${new Date().toISOString()}`
-    );
-
-    try {
-      responsePromise = callback(); // store promise so that if it fails and no more attempts, we return the last failure
-      return await responsePromise;
-    } catch (err) {
-      log.info(
-        `retryInstallOrUpgradeEndpointFleetPackage(): attempt ${thisAttempt} failed with:`,
-        err
-      );
-
-      // If not a no_shard_available_action_exception error, then end loop here and throw
-      if (!isNoShardAvailableActionExceptionError(err)) {
-        log.error(err);
-        return Promise.reject(err);
-      }
-    }
-
-    await delay(10000);
-  }
-
-  // @ts-expect-error;
-  return responsePromise;
-};
