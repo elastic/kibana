@@ -54,7 +54,10 @@ export const DATA_COMPARISON_TYPE_LABEL = {
 } as const;
 
 export const DRIFT_P_VALUE_THRESHOLD = 0.05;
-
+/**
+ * Table generated from https://github.com/elastic/kibana-drift-data-generation/blob/main/notebooks/chi_squared.ipynb
+ * until we find a low size replacement for doing chi2test
+ */
 export const CRITICAL_VALUES_TABLE = [
   [
     23.93, 17.32, 10.83, 6.63, 5.41, 4.71, 4.22, 3.84, 3.54, 3.28, 3.06, 2.87, 2.71, 2.55, 2.42,

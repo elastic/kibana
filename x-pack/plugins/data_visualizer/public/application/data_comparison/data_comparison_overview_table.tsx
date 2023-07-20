@@ -99,7 +99,7 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'featureName',
       name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldNameLabel', {
-        defaultMessage: 'Field name',
+        defaultMessage: 'Name',
       }),
       'data-test-subj': 'mlDataComparisonOverviewTableFeatureName',
       sortable: true,
@@ -108,7 +108,7 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'fieldType',
       name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldTypeLabel', {
-        defaultMessage: 'Field type',
+        defaultMessage: 'Type',
       }),
       'data-test-subj': 'mlDataComparisonOverviewTableFeatureType',
       sortable: true,

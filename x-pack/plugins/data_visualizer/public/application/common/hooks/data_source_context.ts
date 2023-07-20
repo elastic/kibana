@@ -6,8 +6,8 @@
  */
 
 import { createContext, useContext } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 export const DataSourceContext = createContext<{
   dataView: DataView | never;
