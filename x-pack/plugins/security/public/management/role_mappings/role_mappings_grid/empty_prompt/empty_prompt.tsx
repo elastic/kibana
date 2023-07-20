@@ -10,6 +10,8 @@ import React, { Fragment } from 'react';
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
@@ -22,7 +24,7 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
   history,
   readOnly = false,
 }) => (
-  <EuiEmptyPrompt
+  <KibanaPageTemplate.EmptyPrompt
     iconType="managementApp"
     title={
       <h1>
@@ -37,19 +39,18 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
             defaultMessage="Create your first role mapping"
           />
         )}
+
       </h1>
     }
     body={
-      <Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.security.management.roleMappings.emptyPromptDescription"
-            defaultMessage="Role mappings control which roles are assigned to your users."
-          />
-        </p>
-      </Fragment>
+      <p>
+        <FormattedMessage
+          id="xpack.security.management.roleMappings.emptyPromptDescription"
+          defaultMessage="Role mappings control which roles are assigned to your users."
+        />
+      </p>
     }
     actions={readOnly ? null : <CreateRoleMappingButton history={history} />}
-    data-test-subj="roleMappingsEmptyPrompt"
+
   />
 );
