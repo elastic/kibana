@@ -10,11 +10,8 @@ import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitorAttributes, ServiceLocations } from '../../common/runtime_types';
-import {
-  PrivateLocation,
-  ServiceLocation,
-} from '../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
+import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
