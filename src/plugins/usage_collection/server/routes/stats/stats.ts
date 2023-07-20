@@ -55,8 +55,8 @@ export function registerStatsRoute({
       path: '/api/stats',
       options: {
         authRequired: !config.allowAnonymous,
-        access: 'public',
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
+        access: 'public',
       },
       validate: {
         query: schema.object({
