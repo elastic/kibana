@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import { createPdfV2Params, createPngV2Params } from '..';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UsageStatsPayloadTestFriendly } from '../../../api_integration/services/usage_api';
@@ -45,14 +46,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('API counters: management', () => {
-      enum paths {
-        LIST = '/api/reporting/jobs/list',
-        COUNT = '/api/reporting/jobs/count',
-        INFO = '/api/reporting/jobs/info/kraz0qle154g0763b569zz83',
-        ILM = '/api/reporting/ilm_policy_status',
-        DIAG_BROWSER = '/api/reporting/diagnose/browser',
-        DIAG_SCREENSHOT = '/api/reporting/diagnose/screenshot',
-      }
+      const paths = {
+        LIST: INTERNAL_ROUTES.JOBS.LIST,
+        COUNT: INTERNAL_ROUTES.JOBS.COUNT,
+        INFO: INTERNAL_ROUTES.JOBS.COUNT + '/kraz0qle154g0763b569zz83',
+        ILM: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS,
+        DIAG_BROWSER: INTERNAL_ROUTES.DIAGNOSE.BROWSER,
+        DIAG_SCREENSHOT: INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT,
+      };
 
       let initialStats: UsageStatsPayloadTestFriendly;
       let stats: UsageStatsPayloadTestFriendly;
@@ -91,11 +92,11 @@ export default function ({ getService }: FtrProviderContext) {
       it('job info', async () => {
         const initialCount = getUsageCount(
           initialStats,
-          `get /api/reporting/jobs/info/{docId}:printable_pdf`
+          `get ${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/{docId}:printable_pdf`
         );
-        expect(getUsageCount(stats, `get /api/reporting/jobs/info/{docId}:printable_pdf`)).to.be(
-          CALL_COUNT + initialCount
-        );
+        expect(
+          getUsageCount(stats, `get ${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/{docId}:printable_pdf`)
+        ).to.be(CALL_COUNT + initialCount);
       });
     });
 

@@ -197,7 +197,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const {
       body: [job],
     } = await supertestWithoutAuth
-      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
+      .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send()
