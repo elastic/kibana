@@ -45,11 +45,13 @@ run(
       const maybeValidationResult: Result<CypressJunitReport> =
         validatedCypressJunitReport(unvalidatedReportJson);
 
+      const boilerplate = `This script validates each Junit report to ensure that it was produced by Cypress and that it has not already been processed by this script
+This script relies on various assumptions. If your junit report is valid, then you must enhance this script in order to have support for it. If you are not trying to transform a Cypress junit report into a report that is compatible with Kibana Operations workflows, then you are running this script in error.`;
+
       const logError = (error: string) => {
         log.error(`Error while validating ${path}: ${error}
-
-This script validates each Junit report to ensure that it was produced by Cypress and that it has not already been processed by this script
-This script relies on various assumptions. If your junit report is valid, then you must enhance this script in order to have support for it. If you are not trying to transform a Cypress junit report into a report that is compatible with Kibana Operations workflows, then you are running this script in error.`);
+${boilerplate}
+`);
       };
 
       if ('error' in maybeValidationResult) {
@@ -60,14 +62,16 @@ This script relies on various assumptions. If your junit report is valid, then y
 
       const reportJson: CypressJunitReport = maybeValidationResult.result;
 
-      const maybeAlreadyProcessedResult = isReportAlreadyProcessed(reportJson);
-      if ('error' in maybeAlreadyProcessedResult) {
-        logError(maybeAlreadyProcessedResult.error);
+      const { processed, hadTestCases } = isReportAlreadyProcessed(reportJson);
+      if (hadTestCases === false) {
+        log.warning(`${path} had no test cases. Skipping it.
+${boilerplate}
+`);
         // If there is an error, continue trying to process other files.
         continue;
       }
 
-      if (maybeAlreadyProcessedResult.result) {
+      if (processed) {
         logError(
           "This report appears to have already been transformed because a '·' character was found in the classname. If your test intentionally includes this character as part of its name, remove it. This character is reserved for encoding file paths in the classname attribute."
         );
@@ -209,7 +213,9 @@ type Result<T> = { result: T } | { error: string };
 /*
  * This checks if the junit report contains '·' characters in the classname. This character is used by the kibana operations triage scripts, and the failed test reporter, to replace `.` characters in a path as part of its encoding scheme. If this character is found, we assume that the encoding has already taken place.
  */
-function isReportAlreadyProcessed(report: CypressJunitReport): Result<boolean> {
+function isReportAlreadyProcessed(
+  report: CypressJunitReport
+): { processed: boolean; hadTestCases: true } | { processed: undefined; hadTestCases: false } {
   for (const testsuite of report.testsuites.testsuite) {
     if (!testsuite.testcase) {
       // If there are no testcases for this testsuite, skip it
@@ -217,13 +223,13 @@ function isReportAlreadyProcessed(report: CypressJunitReport): Result<boolean> {
     }
     for (const testcase of testsuite.testcase) {
       if (testcase.$.classname.indexOf('·') !== -1) {
-        return { result: true };
+        return { processed: true, hadTestCases: true };
       } else {
-        return { result: false };
+        return { processed: false, hadTestCases: true };
       }
     }
   }
-  return { error: 'the report had no test cases.' };
+  return { processed: undefined, hadTestCases: false };
 }
 
 /**
