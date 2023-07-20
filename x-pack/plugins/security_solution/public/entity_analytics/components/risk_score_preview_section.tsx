@@ -95,15 +95,16 @@ export const RiskScorePreviewSection = () => {
 
   const { addError } = useAppToasts();
 
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
+    data_view_id: indexPattern.title, // TODO @nkhristinin verify this is correct
     filter: filters,
     range: {
       start: dateRange.from,
       end: dateRange.to,
     },
   });
-
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   const hosts = getRiskiestScores(data?.scores, 'host.name');
   const users = getRiskiestScores(data?.scores, 'user.name');
