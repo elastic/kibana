@@ -12,20 +12,20 @@ import { i18n } from '@kbn/i18n';
 export function InsightError() {
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.obsAiAssistant.insight.error.title', {
+      title={i18n.translate('xpack.observabilityAiAssistant.insight.error.title', {
         defaultMessage: 'Error',
       })}
       color="danger"
       iconType="error"
     >
-      {i18n.translate('xpack.obsAiAssistant.insight.error.description', {
+      {i18n.translate('xpack.observabilityAiAssistant.insight.error.description', {
         defaultMessage: 'An error occured.',
       })}
 
       <EuiSpacer size="m" />
 
       <EuiButton fill color="danger">
-        {i18n.translate('xpack.obsAiAssistant.insight.error.buttonLabel', {
+        {i18n.translate('xpack.observabilityAiAssistant.insight.error.buttonLabel', {
           defaultMessage: 'Regenerate',
         })}
       </EuiButton>

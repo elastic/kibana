@@ -21,7 +21,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
           <em>
-            {i18n.translate('xpack.obsAiAssistant.insight.feedbackButtons.title', {
+            {i18n.translate('xpack.observabilityAiAssistant.insight.feedbackButtons.title', {
               defaultMessage: 'Was this helpful?',
             })}
           </em>
@@ -37,7 +37,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
               size="s"
               onClick={() => onClickFeedback('positive')}
             >
-              {i18n.translate('xpack.obsAiAssistant.insight.feedbackButtons.positive', {
+              {i18n.translate('xpack.observabilityAiAssistant.insight.feedbackButtons.positive', {
                 defaultMessage: 'Yes',
               })}
             </EuiButtonEmpty>
@@ -50,7 +50,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
               size="s"
               onClick={() => onClickFeedback('negative')}
             >
-              {i18n.translate('xpack.obsAiAssistant.insight.feedbackButtons.negative', {
+              {i18n.translate('xpack.observabilityAiAssistant.insight.feedbackButtons.negative', {
                 defaultMessage: 'No',
               })}
             </EuiButtonEmpty>
