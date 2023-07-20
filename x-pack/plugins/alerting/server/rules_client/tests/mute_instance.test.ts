@@ -160,7 +160,7 @@ describe('muteInstance()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
       await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',

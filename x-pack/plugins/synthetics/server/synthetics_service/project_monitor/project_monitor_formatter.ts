@@ -21,8 +21,8 @@ import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monito
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
-  SyntheticsMonitorWithSecrets,
-  EncryptedSyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
+  EncryptedSyntheticsMonitorAttributes,
   ServiceLocationErrors,
   ProjectMonitor,
   Locations,
@@ -122,7 +122,7 @@ export class ProjectMonitorFormatter {
 
     const normalizedNewMonitors: SyntheticsMonitor[] = [];
     const normalizedUpdateMonitors: Array<{
-      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
+      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>;
       monitor: SyntheticsMonitor;
     }> = [];
 
@@ -243,10 +243,12 @@ export class ProjectMonitorFormatter {
       filter: this.projectFilter,
     });
 
-    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
+    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
     for await (const result of finder.find()) {
       hits.push(
-        ...(result.saved_objects as Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>)
+        ...(result.saved_objects as Array<
+          SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>
+        >)
       );
     }
 
@@ -323,12 +325,12 @@ export class ProjectMonitorFormatter {
   };
 
   private getDecryptedMonitors = async (
-    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>
+    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
   ) => {
     return await pMap(
       monitors,
       async (monitor) =>
-        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
           syntheticsMonitorType,
           monitor.id,
           {
@@ -342,11 +344,11 @@ export class ProjectMonitorFormatter {
   private updateMonitorsBulk = async (
     monitors: Array<{
       monitor: SyntheticsMonitor;
-      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
+      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>;
     }>
   ): Promise<
     | {
-        editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>>;
+        editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>>;
         errors: ServiceLocationErrors;
         updatedCount: number;
       }

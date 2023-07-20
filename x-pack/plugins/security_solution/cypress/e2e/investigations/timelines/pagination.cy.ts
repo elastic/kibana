@@ -15,7 +15,6 @@ import {
   TIMELINE_FLYOUT,
 } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 import { login, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -27,7 +26,7 @@ const defaultPageSize = 25;
 describe('Pagination', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('timeline');
+    cy.task('esArchiverLoad', 'timeline');
   });
 
   beforeEach(() => {
@@ -38,7 +37,7 @@ describe('Pagination', () => {
   });
 
   after(() => {
-    esArchiverUnload('timeline');
+    cy.task('esArchiverUnload', 'timeline');
   });
 
   it(`should have ${defaultPageSize} events in the page by default`, () => {
