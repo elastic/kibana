@@ -123,7 +123,7 @@ import type {
   RuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '../../common/detection_engine/rule_schema';
+} from '../../common/api/detection_engine/model';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
