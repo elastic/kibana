@@ -81,7 +81,7 @@ export interface FieldExampleCheck {
 }
 
 export interface FieldValidationResults {
-  examples: CategoryFieldExample[];
+  examples?: CategoryFieldExample[];
   sampleSize: number;
   overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
   validationChecks: FieldExampleCheck[];

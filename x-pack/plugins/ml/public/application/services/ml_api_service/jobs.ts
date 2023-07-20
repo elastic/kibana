@@ -341,7 +341,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    includeExamples?: boolean
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -354,6 +355,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       analyzer,
       runtimeMappings,
       indicesOptions,
+      includeExamples,
     });
     return httpService.http<FieldValidationResults>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,

@@ -22,11 +22,11 @@ export function useValidateFieldRequest() {
       index: string,
       field: string,
       timeField: string,
-      from: number | undefined,
-      to: number | undefined,
+      start: number | undefined,
+      end: number | undefined,
       queryIn: QueryDslQueryContainer
     ) => {
-      const query = processQuery(queryIn, timeField, from, to);
+      const query = processQuery(queryIn, timeField, start, end);
       const resp = await http.post<FieldValidationResults>(
         AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
         {
@@ -36,10 +36,14 @@ export function useValidateFieldRequest() {
             size: 5,
             field,
             timeField,
-            start: from,
-            end: to,
-            runtimeMappings: {},
+            start,
+            end,
+            // only text fields are supported in patten analysis,
+            // and it is not possible to create a text run time field
+            // so runtimeMappings are not needed
+            runtimeMappings: undefined,
             indicesOptions: undefined,
+            includeExamples: false,
           }),
           version: '1',
         }

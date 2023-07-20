@@ -51,6 +51,7 @@ export const defineLogCategorizationRoutes = (
             analyzer,
             runtimeMappings,
             indicesOptions,
+            includeExamples,
           } = request.body;
 
           const { validateCategoryExamples } = categorizationExamplesProvider(client);
@@ -64,7 +65,8 @@ export const defineLogCategorizationRoutes = (
             end,
             analyzer ?? {},
             runtimeMappings,
-            indicesOptions
+            indicesOptions,
+            includeExamples
           );
 
           return response.ok({

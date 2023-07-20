@@ -210,7 +210,8 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: estypes.IndicesOptions | undefined
+    indicesOptions: estypes.IndicesOptions | undefined,
+    includeExamples = true
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
@@ -228,6 +229,14 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     const { examples } = resp;
     const sampleSize = examples.length;
     validationResults.createTokenCountResult(examples, sampleSize);
+
+    if (includeExamples === false) {
+      return {
+        overallValidStatus: validationResults.overallResult,
+        validationChecks: validationResults.results,
+        sampleSize,
+      };
+    }
 
     // sort examples by number of tokens, keeping track of their original order
     // with an origIndex property
