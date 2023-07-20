@@ -9,11 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import type { ReportingCore } from '../..';
-import { INTERNAL_ROUTES } from '../../../common/constants';
-import { generatePngObservable } from '../../export_types/common';
-import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { authorizedUserPreRouting, getCounters } from '../lib';
+import type { ReportingCore } from '../../..';
+import { INTERNAL_ROUTES } from '../../../../common/constants';
+import { generatePngObservable } from '../../../export_types/common';
+import { getAbsoluteUrlFactory } from '../../../export_types/common/get_absolute_url';
+import { authorizedUserPreRouting, getCounters } from '../../lib';
 
 const path = INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT;
 

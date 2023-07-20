@@ -10,17 +10,17 @@ import { ReportingCore } from '..';
 import { registerDeprecationRoutes as internalDeprecationRoutes } from './internal/deprecations/deprecations';
 import { registerDiagnosticRoutes as internalDiagnosticsRoutes } from './internal/diagnostic';
 import { registerGenerateCsvFromSavedObjectImmediate as internalCsvFromSavedObjectImmediate } from './internal/generate/csv_searchsource_immediate';
-import { registerJobGeneration as internalJobGenerationRoutes } from './internal/generate/generate_from_jobparams';
+import { registerGeneration as internalGenerationRoutes } from './internal/generate/generate_from_jobparams';
 import { registerJobRoutes as internalJobRoutes } from './internal/management';
-import { registerJobGenerationRoutes as publicJobGenerationRoutes } from './public/generate_from_jobparams';
+import { registerGenerationRoutes as publicGenerationRoutes } from './public/generate_from_jobparams';
 import { registerJobRoutes as publicJobRoutes } from './public/jobs';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   internalDeprecationRoutes(reporting, logger);
   internalDiagnosticsRoutes(reporting, logger);
   internalCsvFromSavedObjectImmediate(reporting, logger);
-  internalJobGenerationRoutes(reporting, logger);
+  internalGenerationRoutes(reporting, logger);
   internalJobRoutes(reporting);
-  publicJobGenerationRoutes(reporting, logger);
+  publicGenerationRoutes(reporting, logger);
   publicJobRoutes(reporting);
 }

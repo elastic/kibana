@@ -13,7 +13,7 @@ import { INTERNAL_ROUTES } from '../../../../common/constants';
 import type { BaseParams } from '../../../types';
 import { authorizedUserPreRouting, getCounters, RequestHandler } from '../../lib';
 
-export function registerJobGeneration(reporting: ReportingCore, logger: Logger) {
+export function registerGeneration(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 

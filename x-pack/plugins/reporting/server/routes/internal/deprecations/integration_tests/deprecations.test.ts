@@ -10,14 +10,14 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
+import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../test_helpers';
-import { registerDeprecations } from '../deprecations';
+} from '../../../../test_helpers';
+import { registerDeprecationRoutes } from '../deprecations';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -53,7 +53,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   it('correctly handles authz when security is unavailable', async () => {
     const core = await createReportingCore({});
 
-    registerDeprecations(core, loggingSystemMock.createLogger());
+    registerDeprecationRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)
@@ -67,7 +67,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     security.license.isEnabled.mockReturnValue(false);
     const core = await createReportingCore({ security });
 
-    registerDeprecations(core, loggingSystemMock.createLogger());
+    registerDeprecationRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)

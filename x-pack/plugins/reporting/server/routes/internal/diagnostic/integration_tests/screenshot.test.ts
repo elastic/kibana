@@ -9,18 +9,18 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { defer } from 'rxjs';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
-import { generatePngObservable } from '../../../export_types/common';
+import { ReportingCore } from '../../../..';
+import { INTERNAL_ROUTES } from '../../../../../common/constants';
+import { generatePngObservable } from '../../../../export_types/common';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
-} from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
+} from '../../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
 
-jest.mock('../../../export_types/common/generate_png');
+jest.mock('../../../../export_types/common/generate_png');
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

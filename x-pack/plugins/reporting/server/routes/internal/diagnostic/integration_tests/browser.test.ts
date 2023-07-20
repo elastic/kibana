@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
-import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import supertest from 'supertest';
-import { ReportingCore } from '../../..';
+import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import * as Rx from 'rxjs';
+import supertest from 'supertest';
+import { ReportingCore } from '../../../..';
+import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
-} from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
+} from '../../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerDiagnoseBrowser } from '../browser';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

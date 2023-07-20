@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../lib/content_stream', () => ({
+jest.mock('../../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 import { estypes } from '@elastic/elasticsearch';
@@ -15,17 +15,17 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
+import { ReportingCore } from '../../../..';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
+import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../test_helpers';
-import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
-import { registerJobInfoRoutes } from '../jobs';
+} from '../../../../test_helpers';
+import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../../types';
+import { registerJobRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -115,7 +115,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('fails on malformed download IDs', async () => {
     mockEsClient.search.mockResponseOnce(getHits());
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
 
@@ -141,7 +141,7 @@ describe('GET /api/reporting/jobs/download', () => {
       mockConfigSchema
     );
     core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
 
@@ -155,7 +155,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns 404 if job not found', async () => {
     mockEsClient.search.mockResponseOnce(getHits());
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
 
@@ -169,7 +169,7 @@ describe('GET /api/reporting/jobs/download', () => {
         payload: { title: 'invalid!' },
       })
     );
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
 
@@ -184,7 +184,7 @@ describe('GET /api/reporting/jobs/download', () => {
       })
     );
 
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
 
@@ -199,7 +199,7 @@ describe('GET /api/reporting/jobs/download', () => {
       })
     );
 
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
 
@@ -214,7 +214,7 @@ describe('GET /api/reporting/jobs/download', () => {
         payload: { title: 'incomplete!' },
       })
     );
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
     await supertest(httpSetup.server.listener)
@@ -234,7 +234,7 @@ describe('GET /api/reporting/jobs/download', () => {
         payload: { title: 'failing job!' },
       })
     );
-    registerJobInfoRoutes(core);
+    registerJobRoutes(core);
 
     await server.start();
     await supertest(httpSetup.server.listener)
@@ -262,7 +262,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     it('when a known job-type is complete', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobInfoRoutes(core);
+      registerJobRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -278,7 +278,7 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       core.pluginSetupDeps.security = null;
 
-      registerJobInfoRoutes(core);
+      registerJobRoutes(core);
 
       await server.start();
 
@@ -295,7 +295,7 @@ describe('GET /api/reporting/jobs/download', () => {
           jobType: 'unencodedJobType',
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -312,7 +312,7 @@ describe('GET /api/reporting/jobs/download', () => {
           outputContentType: 'application/html',
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -334,7 +334,7 @@ describe('GET /api/reporting/jobs/download', () => {
           title: '日本語ダッシュボード',
         })
       );
-      registerJobInfoRoutes(core);
+      registerJobRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -371,7 +371,7 @@ describe('GET /api/reporting/jobs/download', () => {
         mockStartDeps
       );
 
-      registerJobInfoRoutes(core);
+      registerJobRoutes(core);
 
       await server.start();
 
