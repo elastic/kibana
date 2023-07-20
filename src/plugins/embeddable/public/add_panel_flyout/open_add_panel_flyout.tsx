@@ -23,9 +23,11 @@ const LazyAddPanelFlyout = React.lazy(async () => {
 export const openAddPanelFlyout = ({
   container,
   onAddPanel,
+  onClose = () => {},
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
+  onClose?: () => void;
 }): OverlayRef => {
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
@@ -37,6 +39,7 @@ export const openAddPanelFlyout = ({
     {
       'data-test-subj': 'dashboardAddPanel',
       ownFocus: true,
+      onClose,
     }
   );
   return flyoutSession;
