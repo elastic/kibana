@@ -11,7 +11,7 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ViewMode } from '@kbn/embeddable-plugin/public';
-import { SecurityPageName } from '../../../common';
+import { APP_UI_ID, SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 
@@ -79,7 +79,7 @@ const DashboardToolBarComponent = ({
         `,
         topNavMenuAlignRight: true,
       }}
-      originatingApp="security"
+      originatingApp={APP_UI_ID}
       originatingPath={`dashboards/${dashboardId}/edit`}
     />
   );

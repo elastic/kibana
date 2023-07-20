@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
 import { useKibana } from '../../common/lib/kibana';
-import { APP_ID } from '../../../common';
+import { APP_UI_ID } from '../../../common';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -51,14 +51,19 @@ const DashboardRendererComponent = ({
       Promise.resolve({
         getInitialInput: () => ({ timeRange, viewMode, query, filters }),
         getIncomingEmbeddable: () =>
-          embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_ID, true),
+          embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
       }),
     [embeddable, filters, query, timeRange, viewMode]
   );
+  const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
+    React.ReactElement | undefined
+  >(undefined);
 
   const refetchByForceRefresh = useCallback(() => {
     dashboardContainer?.forceRefresh();
   }, [dashboardContainer]);
+
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     dispatch(
@@ -79,12 +84,24 @@ const DashboardRendererComponent = ({
     dashboardContainer?.updateInput({ timeRange, query, filters });
   }, [dashboardContainer, filters, query, timeRange]);
 
+  useEffect(() => {
+    if (wrapperRef) {
+      setDashboardContainerRenderer(
+        <DashboardContainerRenderer
+          ref={onDashboardContainerLoaded}
+          savedObjectId={savedObjectId}
+          getCreationOptions={getCreationOptions}
+        />
+      );
+    }
+
+    return () => {
+      setDashboardContainerRenderer(undefined);
+    };
+  }, [getCreationOptions, onDashboardContainerLoaded, savedObjectId]);
+
   return savedObjectId && canReadDashboard ? (
-    <DashboardContainerRenderer
-      ref={onDashboardContainerLoaded}
-      savedObjectId={savedObjectId}
-      getCreationOptions={getCreationOptions}
-    />
+    <div ref={wrapperRef}>{dashboardContainerRenderer}</div>
   ) : null;
 };
 DashboardRendererComponent.displayName = 'DashboardRendererComponent';
