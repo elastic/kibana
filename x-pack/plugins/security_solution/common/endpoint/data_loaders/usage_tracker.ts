@@ -63,7 +63,7 @@ export class UsageTracker {
   }
 
   create(id: string): UsageRecord {
-    this.records[id] = this.records[id] ?? { [id]: { count: 0, records: [] } };
+    this.records[id] = this.records[id] ?? { count: 0, records: [] };
 
     const maxRecords = this.options.maxRecordsPerType;
     const usageRecord = new UsageRecord(id);
@@ -95,7 +95,7 @@ export class UsageTracker {
       Object.entries(this.records)
         .map(([key, { count, records: usageRecords }]) => {
           return `
-  [${key}]: Invoked ${count} times
+  [${key}] Invoked ${count} times. Last ${this.options.maxRecordsPerType}:
       ${usageRecords
         .map((record) => {
           return record.toString();
