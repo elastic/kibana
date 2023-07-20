@@ -27,6 +27,7 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/dom-drag-drop",
     "@kbn/shared-ux-utility",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }
