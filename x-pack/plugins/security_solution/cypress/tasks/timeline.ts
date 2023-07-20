@@ -107,6 +107,8 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
+  cy.get('[data-test-subj="progress-bar"]').should('exist');
+  cy.get('[data-test-subj="progress-bar"]').should('not.exist');
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
