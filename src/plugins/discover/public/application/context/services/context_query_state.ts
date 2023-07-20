@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface ContextFetchState {
   /**

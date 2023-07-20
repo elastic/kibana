@@ -131,7 +131,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
 };
 
 // FAILING: https://github.com/elastic/kibana/issues/155534
-describe.skip('The metric threshold alert type', () => {
+describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1401,7 +1401,7 @@ describe.skip('The metric threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertDetailsUrl: '',
         alertState: 'NO DATA',
         group: '*',
         groupByKeys: undefined,
@@ -1901,6 +1901,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   logs: {
     app_target: 'logs-ui',
   },
+  enabled: true,
   sources,
 });
 
@@ -1961,10 +1962,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     alertInstance.state = newState;
     return alertInstance.instance;
   });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
   return alertInstance.instance;
 });
 

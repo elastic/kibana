@@ -12,7 +12,7 @@ import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/
 import {
   BulkPatchRulesRequestBody,
   BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';

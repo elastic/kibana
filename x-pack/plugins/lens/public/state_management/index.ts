@@ -26,7 +26,6 @@ export const {
   applyChanges,
   setSaveable,
   onActiveDataChange,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   insertLayer,
@@ -43,10 +42,12 @@ export const {
   removeOrClearLayer,
   cloneLayer,
   addLayer,
+  onDimensionDrop,
   setLayerDefaultDimension,
   removeDimension,
   setIsLoadLibraryVisible,
   registerLibraryAnnotationGroup,
+  changeIndexPattern,
 } = lensActions;
 
 export const makeConfigureStore = (
@@ -55,7 +56,18 @@ export const makeConfigureStore = (
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActionPaths: [
+          'payload.dataViews.indexPatterns',
+          'payload.redirectCallback',
+          'payload.history',
+          'payload.newState.dataViews',
+          'lens.activeData',
+          'payload.source.filterOperations',
+          'payload.target.filterOperations',
+        ],
+        ignoredPaths: ['lens.dataViews.indexPatterns'],
+      },
     }),
     initMiddleware(storeDeps),
     optimizingMiddleware(),

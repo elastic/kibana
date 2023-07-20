@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildNode, KQL_NODE_TYPE_LITERAL, toElasticsearchQuery } from './literal';
+import { buildNode, KQL_NODE_TYPE_LITERAL, toElasticsearchQuery, toKqlExpression } from './literal';
 
 jest.mock('../grammar');
 
@@ -27,6 +27,20 @@ describe('kuery node types', () => {
         const result = toElasticsearchQuery(node);
 
         expect(result).toBe('foo');
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('quoted', () => {
+        const node = buildNode('foo');
+        const result = toKqlExpression(node);
+        expect(result).toBe('foo');
+      });
+
+      test('unquoted', () => {
+        const node = buildNode('foo', true);
+        const result = toKqlExpression(node);
+        expect(result).toBe('"foo"');
       });
     });
   });
