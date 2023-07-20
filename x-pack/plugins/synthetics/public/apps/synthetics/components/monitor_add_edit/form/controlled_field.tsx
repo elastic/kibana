@@ -27,6 +27,7 @@ type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {
 export const ControlledField = <TFieldKey extends keyof FormConfig>({
   component: FieldComponent,
   props,
+  fieldKey,
   field,
   formRowProps,
   error,
@@ -34,7 +35,7 @@ export const ControlledField = <TFieldKey extends keyof FormConfig>({
   dependenciesFieldMeta,
   isInvalid,
 }: Props<TFieldKey>) => {
-  const { setValue, reset, formState, trigger } = useFormContext<FormConfig>();
+  const { setValue, getFieldState, reset, formState, trigger } = useFormContext<FormConfig>();
 
   const { locations } = useSelector(selectServiceLocationsState);
   const { space } = useKibanaSpace();
@@ -56,6 +57,11 @@ export const ControlledField = <TFieldKey extends keyof FormConfig>({
 
   const handleChange = useCallback(
     async (...event: any[]) => {
+      if (typeof event?.[0] === 'string' && !getFieldState(fieldKey).isTouched) {
+        // This is needed for composite fields like code editors
+        setValue(fieldKey, event[0], { shouldTouch: true });
+      }
+
       field.onChange(...event);
       setOnChangeArgs(event);
     },

@@ -48,7 +48,7 @@ export function useValidateField<TFieldKey extends keyof FormConfig>({
         }));
       });
     }
-    // run effect when dependencies values change, to get the most up to date meta state
+    // run effect when dependencies values change, to get the most up-to-date meta state
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(dependenciesValues || []), dependencies, getFieldState]);
 

@@ -246,11 +246,13 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       return {
         'data-test-subj': 'syntheticsMonitorConfigURL',
         onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value);
+          setValue(ConfigKey.URLS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, {
+              shouldTouch: true,
+            });
           }
-          await trigger([ConfigKey.URLS, ConfigKey.NAME]);
+          await trigger();
         },
         readOnly,
       };
@@ -271,11 +273,13 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     props: ({ setValue, trigger, dependenciesFieldMeta, isEdit }): EuiFieldTextProps => {
       return {
         onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value);
+          setValue(ConfigKey.URLS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, {
+              shouldTouch: true,
+            });
+            await trigger();
           }
-          await trigger([ConfigKey.URLS, ConfigKey.NAME]);
         },
         'data-test-subj': 'syntheticsMonitorConfigURL',
         readOnly,
@@ -294,11 +298,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     props: ({ setValue, trigger, dependenciesFieldMeta, isEdit }): EuiFieldTextProps => {
       return {
         onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value);
+          setValue(ConfigKey.HOSTS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, { shouldTouch: true });
           }
-          await trigger([ConfigKey.HOSTS, ConfigKey.NAME]);
+          await trigger();
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
         readOnly,
@@ -317,11 +321,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     props: ({ setValue, trigger, dependenciesFieldMeta, isEdit }): EuiFieldTextProps => {
       return {
         onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value);
+          setValue(ConfigKey.HOSTS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value);
+            setValue(ConfigKey.NAME, event.target.value, { shouldTouch: true });
           }
-          await trigger([ConfigKey.HOSTS, ConfigKey.NAME]);
+          await trigger();
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
         readOnly,
