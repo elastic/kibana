@@ -60,7 +60,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
         })
         .catch((error) => {
           setErrorState(error);
-          label = 'Error fetching dashboard';
+          label = link.label || 'Error fetching dashboard';
         });
     }
     return label || link.destination;
@@ -84,35 +84,29 @@ export const NavigationEmbeddablePanelEditorLink = ({
             <EuiIcon type="grab" />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem>
-          {/* <EuiToolTip content={errorState ? errorState.message : ''} display="block"> */}
-          <EuiFlexGroup
-            gutterSize="s"
-            responsive={false}
-            wrap={false}
-            alignItems="center"
-            className="navEmbeddableLinkText"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
-                color={errorState ? 'danger' : 'text'}
-              />
-            </EuiFlexItem>
+        <EuiFlexItem className="navEmbeddableLinkText">
+          <EuiToolTip content={errorState ? errorState.message : ''} display="block">
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
+                  color={errorState ? 'danger' : 'text'}
+                />
+              </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiSkeletonTitle
-                size="xxxs"
-                isLoading={linkLabelLoading}
-                contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
-              >
-                <EuiText size="s" className="wrapText" color={errorState ? 'danger' : 'text'}>
-                  {linkLabel}
-                </EuiText>
-              </EuiSkeletonTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {/* </EuiToolTip> */}
+              <EuiFlexItem className="navEmbeddableLinkText">
+                <EuiSkeletonTitle
+                  size="xxxs"
+                  isLoading={linkLabelLoading}
+                  contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
+                >
+                  <EuiText size="s" color={errorState ? 'danger' : 'text'} className="wrapText">
+                    {linkLabel}
+                  </EuiText>
+                </EuiSkeletonTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
