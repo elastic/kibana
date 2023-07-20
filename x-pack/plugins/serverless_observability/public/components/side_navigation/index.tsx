@@ -59,10 +59,10 @@ const navigationTree: NavigationTreeDefinition = {
                   link: 'ml:anomalyDetection',
                 },
                 {
-                  title: i18n.translate('xpack.serverlessObservability.ml.spike.analysis', {
-                    defaultMessage: 'Spike analysis',
+                  title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
+                    defaultMessage: 'Log rate analysis',
                   }),
-                  link: 'ml:explainLogRateSpikes',
+                  link: 'ml:logRateAnalysis',
                   icon: 'beaker',
                 },
                 {
@@ -173,10 +173,6 @@ const navigationTree: NavigationTreeDefinition = {
             {
               id: 'cloudLinkUserAndRoles',
               cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkPerformance',
-              cloudLink: 'performance',
             },
             {
               id: 'cloudLinkBilling',

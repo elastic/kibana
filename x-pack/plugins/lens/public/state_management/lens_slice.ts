@@ -11,7 +11,7 @@ import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
