@@ -38,6 +38,49 @@ export interface IndiciesItem {
   isValid: boolean;
 }
 
+export type DiagnosticsBundle = Promise<{
+  esResponses: {
+    existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];
+    fieldCaps: FieldCapsResponse;
+    indices: IndicesGetResponse;
+    ingestPipelines: IngestGetPipelineResponse;
+  };
+  diagnosticsPrivileges: {
+    index: Record<string, SecurityHasPrivilegesPrivileges>;
+    cluster: Record<string, boolean>;
+    hasAllClusterPrivileges: boolean;
+    hasAllIndexPrivileges: boolean;
+    hasAllPrivileges: boolean;
+  };
+  apmIndices: ApmIndicesConfig;
+  apmIndexTemplates: Array<{
+    name: string;
+    isNonStandard: boolean;
+    exists: boolean;
+  }>;
+  fleetPackageInfo: {
+    isInstalled: boolean;
+    version?: string;
+  };
+  kibanaVersion: string;
+  elasticsearchVersion: string;
+  apmEvents: ApmEvent[];
+  invalidIndices: IndiciesItem[];
+  validIndices: IndiciesItem[];
+  dataStreams: IndicesDataStream[];
+  nonDataStreamIndices: string[];
+  indexTemplatesByIndexPattern: Array<{
+    indexPattern: string;
+    indexTemplates: Array<{
+      priority: number | undefined;
+      isNonStandard: boolean;
+      templateIndexPatterns: string[];
+      templateName: string;
+    }>;
+  }>;
+  params: { start: number; end: number; kuery?: string };
+}>;
+
 const getDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics',
   options: { tags: ['access:apm'] },
@@ -97,7 +140,7 @@ const getDiagnosticsRoute = createApmServerRoute({
     const { asCurrentUser: esClient } = coreContext.elasticsearch.client;
     const apmIndices = await getApmIndices({
       savedObjectsClient: coreContext.savedObjects.client,
-      config: resources.config,
+      apmIndicesConfig: resources.apmIndicesConfig,
     });
 
     const bundle = await getDiagnosticsBundle({

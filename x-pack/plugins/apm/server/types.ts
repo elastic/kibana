@@ -17,6 +17,11 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
+
+import {
   SpacesPluginSetup,
   SpacesPluginStart,
 } from '@kbn/spaces-plugin/server';
@@ -74,6 +79,7 @@ export interface APMPluginSetup {
 
 export interface APMPluginSetupDependencies {
   // required dependencies
+  apmDataAccess: ApmDataAccessPluginSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
@@ -98,6 +104,7 @@ export interface APMPluginSetupDependencies {
 }
 export interface APMPluginStartDependencies {
   // required dependencies
+  apmDataAccess: ApmDataAccessPluginStart;
   data: DataPluginStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;

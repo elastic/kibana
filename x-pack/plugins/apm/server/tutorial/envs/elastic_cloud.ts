@@ -26,16 +26,16 @@ import {
   createPhpAgentInstructions,
   createOpenTelemetryAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
-import { APMConfig } from '../..';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
+import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
 
 export function createElasticCloudInstructions({
   cloudSetup,
-  apmConfig,
+  apmIndicesConfig,
   isFleetPluginEnabled,
 }: {
   cloudSetup?: CloudSetup;
-  apmConfig: APMConfig;
+  apmIndicesConfig: ApmIndicesConfig;
   isFleetPluginEnabled: boolean;
 }): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
@@ -46,7 +46,7 @@ export function createElasticCloudInstructions({
   }
 
   instructionSets.push(
-    getOnPremApmServerInstructionSet({ apmConfig, isFleetPluginEnabled })
+    getOnPremApmServerInstructionSet({ apmIndicesConfig, isFleetPluginEnabled })
   );
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 

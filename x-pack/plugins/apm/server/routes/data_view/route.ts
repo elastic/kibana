@@ -45,12 +45,12 @@ const dataViewTitleRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async ({
     context,
-    config,
+    apmIndicesConfig,
   }): Promise<{ apmDataViewTitle: string }> => {
     const coreContext = await context.core;
     const apmIndicies = await getApmIndices({
       savedObjectsClient: coreContext.savedObjects.client,
-      config,
+      apmIndicesConfig,
     });
     const apmDataViewTitle = getApmDataViewTitle(apmIndicies);
 

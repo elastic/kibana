@@ -10,7 +10,7 @@ import {
   INSTRUCTION_VARIANT,
   InstructionsSchema,
 } from '@kbn/home-plugin/server';
-import { APMConfig } from '../..';
+import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,
@@ -27,15 +27,18 @@ import {
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 
 export function onPremInstructions({
-  apmConfig,
+  apmIndicesConfig,
   isFleetPluginEnabled,
 }: {
-  apmConfig: APMConfig;
+  apmIndicesConfig: APMDataAccessConfig['indices'];
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   return {
     instructionSets: [
-      getOnPremApmServerInstructionSet({ apmConfig, isFleetPluginEnabled }),
+      getOnPremApmServerInstructionSet({
+        apmIndicesConfig,
+        isFleetPluginEnabled,
+      }),
       {
         title: i18n.translate('xpack.apm.tutorial.apmAgents.title', {
           defaultMessage: 'APM Agents',
@@ -121,9 +124,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmConfig.indices.error,
-              apmConfig.indices.transaction,
-              apmConfig.indices.metric,
+              apmIndicesConfig.error,
+              apmIndicesConfig.transaction,
+              apmIndicesConfig.metric,
             ],
             query: {
               bool: {

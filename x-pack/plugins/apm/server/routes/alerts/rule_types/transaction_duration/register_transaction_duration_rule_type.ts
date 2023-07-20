@@ -76,6 +76,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
+  apmIndicesConfig,
   config$,
   logger,
   basePath,
@@ -120,7 +121,7 @@ export function registerTransactionDurationRuleType({
         services;
 
       const indices = await getApmIndices({
-        config,
+        apmIndicesConfig,
         savedObjectsClient,
       });
 

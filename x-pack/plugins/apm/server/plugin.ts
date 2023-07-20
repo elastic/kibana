@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -143,9 +142,10 @@ export class APMPlugin
 
     const boundGetApmIndices = async () => {
       const coreStart = await getCoreStart();
+
       return getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(coreStart),
-        config: await firstValueFrom(config$),
+        apmIndicesConfig: plugins.apmDataAccess.indices,
       });
     };
 
@@ -162,7 +162,7 @@ export class APMPlugin
         plugins.home?.tutorials.registerTutorial(
           tutorialProvider({
             apmConfig: currentConfig,
-            apmIndices: indices,
+            apmIndicesConfig: plugins.apmDataAccess.indices,
             cloud: plugins.cloud,
             isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
           })
@@ -194,6 +194,7 @@ export class APMPlugin
       registerApmRuleTypes({
         alerting: plugins.alerting,
         basePath: core.http.basePath,
+        apmIndicesConfig: plugins.apmDataAccess.indices,
         config$,
         logger: this.logger!.get('rule'),
         ml: plugins.ml,

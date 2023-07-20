@@ -10,7 +10,7 @@ import {
   InstructionsSchema,
   INSTRUCTION_VARIANT,
 } from '@kbn/home-plugin/server';
-import { APMConfig } from '../..';
+import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -29,10 +29,10 @@ const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
 const START_SERVER_UNIX_BINARI = createStartServerUnixBinari();
 
 export function getOnPremApmServerInstructionSet({
-  apmConfig,
+  apmIndicesConfig,
   isFleetPluginEnabled,
 }: {
-  apmConfig: APMConfig;
+  apmIndicesConfig: APMDataAccessConfig['indices'];
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema['instructionSets'][0] {
   return {
@@ -132,7 +132,7 @@ export function getOnPremApmServerInstructionSet({
         }
       ),
       esHitsCheck: {
-        index: apmConfig.indices.onboarding,
+        index: apmIndicesConfig.onboarding,
         query: {
           bool: {
             filter: [{ term: { 'processor.event': 'onboarding' } }],

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { firstValueFrom } from 'rxjs';
+
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -20,11 +20,13 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../../../settings/apm_indices/get_apm_indices';
 
 export async function getServiceGroupFieldsForAnomaly({
-  config$,
+  apmIndicesConfig,
   scopedClusterClient,
   savedObjectsClient,
   serviceName,
@@ -33,7 +35,7 @@ export async function getServiceGroupFieldsForAnomaly({
   timestamp,
   bucketSpan,
 }: {
-  config$: RegisterRuleDependencies['config$'];
+  apmIndicesConfig: ApmIndicesConfig;
   scopedClusterClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
   serviceName: string;
@@ -42,9 +44,8 @@ export async function getServiceGroupFieldsForAnomaly({
   timestamp: number;
   bucketSpan: number;
 }) {
-  const config = await firstValueFrom(config$);
   const indices = await getApmIndices({
-    config,
+    apmIndicesConfig,
     savedObjectsClient,
   });
   const { transaction: index } = indices;

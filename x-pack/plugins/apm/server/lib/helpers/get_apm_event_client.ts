@@ -15,6 +15,7 @@ export async function getApmEventClient({
   context,
   params,
   config,
+  apmIndicesConfig,
   request,
 }: APMRouteHandlerResources): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
@@ -22,7 +23,7 @@ export async function getApmEventClient({
     const [indices, includeFrozen] = await Promise.all([
       getApmIndices({
         savedObjectsClient: coreContext.savedObjects.client,
-        config,
+        apmIndicesConfig,
       }),
       withApmSpan('get_ui_settings', () =>
         coreContext.uiSettings.client.get<boolean>(

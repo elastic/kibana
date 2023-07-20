@@ -68,7 +68,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<{ jobCreated: true }> => {
-    const { params, context, logger, config } = resources;
+    const { params, context, logger, apmIndicesConfig } = resources;
     const { environments } = params.body;
     const licensingContext = await context.licensing;
     const coreContext = await context.core;
@@ -78,7 +78,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
       getMlClient(resources),
       getApmIndices({
         savedObjectsClient: coreContext.savedObjects.client,
-        config,
+        apmIndicesConfig,
       }),
     ]);
 
@@ -142,7 +142,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
     ],
   },
   handler: async (resources): Promise<{ update: boolean }> => {
-    const { config, context } = resources;
+    const { apmIndicesConfig, context } = resources;
     const coreContext = await context.core;
     const [mlClient, esClient, indices] = await Promise.all([
       getMlClient(resources),
@@ -153,7 +153,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
             start.elasticsearch.client.asInternalUser
         ),
       getApmIndices({
-        config,
+        apmIndicesConfig,
         savedObjectsClient: coreContext.savedObjects.client,
       }),
     ]);

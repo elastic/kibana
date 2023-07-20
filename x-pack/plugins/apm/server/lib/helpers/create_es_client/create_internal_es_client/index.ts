@@ -10,7 +10,6 @@ import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { APMConfig } from '../../../..';
 import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
@@ -18,7 +17,10 @@ import {
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { getApmIndices } from '../../../../routes/settings/apm_indices/get_apm_indices';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../../../../routes/settings/apm_indices/get_apm_indices';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
@@ -28,12 +30,12 @@ export type APMInternalESClient = Awaited<
 
 export async function createInternalESClientWithContext({
   debug,
-  config,
+  apmIndicesConfig,
   request,
   context,
 }: {
   debug: boolean;
-  config: APMConfig;
+  apmIndicesConfig: ApmIndicesConfig;
   request: APMRouteHandlerResources['request'];
   context: APMRouteHandlerResources['context'];
 }) {
@@ -43,7 +45,7 @@ export async function createInternalESClientWithContext({
 
   return createInternalESClient({
     debug,
-    config,
+    apmIndicesConfig,
     request,
     savedObjectsClient,
     elasticsearchClient: asInternalUser,
@@ -52,13 +54,13 @@ export async function createInternalESClientWithContext({
 
 export async function createInternalESClient({
   debug,
-  config,
+  apmIndicesConfig,
   request,
   savedObjectsClient,
   elasticsearchClient,
 }: {
   debug: boolean;
-  config: APMConfig;
+  apmIndicesConfig: ApmIndicesConfig;
   request?: APMRouteHandlerResources['request'];
   savedObjectsClient: SavedObjectsClientContract;
   elasticsearchClient: ElasticsearchClient;
@@ -98,7 +100,7 @@ export async function createInternalESClient({
   }
 
   return {
-    apmIndices: await getApmIndices({ savedObjectsClient, config }),
+    apmIndices: await getApmIndices({ savedObjectsClient, apmIndicesConfig }),
     search: async <
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest

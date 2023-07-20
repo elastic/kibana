@@ -99,6 +99,8 @@ export function registerRoutes({
           runtimeType
         );
 
+        const apmIndicesConfig = plugins.apmDataAccess.setup.indices;
+
         const { aborted, data } = await Promise.race([
           handler({
             request,
@@ -109,6 +111,7 @@ export function registerRoutes({
             core,
             plugins,
             telemetryUsageCounter,
+            apmIndicesConfig,
             params: merge(
               {
                 query: {

@@ -26,12 +26,12 @@ const moduleName = 'apm';
 export const tutorialProvider =
   ({
     apmConfig,
-    apmIndices,
+    apmIndicesConfig,
     cloud,
     isFleetPluginEnabled,
   }: {
     apmConfig: APMConfig;
-    apmIndices: ApmIndicesConfig;
+    apmIndicesConfig: ApmIndicesConfig;
     cloud?: CloudSetup;
     isFleetPluginEnabled: boolean;
   }) =>
@@ -90,9 +90,9 @@ It allows you to monitor the performance of thousands of applications in real ti
       integrationBrowserCategories: ['observability', 'apm'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
-      onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
+      onPrem: onPremInstructions({ apmIndicesConfig, isFleetPluginEnabled }),
       elasticCloud: createElasticCloudInstructions({
-        apmConfig,
+        apmIndicesConfig,
         isFleetPluginEnabled,
         cloudSetup: cloud,
       }),

@@ -33,6 +33,7 @@ import { registerAnomalyRuleType } from './rule_types/anomaly/register_anomaly_r
 import { registerErrorCountRuleType } from './rule_types/error_count/register_error_count_rule_type';
 import { APMConfig } from '../..';
 import { registerTransactionErrorRateRuleType } from './rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export const APM_RULE_TYPE_ALERT_CONTEXT = 'observability.apm';
 
@@ -91,6 +92,7 @@ export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts = {
 export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
   basePath: IBasePath;
+  apmIndicesConfig: ApmIndicesConfig;
   config$: Observable<APMConfig>;
   logger: Logger;
   ml?: MlPluginSetup;

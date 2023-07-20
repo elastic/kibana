@@ -72,6 +72,7 @@ export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
   basePath,
+  apmIndicesConfig,
   config$,
   logger,
   ruleDataClient,
@@ -127,7 +128,7 @@ export function registerTransactionErrorRateRuleType({
         } = services;
 
         const indices = await getApmIndices({
-          config,
+          apmIndicesConfig,
           savedObjectsClient,
         });
 

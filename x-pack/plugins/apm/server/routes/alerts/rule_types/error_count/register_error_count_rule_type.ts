@@ -25,7 +25,6 @@ import {
 } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { firstValueFrom } from 'rxjs';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -63,7 +62,7 @@ export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
   basePath,
-  config$,
+  apmIndicesConfig,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -108,8 +107,6 @@ export function registerErrorCountRuleType({
           ruleParams.groupBy
         );
 
-        const config = await firstValueFrom(config$);
-
         const {
           getAlertUuid,
           getAlertStartedDate,
@@ -118,7 +115,7 @@ export function registerErrorCountRuleType({
         } = services;
 
         const indices = await getApmIndices({
-          config,
+          apmIndicesConfig,
           savedObjectsClient,
         });
 

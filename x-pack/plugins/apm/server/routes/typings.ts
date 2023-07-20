@@ -18,6 +18,7 @@ import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { APMConfig } from '..';
 import {
   APMPluginSetupDependencies,
@@ -76,4 +77,5 @@ export interface APMRouteHandlerResources {
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
+  apmIndicesConfig: APMDataAccessConfig['indices'];
 }
