@@ -61,8 +61,8 @@ export class PrivateLocationTestService {
       agentPolicyId: id,
       id,
       geo: {
-        lat: '',
-        lon: '',
+        lat: 0,
+        lon: 0,
       },
       concurrentMonitors: 1,
       isServiceManaged: false,
