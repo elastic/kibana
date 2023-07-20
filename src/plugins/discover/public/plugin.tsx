@@ -43,6 +43,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -60,7 +61,6 @@ import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
-import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {

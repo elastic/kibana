@@ -31,6 +31,7 @@ import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
 import {
+  SHOW_MULTIFIELDS,
   formatFieldValue,
   getIgnoredReason,
   getShouldShowFieldHandler,
@@ -39,7 +40,6 @@ import {
 } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FieldName } from '../../../../components/field_name/field_name';
-import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';

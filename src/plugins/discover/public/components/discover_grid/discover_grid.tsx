@@ -37,6 +37,11 @@ import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/pub
 import { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
+} from '@kbn/discover-utils';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -50,11 +55,6 @@ import {
 } from './discover_grid_columns';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import { getDisplayedColumns } from '../../utils/columns';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-  SHOW_MULTIFIELDS,
-} from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import type { ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';

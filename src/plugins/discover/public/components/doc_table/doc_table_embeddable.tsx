@@ -10,8 +10,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import { usePager } from '@kbn/discover-utils';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
+import { SAMPLE_SIZE_SETTING, usePager } from '@kbn/discover-utils';
 import {
   ToolBarPagination,
   MAX_ROWS_PER_PAGE_OPTION,

@@ -36,14 +36,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { VIEW_MODE } from '../../common/constants';
-import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
-import { DiscoverServices } from '../build_services';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -51,7 +44,14 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../common';
+  buildDataTableRecord,
+} from '@kbn/discover-utils';
+import { VIEW_MODE } from '../../common/constants';
+import { getSortForEmbeddable, SortPair } from '../utils/sorting';
+import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
+import { DiscoverServices } from '../build_services';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';

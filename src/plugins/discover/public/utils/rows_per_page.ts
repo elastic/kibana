@@ -7,8 +7,8 @@
  */
 
 import { sortBy, uniq } from 'lodash';
+import { SAMPLE_ROWS_PER_PAGE_SETTING } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../../common/constants';
-import { SAMPLE_ROWS_PER_PAGE_SETTING } from '../../common';
 import { DiscoverServices } from '../build_services';
 
 export const getRowsPerPageOptions = (currentRowsPerPage?: number): number[] => {
