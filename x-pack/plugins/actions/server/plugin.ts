@@ -491,7 +491,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
           ? Promise.all(
-              objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
+              objects.map(
+                async (objectItem) =>
+                  /**
+                   * TODO: Change with getBulk
+                   */
+                  await (await client).get({ id: objectItem.id, throwIfSystemAction: false })
+              )
             )
           : Promise.resolve([]);
     });
