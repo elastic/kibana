@@ -191,7 +191,13 @@ export function DashboardApp({
       )}
       {!showNoDataPage && (
         <>
-          <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
+          {dashboardAPI && (
+            <DashboardTopNav
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardContainer={dashboardAPI}
+            />
+          )}
 
           {getLegacyConflictWarning?.()}
 

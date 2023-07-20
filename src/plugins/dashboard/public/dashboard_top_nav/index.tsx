@@ -12,7 +12,7 @@ import { servicesReady } from '../plugin';
 import { InternalDashboardTopNavProps } from './dashboard_top_nav';
 
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
-  dashboardContainer?: DashboardContainer;
+  dashboardContainer: DashboardContainer;
 }
 
 const LazyDashboardTopNav = React.lazy(() =>
@@ -28,11 +28,11 @@ const LazyDashboardTopNav = React.lazy(() =>
 
 export const DashboardTopNav = (props: DashboardTopNavProps) => {
   const { dashboardContainer, ...rest } = props;
-  return dashboardContainer ? (
+  return (
     <Suspense fallback={<div />}>
       <DashboardAPIContext.Provider value={dashboardContainer}>
         <LazyDashboardTopNav {...rest} />
       </DashboardAPIContext.Provider>
     </Suspense>
-  ) : null;
+  );
 };

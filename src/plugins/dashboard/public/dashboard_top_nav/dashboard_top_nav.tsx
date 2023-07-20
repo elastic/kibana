@@ -195,7 +195,7 @@ export function InternalDashboardTopNav({
 
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
-      forceShow && isChromeVisible && !fullScreenMode;
+      (forceShow || isChromeVisible) && !fullScreenMode;
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
