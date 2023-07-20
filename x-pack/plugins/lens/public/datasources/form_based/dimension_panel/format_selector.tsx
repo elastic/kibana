@@ -28,7 +28,7 @@ import { LensAppServices } from '../../../app_plugin/types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 import { ValueFormatConfig } from '../operations/definitions/column_types';
-import { DurationControlDelimitedInput, DurationRowInputs } from './formatting/duration_input';
+import { DurationRowInputs } from './formatting/duration_input';
 
 const supportedFormats: Record<
   string,
@@ -288,20 +288,7 @@ export function FormatSelector(props: FormatSelectorProps) {
           />
           {currentFormat && selectedFormat ? (
             <>
-              {currentFormat?.id === 'duration' && false ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <DurationControlDelimitedInput
-                    onStartChange={setDurationFrom}
-                    onEndChange={setDurationTo}
-                    startValue={durationFrom}
-                    endValue={durationTo}
-                    testSubjEnd="indexPattern-dimension-duration-end"
-                    testSubjStart="indexPattern-dimension-duration-start"
-                  />
-                </>
-              ) : null}
-              {currentFormat?.id === 'duration' && true ? (
+              {currentFormat?.id === 'duration' ? (
                 <>
                   <EuiSpacer size="s" />
                   <DurationRowInputs

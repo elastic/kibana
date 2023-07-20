@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormControlLayoutDelimited, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { EuiComboBox, EuiSpacer } from '@elastic/eui';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,
@@ -42,44 +42,6 @@ function getSelectedOption(
   return option ? [option] : [];
 }
 
-export const DurationControlDelimitedInput = ({
-  testSubjLayout,
-  testSubjStart,
-  testSubjEnd,
-  startValue = DEFAULT_DURATION_INPUT_FORMAT.kind,
-  endValue = DEFAULT_DURATION_OUTPUT_FORMAT.method,
-  onStartChange,
-  onEndChange,
-}: DurationInputProps) => {
-  return (
-    <EuiFormControlLayoutDelimited
-      data-test-subj={testSubjLayout}
-      compressed
-      startControl={
-        <EuiComboBox
-          isClearable={false}
-          options={durationInputOptions}
-          selectedOptions={getSelectedOption(startValue, durationInputOptions)}
-          onChange={([newStartValue]) => onStartChange(newStartValue.value!)}
-          singleSelection={{ asPlainText: true }}
-          data-test-subj={testSubjStart}
-          compressed
-        />
-      }
-      endControl={
-        <EuiComboBox
-          isClearable={false}
-          options={durationOutputOptions}
-          selectedOptions={getSelectedOption(endValue, durationOutputOptions)}
-          onChange={([newEndChange]) => onEndChange(newEndChange.value!)}
-          singleSelection={{ asPlainText: true }}
-          data-test-subj={testSubjEnd}
-          compressed
-        />
-      }
-    />
-  );
-};
 
 export const DurationRowInputs = ({
   testSubjLayout,
