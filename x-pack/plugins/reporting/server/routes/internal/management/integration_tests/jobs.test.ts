@@ -159,7 +159,9 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/download/poo').expect(404);
+    await supertest(httpSetup.server.listener)
+      .get('/internal/reporting/jobs/download/poo')
+      .expect(404);
   });
 
   it('returns a 403 if not a valid job type', async () => {
@@ -173,7 +175,9 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/download/poo').expect(403);
+    await supertest(httpSetup.server.listener)
+      .get('/internal/reporting/jobs/download/poo')
+      .expect(403);
   });
 
   it(`returns job's info`, async () => {
@@ -188,7 +192,9 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/info/test').expect(200);
+    await supertest(httpSetup.server.listener)
+      .get('/internal/reporting/jobs/info/test')
+      .expect(200);
   });
 
   it(`returns 403 if a user cannot view a job's info`, async () => {
@@ -203,7 +209,9 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/info/test').expect(403);
+    await supertest(httpSetup.server.listener)
+      .get('/internal/reporting/jobs/info/test')
+      .expect(403);
   });
 
   it('when a job is incomplete', async () => {
