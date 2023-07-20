@@ -53,9 +53,15 @@ export const DashboardLinkDestinationPicker = ({
 
   useMount(async () => {
     if (initialSelection) {
-      const dashboard = await memoizedFetchDashboard(initialSelection);
-      onDestinationPicked(dashboard);
-      setSelectedOption([getDashboardItem(dashboard)]);
+      const dashboard = await memoizedFetchDashboard(initialSelection).catch(() => {
+        // swallow the error that is thrown, since this means the selected dashboard was deleted
+      });
+      if (dashboard) {
+        onDestinationPicked(dashboard);
+        setSelectedOption([getDashboardItem(dashboard)]);
+      } else {
+        onDestinationPicked(undefined);
+      }
     }
   });
 

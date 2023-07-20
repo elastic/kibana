@@ -169,8 +169,10 @@ export const NavigationEmbeddableLinkEditor = ({
                 (linkDestination ? defaultLinkLabel : '') ||
                 NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={linkDestination ? currentLinkLabel : ''}
-              onChange={(e) => setCurrentLinkLabel(e.target.value)}
+              value={currentLinkLabel}
+              onChange={(e) => {
+                setCurrentLinkLabel(e.target.value);
+              }}
             />
           </EuiFormRow>
         </EuiForm>

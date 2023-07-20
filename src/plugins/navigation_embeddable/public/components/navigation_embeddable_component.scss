@@ -8,7 +8,7 @@
       .euiListGroupItem__text {
         cursor: default;
         font-weight: $euiFontWeightSemiBold;
-        color: $euiColorPrimary;
+        color: $euiTextColor;
       }
     }
   }
@@ -23,7 +23,7 @@
       }
 
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 2px 0px 0px inset;
+        box-shadow: $euiTextColor 2px 0px 0px inset;
       }
     }
   }
@@ -39,7 +39,7 @@
       // min-width: 50px;
 
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 0px -2px 0px inset;
+        box-shadow: $euiTextColor 0px -2px 0px inset;
 
         .euiListGroupItem__text {
           padding-inline: 0px;

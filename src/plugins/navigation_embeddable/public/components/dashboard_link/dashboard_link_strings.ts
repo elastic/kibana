@@ -33,4 +33,8 @@ export const DashboardLinkStrings = {
     i18n.translate('navigationEmbeddable.dashboardLink.editor.loadingDashboardLabel', {
       defaultMessage: 'Loading...',
     }),
+  getDashboardErrorLabel: () =>
+    i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardErrorLabel', {
+      defaultMessage: 'Error fetching dashboard',
+    }),
 };

@@ -43,31 +43,36 @@ export const NavigationEmbeddablePanelEditorLink = ({
   parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
-  const [errorState, setErrorState] = useState<boolean>(false);
+  const [errorState, setErrorState] = useState<Error | undefined>();
   const parentDashboardTitle = parentDashboard?.select((state) => state.explicitInput.title);
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
     let label = link.label;
-    if (link.type === DASHBOARD_LINK_TYPE && !label) {
-      if (parentDashboardId === link.destination) {
-        label = parentDashboardTitle;
-      } else {
-        await fetchDashboard(link.destination)
-          .then((dashboard) => {
-            label = dashboard.attributes.title;
-          })
-          .catch((error) => {
-            setErrorState(true);
-            label = error.message;
-          });
+    if (link.type === DASHBOARD_LINK_TYPE) {
+      if (!label && parentDashboardId === link.destination) {
+        return parentDashboardTitle;
       }
+
+      await fetchDashboard(link.destination)
+        .then((dashboard) => {
+          label = dashboard.attributes.title;
+        })
+        .catch((error) => {
+          setErrorState(error);
+          label = 'Error fetching dashboard';
+        });
     }
     return label || link.destination;
   }, [link]);
 
   return (
-    <EuiPanel hasBorder hasShadow={false} className="navEmbeddableLinkPanel">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      className="navEmbeddableLinkPanel"
+      color={errorState ? 'danger' : 'plain'}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiPanel
@@ -79,23 +84,37 @@ export const NavigationEmbeddablePanelEditorLink = ({
             <EuiIcon type="grab" />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
-            color={errorState ? 'danger' : 'text'}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem className="navEmbeddableLinkText">
-          <EuiSkeletonTitle
-            size="xxxs"
-            isLoading={linkLabelLoading}
-            contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
+        <EuiFlexItem>
+          {/* <EuiToolTip content={errorState ? errorState.message : ''} display="block"> */}
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            wrap={false}
+            alignItems="center"
+            className="navEmbeddableLinkText"
           >
-            <EuiText size="s" className="wrapText" color={errorState ? 'danger' : 'text'}>
-              {linkLabel}
-            </EuiText>
-          </EuiSkeletonTitle>
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
+                color={errorState ? 'danger' : 'text'}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiSkeletonTitle
+                size="xxxs"
+                isLoading={linkLabelLoading}
+                contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
+              >
+                <EuiText size="s" className="wrapText" color={errorState ? 'danger' : 'text'}>
+                  {linkLabel}
+                </EuiText>
+              </EuiSkeletonTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {/* </EuiToolTip> */}
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" responsive={false} className="navEmbeddable_hoverActions">
             <EuiFlexItem>

@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useMemo, useState } from 'react';
 
-import { EuiButtonEmpty, EuiListGroupItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { fetchDashboard } from './dashboard_link_tools';
@@ -20,7 +20,7 @@ import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable'
 
 export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();
-  const [errorState, setErrorState] = useState<boolean>(false);
+  const [errorState, setErrorState] = useState<Error | undefined>();
 
   const dashboardContainer = navEmbeddable.parent as DashboardContainer;
   const parentDashboardTitle = dashboardContainer.select((state) => state.explicitInput.title);
@@ -28,15 +28,14 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
 
   const { loading: loadingDestinationDashboard, value: destinationDashboard } =
     useAsync(async () => {
-      if (!link.label && link.id !== parentDashboardId) {
+      if (link.id !== parentDashboardId) {
         /**
-         * only fetch the dashboard if **absolutely** necessary; i.e. only if the dashboard link doesn't have
-         * some custom label, and if it's not the current dashboard (if it is, use `dashboardContainer` instead)
+         * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
+         * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
          */
-        const dashboard: DashboardItem | Error = await fetchDashboard(link.destination).catch(
+        const dashboard: DashboardItem | void = await fetchDashboard(link.destination).catch(
           (error: Error) => {
-            setErrorState(true);
-            return error;
+            setErrorState(error);
           }
         );
         return dashboard;
@@ -48,9 +47,7 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
       link.label ||
       (link.destination === parentDashboardId
         ? parentDashboardTitle
-        : destinationDashboard instanceof Error
-        ? destinationDashboard.message
-        : destinationDashboard?.attributes.title)
+        : destinationDashboard?.attributes.title ?? DashboardLinkStrings.getDashboardErrorLabel())
     );
   }, [link, destinationDashboard, parentDashboardId, parentDashboardTitle]);
 
@@ -64,7 +61,9 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
     <EuiListGroupItem
       {...other}
       size="s"
-      isDisabled={errorState}
+      color="primary"
+      showToolTip={Boolean(errorState)}
+      isDisabled={Boolean(errorState)}
       id={`dashboardLink--${link.id}`}
       iconType={errorState ? 'warning' : undefined}
       className={classNames('navigationLink', {
@@ -77,7 +76,8 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
               // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
             }
       }
-      label={<EuiText size="s">{linkLabel}</EuiText>}
+      label={linkLabel}
+      toolTipText={errorState ? errorState.message : undefined}
     />
   );
 };

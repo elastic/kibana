@@ -16,6 +16,7 @@ export const ExternalLinkComponent = ({ link, ...other }: { link: NavigationEmbe
     <EuiListGroupItem
       {...other}
       size="s"
+      color="primary"
       className={'navigationLink'}
       id={`externalLink--${link.id}`}
       label={link.label || link.destination}

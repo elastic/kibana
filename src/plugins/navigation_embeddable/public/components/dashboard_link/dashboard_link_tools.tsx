@@ -81,7 +81,13 @@ const fetchDashboards = async ({
     }
 
     if (selectedDashboardId && selectedDashboardId !== parentDashboardId) {
-      dashboardList.unshift(await fetchDashboard(selectedDashboardId));
+      const selectedDashboard = await fetchDashboard(selectedDashboardId).catch(() => {
+        /**
+         * Swallow the error thrown, since this just means you are editing a link that is pointing to a dashboard that
+         * was deleted, which is a normal part of the flow - so, just treat this like there is **no** selection
+         */
+      });
+      if (selectedDashboard) dashboardList.unshift(await fetchDashboard(selectedDashboardId));
     }
   }
 
