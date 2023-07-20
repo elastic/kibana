@@ -145,7 +145,7 @@ describe('Handle request to generate', () => {
       `);
     });
 
-    xtest('provides a default kibana version field for older POST URLs', async () => {
+    test('provides a default kibana version field for older POST URLs', async () => {
       // how do we handle the printable_pdf endpoint that isn't migrating to the class instance of export types?
       (mockJobParams as unknown as { version?: string }).version = undefined;
       const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);

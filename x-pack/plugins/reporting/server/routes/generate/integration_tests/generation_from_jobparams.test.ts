@@ -182,7 +182,7 @@ describe('POST /api/reporting/generate', () => {
       .expect(500);
   });
 
-  xit(`returns 200 if job handler doesn't error`, async () => {
+  it(`returns 200 if job handler doesn't error`, async () => {
     registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
