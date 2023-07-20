@@ -22,7 +22,7 @@ export const kibanaLogsDataViewTestData: TestData = {
     expected: {
       queryBar:
         'clientip:30.156.16.164 AND host.keyword:elastic-elastic-elastic.org AND ip:30.156.16.163 AND response.keyword:404 AND machine.os.keyword:win xp AND geo.dest:IN AND geo.srcdest:US\\:IN',
-      totalDocCount: '100',
+      totalDocCount: 100,
     },
   },
   expected: {
@@ -226,7 +226,7 @@ export const artificialLogDataViewTestData: TestData = {
   },
 };
 
-export const explainLogRateSpikesTestData: TestData[] = [
+export const logRateAnalysisTestData: TestData[] = [
   kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,

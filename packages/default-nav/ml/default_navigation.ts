@@ -23,9 +23,9 @@ export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, Navigation
 export const defaultNavigation: MlNodeDefinition = {
   id: 'rootNav:ml',
   title: i18n.translate('defaultNavigation.ml.machineLearning', {
-    defaultMessage: 'Machine learning',
+    defaultMessage: 'Machine Learning',
   }),
-  icon: 'indexMapping',
+  icon: 'machineLearningApp',
   children: [
     {
       title: '',
@@ -65,7 +65,7 @@ export const defaultNavigation: MlNodeDefinition = {
     {
       id: 'data_frame_analytics',
       title: i18n.translate('defaultNavigation.ml.dataFrameAnalytics', {
-        defaultMessage: 'Data frame analytics',
+        defaultMessage: 'Data Frame Analytics',
       }),
       children: [
         {
@@ -83,7 +83,7 @@ export const defaultNavigation: MlNodeDefinition = {
     {
       id: 'model_management',
       title: i18n.translate('defaultNavigation.ml.modelManagement', {
-        defaultMessage: 'Model management',
+        defaultMessage: 'Model Management',
       }),
       children: [
         {
@@ -97,7 +97,7 @@ export const defaultNavigation: MlNodeDefinition = {
     {
       id: 'data_visualizer',
       title: i18n.translate('defaultNavigation.ml.dataVisualizer', {
-        defaultMessage: 'Data visualizer',
+        defaultMessage: 'Data Visualizer',
       }),
       children: [
         {
@@ -121,13 +121,13 @@ export const defaultNavigation: MlNodeDefinition = {
       }),
       children: [
         {
-          title: i18n.translate('defaultNavigation.ml.explainLogRateSpikes', {
-            defaultMessage: 'Explain log rate spikes',
-          }),
-          link: 'ml:explainLogRateSpikes',
+          link: 'ml:logRateAnalysis',
         },
         {
           link: 'ml:logPatternAnalysis',
+        },
+        {
+          link: 'ml:changePointDetections',
         },
       ],
     },

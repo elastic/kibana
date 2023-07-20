@@ -14,6 +14,7 @@ import {
   AlertInstanceContext as AlertContext,
 } from '@kbn/alerting-plugin/server';
 import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import {
   createMetricAnomalyExecutor,
   FIRED_ACTIONS,
@@ -67,6 +68,7 @@ export const registerMetricAnomalyRuleType = (
   minimumLicenseRequired: 'basic',
   isExportable: true,
   executor: createMetricAnomalyExecutor(libs, ml),
+  fieldsForAAD: O11Y_AAD_FIELDS,
   actionVariables: {
     context: [
       { name: 'alertState', description: alertStateActionVariableDescription },

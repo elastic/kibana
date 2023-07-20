@@ -20,22 +20,20 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  RouteComponentProps,
-  RouteProps,
-  Router,
-  Switch,
-} from 'react-router-dom';
+import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { ConfigSchema } from '..';
+import { customLogsRoutes } from '../components/app/custom_logs/wizard';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
-import { routes } from '../routes';
+import { baseRoutes, routes } from '../routes';
+import { CustomLogs } from '../routes/templates/custom_logs';
 
 export type BreadcrumbTitle<
   T extends { [K in keyof T]?: string | undefined } = {}
@@ -60,20 +58,43 @@ export const breadcrumbsApp = {
 };
 
 function App() {
+  const customLogRoutesPaths = Object.keys(customLogsRoutes);
+
   return (
     <>
-      <Switch>
-        {Object.keys(routes).map((key) => {
+      <Routes>
+        {Object.keys(baseRoutes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
           const Wrapper = () => {
             return handler();
           };
+
           return (
             <Route key={path} path={path} exact={exact} component={Wrapper} />
           );
         })}
-      </Switch>
+        <Route exact path={customLogRoutesPaths}>
+          <CustomLogs>
+            {customLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return (
+                <Route
+                  key={path}
+                  path={path}
+                  exact={exact}
+                  component={Wrapper}
+                />
+              );
+            })}
+          </CustomLogs>
+        </Route>
+      </Routes>
     </>
   );
 }
@@ -101,11 +122,13 @@ export function ObservabilityOnboardingAppRoot({
   core,
   deps,
   corePlugins: { observability, data },
+  config,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
+  config: ConfigSchema;
 }) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -122,6 +145,7 @@ export function ObservabilityOnboardingAppRoot({
           ...plugins,
           observability,
           data,
+          config,
         }}
       >
         <KibanaThemeProvider
@@ -161,11 +185,13 @@ export const renderApp = ({
   deps,
   appMountParameters,
   corePlugins,
+  config,
 }: {
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
+  config: ConfigSchema;
 }) => {
   const { element } = appMountParameters;
 
@@ -175,6 +201,7 @@ export const renderApp = ({
       core={core}
       deps={deps}
       corePlugins={corePlugins}
+      config={config}
     />,
     element
   );

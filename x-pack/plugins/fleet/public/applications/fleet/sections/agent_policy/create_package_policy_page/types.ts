@@ -21,7 +21,8 @@ export type PackagePolicyFormState =
   | 'CONFIRM'
   | 'LOADING'
   | 'SUBMITTED'
-  | 'SUBMITTED_NO_AGENTS';
+  | 'SUBMITTED_NO_AGENTS'
+  | 'SUBMITTED_CLOUD_FORMATION';
 
 export interface AddToPolicyParams {
   pkgkey: string;

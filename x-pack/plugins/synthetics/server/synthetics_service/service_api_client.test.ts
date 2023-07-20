@@ -10,11 +10,11 @@ import { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SyntheticsServerSetup } from '../types';
 
 const licenseMock: LicenseGetResponse = {
   license: {
@@ -63,7 +63,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { username: 'u', password: 'p' },
-      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
     expect(result).not.toHaveProperty('cert');
@@ -74,7 +74,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://example.com');
@@ -85,7 +85,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -96,7 +96,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -109,13 +109,11 @@ describe('checkAccountAccessStatus', () => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
   });
 
-  afterEach(() => jest.restoreAllMocks());
-
   it('includes a header with the kibana version', async () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     apiClient.locations = [
@@ -151,8 +149,6 @@ describe('callAPI', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => jest.restoreAllMocks());
-
   const logger = loggerMock.create();
 
   const config = {
@@ -174,7 +170,7 @@ describe('callAPI', () => {
       isDev: true,
       stackVersion: '8.7.0',
       coreStart: mockCoreStart,
-    } as UptimeServerSetup);
+    } as SyntheticsServerSetup);
 
     const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
 
@@ -323,7 +319,7 @@ describe('callAPI', () => {
         isDev: true,
         stackVersion: '8.7.0',
         coreStart: mockCoreStart,
-      } as UptimeServerSetup
+      } as SyntheticsServerSetup
     );
     apiClient.locations = testLocations;
 
@@ -375,7 +371,7 @@ describe('callAPI', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
         tls: { certificate: 'test-certificate', key: 'test-key' } as any,
       },
-      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+      { isDev: true, stackVersion: '8.7.0' } as SyntheticsServerSetup
     );
 
     apiClient.locations = testLocations;
@@ -432,7 +428,7 @@ describe('callAPI', () => {
         isDev: true,
         stackVersion: '8.7.0',
         cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
-      } as UptimeServerSetup
+      } as SyntheticsServerSetup
     );
 
     apiClient.locations = testLocations;

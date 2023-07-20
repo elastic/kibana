@@ -37,6 +37,7 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store/timeline';
 import { TimelineId } from '../common/types';
+import { SourcererScopeName } from './common/store/sourcerer/model';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -308,6 +309,11 @@ export const isTimelineScope = (scopeId: string) =>
 export const isInTableScope = (scopeId: string) =>
   Object.values(TableId).includes(scopeId as unknown as TableId);
 
+export const isAlertsPageScope = (scopeId: string) =>
+  [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage, TableId.alertsOnCasePage].includes(
+    scopeId as TableId
+  );
+
 export const getScopedActions = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {
     return timelineActions;
@@ -325,3 +331,13 @@ export const getScopedSelectors = (scopeId: string) => {
 };
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
+
+export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+  if (isTimelineScope(scopeId)) {
+    return SourcererScopeName.timeline;
+  } else if (isAlertsPageScope(scopeId)) {
+    return SourcererScopeName.detections;
+  } else {
+    return SourcererScopeName.default;
+  }
+};

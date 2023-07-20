@@ -10,7 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ServerError } from '../../../types';
-import type { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { connectorsQueriesKeys } from '../constants';
 import { getIssueTypes } from './api';
 import type { IssueTypes } from './types';
@@ -25,11 +25,10 @@ export const useGetIssueTypes = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<IssueTypes>, ServerError>(
     connectorsQueriesKeys.jiraGetIssueTypes(connector?.id ?? ''),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       return getIssueTypes({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
       });
     },

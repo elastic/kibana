@@ -15,6 +15,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Subscription } from 'rxjs';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../../hooks/use_control_panels_url_state';
 
 interface Props {
@@ -76,12 +77,20 @@ export const ControlsContent: React.FC<Props> = ({
   }, []);
 
   return (
-    <ControlGroupRenderer
-      getCreationOptions={getInitialInput}
-      ref={loadCompleteHandler}
-      timeRange={timeRange}
-      query={query}
-      filters={filters}
-    />
+    <ControlGroupContainer>
+      <ControlGroupRenderer
+        getCreationOptions={getInitialInput}
+        ref={loadCompleteHandler}
+        timeRange={timeRange}
+        query={query}
+        filters={filters}
+      />
+    </ControlGroupContainer>
   );
 };
+
+const ControlGroupContainer = euiStyled.div`
+  .controlGroup {
+    min-height: ${(props) => props.theme.eui.euiSizeXXL}
+  }
+`;

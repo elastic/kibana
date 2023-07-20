@@ -87,10 +87,52 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.billing_url",
+            "type": "string",
+            "tags": [],
+            "label": "billing_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.organization_url",
             "type": "string",
             "tags": [],
             "label": "organization_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.users_and_roles_url",
+            "type": "string",
+            "tags": [],
+            "label": "users_and_roles_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.performance_url",
+            "type": "string",
+            "tags": [],
+            "label": "performance_url",
             "description": [],
             "signature": [
               "string | undefined"
@@ -122,6 +164,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              "{ project_id: string; } | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -251,12 +307,60 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.billingUrl",
+            "type": "string",
+            "tags": [],
+            "label": "billingUrl",
+            "description": [
+              "\nThe full URL to the billing page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudStart.organizationUrl",
             "type": "string",
             "tags": [],
             "label": "organizationUrl",
             "description": [
               "\nThe full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.performanceUrl",
+            "type": "string",
+            "tags": [],
+            "label": "performanceUrl",
+            "description": [
+              "\nThe full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.usersAndRolesUrl",
+            "type": "string",
+            "tags": [],
+            "label": "usersAndRolesUrl",
+            "description": [
+              "\nThe full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud."
             ],
             "signature": [
               "string | undefined"
@@ -292,6 +396,35 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.isServerlessEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isServerlessEnabled",
+            "description": [
+              "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [
+              "\nServerless configuration"
+            ],
+            "signature": [
+              "{ projectId?: string | undefined; }"
             ],
             "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
@@ -587,6 +720,35 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.isServerlessEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isServerlessEnabled",
+          "description": [
+            "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.serverless",
+          "type": "Object",
+          "tags": [],
+          "label": "serverless",
+          "description": [
+            "\nServerless configuration"
+          ],
+          "signature": [
+            "{ projectId?: string | undefined; }"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -781,6 +943,35 @@
           ],
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isServerlessEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isServerlessEnabled",
+          "description": [
+            "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.serverless",
+          "type": "Object",
+          "tags": [],
+          "label": "serverless",
+          "description": [
+            "\nServerless configuration"
+          ],
+          "signature": [
+            "{ projectId?: string | undefined; }"
           ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false,

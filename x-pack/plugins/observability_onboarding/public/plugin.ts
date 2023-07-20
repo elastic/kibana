@@ -52,9 +52,11 @@ export class ObservabilityOnboardingPlugin
     core: CoreSetup,
     plugins: ObservabilityOnboardingPluginSetupDeps
   ) {
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
-    } = this.ctx.config.get<ObservabilityOnboardingConfig>();
+      serverless: { enabled: isServerlessEnabled },
+    } = config;
 
     const pluginSetupDeps = plugins;
 
@@ -62,7 +64,9 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: AppNavLinkStatus.hidden,
+        navLinkStatus: isServerlessEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
         id: 'observabilityOnboarding',
         title: 'Observability Onboarding',
         order: 8500,
@@ -87,6 +91,7 @@ export class ObservabilityOnboardingPlugin
             deps: pluginSetupDeps,
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+            config,
           });
         },
       });

@@ -11,13 +11,12 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  GetCaseConnectorsResponse,
-  CaseConnector,
-  UserActionAttributes,
-  CaseExternalServiceBasic,
   GetCaseConnectorsPushDetails,
-} from '../../../common/api';
-import { decodeOrThrow, GetCaseConnectorsResponseRt } from '../../../common/api';
+  GetCaseConnectorsResponse,
+} from '../../../common/types/api';
+import { GetCaseConnectorsResponseRt } from '../../../common/types/api';
+import type { CaseExternalServiceBasic } from '../../../common/api';
+import { decodeOrThrow } from '../../../common/api';
 import {
   isConnectorUserAction,
   isCreateCaseUserAction,
@@ -30,6 +29,7 @@ import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
 import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
+import type { CaseConnector, UserActionAttributes } from '../../../common/types/domain';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,

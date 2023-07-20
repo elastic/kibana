@@ -337,7 +337,7 @@ export class CommonPageObject extends FtrService {
 
   async ensureModalOverlayHidden() {
     return this.retry.try(async () => {
-      const shown = await this.testSubjects.exists('confirmModalTitleText');
+      const shown = await this.testSubjects.exists('confirmModalTitleText', { timeout: 500 });
       if (shown) {
         throw new Error('Modal overlay is showing');
       }

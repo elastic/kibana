@@ -111,7 +111,7 @@ export const IntegrationsPanel: React.FC = () => {
         <EuiSpacer size="l" />
         <EuiFlexGroup alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoBeats" size="xxl" />
+            <EuiIcon type="logoEnterpriseSearch" size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">

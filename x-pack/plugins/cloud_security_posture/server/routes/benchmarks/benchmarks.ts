@@ -19,7 +19,7 @@ import {
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark, GetBenchmarkResponse } from '../../../common/types';
 import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkTypeFilter,
@@ -88,21 +88,30 @@ const createBenchmarks = (
   );
 };
 
-export const defineGetBenchmarksRoute = (router: CspRouter): void =>
-  router.get(
-    {
+export const defineGetBenchmarksRoute = (router: CspRouter) =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: benchmarksQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
-    },
-    async (context, request, response) => {
-      if (!(await context.fleet).authz.fleet.all) {
-        return response.forbidden();
-      }
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: benchmarksQueryParamsSchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        if (!(await context.fleet).authz.fleet.all) {
+          return response.forbidden();
+        }
 
-      const cspContext = await context.csp;
+        const cspContext = await context.csp;
 
       try {
         const packagePolicies = await getCspPackagePolicies(
@@ -125,11 +134,11 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
           cspContext.agentPolicyService
         );
 
-        const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
-          cspContext.agentService,
-          agentPolicies,
-          cspContext.logger
-        );
+          const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
+            cspContext.agentService,
+            agentPolicies,
+            cspContext.logger
+          );
 
         const benchmarks = await createBenchmarks(
           cspContext.soClient,
@@ -143,15 +152,18 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
             ...packagePolicies,
             total: cspPackagePolicies.length,
             items: benchmarks,
-          },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
+          };
+
+          return response.ok({
+            body: getBenchmarkResponse,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );

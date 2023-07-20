@@ -17,11 +17,7 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
-import {
-  areTotalAssigneesInvalid,
-  isCategoryFieldInvalidString,
-  isCategoryFieldTooLong,
-} from '../../../common/utils/validators';
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
   CaseAssignees,
   CaseAttributes,
@@ -43,8 +39,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
-  MAX_CATEGORY_LENGTH,
-  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
 import { arraysDifference, getCaseToUpdate } from '../utils';
@@ -79,24 +73,6 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
 }
 
 /**
- * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
- */
-function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidTitle = requests.filter(
-    ({ updateReq }) => updateReq.title !== undefined && updateReq.title.length > MAX_TITLE_LENGTH
-  );
-
-  if (requestsInvalidTitle.length > 0) {
-    const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
-        ', '
-      )}]`
-    );
-  }
-}
-
-/**
  * Throws an error if any of the requests attempt to update the assignees of the case
  * without the appropriate license
  */
@@ -119,40 +95,6 @@ function throwIfUpdateAssigneesWithoutValidLicense(
         ', '
       )}]`
     );
-  }
-}
-
-/**
- * Throws an error if any of the requests tries to update the category and
- * the length is > MAX_CATEGORY_LENGTH.
- */
-function throwIfCategoryLengthIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidCategory = requests.filter(({ updateReq }) =>
-    isCategoryFieldTooLong(updateReq.category)
-  );
-
-  if (requestsInvalidCategory.length > 0) {
-    const ids = requestsInvalidCategory.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}, ids: [${ids.join(
-        ', '
-      )}]`
-    );
-  }
-}
-
-/**
- * Throws an error if any of the requests tries to update the category and
- * the new value is an empty string.
- */
-function throwIfCategoryIsInvalidString(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidCategory = requests.filter(({ updateReq }) =>
-    isCategoryFieldInvalidString(updateReq.category)
-  );
-
-  if (requestsInvalidCategory.length > 0) {
-    const ids = requestsInvalidCategory.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(`The category cannot be an empty string. Ids: [${ids.join(', ')}]`);
   }
 }
 
@@ -424,9 +366,6 @@ export const update = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
-    throwIfTitleIsInvalid(casesToUpdate);
-    throwIfCategoryLengthIsInvalid(casesToUpdate);
-    throwIfCategoryIsInvalidString(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
 

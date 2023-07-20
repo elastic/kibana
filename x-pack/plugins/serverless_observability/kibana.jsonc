@@ -8,7 +8,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "serverless", "observability"],
-    "requiredPlugins": ["serverless", "observabilityShared", "kibanaReact"],
+    "requiredPlugins": ["serverless", "observabilityShared", "kibanaReact", "management", "ml", "cloud"],
     "optionalPlugins": [],
     "requiredBundles": []
   }

@@ -12,8 +12,10 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
+  expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
+  openAddRuleExceptionFromAlertActionButton,
 } from '../../../tasks/alerts';
 import {
   addExceptionEntryFieldValue,
@@ -26,12 +28,10 @@ import {
   validateExceptionItemAffectsTheCorrectRulesInRulePage,
   validateExceptionConditionField,
   validateExceptionCommentCountAndText,
+  editExceptionFlyoutItemName,
+  validateHighlightedFieldsPopulatedAsExceptionConditions,
+  validateEmptyExceptionConditionField,
 } from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   goToAlertsTab,
@@ -42,27 +42,45 @@ import {
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
-import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
+import {
+  ADD_AND_BTN,
+  ENTRY_DELETE_BTN,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  NO_EXCEPTIONS_EXIST_PROMPT,
+} from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+
+const loadEndpointRuleAndAlerts = () => {
+  cy.task('esArchiverLoad', 'endpoint');
+  login();
+  createRule(getEndpointRule());
+  visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+  goToRuleDetails();
+  waitForAlertsToPopulate();
+};
 
 describe('Rule Exceptions workflows from Alert', () => {
   const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
-  const ITEM_NAME = 'Sample Exception List Item';
+  const ITEM_NAME = 'Sample Exception Item';
+  const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
+  const ADDITIONAL_ENTRY = 'host.hostname';
   const newRule = getNewRule();
 
   beforeEach(() => {
-    esArchiverResetKibana();
-    deleteAlertsAndRules();
+    cy.task('esArchiverResetKibana');
   });
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
+    deleteAlertsAndRules();
   });
   afterEach(() => {
-    esArchiverUnload('exceptions_2');
+    cy.task('esArchiverUnload', 'exceptions_2');
   });
 
-  it('Creates an exception item from alert actions overflow menu and close all matching alerts', () => {
-    esArchiverLoad('exceptions');
+  it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
+    cy.task('esArchiverLoad', 'exceptions');
     login();
     postDataView('exceptions-*');
     createRule({
@@ -109,7 +127,7 @@ describe('Rule Exceptions workflows from Alert', () => {
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // load more docs
-    esArchiverLoad('exceptions_2');
+    cy.task('esArchiverLoad', 'exceptions_2');
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
@@ -119,14 +137,8 @@ describe('Rule Exceptions workflows from Alert', () => {
 
     cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
   });
-
-  it('Creates an exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields ', () => {
-    esArchiverLoad('endpoint');
-    login();
-    createRule(getEndpointRule());
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
-    waitForAlertsToPopulate();
+  it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
+    loadEndpointRuleAndAlerts();
 
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
@@ -144,9 +156,7 @@ describe('Rule Exceptions workflows from Alert', () => {
      * fields are based on the alert document that should be generated
      * when the endpoint rule runs
      */
-    highlightedFieldsBasedOnAlertDoc.forEach((field, index) => {
-      validateExceptionConditionField(field);
-    });
+    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
     /**
      * Validate that the comments are opened by default with one comment added
@@ -154,10 +164,112 @@ describe('Rule Exceptions workflows from Alert', () => {
      */
     validateExceptionCommentCountAndText(
       1,
-      'Exception conditions are pre-filled with relevant data from'
+      'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
     );
 
     addExceptionFlyoutItemName(ITEM_NAME);
     submitNewExceptionItem();
+  });
+  it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+    loadEndpointRuleAndAlerts();
+
+    cy.get(LOADING_INDICATOR).should('not.exist');
+
+    // Open first Alert Summary
+    expandFirstAlert();
+
+    // The Rule exception should populated with highlighted fields
+    openAddRuleExceptionFromAlertActionButton();
+
+    const highlightedFieldsBasedOnAlertDoc = [
+      'host.name',
+      'agent.id',
+      'user.name',
+      'process.executable',
+      'file.path',
+    ];
+
+    /**
+     * Validate the highlighted fields are auto populated, these
+     * fields are based on the alert document that should be generated
+     * when the endpoint rule runs
+     */
+    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+
+    /**
+     * Validate that the comments are opened by default with one comment added
+     * showing a text contains information about the pre-filled conditions
+     */
+    validateExceptionCommentCountAndText(
+      1,
+      'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
+    );
+
+    addExceptionFlyoutItemName(ITEM_NAME);
+
+    cy.get(ADD_AND_BTN).click();
+
+    // edit conditions
+    addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 5);
+    addExceptionEntryFieldValueValue('foo', 5);
+
+    // Change the name again
+    editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+
+    // validate the condition is still 'host.hostname' or got rest after the name is changed
+    validateExceptionConditionField(ADDITIONAL_ENTRY);
+
+    submitNewExceptionItem();
+
+    goToExceptionsTab();
+
+    // new exception item displays
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
+  });
+  it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
+    loadEndpointRuleAndAlerts();
+
+    cy.get(LOADING_INDICATOR).should('not.exist');
+
+    // Open first Alert Summary
+    expandFirstAlert();
+
+    // The Rule exception should populated with highlighted fields
+    openAddRuleExceptionFromAlertActionButton();
+
+    const highlightedFieldsBasedOnAlertDoc = [
+      'host.name',
+      'agent.id',
+      'user.name',
+      'process.executable',
+      'file.path',
+    ];
+
+    /**
+     * Validate the highlighted fields are auto populated, these
+     * fields are based on the alert document that should be generated
+     * when the endpoint rule runs
+     */
+    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+
+    /**
+     * Delete all the highlighted fields to see if any condition
+     * will prefuilled again.
+     */
+    const highlightedFieldsCount = highlightedFieldsBasedOnAlertDoc.length - 1;
+    highlightedFieldsBasedOnAlertDoc.forEach((_, index) =>
+      cy
+        .get(ENTRY_DELETE_BTN)
+        .eq(highlightedFieldsCount - index)
+        .click()
+    );
+
+    /**
+     * Validate that there are no highlighted fields are auto populated
+     * after the deletion
+     */
+    validateEmptyExceptionConditionField();
   });
 });

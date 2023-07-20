@@ -38,6 +38,7 @@ export interface FormLocation {
   id: string;
   isServiceManaged: boolean;
   label: string;
+  isInvalid?: boolean;
 }
 
 export type FormConfig = MonitorFields & {

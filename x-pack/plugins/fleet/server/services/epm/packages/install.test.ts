@@ -37,6 +37,7 @@ jest.mock('../../app_context', () => {
       getSavedObjects: jest.fn(() => ({
         createImporter: jest.fn(),
       })),
+      getConfig: jest.fn(() => ({})),
       getSavedObjectsTagging: jest.fn(() => ({
         createInternalAssignmentService: jest.fn(),
         createTagClient: jest.fn(),
@@ -45,7 +46,13 @@ jest.mock('../../app_context', () => {
   };
 });
 jest.mock('.');
-jest.mock('../registry');
+jest.mock('../registry', () => {
+  return {
+    ...jest.requireActual('../registry'),
+    fetchFindLatestPackageOrThrow: jest.fn(),
+    getPackage: jest.fn(),
+  };
+});
 jest.mock('../../upgrade_sender');
 jest.mock('../../license');
 jest.mock('../../upgrade_sender');
@@ -127,19 +134,10 @@ describe('createInstallation', () => {
 
 describe('install', () => {
   beforeEach(() => {
-    jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
-      const [pkgName, pkgVersion] = pkgKey.split('-');
-      return { pkgName, pkgVersion };
-    });
     jest
-      .spyOn(Registry, 'pkgToPkgKey')
-      .mockImplementation((pkg: { name: string; version: string }) => {
-        return `${pkg.name}-${pkg.version}`;
-      });
-    jest
-      .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
+      .mocked(Registry.fetchFindLatestPackageOrThrow)
       .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
-    jest.spyOn(Registry, 'getPackage').mockImplementation(() =>
+    jest.mocked(Registry.getPackage).mockImplementation(() =>
       Promise.resolve({
         packageInfo: { license: 'basic', conditions: { elastic: { subscription: 'basic' } } },
       } as any)
@@ -332,6 +330,25 @@ describe('install', () => {
       });
 
       expect(response.status).toEqual('already_installed');
+    });
+
+    it('should not allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+      jest.mocked(appContextService.getConfig).mockReturnValueOnce({
+        internal: {
+          fleetServerStandalone: true,
+        },
+      } as any);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'fleet_server-2.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error?.message).toMatch(/fleet_server installation is not authorized/);
     });
   });
 
