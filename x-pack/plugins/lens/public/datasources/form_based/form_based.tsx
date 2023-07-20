@@ -23,7 +23,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
-import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import type {
   DatasourceDimensionEditorProps,
