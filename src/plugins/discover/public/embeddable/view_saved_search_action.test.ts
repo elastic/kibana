@@ -12,6 +12,7 @@ import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { createStartContractMock } from '../__mocks__/start_contract';
 import { discoverServiceMock } from '../__mocks__/services';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
@@ -36,13 +37,13 @@ const embeddableConfig = {
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
     expect(await action.isCompatible({ embeddable, trigger })).toBe(true);
   });
 
   it('is not compatible when embeddable not of type saved search', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new ContactCardEmbeddable(
       {
         id: '123',
@@ -62,7 +63,7 @@ describe('view saved search action', () => {
   });
 
   it('is not visible when in edit mode', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const input = { ...searchInput, viewMode: ViewMode.EDIT };
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, input);
     expect(
@@ -74,12 +75,15 @@ describe('view saved search action', () => {
   });
 
   it('execute navigates to a saved search', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
     await new Promise((resolve) => setTimeout(resolve, 0));
     await action.execute({ embeddable, trigger });
-    expect(applicationMock.navigateToApp).toHaveBeenCalledWith('discover', {
-      path: `#/view/${searchInput.savedObjectId}`,
-    });
+    expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
+      getDiscoverLocatorParams({
+        input: embeddable.getInput(),
+        savedSearch: embeddable.getSavedSearch(),
+      })
+    );
   });
 });

@@ -46,7 +46,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
@@ -76,6 +75,7 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -203,8 +203,15 @@ export class SavedSearchEmbeddable
     const title = input.hidePanelTitles ? '' : input.title ?? savedSearch.title;
     const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
     const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
-    const editPath = getSavedSearchUrl(savedObjectId);
-    const editUrl = this.services.addBasePath(`/app/discover${editPath}`);
+    const locatorParams = getDiscoverLocatorParams({ input, savedSearch });
+    // We need to use a redirect URL if this is a by value saved search using
+    // an ad hoc data view to ensure the data view spec gets encoded in the URL
+    const useRedirect = !savedObjectId && !dataView?.isPersisted();
+    const editPath = useRedirect
+      ? this.services.locator.getRedirectUrl(locatorParams)
+      : await this.services.locator.getUrl(locatorParams);
+    const editUrl = this.services.addBasePath(editPath);
+    const editApp = useRedirect ? 'r' : 'discover';
 
     this.updateOutput({
       ...this.getOutput(),
@@ -212,6 +219,7 @@ export class SavedSearchEmbeddable
       defaultDescription: savedSearch.description,
       title,
       description,
+      editApp,
       editPath,
       editUrl,
       indexPatterns,
