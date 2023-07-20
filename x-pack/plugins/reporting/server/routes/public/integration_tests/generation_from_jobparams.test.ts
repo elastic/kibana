@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../..';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { ReportingStore } from '../../../../lib';
-import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
-import { Report } from '../../../../lib/store';
+import { ReportingCore } from '../../..';
+import { ReportingStore } from '../../../lib';
+import { ExportTypesRegistry } from '../../../lib/export_types_registry';
+import { Report } from '../../../lib/store';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../../types';
-import { registerGeneration } from '../generate_from_jobparams';
+} from '../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../types';
+import { registerGenerationRoutes } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -105,7 +105,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -120,7 +120,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -131,7 +131,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -143,7 +143,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -157,7 +157,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 on invalid browser timezone', async () => {
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -173,7 +173,7 @@ describe('POST /api/reporting/generate', () => {
   it('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -184,7 +184,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    registerGeneration(mockReportingCore, mockLogger);
+    registerGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 

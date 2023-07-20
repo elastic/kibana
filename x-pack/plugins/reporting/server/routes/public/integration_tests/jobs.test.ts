@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../../lib/content_stream', () => ({
+jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 import { estypes } from '@elastic/elasticsearch';
@@ -15,21 +15,21 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../../lib';
+import { ReportingCore } from '../../..';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
+import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../../test_helpers';
-import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../../types';
+} from '../../../test_helpers';
+import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
 import { registerJobRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('GET /internal/reporting/jobs/download', () => {
+describe('GET /api/reporting/jobs/download', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -120,7 +120,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/1')
+      .get('/api/reporting/jobs/download/1')
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -146,7 +146,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/dope')
+      .get('/api/reporting/jobs/download/dope')
       .expect(401)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
@@ -159,7 +159,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/download/poo').expect(404);
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(404);
   });
 
   it('returns a 403 if not a valid job type', async () => {
@@ -173,37 +173,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/download/poo').expect(403);
-  });
-
-  it(`returns job's info`, async () => {
-    mockEsClient.search.mockResponseOnce(
-      getHits({
-        jobtype: 'base64EncodedJobType',
-        payload: {}, // payload is irrelevant
-      })
-    );
-
-    registerJobRoutes(core);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/info/test').expect(200);
-  });
-
-  it(`returns 403 if a user cannot view a job's info`, async () => {
-    mockEsClient.search.mockResponseOnce(
-      getHits({
-        jobtype: 'customForbiddenJobType',
-        payload: {}, // payload is irrelevant
-      })
-    );
-
-    registerJobRoutes(core);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener).get('/internal/reporting/jobs/info/test').expect(403);
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(403);
   });
 
   it('when a job is incomplete', async () => {
@@ -218,7 +188,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/dank')
+      .get('/api/reporting/jobs/download/dank')
       .expect(503)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect('Retry-After', '30')
@@ -238,7 +208,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/dank')
+      .get('/api/reporting/jobs/download/dank')
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .then(({ body }) =>
@@ -266,124 +236,10 @@ describe('GET /internal/reporting/jobs/download', () => {
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dank')
+        .get('/api/reporting/jobs/download/dank')
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
-    });
-
-    it('succeeds when security is not there or disabled', async () => {
-      mockEsClient.search.mockResponseOnce(getCompleteHits());
-
-      // @ts-ignore
-      core.pluginSetupDeps.security = null;
-
-      registerJobRoutes(core);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dope')
-        .expect(200)
-        .expect('Content-Type', 'text/csv; charset=utf-8')
-        .expect('content-disposition', 'attachment; filename=report.csv');
-    });
-
-    it('forwards job content stream', async () => {
-      mockEsClient.search.mockResponseOnce(
-        getCompleteHits({
-          jobType: 'unencodedJobType',
-        })
-      );
-      registerJobRoutes(core);
-
-      await server.start();
-      await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dank')
-        .expect(200)
-        .expect('Content-Type', 'text/csv; charset=utf-8')
-        .then(({ text }) => expect(text).toEqual('test'));
-    });
-
-    it('refuses to return unknown content-types', async () => {
-      mockEsClient.search.mockResponseOnce(
-        getCompleteHits({
-          jobType: 'unencodedJobType',
-          outputContentType: 'application/html',
-        })
-      );
-      registerJobRoutes(core);
-
-      await server.start();
-      await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dank')
-        .expect(400)
-        .then(({ body }) => {
-          expect(body).toEqual({
-            error: 'Bad Request',
-            message: 'Unsupported content-type of application/html specified by job output',
-            statusCode: 400,
-          });
-        });
-    });
-
-    it('allows multi-byte characters in file names', async () => {
-      mockEsClient.search.mockResponseOnce(
-        getCompleteHits({
-          jobType: 'base64EncodedJobType',
-          title: '日本語ダッシュボード',
-        })
-      );
-      registerJobRoutes(core);
-
-      await server.start();
-      await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/japanese-dashboard')
-        .expect(200)
-        .expect('Content-Type', 'application/pdf')
-        .expect(
-          'content-disposition',
-          'attachment; filename=%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89.pdf'
-        );
-    });
-  });
-
-  describe('Deprecated: role-based access control', () => {
-    it('fails on users without the appropriate role', async () => {
-      mockStartDeps = await createMockPluginStart(
-        {
-          licensing: {
-            ...licensingMock.createStart(),
-            license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
-          },
-          security: {
-            authc: {
-              getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
-            },
-          },
-        },
-        mockConfigSchema
-      );
-
-      core = await createMockReportingCore(
-        createMockConfigSchema({ roles: { enabled: true } }),
-        mockSetupDeps,
-        mockStartDeps
-      );
-
-      registerJobRoutes(core);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dope')
-        .expect(403)
-        .then(({ body }) =>
-          expect(body.message).toMatchInlineSnapshot(`
-            "Ask your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\\"font-weight: 600;\\"
-                                target=\\"_blank\\" rel=\\"noopener\\">Learn more</a>."
-          `)
-        );
     });
   });
 });
