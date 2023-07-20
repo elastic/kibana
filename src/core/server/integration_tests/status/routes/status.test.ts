@@ -86,6 +86,7 @@ describe('GET /api/status', () => {
           dist: true,
           version: '9.9.9-SNAPSHOT',
           buildDate: new Date('2023-05-15T23:12:09.000Z'),
+          buildFlavor: 'traditional',
         },
         serverName: 'xkibana',
         uuid: 'xxxx-xxxxx',
