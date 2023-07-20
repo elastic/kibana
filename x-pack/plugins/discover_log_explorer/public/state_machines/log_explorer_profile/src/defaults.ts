@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { AllDatasetSelection } from '../../../utils/dataset_selection';
+import { DefaultLogExplorerProfileState } from './types';
 
-export const LayoutContent = euiStyled(EuiPageContent)`
-  position: relative;
-`;
+export const DEFAULT_CONTEXT: DefaultLogExplorerProfileState = {
+  datasetSelection: AllDatasetSelection.create(),
+};
