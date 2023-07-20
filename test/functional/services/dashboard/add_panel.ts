@@ -19,7 +19,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
-    await this.testSubjects.click('dashboardAddPanelButton');
+    await this.testSubjects.click('dashboardAddFromLibraryButton');
     // Give some time for the animation to complete
     await this.common.sleep(500);
   }

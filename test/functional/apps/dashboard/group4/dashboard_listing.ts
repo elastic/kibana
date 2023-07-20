@@ -15,9 +15,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const retry = getService('retry');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe.only('dashboard listing page', function describeIndexTests() {
+  describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
@@ -49,19 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
         await listingTable.clearSearchFilter();
-      });
-    });
-
-    describe('edit meta data', () => {
-      it('saves changes to title, description, and tags', async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await testSubjects.click('edit-action');
-        await testSubjects.setValue('nameInput', 'new title');
-        await testSubjects.setValue('descriptionInput', 'new description');
-        await find.clickByCssSelector('euiFilterSelectItem');
-        await testSubjects.click('saveButton');
-        await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
-        await listingTable.clickItemLink('dashboard', 'new title');
       });
     });
 
@@ -214,6 +202,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
+      });
+    });
+
+    describe('edit meta data', () => {
+      it('saves changes to dashboard metadata', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
+        await PageObjects.dashboard.saveDashboard(`${dashboardName}-editMetaData`);
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.searchForItemWithName(`${dashboardName}-editMetaData`);
+        await testSubjects.click('inspect-action');
+        await testSubjects.setValue('nameInput', 'new title');
+        await testSubjects.setValue('descriptionInput', 'new description');
+        await retry.try(async () => {
+          await testSubjects.click('saveButton');
+          await testSubjects.missingOrFail('flyoutTitle');
+        });
+
+        await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
+        await listingTable.setSearchFilterValue('new description');
+        await listingTable.expectItemsCount('dashboard', 1);
+        await listingTable.clickItemLink('dashboard', 'new title');
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.equal(originalPanelCount);
       });
     });
   });
