@@ -12,7 +12,6 @@ import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
@@ -55,7 +54,7 @@ interface ResponseType {
 describe('Add, copy comments in different exceptions type and validate sharing them between users', () => {
   describe('Rule exceptions', () => {
     beforeEach(() => {
-      esArchiverResetKibana();
+      cy.task('esArchiverResetKibana');
       login();
       const exceptionList = getExceptionList();
       // create rule with exceptions
@@ -153,7 +152,7 @@ describe('Add, copy comments in different exceptions type and validate sharing t
 
   describe('Endpoint exceptions', () => {
     beforeEach(() => {
-      esArchiverResetKibana();
+      cy.task('esArchiverResetKibana');
       login();
       // create rule with exception
       createEndpointExceptionList().then((response) => {

@@ -7,6 +7,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 
 import { Navigation } from './components';
@@ -54,11 +55,42 @@ const getDefaultNavigationTree = (
     footer: [
       {
         type: 'navGroup',
-        ...getPresets('devtools'),
+        id: 'devTools',
+        title: i18n.translate('sharedUXPackages.chrome.sideNavigation.devTools', {
+          defaultMessage: 'Developer tools',
+        }),
+        link: 'dev_tools',
+        icon: 'editorCodeBlock',
       },
       {
         type: 'navGroup',
-        ...getPresets('management'),
+        id: 'project_settings_project_nav',
+        title: i18n.translate('sharedUXPackages.chrome.sideNavigation.projectSettings', {
+          defaultMessage: 'Project settings',
+        }),
+        icon: 'gear',
+        breadcrumbStatus: 'hidden',
+        children: [
+          {
+            id: 'settings',
+            children: [
+              {
+                link: 'management',
+                title: i18n.translate('sharedUXPackages.chrome.sideNavigation.mngt', {
+                  defaultMessage: 'Management',
+                }),
+              },
+              {
+                id: 'cloudLinkUserAndRoles',
+                cloudLink: 'userAndRoles',
+              },
+              {
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
+              },
+            ],
+          },
+        ],
       },
     ],
   };
@@ -102,15 +134,12 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
           );
         }
 
-        const { ...copy } = item as GroupDefinition;
-        delete (copy as any).type;
-
-        return copy.children ? (
-          <Navigation.Group {...copy} key={id}>
-            {renderItems(copy.children, [...path, id])}
+        return item.children || (item as GroupDefinition).type === 'navGroup' ? (
+          <Navigation.Group {...item} key={id}>
+            {renderItems(item.children, [...path, id])}
           </Navigation.Group>
         ) : (
-          <Navigation.Item {...copy} key={id} />
+          <Navigation.Item {...item} key={id} />
         );
       });
     },

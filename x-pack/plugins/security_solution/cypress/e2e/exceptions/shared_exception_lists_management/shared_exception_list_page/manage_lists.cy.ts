@@ -25,7 +25,6 @@ import {
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../screens/exceptions';
 import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 
@@ -47,8 +46,6 @@ const getExceptionList2 = () => ({
 describe('Manage lists from "Shared Exception Lists" page', () => {
   describe('Create/Export/Delete List', () => {
     before(() => {
-      esArchiverResetKibana();
-
       createRule(getNewRule({ name: 'Another rule' }));
 
       // Create exception list associated with a rule

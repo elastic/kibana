@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
-import type { EventFormOption } from './event_collection_card';
-import { EventCollectionCard } from './event_collection_card';
+import type { EventFormOption } from '../event_collection_card';
+import { EventCollectionCard } from '../event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
@@ -33,7 +33,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
   },
 ];
 
-type MacEventCollectionCardProps = PolicyFormComponentCommonProps;
+export type MacEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const MacEventCollectionCard = memo<MacEventCollectionCardProps>((props) => {
   return (
