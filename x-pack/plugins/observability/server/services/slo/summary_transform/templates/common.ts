@@ -56,6 +56,11 @@ export const groupBy = {
       field: 'slo.timeWindow.type',
     },
   },
+  errorBudgetEstimated: {
+    terms: {
+      field: 'errorBudgetEstimated',
+    },
+  },
   // optional fields: only specified for APM indicators. Must include missing_bucket:true
   'service.name': {
     terms: {

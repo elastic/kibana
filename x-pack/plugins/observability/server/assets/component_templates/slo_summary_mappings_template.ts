@@ -103,8 +103,15 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
         errorBudgetRemaining: {
           type: 'double',
         },
+        errorBudgetEstimated: {
+          type: 'boolean',
+        },
         status: {
           type: 'byte',
+        },
+        statusLabel: {
+          type: 'keyword',
+          ignore_above: 32,
         },
       },
     },

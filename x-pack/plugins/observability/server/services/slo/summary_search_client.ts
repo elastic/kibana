@@ -20,7 +20,9 @@ interface EsSummaryDocument {
   errorBudgetConsumed: number;
   errorBudgetRemaining: number;
   errorBudgetInitial: number;
+  errorBudgetEstimated: boolean;
   status: number;
+  statusLabel: Status;
 }
 
 export interface Paginated<T> {
@@ -89,10 +91,10 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               initial: doc._source!.errorBudgetInitial,
               consumed: doc._source!.errorBudgetConsumed,
               remaining: doc._source!.errorBudgetRemaining,
-              isEstimated: false, // TODO: check how to set
+              isEstimated: doc._source!.errorBudgetEstimated,
             },
             sliValue: doc._source!.sliValue,
-            status: toStatus(doc._source!.status),
+            status: doc._source!.statusLabel,
           },
         })),
       };
@@ -115,19 +117,5 @@ function toDocumentSortField(field: SortField) {
       return 'sliValue';
     default:
       assertNever(field);
-  }
-}
-
-function toStatus(status: number): Status {
-  switch (status) {
-    case 4:
-      return 'HEALTHY';
-    case 2:
-      return 'DEGRADING';
-    case 1:
-      return 'VIOLATED';
-    case 0:
-    default:
-      return 'NO_DATA';
   }
 }
