@@ -29,12 +29,12 @@ export const useStyles = () => {
       & .euiButtonEmpty {
         font-weight: ${euiTheme.font.weight.bold};
       }
-
-      & .euiDataGrid__leftControls {
-        & .euiButtonEmpty:hover:not(:disabled) {
-          text-decoration: none;
-          cursor: default;
-        }
+    }
+    & .euiDataGrid__leftControls {
+      > .euiButtonEmpty:hover:not(:disabled),
+      .euiButtonEmpty:focus {
+        text-decoration: none;
+        cursor: default;
       }
     }
     & .euiButtonIcon {
@@ -69,17 +69,9 @@ export const useStyles = () => {
     width: 188px;
   `;
 
-  const leftDatagridControl = css`
-    &:hover:not(:disabled) {
-      text-decoration: none;
-      cursor: default;
-    }
-  `;
-
   return {
     highlightStyle,
     gridStyle,
     groupBySelector,
-    leftDatagridControl,
   };
 };
