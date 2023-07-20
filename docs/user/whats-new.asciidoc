@@ -109,7 +109,7 @@ image::images/timefunctions.png[Example of customizing the histogram interval an
 [discrete]
 ==== Ignore global filters in Lens
 
-We now offer users the ability to ignore global filters per data layer in Lens. This allows users to easily compare different time frames in the same chart. This functionality previously only existed in the annotations layer.
+We now offer users the ability to ignore global filters per data layer in **Lens**. This allows users to easily compare different time frames in the same chart. This functionality previously only existed in the annotations layer.
  
 [role="screenshot"]
 image::images/globalfilter.png[Example of the new global filter slider]
