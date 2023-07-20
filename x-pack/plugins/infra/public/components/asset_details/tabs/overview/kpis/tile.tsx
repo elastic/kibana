@@ -109,6 +109,7 @@ export const Tile = ({
             dateRange={timeRange}
             filters={filters}
             loading={loading}
+            hidePanelTitles
           />
         </EuiToolTip>
       )}

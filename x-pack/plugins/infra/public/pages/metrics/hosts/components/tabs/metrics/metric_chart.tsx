@@ -130,7 +130,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`hostsViewsmetricsChart-${id}`}
+          id={`hostsViewMetricsChart-${id}`}
           attributes={attributes}
           style={lensStyle}
           extraActions={extraActions}
@@ -141,7 +141,6 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           onBrushEnd={handleBrushEnd}
           loading={loading}
           overrides={overrides}
-          hasTitle
         />
       )}
     </EuiPanel>

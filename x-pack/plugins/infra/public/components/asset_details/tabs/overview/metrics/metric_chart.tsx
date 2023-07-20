@@ -109,7 +109,6 @@ export const MetricChart = ({
           overrides={overrides}
           loading={loading}
           disableTriggers
-          hasTitle
         />
       )}
     </EuiPanel>

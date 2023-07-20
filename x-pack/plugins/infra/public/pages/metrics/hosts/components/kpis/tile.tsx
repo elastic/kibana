@@ -24,7 +24,7 @@ import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartProps) => {
+export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
@@ -149,6 +149,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
               query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
               onBrushEnd={handleBrushEnd}
               loading={loading}
+              hidePanelTitles
             />
           </div>
         </EuiToolTip>
