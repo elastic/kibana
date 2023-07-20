@@ -29,7 +29,7 @@ export class ShareMenuManager {
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract,
-    hideEmbed?: boolean,
+    hideEmbed?: boolean
   ) {
     return {
       /**
