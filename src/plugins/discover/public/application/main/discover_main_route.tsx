@@ -46,7 +46,6 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
-  providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
 export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
