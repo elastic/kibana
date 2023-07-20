@@ -113,7 +113,7 @@ export function StorageChart() {
         <Axis
           id="y-axis"
           position={Position.Left}
-          showGridLines
+          gridLine={{ visible: true }}
           tickFormat={asDynamicBytes}
         />
         {storageTimeSeries.map((serie) => (

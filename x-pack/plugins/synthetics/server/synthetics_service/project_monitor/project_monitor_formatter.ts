@@ -12,16 +12,17 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SyntheticsServerSetup } from '../../types';
+import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { RouteContext } from '../../legacy_uptime/routes';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
-  SyntheticsMonitorWithSecrets,
-  EncryptedSyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
+  EncryptedSyntheticsMonitorAttributes,
   ServiceLocationErrors,
   ProjectMonitor,
   Locations,
@@ -29,7 +30,6 @@ import {
   MonitorFields,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
   validateProjectMonitor,
@@ -65,7 +65,7 @@ export class ProjectMonitorFormatter {
   public createdMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public failedMonitors: FailedError = [];
-  private server: UptimeServerSetup;
+  private server: SyntheticsServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
   private routeContext: RouteContext;
@@ -122,7 +122,7 @@ export class ProjectMonitorFormatter {
 
     const normalizedNewMonitors: SyntheticsMonitor[] = [];
     const normalizedUpdateMonitors: Array<{
-      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
+      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>;
       monitor: SyntheticsMonitor;
     }> = [];
 
@@ -243,10 +243,12 @@ export class ProjectMonitorFormatter {
       filter: this.projectFilter,
     });
 
-    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
+    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
     for await (const result of finder.find()) {
       hits.push(
-        ...(result.saved_objects as Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>)
+        ...(result.saved_objects as Array<
+          SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>
+        >)
       );
     }
 
@@ -323,12 +325,12 @@ export class ProjectMonitorFormatter {
   };
 
   private getDecryptedMonitors = async (
-    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>
+    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
   ) => {
     return await pMap(
       monitors,
       async (monitor) =>
-        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
           syntheticsMonitorType,
           monitor.id,
           {
@@ -342,11 +344,11 @@ export class ProjectMonitorFormatter {
   private updateMonitorsBulk = async (
     monitors: Array<{
       monitor: SyntheticsMonitor;
-      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
+      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>;
     }>
   ): Promise<
     | {
-        editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>>;
+        editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>>;
         errors: ServiceLocationErrors;
         updatedCount: number;
       }

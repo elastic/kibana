@@ -7,3 +7,4 @@
  */
 
 export const SERVERLESS_ES_APP_ID = 'serverlessElasticsearch';
+export const SERVERLESS_ES_INDEXING_API_ID = 'serverlessIndexingApi';

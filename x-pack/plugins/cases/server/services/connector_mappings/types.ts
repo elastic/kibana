@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
 
-import type { ConnectorMappingsAttributes } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type { IndexRefresh } from '../types';
 

@@ -19,9 +19,9 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
@@ -30,13 +30,13 @@ import { ServiceAPIClient, ServiceData } from './service_api_client';
 
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecrets,
-  SyntheticsParamSO,
+  SyntheticsMonitorWithSecretsAttributes,
+  SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -57,7 +57,7 @@ const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 export class SyntheticsService {
   private logger: Logger;
   private esClient?: ElasticsearchClient;
-  private readonly server: UptimeServerSetup;
+  private readonly server: SyntheticsServerSetup;
   public apiClient: ServiceAPIClient;
 
   private readonly config: ServiceConfig;
@@ -76,7 +76,7 @@ export class SyntheticsService {
 
   public invalidApiKeyError?: boolean;
 
-  constructor(server: UptimeServerSetup) {
+  constructor(server: SyntheticsServerSetup) {
     this.logger = server.logger;
     this.server = server;
     this.config = server.config.service ?? {};
@@ -238,9 +238,10 @@ export class SyntheticsService {
         stackVersion: this.server.stackVersion,
       });
 
+      this.logger?.error(e);
+
       this.logger?.error(
-        `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-        e?.message ?? e
+        `Error running synthetics syncs task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, ${e?.message}`
       );
 
       return null;
@@ -506,7 +507,7 @@ export class SyntheticsService {
 
     const paramsBySpace = await this.getSyntheticsParams();
 
-    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitor>({
+    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
       type: syntheticsMonitorType,
       perPage: 100,
       namespaces: [ALL_SPACES_ID],
@@ -538,7 +539,7 @@ export class SyntheticsService {
   }
 
   async decryptMonitors(
-    monitors: Array<SavedObject<EncryptedSyntheticsMonitor>>,
+    monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
     encryptedClient: EncryptedSavedObjectsClient
   ) {
     const start = performance.now();
@@ -548,7 +549,7 @@ export class SyntheticsService {
       (monitor) =>
         new Promise((resolve) => {
           encryptedClient
-            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
               syntheticsMonitorType,
               monitor.id,
               {
@@ -582,7 +583,7 @@ export class SyntheticsService {
     });
 
     return decryptedMonitors.filter((monitor) => monitor !== null) as Array<
-      SavedObject<SyntheticsMonitorWithSecrets>
+      SavedObject<SyntheticsMonitorWithSecretsAttributes>
     >;
   }
 
@@ -599,7 +600,7 @@ export class SyntheticsService {
     const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParamSO>({
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>({
         type: syntheticsParamType,
         perPage: 1000,
         namespaces: spaceId ? [spaceId] : undefined,

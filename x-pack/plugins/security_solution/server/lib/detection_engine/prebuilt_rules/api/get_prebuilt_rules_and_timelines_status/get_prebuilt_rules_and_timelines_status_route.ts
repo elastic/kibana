@@ -14,7 +14,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import {
   PREBUILT_RULES_STATUS_URL,
   GetPrebuiltRulesAndTimelinesStatusResponse,
-} from '../../../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { findRules } from '../../../rule_management/logic/search/find_rules';

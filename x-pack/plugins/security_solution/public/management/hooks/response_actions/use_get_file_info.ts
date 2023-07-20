@@ -40,7 +40,7 @@ export const useGetFileInfo = (
         file_id: getFileDownloadId(action as ActionDetails, agentId),
       });
 
-      return http.get<ActionFileInfoApiResponse>(apiUrl);
+      return http.get<ActionFileInfoApiResponse>(apiUrl, { version: '2023-10-31' });
     },
   });
 };

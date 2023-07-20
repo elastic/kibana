@@ -16,8 +16,7 @@ import {
   EuiButton,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
@@ -111,11 +110,9 @@ const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
           >
             <StyledComponentsThemeProvider>
               <Router history={history}>
-                <CompatRouter>
-                  <CasesContext owner={[]} permissions={permissions}>
-                    <CasesFixtureAppWithContext cases={cases} />
-                  </CasesContext>
-                </CompatRouter>
+                <CasesContext owner={[]} permissions={permissions}>
+                  <CasesFixtureAppWithContext cases={cases} />
+                </CasesContext>
               </Router>
             </StyledComponentsThemeProvider>
           </KibanaContextProvider>

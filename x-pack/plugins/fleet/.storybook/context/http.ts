@@ -101,7 +101,14 @@ export const getHttp = (basepath = BASE_PATH) => {
         };
       }
 
-      if (path.match('/api/fleet/uninstall_tokens')) {
+      if (path.match('/api/fleet/uninstall_tokens/token-id-13')) {
+        return {
+          item: { token: '123-456-789' },
+          page: 1,
+          perPage: 20,
+          total: 1,
+        };
+      } else if (path.match('/api/fleet/uninstall_tokens')) {
         if (options.query?.policyId === 'missing-policy') {
           return {
             items: [],
@@ -111,7 +118,7 @@ export const getHttp = (basepath = BASE_PATH) => {
           };
         } else {
           return {
-            items: [{ token: '123-456-789' }],
+            items: [{ id: 'token-id-13' }],
             page: 1,
             perPage: 20,
             total: 1,

@@ -7,8 +7,9 @@
  */
 
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
-
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+
+import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
 import type { NodeProps, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
@@ -45,9 +46,21 @@ function NavigationGroupInternalComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
+  const { cloudLinks } = useNavigationServices();
   const navigationContext = useNavigation();
-  const { children, defaultIsCollapsed, ...node } = props;
-  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
+
+  const { children, node } = useMemo(() => {
+    const { children: _children, defaultIsCollapsed, ...rest } = props;
+    return {
+      children: _children,
+      node: {
+        ...rest,
+        isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
+      },
+    };
+  }, [props]);
+
+  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node, { cloudLinks });
 
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
@@ -68,11 +81,7 @@ function NavigationGroupInternalComp<
     return (
       <>
         {isTopLevel && (
-          <NavigationSectionUI
-            navNode={navNode}
-            items={Object.values(childrenNodes)}
-            defaultIsCollapsed={defaultIsCollapsed}
-          />
+          <NavigationSectionUI navNode={navNode} items={Object.values(childrenNodes)} />
         )}
         {/* We render the children so they mount and can register themselves but
         visually they don't appear here in the DOM. They are rendered inside the
@@ -80,7 +89,7 @@ function NavigationGroupInternalComp<
         {children}
       </>
     );
-  }, [navNode, path, childrenNodes, children, defaultIsCollapsed, unstyled]);
+  }, [navNode, path, childrenNodes, children, unstyled]);
 
   const contextValue = useMemo(() => {
     return {

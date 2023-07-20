@@ -13,7 +13,7 @@ import { generateYml } from './generate_yml';
 import { getFallbackUrls } from '../custom_logs/get_fallback_urls';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+  endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',
   params: t.type({
     query: t.type({ onboardingId: t.string }),
   }),

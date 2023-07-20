@@ -15,7 +15,8 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { of } from 'rxjs';
 
 const mockDataView = {
   getComputedFields: () => [],
@@ -34,6 +35,9 @@ const services = {
   },
   data: {
     dataViewService: mockDataViewService,
+  },
+  theme: {
+    theme$: of({ darkMode: false }),
   },
 };
 

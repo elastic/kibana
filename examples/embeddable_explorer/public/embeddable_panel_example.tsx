@@ -7,18 +7,9 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  EuiPanel,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiPageTemplate } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { IEmbeddable, EmbeddablePanel } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
@@ -28,11 +19,10 @@ import {
 } from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
-  embeddableServices: EmbeddableStart;
   searchListContainerFactory: SearchableListContainerFactory;
 }
 
-export function EmbeddablePanelExample({ embeddableServices, searchListContainerFactory }: Props) {
+export function EmbeddablePanelExample({ searchListContainerFactory }: Props) {
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
@@ -116,16 +106,10 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
   });
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>The embeddable panel component</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
+    <>
+      <EuiPageTemplate.Header pageTitle="Context menu" />
+      <EuiPageTemplate.Section grow={false}>
+        <>
           <EuiText>
             You can render your embeddable inside the EmbeddablePanel component. This adds some
             extra rendering and offers a context menu with pluggable actions. Using EmbeddablePanel
@@ -135,15 +119,15 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
           </EuiText>
           <EuiPanel data-test-subj="embeddedPanelExample" paddingSize="none" role="figure">
             {embeddable ? (
-              <embeddableServices.EmbeddablePanel embeddable={embeddable} />
+              <EmbeddablePanel embeddable={embeddable} />
             ) : (
               <EuiText>Loading...</EuiText>
             )}
           </EuiPanel>
 
           <EuiSpacer />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+        </>
+      </EuiPageTemplate.Section>
+    </>
   );
 }

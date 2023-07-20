@@ -9,61 +9,105 @@ import React from 'react';
 
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type {
+  UninstallToken,
+  UninstallTokenMetadata,
+} from '../../../common/types/models/uninstall_token';
 
+import type {
+  GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
+} from '../../../common/types/rest_spec/uninstall_token';
+
+import type { TestRenderer } from '../../mock';
 import { createFleetTestRendererMock } from '../../mock';
 
-import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_tokens';
+import {
+  useGetUninstallTokens,
+  useGetUninstallToken,
+} from '../../hooks/use_request/uninstall_tokens';
 
 import type { RequestError } from '../../hooks';
 
-import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
+import type { UninstallCommandTarget } from './types';
 
 jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
+  useGetUninstallToken: jest.fn(),
   useGetUninstallTokens: jest.fn(),
 }));
 
-type MockReturnType = Partial<UseRequestResponse<GetUninstallTokensResponse, RequestError>>;
+type MockResponseType<DataType> = Pick<
+  UseRequestResponse<DataType, RequestError>,
+  'data' | 'error' | 'isLoading'
+>;
 
 describe('UninstallCommandFlyout', () => {
-  const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
-
-  const render = (props: Partial<UninstallCommandFlyoutProps> = {}) => {
-    const renderer = createFleetTestRendererMock();
-
-    return renderer.render(
-      <UninstallCommandFlyout onClose={() => {}} target="agent" policyId="policy_id" {...props} />
-    );
+  const uninstallTokenMetadataFixture: UninstallTokenMetadata = {
+    id: 'id-1',
+    policy_id: 'policy_id',
+    created_at: '2023-06-19T08:47:31.457Z',
   };
 
-  beforeEach(() => {
-    const response: GetUninstallTokensResponse = {
-      items: [{ policy_id: 'policy_id', token: '123456789' }],
-      total: 1,
-      page: 1,
-      perPage: 20,
-    };
+  const uninstallTokenFixture: UninstallToken = {
+    ...uninstallTokenMetadataFixture,
+    token: '123456789',
+  };
 
-    const mockReturn: MockReturnType = {
+  const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
+  const useGetUninstallTokenMock = useGetUninstallToken as jest.Mock;
+
+  let renderer: TestRenderer;
+
+  const render = () =>
+    renderer.render(
+      <UninstallCommandFlyout onClose={() => {}} policyId="policy_id" target="agent" />
+    );
+
+  const renderForTarget = (target: UninstallCommandTarget) =>
+    renderer.render(
+      <UninstallCommandFlyout onClose={() => {}} policyId="policy_id" target={target} />
+    );
+
+  beforeEach(() => {
+    renderer = createFleetTestRendererMock();
+
+    const getTokensResponseFixture: MockResponseType<GetUninstallTokensMetadataResponse> = {
       isLoading: false,
       error: null,
-      data: response,
+      data: {
+        items: [uninstallTokenMetadataFixture],
+        total: 1,
+        page: 1,
+        perPage: 20,
+      },
     };
+    useGetUninstallTokensMock.mockReturnValue(getTokensResponseFixture);
 
-    useGetUninstallTokensMock.mockReturnValue(mockReturn);
+    const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
+      isLoading: false,
+      error: null,
+      data: {
+        item: uninstallTokenFixture,
+      },
+    };
+    useGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('uninstall command targets', () => {
     it('renders flyout for Agent', () => {
-      const renderResult = render({ target: 'agent' });
+      const renderResult = renderForTarget('agent');
 
       expect(renderResult.queryByText(/Uninstall Elastic Agent on your host/)).toBeInTheDocument();
       expect(renderResult.queryByText(/Uninstall Elastic Defend/)).not.toBeInTheDocument();
     });
 
     it('renders flyout for Endpoint integration', () => {
-      const renderResult = render({ target: 'endpoint' });
+      const renderResult = renderForTarget('endpoint');
 
       expect(renderResult.queryByText(/Uninstall Elastic Defend/)).toBeInTheDocument();
       expect(
@@ -72,9 +116,9 @@ describe('UninstallCommandFlyout', () => {
     });
   });
 
-  describe('when fetching the tokens is successful', () => {
+  describe('when fetching the token is successful', () => {
     it('shows loading spinner while fetching', () => {
-      const mockReturn: MockReturnType = {
+      const mockReturn: MockResponseType<GetUninstallTokensMetadataResponse> = {
         isLoading: true,
         error: null,
         data: null,
@@ -132,9 +176,9 @@ describe('UninstallCommandFlyout', () => {
     });
   });
 
-  describe('when fetching the tokens is unsuccessful', () => {
+  describe('when fetching the token metadata is unsuccessful', () => {
     it('shows error message when fetching returns an error', () => {
-      const mockReturn: MockReturnType = {
+      const mockReturn: MockResponseType<GetUninstallTokensMetadataResponse> = {
         isLoading: false,
         error: new Error('received error message'),
         data: null,
@@ -150,7 +194,7 @@ describe('UninstallCommandFlyout', () => {
     });
 
     it('shows "Unknown error" error message when token is missing from response', () => {
-      const mockReturn: MockReturnType = {
+      const mockReturn: MockResponseType<GetUninstallTokensMetadataResponse> = {
         isLoading: false,
         error: null,
         data: null,
@@ -163,6 +207,64 @@ describe('UninstallCommandFlyout', () => {
 
       expect(renderResult.queryByText(/Unable to fetch uninstall token/)).toBeInTheDocument();
       expect(renderResult.queryByText(/Unknown error/)).toBeInTheDocument();
+    });
+  });
+
+  describe('when fetching the decrypted token is unsuccessful', () => {
+    it('shows error message when fetching returns an error', () => {
+      const mockReturn: MockResponseType<GetUninstallTokenResponse> = {
+        isLoading: false,
+        error: new Error('received error message'),
+        data: null,
+      };
+      useGetUninstallTokenMock.mockReturnValue(mockReturn);
+
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+
+      expect(renderResult.queryByText(/Unable to fetch uninstall token/)).toBeInTheDocument();
+      expect(renderResult.queryByText(/received error message/)).toBeInTheDocument();
+    });
+
+    it('shows "Unknown error" error message when token is missing from response', () => {
+      const mockReturn: MockResponseType<GetUninstallTokenResponse> = {
+        isLoading: false,
+        error: null,
+        data: null,
+      };
+      useGetUninstallTokenMock.mockReturnValue(mockReturn);
+
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+
+      expect(renderResult.queryByText(/Unable to fetch uninstall token/)).toBeInTheDocument();
+      expect(renderResult.queryByText(/Unknown error/)).toBeInTheDocument();
+    });
+  });
+
+  describe('when using either with `policyId` or `uninstallTokenId`', () => {
+    it('should perform 2 fetches when using with `policyId`', () => {
+      renderer.render(
+        <UninstallCommandFlyout onClose={() => {}} policyId="policy_id" target="agent" />
+      );
+
+      expect(useGetUninstallTokensMock).toHaveBeenCalled();
+      expect(useGetUninstallTokenMock).toHaveBeenCalled();
+    });
+
+    it('should perform only 1 fetch when providing `uninstallTokenId`', () => {
+      renderer.render(
+        <UninstallCommandFlyout
+          onClose={() => {}}
+          uninstallTokenId="theProvidedTokenId"
+          target="agent"
+        />
+      );
+
+      expect(useGetUninstallTokensMock).not.toHaveBeenCalled();
+      expect(useGetUninstallTokenMock).toHaveBeenCalledWith('theProvidedTokenId');
     });
   });
 });

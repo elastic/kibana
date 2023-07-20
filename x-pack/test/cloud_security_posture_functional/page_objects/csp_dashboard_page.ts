@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
@@ -13,7 +14,7 @@ const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-defau
 
 export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
@@ -27,6 +28,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       log.debug('Check CSP plugin is initialized');
       const response = await supertest
         .get('/internal/cloud_security_posture/status?check=init')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
@@ -50,6 +52,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
 
     getDashboardTabs: async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const dashboardPageHeader = await dashboard.getDashboardPageHeader();
       return await dashboardPageHeader.findByClassName('euiTabs');
     },

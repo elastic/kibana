@@ -15,6 +15,13 @@ export interface ChromeNavControl {
   mount: MountPoint;
 }
 
+/** @public */
+export interface ChromeHelpMenuLink {
+  title: string;
+  href: string;
+  iconType?: string;
+}
+
 /**
  * {@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.
  *
@@ -44,6 +51,9 @@ export interface ChromeNavControls {
   /** Register an extension to be presented to the left of the top-right side of the chrome header. */
   registerExtension(navControl: ChromeNavControl): void;
 
+  /** Set the help menu links */
+  setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;
+
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
 
@@ -55,4 +65,7 @@ export interface ChromeNavControls {
 
   /** @internal */
   getExtension$(): Observable<ChromeNavControl[]>;
+
+  /** @internal */
+  getHelpMenuLinks$(): Observable<ChromeHelpMenuLink[]>;
 }

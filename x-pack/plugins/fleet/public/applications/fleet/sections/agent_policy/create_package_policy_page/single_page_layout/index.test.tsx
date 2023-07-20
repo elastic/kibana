@@ -87,6 +87,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ search: '' }),
   useHistory: jest.fn().mockReturnValue({
     push: jest.fn(),
+    listen: jest.fn(),
     location: {
       search: '',
     },
@@ -400,6 +401,7 @@ describe('when on the package policy create page', () => {
           name: 'Agent policy 2',
           namespace: 'default',
           inactivity_timeout: 1209600,
+          is_protected: false,
         },
         { withSysMonitoring: false }
       );
@@ -431,6 +433,7 @@ describe('when on the package policy create page', () => {
             name: 'Agent policy 2',
             namespace: 'default',
             inactivity_timeout: 1209600,
+            is_protected: false,
           },
           { withSysMonitoring: true }
         );

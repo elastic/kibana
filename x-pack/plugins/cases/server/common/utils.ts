@@ -15,6 +15,7 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { ConnectorTypes } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -43,7 +44,6 @@ import {
   CaseSeverity,
   CaseStatuses,
   CommentType,
-  ConnectorTypes,
   ExternalReferenceSORt,
   FileAttachmentMetadataRt,
 } from '../../common/api';
@@ -460,3 +460,17 @@ export const getCaseViewPath = (params: {
 };
 
 export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;
+
+export const countUserAttachments = (
+  attachments: Array<SavedObject<CommentAttributes>>
+): number => {
+  let total = 0;
+
+  for (const attachment of attachments) {
+    if (attachment.attributes.type === CommentType.user) {
+      total += 1;
+    }
+  }
+
+  return total;
+};

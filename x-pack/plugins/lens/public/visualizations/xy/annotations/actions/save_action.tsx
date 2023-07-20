@@ -18,11 +18,15 @@ import {
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { LayerAction, StateSetter } from '../../../../types';
+import type {
+  LayerAction,
+  RegisterLibraryAnnotationGroupFunction,
+  StateSetter,
+} from '../../../../types';
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
 
@@ -133,26 +137,72 @@ const saveAnnotationGroupToLibrary = async (
   return { id: savedId, config: groupConfig };
 };
 
+const shouldStopBecauseDuplicateTitle = async (
+  newTitle: string,
+  existingTitle: string,
+  newCopyOnSave: ModalOnSaveProps['newCopyOnSave'],
+  onTitleDuplicate: ModalOnSaveProps['onTitleDuplicate'],
+  isTitleDuplicateConfirmed: ModalOnSaveProps['isTitleDuplicateConfirmed'],
+  eventAnnotationService: EventAnnotationServiceType
+) => {
+  if (isTitleDuplicateConfirmed || (newTitle === existingTitle && !newCopyOnSave)) {
+    return false;
+  }
+
+  const duplicateExists = await eventAnnotationService.groupExistsWithTitle(newTitle);
+
+  if (duplicateExists) {
+    onTitleDuplicate();
+    return true;
+  } else {
+    return false;
+  }
+};
+
 /** @internal exported for testing only */
 export const onSave = async ({
   state,
   layer,
   setState,
+  registerLibraryAnnotationGroup,
   eventAnnotationService,
   toasts,
-  modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
+  modalOnSaveProps: {
+    newTitle,
+    newDescription,
+    newTags,
+    closeModal,
+    newCopyOnSave,
+    onTitleDuplicate,
+    isTitleDuplicateConfirmed,
+  },
   dataViews,
   goToAnnotationLibrary,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
+  registerLibraryAnnotationGroup: (props: {
+    id: string;
+    group: EventAnnotationGroupConfig;
+  }) => void;
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
   modalOnSaveProps: ModalOnSaveProps;
   dataViews: DataViewsContract;
   goToAnnotationLibrary: () => Promise<void>;
 }) => {
+  const shouldStop = await shouldStopBecauseDuplicateTitle(
+    newTitle,
+    isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : '',
+    newCopyOnSave,
+    onTitleDuplicate,
+    isTitleDuplicateConfirmed,
+    eventAnnotationService
+  );
+
+  if (shouldStop) return;
+
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
     savedInfo = await saveAnnotationGroupToLibrary(
@@ -161,6 +211,12 @@ export const onSave = async ({
       eventAnnotationService,
       dataViews
     );
+
+    // add new group to state
+    registerLibraryAnnotationGroup({
+      id: savedInfo.id,
+      group: savedInfo.config,
+    });
   } catch (err) {
     toasts.addError(err, {
       title: i18n.translate(
@@ -205,27 +261,25 @@ export const onSave = async ({
     text: ((element) =>
       render(
         <I18nProvider>
-          <p>
-            <FormattedMessage
-              id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-              defaultMessage="View or manage in the {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    data-test-subj="lnsAnnotationLibraryLink"
-                    onClick={() => goToAnnotationLibrary()}
-                  >
-                    {i18n.translate(
-                      'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
-                      {
-                        defaultMessage: 'annotation library',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
+            defaultMessage="View or manage in the {link}."
+            values={{
+              link: (
+                <EuiLink
+                  data-test-subj="lnsAnnotationLibraryLink"
+                  onClick={() => goToAnnotationLibrary()}
+                >
+                  {i18n.translate(
+                    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
+                    {
+                      defaultMessage: 'annotation library',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
         </I18nProvider>,
         element
       )) as MountPoint,
@@ -236,6 +290,7 @@ export const getSaveLayerAction = ({
   state,
   layer,
   setState,
+  registerLibraryAnnotationGroup,
   eventAnnotationService,
   toasts,
   savedObjectsTagging,
@@ -246,6 +301,7 @@ export const getSaveLayerAction = ({
   state: XYState;
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
+  registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
@@ -258,7 +314,7 @@ export const getSaveLayerAction = ({
   const displayName = i18n.translate(
     'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary',
     {
-      defaultMessage: 'Save annotation group',
+      defaultMessage: 'Save to library',
     }
   );
 
@@ -281,6 +337,7 @@ export const getSaveLayerAction = ({
                     state,
                     layer,
                     setState,
+                    registerLibraryAnnotationGroup,
                     eventAnnotationService,
                     toasts,
                     modalOnSaveProps: props,
