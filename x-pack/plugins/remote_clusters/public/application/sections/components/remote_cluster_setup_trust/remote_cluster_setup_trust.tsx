@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { remoteClustersUrl } from '../../../services/documentation';
 import { AppContext } from '../../../app_context';
 import { ConfirmTrustSetupModal } from './confirm_modal';
 
@@ -51,13 +52,10 @@ const i18nTexts = {
 };
 
 const docLinks = {
-  apiKey:
-    'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
-  apiKeyCloud:
-    'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
-  cert: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
-  certCloud:
-    'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
+  apiKey: remoteClustersUrl,
+  apiKeyCloud: remoteClustersUrl,
+  cert: remoteClustersUrl,
+  certCloud: remoteClustersUrl,
 };
 
 interface Props {
