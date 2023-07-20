@@ -42,6 +42,7 @@ describe('registerRouteForBundle', () => {
       {
         path: '/route-path/{path*}',
         options: {
+          access: 'public',
           authRequired: false,
         },
         validate: expect.any(Object),
