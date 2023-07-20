@@ -77,6 +77,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // generator templates use weird filenames based on the requirements for the files they're generating
   'packages/kbn-generate/templates/**/*',
+
+  // patch-package artifacts
+  'patches/*',
 ];
 
 /**
@@ -110,7 +113,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
-  'patches/*',
 ];
 
 /**
