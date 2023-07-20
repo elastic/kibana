@@ -30,15 +30,9 @@ describe('junit_transformer', () => {
     // read the fixture and write it to the temporary file
     await fs.writeFile(
       path,
-      await fs.readFile(
-        join(
-          __dirname,
-          './fixtures/TEST-security-solution-cypress-f394e842ddafcd56b1dd4527c807c11e.xml'
-        ),
-        {
-          encoding: 'utf8',
-        }
-      )
+      await fs.readFile(join(__dirname, './fixtures/suite_with_failing_test.xml'), {
+        encoding: 'utf8',
+      })
     );
 
     mockCommandArgs = {
