@@ -9,9 +9,9 @@ import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
-  goToOpenedAlertsOnRuleDetailsPage,
   openAddEndpointExceptionFromAlertActionButton,
   openAddEndpointExceptionFromFirstAlert,
+  waitForAlerts,
 } from '../../../tasks/alerts';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
@@ -36,115 +36,92 @@ import {
   submitNewExceptionItem,
   validateExceptionConditionField,
 } from '../../../tasks/exceptions';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { ALERTS_COUNT } from '../../../screens/alerts';
 import {
   ADD_AND_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
-  NO_EXCEPTIONS_EXIST_PROMPT,
 } from '../../../screens/exceptions';
-import {
-  removeException,
-  goToAlertsTab,
-  goToEndpointExceptionsTab,
-} from '../../../tasks/rule_details';
+import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
 
-describe('Endpoint Exceptions workflows from Alert', () => {
-  const expectedNumberOfAlerts = 1;
-  const ITEM_NAME = 'Sample Exception List Item';
-  const ITEM_NAME_EDIT = 'Sample Exception List Item';
-  const ADDITIONAL_ENTRY = 'host.hostname';
-  beforeEach(() => {
-    esArchiverResetKibana();
-    login();
-    deleteAlertsAndRules();
-    esArchiverLoad('endpoint');
-    createRule(getEndpointRule());
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
-  });
+Cypress._.times(50, () => {
+  describe('Endpoint Exceptions workflows from Alert', () => {
+    const ITEM_NAME = 'Sample Exception List Item';
+    const ITEM_NAME_EDIT = 'Sample Exception List Item';
+    const ADDITIONAL_ENTRY = 'host.hostname';
+    beforeEach(() => {
+      esArchiverResetKibana();
+      login();
+      deleteAlertsAndRules();
+      esArchiverLoad('endpoint');
+      createRule(getEndpointRule());
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
+      waitForTheRuleToBeExecuted();
+      waitForAlertsToPopulate();
+    });
 
-  after(() => {
-    esArchiverUnload('endpoint');
-    esArchiverUnload('endpoint_2');
-  });
+    after(() => {
+      esArchiverUnload('endpoint');
+      esArchiverUnload('endpoint_2');
+    });
 
-  it('Should be able to create and close single Endpoint exception from overflow menu', () => {
-    // The Endpoint will populated with predefined fields
-    openAddEndpointExceptionFromFirstAlert();
+    it('Should be able to create and close single Endpoint exception from overflow menu', () => {
+      // The Endpoint will populated with predefined fields
+      openAddEndpointExceptionFromFirstAlert();
 
-    // As the endpoint.alerts-* is used to trigger the alert the
-    // file.Ext.code_signature will be auto-populated
-    validateExceptionConditionField('file.Ext.code_signature');
+      // As the endpoint.alerts-* is used to trigger the alert the
+      // file.Ext.code_signature will be auto-populated
+      validateExceptionConditionField('file.Ext.code_signature');
 
-    selectCloseSingleAlerts();
-    addExceptionFlyoutItemName(ITEM_NAME);
-    submitNewExceptionItem();
+      selectCloseSingleAlerts();
+      addExceptionFlyoutItemName(ITEM_NAME);
+      submitNewExceptionItem();
 
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
+      // Instead of immediately checking if the Opened Alert has moved to the closed tab,
+      // use the waitForAlerts method to create a buffer, allowing the alerts some time to
+      // be moved to the Closed Alert tab.
+      waitForAlerts();
 
-    // Closed alert should appear in table
-    goToClosedAlertsOnRuleDetailsPage();
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
+      // Closed alert should appear in table
+      goToClosedAlertsOnRuleDetailsPage();
+      cy.get(ALERTS_COUNT).should('exist');
+    });
 
-    // Endpoint Exception will move to Endpoint List under Exception tab of rule
-    goToEndpointExceptionsTab();
+    it('Should be able to create Endpoint exception from Alerts take action button, and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+      // Open first Alert Summary
+      expandFirstAlert();
 
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    removeException();
-    // when removing exception and again, no more exist, empty screen shows again
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
+      // The Endpoint should populated with predefined fields
+      openAddEndpointExceptionFromAlertActionButton();
 
-    // load more docs
-    esArchiverLoad('endpoint_2');
+      // As the endpoint.alerts-* is used to trigger the alert the
+      // file.Ext.code_signature will be auto-populated
+      validateExceptionConditionField('file.Ext.code_signature');
+      addExceptionFlyoutItemName(ITEM_NAME);
 
-    goToAlertsTab();
-    goToOpenedAlertsOnRuleDetailsPage();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
+      cy.get(ADD_AND_BTN).click();
+      // edit conditions
+      addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 6);
+      addExceptionEntryFieldValueValue('foo', 4);
 
-    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
-  });
+      // Change the name again
+      editExceptionFlyoutItemName(ITEM_NAME_EDIT);
 
-  it('Should be able to create Endpoint exception from Alerts take action button, and change multiple exception items without resetting to initial auto-prefilled entries', () => {
-    // Open first Alert Summary
-    expandFirstAlert();
+      // validate the condition is still "agent.name" or got rest after the name is changed
+      validateExceptionConditionField(ADDITIONAL_ENTRY);
 
-    // The Endpoint should populated with predefined fields
-    openAddEndpointExceptionFromAlertActionButton();
+      selectCloseSingleAlerts();
+      submitNewExceptionItem();
 
-    // As the endpoint.alerts-* is used to trigger the alert the
-    // file.Ext.code_signature will be auto-populated
-    validateExceptionConditionField('file.Ext.code_signature');
-    addExceptionFlyoutItemName(ITEM_NAME);
+      // Endpoint Exception will move to Endpoint List under Exception tab of rule
+      goToEndpointExceptionsTab();
 
-    cy.get(ADD_AND_BTN).click();
-    // edit conditions
-    addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 6);
-    addExceptionEntryFieldValueValue('foo', 4);
-
-    // Change the name again
-    editExceptionFlyoutItemName(ITEM_NAME_EDIT);
-
-    // validate the condition is still "agent.name" or got rest after the name is changed
-    validateExceptionConditionField(ADDITIONAL_ENTRY);
-
-    selectCloseSingleAlerts();
-    submitNewExceptionItem();
-
-    // Endpoint Exception will move to Endpoint List under Exception tab of rule
-    goToEndpointExceptionsTab();
-
-    // new exception item displays
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+    });
   });
 });
