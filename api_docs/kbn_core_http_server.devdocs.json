@@ -14736,7 +14736,7 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/explain_log_rate_spikes.ts"
+                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis.ts"
               },
               {
                 "plugin": "unifiedSearch",
