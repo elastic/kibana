@@ -526,8 +526,9 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly phpGuide: string;
+    readonly phpConfiguration: string;
     readonly phpConnecting: string;
+    readonly phpGuide: string;
     readonly phpInstallation: string;
     readonly phpOverview: string;
     readonly pythonAuthentication: string;

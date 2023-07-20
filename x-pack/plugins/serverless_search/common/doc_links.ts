@@ -23,6 +23,9 @@ class ESDocLinks {
   public kibanaRunApiInConsole: string = '';
   public logStash: string = '';
   public metadata: string = '';
+  public phpAdvancedConfig: string = '';
+  public phpBasicConfig: string = '';
+  public phpClient: string = '';
   public pythonAdvancedConfig: string = '';
   public pythonBasicConfig: string = '';
   public pythonClient: string = '';
@@ -47,6 +50,10 @@ class ESDocLinks {
     this.jsClient = newDocLinks.clients.jsIntro;
     this.kibanaRunApiInConsole = newDocLinks.console.guide;
     this.metadata = newDocLinks.security.mappingRoles;
+    this.phpAdvancedConfig = newDocLinks.clients.phpConfiguration;
+    this.phpBasicConfig = newDocLinks.clients.phpConnecting;
+    this.phpClient = newDocLinks.clients.phpOverview;
+    this.phpBasicConfig = newDocLinks.clients.phpConnecting;
     this.pythonAdvancedConfig = newDocLinks.clients.pythonConfig;
     this.pythonBasicConfig = newDocLinks.clients.pythonConnecting;
     this.pythonClient = newDocLinks.clients.pythonOverview;
