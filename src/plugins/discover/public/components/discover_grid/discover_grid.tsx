@@ -25,7 +25,7 @@ import {
   EuiDataGridInMemory,
   EuiDataGridProps,
 } from '@elastic/eui';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   useDataGridColumnsCellActions,
@@ -220,7 +220,6 @@ export interface DiscoverGridProps {
    */
   services: {
     core: CoreStart;
-    dataViews: DataViewsContract;
     fieldFormats: FieldFormatsStart;
     addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
