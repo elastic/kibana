@@ -9,7 +9,7 @@ import apm from 'elastic-apm-node';
 import { ImplicitCollectionOptions } from '.';
 import { Collector, CollectorOptions, QUERY_MAX_SIZE } from '../collectors';
 import { Asset } from '../../../common/types_api';
-import { withSpan } from '../collectors/helpers';
+import { withSpan } from './helpers';
 
 const TRANSACTION_TYPE = 'asset_manager-implicit_collection';
 const transactionName = (collectorName: string) => `asset_manager-collector_${collectorName}`;
@@ -36,7 +36,6 @@ export class CollectorRunner {
         from: new Date(from).toISOString(),
         to: new Date(to).toISOString(),
         client: this.options.inputClient,
-        transaction,
         sourceIndices: this.options.sourceIndices,
       };
 

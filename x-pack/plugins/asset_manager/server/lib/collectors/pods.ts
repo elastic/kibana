@@ -8,16 +8,8 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
-import { withSpan } from './helpers';
 
-export async function collectPods({
-  client,
-  from,
-  to,
-  transaction,
-  sourceIndices,
-  afterKey,
-}: CollectorOptions) {
+export async function collectPods({ client, from, to, sourceIndices, afterKey }: CollectorOptions) {
   const { metrics, logs, traces } = sourceIndices;
   const dsl: estypes.SearchRequest = {
     index: [metrics, logs, traces],
@@ -60,38 +52,34 @@ export async function collectPods({
 
   const esResponse = await client.search(dsl);
 
-  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
-    const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
-      const { fields = {} } = hit;
-      const podUid = fields['kubernetes.pod.uid'];
-      const nodeName = fields['kubernetes.node.name'];
-      const clusterName = fields['orchestrator.cluster.name'];
+  const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+    const { fields = {} } = hit;
+    const podUid = fields['kubernetes.pod.uid'];
+    const nodeName = fields['kubernetes.node.name'];
+    const clusterName = fields['orchestrator.cluster.name'];
 
-      const pod: Asset = {
-        '@timestamp': new Date().toISOString(),
-        'asset.kind': 'pod',
-        'asset.id': podUid,
-        'asset.ean': `pod:${podUid}`,
-        'asset.parents': [`host:${nodeName}`],
-      };
+    const pod: Asset = {
+      '@timestamp': new Date().toISOString(),
+      'asset.kind': 'pod',
+      'asset.id': podUid,
+      'asset.ean': `pod:${podUid}`,
+      'asset.parents': [`host:${nodeName}`],
+    };
 
-      if (fields['cloud.provider']) {
-        pod['cloud.provider'] = fields['cloud.provider'];
-      }
+    if (fields['cloud.provider']) {
+      pod['cloud.provider'] = fields['cloud.provider'];
+    }
 
-      if (clusterName) {
-        pod['orchestrator.cluster.name'] = clusterName;
-      }
+    if (clusterName) {
+      pod['orchestrator.cluster.name'] = clusterName;
+    }
 
-      acc.push(pod);
+    acc.push(pod);
 
-      return acc;
-    }, []);
+    return acc;
+  }, []);
 
-    const hitsLen = esResponse.hits.hits.length;
-    const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
-    return { assets, afterKey: next };
-  });
-
-  return result;
+  const hitsLen = esResponse.hits.hits.length;
+  const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
+  return { assets, afterKey: next };
 }

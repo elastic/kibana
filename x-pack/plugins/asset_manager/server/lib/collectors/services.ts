@@ -8,13 +8,11 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
-import { withSpan } from './helpers';
 
 export async function collectServices({
   client,
   from,
   to,
-  transaction,
   sourceIndices,
   afterKey,
   filters = [],
@@ -94,49 +92,45 @@ export async function collectServices({
 
   const esResponse = await client.search(dsl);
 
-  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
-    const { after_key: nextKey, buckets = [] } = (esResponse.aggregations?.services || {}) as any;
-    const assets = buckets.reduce((acc: Asset[], bucket: any) => {
-      const {
-        key: { serviceName, serviceEnvironment },
-        container_and_hosts: containerHosts,
-      } = bucket;
+  const { after_key: nextKey, buckets = [] } = (esResponse.aggregations?.services || {}) as any;
+  const assets = buckets.reduce((acc: Asset[], bucket: any) => {
+    const {
+      key: { serviceName, serviceEnvironment },
+      container_and_hosts: containerHosts,
+    } = bucket;
 
-      if (!serviceName) {
-        return acc;
-      }
-
-      const service: Asset = {
-        '@timestamp': new Date().toISOString(),
-        'asset.kind': 'service',
-        'asset.id': serviceName,
-        'asset.ean': `service:${serviceName}`,
-        'asset.references': [],
-        'asset.parents': [],
-      };
-
-      if (serviceEnvironment) {
-        service['service.environment'] = serviceEnvironment;
-      }
-
-      containerHosts.buckets?.forEach((containerBucket: any) => {
-        const [hostname, containerId] = containerBucket.key;
-        if (hostname) {
-          (service['asset.references'] as string[]).push(`host:${hostname}`);
-        }
-
-        if (containerId) {
-          (service['asset.parents'] as string[]).push(`container:${containerId}`);
-        }
-      });
-
-      acc.push(service);
-
+    if (!serviceName) {
       return acc;
-    }, []);
+    }
 
-    return { assets, afterKey: buckets.length === QUERY_MAX_SIZE ? nextKey : undefined };
-  });
+    const service: Asset = {
+      '@timestamp': new Date().toISOString(),
+      'asset.kind': 'service',
+      'asset.id': serviceName,
+      'asset.ean': `service:${serviceName}`,
+      'asset.references': [],
+      'asset.parents': [],
+    };
 
-  return result;
+    if (serviceEnvironment) {
+      service['service.environment'] = serviceEnvironment;
+    }
+
+    containerHosts.buckets?.forEach((containerBucket: any) => {
+      const [hostname, containerId] = containerBucket.key;
+      if (hostname) {
+        (service['asset.references'] as string[]).push(`host:${hostname}`);
+      }
+
+      if (containerId) {
+        (service['asset.parents'] as string[]).push(`container:${containerId}`);
+      }
+    });
+
+    acc.push(service);
+
+    return acc;
+  }, []);
+
+  return { assets, afterKey: buckets.length === QUERY_MAX_SIZE ? nextKey : undefined };
 }

@@ -8,13 +8,11 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
-import { withSpan } from './helpers';
 
 export async function collectHosts({
   client,
   from,
   to,
-  transaction,
   sourceIndices,
   afterKey,
 }: CollectorOptions) {
@@ -61,56 +59,52 @@ export async function collectHosts({
 
   const esResponse = await client.search(dsl);
 
-  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
-    const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
-      const { fields = {} } = hit;
-      const hostName = fields['host.hostname'];
-      const k8sNode = fields['kubernetes.node.name'];
-      const k8sPod = fields['kubernetes.pod.uid'];
+  const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+    const { fields = {} } = hit;
+    const hostName = fields['host.hostname'];
+    const k8sNode = fields['kubernetes.node.name'];
+    const k8sPod = fields['kubernetes.pod.uid'];
 
-      const hostEan = `host:${k8sNode || hostName}`;
+    const hostEan = `host:${k8sNode || hostName}`;
 
-      const host: Asset = {
-        '@timestamp': new Date().toISOString(),
-        'asset.kind': 'host',
-        'asset.id': k8sNode || hostName,
-        'asset.name': k8sNode || hostName,
-        'asset.ean': hostEan,
-      };
+    const host: Asset = {
+      '@timestamp': new Date().toISOString(),
+      'asset.kind': 'host',
+      'asset.id': k8sNode || hostName,
+      'asset.name': k8sNode || hostName,
+      'asset.ean': hostEan,
+    };
 
-      if (fields['cloud.provider']) {
-        host['cloud.provider'] = fields['cloud.provider'];
-      }
+    if (fields['cloud.provider']) {
+      host['cloud.provider'] = fields['cloud.provider'];
+    }
 
-      if (fields['cloud.instance.id']) {
-        host['cloud.instance.id'] = fields['cloud.instance.id'];
-      }
+    if (fields['cloud.instance.id']) {
+      host['cloud.instance.id'] = fields['cloud.instance.id'];
+    }
 
-      if (fields['cloud.service.name']) {
-        host['cloud.service.name'] = fields['cloud.service.name'];
-      }
+    if (fields['cloud.service.name']) {
+      host['cloud.service.name'] = fields['cloud.service.name'];
+    }
 
-      if (fields['cloud.region']) {
-        host['cloud.region'] = fields['cloud.region'];
-      }
+    if (fields['cloud.region']) {
+      host['cloud.region'] = fields['cloud.region'];
+    }
 
-      if (fields['orchestrator.cluster.name']) {
-        host['orchestrator.cluster.name'] = fields['orchestrator.cluster.name'];
-      }
+    if (fields['orchestrator.cluster.name']) {
+      host['orchestrator.cluster.name'] = fields['orchestrator.cluster.name'];
+    }
 
-      if (k8sPod) {
-        host['asset.children'] = [`pod:${k8sPod}`];
-      }
+    if (k8sPod) {
+      host['asset.children'] = [`pod:${k8sPod}`];
+    }
 
-      acc.push(host);
+    acc.push(host);
 
-      return acc;
-    }, []);
+    return acc;
+  }, []);
 
-    const hitsLen = esResponse.hits.hits.length;
-    const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
-    return { assets, afterKey: next };
-  });
-
-  return result;
+  const hitsLen = esResponse.hits.hits.length;
+  const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
+  return { assets, afterKey: next };
 }
