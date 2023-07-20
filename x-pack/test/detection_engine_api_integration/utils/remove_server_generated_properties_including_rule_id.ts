@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 

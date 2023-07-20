@@ -82,7 +82,6 @@ export interface ReferenceEditorProps {
   labelAppend?: EuiFormRowProps['labelAppend'];
   isFullscreen: boolean;
   toggleFullscreen: () => void;
-  setIsCloseable: (isCloseable: boolean) => void;
   paramEditorCustomProps?: ParamEditorCustomProps;
   paramEditorUpdater: (
     setter:
