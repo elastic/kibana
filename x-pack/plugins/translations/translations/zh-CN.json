@@ -11366,7 +11366,6 @@
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip": "添加 {columnId} 筛选",
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip": "添加 {columnId} 作废筛选",
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton": "添加 {columnId} 作废筛选",
-    "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.descriptionText": "{description}",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTile.publishedDateText": "{date}",
     "xpack.csp.vulnerabilitiesByResource.totalResources": "{total, plural, other {# 项资源}}",
     "xpack.csp.vulnerabilitiesByResource.totalVulnerabilities": "{total, plural, other {# 个漏洞}}",
