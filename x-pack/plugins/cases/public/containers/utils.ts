@@ -11,16 +11,15 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import type { Configuration, Configurations } from '../../common/types/domain';
-import { ConfigurationRt, ConfigurationsRt } from '../../common/types/domain';
+import type { CaseUserActionStatsResponse } from '../../common/types/api';
+import type { Configuration, Configurations, UserActions } from '../../common/types/domain';
+import { ConfigurationRt, ConfigurationsRt, UserActionsRt } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
-  UserActions,
   CasePatchRequest,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
   User,
-  CaseUserActionStatsResponse,
   Case,
   Cases,
 } from '../../common/api';
@@ -28,14 +27,13 @@ import {
   CaseRt,
   CasesRt,
   throwErrors,
-  UserActionsRt,
   CommentType,
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
-  CaseUserActionStatsResponseRt,
 } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
+import { CaseUserActionStatsResponseRt } from '../../common/types/api';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 

@@ -108,6 +108,16 @@ describe('Transaction details', () => {
     cy.getByTestSubj('errorRate');
   });
 
+  it('shows slo callout', () => {
+    cy.visitKibana(
+      `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
+        ...timeRange,
+        transactionName: 'GET 240rpm/75% 1000ms',
+      })}`
+    );
+    cy.contains('Create SLO');
+  });
+
   it('shows top errors table', () => {
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({

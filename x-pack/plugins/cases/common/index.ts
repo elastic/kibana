@@ -40,13 +40,14 @@ export {
   LENS_ATTACHMENT_TYPE,
 } from './constants';
 
+export { ConnectorTypes } from './types/domain';
+
 export {
-  CommentType,
-  CaseStatuses,
-  CaseSeverity,
-  ConnectorTypes,
   getCasesFromAlertsUrl,
   throwErrors,
+  CaseStatuses,
+  CaseSeverity,
+  CommentType,
   ExternalReferenceStorageType,
 } from './api';
 export { StatusAll } from './ui/types';
