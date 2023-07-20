@@ -66,8 +66,8 @@ describe('toClientContract', () => {
           agentPolicyId: 'e3134290-0f73-11ee-ba15-159f4f728deb',
           concurrentMonitors: 1,
           geo: {
-            lat: null,
-            lon: null,
+            lat: 0,
+            lon: 0,
           },
           id: 'e3134290-0f73-11ee-ba15-159f4f728dec',
           isInvalid: true,
@@ -79,8 +79,8 @@ describe('toClientContract', () => {
           agentPolicyId: 'e3134290-0f73-11ee-ba15-159f4f728dec',
           concurrentMonitors: 1,
           geo: {
-            lat: null,
-            lon: null,
+            lat: '',
+            lon: '',
           },
           id: 'e3134290-0f73-11ee-ba15-159f4f728dec',
           isInvalid: true,
@@ -100,8 +100,8 @@ describe('toClientContract', () => {
           agentPolicyId: 'e3134290-0f73-11ee-ba15-159f4f728deb',
           concurrentMonitors: 1,
           geo: {
-            lat: '-10',
-            lon: '20',
+            lat: -10,
+            lon: 20,
           },
           id: 'e3134290-0f73-11ee-ba15-159f4f728dec',
           isInvalid: true,
