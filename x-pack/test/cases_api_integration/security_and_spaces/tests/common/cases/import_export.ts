@@ -18,18 +18,20 @@ import {
   AttributesTypeUser,
   CaseAttributes,
   CasePostRequest,
-  PushedUserAction,
-  ConnectorUserAction,
-  CommentUserAction,
-  CreateCaseUserAction,
   CaseStatuses,
   CaseSeverity,
-  CaseUserActionWithoutReferenceIds,
 } from '@kbn/cases-plugin/common/api';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
 } from '@kbn/cases-plugin/server/common/types/case';
+import {
+  CaseUserActionWithoutReferenceIds,
+  CommentUserAction,
+  ConnectorUserAction,
+  CreateCaseUserAction,
+  PushedUserAction,
+} from '@kbn/cases-plugin/common/types/domain';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
@@ -121,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(userActions[1].action).to.eql('create');
       expect(userActions[1].type).to.eql('comment');
-      expect((userActions[1] as CommentUserAction).payload.comment).to.eql({
+      expect((userActions[1] as unknown as CommentUserAction).payload.comment).to.eql({
         comment: 'A comment for my case',
         type: 'user',
         owner: 'securitySolution',

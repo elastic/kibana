@@ -13,9 +13,9 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
-import type { EsHitRecord } from '../../../types';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const getDeps = () =>
   ({

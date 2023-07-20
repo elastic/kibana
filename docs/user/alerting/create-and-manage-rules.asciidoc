@@ -43,6 +43,9 @@ a rule type and configuring its conditions and actions.
 After a rule is created, you can open the action menu (…) and select *Edit rule*
 to re-open the flyout and change the rule properties.
 
+TIP: You can also manage rules as resources with the https://registry.terraform.io/providers/elastic/elasticstack/latest[Elasticstack provider] for Terraform.
+For more details, refer to the https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule[elasticstack_kibana_alerting_rule] resource.
+
 [float]
 [[defining-rules-type-conditions]]
 ==== Rule type and conditions
