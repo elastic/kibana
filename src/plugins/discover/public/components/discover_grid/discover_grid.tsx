@@ -23,6 +23,7 @@ import {
   EuiIcon,
   EuiDataGridRefProps,
   EuiDataGridInMemory,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';

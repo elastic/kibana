@@ -232,3 +232,7 @@ export const DiscoverTopNav = ({
     />
   );
 };
+
+// enable lazy loading
+// eslint-disable-next-line import/no-default-export
+export default DiscoverTopNav;

@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { CoreStart } from '@kbn/core/public';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -27,15 +28,10 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
-
-  /**
-   * Services passed in
-   */
-  providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { providedServices, stateContainer } = props;
+  const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
@@ -51,7 +47,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * State changes (data view, columns), when a text base query result is returned
    */
   useTextBasedQueryLanguage({
-    dataViews: services.dataViews ?? providedServices?.dataViews,
+    dataViews: services.dataViews,
     stateContainer,
   });
   /**

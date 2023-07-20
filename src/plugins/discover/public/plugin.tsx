@@ -76,6 +76,7 @@ import type { CustomizationCallback } from './customizations';
 import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import { useDiscoverGrid } from './exports/discover_grid';
+import { useDiscoverTopNav } from './exports/discover_nav';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -161,6 +162,7 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   useDiscoverGrid: () => ReturnType<typeof useDiscoverGrid>;
+  useDiscoverTopNav: () => ReturnType<typeof useDiscoverTopNav>;
   readonly customize: (profileName: string, callback: CustomizationCallback) => void;
 }
 
@@ -429,6 +431,9 @@ export class DiscoverPlugin
       locator: this.locator,
       useDiscoverGrid: () => {
         return useDiscoverGrid(services);
+      },
+      useDiscoverTopNav: () => {
+        return useDiscoverTopNav(services);
       },
       customize: createCustomizeFunction(this.profileRegistry),
     };

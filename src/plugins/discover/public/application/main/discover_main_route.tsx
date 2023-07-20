@@ -49,11 +49,7 @@ export interface MainRouteProps {
   providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
-export function DiscoverMainRoute({
-  customizationCallbacks,
-  isDev,
-  providedServices,
-}: MainRouteProps) {
+export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -68,7 +64,7 @@ export function DiscoverMainRoute({
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
-      services: services ?? providedServices,
+      services,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
