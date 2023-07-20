@@ -90,4 +90,20 @@ export function registerStorageExplorerRoute({
       });
     }
   );
+  router.get(
+    {
+      path: paths.StorageExplorerHostBreakdown,
+      options: { tags: ['access:profiling'] },
+      validate: {
+        query: schema.object({
+          timeFrom: schema.number(),
+          timeTo: schema.number(),
+          kuery: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return response.ok({});
+    }
+  );
 }
