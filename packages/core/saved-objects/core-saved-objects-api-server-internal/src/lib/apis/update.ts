@@ -266,7 +266,8 @@ export const performUpdate = async <T>(
       index: commonHelper.getIndexForType(type),
       refresh,
       body: docToSend._source,
-      ...(version ? decodeRequestVersion(version) : {}),
+      // using version from the source doc is not provided to avoid erasing changes
+      ...decodeRequestVersion(version || migrated!.version),
       require_alias: true,
     };
 
