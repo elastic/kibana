@@ -52,10 +52,3 @@ export const SESSION_TAB = i18n.translate(
     defaultMessage: 'Session View',
   }
 );
-
-export const DISCOVER_TAB = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.discoverTabTimelineTitle',
-  {
-    defaultMessage: 'Discover',
-  }
-);

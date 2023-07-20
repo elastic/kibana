@@ -143,7 +143,6 @@ PinnedTab.displayName = 'PinnedTab';
 
 const AssistantTab: React.FC<{
   isAssistantEnabled: boolean;
-
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;

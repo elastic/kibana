@@ -85,8 +85,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const dispatch = useDispatch();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { defaultColumns } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? 'timeline-1') // TODO fix
+  const { defaultColumns } = useDeepEqualSelector(
+    (state) => getManageTimeline(state, timelineId ?? TimelineId.active) // TODO fix
   );
 
   const toggleFullScreen = useCallback(() => {
