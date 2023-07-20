@@ -16,48 +16,6 @@ export function useValidateFieldRequest() {
   const { http } = useAiopsAppContext();
   const abortController = useRef(new AbortController());
 
-  // const runCategorizeRequest = useCallback(
-  //   (
-  //     index: string,
-  //     field: string,
-  //     timeField: string,
-  //     from: number | undefined,
-  //     to: number | undefined,
-  //     query: QueryDslQueryContainer,
-  //     intervalMs?: number
-  //   ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
-  //     const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
-
-  //     return new Promise((resolve, reject) => {
-  //       data.search
-  //         .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-  //           createCategoryRequest(index, field, timeField, from, to, query, wrap, intervalMs),
-  //           { abortSignal: abortController.current.signal }
-  //         )
-  //         .subscribe({
-  //           next: (result) => {
-  //             if (isCompleteResponse(result)) {
-  //               resolve(processCategoryResults(result, field, unwrap));
-  //             } else if (isErrorResponse(result)) {
-  //               reject(result);
-  //             } else {
-  //               // partial results
-  //               // Ignore partial results for now.
-  //               // An issue with the search function means partial results are not being returned correctly.
-  //             }
-  //           },
-  //           error: (error) => {
-  //             if (error.name === 'AbortError') {
-  //               return resolve({ categories: [], sparkLinesPerCategory: {} });
-  //             }
-  //             reject(error);
-  //           },
-  //         });
-  //     });
-  //   },
-  //   [data.search, randomSampler]
-  // );
-
   const runValidateFieldRequest = useCallback(
     async (
       index: string,
