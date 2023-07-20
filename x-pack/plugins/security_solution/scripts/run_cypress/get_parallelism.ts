@@ -38,8 +38,6 @@ import { getRun } from './gql/getRun';
     console.error('e', e);
   }
 
-  console.error('data', JSON.stringify(data, null, 2));
-
   const lastSuccessfulRunId = first(
     filter(
       data.runFeed.runs,
@@ -51,11 +49,7 @@ import { getRun } from './gql/getRun';
     )
   )?.runId;
 
-  console.error('lastSuccessfulRun', lastSuccessfulRunId);
-
   const runData = await client.request(getRun, { runId: lastSuccessfulRunId });
-
-  console.error('runData', runData);
 
   const totalRunTime = reduce(
     runData.run.specs,
@@ -63,11 +57,9 @@ import { getRun } from './gql/getRun';
     0
   );
 
-  console.error('totalRunTime', totalRunTime);
-
+  // try to fit into 25min per agent
   const parallelism = Math.ceil(totalRunTime / 1500000);
 
-  console.error('parallelism', parallelism);
   console.log(parallelism);
   return parallelism;
 })();

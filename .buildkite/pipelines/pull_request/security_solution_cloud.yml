@@ -15,13 +15,7 @@ steps:
         agents:
           queue: n2-4-spot
         depends_on: build
-        timeout_in_minutes: 120
-        retry:
-          automatic:
-            - exit_status: '-1'
-              limit: 3
-            - exit_status: '*'
-              limit: 1
+        timeout_in_minutes: 60
         artifact_paths:
           - "target/kibana-security-solution/**/*"
       YAML
