@@ -85,9 +85,11 @@ export function TransactionCharts({
       />
     </EuiFlexItem>
   ) : (
-    <EuiFlexItem>
-      <TransactionBreakdownChart kuery={kuery} environment={environment} />
-    </EuiFlexItem>
+    !isOpenTelemetryAgent && (
+      <EuiFlexItem>
+        <TransactionBreakdownChart kuery={kuery} environment={environment} />
+      </EuiFlexItem>
+    )
   );
 
   const failedTransactionRateChart = (
@@ -107,11 +109,11 @@ export function TransactionCharts({
         <ChartPointerEventContextProvider>
           {transactionName ? (
             <>
-              <EuiFlexGrid columns={3} gutterSize="s">
+              <EuiFlexGroup gutterSize="s">
                 {latencyChart}
                 {serviceOverviewThroughputChart}
                 {coldStartRateOrBreakdownChart}
-              </EuiFlexGrid>
+              </EuiFlexGroup>
               <EuiSpacer size="l" />
               <EuiFlexGroup
                 direction={rowDirection}
@@ -135,10 +137,10 @@ export function TransactionCharts({
                 {serviceOverviewThroughputChart}
               </EuiFlexGrid>
               <EuiSpacer size="s" />
-              <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexGroup gutterSize="s">
                 {failedTransactionRateChart}
                 {coldStartRateOrBreakdownChart}
-              </EuiFlexGrid>
+              </EuiFlexGroup>
             </>
           )}
         </ChartPointerEventContextProvider>
