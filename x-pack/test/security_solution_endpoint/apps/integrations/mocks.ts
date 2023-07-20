@@ -207,21 +207,22 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'customClick',
-          selector: 'button[title="agent.type"]',
+          selector: 'button[title="agent.ephemeral_id"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="endpoint"]',
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: 'endpoint',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND agent.ephemeral_idIS endpoint',
         },
       ],
     },
@@ -243,7 +244,7 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'customClick',
-          selector: 'button[title="agent.name"]',
+          selector: 'button[title="agent.id"]',
         },
         {
           type: 'input',
@@ -258,7 +259,7 @@ export const getArtifactsListTestsData = () => [
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.nameIS test super large value',
+          value: 'AND agent.idIS test super large value',
         },
         {
           selector: 'EventFiltersListPage-card-header-title',
@@ -269,7 +270,7 @@ export const getArtifactsListTestsData = () => [
           value: 'This is the event filter description edited',
         },
       ],
-      waitForValue: 'AND agent.nameIS test super large value',
+      waitForValue: 'AND agent.idIS test super large value',
     },
     delete: {
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
@@ -301,7 +302,7 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
-                field: 'agent.type',
+                field: 'agent.ephemeral_id',
                 operator: 'included',
                 type: 'exact_cased',
                 value: 'endpoint',
@@ -331,7 +332,7 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
-                field: 'agent.name',
+                field: 'agent.id',
                 operator: 'included',
                 type: 'exact_caseless',
                 value: 'test super large value',
