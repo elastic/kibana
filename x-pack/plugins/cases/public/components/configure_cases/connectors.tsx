@@ -22,8 +22,8 @@ import * as i18n from './translations';
 
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import type { ActionTypeConnector } from '../../../common/api';
-import { ConnectorTypes } from '../../../common/api';
+import type { ActionTypeConnector } from '../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
