@@ -178,6 +178,7 @@ export const getSecurityAppFeaturesConfig = (
         ...endpointBaseFeatureIds,
 
         SecuritySubFeatureId.responseActionsHistory,
+        SecuritySubFeatureId.hostIsolation,
         SecuritySubFeatureId.processOperations,
         SecuritySubFeatureId.fileOperations,
         SecuritySubFeatureId.executeAction,
