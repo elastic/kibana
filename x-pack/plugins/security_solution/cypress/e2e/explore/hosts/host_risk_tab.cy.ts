@@ -6,7 +6,6 @@
  */
 
 import { cleanKibana } from '../../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
@@ -25,7 +24,7 @@ import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risk_hosts');
+    cy.task('esArchiverLoad', 'risk_hosts');
   });
 
   beforeEach(() => {
@@ -35,7 +34,7 @@ describe('risk tab', () => {
   });
 
   after(() => {
-    esArchiverUnload('risk_hosts');
+    cy.task('esArchiverUnload', 'risk_hosts');
   });
 
   it('renders the table', () => {

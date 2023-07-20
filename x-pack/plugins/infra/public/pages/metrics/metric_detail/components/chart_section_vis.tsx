@@ -18,9 +18,8 @@ import {
   TooltipProps,
   Tooltip,
 } from '@elastic/charts';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
-
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -111,7 +110,7 @@ export const ChartSectionVis = ({
   }
 
   return (
-    <EuiPageContentBody>
+    <EuiPageSection>
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
@@ -143,6 +142,6 @@ export const ChartSectionVis = ({
           />
         </Chart>
       </div>
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };
