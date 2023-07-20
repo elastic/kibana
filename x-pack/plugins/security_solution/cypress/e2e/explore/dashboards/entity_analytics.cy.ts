@@ -306,7 +306,7 @@ describe('Entity Analytics Dashboard', () => {
   });
 
   // tracked by https://github.com/elastic/kibana/issues/161874
-  describe.skip('With anomalies data', () => {
+  describe('With anomalies data', () => {
     before(() => {
       esArchiverLoad('network');
     });
