@@ -21,6 +21,7 @@
     "@kbn/rison",
     "@kbn/crypto-browser",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-base-common",
   ],
   "exclude": [
     "target/**/*",
