@@ -308,7 +308,7 @@ describe('Exception builder helpers', () => {
           fields: [
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
-            getEndpointField('file.Ext.code_signature.status')
+            getEndpointField('file.Ext.code_signature.status'),
           ],
           id: '1234',
           title: 'logstash-*',
