@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { TaskManagerConfig } from '../config';
 import { Metrics, createMetricsAggregators, createMetricsStream } from './metrics_stream';
-import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 export type { Metrics } from './metrics_stream';
 
 export function metricsStream(
-  taskStore: TaskStore,
-  elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
-  logger: Logger,
   resetMetrics$: Observable<boolean>,
   taskPollingLifecycle?: TaskPollingLifecycle
 ): Observable<Metrics> {
   return createMetricsStream(
     createMetricsAggregators({
-      taskStore,
-      elasticsearchAndSOAvailability$,
       config,
-      logger,
       resetMetrics$,
       taskPollingLifecycle,
     })

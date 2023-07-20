@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
 import { combineLatest, filter, interval, map, merge, Observable, startWith } from 'rxjs';
-import { isOk } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
-import { isTaskPollingCycleEvent, TaskRun } from '../task_events';
+import { isTaskPollingCycleEvent } from '../task_events';
 import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { SuccessRate } from './metrics_stream';
 import { TaskManagerConfig } from '../config';
+import { taskLifecycleEventToSuccessMetric } from './utils';
 
-export type TaskClaimSuccessRate = JsonObject & SuccessRate;
+export type TaskClaimMetric = SuccessRate;
 
-export function createTaskClaimAggregator(
+export function createTaskClaimMetricsAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   config: TaskManagerConfig,
   resetMetrics$: Observable<boolean>
-): AggregatedStatProvider<TaskClaimSuccessRate> {
-  let allClaimEvents = 0;
-  let successfulClaimEvents = 0;
+): AggregatedStatProvider<TaskClaimMetric> {
+  const claimSuccessCounter: SuccessRate = { total: 0, success: 0 };
 
   // Resets the claim counters either when the reset interval has passed or
   // a resetMetrics$ event is received
@@ -30,20 +28,16 @@ export function createTaskClaimAggregator(
     interval(config.metrics_reset_interval).pipe(map(() => true)),
     resetMetrics$.pipe(map(() => true))
   ).subscribe(() => {
-    allClaimEvents = 0;
-    successfulClaimEvents = 0;
+    claimSuccessCounter.success = 0;
+    claimSuccessCounter.total = 0;
   });
 
-  const taskClaimEvents$: Observable<TaskClaimSuccessRate> = taskPollingLifecycle.events.pipe(
+  const taskClaimEvents$: Observable<TaskClaimMetric> = taskPollingLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent)),
     map((taskEvent: TaskLifecycleEvent) => {
-      const metric = taskPollingCycleEventToSuccessMetric(
-        taskEvent,
-        allClaimEvents,
-        successfulClaimEvents
-      );
-      allClaimEvents = metric.total;
-      successfulClaimEvents = metric.success;
+      const metric = taskLifecycleEventToSuccessMetric(taskEvent, claimSuccessCounter);
+      claimSuccessCounter.success = metric.success;
+      claimSuccessCounter.total = metric.total;
       return metric;
     })
   );
@@ -56,23 +50,11 @@ export function createTaskClaimAggregator(
       })
     ),
   ]).pipe(
-    map(([claim]: [TaskClaimSuccessRate]) => {
+    map(([claim]: [TaskClaimMetric]) => {
       return {
-        key: 'task_claim_success',
+        key: 'task_claim',
         value: claim,
-      } as AggregatedStat<TaskClaimSuccessRate>;
+      } as AggregatedStat<TaskClaimMetric>;
     })
   );
-}
-
-function taskPollingCycleEventToSuccessMetric(
-  taskEvent: TaskLifecycleEvent,
-  allClaimEvents: number,
-  successfulClaimEvents: number
-) {
-  const success = isOk((taskEvent as TaskRun).event);
-  return {
-    success: (successfulClaimEvents += success ? 1 : 0),
-    total: (allClaimEvents += 1),
-  };
 }

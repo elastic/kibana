@@ -285,14 +285,9 @@ export class TaskManagerPlugin
       this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));
 
-    metricsStream(
-      taskStore,
-      this.elasticsearchAndSOAvailability$!,
-      this.config!,
-      this.logger,
-      this.resetMetrics$,
-      this.taskPollingLifecycle
-    ).subscribe((metric) => this.metrics$.next(metric));
+    metricsStream(this.config!, this.resetMetrics$, this.taskPollingLifecycle).subscribe((metric) =>
+      this.metrics$.next(metric)
+    );
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,

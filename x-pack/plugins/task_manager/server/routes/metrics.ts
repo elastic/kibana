@@ -31,7 +31,7 @@ export interface MetricsRouteParams {
 }
 
 const QuerySchema = schema.object({
-  reset: schema.boolean({ defaultValue: true }),
+  reset: schema.boolean({ defaultValue: false }),
 });
 
 export function metricsRoute(params: MetricsRouteParams) {

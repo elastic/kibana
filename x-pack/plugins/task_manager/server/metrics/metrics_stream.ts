@@ -8,17 +8,18 @@
 import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
 import { set } from '@kbn/safer-lodash-set';
-import { Logger } from '@kbn/core/server';
-import { TaskStore } from '../task_store';
+import { JsonObject } from '@kbn/utility-types';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { createTaskClaimAggregator } from './task_claim_success_rate';
+import { createTaskClaimMetricsAggregator, TaskClaimMetric } from './task_claim_metrics';
+import { createTaskRunMetricsAggregator, TaskRunMetric } from './task_run_metrics';
 
 export interface Metrics {
   last_update: string;
   metrics: {
-    task_claim_success?: SuccessRateMetric;
+    task_claim?: Metric<TaskClaimMetric>;
+    task_run?: Metric<TaskRunMetric>;
   };
 }
 
@@ -27,31 +28,26 @@ export interface Metric<T> {
   value: T;
 }
 
-export interface SuccessRate {
+export interface SuccessRate extends JsonObject {
   success: number;
   total: number;
 }
-export type SuccessRateMetric = Metric<SuccessRate>;
-
 interface CreateMetricsAggregatorsOpts {
-  taskStore: TaskStore;
-  elasticsearchAndSOAvailability$: Observable<boolean>;
   config: TaskManagerConfig;
-  logger: Logger;
   resetMetrics$: Observable<boolean>;
   taskPollingLifecycle?: TaskPollingLifecycle;
 }
 export function createMetricsAggregators({
-  taskStore,
-  elasticsearchAndSOAvailability$,
   config,
-  logger,
   resetMetrics$,
   taskPollingLifecycle,
 }: CreateMetricsAggregatorsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [];
   if (taskPollingLifecycle) {
-    aggregators.push(createTaskClaimAggregator(taskPollingLifecycle, config, resetMetrics$));
+    aggregators.push(
+      createTaskClaimMetricsAggregator(taskPollingLifecycle, config, resetMetrics$),
+      createTaskRunMetricsAggregator(taskPollingLifecycle, config, resetMetrics$)
+    );
   }
   return merge(...aggregators);
 }
