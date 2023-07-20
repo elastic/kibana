@@ -10,8 +10,6 @@ import { Subscription } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
-import { AIOPS_ENABLED } from '../common';
-
 import { isActiveLicense } from './lib/license';
 import {
   AiopsLicense,
@@ -20,7 +18,8 @@ import {
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
-import { defineExplainLogRateSpikesRoute } from './routes';
+
+import { defineLogRateAnalysisRoute } from './routes';
 import { defineLogCategorizationRoutes } from './routes/log_categorization';
 
 export class AiopsPlugin
@@ -52,7 +51,7 @@ export class AiopsPlugin
     // Register server side APIs
     if (AIOPS_ENABLED) {
       core.getStartServices().then(([coreStart, depsStart]) => {
-        defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger, coreStart);
+        defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart);
         defineLogCategorizationRoutes(router, aiopsLicense);
       });
     }

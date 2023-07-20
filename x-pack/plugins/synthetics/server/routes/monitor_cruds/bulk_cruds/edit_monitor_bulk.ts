@@ -11,12 +11,12 @@ import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   PrivateLocation,
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
 import {
   formatTelemetryUpdateEvent,
@@ -27,9 +27,9 @@ import {
 
 interface MonitorConfigUpdate {
   normalizedMonitor: SyntheticsMonitor;
-  monitorWithRevision: SyntheticsMonitorWithSecrets;
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
-  decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
+  monitorWithRevision: SyntheticsMonitorWithSecretsAttributes;
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+  decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 }
 
 const updateConfigSavedObjects = async ({
@@ -114,7 +114,7 @@ export const syncEditedMonitorBulk = async ({
         server.logger,
         server.telemetry,
         formatTelemetryUpdateEvent(
-          editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
+          editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
           previousMonitor,
           server.stackVersion,
           Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
@@ -168,8 +168,8 @@ export const rollbackFailedUpdates = async ({
   monitorsToUpdate,
 }: {
   monitorsToUpdate: Array<{
-    previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
-    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
+    previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
   }>;
   routeContext: RouteContext;
   failedPolicyUpdates?: FailedPolicyUpdate[];

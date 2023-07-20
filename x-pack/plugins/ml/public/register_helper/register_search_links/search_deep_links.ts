@@ -103,16 +103,16 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
     title: i18n.translate('xpack.ml.deepLink.aiOps', {
       defaultMessage: 'AIOps',
     }),
-    // Default to the index select page for the explain log rate spikes since we don't have an AIops overview page
-    path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+    // Default to the index select page for log rate analysis since we don't have an AIops overview page
+    path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
     navLinkStatus,
     deepLinks: [
       {
-        id: 'explainLogRateSpikes',
-        title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
-          defaultMessage: 'Explain Log Rate Spikes',
+        id: 'logRateAnalysis',
+        title: i18n.translate('xpack.ml.deepLink.logRateAnalysis', {
+          defaultMessage: 'Log Rate Analysis',
         }),
-        path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+        path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
         navLinkStatus,
       },
       {

@@ -14,6 +14,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -23,7 +24,7 @@ import {
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
 import type { CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,

@@ -23,6 +23,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./enqueue'));
+    loadTestFile(require.resolve('./bulk_enqueue'));
     loadTestFile(require.resolve('./connector_types/stack/email'));
     loadTestFile(require.resolve('./connector_types/stack/email_html'));
     loadTestFile(require.resolve('./connector_types/stack/es_index'));
