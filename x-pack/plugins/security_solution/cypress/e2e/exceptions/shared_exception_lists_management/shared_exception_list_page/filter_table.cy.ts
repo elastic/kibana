@@ -12,7 +12,6 @@ import {
 } from '../../../../screens/exceptions';
 import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import {
   waitForExceptionsTableToBeLoaded,
   searchForExceptionList,
@@ -37,7 +36,7 @@ const getExceptionList2 = () => ({
 });
 describe('Filter Lists', () => {
   beforeEach(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     login();
 
     // Create exception list associated with a rule
