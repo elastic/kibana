@@ -17,7 +17,6 @@ import {
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { CoreStart } from '@kbn/core/public';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -35,7 +34,6 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import { DiscoverServices } from '../../build_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 

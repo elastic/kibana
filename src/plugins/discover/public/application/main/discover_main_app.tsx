@@ -8,7 +8,6 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { CoreStart } from '@kbn/core/public';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
