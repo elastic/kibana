@@ -93,6 +93,9 @@ export class ReportingAPIClient implements IReportingAPI {
     return href;
   }
 
+  /**
+   * Get the internal URL
+   */
   public getReportURL(jobId: string) {
     const downloadLink = this.http.basePath.prepend(
       `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
@@ -163,6 +166,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   /**
    * Returns a string for the public API endpoint used to automate the generation of reports
+   * This string must be shown when the user selects the option to view/copy the POST URL
    */
   public getReportingPublicJobPath(exportType: string, jobParams: BaseParams) {
     const params = stringify({
@@ -228,6 +232,6 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.http.put(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS);
+    return this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY);
   }
 }
