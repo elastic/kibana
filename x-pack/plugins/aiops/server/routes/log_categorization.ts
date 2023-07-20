@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { categorizationFieldValidationSchema } from '../../common/api/log_categorization/schema';
-import { API_ENDPOINT } from '../../common/api';
+import { AIOPS_API_ENDPOINT } from '../../common/api';
 import type { AiopsLicense } from '../types';
 import { wrapError } from './error_wrapper';
 
@@ -19,7 +19,7 @@ export const defineLogCategorizationRoutes = (
 ) => {
   router.versioned
     .post({
-      path: API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
+      path: AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
       access: 'internal',
     })
     .addVersion(

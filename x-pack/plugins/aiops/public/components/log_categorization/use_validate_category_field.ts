@@ -9,7 +9,7 @@ import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { API_ENDPOINT } from '../../../common/api';
+import { AIOPS_API_ENDPOINT } from '../../../common/api';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export function useValidateFieldRequest() {
@@ -26,7 +26,7 @@ export function useValidateFieldRequest() {
       query: QueryDslQueryContainer
     ) => {
       const resp = await http.post<FieldValidationResults>(
-        API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
+        AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
         {
           body: JSON.stringify({
             indexPatternTitle: index,

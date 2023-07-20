@@ -11,7 +11,7 @@ import type {
 } from './log_rate_analysis';
 import { streamReducer } from './stream_reducer';
 
-export const API_ENDPOINT = {
+export const AIOPS_API_ENDPOINT = {
   LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',
   CATEGORIZATION_FIELD_EXAMPLES: '/internal/aiops/categorization_field_validation',
 } as const;
