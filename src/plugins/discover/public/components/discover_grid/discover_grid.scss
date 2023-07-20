@@ -29,6 +29,10 @@
   .euiDataGridHeaderCell:last-of-type {
     border-right: none;
   }
+
+  .euiDataGridRowCell__contentByHeight {
+    min-width: 0;
+  }
 }
 
 .dscDiscoverGrid__cellValue {
@@ -119,8 +123,8 @@
 }
 
 .dscDiscoverGrid__descriptionListDescription {
-  word-break: normal !important;
-  white-space: nowrap;
+  word-break: break-all;
+  white-space: normal;
 
   // Special handling for images coming from the image field formatter
   img {
