@@ -8,7 +8,7 @@
 
 import { getIgnoredReason, IgnoredReason } from './get_ignored_reason';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 function field(params: Partial<DataViewField>): DataViewField {
   return {

@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '../types';
 import { formatFieldValue } from './format_value';
-import { type ShouldShowFieldInTableHandler } from './get_should_show_field_handler';
 
-const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
+const formattedHitCache = new WeakMap<SearchHit, FormattedHit>();
 
 type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
 
@@ -79,7 +78,7 @@ export function formatHit(
       : [
           ...pairs.slice(0, maxEntries),
           [
-            i18n.translate('discover.utils.formatHit.moreFields', {
+            i18n.translate('discover.formatHit.moreFields', {
               defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
               values: { count: pairs.length - maxEntries },
             }),

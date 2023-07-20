@@ -8,7 +8,7 @@
 
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock } from '../__mocks__';
 import { formatFieldValue } from './format_value';
 
 const services = {
