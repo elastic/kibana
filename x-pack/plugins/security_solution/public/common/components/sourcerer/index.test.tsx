@@ -26,7 +26,7 @@ import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { categorizationExamplesProvider } from './examples';
 export { topCategoriesProvider } from './top_categories';
