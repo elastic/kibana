@@ -66,7 +66,6 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
-  declare startDeps: CsvSearchSourceImmediateExportTypeStartDeps;
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
