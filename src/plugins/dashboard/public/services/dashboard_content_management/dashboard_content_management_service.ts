@@ -23,12 +23,19 @@ import type {
 } from './types';
 import { loadDashboardState } from './lib/load_dashboard_state';
 import { deleteDashboards } from './lib/delete_dashboards';
+import { DashboardCrudTypes } from '../../../common/content_management';
 
 export type DashboardContentManagementServiceFactory = KibanaPluginServiceFactory<
   DashboardContentManagementService,
   DashboardStartDependencies,
   DashboardContentManagementRequiredServices
 >;
+
+export const dashboardContentManagementServiceCache: {
+  [dashboardId: string]: DashboardCrudTypes['GetOut'] & {
+    lastFetched: Date;
+  };
+} = {};
 
 export const dashboardContentManagementServiceFactory: DashboardContentManagementServiceFactory = (
   { startPlugins: { contentManagement } },

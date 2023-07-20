@@ -23,7 +23,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { DashboardItem } from '../../embeddable/types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { memoizedFetchDashboard, memoizedFetchDashboards } from './dashboard_link_tools';
+import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 
 type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 
@@ -53,7 +53,7 @@ export const DashboardLinkDestinationPicker = ({
 
   useMount(async () => {
     if (initialSelection) {
-      const dashboard = await memoizedFetchDashboard(initialSelection).catch(() => {
+      const dashboard = await fetchDashboard(initialSelection).catch(() => {
         // swallow the error that is thrown, since this means the selected dashboard was deleted
       });
       if (dashboard) {
@@ -66,7 +66,7 @@ export const DashboardLinkDestinationPicker = ({
   });
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    const dashboards = await memoizedFetchDashboards({
+    const dashboards = await fetchDashboards({
       search: searchString,
       parentDashboardId,
       selectedDashboardId: initialSelection,

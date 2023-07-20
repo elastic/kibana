@@ -23,6 +23,7 @@ import {
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { dashboardContentManagementServiceCache } from '../dashboard_content_management_service';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -58,14 +59,32 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  const { item: rawDashboardContent, meta: resolveMeta } = await contentManagement.client
-    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    })
-    .catch((e) => {
-      throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
-    });
+  let rawDashboardContent;
+  let resolveMeta;
+
+  // console.log('Loading dashboard', id, dashboardContentManagementServiceCache);
+  if (dashboardContentManagementServiceCache[id]) {
+    // console.log('...found in cache!');
+
+    ({ item: rawDashboardContent, meta: resolveMeta } = dashboardContentManagementServiceCache[id]);
+  } else {
+    // console.log('...need to load');
+    ({ item: rawDashboardContent, meta: resolveMeta } = await contentManagement.client
+      .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+        contentTypeId: DASHBOARD_CONTENT_ID,
+        id,
+      })
+      .catch((e) => {
+        throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+      }));
+
+    dashboardContentManagementServiceCache[id] = {
+      meta: resolveMeta,
+      lastFetched: new Date(),
+      item: rawDashboardContent,
+    };
+  }
+
   if (!rawDashboardContent || !rawDashboardContent.version) {
     return {
       dashboardInput: newDashboardState,

@@ -15,6 +15,7 @@ import {
 } from '../../../../common/content_management';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { dashboardContentManagementServiceCache } from '../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];
@@ -67,19 +68,46 @@ export type FindDashboardsByIdResponse = { id: string } & (
   | { status: 'error'; error: SavedObjectError }
 );
 
+export async function findDashboardById(
+  contentManagement: DashboardStartDependencies['contentManagement'],
+  id: string
+): Promise<FindDashboardsByIdResponse> {
+  // console.log('checking cache', id, dashboardContentManagementServiceCache);
+  if (
+    dashboardContentManagementServiceCache[id] &&
+    Math.abs(+new Date() - +dashboardContentManagementServiceCache[id].lastFetched) < 300000 // 5 minutes
+  ) {
+    // this dashboard already exists in the cache and the cache hasn't timed out, so just return the cached version
+    // console.log('...found in cache!');
+    return {
+      id,
+      status: 'success',
+      attributes: dashboardContentManagementServiceCache[id].item.attributes,
+    };
+  }
+  const response = await contentManagement.client
+    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+      contentTypeId: DASHBOARD_CONTENT_ID,
+      id,
+    })
+    .then((result) => {
+      dashboardContentManagementServiceCache[id] = {
+        item: result.item,
+        meta: result.meta,
+        lastFetched: new Date(),
+      };
+      return { id, status: 'success', attributes: result.item.attributes };
+    })
+    .catch((e) => ({ status: 'error', error: e.body, id }));
+
+  return response as FindDashboardsByIdResponse;
+}
+
 export async function findDashboardsByIds(
   contentManagement: DashboardStartDependencies['contentManagement'],
   ids: string[]
 ): Promise<FindDashboardsByIdResponse[]> {
-  const findPromises = ids.map((id) =>
-    contentManagement.client
-      .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
-        contentTypeId: DASHBOARD_CONTENT_ID,
-        id,
-      })
-      .then((result) => ({ id, status: 'success', attributes: result.item.attributes }))
-      .catch((e) => ({ status: 'error', error: e.body, id }))
-  );
+  const findPromises = ids.map((id) => findDashboardById(contentManagement, id));
   const results = await Promise.all(findPromises);
   return results as FindDashboardsByIdResponse[];
 }
