@@ -57,7 +57,7 @@ export const createRuntimeServices = async ({
   fleetServerUrl = 'https://localhost:8220',
   username: _username,
   password: _password,
-  log = new ToolingLog(),
+  log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
   asSuperuser = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   let username = _username;
