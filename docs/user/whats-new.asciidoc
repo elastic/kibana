@@ -101,7 +101,7 @@ image::images/annotation.gif[Example of how to save an annotation group to the v
 [discrete]
 ==== New time functions in Lens formula
 
-The Lens formula now supports customizing the histogram interval and defining the desired time range. This was already available in TSVB charts and it was important to facilitate the conversion to Lens. 
+The **Lens** formula now supports customizing the histogram interval and defining the desired time range. This was already available in TSVB charts and it was important to facilitate the conversion to **Lens**. 
  
 [role="screenshot"]
 image::images/timefunctions.png[Example of customizing the histogram interval and defining the desired time range]
