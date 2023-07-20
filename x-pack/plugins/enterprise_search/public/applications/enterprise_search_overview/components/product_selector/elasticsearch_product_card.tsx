@@ -7,13 +7,17 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
-import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
+import { ELASTICSEARCH_PLUGIN, SEARCH_EXPERIENCES_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
+import { HttpLogic } from '../../../shared/http';
 import { ProductCard } from '../product_card';
 
 export const ElasticsearchProductCard = () => {
+  const { http } = useValues(HttpLogic);
   return (
     <ProductCard
       data-test-subj="productCard-elasticsearch"
@@ -77,6 +81,15 @@ export const ElasticsearchProductCard = () => {
             defaultMessage: 'ELSER text expansion',
           }),
           to: docLinks.elser,
+        },
+        {
+          label: i18n.translate(
+            'xpack.enterpriseSearch.elasticsearch.resources.searchExperiencesLabel',
+            {
+              defaultMessage: 'Search Experiences',
+            }
+          ),
+          to: http.basePath.prepend(SEARCH_EXPERIENCES_PLUGIN.URL),
         },
       ]}
     />
