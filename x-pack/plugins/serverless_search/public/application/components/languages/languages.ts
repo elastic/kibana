@@ -6,6 +6,7 @@
  */
 
 import { curlDefinition } from './curl';
+import { goDefinition } from './go';
 import { javascriptDefinition } from './javascript';
 import { pythonDefinition } from './python';
 import { rubyDefinition } from './ruby';
@@ -15,6 +16,7 @@ const languageDefinitionRecords: Partial<Record<Languages, LanguageDefinition>> 
   [Languages.CURL]: curlDefinition,
   [Languages.PYTHON]: pythonDefinition,
   [Languages.JAVASCRIPT]: javascriptDefinition,
+  [Languages.GO]: goDefinition,
   [Languages.RUBY]: rubyDefinition,
 };
 

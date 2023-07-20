@@ -508,6 +508,8 @@ export interface DocLinks {
   };
   readonly clients: {
     readonly guide: string;
+    readonly goConnecting: string;
+    readonly goGettingStarted: string;
     readonly goIndex: string;
     readonly goOverview: string;
     readonly javaBasicAuthentication: string;

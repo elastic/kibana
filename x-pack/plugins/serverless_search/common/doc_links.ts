@@ -13,6 +13,9 @@ class ESDocLinks {
   public connectors: string = '';
   public elasticsearchClients: string = '';
   public integrations: string = '';
+  public goAdvancedConfig: string = '';
+  public goBasicConfig: string = '';
+  public goClient: string = '';
   public jsApiReference: string = '';
   public jsAdvancedConfig: string = '';
   public jsBasicConfig: string = '';
@@ -35,6 +38,9 @@ class ESDocLinks {
     this.apiIntro = newDocLinks.apis.restApis;
     this.elasticsearchClients = newDocLinks.clients.guide;
     this.integrations = newDocLinks.serverlessSearch.integrations;
+    this.goAdvancedConfig = newDocLinks.clients.goConnecting;
+    this.goBasicConfig = newDocLinks.clients.goGettingStarted;
+    this.goClient = newDocLinks.clients.goOverview;
     this.jsAdvancedConfig = newDocLinks.clients.jsAdvancedConfig;
     this.jsApiReference = newDocLinks.clients.jsApiReference;
     this.jsBasicConfig = newDocLinks.clients.jsBasicConfig;
