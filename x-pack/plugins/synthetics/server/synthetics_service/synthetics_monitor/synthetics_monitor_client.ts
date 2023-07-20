@@ -21,12 +21,12 @@ import {
 } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
 import {
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   MonitorServiceLocation,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
 import {
   ConfigData,
@@ -89,8 +89,8 @@ export class SyntheticsMonitorClient {
     monitors: Array<{
       monitor: MonitorFields;
       id: string;
-      previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
-      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
+      previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>,
     routeContext: RouteContext,
     allPrivateLocations: PrivateLocationAttributes[],
@@ -175,7 +175,7 @@ export class SyntheticsMonitorClient {
     return pubicResponse;
   }
 
-  hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitor>) {
+  hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>) {
     const { locations } = previousMonitor.attributes;
 
     return locations.some((loc) => !loc.isServiceManaged);
@@ -183,7 +183,7 @@ export class SyntheticsMonitorClient {
 
   hasDeletedPublicLocations(
     updatedLocations: MonitorServiceLocation[],
-    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
   ) {
     const { locations } = decryptedPreviousMonitor.attributes;
 
@@ -284,10 +284,10 @@ export class SyntheticsMonitorClient {
   }) {
     const encryptedClient = encryptedSavedObjects.getClient();
 
-    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecrets>> = [];
+    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> = [];
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         {
           type: syntheticsMonitorType,
           perPage: 1000,
@@ -309,7 +309,7 @@ export class SyntheticsMonitorClient {
 
   mixParamsWithMonitors(
     spaceId: string,
-    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecrets>>,
+    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>
   ) {
     const heartbeatConfigs: HeartbeatConfig[] = [];
