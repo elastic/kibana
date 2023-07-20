@@ -21,11 +21,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   addExceptionEntryFieldValue,
@@ -49,11 +44,13 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   const ITEM_NAME = 'Sample Exception List Item';
   const ITEM_NAME_EDIT = 'Sample Exception List Item';
   const ADDITIONAL_ENTRY = 'host.hostname';
+
   beforeEach(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverUnload', 'endpoint');
+    cy.task('esArchiverResetKibana');
     login();
     deleteAlertsAndRules();
-    esArchiverLoad('endpoint');
+    cy.task('esArchiverLoad', 'endpoint');
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
@@ -62,8 +59,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   });
 
   after(() => {
-    esArchiverUnload('endpoint');
-    esArchiverUnload('endpoint_2');
+    cy.task('esArchiverUnload', 'endpoint');
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {

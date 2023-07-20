@@ -7,15 +7,14 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from './data_view';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from './data_view_complex';
-import { esHits } from './es_hits';
 import { esHitsComplex } from './es_hits_complex';
 import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { EsHitRecord } from '../types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext => {
   const usedRows = rows.map((row) => {
@@ -43,6 +42,6 @@ const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext 
   };
 };
 
-export const discoverGridContextMock = buildGridContext(dataViewMock, esHits);
+export const discoverGridContextMock = buildGridContext(dataViewMock, esHitsMock);
 
 export const discoverGridContextComplexMock = buildGridContext(dataViewComplexMock, esHitsComplex);

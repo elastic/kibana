@@ -14,11 +14,6 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../../tasks/es_archiver';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -37,10 +32,11 @@ describe('Close matching Alerts ', () => {
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {
-    esArchiverUnload('exceptions');
-    esArchiverResetKibana();
+    cy.task('esArchiverUnload', 'exceptions');
+    cy.task('esArchiverResetKibana');
     deleteAlertsAndRules();
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverLoad', 'exceptions');
+
     login();
     postDataView('exceptions-*');
     createRule({
@@ -55,7 +51,7 @@ describe('Close matching Alerts ', () => {
     waitForAlertsToPopulate();
   });
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {

@@ -10,9 +10,6 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 
 # Cloud links
 xpack.cloud.base_url: "https://cloud.elastic.co"
-xpack.cloud.profile_url: "/user/settings"
-xpack.cloud.billing_url: "/billing"
-xpack.cloud.organization_url: "/account"
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt

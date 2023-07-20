@@ -254,6 +254,29 @@ describe('findActiveNodes', () => {
     ]);
   });
 
+  test('should find active node at the root', () => {
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'root',
+        title: 'Root',
+        deepLink: getDeepLink('root', `root`),
+        path: ['root'],
+      },
+    };
+
+    expect(findActiveNodes(`/foo/root`, flattendNavTree)).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          isActive: true,
+          deepLink: getDeepLink('root', `root`),
+          path: ['root'],
+        },
+      ],
+    ]);
+  });
+
   test('should match the longest matching node', () => {
     const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
       '[0]': {
@@ -345,7 +368,7 @@ describe('findActiveNodes', () => {
         id: 'item1',
         title: 'Item 1',
         path: ['root', 'item1'],
-        getIsActive: (loc) => loc.pathname.startsWith('/foo'), // Should match
+        getIsActive: ({ location }) => location.pathname.startsWith('/foo'), // Should match
       },
       '[0][2]': {
         id: 'item2',

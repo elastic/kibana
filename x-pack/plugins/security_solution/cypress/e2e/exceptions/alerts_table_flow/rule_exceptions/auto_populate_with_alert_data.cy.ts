@@ -25,11 +25,6 @@ import {
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { goToExceptionsTab } from '../../../../tasks/rule_details';
 
@@ -50,8 +45,9 @@ describe('Auto populate exception with Alert data', () => {
   const ADDITIONAL_ENTRY = 'host.hostname';
 
   beforeEach(() => {
-    esArchiverResetKibana();
-    esArchiverLoad('endpoint');
+    cy.task('esArchiverUnload', 'endpoint');
+    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', 'endpoint');
     login();
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
@@ -59,11 +55,11 @@ describe('Auto populate exception with Alert data', () => {
     waitForAlertsToPopulate();
   });
   after(() => {
-    esArchiverUnload('endpoint');
+    cy.task('esArchiverUnload', 'endpoint');
     deleteAlertsAndRules();
   });
   afterEach(() => {
-    esArchiverUnload('endpoint');
+    cy.task('esArchiverUnload', 'endpoint');
   });
 
   it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {

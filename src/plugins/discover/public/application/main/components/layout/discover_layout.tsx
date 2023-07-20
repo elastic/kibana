@@ -47,6 +47,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
+import { addLog } from '../../../../utils/add_log';
 
 /**
  * Local storage key for sidebar persistence state
@@ -209,6 +210,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
 
     if (resultState === 'uninitialized') {
+      addLog('[DiscoverLayout] uninitialized triggers data fetching');
       return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
     }
 
