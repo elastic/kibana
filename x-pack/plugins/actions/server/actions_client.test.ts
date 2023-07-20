@@ -1164,7 +1164,7 @@ describe('get()', () => {
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
-  it('throws when getting a system action', async () => {
+  it('throws when getting a system action by default', async () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -1197,6 +1197,48 @@ describe('get()', () => {
     await expect(
       actionsClient.get({ id: 'system-connector-.cases' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+  });
+
+  it('does not throw when getting a system action if throwIfSystemAction=false', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    expect(
+      await actionsClient.get({ id: 'system-connector-.cases', throwIfSystemAction: false })
+    ).toEqual({
+      actionTypeId: '.cases',
+      id: 'system-connector-.cases',
+      isDeprecated: false,
+      isPreconfigured: false,
+      isSystemAction: true,
+      name: 'System action: .cases',
+    });
   });
 });
 
@@ -1794,7 +1836,7 @@ describe('getBulk()', () => {
     ]);
   });
 
-  test('should throw an error if a system action is requested', async () => {
+  test('should throw an error if a system action is requested by default', async () => {
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -1867,6 +1909,113 @@ describe('getBulk()', () => {
     await expect(
       actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+  });
+
+  test('should throw an error if a system action is requested', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+            isMissingSecrets: false,
+          },
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    expect(
+      await actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'], false)
+    ).toEqual([
+      {
+        actionTypeId: '.slack',
+        config: { foo: 'bar' },
+        id: 'testPreconfigured',
+        isDeprecated: false,
+        isPreconfigured: true,
+        isSystemAction: false,
+        name: 'test',
+        secrets: {},
+      },
+      {
+        actionTypeId: '.cases',
+        config: {},
+        id: 'system-connector-.cases',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: true,
+        name: 'System action: .cases',
+        secrets: {},
+      },
+      {
+        actionTypeId: 'test',
+        config: { foo: 'bar' },
+        id: '1',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: false,
+        name: 'test',
+      },
+    ]);
   });
 });
 

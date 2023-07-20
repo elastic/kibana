@@ -403,7 +403,13 @@ export class ActionsClient {
   /**
    * Get an action
    */
-  public async get({ id }: { id: string }): Promise<ActionResult> {
+  public async get({
+    id,
+    throwIfSystemAction = true,
+  }: {
+    id: string;
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult> {
     try {
       await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -421,12 +427,18 @@ export class ActionsClient {
 
     /**
      * Getting system connector is not allowed
+     * if throwIfSystemAction is set to true.
+     * Default behavior is to throw
      */
-    if (foundInMemoryConnector !== undefined && foundInMemoryConnector.isSystemAction) {
+    if (
+      foundInMemoryConnector !== undefined &&
+      foundInMemoryConnector.isSystemAction &&
+      throwIfSystemAction
+    ) {
       throw Boom.notFound(`Connector ${id} not found`);
     }
 
-    if (foundInMemoryConnector !== undefined && foundInMemoryConnector.isPreconfigured) {
+    if (foundInMemoryConnector !== undefined) {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
@@ -522,7 +534,10 @@ export class ActionsClient {
   /**
    * Get bulk actions with in-memory list
    */
-  public async getBulk(ids: string[]): Promise<ActionResult[]> {
+  public async getBulk(
+    ids: string[],
+    throwIfSystemAction: boolean = true
+  ): Promise<ActionResult[]> {
     try {
       await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -547,12 +562,14 @@ export class ActionsClient {
 
       /**
        * Getting system connector is not allowed
+       * if throwIfSystemAction is set to true.
+       * Default behavior is to throw
        */
-      if (action !== undefined && action.isSystemAction) {
+      if (action !== undefined && action.isSystemAction && throwIfSystemAction) {
         throw Boom.notFound(`Connector ${action.id} not found`);
       }
 
-      if (action !== undefined && action.isPreconfigured) {
+      if (action !== undefined) {
         actionResults.push(action);
       }
     }
