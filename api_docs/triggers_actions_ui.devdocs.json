@@ -6859,6 +6859,64 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.NOT_BETWEEN]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.text",
+                "type": "Any",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
