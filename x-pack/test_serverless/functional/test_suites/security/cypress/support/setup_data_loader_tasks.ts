@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { LoadUserAndRoleCyTaskOptions } from '../cypress';
+import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
+
+export const setupDataLoaderTasks = (
+  on: Cypress.PluginEvents,
+  config: Cypress.PluginConfigOptions
+) => {
+  const stackServicesPromise = createRuntimeServices({
+    kibanaUrl: config.env.KIBANA_URL,
+    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
+    username: config.env.ELASTICSEARCH_USERNAME,
+    password: config.env.ELASTICSEARCH_PASSWORD,
+    asSuperuser: true,
+  });
+
+  const roleAndUserLoaderPromise: Promise<SecurityRoleAndUserLoader> = stackServicesPromise.then(
+    ({ kbnClient, log }) => {
+      return new SecurityRoleAndUserLoader(kbnClient, log);
+    }
+  );
+
+  on('task', {
+    loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
+      return (await roleAndUserLoaderPromise).load(name);
+    },
+  });
+};
