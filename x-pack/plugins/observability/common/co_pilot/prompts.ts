@@ -291,9 +291,9 @@ export const coPilotPrompts = {
       const rows = significantFieldValues.map((item) => Object.values(item).join(',')).join('\n');
 
       const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a spike of log messages. Your job is to take immediate action and proceed with both urgency and precision.
-      "Explain Log Rate Spikes" is an AIOps feature that uses advanced statistical methods to identify reasons for increases in log rates. It makes it easy to find and investigate causes of unusual spikes by using the analysis workflow view.
-      You are using "Explain Log Rate Spikes" and ran the statistical analysis on the log messages which occured during the alert.
-      You received the following analysis results from "Explain Log Rate Spikes" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that contribute to the log messages spike:
+      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases in log rates. It makes it easy to find and investigate causes of unusual spikes by using the analysis workflow view.
+      You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
+      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that contribute to the log messages spike:
 
       ${header}
       ${rows}
