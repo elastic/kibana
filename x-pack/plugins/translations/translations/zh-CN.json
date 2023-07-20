@@ -25597,7 +25597,6 @@
     "xpack.ml.trainedModels.nodesList.totalAmountLabel": "Machine Learning 节点总数",
     "xpack.ml.trainedModels.testModelsFlyout.deploymentIdLabel": "部署 ID",
     "xpack.ml.trainedModels.testModelsFlyout.fillMask.info1": "测试模型预测短语中缺失的词的表现。",
-    "xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText": "输入短语以进行测试。将 [MASK] 用作缺失词的占位符。",
     "xpack.ml.trainedModels.testModelsFlyout.fillMask.label": "填充掩码",
     "xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputText": "输入文本",
     "xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputTitle": "输入文本",
