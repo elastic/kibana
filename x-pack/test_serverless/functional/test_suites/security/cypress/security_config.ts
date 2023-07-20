@@ -7,13 +7,17 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { SecuritySolutionServerlessVisualTestRunner } from './runner';
+import type { FtrProviderContext } from './runner';
+import { SecuritySolutionCypressTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const svlSecConfig = await readConfigFile(require.resolve('./security_config.base.ts'));
+  const securitySolutionCypressConfig = await readConfigFile(
+    require.resolve('./security_config.base.ts')
+  );
 
   return {
-    ...svlSecConfig.getAll(),
-    testRunner: SecuritySolutionServerlessVisualTestRunner,
+    ...securitySolutionCypressConfig.getAll(),
+
+    testRunner: (context: FtrProviderContext) => SecuritySolutionCypressTestRunner(context),
   };
 }
