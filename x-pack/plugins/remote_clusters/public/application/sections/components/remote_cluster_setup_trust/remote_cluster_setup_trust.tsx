@@ -93,6 +93,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
               title={i18nTexts.apiKeyTitle}
               paddingSize="l"
               betaBadgeProps={{ label: i18nTexts.apiKeyBadge, color: 'accent' }}
+              data-test-subj="setupTrustApiKeyCard"
             >
               <EuiText size="s">
                 <p>{i18nTexts.apiKeyDescription}</p>
@@ -103,6 +104,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
                 iconSide="right"
                 iconType="popout"
                 target="_blank"
+                data-test-subj="setupTrustApiKeyCardDocs"
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.clusterWizard.trustStep.docs"
@@ -114,7 +116,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
         )}
 
         <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
-          <EuiCard title={i18nTexts.certTitle} paddingSize="l">
+          <EuiCard title={i18nTexts.certTitle} paddingSize="l" data-test-subj="setupTrustCertCard">
             <EuiText size="s">
               <p>{i18nTexts.certDescription}</p>
             </EuiText>
@@ -124,6 +126,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
               iconSide="right"
               iconType="popout"
               target="_blank"
+              data-test-subj="setupTrustCertCardDocs"
             >
               <FormattedMessage
                 id="xpack.remoteClusters.clusterWizard.trustStep.docs"
@@ -141,7 +144,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="setupTrustDoneButton"
+                data-test-subj="setupTrustBackButton"
                 iconType="arrowLeft"
                 onClick={onBack}
               >
