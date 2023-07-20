@@ -30,6 +30,7 @@ import { Vulnerabilities } from '../vulnerabilities';
 type FindingsTabKey = 'vuln_mgmt' | 'configurations';
 
 const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: FindingsTabKey }) => {
+  const location = useLocation();
   const getSetupStatus = useCspSetupStatusApi();
 
   if (!getSetupStatus.data) {
@@ -48,11 +49,17 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
     (!lastTabSelected && !hasVulnerabilities && hasFindings);
 
   if (redirectToMisconfigurationsTab) {
-    return <Redirect to={findingsNavigation.findings_default.path} />;
+    return (
+      <Redirect
+        to={{ search: location.search, pathname: findingsNavigation.findings_default.path }}
+      />
+    );
   }
 
   // otherwise stay on the vulnerabilities tab, since it's the first one.
-  return <Redirect to={findingsNavigation.vulnerabilities.path} />;
+  return (
+    <Redirect to={{ search: location.search, pathname: findingsNavigation.vulnerabilities.path }} />
+  );
 };
 
 export const Findings = () => {
