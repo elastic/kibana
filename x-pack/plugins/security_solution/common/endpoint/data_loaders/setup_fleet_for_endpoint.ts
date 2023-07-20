@@ -15,38 +15,14 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { AGENTS_SETUP_API_ROUTES, EPM_API_ROUTES, SETUP_API_ROUTE } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
+import { UsageTracker } from './usage_tracker';
 import { EndpointDataLoadingError, retryOnError, wrapErrorAndRejectPromise } from './utils';
+
+const usageTracker = new UsageTracker({ dumpOnProcessExit: true });
 
 export interface SetupFleetForEndpointResponse {
   endpointPackage: BulkInstallPackageInfo;
 }
-
-interface UsageRecord {
-  start: string;
-  finish: string;
-  status: 'success' | 'failure' | 'pending';
-  error?: string;
-  stack?: string;
-}
-const usage: Record<string, UsageRecord[]> = {};
-const addUsageRecord = (key: string, record: UsageRecord) => {
-  usage[key] = usage[key] ?? [];
-  usage[key].push(record);
-};
-const dumpUsage = (logger: ToolingLog) => {
-  Object.entries(usage)
-    .map(([key, usageRecords]) => {
-      return `
-  [${key}]: invocation call count: ${usageRecords.length}
-      ${usageRecords
-        .map((record) => {
-          return JSON.stringify(record);
-        })
-        .join('\n      ')}
-`;
-    })
-    .join('\n');
-};
 
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
@@ -58,13 +34,7 @@ export const setupFleetForEndpoint = async (
   logger?: ToolingLog
 ): Promise<void> => {
   const log = logger ?? new ToolingLog();
-  const usageRecord: UsageRecord = {
-    start: new Date().toISOString(),
-    finish: '',
-    status: 'pending',
-    error: '',
-  };
-  addUsageRecord('setupFleetForEndpoint()', usageRecord);
+  const usageRecord = usageTracker.create('setupFleetForEndpoint()');
 
   log.info(`setupFleetForEndpoint(): Setting up fleet for endpoint`);
 
@@ -83,12 +53,7 @@ export const setupFleetForEndpoint = async (
     }
   } catch (error) {
     log.error(error);
-
-    usageRecord.finish = new Date().toISOString();
-    usageRecord.status = 'failure';
-    usageRecord.error = error.message;
-    Error.captureStackTrace(usageRecord);
-    dumpUsage(log);
+    usageRecord.set('failure', error.message);
 
     throw error;
   }
@@ -109,11 +74,7 @@ export const setupFleetForEndpoint = async (
   } catch (error) {
     log.error(error);
 
-    usageRecord.finish = new Date().toISOString();
-    usageRecord.status = 'failure';
-    usageRecord.error = error.message;
-    Error.captureStackTrace(usageRecord);
-    dumpUsage(log);
+    usageRecord.set('failure', error.message);
 
     throw error;
   }
@@ -124,18 +85,12 @@ export const setupFleetForEndpoint = async (
   } catch (error) {
     log.error(error);
 
-    usageRecord.finish = new Date().toISOString();
-    usageRecord.status = 'failure';
-    usageRecord.error = error.message;
-    Error.captureStackTrace(usageRecord);
-    dumpUsage(log);
+    usageRecord.set('failure', error.message);
 
     throw error;
   }
 
-  usageRecord.finish = new Date().toISOString();
-  usageRecord.status = 'success';
-  dumpUsage(log);
+  usageRecord.set('success');
 };
 
 /**
@@ -150,13 +105,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
 ): Promise<BulkInstallPackageInfo> => {
   logger.info(`installOrUpgradeEndpointFleetPackage(): starting`);
 
-  const usageRecord: UsageRecord = {
-    start: new Date().toISOString(),
-    finish: '',
-    status: 'pending',
-    error: '',
-  };
-  addUsageRecord('installOrUpgradeEndpointFleetPackage()', usageRecord);
+  const usageRecord = usageTracker.create('installOrUpgradeEndpointFleetPackage()');
 
   const updatePackages = async () => {
     const installEndpointPackageResp = (await kbnClient
@@ -172,7 +121,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
 
-    logger.debug(`Fleet bulk install response:`, installEndpointPackageResp.data, 10);
+    logger.debug(`Fleet bulk install response:`, installEndpointPackageResp.data);
 
     const bulkResp = installEndpointPackageResp.data.items;
 
@@ -206,18 +155,12 @@ export const installOrUpgradeEndpointFleetPackage = async (
 
   return retryOnError(updatePackages, ['no_shard_available_action_exception'], logger, 5, 10000)
     .then((result) => {
-      usageRecord.finish = new Date().toISOString();
-      usageRecord.status = 'success';
-      dumpUsage(logger);
+      usageRecord.set('success');
 
       return result;
     })
     .catch((err) => {
-      usageRecord.finish = new Date().toISOString();
-      usageRecord.status = 'failure';
-      usageRecord.error = err.message;
-      Error.captureStackTrace(usageRecord);
-      dumpUsage(logger);
+      usageRecord.set('failure', err.message);
 
       throw err;
     });
