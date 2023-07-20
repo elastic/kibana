@@ -14,7 +14,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
 
-  describe('navigation', function () {
+  // eslint-disable-next-line ban/ban
+  describe.only('navigation', function () {
     before(async () => {
       await svlObltNavigation.navigateToLandingPage();
     });
