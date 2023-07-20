@@ -68,7 +68,7 @@ image::images/newwayhighlighted.png[Example of the new ordering of the chart leg
 [discrete]
 ==== Step curve
 
-Lens now supports three new options for line charts. The three options are straight, smooth, and step. Step curve line charts help users see clearly when data changes at irregular intervals, which helps to avoid misinterpretation. When creating visualizations select Line in the visualization type dropdown. Then use the visual options menu to choose between straight, smooth, or step in the Line interpolation dropdown. 
+**Lens** now supports three new options for line charts. The three options are straight, smooth, and step. Step curve line charts help users see clearly when data changes at irregular intervals, which helps to avoid misinterpretation. When creating visualizations select **Line** in the visualization type dropdown. Then use the visual options menu to choose between straight, smooth, or step in the Line interpolation dropdown. 
 
 [role="screenshot"]
 image::images/stepcurve.gif[An short video displaying the three new chart options]
