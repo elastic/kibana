@@ -171,7 +171,7 @@ describe('POST risk_engine/preview route', () => {
           weights: [
             {
               type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.alerts,
+              value: RiskCategories.category_1,
               host: 0.1,
               user: 0.2,
             },
@@ -186,7 +186,7 @@ describe('POST risk_engine/preview route', () => {
             weights: [
               {
                 type: RiskWeightTypes.riskCategory,
-                value: RiskCategories.alerts,
+                value: RiskCategories.category_1,
                 host: 0.1,
                 user: 0.2,
               },
@@ -200,7 +200,7 @@ describe('POST risk_engine/preview route', () => {
           weights: [
             {
               type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.alerts,
+              value: RiskCategories.category_1,
               host: 1.1,
             },
           ],

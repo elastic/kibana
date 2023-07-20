@@ -9,7 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import type {
+  EcsRiskScore,
+  RiskScore,
+} from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
 
 import {
   createRule,
@@ -20,15 +23,19 @@ import {
   waitFor,
 } from '../../../utils';
 
+const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
+  delete score['@timestamp'];
+  delete score.risk_inputs;
+  delete score.notes;
+  // delete score.category_1_score;
+  return score;
+};
+
 export const sanitizeScores = (scores: Array<Partial<RiskScore>>): Array<Partial<RiskScore>> =>
-  scores.map((item) => {
-    delete item['@timestamp'];
-    delete item.riskiestInputs;
-    delete item.notes;
-    delete item.alertsScore;
-    delete item.otherScore;
-    return item;
-  });
+  scores.map(sanitizeScore);
+
+export const normalizeScores = (scores: Array<Partial<EcsRiskScore>>): Array<Partial<RiskScore>> =>
+  scores.map((score) => sanitizeScore(score.host?.risk ?? score.user?.risk ?? {}));
 
 export const buildDocument = (body: object, id?: string) => {
   const firstTimestamp = Date.now();
@@ -108,11 +115,11 @@ export const deleteAllRiskScores = async (
 export const readRiskScores = async (
   es: Client,
   index: string[] = ['risk-score.risk-score-default']
-): Promise<RiskScore[]> => {
+): Promise<EcsRiskScore[]> => {
   const results = await es.search({
     index: 'risk-score.risk-score-default',
   });
-  return results.hits.hits.map((hit) => hit._source as RiskScore);
+  return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
 
 export const waitForRiskScoresToBePresent = async (

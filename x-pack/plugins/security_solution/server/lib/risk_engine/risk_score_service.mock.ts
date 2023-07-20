@@ -10,15 +10,15 @@ import type { RiskScore } from './types';
 
 const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',
-  identifierField: 'host.name',
-  identifierValue: 'hostname',
-  level: 'High',
-  totalScore: 149,
-  totalScoreNormalized: 85.332,
-  alertsScore: 85,
-  otherScore: 0,
+  identifier_field: 'host.name',
+  identifier_value: 'hostname',
+  calculated_level: 'High',
+  calculated_score: 149,
+  calculated_score_norm: 85.332,
+  category_1_score: 85,
+  category_1_count: 12,
   notes: [],
-  riskiestInputs: [],
+  risk_inputs: [],
   ...overrides,
 });
 

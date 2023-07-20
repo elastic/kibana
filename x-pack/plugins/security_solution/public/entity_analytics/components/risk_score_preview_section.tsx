@@ -40,8 +40,8 @@ interface IRiskScorePreviewPanel {
 
 const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
   scores
-    ?.filter((item) => item?.identifierField === field)
-    ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
+    ?.filter((item) => item?.identifier_field === field)
+    ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 
 const RiskScorePreviewPanel = ({
@@ -106,8 +106,8 @@ export const RiskScorePreviewSection = () => {
     },
   });
 
-  const hosts = getRiskiestScores(data?.scores, 'host.name');
-  const users = getRiskiestScores(data?.scores, 'user.name');
+  const hosts = getRiskiestScores(data?.scores.host, 'host.name');
+  const users = getRiskiestScores(data?.scores.user, 'user.name');
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {

@@ -28,7 +28,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
-  const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: RiskScore[] }> => {
+  const previewRiskScores = async ({
+    body,
+  }: {
+    body: object;
+  }): Promise<{ scores: { host?: RiskScore[]; user?: RiskScore[] } }> => {
     const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
@@ -48,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
   ) => {
     await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
 
-    return await getRiskScores({ body: { debug: true } });
+    return await previewRiskScores({ body: { debug: true } });
   };
 
   describe('Risk Engine Scoring - Preview', () => {
@@ -89,13 +93,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Unknown',
-              totalScore: 21,
-              totalScoreNormalized: 8.039816232771823,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 21,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -111,20 +117,24 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Unknown',
-              totalScore: 21,
-              totalScoreNormalized: 8.039816232771823,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 21,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
             {
-              level: 'Unknown',
-              totalScore: 21,
-              totalScoreNormalized: 8.039816232771823,
-              identifierField: 'host.name',
-              identifierValue: 'host-2',
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 21,
+              identifier_field: 'host.name',
+              identifier_value: 'host-2',
             },
           ]);
         });
@@ -140,13 +150,15 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Unknown',
-              totalScore: 28.42462120245875,
-              totalScoreNormalized: 10.88232052161514,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Unknown',
+              calculated_score: 28.42462120245875,
+              calculated_score_norm: 10.88232052161514,
+              category_1_count: 2,
+              category_1_score: 28,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -160,13 +172,15 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 30,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Unknown',
-              totalScore: 47.25513506055279,
-              totalScoreNormalized: 18.091552473412246,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Unknown',
+              calculated_score: 47.25513506055279,
+              calculated_score_norm: 18.091552473412246,
+              category_1_count: 30,
+              category_1_score: 37,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -183,20 +197,24 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 31,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Unknown',
-              totalScore: 47.25513506055279,
-              totalScoreNormalized: 18.091552473412246,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Unknown',
+              calculated_score: 47.25513506055279,
+              calculated_score_norm: 18.091552473412246,
+              category_1_count: 30,
+              category_1_score: 37,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
             {
-              level: 'Unknown',
-              totalScore: 21,
-              totalScoreNormalized: 8.039816232771823,
-              identifierField: 'host.name',
-              identifierValue: 'host-2',
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 21,
+              identifier_field: 'host.name',
+              identifier_value: 'host-2',
             },
           ]);
         });
@@ -210,13 +228,15 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Unknown',
-              totalScore: 50.67035607277805,
-              totalScoreNormalized: 19.399064346392823,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Unknown',
+              calculated_score: 50.67035607277805,
+              calculated_score_norm: 19.399064346392823,
+              category_1_count: 100,
+              category_1_score: 37,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -233,13 +253,15 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Critical',
-              totalScore: 241.2874098703716,
-              totalScoreNormalized: 92.37649688758484,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Critical',
+              calculated_score: 241.2874098703716,
+              calculated_score_norm: 92.37649688758484,
+              category_1_count: 100,
+              category_1_score: 209,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -262,13 +284,15 @@ export default ({ getService }: FtrProviderContext): void => {
             maxSignals: 1000,
           });
 
-          expect(sanitizeScores(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              level: 'Critical',
-              totalScore: 254.91456029175757,
-              totalScoreNormalized: 97.59362951445543,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Critical',
+              calculated_score: 254.91456029175757,
+              calculated_score_norm: 97.59362951445543,
+              category_1_count: 1000,
+              category_1_score: 209,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -288,14 +312,14 @@ export default ({ getService }: FtrProviderContext): void => {
             riskScore: 100,
           });
 
-          const { scores } = await getRiskScores({
+          const { scores } = await previewRiskScores({
             body: {
               after_keys: { user: { 'user.name': 'aaa' } },
             },
           });
           // if after_key was not respected, 'aaa' would be included here
-          expect(scores).to.have.length(1);
-          expect(scores[0].identifierValue).to.equal('zzz');
+          expect(scores.user).to.have.length(1);
+          expect(scores.user?.[0].identifier_value).to.equal('zzz');
         });
       });
 
@@ -315,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
             riskScore: 100,
             riskScoreOverride: 'event.risk_score',
           });
-          const { scores } = await getRiskScores({
+          const { scores } = await previewRiskScores({
             body: {
               filter: {
                 bool: {
@@ -333,8 +357,8 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          expect(scores).to.have.length(1);
-          expect(scores[0].riskiestInputs).to.have.length(1);
+          expect(scores.host).to.have.length(1);
+          expect(scores.host?.[0].risk_inputs).to.have.length(1);
         });
       });
 
@@ -354,15 +378,17 @@ export default ({ getService }: FtrProviderContext): void => {
             riskScore: 100,
             riskScoreOverride: 'event.risk_score',
           });
-          const { scores } = await getRiskScores({ body: {} });
+          const { scores } = await previewRiskScores({ body: {} });
 
-          expect(sanitizeScores(scores)).to.eql([
+          expect(sanitizeScores(scores.host!)).to.eql([
             {
-              level: 'High',
-              totalScore: 225.1106801442913,
-              totalScoreNormalized: 86.18326192354185,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'High',
+              calculated_score: 225.1106801442913,
+              calculated_score_norm: 86.18326192354185,
+              category_1_count: 100,
+              category_1_score: 203,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -379,17 +405,19 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({
+          const { scores } = await previewRiskScores({
             body: { weights: [{ type: 'global_identifier', host: 0.5 }] },
           });
 
-          expect(sanitizeScores(scores)).to.eql([
+          expect(sanitizeScores(scores.host!)).to.eql([
             {
-              level: 'Moderate',
-              totalScore: 120.6437049351858,
-              totalScoreNormalized: 46.18824844379242,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'Moderate',
+              calculated_score: 120.6437049351858,
+              calculated_score_norm: 46.18824844379242,
+              category_1_count: 100,
+              category_1_score: 209,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
           ]);
         });
@@ -404,17 +432,19 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({
+          const { scores } = await previewRiskScores({
             body: { weights: [{ type: 'global_identifier', user: 0.7 }] },
           });
 
-          expect(sanitizeScores(scores)).to.eql([
+          expect(sanitizeScores(scores.user!)).to.eql([
             {
-              level: 'Moderate',
-              totalScore: 168.9011869092601,
-              totalScoreNormalized: 64.66354782130938,
-              identifierField: 'user.name',
-              identifierValue: 'user-1',
+              calculated_level: 'Moderate',
+              calculated_score: 168.9011869092601,
+              calculated_score_norm: 64.66354782130938,
+              category_1_count: 100,
+              category_1_score: 209,
+              identifier_field: 'user.name',
+              identifier_value: 'user-1',
             },
           ]);
         });
@@ -431,24 +461,31 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({
+          const { scores } = await previewRiskScores({
             body: { weights: [{ type: 'global_identifier', host: 0.4, user: 0.8 }] },
           });
 
-          expect(sanitizeScores(scores)).to.eql([
+          expect(sanitizeScores(scores.host!)).to.eql([
             {
-              level: 'High',
-              totalScore: 186.47518232942502,
-              totalScoreNormalized: 71.39172370958079,
-              identifierField: 'user.name',
-              identifierValue: 'user-1',
+              calculated_level: 'Low',
+              calculated_score: 93.23759116471251,
+              calculated_score_norm: 35.695861854790394,
+              category_1_count: 50,
+              category_1_score: 209,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
+          ]);
+
+          expect(sanitizeScores(scores.user!)).to.eql([
             {
-              level: 'Low',
-              totalScore: 93.23759116471251,
-              totalScoreNormalized: 35.695861854790394,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'High',
+              calculated_score: 186.47518232942502,
+              calculated_score_norm: 71.39172370958079,
+              category_1_count: 50,
+              category_1_score: 209,
+              identifier_field: 'user.name',
+              identifier_value: 'user-1',
             },
           ]);
         });
@@ -472,26 +509,33 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({
+          const { scores } = await previewRiskScores({
             body: {
-              weights: [{ type: 'risk_category', value: 'alerts', host: 0.4, user: 0.8 }],
+              weights: [{ type: 'risk_category', value: 'category_1', host: 0.4, user: 0.8 }],
             },
           });
 
-          expect(sanitizeScores(scores)).to.eql([
+          expect(sanitizeScores(scores.host!)).to.eql([
             {
-              level: 'High',
-              totalScore: 186.475182329425,
-              totalScoreNormalized: 71.39172370958079,
-              identifierField: 'user.name',
-              identifierValue: 'user-1',
+              calculated_level: 'Low',
+              calculated_score: 93.2375911647125,
+              calculated_score_norm: 35.695861854790394,
+              category_1_score: 77,
+              category_1_count: 50,
+              identifier_field: 'host.name',
+              identifier_value: 'host-1',
             },
+          ]);
+
+          expect(sanitizeScores(scores.user!)).to.eql([
             {
-              level: 'Low',
-              totalScore: 93.2375911647125,
-              totalScoreNormalized: 35.695861854790394,
-              identifierField: 'host.name',
-              identifierValue: 'host-1',
+              calculated_level: 'High',
+              calculated_score: 186.475182329425,
+              calculated_score_norm: 71.39172370958079,
+              category_1_score: 165,
+              category_1_count: 50,
+              identifier_field: 'user.name',
+              identifier_value: 'user-1',
             },
           ]);
         });

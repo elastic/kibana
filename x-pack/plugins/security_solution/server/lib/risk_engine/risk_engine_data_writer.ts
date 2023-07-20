@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { IdentifierType } from '../../../common/risk_engine';
 import type { RiskScore } from './types';
 
 interface WriterBulkResponse {
@@ -14,9 +16,15 @@ interface WriterBulkResponse {
   took: number;
 }
 
-export interface RiskEngineDataWriter {
-  bulk: (scores: RiskScore[]) => Promise<WriterBulkResponse>;
+interface BulkParams {
+  host?: RiskScore[];
+  user?: RiskScore[];
 }
+
+export interface RiskEngineDataWriter {
+  bulk: (params: BulkParams) => Promise<WriterBulkResponse>;
+}
+
 interface RiskEngineDataWriterOptions {
   esClient: ElasticsearchClient;
   index: string;
@@ -27,10 +35,10 @@ interface RiskEngineDataWriterOptions {
 export class RiskEngineDataWriter implements RiskEngineDataWriter {
   constructor(private readonly options: RiskEngineDataWriterOptions) {}
 
-  public bulk = async (scores: RiskScore[]) => {
+  public bulk = async (params: BulkParams) => {
     try {
       const { errors, items, took } = await this.options.esClient.bulk({
-        body: scores.flatMap((score) => [{ create: { _index: this.options.index } }, score]),
+        operations: this.buildBulkOperations(params),
       });
 
       return {
@@ -52,5 +60,33 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
         took: 0,
       };
     }
+  };
+
+  private buildBulkOperations = (params: BulkParams): BulkOperationContainer[] => {
+    const hostBody =
+      params.host?.flatMap((score) => [
+        { create: { _index: this.options.index } },
+        this.scoreToEcs(score, 'host'),
+      ]) ?? [];
+
+    const userBody =
+      params.user?.flatMap((score) => [
+        { create: { _index: this.options.index } },
+        this.scoreToEcs(score, 'user'),
+      ]) ?? [];
+
+    return hostBody.concat(userBody) as BulkOperationContainer[];
+  };
+
+  private scoreToEcs = (score: RiskScore, identifierType: IdentifierType): unknown => {
+    const { '@timestamp': _, ...rest } = score;
+    return {
+      '@timestamp': score['@timestamp'],
+      [identifierType]: {
+        risk: {
+          ...rest,
+        },
+      },
+    };
   };
 }

@@ -7,7 +7,13 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AfterKey, AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type {
+  AfterKey,
+  AfterKeys,
+  IdentifierType,
+  RiskCategories,
+  RiskWeights,
+} from '../../../common/risk_engine';
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
@@ -45,28 +51,44 @@ export interface CalculateScoresResponse {
     response: unknown;
   };
   after_keys: AfterKeys;
-  scores: RiskScore[];
+  scores: {
+    host?: RiskScore[];
+    user?: RiskScore[];
+  };
 }
 
 export interface SimpleRiskInput {
   id: string;
   index: string;
-  riskScore: string | number | undefined;
+  risk_category: RiskCategories;
+  risk_description: string;
+  risk_score: string | number | undefined;
+  timestamp: string | undefined;
 }
 
 export type RiskInput = Ecs;
 
+export interface EcsRiskScore {
+  '@timestamp': string;
+  host?: {
+    risk: Omit<RiskScore, '@timestamp'>;
+  };
+  user?: {
+    risk: Omit<RiskScore, '@timestamp'>;
+  };
+}
+
 export interface RiskScore {
   '@timestamp': string;
-  identifierField: string;
-  identifierValue: string;
-  level: string;
-  totalScore: number;
-  totalScoreNormalized: number;
-  alertsScore: number;
-  otherScore: number;
+  identifier_field: string;
+  identifier_value: string;
+  calculated_level: string;
+  calculated_score: number;
+  calculated_score_norm: number;
+  category_1_score: number;
+  category_1_count: number;
   notes: string[];
-  riskiestInputs: SimpleRiskInput[] | RiskInput[];
+  risk_inputs: SimpleRiskInput[] | RiskInput[];
 }
 
 export interface CalculateRiskScoreAggregations {
@@ -81,7 +103,7 @@ export interface CalculateRiskScoreAggregations {
 }
 
 export interface RiskScoreBucket {
-  key: { [identifierField: string]: string; category: string };
+  key: { [identifierField: string]: string };
   doc_count: number;
   risk_details: {
     value: {
@@ -89,10 +111,9 @@ export interface RiskScoreBucket {
       normalized_score: number;
       notes: string[];
       level: string;
-      alerts_score: number;
-      other_score: number;
+      category_1_score: number;
+      category_1_count: number;
     };
   };
-
-  riskiest_inputs: SearchResponse;
+  risk_inputs: SearchResponse;
 }

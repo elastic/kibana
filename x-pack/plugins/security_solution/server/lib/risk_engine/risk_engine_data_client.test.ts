@@ -93,63 +93,139 @@ describe('RiskEngineDataClient', () => {
         },
       });
 
-      expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith({
-        logger,
-        esClient,
-        template: {
-          name: '.risk-score-mappings',
-          _meta: {
-            managed: true,
-          },
-          template: {
-            settings: {},
-            mappings: {
-              dynamic: 'strict',
-              properties: {
-                '@timestamp': {
-                  type: 'date',
-                },
-                alertsScore: {
-                  type: 'float',
-                },
-                identifierField: {
-                  type: 'keyword',
-                },
-                identifierValue: {
-                  type: 'keyword',
-                },
-                level: {
-                  type: 'keyword',
-                },
-                otherScore: {
-                  type: 'float',
-                },
-                riskiestInputs: {
-                  properties: {
-                    id: {
-                      type: 'keyword',
+      expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger,
+          esClient,
+          template: expect.objectContaining({
+            name: '.risk-score-mappings',
+            _meta: {
+              managed: true,
+            },
+          }),
+          totalFieldsLimit: 1000,
+        })
+      );
+      expect((createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template)
+        .toMatchInlineSnapshot(`
+        Object {
+          "mappings": Object {
+            "dynamic": "strict",
+            "properties": Object {
+              "@timestamp": Object {
+                "type": "date",
+              },
+              "host": Object {
+                "properties": Object {
+                  "risk": Object {
+                    "properties": Object {
+                      "calculated_level": Object {
+                        "type": "keyword",
+                      },
+                      "calculated_score": Object {
+                        "type": "float",
+                      },
+                      "calculated_score_norm": Object {
+                        "type": "float",
+                      },
+                      "category_1_score": Object {
+                        "type": "float",
+                      },
+                      "identifier_field": Object {
+                        "type": "keyword",
+                      },
+                      "identifier_value": Object {
+                        "type": "keyword",
+                      },
+                      "notes": Object {
+                        "type": "keyword",
+                      },
+                      "risk_inputs": Object {
+                        "properties": Object {
+                          "id": Object {
+                            "type": "keyword",
+                          },
+                          "index": Object {
+                            "type": "keyword",
+                          },
+                          "risk_category": Object {
+                            "type": "keyword",
+                          },
+                          "risk_description": Object {
+                            "type": "float",
+                          },
+                          "risk_score": Object {
+                            "type": "float",
+                          },
+                          "timestamp": Object {
+                            "type": "date",
+                          },
+                        },
+                        "type": "object",
+                      },
                     },
-                    index: {
-                      type: 'keyword',
-                    },
-                    riskScore: {
-                      type: 'float',
-                    },
+                    "type": "object",
                   },
-                  type: 'nested',
                 },
-                totalScore: {
-                  type: 'float',
-                },
-                totalScoreNormalized: {
-                  type: 'float',
+              },
+              "user": Object {
+                "properties": Object {
+                  "risk": Object {
+                    "properties": Object {
+                      "calculated_level": Object {
+                        "type": "keyword",
+                      },
+                      "calculated_score": Object {
+                        "type": "float",
+                      },
+                      "calculated_score_norm": Object {
+                        "type": "float",
+                      },
+                      "category_1_score": Object {
+                        "type": "float",
+                      },
+                      "identifier_field": Object {
+                        "type": "keyword",
+                      },
+                      "identifier_value": Object {
+                        "type": "keyword",
+                      },
+                      "notes": Object {
+                        "type": "keyword",
+                      },
+                      "risk_inputs": Object {
+                        "properties": Object {
+                          "id": Object {
+                            "type": "keyword",
+                          },
+                          "index": Object {
+                            "type": "keyword",
+                          },
+                          "risk_category": Object {
+                            "type": "keyword",
+                          },
+                          "risk_description": Object {
+                            "type": "float",
+                          },
+                          "risk_score": Object {
+                            "type": "float",
+                          },
+                          "timestamp": Object {
+                            "type": "date",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    },
+                    "type": "object",
+                  },
                 },
               },
             },
           },
-        },
-        totalFieldsLimit,
-      });
+          "settings": Object {},
+        }
+      `);
 
       expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
         logger,

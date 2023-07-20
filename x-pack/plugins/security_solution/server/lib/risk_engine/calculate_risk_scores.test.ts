@@ -142,38 +142,45 @@ describe('calculateRiskScores()', () => {
     it('returns a flattened list of risk scores', async () => {
       const response = await calculateRiskScores(params);
       expect(response).toHaveProperty('scores');
-      expect(response.scores).toHaveLength(4);
+      expect(response.scores.host).toHaveLength(2);
+      expect(response.scores.user).toHaveLength(2);
     });
 
     it('returns scores in the expected format', async () => {
       const {
-        scores: [score],
+        scores: { host: hostScores },
       } = await calculateRiskScores(params);
+      const [score] = hostScores ?? [];
       expect(score).toEqual(
         expect.objectContaining({
           '@timestamp': expect.any(String),
-          identifierField: expect.any(String),
-          identifierValue: expect.any(String),
-          level: 'Unknown',
-          totalScore: expect.any(Number),
-          totalScoreNormalized: expect.any(Number),
-          alertsScore: expect.any(Number),
-          otherScore: expect.any(Number),
+          identifier_field: expect.any(String),
+          identifier_value: expect.any(String),
+          calculated_level: 'Unknown',
+          calculated_score: expect.any(Number),
+          calculated_score_norm: expect.any(Number),
+          category_1_score: expect.any(Number),
+          category_1_count: expect.any(Number),
+          notes: expect.any(Array),
         })
       );
     });
 
     it('returns risk inputs in the expected format', async () => {
       const {
-        scores: [score],
+        scores: { user: userScores },
       } = await calculateRiskScores(params);
+      const [score] = userScores ?? [];
       expect(score).toEqual(
         expect.objectContaining({
-          riskiestInputs: expect.arrayContaining([
+          risk_inputs: expect.arrayContaining([
             expect.objectContaining({
               id: expect.any(String),
               index: expect.any(String),
-              riskScore: expect.any(Number),
+              risk_category: expect.any(String),
+              risk_description: expect.any(String),
+              risk_score: expect.any(Number),
+              timestamp: expect.any(String),
             }),
           ]),
         })

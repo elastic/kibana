@@ -17,7 +17,7 @@ import {
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
   readRiskScores,
-  sanitizeScores,
+  normalizeScores,
   waitForRiskScoresToBePresent,
 } from './utils';
 
@@ -111,13 +111,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const scores = await readRiskScores(es);
 
         expect(scores.length).to.eql(1);
-        expect(sanitizeScores(scores)).to.eql([
+        expect(normalizeScores(scores)).to.eql([
           {
-            level: 'Unknown',
-            totalScore: 21,
-            totalScoreNormalized: 8.039816232771823,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
+            calculated_level: 'Unknown',
+            calculated_score: 21,
+            calculated_score_norm: 8.039816232771823,
+            category_1_score: 21,
+            category_1_count: 1,
+            identifier_field: 'host.name',
+            identifier_value: 'host-1',
           },
         ]);
       });
