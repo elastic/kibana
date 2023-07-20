@@ -5,23 +5,7 @@
  * 2.0.
  */
 
-import {
-  ReadableStreamPolyfill,
-  BlobPolyfill,
-  FileReaderPolyfill,
-  FilePolyfill,
-} from '@loaders.gl/polyfills';
 import { GeoJsonImporter } from './geojson_importer';
-
-// Remove polyfill with node 18 upgrade
-(function () {
-  // can not use installFilePolyfills because global.Blob exists, it just does not contain Blob.prototype.arrayBuffer
-  // installFilePolyfills only installs poly fill if global.Blob does not exist
-  global.ReadableStream = ReadableStreamPolyfill;
-  global.Blob = BlobPolyfill;
-  global.FileReader = FileReaderPolyfill;
-  global.File = FilePolyfill;
-})();
 
 const FEATURE_COLLECTION = {
   type: 'FeatureCollection',
