@@ -8,7 +8,6 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import globby from 'globby';
 
-
 /**
  * This script processes all junit reports matching a glob pattern. It reads each report, parses it into json, validates that it is a report from Cypress, then transforms the report to a form that can be processed by Kibana Operations workflows and the failed-test-reporter, it then optionally writes the report back, in xml format, to the original file path.
  */
@@ -35,7 +34,7 @@ run(
       const unvalidatedReportJson: unknown = await parseStringPromise(source);
 
       // Apply validation and return the validated report, or an error message
-      const maybeValidationResult: { result: t.TypeOf<typeof CypressJunitReport> } | { error: string } = validatedCypressJunitReport(unvalidatedReportJson);
+      const maybeValidationResult: { result: CypressJunitReport } | { error: string } = validatedCypressJunitReport(unvalidatedReportJson);
 
       const logError = (error: string) => {
         log.error(`Error while validating ${path}: ${error}
@@ -50,7 +49,7 @@ This script relies on various assumptions. If your junit report is valid, then y
         continue;
       }
 
-      const reportJson: t.TypeOf<typeof CypressJunitReport> = maybeValidationResult.result;
+      const reportJson: CypressJunitReport = maybeValidationResult.result;
 
       const maybeAlreadyProcessedResult = isReportAlreadyProcessed(reportJson);
       if ('error' in maybeAlreadyProcessedResult) {
@@ -113,7 +112,7 @@ This script relies on various assumptions. If your junit report is valid, then y
  * `name` will have the value of `classname` appended to it. This makes sense because they each contain part of the bdd spec.
  * `classname` is replaced with the file path, relative to the kibana project directory, and encoded (by replacing periods with a non-ascii character.) This is the format expected by the failed test reporter and the Kibana Operations flaky test triage workflows.
  */
-async function transformedReport({ reportJson, specFilePath, rootDirectory, reportName }: { reportJson: t.TypeOf<typeof CypressJunitReport>, specFilePath: string, rootDirectory: string, reportName: string }): Promise<string> {
+async function transformedReport({ reportJson, specFilePath, rootDirectory, reportName }: { reportJson: CypressJunitReport, specFilePath: string, rootDirectory: string, reportName: string }): Promise<string> {
 
   for (const testsuite of reportJson.testsuites.testsuite) {
     for (const testcase of testsuite.testcase) {
@@ -156,25 +155,33 @@ const CypressJunitTestSuite = t.type({
     t.type({
       name: t.string,
     }),
+    /* `file` is only found on some suites, namely the 'Root Suite' */
     t.partial({
       file: t.string
     }),
   ])
 });
 
-/**
- * This type represents the Cypress-specific flavor of junit report.
- **/
 const CypressJunitReport = t.type({
   testsuites: t.type({
     testsuite: t.array(CypressJunitTestSuite)
   })
 })
 
+/**
+ * This type represents the Cypress-specific flavor of junit report.
+ **/
+type CypressJunitReport = t.TypeOf<typeof CypressJunitReport>;
+
+/**
+ * Encapsulate either a successful result, or a recoverable error. This module only throws unrecoverable errors.
+ */
+type Result<T> = { result: T } | { error: string };
+
 /*
  * This checks if the junit report contains '·' characters in the classname. This character is used by the kibana operations triage scripts, and the failed test reporter, to replace `.` characters in a path as part of its encoding scheme. If this character is found, we assume that the encoding has already taken place.
  */
-function isReportAlreadyProcessed(report: t.TypeOf<typeof CypressJunitReport>): { result: boolean } | { error: string } {
+function isReportAlreadyProcessed(report: CypressJunitReport): Result<boolean> {
   for (const testsuite of report.testsuites.testsuite) {
     for (const testcase of testsuite.testcase) {
       if (testcase.$.classname.indexOf('·') !== -1) {
@@ -193,7 +200,7 @@ function isReportAlreadyProcessed(report: t.TypeOf<typeof CypressJunitReport>): 
  * If there are no errors, this returns `{ result: 'successs' }`, otherwise it returns an error, wrapped in `{ error: string }`.
  *
  */
-function validatedCypressJunitReport(parsedReport: unknown): { result: t.TypeOf<typeof CypressJunitReport> } | { error: string } {
+function validatedCypressJunitReport(parsedReport: unknown): Result<CypressJunitReport> {
   const decoded = CypressJunitReport.decode(parsedReport);
 
   if (isLeft(decoded)) {
@@ -208,7 +215,7 @@ function validatedCypressJunitReport(parsedReport: unknown): { result: t.TypeOf<
 /**
  * Iterate over the test suites and find the root suite, which Cypress populates with the path to the spec file. Return the path.
  */
-function findSpecFilePathFromRootSuite(reportJson: t.TypeOf<typeof CypressJunitReport>): { result: string } | { error: string } {
+function findSpecFilePathFromRootSuite(reportJson: CypressJunitReport): Result<string> {
   for (const testsuite of reportJson.testsuites.testsuite) {
     if (testsuite.$.name === "Root Suite" && testsuite.$.file) {
       return { result: testsuite.$.file }
@@ -218,3 +225,5 @@ function findSpecFilePathFromRootSuite(reportJson: t.TypeOf<typeof CypressJunitR
     error: "No Root Suite containing a 'file' attribute was found."
   }
 }
+
+
