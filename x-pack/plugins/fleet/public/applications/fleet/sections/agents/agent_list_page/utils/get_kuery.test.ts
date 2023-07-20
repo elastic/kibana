@@ -52,7 +52,7 @@ describe('getKuery', () => {
 
   it('should return a kuery with a combination of previous kueries', () => {
     expect(getKuery({ search, selectedTags, selectedStatus })).toEqual(
-      '((base search) and tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))'
+      '((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))'
     );
   });
 
