@@ -7,11 +7,13 @@
 
 import { curlDefinition } from './curl';
 import { javascriptDefinition } from './javascript';
+import { pythonDefinition } from './python';
 import { rubyDefinition } from './ruby';
 import { Languages, LanguageDefinition } from './types';
 
 const languageDefinitionRecords: Partial<Record<Languages, LanguageDefinition>> = {
   [Languages.CURL]: curlDefinition,
+  [Languages.PYTHON]: pythonDefinition,
   [Languages.JAVASCRIPT]: javascriptDefinition,
   [Languages.RUBY]: rubyDefinition,
 };

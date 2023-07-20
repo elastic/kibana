@@ -529,6 +529,8 @@ export interface DocLinks {
     readonly phpInstallation: string;
     readonly phpOverview: string;
     readonly pythonAuthentication: string;
+    readonly pythonConfig: string;
+    readonly pythonConnecting: string;
     readonly pythonGuide: string;
     readonly pythonOverview: string;
     readonly rubyAuthentication: string;
