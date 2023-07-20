@@ -20,30 +20,24 @@ const CSPM_CYCLE_SCAN_FREQUENT = '24h';
 const CSPM_METRING_TASK_NAME = 'cspm-usage-report';
 const CSPM_BUCKET_TYPE_NAME = 'cspm-resource';
 
-export interface ResourcesStats {
+export interface Benchmarks {
   benchmarks: {
     buckets: BenchmarkBucket[];
   };
 }
 
 interface BenchmarkBucket {
-  key: string;
+  key: string; // benchmark name
   doc_count: number;
-  by_resource_id: {
-    buckets: ResourceIdBucket[];
-  };
-  overall_min_timestamp: {
+  min_timestamp: MinTimestamp;
+  unique_resources: {
     value: number;
   };
 }
 
-interface ResourceIdBucket {
-  key: string;
-  doc_count: number;
-
-  earliest_timestamp: {
-    value: number;
-  };
+interface MinTimestamp {
+  value: number;
+  value_as_string: string;
 }
 
 export const cspmMetringCallback = async ({
@@ -53,29 +47,34 @@ export const cspmMetringCallback = async ({
   taskId,
 }: MeteringCallbackInput): Promise<UsageRecord[]> => {
   try {
-    const response = await esClient.search<unknown, ResourcesStats>(
-      getFindingsByResourceAggQuery()
-    );
-    const projectId = cloudSetup?.serverless?.projectId;
-    if (!projectId) {
-      throw new Error('no project id found');
-    }
+    const projectId = cloudSetup?.serverless?.projectId || 'missing project id';
+    logger.error('no project id found');
+
+    const response = await esClient.search<unknown, Benchmarks>(getFindingsByResourceAggQuery());
 
     const cspmBenchmarks = response.aggregations?.benchmarks.buckets;
 
-    const { sumResources, earliestTimestampArray } = cspmBenchmarks
+    const { benchmarks, sumResources, earliestTimestampArray } = cspmBenchmarks
       ? cspmBenchmarks.reduce(
           (accumulator, benchmarkBucket: BenchmarkBucket) => {
-            accumulator.sumResources += benchmarkBucket.by_resource_id.buckets.length;
-            accumulator.earliestTimestampArray.push(benchmarkBucket.overall_min_timestamp.value);
+            accumulator.benchmarks.push(benchmarkBucket.key);
+            accumulator.sumResources += benchmarkBucket.unique_resources.value;
+            accumulator.earliestTimestampArray.push(benchmarkBucket.min_timestamp);
+
             return accumulator;
           },
-          { sumResources: 0, earliestTimestampArray: [] as number[] }
+          {
+            benchmarks: [] as string[],
+            sumResources: 0,
+            earliestTimestampArray: [] as MinTimestamp[],
+          }
         )
-      : { sumResources: 0, earliestTimestampArray: undefined };
+      : { benchmarks: [], sumResources: 0, earliestTimestampArray: undefined };
 
-    const minTimestamp = earliestTimestampArray
-      ? new Date(Math.min(...earliestTimestampArray)).toLocaleString()
+    const minTimestamp: string = earliestTimestampArray
+      ? earliestTimestampArray.reduce((min, current) => {
+          return current.value < min.value ? current : min;
+        }, earliestTimestampArray[0]).value_as_string
       : new Date().toLocaleString();
 
     const usageRecords = {
@@ -86,6 +85,7 @@ export const cspmMetringCallback = async ({
         type: CSPM_BUCKET_TYPE_NAME,
         quantity: sumResources,
         period_seconds: cspmMetringTaskProperties.periodSeconds,
+        cause: benchmarks.join(', '),
       },
       source: {
         id: taskId,
@@ -127,24 +127,17 @@ export const getFindingsByResourceAggQuery = () => ({
     benchmarks: {
       terms: {
         field: 'rule.benchmark.name',
+        size: MAX_BUCKETS,
       },
       aggs: {
-        by_resource_id: {
-          terms: {
+        unique_resources: {
+          cardinality: {
             field: 'resource.id',
-            size: MAX_BUCKETS,
-          },
-          aggs: {
-            min_timestamp: {
-              min: {
-                field: '@timestamp',
-              },
-            },
           },
         },
-        overall_min_timestamp: {
-          min_bucket: {
-            buckets_path: 'by_resource_id>min_timestamp',
+        min_timestamp: {
+          min: {
+            field: '@timestamp',
           },
         },
       },
