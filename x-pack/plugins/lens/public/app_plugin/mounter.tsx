@@ -42,7 +42,14 @@ import {
 } from '../embeddable/embeddable';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
-import { makeConfigureStore, navigateAway, LensRootStore, loadInitial } from '../state_management';
+import {
+  makeConfigureStore,
+  navigateAway,
+  LensRootStore,
+  loadInitial,
+  setState,
+} from '../state_management';
+import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import {
   LensAppLocator,
@@ -311,6 +318,7 @@ export async function mountApp(
           data.query.filterManager.setAppFilters([]);
           data.query.queryString.clearQuery();
         }
+        lensStore.dispatch(setState(getPreloadedState(storeDeps)));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
       }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {
