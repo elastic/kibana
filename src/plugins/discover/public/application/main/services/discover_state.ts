@@ -78,11 +78,6 @@ export interface LoadParams {
    * the data view spec to use, if undefined, the saved search's data view will be used
    */
   dataViewSpec?: DataViewSpec;
-  /**
-   * determines if AppState should be used to update the saved search
-   * URL is overwriting savedSearch params in this case
-   */
-  useAppState?: boolean;
 }
 
 export interface DiscoverStateContainer {
@@ -134,7 +129,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
+    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -321,6 +316,7 @@ export function getDiscoverStateContainer({
       await updateAdHocDataViewId();
     }
     loadDataViewList();
+    addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
   };
 
@@ -364,6 +360,7 @@ export function getDiscoverStateContainer({
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
+      addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
       fetchData();
     });
 
@@ -392,7 +389,7 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const onCreateDefaultAdHocDataView = async (dataViewSpec: DataViewSpec) => {
+  const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
     const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
@@ -400,6 +397,7 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.appendAdHocDataViews(newDataView);
 
     await onChangeDataView(newDataView);
+    return newDataView;
   };
   /**
    * Triggered when a user submits a query in the search bar
@@ -411,6 +409,7 @@ export function getDiscoverStateContainer({
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+      addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
       dataStateContainer.fetch();
     }
   };
@@ -459,7 +458,7 @@ export function getDiscoverStateContainer({
       loadDataViewList,
       loadSavedSearch,
       onChangeDataView,
-      onCreateDefaultAdHocDataView,
+      createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
