@@ -205,12 +205,12 @@ export const CasePostRequestRt = rt.intersection([
   ),
 ]);
 
-const CasesFindRequestSearchFieldsRt = rt.keyof({
+export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   title: null,
 });
 
-const CasesFindRequestSortFieldsRt = rt.keyof({
+export const CasesFindRequestSortFieldsRt = rt.keyof({
   title: null,
   category: null,
   createdAt: null,

@@ -857,12 +857,15 @@ describe('utils', () => {
   describe('constructSearchById', () => {
     const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
-    it('returns the search with correct values when given a uuid', () => {
+    it('returns the rootSearchFields and search with correct values when given a uuid', () => {
       const uuid = uuidv1(); // the specific version is irrelevant
 
       expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
         .toMatchInlineSnapshot(`
         Object {
+          "rootSearchFields": Array [
+            "_id",
+          ],
           "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
         }
       `);

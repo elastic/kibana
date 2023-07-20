@@ -21,7 +21,6 @@ import type {
   CommentRequest,
   CaseSeverity,
   CommentRequestExternalReferenceType,
-  CasesFindRequest,
   CasesFindRequestSortFields,
 } from '../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
@@ -503,7 +502,7 @@ export const constructSearch = (
   search: string | undefined,
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-): Pick<CasesFindRequest, 'search'> | undefined => {
+): { search: string; rootSearchFields?: string[] } | undefined => {
   if (!search) {
     return undefined;
   }
@@ -517,6 +516,7 @@ export const constructSearch = (
 
     return {
       search: `"${search}" "${rawId}"`,
+      rootSearchFields: ['_id'],
     };
   }
 

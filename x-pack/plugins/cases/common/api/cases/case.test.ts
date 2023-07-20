@@ -26,6 +26,8 @@ import {
   CasesRt,
   CasesFindResponseRt,
   CaseResolveResponseRt,
+  CasesFindRequestSearchFieldsRt,
+  CasesFindRequestSortFieldsRt,
 } from './case';
 import { CommentType } from './comment';
 import { CaseStatuses } from './status';
@@ -362,75 +364,25 @@ describe('Case', () => {
       });
     });
 
-    it('succeeds with description as searchFields', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'description' });
+    const searchFields = Object.keys(CasesFindRequestSearchFieldsRt.keys);
+
+    it.each(searchFields)('succeeds with %s as searchFields', (field) => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: field });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, searchFields: 'description', page: 1, perPage: 10 },
+        right: { ...defaultRequest, searchFields: field, page: 1, perPage: 10 },
       });
     });
 
-    it('succeeds with title as searchFields', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'title' });
+    const sortFields = Object.keys(CasesFindRequestSortFieldsRt.keys);
+
+    it.each(sortFields)('succeeds with %s as sortField', (sortField) => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, searchFields: 'title', page: 1, perPage: 10 },
-      });
-    });
-
-    it('succeeds with updatedAt as sortField', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'updatedAt' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, sortField: 'updatedAt', page: 1, perPage: 10 },
-      });
-    });
-
-    it('succeeds with closedAt as sortField', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'closedAt' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, sortField: 'closedAt', page: 1, perPage: 10 },
-      });
-    });
-
-    it('succeeds with severity as sortField', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'severity' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, sortField: 'severity', page: 1, perPage: 10 },
-      });
-    });
-
-    it('succeeds with status as sortField', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'status' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, sortField: 'status', page: 1, perPage: 10 },
-      });
-    });
-
-    it('succeeds with category as sortField', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'category' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, sortField: 'category', page: 1, perPage: 10 },
-      });
-    });
-
-    it('succeeds with title as sortField', () => {
-      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'title' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, sortField: 'title', page: 1, perPage: 10 },
+        right: { ...defaultRequest, sortField, page: 1, perPage: 10 },
       });
     });
 

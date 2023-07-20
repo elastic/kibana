@@ -45,7 +45,7 @@ describe('find', () => {
       jest.clearAllMocks();
     });
 
-    it('search by uuid updates search term', async () => {
+    it('search by uuid updates search term and adds rootSearchFields', async () => {
       const search = uuidv1();
       const findRequest = createCasesClientMockFindRequest({ search });
 
@@ -55,6 +55,19 @@ describe('find', () => {
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
       expect(call.caseOptions.search).toBe(`"${search}" "cases:${search}"`);
+      expect(call.caseOptions).toHaveProperty('rootSearchFields', ['_id']);
+    });
+
+    it('regular search term does not cause rootSearchFields to be appended', async () => {
+      const search = 'foobar';
+      const findRequest = createCasesClientMockFindRequest({ search });
+      await find(findRequest, clientArgs);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+
+      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
+
+      expect(call.caseOptions.search).toBe(search);
+      expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
   });
 

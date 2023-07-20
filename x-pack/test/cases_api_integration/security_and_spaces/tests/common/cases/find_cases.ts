@@ -369,6 +369,18 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(cases.total).to.be(1);
         });
 
+        it('should successfully find a case when using a valid uuid', async () => {
+          const caseWithId = await createCase(supertest, postCaseReq);
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: caseWithId.id },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].id).to.equal(caseWithId.id);
+        });
+
         it('should successfully find a case with a valid uuid in title', async () => {
           const uuid = uuidv1();
           await createCase(supertest, { ...postCaseReq, title: uuid });
