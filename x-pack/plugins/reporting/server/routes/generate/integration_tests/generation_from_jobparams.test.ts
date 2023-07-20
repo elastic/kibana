@@ -189,7 +189,14 @@ describe('POST /api/reporting/generate', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/generate/printablePdf')
-      .send({ jobParams: rison.encode({ title: `abc` }) })
+      .send({
+        jobParams: rison.encode({
+          title: `abc`,
+          relativeUrls: ['test'],
+          layout: { id: 'test' },
+          objectType: 'canvas workpad',
+        }),
+      })
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchObject({
@@ -200,9 +207,19 @@ describe('POST /api/reporting/generate', () => {
             index: 'foo-index',
             jobtype: 'printable_pdf',
             payload: {
-              createJobTest: {
-                test1: 'yes',
+              forceNow: expect.any(String),
+              isDeprecated: true,
+              layout: {
+                id: 'test',
               },
+              objectType: 'canvas workpad',
+              objects: [
+                {
+                  relativeUrl: 'test',
+                },
+              ],
+              title: 'abc',
+              version: '7.14.0',
             },
             status: 'pending',
           },

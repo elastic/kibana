@@ -84,6 +84,7 @@ export class RequestHandler {
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
         payload,
+        migration_version: jobParams.version,
         meta: {
           // telemetry fields
           objectType: jobParams.objectType,
