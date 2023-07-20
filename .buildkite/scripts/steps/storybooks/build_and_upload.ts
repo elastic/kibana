@@ -42,7 +42,7 @@ const STORYBOOKS = [
   'lists',
   'observability',
   'presentation',
-  'security_solution',
+  // 'security_solution', => This build is error out and failing CI. SEE: https://github.com/elastic/kibana/issues/162290
   'serverless',
   'shared_ux',
   'triggers_actions_ui',
