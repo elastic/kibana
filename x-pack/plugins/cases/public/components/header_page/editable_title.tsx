@@ -78,6 +78,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
               return onClickSubmit(value);
             }}
             startWithEditOpen={editMode}
+            data-test-subj="header-page-title"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

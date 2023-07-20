@@ -35,14 +35,16 @@ describe('EditableTitle', () => {
     expect(renderResult.getByText('Test title')).toBeInTheDocument();
   });
 
-  it('does not show the edit icon when the user does not have edit permissions', () => {
+  it('inline edit defaults to readOnly when the user does not have the edit permissions', () => {
     const wrapper = mount(
       <TestProviders permissions={readCasesPermissions()}>
         <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').exists()).toBeFalsy();
+    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').prop('disabled')).toBe(
+      true
+    );
   });
 
   it('shows the edit title input field', () => {
@@ -52,12 +54,10 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="editable-title-input-field"]').first().exists()).toBe(
-      true
-    );
+    expect(wrapper.find('[data-test-subj="euiInlineEditModeInput"]').first().exists()).toBe(true);
   });
 
   it('shows the submit button', () => {
@@ -67,12 +67,12 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="editable-title-submit-btn"]').first().exists()).toBe(
-      true
-    );
+    expect(
+      wrapper.find('button[data-test-subj="euiInlineEditModeSaveButton"]').first().exists()
+    ).toBe(true);
   });
 
   it('shows the cancel button', () => {
@@ -82,27 +82,12 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="editable-title-cancel-btn"]').first().exists()).toBe(
-      true
-    );
-  });
-
-  it('DOES NOT shows the edit icon when in edit mode', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
-    wrapper.update();
-
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
-      false
-    );
+    expect(
+      wrapper.find('button[data-test-subj="euiInlineEditModeCancelButton"]').first().exists()
+    ).toBe(true);
   });
 
   it('switch to non edit mode when canceled', () => {
@@ -112,11 +97,13 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
-    wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeCancelButton"]').simulate('click');
 
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
+    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
+      true
+    );
   });
 
   it('should change the title', () => {
@@ -128,18 +115,18 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
       .simulate('change', { target: { value: newTitle } });
 
     wrapper.update();
 
-    expect(
-      wrapper.find('input[data-test-subj="editable-title-input-field"]').prop('value')
-    ).toEqual(newTitle);
+    expect(wrapper.find('input[data-test-subj="euiInlineEditModeInput"]').prop('value')).toEqual(
+      newTitle
+    );
   });
 
   it('should NOT change the title when cancel', () => {
@@ -152,18 +139,19 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
+
       .simulate('change', { target: { value: newTitle } });
     wrapper.update();
 
-    wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeCancelButton"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('h1[data-test-subj="header-page-title"]').text()).toEqual(title);
+    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').text()).toEqual(title);
   });
 
   it('submits the title', () => {
@@ -175,19 +163,22 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
+      .last()
       .simulate('change', { target: { value: newTitle } });
 
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeSaveButton"]').simulate('click');
     wrapper.update();
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
+    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
+      true
+    );
   });
 
   it('does not submit the title when the length is longer than 160 characters', () => {
@@ -199,21 +190,21 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
       .simulate('change', { target: { value: longTitle } });
 
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeSaveButton"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
       'The length of the title is too long. The maximum length is 160 characters.'
     );
 
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
+    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
       false
     );
   });
@@ -225,19 +216,20 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
+
       .simulate('change', { target: { value: '' } });
 
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeSaveButton"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe('A name is required.');
 
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
+    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
       false
     );
   });
@@ -252,15 +244,15 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     // simualte a long title
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
       .simulate('change', { target: { value: longTitle } });
 
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeSaveButton"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
       'The length of the title is too long. The maximum length is 160 characters.'
@@ -268,16 +260,17 @@ describe('EditableTitle', () => {
 
     // write a shorter one
     wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
+      .find('input[data-test-subj="euiInlineEditModeInput"]')
+
       .simulate('change', { target: { value: shortTitle } });
     wrapper.update();
 
     // submit the form
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineEditModeSaveButton"]').simulate('click');
     wrapper.update();
 
     // edit again
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
     wrapper.update();
 
     // no error should appear
