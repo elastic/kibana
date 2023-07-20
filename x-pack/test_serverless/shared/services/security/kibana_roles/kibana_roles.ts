@@ -59,7 +59,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurity
           feature: definition.applications.reduce((features, application) => {
             if (application.resources !== '*') {
               throw new Error(
-                `YAML role definition parser does not currently support 'application.resource' of ${application.resources}`
+                `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
               );
             }
 
