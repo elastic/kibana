@@ -81,6 +81,7 @@ This script relies on various assumptions. If your junit report is valid, then y
 
       // If the writeInPlace flag was passed, overwrite the original file, otherwise log the output to stdout
       if (flags.writeInPlace) {
+        log.info(`Wrote transformed junit report to ${path}`);
         await fs.writeFile(path, reportString);
       } else {
         log.write(reportString);
@@ -115,6 +116,10 @@ This script relies on various assumptions. If your junit report is valid, then y
 async function transformedReport({ reportJson, specFilePath, rootDirectory, reportName }: { reportJson: CypressJunitReport, specFilePath: string, rootDirectory: string, reportName: string }): Promise<string> {
 
   for (const testsuite of reportJson.testsuites.testsuite) {
+    if (!testsuite.testcase) {
+      // If there are no testcases for this testsuite, skip it
+      continue;
+    }
     for (const testcase of testsuite.testcase) {
 
       // append the `classname` attribute to the `name` attribute
@@ -149,18 +154,22 @@ const CypressJunitTestCase = t.type({
 /**
  * Standard testsuites contain testcase elements, each representing a specific test execution.
  */
-const CypressJunitTestSuite = t.type({
-  testcase: t.array(CypressJunitTestCase),
-  $: t.intersection([
-    t.type({
-      name: t.string,
-    }),
-    /* `file` is only found on some suites, namely the 'Root Suite' */
-    t.partial({
-      file: t.string
-    }),
-  ])
-});
+const CypressJunitTestSuite = t.intersection([
+  t.partial({
+    testcase: t.array(CypressJunitTestCase),
+  }),
+  t.type({
+    $: t.intersection([
+      t.type({
+        name: t.string,
+      }),
+      /* `file` is only found on some suites, namely the 'Root Suite' */
+      t.partial({
+        file: t.string
+      }),
+    ])
+  })
+]);
 
 const CypressJunitReport = t.type({
   testsuites: t.type({
@@ -183,6 +192,10 @@ type Result<T> = { result: T } | { error: string };
  */
 function isReportAlreadyProcessed(report: CypressJunitReport): Result<boolean> {
   for (const testsuite of report.testsuites.testsuite) {
+    if (!testsuite.testcase) {
+      // If there are no testcases for this testsuite, skip it
+      continue;
+    }
     for (const testcase of testsuite.testcase) {
       if (testcase.$.classname.indexOf('·') !== -1) {
         return { result: true }
