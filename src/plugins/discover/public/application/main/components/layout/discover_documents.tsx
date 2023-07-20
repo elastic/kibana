@@ -20,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -45,7 +46,6 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
-import { WarningsCallout } from '../../../../components/common/warnings_callout';
 
 const containerStyles = css`
   position: relative;
@@ -205,8 +205,8 @@ function DiscoverDocumentsComponent({
         </h2>
       </EuiScreenReaderOnly>
       {!!documentState.interceptedWarnings?.length && (
-        <WarningsCallout
-          variant="inline"
+        <SearchResponseWarnings
+          variant="callout"
           interceptedWarnings={documentState.interceptedWarnings}
           data-test-subj="dscInterceptedWarningsCallout"
         />

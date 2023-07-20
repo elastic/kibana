@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { WarningsCallout, type WarningsCalloutProps } from './warnings_callout';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-search-response-warnings'],
+};

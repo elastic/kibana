@@ -8,19 +8,19 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { WarningsCallout } from './warnings_callout';
-import { searchResponseWarningsMock } from '../../../__mocks__/search_response_warnings';
+import { SearchResponseWarnings } from './search_response_warnings';
+import { searchResponseWarningsMock } from '../../__mocks__/search_response_warnings';
 
 const interceptedWarnings = searchResponseWarningsMock.map((originalWarning, index) => ({
   originalWarning,
   action: originalWarning.type === 'shard_failure' ? <button>{`test${index}`}</button> : undefined,
 }));
 
-describe('WarningsCallout', () => {
-  it('renders "inline" correctly', () => {
+describe('SearchResponseWarnings', () => {
+  it('renders "callout" correctly', () => {
     const component = mountWithIntl(
-      <WarningsCallout
-        variant="inline"
+      <SearchResponseWarnings
+        variant="callout"
         interceptedWarnings={interceptedWarnings}
         data-test-subj="test1"
       />
@@ -30,7 +30,7 @@ describe('WarningsCallout', () => {
 
   it('renders "badge" correctly', () => {
     const component = mountWithIntl(
-      <WarningsCallout
+      <SearchResponseWarnings
         variant="badge"
         interceptedWarnings={interceptedWarnings}
         data-test-subj="test2"
@@ -41,7 +41,7 @@ describe('WarningsCallout', () => {
 
   it('renders "empty_prompt" correctly', () => {
     const component = mountWithIntl(
-      <WarningsCallout
+      <SearchResponseWarnings
         variant="empty_prompt"
         interceptedWarnings={interceptedWarnings}
         data-test-subj="test3"

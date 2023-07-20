@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { WarningsCallout } from '../components/common/warnings_callout';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import type { SearchResponseInterceptedWarning } from '../types';
 
 export interface SavedSearchEmbeddableBadgeProps {
@@ -35,7 +35,7 @@ export const SavedSearchEmbeddableBadge: React.FC<SavedSearchEmbeddableBadgeProp
         bottom: 0,
       })}
     >
-      <WarningsCallout
+      <SearchResponseWarnings
         variant="badge"
         interceptedWarnings={interceptedWarnings}
         data-test-subj="savedSearchEmbeddableWarningsCallout"

@@ -1152,6 +1152,8 @@
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
+      "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
+      "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],
       "@kbn/searchprofiler-plugin/*": ["x-pack/plugins/searchprofiler/*"],
       "@kbn/security-api-integration-helpers": ["x-pack/test/security_api_integration/packages/helpers"],

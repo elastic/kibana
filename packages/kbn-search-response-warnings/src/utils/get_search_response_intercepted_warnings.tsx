@@ -8,9 +8,13 @@
 
 import React from 'react';
 import { uniqBy } from 'lodash';
-import { ShardFailureOpenModalButton, ShardFailureRequest } from '@kbn/data-plugin/public';
+import {
+  type DataPublicPluginStart,
+  type ShardFailureRequest,
+  ShardFailureOpenModalButton,
+} from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DiscoverServices } from '../build_services';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SearchResponseInterceptedWarning } from '../types';
 
 export const getSearchResponseInterceptedWarnings = ({
@@ -18,7 +22,10 @@ export const getSearchResponseInterceptedWarnings = ({
   adapter,
   options,
 }: {
-  services: Pick<DiscoverServices, 'data' | 'theme'>;
+  services: {
+    data: DataPublicPluginStart;
+    theme: CoreStart['theme'];
+  };
   adapter: RequestAdapter;
   options?: {
     disableShardFailureWarning?: boolean;

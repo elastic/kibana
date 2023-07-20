@@ -25,19 +25,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { SearchResponseInterceptedWarning } from '../../../types';
+import type { SearchResponseInterceptedWarning } from '../../types';
 
-export interface WarningsCalloutProps {
+export interface SearchResponseWarningsProps {
   interceptedWarnings?: SearchResponseInterceptedWarning[];
-  variant: 'inline' | 'badge' | 'empty_prompt';
+  variant: 'callout' | 'badge' | 'empty_prompt';
   'data-test-subj': string;
 }
 
-export const WarningsCallout = ({
+export const SearchResponseWarnings = ({
   interceptedWarnings,
   variant,
   'data-test-subj': dataTestSubj,
-}: WarningsCalloutProps) => {
+}: SearchResponseWarningsProps) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isCalloutVisibleMap, setIsCalloutVisibleMap] = useState<Record<number, boolean>>({});
@@ -51,7 +51,7 @@ export const WarningsCallout = ({
     return null;
   }
 
-  if (variant === 'inline') {
+  if (variant === 'callout') {
     return (
       <div>
         <ul
@@ -116,7 +116,7 @@ export const WarningsCallout = ({
                   text-align: left;
                 `}
               >
-                {i18n.translate('discover.warningsCallout.noResultsTitle', {
+                {i18n.translate('searchResponseWarnings.noResultsTitle', {
                   defaultMessage: 'No results found',
                 })}
               </h2>
@@ -161,7 +161,7 @@ export const WarningsCallout = ({
 
   if (variant === 'badge') {
     const warningCount = interceptedWarnings.length;
-    const buttonLabel = i18n.translate('discover.warningsCallout.badgeButtonLabel', {
+    const buttonLabel = i18n.translate('searchResponseWarnings.badgeButtonLabel', {
       defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
       values: {
         warningCount,
@@ -289,7 +289,7 @@ function CalloutTitleWrapper({
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          aria-label={i18n.translate('discover.warningsCallout.closeButtonAriaLabel', {
+          aria-label={i18n.translate('searchResponseWarnings.closeButtonAriaLabel', {
             defaultMessage: 'Close',
           })}
           onClick={onCloseCallout}

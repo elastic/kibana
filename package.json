@@ -582,6 +582,7 @@
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
     "@kbn/search-examples-plugin": "link:examples/search_examples",
+    "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
     "@kbn/security-plugin": "link:x-pack/plugins/security",
     "@kbn/security-solution-ess": "link:x-pack/plugins/security_solution_ess",

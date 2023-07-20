@@ -14,6 +14,10 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import {
+  SearchResponseWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -26,8 +30,6 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
-import type { SearchResponseInterceptedWarning } from '../../types';
-import { WarningsCallout } from '../../components/common/warnings_callout';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -124,8 +126,8 @@ export function ContextAppContent({
     <Fragment>
       {!!interceptedWarnings?.length && (
         <>
-          <WarningsCallout
-            variant="inline"
+          <SearchResponseWarnings
+            variant="callout"
             interceptedWarnings={interceptedWarnings}
             data-test-subj="dscContextInterceptedWarnings"
           />

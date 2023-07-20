@@ -7,19 +7,25 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   getSearchResponseInterceptedWarnings,
   removeInterceptedWarningDuplicates,
 } from './get_search_response_intercepted_warnings';
-import { discoverServiceMock } from '../__mocks__/services';
 import { searchResponseWarningsMock } from '../__mocks__/search_response_warnings';
+
+const servicesMock = {
+  data: dataPluginMock.createStartContract(),
+  theme: coreMock.createStart().theme,
+};
 
 describe('getSearchResponseInterceptedWarnings', () => {
   const adapter = new RequestAdapter();
 
   it('should catch warnings correctly', () => {
     const services = {
-      ...discoverServiceMock,
+      ...servicesMock,
     };
     services.data.search.showWarnings = jest.fn((_, callback) => {
       // @ts-expect-error for empty meta
@@ -138,7 +144,7 @@ describe('getSearchResponseInterceptedWarnings', () => {
 
   it('should not catch any warnings if disableShardFailureWarning is false', () => {
     const services = {
-      ...discoverServiceMock,
+      ...servicesMock,
     };
     services.data.search.showWarnings = jest.fn((_, callback) => {
       // @ts-expect-error for empty meta
