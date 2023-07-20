@@ -93,7 +93,7 @@ image::images/tagcloud.png[Example of a tag cloud, width=70%]
 [discrete]
 ==== Save annotation groups as a Kibana saved object
 
-Group annotations and save them to the visualize library, so the content can be reused across multiple visualizations. This saves time for users with complicated annotations. From the main menu select Visualize Library, then select the tab Annotation groups. Here you can create new annotation groups in Lens, or select from a list of previously created annotation groups.
+Group annotations and save them to the visualize library, so the content can be reused across multiple visualizations. This saves time for users with complicated annotations. From the main menu select Visualize Library, then select the tab **Annotation groups**. Here you can create new annotation groups in **Lens**, or select from a list of previously created annotation groups.
  
 [role="screenshot"]
 image::images/annotation.gif[Example of how to save an annotation group to the visualize library]
