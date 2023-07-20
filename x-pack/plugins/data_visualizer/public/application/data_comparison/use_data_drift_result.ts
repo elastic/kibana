@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -563,14 +563,16 @@ export const useFetchDataComparisonResult = (
   });
   const [loaded, setLoaded] = useState<number>(0);
   const [progressMessage, setProgressMessage] = useState<string | undefined>();
+  const abortController = useRef(new AbortController());
+
+  const cancelRequest = useCallback(() => {
+    abortController.current.abort();
+    abortController.current = new AbortController();
+  }, []);
 
   useEffect(
     () => {
-      let controller: AbortController = new AbortController();
-
       const doFetchEsRequest = async function () {
-        controller.abort();
-
         if (!randomSampler) return;
 
         const randomSamplerWrapper = randomSampler.createRandomSamplerWrapper();
@@ -588,10 +590,7 @@ export const useFetchDataComparisonResult = (
           })
         );
 
-        controller = new AbortController();
-
-        const signal = controller.signal;
-
+        const signal = abortController.current.signal;
         if (!fields || !currentDataView) return;
 
         setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
@@ -853,10 +852,6 @@ export const useFetchDataComparisonResult = (
       };
 
       doFetchEsRequest();
-
-      return () => {
-        controller.abort();
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -872,8 +867,8 @@ export const useFetchDataComparisonResult = (
     ]
   );
   const dataComparisonResult = useMemo(
-    () => ({ ...result, loaded, progressMessage }),
-    [result, loaded, progressMessage]
+    () => ({ result: { ...result, loaded, progressMessage }, cancelRequest }),
+    [result, loaded, progressMessage, cancelRequest]
   );
   return dataComparisonResult;
 };

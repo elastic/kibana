@@ -106,7 +106,7 @@ export const DataComparisonView = ({
         : {}),
     });
   }, [dataView, windowParameters]);
-  const result = useFetchDataComparisonResult({
+  const { result, cancelRequest } = useFetchDataComparisonResult({
     ...fetchInfo,
     lastRefresh,
     randomSampler,
@@ -114,6 +114,11 @@ export const DataComparisonView = ({
     searchQueryLanguage,
     searchQuery,
   });
+
+  const onCancel = () => {
+    cancelRequest();
+    onReset();
+  };
 
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
@@ -179,7 +184,7 @@ export const DataComparisonView = ({
         progressMessage={result.progressMessage ?? ''}
         isRunning={result.loaded > 0 && result.loaded < 1}
         onRefresh={updateFieldsAndTime}
-        onCancel={() => {}}
+        onCancel={onCancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
         runAnalysisDisabled={!dataView || !windowParameters}
       >
