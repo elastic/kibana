@@ -7,10 +7,12 @@ date: 2022-05-24
 tags: ['kibana', 'dev', 'contributor', 'operations', 'es']
 ---
 
-> A command line utility for running elasticsearch from snapshot, source, archive or even building snapshot artifacts. 
+> A command line utility for running elasticsearch from snapshot, source, archive, docker, serverless or even building snapshot artifacts. 
 
 ## Getting started
 If running elasticsearch from source, elasticsearch needs to be cloned to a sibling directory of Kibana.
+
+If running elasticsearch serverless or a docker container, docker is required to be installed locally. Installation instructions can be found [here](https://www.docker.com/).
 
 To run, go to the Kibana root and run `node scripts/es --help` to get the latest command line options.
 
@@ -26,6 +28,16 @@ node scripts/es snapshot --license=trial
 Run from source with a configured data directory
 ```
 node scripts/es source --Epath.data=/home/me/es_data
+```
+
+Run serverless with a specific image tag
+```
+node scripts/es serverless --tag git-fec36430fba2-x86_64
+```
+
+Run an official Docker release
+```
+node scripts/es docker --tag 8.8.2
 ```
 
 ## API
