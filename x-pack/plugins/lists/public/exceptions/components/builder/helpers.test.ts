@@ -305,7 +305,11 @@ describe('Exception builder helpers', () => {
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
-          fields: [getEndpointField('file.Ext.code_signature.status')],
+          fields: [
+            { ...getField('nestedField.child') },
+            { ...getField('nestedField.nestedChild.doublyNestedChild') },
+            getEndpointField('file.Ext.code_signature.status')
+          ],
           id: '1234',
           title: 'logstash-*',
         };
