@@ -53,7 +53,15 @@ export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsTitle';
 export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsDetails';
-export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsCell';
+export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsBasicCell';
+export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsLinkedCell';
+export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
+
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
 
