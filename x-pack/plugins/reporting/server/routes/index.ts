@@ -7,18 +7,16 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ReportingCore } from '..';
-import { registerDeprecationsRoutes } from './deprecations/deprecations';
-import { registerDiagnosticRoutes } from './diagnostic';
-import {
-  registerGenerateCsvFromSavedObjectImmediate,
-  registerJobGenerationRoutes,
-} from './generate';
-import { registerJobInfoRoutes } from './management';
+import { registerDeprecations as internalDeprecations } from './internal/deprecations/deprecations';
+import { registerDiagnostics as internalDiagnostics } from './internal/diagnostic';
+import { registerGenerateCsvFromSavedObjectImmediate as internalCsvFromSavedObjectImmediate } from './internal/generate/csv_searchsource_immediate';
+import { registerJobGeneration as internalJobGenerationRoutes } from './internal/generate/generate_from_jobparams';
+import { registerJobInfo as internalJobInfoRoutes } from './internal/management';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
-  registerDeprecationsRoutes(reporting, logger);
-  registerDiagnosticRoutes(reporting, logger);
-  registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
-  registerJobGenerationRoutes(reporting, logger);
-  registerJobInfoRoutes(reporting);
+  internalDeprecations(reporting, logger);
+  internalDiagnostics(reporting, logger);
+  internalCsvFromSavedObjectImmediate(reporting, logger);
+  internalJobGenerationRoutes(reporting, logger);
+  internalJobInfoRoutes(reporting);
 }
