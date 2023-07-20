@@ -129,11 +129,11 @@ describe('Task Run Metrics', () => {
         getTaskRunSuccessEvent('alerting:example'),
         getTaskRunSuccessEvent('report'),
         getTaskRunFailedEvent('alerting:example'),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:.index-threshold'),
         getTaskRunSuccessEvent('alerting:example'),
         getTaskRunFailedEvent('alerting:example'),
         getTaskRunSuccessEvent('alerting:example'),
-        getTaskRunFailedEvent('action:webhook'),
+        getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
       const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -160,7 +160,10 @@ describe('Task Run Metrics', () => {
               key: 'task_run',
               value: {
                 overall: { success: 1, total: 1 },
-                by_type: { 'alerting:example': { success: 1, total: 1 } },
+                by_type: {
+                  alerting: { success: 1, total: 1 },
+                  'alerting:example': { success: 1, total: 1 },
+                },
               },
             });
             expect(metrics[1]).toEqual({
@@ -168,6 +171,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 2 },
                 by_type: {
+                  alerting: { success: 1, total: 1 },
                   'alerting:example': { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -178,6 +182,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 3 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -188,6 +193,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 4, total: 4 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
@@ -199,6 +205,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 4, total: 5 },
                 by_type: {
+                  alerting: { success: 2, total: 3 },
                   'alerting:example': { success: 2, total: 3 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
@@ -210,7 +217,9 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 5, total: 6 },
                 by_type: {
-                  'alerting:example': { success: 3, total: 4 },
+                  alerting: { success: 3, total: 4 },
+                  'alerting:.index-threshold': { success: 1, total: 1 },
+                  'alerting:example': { success: 2, total: 3 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -221,7 +230,9 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 6, total: 7 },
                 by_type: {
-                  'alerting:example': { success: 4, total: 5 },
+                  alerting: { success: 4, total: 5 },
+                  'alerting:.index-threshold': { success: 1, total: 1 },
+                  'alerting:example': { success: 3, total: 4 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -232,7 +243,9 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 6, total: 8 },
                 by_type: {
-                  'alerting:example': { success: 4, total: 6 },
+                  alerting: { success: 4, total: 6 },
+                  'alerting:.index-threshold': { success: 1, total: 1 },
+                  'alerting:example': { success: 3, total: 5 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -243,7 +256,9 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 7, total: 9 },
                 by_type: {
-                  'alerting:example': { success: 5, total: 7 },
+                  alerting: { success: 5, total: 7 },
+                  'alerting:.index-threshold': { success: 1, total: 1 },
+                  'alerting:example': { success: 4, total: 6 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -254,8 +269,11 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 7, total: 10 },
                 by_type: {
-                  'action:webhook': { success: 0, total: 1 },
-                  'alerting:example': { success: 5, total: 7 },
+                  actions: { success: 0, total: 1 },
+                  alerting: { success: 5, total: 7 },
+                  'actions:webhook': { success: 0, total: 1 },
+                  'alerting:.index-threshold': { success: 1, total: 1 },
+                  'alerting:example': { success: 4, total: 6 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -285,7 +303,7 @@ describe('Task Run Metrics', () => {
         getTaskRunSuccessEvent('alerting:example'),
         getTaskRunFailedEvent('alerting:example'),
         getTaskRunSuccessEvent('alerting:example'),
-        getTaskRunFailedEvent('action:webhook'),
+        getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
       const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -312,7 +330,10 @@ describe('Task Run Metrics', () => {
               key: 'task_run',
               value: {
                 overall: { success: 1, total: 1 },
-                by_type: { 'alerting:example': { success: 1, total: 1 } },
+                by_type: {
+                  alerting: { success: 1, total: 1 },
+                  'alerting:example': { success: 1, total: 1 },
+                },
               },
             });
             expect(metrics[1]).toEqual({
@@ -320,6 +341,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 2 },
                 by_type: {
+                  alerting: { success: 1, total: 1 },
                   'alerting:example': { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -330,6 +352,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 3 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -340,6 +363,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 4, total: 4 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
@@ -351,6 +375,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 4, total: 5 },
                 by_type: {
+                  alerting: { success: 2, total: 3 },
                   'alerting:example': { success: 2, total: 3 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
@@ -363,6 +388,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 1, total: 1 },
                 by_type: {
+                  alerting: { success: 1, total: 1 },
                   'alerting:example': { success: 1, total: 1 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -374,6 +400,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 2 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -385,6 +412,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 3 },
                 by_type: {
+                  alerting: { success: 2, total: 3 },
                   'alerting:example': { success: 2, total: 3 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -396,6 +424,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 4 },
                 by_type: {
+                  alerting: { success: 3, total: 4 },
                   'alerting:example': { success: 3, total: 4 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -407,7 +436,9 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 5 },
                 by_type: {
-                  'action:webhook': { success: 0, total: 1 },
+                  actions: { success: 0, total: 1 },
+                  alerting: { success: 3, total: 4 },
+                  'actions:webhook': { success: 0, total: 1 },
                   'alerting:example': { success: 3, total: 4 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -443,7 +474,7 @@ describe('Task Run Metrics', () => {
         getTaskRunSuccessEvent('alerting:example'),
         getTaskRunFailedEvent('alerting:example'),
         getTaskRunSuccessEvent('alerting:example'),
-        getTaskRunFailedEvent('action:webhook'),
+        getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
       const taskPollingLifecycle = taskPollingLifecycleMock.create({
@@ -473,7 +504,10 @@ describe('Task Run Metrics', () => {
               key: 'task_run',
               value: {
                 overall: { success: 1, total: 1 },
-                by_type: { 'alerting:example': { success: 1, total: 1 } },
+                by_type: {
+                  alerting: { success: 1, total: 1 },
+                  'alerting:example': { success: 1, total: 1 },
+                },
               },
             });
             expect(metrics[1]).toEqual({
@@ -481,6 +515,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 2 },
                 by_type: {
+                  alerting: { success: 1, total: 1 },
                   'alerting:example': { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -491,6 +526,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 3 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   telemetry: { success: 1, total: 1 },
                 },
@@ -501,6 +537,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 4, total: 4 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
@@ -512,6 +549,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 4, total: 5 },
                 by_type: {
+                  alerting: { success: 2, total: 3 },
                   'alerting:example': { success: 2, total: 3 },
                   report: { success: 1, total: 1 },
                   telemetry: { success: 1, total: 1 },
@@ -524,6 +562,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 1, total: 1 },
                 by_type: {
+                  alerting: { success: 1, total: 1 },
                   'alerting:example': { success: 1, total: 1 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -535,6 +574,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 2 },
                 by_type: {
+                  alerting: { success: 2, total: 2 },
                   'alerting:example': { success: 2, total: 2 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -546,6 +586,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 2, total: 3 },
                 by_type: {
+                  alerting: { success: 2, total: 3 },
                   'alerting:example': { success: 2, total: 3 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -557,6 +598,7 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 4 },
                 by_type: {
+                  alerting: { success: 3, total: 4 },
                   'alerting:example': { success: 3, total: 4 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },
@@ -568,7 +610,9 @@ describe('Task Run Metrics', () => {
               value: {
                 overall: { success: 3, total: 5 },
                 by_type: {
-                  'action:webhook': { success: 0, total: 1 },
+                  actions: { success: 0, total: 1 },
+                  alerting: { success: 3, total: 4 },
+                  'actions:webhook': { success: 0, total: 1 },
                   'alerting:example': { success: 3, total: 4 },
                   report: { success: 0, total: 0 },
                   telemetry: { success: 0, total: 0 },

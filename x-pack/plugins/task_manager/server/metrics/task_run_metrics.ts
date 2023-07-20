@@ -15,6 +15,8 @@ import { SuccessRate } from './metrics_stream';
 import { TaskManagerConfig } from '../config';
 import { taskLifecycleEventToSuccessMetric } from './utils';
 
+const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
+
 export interface TaskRunMetric extends JsonObject {
   overall: SuccessRate;
   by_type: {
@@ -50,6 +52,7 @@ export function createTaskRunMetricsAggregator(
     map((taskEvent: TaskLifecycleEvent) => {
       const { task }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
       const taskType = task.taskType;
+
       const currentMetric: SuccessRate = taskRunSuccessCounter.has(taskType)
         ? taskRunSuccessCounter.get(taskType)!
         : {
@@ -58,6 +61,25 @@ export function createTaskRunMetricsAggregator(
           };
       const taskTypeMetric = taskLifecycleEventToSuccessMetric(taskEvent, currentMetric);
       const overallMetric = taskLifecycleEventToSuccessMetric(taskEvent, overallSuccessCounter);
+
+      const taskTypeGroup = getTaskTypeGroup(taskType);
+      if (taskTypeGroup) {
+        const currentGroupMetric: SuccessRate = taskRunSuccessCounter.has(taskTypeGroup)
+          ? taskRunSuccessCounter.get(taskTypeGroup)!
+          : {
+              success: 0,
+              total: 0,
+            };
+        const taskTypeGroupMetric = taskLifecycleEventToSuccessMetric(
+          taskEvent,
+          currentGroupMetric
+        );
+
+        taskRunSuccessCounter.set(taskTypeGroup, {
+          success: taskTypeGroupMetric.success,
+          total: taskTypeGroupMetric.total,
+        });
+      }
 
       overallSuccessCounter.success = overallMetric.success;
       overallSuccessCounter.total = overallMetric.total;
@@ -81,4 +103,12 @@ export function createTaskRunMetricsAggregator(
       } as AggregatedStat<TaskRunMetric>;
     })
   );
+}
+
+function getTaskTypeGroup(taskType: string): string | undefined {
+  for (const group of taskTypeGrouping) {
+    if (taskType.startsWith(group)) {
+      return group.replaceAll(':', '');
+    }
+  }
 }
