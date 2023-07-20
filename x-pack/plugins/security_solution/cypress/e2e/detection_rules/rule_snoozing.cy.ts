@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import type { RuleResponse } from '../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../common/api/detection_engine';
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';

@@ -15,10 +15,9 @@ import { FtrProviderContext } from '../common/ftr_provider_context';
 
 export type { FtrProviderContext } from '../common/ftr_provider_context';
 
-export async function SecuritySolutionConfigurableCypressTestRunner(
-  { getService }: FtrProviderContext,
-  envVars?: Record<string, string>
-) {
+export async function SecuritySolutionConfigurableCypressTestRunner({
+  getService,
+}: FtrProviderContext) {
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
@@ -30,33 +29,12 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
     CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-    ...envVars,
     baseUrl: Url.format(config.get('servers.kibana')),
     BASE_URL: Url.format(config.get('servers.kibana')),
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
   };
-
-  // await withProcRunner(log, async (procs) => {
-  //   // TODO: use Cypress module API wrapper to make it easier to run Cypress programmatically
-  //   await procs.run('cypress', {
-  //     cmd: 'yarn',
-  //     args: [command],
-  //     cwd: resolve(__dirname, '../../plugins/security_solution'),
-  //     env: {
-  //       FORCE_COLOR: '1',
-  //       CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-  //       CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-  //       CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-  //       CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-  //       ...(config.get('kbnTestServer.env')?.cypress?.env || {}),
-  //       ...process.env,
-  //       ...envVars,
-  //     },
-  //     wait: true,
-  //   });
-  // });
 }
 
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
