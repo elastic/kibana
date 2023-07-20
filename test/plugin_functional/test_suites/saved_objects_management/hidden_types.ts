@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('saved objects management with hidden types', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/116059
+  describe.skip('saved objects management with hidden types', () => {
     before(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
