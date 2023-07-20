@@ -122,7 +122,13 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   service_id: keyword,
   num_service_nodes: long,
   num_transaction_types: long,
-  num_environments: long,
+  num_environments: {
+    ...long,
+    _meta: {
+      description:
+        'Total number of unique environments in transaction events within the last hour',
+    },
+  },
   timed_out: { type: 'boolean' },
   cloud: {
     availability_zones: { type: 'array', items: { type: 'keyword' } },
@@ -203,7 +209,15 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     max_error_groups_per_service: timeframeMapSchema,
     traces: timeframeMapSchema,
     services: timeframeMapSchema,
-    environments: timeframeMap1dSchema,
+    environments: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'Total number of unique environments within the last day',
+        },
+      },
+    },
   },
   cardinality: {
     client: { geo: { country_iso_code: { rum: timeframeMap1dSchema } } },
