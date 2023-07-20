@@ -150,18 +150,18 @@ export function LayerPanels(
 
           onUpdateStateCb?.(newDsState, newVisState);
 
-          // TODO: to fix: changing the order of the updates of datasource and visualization state will result in a bug in metric breakdown dimension
+          dispatchLens(
+            updateVisualizationState({
+              visualizationId: activeVisualization.id,
+              newState: newVisState,
+              dontSyncLinkedDimensions: true, // TODO: to refactor: this is quite brittle, we avoid to sync linked dimensions because we do it with datasourceState update
+            })
+          );
           dispatchLens(
             updateDatasourceState({
               newDatasourceState: newDsState,
               datasourceId,
               clearStagedPreview: false,
-            })
-          );
-          dispatchLens(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              newState: newVisState,
             })
           );
         }, 0);

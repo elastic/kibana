@@ -158,6 +158,7 @@ export const updateDatasourceState = createAction<{
 export const updateVisualizationState = createAction<{
   visualizationId: string;
   newState: unknown;
+  dontSyncLinkedDimensions?: boolean;
 }>('lens/updateVisualizationState');
 
 export const insertLayer = createAction<{
@@ -618,43 +619,28 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
-      const currentState = current(state);
+      if (payload.clearStagedPreview) {
+        state.stagedPreview = undefined;
+      }
 
-      const newAppState: LensAppState = {
-        ...currentState,
-        datasourceStates: {
-          ...currentState.datasourceStates,
-          [payload.datasourceId]: {
-            state: payload.newDatasourceState,
-            isLoading: false,
-          },
-        },
-        stagedPreview: payload.clearStagedPreview ? undefined : currentState.stagedPreview,
+      state.datasourceStates[payload.datasourceId] = {
+        state: payload.newDatasourceState,
+        isLoading: false,
       };
 
       if (payload.dontSyncLinkedDimensions) {
-        return newAppState;
+        return;
       }
+
+      const currentState = current(state);
 
       const {
         datasourceState: syncedDatasourceState,
         visualizationState: syncedVisualizationState,
-      } = syncLinkedDimensions(newAppState, visualizationMap, datasourceMap, payload.datasourceId);
+      } = syncLinkedDimensions(currentState, visualizationMap, datasourceMap, payload.datasourceId);
 
-      return {
-        ...newAppState,
-        visualization: {
-          ...newAppState.visualization,
-          state: syncedVisualizationState,
-        },
-        datasourceStates: {
-          ...newAppState.datasourceStates,
-          [payload.datasourceId]: {
-            state: syncedDatasourceState,
-            isLoading: false,
-          },
-        },
-      };
+      state.visualization.state = syncedVisualizationState;
+      state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
     },
     [updateVisualizationState.type]: (
       state,
@@ -664,6 +650,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload: {
           visualizationId: string;
           newState: unknown;
+          dontSyncLinkedDimensions?: boolean;
         };
       }
     ) => {
@@ -680,6 +667,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.visualization.state = payload.newState;
 
       if (!state.activeDatasourceId) {
+        return;
+      }
+
+      if (payload.dontSyncLinkedDimensions) {
         return;
       }
 
