@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-continue */
+
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { Builder, parseStringPromise } from 'xml2js';
@@ -40,7 +42,7 @@ run(
       const unvalidatedReportJson: unknown = await parseStringPromise(source);
 
       // Apply validation and return the validated report, or an error message
-      const maybeValidationResult: { result: CypressJunitReport } | { error: string } =
+      const maybeValidationResult: Result<CypressJunitReport> =
         validatedCypressJunitReport(unvalidatedReportJson);
 
       const logError = (error: string) => {
@@ -73,8 +75,7 @@ This script relies on various assumptions. If your junit report is valid, then y
         continue;
       }
 
-      const maybeSpecFilePath: { result: string } | { error: string } =
-        findSpecFilePathFromRootSuite(reportJson);
+      const maybeSpecFilePath: Result<string> = findSpecFilePathFromRootSuite(reportJson);
 
       if ('error' in maybeSpecFilePath) {
         logError(maybeSpecFilePath.error);
