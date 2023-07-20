@@ -156,6 +156,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
   // Failing: See https://github.com/elastic/kibana/issues/162221
+  // Failing: See https://github.com/elastic/kibana/issues/162220
   describe.skip('Hosts View', function () {
     before(async () => {
       await Promise.all([
