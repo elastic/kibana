@@ -23,9 +23,7 @@ export const toClientContract = (
       agentPolicyId: location.agentPolicyId,
       concurrentMonitors: location.concurrentMonitors,
       isServiceManaged: false,
-      isInvalid:
-        agentPolicies?.find((policy) => policy.id === location.agentPolicyId) === undefined ||
-        false,
+      isInvalid: Boolean(agentPolicies?.find((policy) => policy.id === location.agentPolicyId)),
       tags: location.tags,
       geo: {
         lat: location.geo?.lat ? String(location.geo.lat) : null,

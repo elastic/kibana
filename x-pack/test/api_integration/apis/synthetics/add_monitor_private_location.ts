@@ -69,7 +69,6 @@ export default function ({ getService }: FtrProviderContext) {
         {
           concurrentMonitors: 1,
           id: testFleetPolicyID,
-          isInvalid: false,
           isServiceManaged: false,
           label: 'Test private location 0',
           geo: {
