@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
