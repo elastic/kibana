@@ -84,8 +84,7 @@
         "default"
       ],
       "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.3.0"
+      "typeMigrationVersion": "7.13.0"
     }
   }
 }
-
