@@ -126,12 +126,13 @@ export class CategorizationJobCreator extends JobCreator {
   public async loadCategorizationFieldExamples() {
     const { examples, sampleSize, overallValidStatus, validationChecks } =
       await this._examplesLoader.loadExamples();
-    this._categoryFieldExamples = examples ?? [];
+    const categoryFieldExamples = examples ?? [];
+    this._categoryFieldExamples = categoryFieldExamples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
     this._ccsVersionFailure = this._checkCcsFailure(
-      this._categoryFieldExamples,
+      categoryFieldExamples,
       overallValidStatus,
       validationChecks
     );
@@ -146,7 +147,7 @@ export class CategorizationJobCreator extends JobCreator {
     this._wizardInitialized$.next(true);
 
     return {
-      examples,
+      examples: categoryFieldExamples,
       sampleSize,
       overallValidStatus,
       validationChecks,
