@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-import './font_awesome.scss';
+export * from './src';
