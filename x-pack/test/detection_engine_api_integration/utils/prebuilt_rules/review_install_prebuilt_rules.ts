@@ -6,22 +6,22 @@
  */
 
 import {
-  GetPrebuiltRulesAndTimelinesStatusResponse,
-  PREBUILT_RULES_STATUS_URL,
+  REVIEW_RULE_INSTALLATION_URL,
+  ReviewRuleInstallationResponseBody,
 } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**
- * (LEGACY)
- * Helper to retrieve the prebuilt rules status
+ * Returns prebuilt rules that are avaialble to install
  *
- * @param supertest The supertest deps
+ * @param supertest SuperTest instance
+ * @returns Review Install prebuilt rules response
  */
-export const getPrebuiltRulesAndTimelinesStatus = async (
+export const reviewPrebuiltRulesToInstall = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
-): Promise<GetPrebuiltRulesAndTimelinesStatusResponse> => {
+): Promise<ReviewRuleInstallationResponseBody> => {
   const response = await supertest
-    .get(PREBUILT_RULES_STATUS_URL)
+    .post(REVIEW_RULE_INSTALLATION_URL)
     .set('kbn-xsrf', 'true')
     .send()
     .expect(200);
