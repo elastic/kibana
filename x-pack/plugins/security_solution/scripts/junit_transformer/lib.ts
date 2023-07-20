@@ -160,7 +160,6 @@ function findSpecFilePathFromRootSuite(reportJson: CypressJunitReport): Result<s
 /**
  * The CLI command, exported for the sake of automated tests.
  */
-
 export async function command({ flags, log }: CommandArgs) {
   if (typeof flags.pathPattern !== 'string' || flags.pathPattern.length === 0) {
     throw createFlagError('please provide a single --pathPattern flag');
@@ -249,7 +248,7 @@ ${boilerplate}
  * The args passed to our command. These are a subset of RunContext. By using a subset, we make mocking easier.
  */
 export interface CommandArgs {
-  flags: { [index: string]: string | boolean };
+  flags: { [index: string]: string | boolean | string[] | undefined };
   /** just pick the parts of `log` that we use. This makes mocking much easier. */
   log: Pick<RunContext['log'], 'info' | 'write' | 'error' | 'success' | 'warning'>;
 }
