@@ -57,8 +57,13 @@ export const LogCategorizationPage: FC = () => {
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
-  const { runValidateFieldRequest } = useValidateFieldRequest();
+  const {
+    runCategorizeRequest,
+    cancelRequest: cancelCategorizationRequest,
+    randomSampler,
+  } = useCategorizeRequest();
+  const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
+    useValidateFieldRequest();
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
     getDefaultAiOpsListState()
@@ -78,6 +83,11 @@ export const LogCategorizationPage: FC = () => {
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+
+  const cancelRequest = useCallback(() => {
+    cancelValidationRequest();
+    cancelCategorizationRequest();
+  }, [cancelCategorizationRequest, cancelValidationRequest]);
 
   useEffect(() => {
     if (savedSearch) {
@@ -201,32 +211,25 @@ export const LogCategorizationPage: FC = () => {
 
     cancelRequest();
 
-    const result = await runValidateFieldRequest(
-      index,
-      selectedField,
-      timeField,
-      earliest,
-      latest,
-      {
-        bool: {
-          must: [searchQuery],
-        },
-      }
-    );
-    setFieldValidationResult(result);
-
     try {
-      const resp = await runCategorizeRequest(
-        index,
-        selectedField,
-        timeField,
-        earliest,
-        latest,
-        searchQuery,
-        intervalMs
-      );
+      const [validationResult, categorizationResult] = await Promise.all([
+        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery),
+        runCategorizeRequest(
+          index,
+          selectedField,
+          timeField,
+          earliest,
+          latest,
+          searchQuery,
+          intervalMs
+        ),
+      ]);
 
-      setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
+      setFieldValidationResult(validationResult);
+      setData({
+        categories: categorizationResult.categories,
+        sparkLines: categorizationResult.sparkLinesPerCategory,
+      });
     } catch (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {

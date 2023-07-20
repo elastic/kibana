@@ -11,6 +11,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { processQuery } from './use_categorize_request';
 
 export function useValidateFieldRequest() {
   const { http } = useAiopsAppContext();
@@ -23,8 +24,9 @@ export function useValidateFieldRequest() {
       timeField: string,
       from: number | undefined,
       to: number | undefined,
-      query: QueryDslQueryContainer
+      queryIn: QueryDslQueryContainer
     ) => {
+      const query = processQuery(queryIn, timeField, from, to);
       const resp = await http.post<FieldValidationResults>(
         AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
         {

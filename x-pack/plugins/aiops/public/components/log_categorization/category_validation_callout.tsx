@@ -39,7 +39,7 @@ export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
           {validationResults.validationChecks
             .filter((check) => check.valid !== CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID)
             .map((check) => (
-              <div>{check.message}</div>
+              <div key={check.id}>{check.message}</div>
             ))}
         </EuiCallOut>
       ) : null}

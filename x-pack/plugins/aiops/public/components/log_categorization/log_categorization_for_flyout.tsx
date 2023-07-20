@@ -64,12 +64,17 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
 
-  const { runValidateFieldRequest } = useValidateFieldRequest();
+  const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
+    useValidateFieldRequest();
   const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
-  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
+  const {
+    runCategorizeRequest,
+    cancelRequest: cancelCategorizationRequest,
+    randomSampler,
+  } = useCategorizeRequest();
   const [aiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
     getDefaultAiOpsListState({
@@ -88,6 +93,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+
+  const cancelRequest = useCallback(() => {
+    cancelValidationRequest();
+    cancelCategorizationRequest();
+  }, [cancelCategorizationRequest, cancelValidationRequest]);
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -130,33 +140,33 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     setData(null);
     setFieldValidationResult(null);
 
-    const result = await runValidateFieldRequest(
-      index,
-      selectedField.name,
-      timeField,
-      earliest,
-      latest,
-      {
-        bool: {
-          must: [searchQuery],
-        },
-      }
-    );
-    setFieldValidationResult(result);
-
     try {
-      const { categories, sparkLinesPerCategory: sparkLines } = await runCategorizeRequest(
-        index,
-        selectedField.name,
-        timeField,
-        earliest,
-        latest,
-        searchQuery,
-        intervalMs
-      );
+      const [validationResult, categorizationResult] = await Promise.all([
+        runValidateFieldRequest(
+          index,
+          selectedField.name,
+          timeField,
+          earliest,
+          latest,
+          searchQuery
+        ),
+        runCategorizeRequest(
+          index,
+          selectedField.name,
+          timeField,
+          earliest,
+          latest,
+          searchQuery,
+          intervalMs
+        ),
+      ]);
 
       if (mounted.current === true) {
-        setData({ categories, sparkLines });
+        setFieldValidationResult(validationResult);
+        setData({
+          categories: categorizationResult.categories,
+          sparkLines: categorizationResult.sparkLinesPerCategory,
+        });
       }
     } catch (error) {
       toasts.addError(error, {
