@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { Builder, parseStringPromise } from 'xml2js';
@@ -26,7 +33,6 @@ run(
     }
 
     for (const path of await globby(flags.pathPattern)) {
-
       // Read the file
       const source: string = await fs.readFile(path, 'utf8');
 
@@ -34,7 +40,8 @@ run(
       const unvalidatedReportJson: unknown = await parseStringPromise(source);
 
       // Apply validation and return the validated report, or an error message
-      const maybeValidationResult: { result: CypressJunitReport } | { error: string } = validatedCypressJunitReport(unvalidatedReportJson);
+      const maybeValidationResult: { result: CypressJunitReport } | { error: string } =
+        validatedCypressJunitReport(unvalidatedReportJson);
 
       const logError = (error: string) => {
         log.error(`Error while validating ${path}: ${error}
@@ -55,16 +62,19 @@ This script relies on various assumptions. If your junit report is valid, then y
       if ('error' in maybeAlreadyProcessedResult) {
         logError(maybeAlreadyProcessedResult.error);
         // If there is an error, continue trying to process other files.
-        continue
+        continue;
       }
 
       if (maybeAlreadyProcessedResult.result) {
-        logError("This report appears to have already been transformed because a '·' character was found in the classname. If your test intentionally includes this character as part of its name, remove it. This character is reserved for encoding file paths in the classname attribute.");
+        logError(
+          "This report appears to have already been transformed because a '·' character was found in the classname. If your test intentionally includes this character as part of its name, remove it. This character is reserved for encoding file paths in the classname attribute."
+        );
         // If there is an error, continue trying to process other files.
         continue;
       }
 
-      const maybeSpecFilePath: { result: string } | { error: string } = findSpecFilePathFromRootSuite(reportJson);
+      const maybeSpecFilePath: { result: string } | { error: string } =
+        findSpecFilePathFromRootSuite(reportJson);
 
       if ('error' in maybeSpecFilePath) {
         logError(maybeSpecFilePath.error);
@@ -76,7 +86,7 @@ This script relies on various assumptions. If your junit report is valid, then y
         reportJson,
         specFilePath: maybeSpecFilePath.result,
         reportName: flags.reportName,
-        rootDirectory: flags.rootDirectory
+        rootDirectory: flags.rootDirectory,
       });
 
       // If the writeInPlace flag was passed, overwrite the original file, otherwise log the output to stdout
@@ -103,7 +113,7 @@ This script relies on various assumptions. If your junit report is valid, then y
         --writeInPlace     Defaults to false. If passed, rewrite the file in place with transformations. If false, the script will pass the transformed XML as a string to stdout
 
       If an error is encountered when processing one file, the script will still attempt to process other files.
-      `
+      `,
     },
   }
 );
@@ -113,15 +123,23 @@ This script relies on various assumptions. If your junit report is valid, then y
  * `name` will have the value of `classname` appended to it. This makes sense because they each contain part of the bdd spec.
  * `classname` is replaced with the file path, relative to the kibana project directory, and encoded (by replacing periods with a non-ascii character.) This is the format expected by the failed test reporter and the Kibana Operations flaky test triage workflows.
  */
-async function transformedReport({ reportJson, specFilePath, rootDirectory, reportName }: { reportJson: CypressJunitReport, specFilePath: string, rootDirectory: string, reportName: string }): Promise<string> {
-
+async function transformedReport({
+  reportJson,
+  specFilePath,
+  rootDirectory,
+  reportName,
+}: {
+  reportJson: CypressJunitReport;
+  specFilePath: string;
+  rootDirectory: string;
+  reportName: string;
+}): Promise<string> {
   for (const testsuite of reportJson.testsuites.testsuite) {
     if (!testsuite.testcase) {
       // If there are no testcases for this testsuite, skip it
       continue;
     }
     for (const testcase of testsuite.testcase) {
-
       // append the `classname` attribute to the `name` attribute
       testcase.$.name = `${testcase.$.name} ${testcase.$.classname}`;
 
@@ -136,7 +154,7 @@ async function transformedReport({ reportJson, specFilePath, rootDirectory, repo
     }
   }
 
-  var builder = new Builder();
+  const builder = new Builder();
   // Return the report in an xml string
   return builder.buildObject(reportJson);
 }
@@ -147,8 +165,8 @@ async function transformedReport({ reportJson, specFilePath, rootDirectory, repo
 const CypressJunitTestCase = t.type({
   $: t.type({
     name: t.string,
-    classname: t.string
-  })
+    classname: t.string,
+  }),
 });
 
 /**
@@ -165,17 +183,17 @@ const CypressJunitTestSuite = t.intersection([
       }),
       /* `file` is only found on some suites, namely the 'Root Suite' */
       t.partial({
-        file: t.string
+        file: t.string,
       }),
-    ])
-  })
+    ]),
+  }),
 ]);
 
 const CypressJunitReport = t.type({
   testsuites: t.type({
-    testsuite: t.array(CypressJunitTestSuite)
-  })
-})
+    testsuite: t.array(CypressJunitTestSuite),
+  }),
+});
 
 /**
  * This type represents the Cypress-specific flavor of junit report.
@@ -198,15 +216,14 @@ function isReportAlreadyProcessed(report: CypressJunitReport): Result<boolean> {
     }
     for (const testcase of testsuite.testcase) {
       if (testcase.$.classname.indexOf('·') !== -1) {
-        return { result: true }
+        return { result: true };
       } else {
-        return { result: false }
+        return { result: false };
       }
     }
   }
-  return { error: 'the report had no test cases.' }
+  return { error: 'the report had no test cases.' };
 }
-
 
 /**
  * Validate the JSON representation of the Junit XML.
@@ -218,25 +235,23 @@ function validatedCypressJunitReport(parsedReport: unknown): Result<CypressJunit
 
   if (isLeft(decoded)) {
     return {
-      error: `Could not validate data: ${PathReporter.report(decoded).join("\n")}.
-` }
+      error: `Could not validate data: ${PathReporter.report(decoded).join('\n')}.
+`,
+    };
   }
-  return { result: decoded.right }
+  return { result: decoded.right };
 }
-
 
 /**
  * Iterate over the test suites and find the root suite, which Cypress populates with the path to the spec file. Return the path.
  */
 function findSpecFilePathFromRootSuite(reportJson: CypressJunitReport): Result<string> {
   for (const testsuite of reportJson.testsuites.testsuite) {
-    if (testsuite.$.name === "Root Suite" && testsuite.$.file) {
-      return { result: testsuite.$.file }
+    if (testsuite.$.name === 'Root Suite' && testsuite.$.file) {
+      return { result: testsuite.$.file };
     }
   }
   return {
-    error: "No Root Suite containing a 'file' attribute was found."
-  }
+    error: "No Root Suite containing a 'file' attribute was found.",
+  };
 }
-
-
