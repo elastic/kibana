@@ -13,7 +13,7 @@ import {
   BulkCreateRulesRequestBody,
   validateCreateRuleProps,
   BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';

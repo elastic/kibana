@@ -19,8 +19,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DiscoverGridContext } from './discover_grid_context';
-import type { DataTableRecord } from '../../types';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =

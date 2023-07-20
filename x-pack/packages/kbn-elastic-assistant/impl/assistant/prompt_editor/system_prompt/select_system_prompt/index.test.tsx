@@ -24,7 +24,9 @@ const props: Props = {
     },
   ],
   conversation: undefined,
+  isSettingsModalVisible: false,
   selectedPrompt: undefined,
+  setIsSettingsModalVisible: jest.fn(),
 };
 
 const mockUseAssistantContext = {
