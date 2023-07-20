@@ -91,19 +91,5 @@ export function registerJobGeneration(reporting: ReportingCore, logger: Logger) 
     );
   };
 
-  const registerGetGenerationEndpoint = () => {
-    // Get route to generation endpoint: show error about GET method to user
-    router.get(
-      {
-        path: `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/{p*}`,
-        validate: false,
-      },
-      (_context, _req, res) => {
-        return res.customError({ statusCode: 405, body: 'GET is not allowed' });
-      }
-    );
-  };
-
   registerPostGenerationEndpoint();
-  registerGetGenerationEndpoint();
 }

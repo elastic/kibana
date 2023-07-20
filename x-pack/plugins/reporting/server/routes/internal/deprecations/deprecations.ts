@@ -51,7 +51,7 @@ const getAuthzWrapper =
     };
   };
 
-export const registerDeprecations = (reporting: ReportingCore, logger: Logger) => {
+export const registerDeprecationRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
   const authzWrapper = getAuthzWrapper(reporting, logger);
 

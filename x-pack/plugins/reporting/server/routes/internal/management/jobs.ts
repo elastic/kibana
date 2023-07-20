@@ -19,7 +19,7 @@ import {
   jobsQueryFactory,
 } from '../../lib';
 
-export function registerJobInfoRoutes(reporting: ReportingCore) {
+export function registerJobRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
   const jobsQuery = jobsQueryFactory(reporting);

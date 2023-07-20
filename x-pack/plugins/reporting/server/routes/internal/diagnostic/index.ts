@@ -10,7 +10,7 @@ import type { ReportingCore } from '../../../core';
 import { registerDiagnoseBrowser } from './browser';
 import { registerDiagnoseScreenshot } from './screenshot';
 
-export const registerDiagnostics = (reporting: ReportingCore, logger: Logger) => {
+export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logger) => {
   registerDiagnoseBrowser(reporting, logger);
   registerDiagnoseScreenshot(reporting, logger);
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerJobInfoRoutes } from './jobs';
+export { registerJobRoutes } from './jobs';
