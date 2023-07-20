@@ -14,8 +14,8 @@ import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   MonitorFields,
-  EncryptedSyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
+  EncryptedSyntheticsMonitorAttributes,
+  SyntheticsMonitorWithSecretsAttributes,
   SyntheticsMonitor,
   ConfigKey,
 } from '../../../common/runtime_types';
@@ -48,16 +48,14 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     try {
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
-        syntheticsMonitorType,
-        monitorId
-      );
+      const previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes> =
+        await savedObjectsClient.get(syntheticsMonitorType, monitorId);
 
       /* Decrypting the previous monitor before editing ensures that all existing fields remain
        * on the object, even in flows where decryption does not take place, such as the enabled tab
        * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
       const decryptedPreviousMonitor =
-        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
           syntheticsMonitorType,
           monitorId,
           {
@@ -135,7 +133,7 @@ const rollbackUpdate = async ({
   configId,
   attributes,
 }: {
-  attributes: SyntheticsMonitorWithSecrets;
+  attributes: SyntheticsMonitorWithSecretsAttributes;
   configId: string;
   routeContext: RouteContext;
 }) => {
@@ -155,8 +153,8 @@ export const syncEditedMonitor = async ({
   routeContext,
 }: {
   normalizedMonitor: SyntheticsMonitor;
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
-  decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+  decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
   routeContext: RouteContext;
   spaceId: string;
 }) => {
@@ -203,7 +201,7 @@ export const syncEditedMonitor = async ({
       server.logger,
       server.telemetry,
       formatTelemetryUpdateEvent(
-        editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
+        editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
         previousMonitor,
         server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
