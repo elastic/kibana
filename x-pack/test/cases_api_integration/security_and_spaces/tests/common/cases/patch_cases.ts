@@ -9,13 +9,8 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  CaseSeverity,
-  Cases,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-} from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, Cases, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
