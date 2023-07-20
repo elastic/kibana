@@ -576,7 +576,7 @@ async function ensureAuthorizationForBulkUpdate(
     const { field } = operation;
     if (field === 'snoozeSchedule' || field === 'apiKey') {
       try {
-        await context.actionsAuthorization.ensureAuthorized('execute');
+        await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
         break;
       } catch (error) {
         throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);

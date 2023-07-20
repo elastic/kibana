@@ -15,11 +15,6 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
@@ -70,13 +65,13 @@ describe('Add/edit exception from rule details', () => {
   const ITEM_FIELD = 'unique_value.test';
 
   before(() => {
-    esArchiverResetKibana();
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', 'exceptions');
     login();
   });
 
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   describe('existing list and items', () => {
@@ -266,7 +261,7 @@ describe('Add/edit exception from rule details', () => {
     });
 
     afterEach(() => {
-      esArchiverUnload('exceptions_2');
+      cy.task('esArchiverUnload', 'exceptions_2');
     });
 
     it('Cannot create an item to add to rule but not shared list as rule has no lists attached', () => {
@@ -324,7 +319,7 @@ describe('Add/edit exception from rule details', () => {
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
       // load more docs
-      esArchiverLoad('exceptions_2');
+      cy.task('esArchiverLoad', 'exceptions_2');
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();

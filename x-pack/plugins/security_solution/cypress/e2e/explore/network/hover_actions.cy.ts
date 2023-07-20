@@ -20,22 +20,22 @@ import {
   openHoverActions,
 } from '../../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const testDomain = 'myTest';
 
-describe('Hover actions', () => {
+// tracked by https://github.com/elastic/kibana/issues/161874
+describe.skip('Hover actions', () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);
   };
 
   before(() => {
-    esArchiverLoad('network');
+    cy.task('esArchiverLoad', 'network');
   });
 
   after(() => {
-    esArchiverUnload('network');
+    cy.task('esArchiverUnload', 'network');
   });
 
   beforeEach(() => {

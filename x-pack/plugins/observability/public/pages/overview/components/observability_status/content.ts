@@ -58,7 +58,7 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.apm.link', {
         defaultMessage: 'Add data',
       }),
-      addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
+      addLink: http.basePath.prepend('/app/apm/tutorial'),
       learnMoreLink: docLinks.links.apm.overview,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show services inventory',
@@ -116,7 +116,7 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.ux.link', {
         defaultMessage: 'Add data',
       }),
-      addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
+      addLink: http.basePath.prepend('/app/apm/tutorial'),
       learnMoreLink: docLinks.links.observability.userExperience,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.ux.goToAppTitle', {
         defaultMessage: 'Show dashboard',
