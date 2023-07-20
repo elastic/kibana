@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
@@ -43,7 +42,7 @@ const EXCEPTION_LIST_NAME = 'Newly created list';
 
 describe('Exception list detail page', () => {
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     login();
 
     // Create exception list associated with a rule
