@@ -34,40 +34,36 @@ export function defineGetApiKeysRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const { elasticsearch } = await context.core;
+        const esClient = (await context.core).elasticsearch.client;
 
-        const [
-          {
-            cluster: {
-              manage_security: manageSecurity,
-              manage_api_key: manageApiKey,
-              manage_own_api_key: manageOwnApiKey,
-            },
-          },
-          areApiKeysEnabled,
-          areCrossClusterApiKeysEnabled,
-        ] = await Promise.all([
-          elasticsearch.client.asCurrentUser.security.hasPrivileges({
-            body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
-          }),
-          getAuthenticationService().apiKeys.areAPIKeysEnabled(),
-          getAuthenticationService().apiKeys.areCrossClusterAPIKeysEnabled(),
-        ]);
+        const [{ cluster: clusterPrivileges }, areApiKeysEnabled, areCrossClusterApiKeysEnabled] =
+          await Promise.all([
+            esClient.asCurrentUser.security.hasPrivileges({
+              body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+            }),
+            getAuthenticationService().apiKeys.areAPIKeysEnabled(),
+            getAuthenticationService().apiKeys.areCrossClusterAPIKeysEnabled(),
+          ]);
 
         if (!areApiKeysEnabled) {
           return response.notFound({
             body: {
               message:
-                "API key service has been disabled in Elasticsearch using 'xpack.security.authc.api_key.enabled' setting.",
+                "API keys are disabled in Elasticsearch. To use API keys enable 'xpack.security.authc.api_key.enabled' setting.",
             },
           });
         }
 
-        const canManageCrossClusterApiKeys = manageSecurity && areCrossClusterApiKeysEnabled;
-        const canManageApiKeys = manageSecurity || manageApiKey;
-        const canManageOwnApiKeys = manageSecurity || manageApiKey || manageOwnApiKey;
+        const canManageCrossClusterApiKeys =
+          clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled;
+        const canManageApiKeys =
+          clusterPrivileges.manage_security || clusterPrivileges.manage_api_key;
+        const canManageOwnApiKeys =
+          clusterPrivileges.manage_security ||
+          clusterPrivileges.manage_api_key ||
+          clusterPrivileges.manage_own_api_key;
 
-        const apiResponse = await elasticsearch.client.asCurrentUser.security.getApiKey({
+        const apiResponse = await esClient.asCurrentUser.security.getApiKey({
           owner: !canManageApiKeys,
         });
 

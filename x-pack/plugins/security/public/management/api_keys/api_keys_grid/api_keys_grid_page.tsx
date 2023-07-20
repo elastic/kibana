@@ -627,6 +627,7 @@ export const UsersFilterButton: FunctionComponent<UsersFilterButtonProps> = ({
   usernames,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (!onChange) {
     return null;
@@ -641,6 +642,10 @@ export const UsersFilterButton: FunctionComponent<UsersFilterButtonProps> = ({
       numActiveFilters = 1;
     }
   }
+
+  const usernamesMatchingSearchTerm = searchTerm
+    ? usernames.filter((username) => username.includes(searchTerm))
+    : usernames;
 
   return (
     <UserProfilesPopover
@@ -665,12 +670,13 @@ export const UsersFilterButton: FunctionComponent<UsersFilterButtonProps> = ({
       panelClassName="euiFilterGroup__popoverPanel"
       closePopover={() => setIsOpen(false)}
       selectableProps={{
-        options: usernames.map((username) => ({
+        options: usernamesMatchingSearchTerm.map((username) => ({
           uid: username,
           user: { username },
           enabled: false,
           data: {},
         })),
+        onSearchChange: setSearchTerm,
         selectedOptions: usernames
           .filter((username) => query.hasOrFieldClause('username', username))
           .map((username) => ({

@@ -142,7 +142,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         throw error;
       }
     },
-    initialValues: apiKey ? mapValuesFromApiKeyToDefaultFlyout(apiKey) : defaultDefaultValues,
+    initialValues: apiKey ? mapApiKeyFormValues(apiKey) : defaultDefaultValues,
   });
 
   useEffect(() => {
@@ -222,7 +222,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               <>
                 <EuiCallOut
                   iconType="lock"
-                  title="You cannot update this API key since it is owned by another user."
+                  title="You cannot update this API key, since it is owned by another user."
                 />
                 <EuiSpacer />
               </>
@@ -230,7 +230,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               <>
                 <EuiCallOut
                   iconType="lock"
-                  title="You cannot update this API key since it has already expired."
+                  title="You cannot update this API key, since it has already expired."
                 />
                 <EuiSpacer />
               </>
@@ -654,7 +654,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateAPIKeyParams {
   const { type, name } = values;
   const expiration = values.customExpiration ? `${values.expiration}d` : undefined;
-  const metadata = values.includeMetadata ? JSON.parse(values.metadata) : undefined;
+  const metadata = values.includeMetadata ? JSON.parse(values.metadata) : '{}';
 
   if (type === 'cross_cluster') {
     return {
@@ -670,7 +670,7 @@ export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateAPIKeyPar
     name,
     expiration,
     metadata,
-    role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : undefined,
+    role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : '{}',
   };
 }
 
@@ -679,7 +679,7 @@ export function mapUpdateApiKeyValues(
   id: string,
   values: ApiKeyFormValues
 ): UpdateAPIKeyParams {
-  const metadata = values.includeMetadata ? JSON.parse(values.metadata) : undefined;
+  const metadata = values.includeMetadata ? JSON.parse(values.metadata) : '{}';
 
   if (type === 'cross_cluster') {
     return {
@@ -693,17 +693,17 @@ export function mapUpdateApiKeyValues(
   return {
     id,
     metadata,
-    role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : undefined,
+    role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : '{}',
   };
 }
 
 /**
  * Maps data from the selected API key to pre-populate the form
  */
-function mapValuesFromApiKeyToDefaultFlyout(apiKey: CategorizedApiKey): ApiKeyFormValues {
+function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
   const includeMetadata = Object.keys(apiKey.metadata).length > 0;
   const customPrivileges =
-    'role_descriptors' in apiKey ? Object.keys(apiKey.role_descriptors).length > 0 : false;
+    apiKey.type !== 'cross_cluster' ? Object.keys(apiKey.role_descriptors).length > 0 : false;
 
   return {
     name: apiKey.name,
@@ -714,8 +714,8 @@ function mapValuesFromApiKeyToDefaultFlyout(apiKey: CategorizedApiKey): ApiKeyFo
     metadata: includeMetadata ? JSON.stringify(apiKey.metadata, null, 2) : '{}',
     customPrivileges,
     role_descriptors: customPrivileges
-      ? JSON.stringify('role_descriptors' in apiKey && apiKey.role_descriptors, null, 2)
+      ? JSON.stringify(apiKey.type !== 'cross_cluster' && apiKey.role_descriptors, null, 2)
       : '{}',
-    access: 'access' in apiKey ? JSON.stringify(apiKey.access, null, 2) : '{}',
+    access: apiKey.type === 'cross_cluster' ? JSON.stringify(apiKey.access, null, 2) : '{}',
   };
 }
