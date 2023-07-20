@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './legacy_icon';
+import { AllDatasetSelection } from '../../../utils/dataset_selection';
+import { DefaultLogExplorerProfileState } from './types';
+
+export const DEFAULT_CONTEXT: DefaultLogExplorerProfileState = {
+  datasetSelection: AllDatasetSelection.create(),
+};
