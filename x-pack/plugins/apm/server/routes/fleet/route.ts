@@ -77,7 +77,6 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<void> => {
-    console.log('we hit the endpoint saveApmServerSchemaRoute');
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { params, logger, core } = resources;
     const coreStart = await core.start();
@@ -98,7 +97,6 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
-    console.log('we hit the endpoint getUnsupportedApmServerSchemaRoute');
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
@@ -113,7 +111,6 @@ const getMigrationCheckRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
-    console.log('we hit the endpoint getMigrationCheckRoute');
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
 
     const { fleet, security } = plugins;

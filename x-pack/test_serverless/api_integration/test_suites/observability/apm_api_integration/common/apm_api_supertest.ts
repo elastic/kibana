@@ -113,18 +113,14 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
   body: APIReturnType<TEndpoint>;
 }
 
-export async function getApmTestService({ readConfigFile }: FtrConfigProviderContext) {
-  const svlSharedConfig = await readConfigFile(require.resolve('../../../../config.base.ts'));
+export async function getApmTestService({ getService }: FtrConfigProviderContext) {
+  const svlSharedConfig = getService('config');
   const kibanaServer = svlSharedConfig.get('servers.kibana');
 
   return {
-    viewerUser: await getApmApiClient({
+    slsUser: await getApmApiClient({
       kibanaServer,
-      username: ApmUsername.viewerUser,
-    }),
-    editorUser: await getApmApiClient({
-      kibanaServer,
-      username: ApmUsername.editorUser,
+      username: 'elastic',
     }),
   };
 }
