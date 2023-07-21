@@ -19,8 +19,8 @@ describe('getFont', () => {
       'zh-Hant: 令',
       'zh-Hans: 令',
       'random: おあいい 漢字 あい 抵 令 대시보드',
-      String.fromCharCode(0x4ee4),  // 令
-      String.fromCharCode(0xD574),  // 해
+      String.fromCharCode(0x4ee4), // 令
+      String.fromCharCode(0xd574), // 해
       String.fromCodePoint(0x9aa8), // 骨
     ];
 
