@@ -87,6 +87,8 @@ export class APMPlugin
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
 
+    const apmIndicesConfig = plugins.apmDataAccess.indices;
+
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
@@ -94,7 +96,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config: currentConfig,
+        apmIndicesConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -145,7 +147,7 @@ export class APMPlugin
 
       return getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(coreStart),
-        apmIndicesConfig: plugins.apmDataAccess.indices,
+        apmIndicesConfig,
       });
     };
 
@@ -162,7 +164,7 @@ export class APMPlugin
         plugins.home?.tutorials.registerTutorial(
           tutorialProvider({
             apmConfig: currentConfig,
-            apmIndicesConfig: plugins.apmDataAccess.indices,
+            apmIndicesConfig,
             cloud: plugins.cloud,
             isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
           })
@@ -194,7 +196,7 @@ export class APMPlugin
       registerApmRuleTypes({
         alerting: plugins.alerting,
         basePath: core.http.basePath,
-        apmIndicesConfig: plugins.apmDataAccess.indices,
+        apmIndicesConfig,
         config$,
         logger: this.logger!.get('rule'),
         ml: plugins.ml,
@@ -208,7 +210,7 @@ export class APMPlugin
       logger: this.logger,
       coreStartPromise: getCoreStart(),
       plugins: resourcePlugins,
-      config: currentConfig,
+      apmIndicesConfig,
     }).catch((e) => {
       this.logger?.error('Failed to register APM Fleet policy callbacks');
       this.logger?.error(e);

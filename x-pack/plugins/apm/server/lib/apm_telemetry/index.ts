@@ -11,7 +11,6 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { APMConfig } from '../..';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
@@ -20,14 +19,17 @@ import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_obj
 import { collectDataTelemetry } from './collect_data_telemetry';
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../../routes/settings/apm_indices/get_apm_indices';
 import { getTelemetryClient } from './telemetry_client';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,
-  config,
+  apmIndicesConfig,
   usageCollector,
   taskManager,
   logger,
@@ -35,7 +37,7 @@ export async function createApmTelemetry({
   isProd,
 }: {
   core: CoreSetup;
-  config: APMConfig;
+  apmIndicesConfig: ApmIndicesConfig;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -58,7 +60,7 @@ export async function createApmTelemetry({
 
   const [coreStart] = await core.getStartServices();
   const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
-  const indices = await getApmIndices({ config, savedObjectsClient });
+  const indices = await getApmIndices({ apmIndicesConfig, savedObjectsClient });
   const telemetryClient = await getTelemetryClient({ core });
 
   const collectAndStore = async () => {

@@ -50,7 +50,7 @@ const listCustomLinksRoute = createApmServerRoute({
   ): Promise<{
     customLinks: CustomLink[];
   }> => {
-    const { context, params, request, config } = resources;
+    const { context, params, request, apmIndicesConfig } = resources;
     const licensingContext = await context.licensing;
 
     if (!isActiveGoldLicense(licensingContext.license)) {
@@ -63,7 +63,7 @@ const listCustomLinksRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      config,
+      apmIndicesConfig,
     });
 
     // picks only the items listed in FILTER_OPTIONS
@@ -83,7 +83,7 @@ const createCustomLinkRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources): Promise<void> => {
-    const { context, params, request, config } = resources;
+    const { context, params, request, apmIndicesConfig } = resources;
     const licensingContext = await context.licensing;
 
     if (!isActiveGoldLicense(licensingContext.license)) {
@@ -94,7 +94,7 @@ const createCustomLinkRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      config,
+      apmIndicesConfig,
     });
     const customLink = params.body;
 
@@ -119,7 +119,7 @@ const updateCustomLinkRoute = createApmServerRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   handler: async (resources): Promise<void> => {
-    const { params, context, request, config } = resources;
+    const { params, context, request, apmIndicesConfig } = resources;
     const licensingContext = await context.licensing;
 
     if (!isActiveGoldLicense(licensingContext.license)) {
@@ -130,7 +130,7 @@ const updateCustomLinkRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      config,
+      apmIndicesConfig,
     });
 
     const { id } = params.path;
@@ -155,7 +155,7 @@ const deleteCustomLinkRoute = createApmServerRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   handler: async (resources): Promise<{ result: string }> => {
-    const { context, params, request, config } = resources;
+    const { context, params, request, apmIndicesConfig } = resources;
     const licensingContext = await context.licensing;
 
     if (!isActiveGoldLicense(licensingContext.license)) {
@@ -166,7 +166,7 @@ const deleteCustomLinkRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      config,
+      apmIndicesConfig,
     });
     const { id } = params.path;
     const res = await deleteCustomLink({

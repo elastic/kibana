@@ -141,7 +141,8 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   ): Promise<{
     cloudApmPackagePolicy: PackagePolicy;
   }> => {
-    const { plugins, context, config, request, logger } = resources;
+    const { plugins, context, config, request, logger, apmIndicesConfig } =
+      resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 
     if (!plugins.fleet || !plugins.security) {
@@ -174,7 +175,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      config: resources.config,
+      apmIndicesConfig,
     });
 
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({

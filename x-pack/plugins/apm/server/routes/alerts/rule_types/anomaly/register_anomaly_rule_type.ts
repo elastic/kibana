@@ -64,7 +64,7 @@ export function registerAnomalyRuleType({
   alerting,
   alertsLocator,
   basePath,
-  config$,
+  apmIndicesConfig,
   logger,
   ml,
   ruleDataClient,
@@ -256,7 +256,7 @@ export function registerAnomalyRuleType({
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
-            config$,
+            apmIndicesConfig,
             scopedClusterClient,
             savedObjectsClient,
             serviceName,
