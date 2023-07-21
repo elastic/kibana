@@ -259,7 +259,7 @@ export function resolveEsArgs(
 /**
  * Setup local volumes for Serverless ES
  */
-async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
+export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
   const volumePath = resolve(options.basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local Serverless ES object store at ${volumePath}`));

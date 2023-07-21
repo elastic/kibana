@@ -5,7 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { resolveDockerImage, DOCKER_IMG, resolveEsArgs } from './docker';
+import mockFs from 'mock-fs';
+
+import { existsSync } from 'fs';
+import { stat } from 'fs/promises';
+
+import { resolveDockerImage, DOCKER_IMG, resolveEsArgs, setupServerlessVolumes } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 const verifyDockerInstalledMock = jest.fn();
@@ -28,11 +33,25 @@ const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
 
+const KIBANA_ROOT = process.cwd();
+const baseEsPath = `${KIBANA_ROOT}/.es`;
+const serverlessDir = 'stateless';
+const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
+
 beforeEach(() => {
   jest.resetAllMocks();
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 });
+
+const volumeCmdTest = async (volumeCmd: string[]) => {
+  expect(volumeCmd).toHaveLength(2);
+  expect(volumeCmd).toEqual(expect.arrayContaining(['--volume', `${baseEsPath}:/objectstore:z`]));
+
+  // extract only permission from mode
+  // eslint-disable-next-line no-bitwise
+  expect((await stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o766);
+};
 
 describe('resolveDockerImage()', () => {
   const defaultRepo = 'another/repo';
@@ -104,6 +123,7 @@ describe('resolveEsArgs()', () => {
   test('should return default args when no options', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, {});
 
+    expect(esArgs).toHaveLength(4);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -117,6 +137,7 @@ describe('resolveEsArgs()', () => {
   test('should override default args when options is a string', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=true' });
 
+    expect(esArgs).toHaveLength(4);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -130,6 +151,7 @@ describe('resolveEsArgs()', () => {
   test('should override default args when options is an array', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: ['foo=false', 'qux=true'] });
 
+    expect(esArgs).toHaveLength(4);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -143,6 +165,7 @@ describe('resolveEsArgs()', () => {
   test('should override defaults args and handle password option', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=false', password: 'hello' });
 
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -153,5 +176,57 @@ describe('resolveEsArgs()', () => {
         "ELASTIC_PASSWORD=hello",
       ]
     `);
+  });
+});
+
+describe('setupServerlessVolumes()', () => {
+  const existingObjectStore = {
+    [baseEsPath]: {
+      [serverlessDir]: {
+        cluster_state: { 0: {}, 1: {}, lease: 'hello world' },
+      },
+    },
+  };
+
+  beforeEach(() => {
+    // jest relies on the filesystem to get sourcemaps when using console.log
+    // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
+    // hijacking logging to process.stdout as a workaround for this suite.
+    jest.spyOn(console, 'log').mockImplementation((...args) => {
+      process.stdout.write(args + '\n');
+    });
+  });
+
+  afterEach(() => {
+    mockFs.restore();
+  });
+
+  test('should create stateless directory and return volume docker command', async () => {
+    mockFs({
+      [baseEsPath]: {},
+    });
+
+    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
+
+    volumeCmdTest(volumeCmd);
+    expect(existsSync(serverlessObjectStorePath)).toBe(true);
+  });
+
+  test('should use an existing object store', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
+
+    volumeCmdTest(volumeCmd);
+    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(true);
+  });
+
+  test('should remove an existing object store when clean is passed', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, clean: true });
+
+    volumeCmdTest(volumeCmd);
+    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
   });
 });
