@@ -6,6 +6,7 @@
  */
 
 import { login } from '../../../tasks/login';
+import { getEndpointManagementPageList } from '../../../lib';
 
 describe(
   'Security Essential PLI',
@@ -16,11 +17,17 @@ describe(
     },
   },
   () => {
-    it('should login', () => {
-      login('endpoint_operations_manager');
-      cy.visit('/app/security/get_started');
+    const pages = getEndpointManagementPageList();
+
+    beforeEach(() => {
+      login();
     });
 
-    // FIXME:PT implement
+    for (const { url, title } of pages) {
+      it(`should not allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj('noPrivilegesPage').should('exist');
+      });
+    }
   }
 );
