@@ -234,7 +234,7 @@ export async function setupDocker(log: ToolingLog) {
 /**
  * Override default esArgs with options.esArgs
  */
-function resolveEsArgs(
+export function resolveEsArgs(
   defaultEsArgs: Array<[string, string]>,
   options: ServerlessOptions | DockerOptions
 ) {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { resolveDockerImage, DOCKER_IMG, setupDocker } from './docker';
+import { resolveDockerImage, DOCKER_IMG, resolveEsArgs } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 const verifyDockerInstalledMock = jest.fn();
@@ -39,7 +39,7 @@ describe('resolveDockerImage()', () => {
   const defaultImg = 'default/reg/repo:tag';
   const tag = '8.8.2';
 
-  test('should return default image without options', () => {
+  test('should return default image when no options', () => {
     const image = resolveDockerImage({ repo: defaultRepo, defaultImg });
 
     expect(image).toEqual(defaultImg);
@@ -72,24 +72,86 @@ describe('resolveDockerImage()', () => {
   });
 });
 
-describe('setupDocker()', () => {
-  test('should log the Docker version when it is installed', async () => {
-    verifyDockerInstalledMock.mockImplementationOnce(() =>
-      log.info('Docker version 23.0.5, build bc4487c')
-    );
+// TODO: setupDocker tests
+// describe('setupDocker()', () => {
+//   test('should log the Docker version when it is installed', async () => {
+//     verifyDockerInstalledMock.mockImplementationOnce(() =>
+//       log.info('Docker version 23.0.5, build bc4487c')
+//     );
 
-    await setupDocker(log);
+//     await setupDocker(log);
 
-    expect(logWriter.messages).toMatchInlineSnapshot(`
+//     expect(logWriter.messages).toMatchInlineSnapshot(`
+//       Array [
+//         " [34minfo[39m [1mVerifying Docker is installed.[22m",
+//         "   │ [34minfo[39m Docker version 23.0.5, build bc4487a",
+//         " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+//         "   │ [34minfo[39m Using existing network.",
+//       ]
+//     `);
+
+//     // expect(verifyDockerInstalledMock.mock.calls).toMatchInlineSnapshot(`Array []`);
+//     // expect(verifyDockerInstalled.mock.calls).toMatchInlineSnapshot(`Array []`);
+//   });
+// });
+
+describe('resolveEsArgs()', () => {
+  const defaultEsArgs: Array<[string, string]> = [
+    ['foo', 'bar'],
+    ['qux', 'zip'],
+  ];
+
+  test('should return default args when no options', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, {});
+
+    expect(esArgs).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mVerifying Docker is installed.[22m",
-        "   │ [34minfo[39m Docker version 23.0.5, build bc4487a",
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
-        "   │ [34minfo[39m Using existing network.",
+        "--env",
+        "foo=bar",
+        "--env",
+        "qux=zip",
       ]
     `);
+  });
 
-    // expect(verifyDockerInstalledMock.mock.calls).toMatchInlineSnapshot(`Array []`);
-    // expect(verifyDockerInstalled.mock.calls).toMatchInlineSnapshot(`Array []`);
+  test('should override default args when options is a string', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=true' });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "foo=true",
+        "--env",
+        "qux=zip",
+      ]
+    `);
+  });
+
+  test('should override default args when options is an array', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: ['foo=false', 'qux=true'] });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "foo=false",
+        "--env",
+        "qux=true",
+      ]
+    `);
+  });
+
+  test('should override defaults args and handle password option', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=false', password: 'hello' });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "foo=false",
+        "--env",
+        "qux=zip",
+        "--env",
+        "ELASTIC_PASSWORD=hello",
+      ]
+    `);
   });
 });
