@@ -68,7 +68,19 @@ const retrieveIntegrations = (
 export const cli = () => {
   run(
     async () => {
-      const { argv } = yargs(process.argv.slice(2));
+      const { argv } = yargs(process.argv.slice(2))
+        .coerce('env', (arg) =>
+          arg.split(',').reduce((acc, curr) => {
+            const [key, value] = curr.split('=');
+            acc[key] = value;
+            return acc;
+          }, {})
+        )
+        .default({
+          env: {},
+        });
+
+      console.error('arggg', argv, argv.env);
 
       const isOpen = argv._[0] === 'open';
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
@@ -293,7 +305,7 @@ export const cli = () => {
                   },
                   env: {
                     ...customEnv,
-                    ...(argv.env ?? {}),
+                    ...argv.env,
                   },
                 },
               });
@@ -312,7 +324,7 @@ export const cli = () => {
                     numTestsKeptInMemory: 0,
                     env: {
                       ...customEnv,
-                      ...(argv.env ?? {}),
+                      ...argv.env,
                     },
                   },
                 });
