@@ -316,6 +316,7 @@ describe('Entity Analytics Dashboard', () => {
       visit(ENTITY_ANALYTICS_URL);
       waitForPageToBeLoaded();
       cy.wait('@anomalies', { timeout: 30000 });
+      cy.scrollTo('bottom');
     });
 
     it('renders table with pagination', () => {
