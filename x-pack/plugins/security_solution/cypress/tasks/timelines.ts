@@ -18,6 +18,7 @@ import {
   TIMELINE,
   TIMELINE_NAME,
   TIMELINE_ITEM_ACTION_BTN,
+  TIMELINE_TEMPLATE_TAB,
 } from '../screens/timelines';
 import { SELECT_ALL_CHECKBOX } from '../screens/shared';
 import { CREATE_NEW_TIMELINE_WITH_BORDER } from '../screens/timeline';
@@ -39,6 +40,14 @@ export const openTimeline = (id?: string) => {
   cy.get(id ? TIMELINE(id) : TIMELINE_NAME)
     .should('be.visible')
     .click();
+};
+
+export const openTimelineTemplate = (id?: string) => {
+  openTimeline(id);
+};
+
+export const navigateToTimelineTemplates = () => {
+  cy.get(TIMELINE_TEMPLATE_TAB).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {

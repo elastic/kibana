@@ -12,6 +12,7 @@ import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
   PIN_EVENT,
+  PIN_TOOLTIP,
   TIMELINE_DESCRIPTION,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
@@ -20,7 +21,7 @@ import {
 import { TIMELINES_DESCRIPTION, TIMELINES_FAVORITE } from '../../../screens/timelines';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/common';
 
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -36,15 +37,15 @@ import {
   populateTimeline,
   waitForTimelineChanges,
 } from '../../../tasks/timeline';
-import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
+import {
+  navigateToTimelineTemplates,
+  openTimelineTemplate,
+  waitForTimelinesPanelToBeLoaded,
+} from '../../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Timeline Templates', () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -59,7 +60,8 @@ describe('Timeline Templates', () => {
     populateTimeline();
     addFilter(getTimeline().filter);
     cy.get(PIN_EVENT).realHover();
-    cy.get('[data-test-subj="timeline-action-pin-tool-tip"]').should(
+
+    cy.get(PIN_TOOLTIP).should(
       'have.text',
       'This alert may not be pinned while editing a template timeline'
     );
@@ -72,32 +74,23 @@ describe('Timeline Templates', () => {
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(getTimeline().description);
-      // addNotesToTimeline(getTimeline().notes);
       markAsFavorite();
       waitForTimelineChanges();
       createNewTimelineTemplate();
       closeTimeline();
 
-      //    openTimelineTemplateFromSettings(timelineId);
-
-      cy.get('[data-test-subj="timeline-tab-template"]').click({ force: true });
+      navigateToTimelineTemplates();
 
       cy.contains(getTimeline().title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
       cy.get(TIMELINES_FAVORITE).first().should('exist');
 
-      openTimeline(timelineId);
+      openTimelineTemplate(timelineId);
 
       cy.get(FAVORITE_TIMELINE).should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
-      cy.get('[data-test-subj="timeline-description"]').should(
-        'have.text',
-        getTimeline().description
-      );
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
       cy.get(TIMELINE_QUERY).should('have.text', `${getTimeline().query} `);
-      // Comments this assertion until we agreed what to do with the filters.
-      // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      // cy.get(NOTES_COUNT).should('have.text', '1');
     });
   });
 

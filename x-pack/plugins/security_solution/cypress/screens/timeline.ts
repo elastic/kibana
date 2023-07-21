@@ -113,6 +113,8 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
+export const PIN_TOOLTIP = '[data-test-subj="timeline-action-pin-tool-tip"]';
+
 export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
 
 export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
