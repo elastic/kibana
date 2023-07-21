@@ -11,11 +11,11 @@ import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { SecurityLicense } from '../../../common/licensing';
-import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../lib';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
+  CreateCrossClusterAPIKeyParams,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   UpdateAPIKeyParams,
@@ -26,6 +26,16 @@ import {
   HTTPAuthorizationHeader,
 } from '../http_authentication';
 import { getFakeKibanaRequest } from './fake_kibana_request';
+
+export type {
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+};
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -38,9 +48,6 @@ export interface ConstructorOptions {
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
 }
-
-export type { CreateAPIKeyParams, CreateAPIKeyResult };
-export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
 
 type GrantAPIKeyParams =
   | {
@@ -237,15 +244,21 @@ export class APIKeys {
             name,
             expiration,
             metadata,
-            role_descriptors: this.parseRoleDescriptorsWithKibanaPrivileges(createParams, false),
+            role_descriptors:
+              'role_descriptors' in createParams
+                ? createParams.role_descriptors
+                : this.parseRoleDescriptorsWithKibanaPrivileges(
+                    createParams.kibana_role_descriptors,
+                    false
+                  ),
           },
         });
       }
 
       this.logger.debug('API key was created successfully');
-    } catch (e) {
-      this.logger.error(`Failed to create API key: ${e.message}`);
-      throw e;
+    } catch (error) {
+      this.logger.error(`Failed to create API key: ${error.message}`);
+      throw error;
     }
     return result;
   }
@@ -285,7 +298,13 @@ export class APIKeys {
         result = await scopedClusterClient.asCurrentUser.security.updateApiKey({
           id,
           metadata,
-          role_descriptors: this.parseRoleDescriptorsWithKibanaPrivileges(updateParams, true),
+          role_descriptors:
+            'role_descriptors' in updateParams
+              ? updateParams.role_descriptors
+              : this.parseRoleDescriptorsWithKibanaPrivileges(
+                  updateParams.kibana_role_descriptors,
+                  true
+                ),
         });
       }
 
@@ -294,9 +313,9 @@ export class APIKeys {
       } else {
         this.logger.debug('There were no updates to make for API key');
       }
-    } catch (e) {
-      this.logger.error(`Failed to update API key: ${e.message}`);
-      throw e;
+    } catch (error) {
+      this.logger.error(`Failed to update API key: ${error.message}`);
+      throw error;
     }
     return result;
   }
@@ -323,7 +342,13 @@ export class APIKeys {
     }
     const { expiration, metadata, name } = createParams;
 
-    const roleDescriptors = this.parseRoleDescriptorsWithKibanaPrivileges(createParams, false);
+    const roleDescriptors =
+      'role_descriptors' in createParams
+        ? createParams.role_descriptors
+        : this.parseRoleDescriptorsWithKibanaPrivileges(
+            createParams.kibana_role_descriptors,
+            false
+          );
 
     const params = this.getGrantParams(
       { expiration, metadata, name, role_descriptors: roleDescriptors },
@@ -471,22 +496,10 @@ export class APIKeys {
   }
 
   private parseRoleDescriptorsWithKibanaPrivileges(
-    params: Partial<{
-      kibana_role_descriptors: Record<
-        string,
-        { elasticsearch: ElasticsearchPrivilegesType; kibana: KibanaPrivilegesType }
-      >;
-      role_descriptors: Record<string, any>;
-    }>,
+    kibanaRoleDescriptors: CreateRestAPIKeyWithKibanaPrivilegesParams['kibana_role_descriptors'],
     isEdit: boolean
   ) {
-    if (params.role_descriptors) {
-      return params.role_descriptors;
-    }
-
     const roleDescriptors = Object.create(null);
-
-    const { kibana_role_descriptors: kibanaRoleDescriptors } = params;
 
     const allValidationErrors: string[] = [];
     if (kibanaRoleDescriptors) {
