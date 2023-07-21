@@ -280,18 +280,50 @@ export const cli = () => {
               EsVersion.getDefault()
             );
 
-            const customEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+            const createUrlFromFtrConfig = (
+              type: 'elasticsearch' | 'kibana' | 'fleetserver'
+            ): string => {
+              const getKeyPath = (path: string = ''): string => {
+                return `servers.${type}${path ? `.${path}` : ''}`;
+              };
+
+              if (!config.get(getKeyPath())) {
+                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
+              }
+
+              const url = new URL('http://localhost');
+
+              url.port = config.get(getKeyPath('port'));
+              url.protocol = config.get(getKeyPath('port'));
+              url.hostname = config.get(getKeyPath('hostname'));
+
+              return url.toString();
+            };
+
+            const baseUrl = createUrlFromFtrConfig('kibana');
+
+            const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
               retries: 1,
             });
+
+            const cyCustomEnv = {
+              ...ftrEnv,
+              KIBANA_URL: baseUrl,
+              ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
+              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+              // Username/password used for both elastic and kibana
+              ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+              ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+            };
 
             if (isOpen) {
               await cypress.open({
                 configFile: cypressConfigFilePath,
                 config: {
                   e2e: {
-                    baseUrl: `http://localhost:${kibanaPort}`,
+                    baseUrl,
                   },
-                  env: customEnv,
+                  env: cyCustomEnv,
                 },
               });
             } else {
@@ -304,10 +336,10 @@ export const cli = () => {
                   reporterOptions: argv.reporterOptions,
                   config: {
                     e2e: {
-                      baseUrl: `http://localhost:${kibanaPort}`,
+                      baseUrl,
                     },
                     numTestsKeptInMemory: 0,
-                    env: customEnv,
+                    env: cyCustomEnv,
                   },
                 });
               } catch (error) {
