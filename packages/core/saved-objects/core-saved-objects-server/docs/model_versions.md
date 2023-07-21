@@ -83,7 +83,7 @@ const myType: SavedObjectsType = {
   name: 'test',
   switchToModelVersionAt: '8.10.0',
   modelVersions: {
-    1: modelVersion1, // valid: start with version 1
+    1: model_version_1, // valid: start with version 1
     2: modelVersion2, // valid: no gap between versions
   },
   // ...other mandatory properties

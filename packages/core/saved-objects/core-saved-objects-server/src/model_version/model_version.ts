@@ -85,7 +85,7 @@ export interface SavedObjectsModelVersion {
  * @example
  * ```typescript
  * const modelVersionMap: SavedObjectsModelVersionMap = {
- *   1: modelVersion1,
+ *   1: model_version_1,
  *   2: modelVersion2,
  *   3: modelVersion3,
  * }
