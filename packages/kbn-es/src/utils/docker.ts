@@ -192,9 +192,9 @@ export function resolveDockerImage({
 export async function verifyDockerInstalled(log: ToolingLog) {
   log.info(chalk.bold('Verifying Docker is installed.'));
 
-  const { stdout } = await execa('docker', ['--version']).catch((error) => {
+  const { stdout } = await execa('docker', ['--version']).catch(({ message }) => {
     throw createCliError(
-      `Docker not found locally. Install it from: https://www.docker.com\n\n${error.message}`
+      `Docker not found locally. Install it from: https://www.docker.com\n\n${message}`
     );
   });
 
@@ -204,7 +204,7 @@ export async function verifyDockerInstalled(log: ToolingLog) {
 /**
  * Setup elastic Docker network if needed
  */
-async function maybeCreateDockerNetwork(log: ToolingLog) {
+export async function maybeCreateDockerNetwork(log: ToolingLog) {
   log.info(chalk.bold('Checking status of elastic Docker network.'));
   log.indent(4);
 

@@ -12,6 +12,7 @@ import { stat } from 'fs/promises';
 
 import {
   DOCKER_IMG,
+  maybeCreateDockerNetwork,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -99,26 +100,26 @@ describe('resolveDockerImage()', () => {
 });
 
 describe('verifyDockerInstalled()', () => {
-  test('should log the Docker version when it is installed', async () => {
+  test('should call the correct Docker command and log the version', async () => {
     execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'Docker Version 123' }));
 
     await verifyDockerInstalled(log);
+
+    expect(execa.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "docker",
+        Array [
+          "--version",
+        ],
+      ],
+    ]
+  `);
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
         " [34minfo[39m [1mVerifying Docker is installed.[22m",
         "   │ [34minfo[39m Docker Version 123",
-      ]
-    `);
-
-    expect(execa.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "docker",
-          Array [
-            "--version",
-          ],
-        ],
       ]
     `);
   });
@@ -131,17 +132,57 @@ describe('verifyDockerInstalled()', () => {
 
       Hello World"
     `);
+  });
+});
+
+describe('maybeCreateDockerNetwork()', () => {
+  test('should call the correct Docker command and create the network if needed', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+    await maybeCreateDockerNetwork(log);
 
     expect(execa.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           "docker",
           Array [
-            "--version",
+            "network",
+            "create",
+            "elastic",
           ],
         ],
       ]
     `);
+
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        "   │ [34minfo[39m Created new network.",
+      ]
+    `);
+  });
+
+  test('should use an existing network', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.reject({ message: 'network with name elastic already exists' })
+    );
+
+    await maybeCreateDockerNetwork(log);
+
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        "   │ [34minfo[39m Using existing network.",
+      ]
+    `);
+  });
+
+  test('should reject for any other Docker error', async () => {
+    execa.mockImplementationOnce(() => Promise.reject({ message: 'some error' }));
+
+    await expect(maybeCreateDockerNetwork(log)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"some error"`
+    );
   });
 });
 
