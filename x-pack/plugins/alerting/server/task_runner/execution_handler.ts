@@ -13,7 +13,10 @@ import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plu
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import {
+  ActionOpts as EventLogAction,
+  AlertingEventLogger,
+} from '../lib/alerting_event_logger/alerting_event_logger';
 import {
   GetSummarizedAlertsFnOpts,
   parseDuration,
@@ -76,9 +79,17 @@ interface RunActionArgs<
   spaceId: string;
 }
 
-interface RunSystemActionArgs {
+interface RunSystemActionArgs<Params extends RuleTypeParams> {
+  action: RuleAction;
   connectorAdapter: ConnectorAdapter;
   summarizedAlerts: CombinedSummarizedAlerts;
+  rule: SanitizedRule<Params>;
+  spaceId: string;
+}
+
+interface RunActionReturnValue {
+  actionsToEnqueueForExecution: EnqueueExecutionOptions[];
+  actionsToLog: EventLogAction[];
 }
 
 export class ExecutionHandler<
@@ -173,150 +184,145 @@ export class ExecutionHandler<
       actions: this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
+
     const executables = await this.generateExecutables(alerts, throttledSummaryActions);
 
-    if (!!executables.length) {
-      const {
-        CHUNK_SIZE,
-        logger,
-        alertingEventLogger,
-        ruleRunMetricsStore,
-        taskRunnerContext: { actionsConfigMap },
-        taskInstance: {
-          params: { spaceId, alertId: ruleId },
-        },
-      } = this;
+    if (executables.length === 0) {
+      return { throttledSummaryActions };
+    }
 
-      const logActions = [];
-      const bulkActions: EnqueueExecutionOptions[] = [];
+    const {
+      logger,
+      ruleRunMetricsStore,
+      taskRunnerContext: { actionsConfigMap },
+      taskInstance: {
+        params: { spaceId, alertId: ruleId },
+      },
+    } = this;
 
-      this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+    const logActions: EventLogAction[] = [];
+    const enqueueActions: EnqueueExecutionOptions[] = [];
 
-      for (const { action, alert, summarizedAlerts } of executables) {
-        const { actionTypeId } = action;
-        const actionGroup = action.group as ActionGroupIds;
+    this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-        ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+    for (const { action, alert, summarizedAlerts } of executables) {
+      const { actionTypeId } = action;
+      const actionGroup = action.group as ActionGroupIds;
 
-        if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+
+        logger.debug(
+          `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+        );
+
+        break;
+      }
+
+      if (
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId,
+          actionsConfigMap,
+        })
+      ) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
           logger.debug(
-            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
           );
-          break;
         }
 
-        if (
-          ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
-            actionTypeId,
-            actionsConfigMap,
-          })
-        ) {
-          if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
-            logger.debug(
-              `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
-            );
-          }
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
-          continue;
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+
+        continue;
+      }
+
+      if (!this.isExecutableAction(action)) {
+        this.logger.warn(
+          `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
+
+        continue;
+      }
+
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+
+      const isSystemAction = this.actionsClient.isSystemAction(action.id);
+
+      if (isSummaryAction(action) && summarizedAlerts && !isSystemAction) {
+        const { actionsToEnqueueForExecution, actionsToLog } = await this.runSummarizedAction({
+          action,
+          summarizedAlerts,
+          spaceId,
+        });
+
+        enqueueActions.push(...actionsToEnqueueForExecution);
+        logActions.push(...actionsToLog);
+
+        if (isActionOnInterval(action)) {
+          throttledSummaryActions[action.uuid!] = { date: new Date() };
         }
+      } else if (isSystemAction && summarizedAlerts) {
+        const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
+          action.actionTypeId
+        );
 
-        if (!this.isExecutableAction(action)) {
-          this.logger.warn(
-            `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
-          );
-          continue;
-        }
-
-        ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-        ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
-
-        const isSystemAction = this.actionsClient.isSystemAction(action.id);
-
-        if (isSummaryAction(action) && summarizedAlerts && !isSystemAction) {
-          const toEnqueueForExecution = await this.runSummarizedAction({
+        /**
+         * System actions without an adapter
+         * cannot be executed
+         *
+         */
+        if (connectorAdapter) {
+          const { actionsToEnqueueForExecution, actionsToLog } = await this.runSystemAction({
             action,
+            connectorAdapter,
             summarizedAlerts,
+            rule: this.rule,
             spaceId,
           });
 
-          bulkActions.push(...toEnqueueForExecution);
+          enqueueActions.push(...actionsToEnqueueForExecution);
+          logActions.push(...actionsToLog);
+        }
+      } else if (!isSystemAction) {
+        const executableAlert = alert!;
 
+        const { actionsToEnqueueForExecution, actionsToLog } = await this.runAction({
+          action,
+          spaceId,
+          alert: executableAlert,
+          ruleId,
+        });
+
+        enqueueActions.push(...actionsToEnqueueForExecution);
+        logActions.push(...actionsToLog);
+
+        if (!this.isRecoveredAlert(actionGroup)) {
           if (isActionOnInterval(action)) {
-            throttledSummaryActions[action.uuid!] = { date: new Date() };
+            executableAlert.updateLastScheduledActions(
+              action.group as ActionGroupIds,
+              generateActionHash(action),
+              action.uuid
+            );
+          } else {
+            executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
           }
-
-          logActions.push({
-            id: action.id,
-            typeId: action.actionTypeId,
-            alertSummary: {
-              new: summarizedAlerts.new.count,
-              ongoing: summarizedAlerts.ongoing.count,
-              recovered: summarizedAlerts.recovered.count,
-            },
-          });
-        } else if (isSystemAction) {
-          const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
-            action.actionTypeId
-          );
-
-          if (connectorAdapter) {
-            const toEnqueueForExecution = await this.runSystemAction({ connectorAdapter });
-
-            bulkActions.push(...toEnqueueForExecution);
-          }
-        } else {
-          const executableAlert = alert!;
-
-          const toEnqueueForExecution = await this.runAction({
-            action,
-            spaceId,
-            alert: executableAlert,
-            ruleId,
-          });
-
-          bulkActions.push(...toEnqueueForExecution);
-
-          logActions.push({
-            id: action.id,
-            typeId: action.actionTypeId,
-            alertId: executableAlert.getId(),
-            alertGroup: action.group,
-          });
-
-          if (!this.isRecoveredAlert(actionGroup)) {
-            if (isActionOnInterval(action)) {
-              executableAlert.updateLastScheduledActions(
-                action.group as ActionGroupIds,
-                generateActionHash(action),
-                action.uuid
-              );
-            } else {
-              executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
-            }
-            executableAlert.unscheduleActions();
-          }
-        }
-      }
-
-      if (!!bulkActions.length) {
-        for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          await this.actionsClient!.bulkEnqueueExecution(c);
-        }
-      }
-
-      if (!!logActions.length) {
-        for (const action of logActions) {
-          alertingEventLogger.logAction(action);
+          executableAlert.unscheduleActions();
         }
       }
     }
+
+    await this.bulkEnqueueForExecution(enqueueActions);
+    this.bulkLogActions(logActions);
+
     return { throttledSummaryActions };
   }
 
@@ -324,7 +330,7 @@ export class ExecutionHandler<
     action,
     summarizedAlerts,
     spaceId,
-  }: RunSummarizedActionArgs): Promise<EnqueueExecutionOptions[]> {
+  }: RunSummarizedActionArgs): Promise<RunActionReturnValue> {
     const { start, end } = getSummaryActionTimeBounds(
       action,
       this.rule.schedule,
@@ -351,11 +357,24 @@ export class ExecutionHandler<
       }),
     };
 
-    const toEnqueueForExecution = await this.actionRunOrAddToBulk({
+    const actionsToEnqueueForExecution = await this.actionRunOrAddToBulk({
       enqueueOptions: this.getEnqueueOptions(actionToRun),
     });
 
-    return toEnqueueForExecution;
+    return {
+      actionsToEnqueueForExecution,
+      actionsToLog: [
+        {
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertSummary: {
+            new: summarizedAlerts.new.count,
+            ongoing: summarizedAlerts.ongoing.count,
+            recovered: summarizedAlerts.recovered.count,
+          },
+        },
+      ],
+    };
   }
 
   private async runAction({
@@ -363,9 +382,12 @@ export class ExecutionHandler<
     spaceId,
     alert,
     ruleId,
-  }: RunActionArgs<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
-    EnqueueExecutionOptions[]
-  > {
+  }: RunActionArgs<
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >): Promise<RunActionReturnValue> {
     const ruleUrl = this.buildRuleUrl(spaceId);
     const actionToRun = {
       ...action,
@@ -396,16 +418,83 @@ export class ExecutionHandler<
       }),
     };
 
-    const toEnqueueForExecution = await this.actionRunOrAddToBulk({
+    const actionsToEnqueueForExecution = await this.actionRunOrAddToBulk({
       enqueueOptions: this.getEnqueueOptions(actionToRun),
     });
 
-    return toEnqueueForExecution;
+    return {
+      actionsToEnqueueForExecution,
+      actionsToLog: [
+        {
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertId: alert.getId(),
+          alertGroup: action.group,
+        },
+      ],
+    };
   }
 
   private async runSystemAction({
+    action,
+    spaceId,
     connectorAdapter,
-  }: RunSystemActionArgs): Promise<EnqueueExecutionOptions[]> {}
+    summarizedAlerts,
+    rule,
+  }: RunSystemActionArgs<Params>): Promise<RunActionReturnValue> {
+    const { start, end } = getSummaryActionTimeBounds(
+      action,
+      this.rule.schedule,
+      this.previousStartedAt
+    );
+
+    const ruleUrl = this.buildRuleUrl(spaceId, start, end);
+
+    const connectorAdapterActionParams = connectorAdapter.buildActionParams({
+      alerts: summarizedAlerts,
+      rule,
+      ruleUrl,
+      spaceId,
+      params: action.params,
+    });
+
+    const actionToRun = Object.assign(action, { params: connectorAdapterActionParams });
+
+    const actionsToEnqueueForExecution = await this.actionRunOrAddToBulk({
+      enqueueOptions: this.getEnqueueOptions(actionToRun),
+    });
+
+    return {
+      actionsToEnqueueForExecution,
+      actionsToLog: [
+        {
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertSummary: {
+            new: summarizedAlerts.new.count,
+            ongoing: summarizedAlerts.ongoing.count,
+            recovered: summarizedAlerts.recovered.count,
+          },
+        },
+      ],
+    };
+  }
+
+  private async bulkEnqueueForExecution(actions: EnqueueExecutionOptions[]) {
+    if (!!actions.length) {
+      for (const c of chunk(actions, this.CHUNK_SIZE)) {
+        await this.actionsClient!.bulkEnqueueExecution(c);
+      }
+    }
+  }
+
+  private async bulkLogActions(actions: EventLogAction[]) {
+    if (!!actions.length) {
+      for (const actionToBeLogged of actions) {
+        this.alertingEventLogger.logAction(actionToBeLogged);
+      }
+    }
+  }
 
   private logNumberOfFilteredAlerts({
     numberOfAlerts = 0,

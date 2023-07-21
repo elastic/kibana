@@ -22,6 +22,8 @@ interface BuildActionParamsArgs<
   alerts: CombinedSummarizedAlerts;
   rule: SanitizedRule<RuleParams>;
   params: RuleActionParams;
+  spaceId: string;
+  ruleUrl?: string;
 }
 
 export interface ConnectorAdapter {
