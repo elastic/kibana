@@ -12,7 +12,6 @@ import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
   PIN_EVENT,
-  PIN_TOOLTIP,
   TIMELINE_DESCRIPTION,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
@@ -26,16 +25,14 @@ import { deleteTimelines } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
-  addDescriptionToTimeline,
   addFilter,
-  addNameToTimeline,
+  addNameAndDescriptionToTimelineTemplate,
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
   expandEventAction,
   markAsFavorite,
   populateTimeline,
-  waitForTimelineChanges,
 } from '../../../tasks/timeline';
 import {
   navigateToTimelineTemplates,
@@ -59,23 +56,14 @@ describe('Timeline Templates', () => {
     createNewTimelineTemplate();
     populateTimeline();
     addFilter(getTimeline().filter);
-    cy.get(PIN_EVENT).realHover();
-
-    cy.get(PIN_TOOLTIP).should(
-      'have.text',
-      'This alert may not be pinned while editing a template timeline'
-    );
-
+    cy.get(PIN_EVENT).should('be.visible');
     cy.get(LOCKED_ICON).should('be.visible');
 
-    addNameToTimeline(getTimeline().title);
+    addNameAndDescriptionToTimelineTemplate(getTimeline());
 
     cy.wait('@timeline').then(({ response }) => {
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
-
-      addDescriptionToTimeline(getTimeline().description);
       markAsFavorite();
-      waitForTimelineChanges();
       createNewTimelineTemplate();
       closeTimeline();
 

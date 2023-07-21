@@ -82,6 +82,7 @@ import {
   TIMELINE_QUERY,
   PROVIDER_BADGE,
   PROVIDER_BADGE_DELETE,
+  TIMELINE_PROGRESS_BAR,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -107,8 +108,8 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get('[data-test-subj="progress-bar"]').should('exist');
-  cy.get('[data-test-subj="progress-bar"]').should('not.exist');
+  cy.get(TIMELINE_PROGRESS_BAR).should('exist');
+  cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
@@ -128,6 +129,13 @@ export const addNameAndDescriptionToTimeline = (
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const addNameAndDescriptionToTimelineTemplate = (
+  timeline: Timeline,
+  modalAlreadyOpen: boolean = false
+) => {
+  addNameAndDescriptionToTimeline(timeline, modalAlreadyOpen);
 };
 
 export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -338,8 +346,9 @@ export const deleteTimeline = () => {
 };
 
 export const markAsFavorite = () => {
+  cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
   cy.get(STAR_ICON).should('be.visible').click();
-  cy.get(LOADING_INDICATOR).should('exist');
+  cy.wait('@markedAsFavourite');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
 

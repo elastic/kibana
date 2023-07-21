@@ -228,6 +228,8 @@ export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="insp
 
 export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
+export const TIMELINE_PROGRESS_BAR = '[data-test-subj="progress-bar"]';
+
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';
