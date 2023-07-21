@@ -9,7 +9,9 @@ import { request } from '@kbn/security-solution-plugin/public/management/cypress
 import { ServerlessRoleName } from '../../../../../shared/lib';
 
 export const login = (user?: ServerlessRoleName) => {
-  const url = Cypress.config().baseUrl;
+  const url = new URL(Cypress.config().baseUrl ?? '');
+  url.pathname = '/internal/security/login';
+
   let username = Cypress.env('ELASTICSEARCH_USERNAME');
   let password = Cypress.env('ELASTICSEARCH_PASSWORD');
 
@@ -26,10 +28,10 @@ export const login = (user?: ServerlessRoleName) => {
   request({
     headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
     method: 'POST',
-    url: `${url}/internal/security/login`,
+    url: url.toString(),
     body: {
       providerType: 'basic',
-      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: !url.toString().includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username,

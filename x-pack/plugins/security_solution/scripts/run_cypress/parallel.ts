@@ -202,7 +202,6 @@ export const cli = () => {
                 );
 
                 if (
-                  // @ts-expect-error
                   configFromTestFile?.enableExperimental?.length &&
                   _.some(vars.kbnTestServer.serverArgs, (value) =>
                     value.includes('--xpack.securitySolution.enableExperimental')
@@ -226,6 +225,21 @@ export const cli = () => {
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
+                  );
+                }
+
+                // Serverless Specific
+                if (vars.serverless === true) {
+                  if (configFromTestFile?.productTypes) {
+                    vars.kbnTestServer.serverArgs.push(
+                      `--xpack.securitySolutionServerless.productTypes: ${JSON.stringify(
+                        configFromTestFile.productTypes
+                      )}`
+                    );
+                  }
+                } else if (configFromTestFile?.productTypes) {
+                  log.warning(
+                    `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
                   );
                 }
 
