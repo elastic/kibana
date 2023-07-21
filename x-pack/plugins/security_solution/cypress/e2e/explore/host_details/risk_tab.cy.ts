@@ -14,6 +14,7 @@ describe('risk tab', () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', 'risk_hosts');
   });
 
   beforeEach(() => {
