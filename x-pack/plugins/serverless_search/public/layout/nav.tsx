@@ -67,7 +67,12 @@ const navigationTree: NavigationTreeDefinition = {
                 );
               },
             },
-            { link: 'observability-overview:alerts' },
+            {
+              link: 'management:triggersActions',
+              title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
+                defaultMessage: 'Alerts',
+              }),
+            },
           ],
         },
         {
@@ -139,10 +144,6 @@ const navigationTree: NavigationTreeDefinition = {
             {
               id: 'cloudLinkUserAndRoles',
               cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkPerformance',
-              cloudLink: 'performance',
             },
             {
               id: 'cloudLinkBilling',

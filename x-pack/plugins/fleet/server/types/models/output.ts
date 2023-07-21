@@ -150,11 +150,12 @@ export const KafkaSchema = {
       schema.literal(kafkaCompressionType.Gzip),
       schema.literal(kafkaCompressionType.Snappy),
       schema.literal(kafkaCompressionType.Lz4),
+      schema.literal(kafkaCompressionType.None),
     ])
   ),
   compression_level: schema.conditional(
     schema.siblingRef('compression'),
-    schema.string(),
+    schema.string({ validate: (val) => (val === kafkaCompressionType.Gzip ? undefined : 'never') }),
     schema.number(),
     schema.never()
   ),
