@@ -10,7 +10,13 @@ import mockFs from 'mock-fs';
 import { existsSync } from 'fs';
 import { stat } from 'fs/promises';
 
-import { resolveDockerImage, DOCKER_IMG, resolveEsArgs, setupServerlessVolumes } from './docker';
+import {
+  resolveDockerImage,
+  DOCKER_IMG,
+  resolveEsArgs,
+  setupServerlessVolumes,
+  resolveDockerCmd,
+} from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 const verifyDockerInstalledMock = jest.fn();
@@ -228,5 +234,26 @@ describe('setupServerlessVolumes()', () => {
 
     volumeCmdTest(volumeCmd);
     expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
+  });
+});
+
+describe('resolveDockerCmd()', () => {
+  test('should return default command with no options', () => {
+    const dockerCmd = resolveDockerCmd({});
+
+    expect(dockerCmd).toEqual(expect.arrayContaining(['run', DOCKER_IMG]));
+  });
+
+  test('should return custom command when passed', () => {
+    const dockerCmd = resolveDockerCmd({ dockerCmd: 'start -a es01' });
+
+    expect(dockerCmd).toHaveLength(3);
+    expect(dockerCmd).toMatchInlineSnapshot(`
+      Array [
+        "start",
+        "-a",
+        "es01",
+      ]
+    `);
   });
 });

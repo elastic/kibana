@@ -363,7 +363,7 @@ function getDockerImage(options: DockerOptions) {
 /**
  * Resolve the full command to run Elasticsearch Docker container
  */
-function resolveDockerCmd(options: DockerOptions) {
+export function resolveDockerCmd(options: DockerOptions) {
   if (options.dockerCmd) {
     return options.dockerCmd.split(' ');
   }
