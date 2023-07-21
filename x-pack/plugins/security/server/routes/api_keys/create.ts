@@ -26,16 +26,16 @@ export type CreateAPIKeyResult = estypes.SecurityCreateApiKeyResponse;
  */
 export type CreateAPIKeyParams =
   | CreateRestAPIKeyParams
-  | CreateCrossClusterAPIKeyParams
-  | CreateRestAPIKeyWithKibanaPrivilegesParams;
+  | CreateRestAPIKeyWithKibanaPrivilegesParams
+  | CreateCrossClusterAPIKeyParams;
 
 export type CreateRestAPIKeyParams = TypeOf<typeof restApiKeySchema>;
-export type CreateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
 export type CreateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
   ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
 >;
+export type CreateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
 
-const restApiKeySchema = schema.object({
+export const restApiKeySchema = schema.object({
   type: schema.maybe(schema.literal('rest')),
   name: schema.string(),
   expiration: schema.maybe(schema.string()),
@@ -45,7 +45,21 @@ const restApiKeySchema = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-const crossClusterApiKeySchema = restApiKeySchema.extends({
+export const getRestApiKeyWithKibanaPrivilegesSchema = (
+  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
+) =>
+  restApiKeySchema.extends({
+    role_descriptors: null,
+    kibana_role_descriptors: schema.recordOf(
+      schema.string(),
+      schema.object({
+        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
+        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
+      })
+    ),
+  });
+
+export const crossClusterApiKeySchema = restApiKeySchema.extends({
   type: schema.literal('cross_cluster'),
   role_descriptors: null,
   access: schema.object(
@@ -69,20 +83,6 @@ const crossClusterApiKeySchema = restApiKeySchema.extends({
   ),
 });
 
-const getRestApiKeyWithKibanaPrivilegesSchema = (
-  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
-) =>
-  restApiKeySchema.extends({
-    role_descriptors: null,
-    kibana_role_descriptors: schema.recordOf(
-      schema.string(),
-      schema.object({
-        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
-        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
-      })
-    ),
-  });
-
 export function defineCreateApiKeyRoutes({
   router,
   authz,
@@ -101,8 +101,8 @@ export function defineCreateApiKeyRoutes({
       validate: {
         body: schema.oneOf([
           restApiKeySchema,
-          crossClusterApiKeySchema,
           bodySchemaWithKibanaPrivileges,
+          crossClusterApiKeySchema,
         ]),
       },
       options: {
