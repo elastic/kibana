@@ -29,6 +29,10 @@ export const setupDataLoaderTasks = (
   );
 
   on('task', {
+    /**
+     * Loads a user/role into Kibana. Used from `login()` task.
+     * @param name
+     */
     loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
       return (await roleAndUserLoaderPromise).load(name);
     },

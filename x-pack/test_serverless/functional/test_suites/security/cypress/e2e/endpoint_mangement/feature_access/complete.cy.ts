@@ -5,6 +5,28 @@
  * 2.0.
  */
 
-describe('Security Complete PLI', () => {
-  // FIXME:PT implement
-});
+import { login } from '../../../tasks/login';
+import { getEndpointManagementPageList } from '../../../lib';
+
+describe(
+  'Security Complete PLI',
+  {
+    env: {
+      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
+    },
+  },
+  () => {
+    const pages = getEndpointManagementPageList();
+
+    beforeEach(() => {
+      login();
+    });
+
+    for (const { url, title } of pages) {
+      it(`should not allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj('noPrivilegesPage').should('exist');
+      });
+    }
+  }
+);
