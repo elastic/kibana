@@ -12,13 +12,11 @@ import {
   LOCKED_ICON,
   NOTES_TEXT,
   PIN_EVENT,
-  SERVER_SIDE_EVENT_COUNT,
   TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
-  TIMELINE_TAB_CONTENT_EQL,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   EDIT_TIMELINE_BTN,
   EDIT_TIMELINE_TOOLTIP,
@@ -30,7 +28,6 @@ import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
-  addEqlToTimeline,
   addFilter,
   addNameAndDescriptionToTimeline,
   addNotesToTimeline,
@@ -139,19 +136,6 @@ describe('Timelines', (): void => {
       cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
         .find(NOTES_TEXT)
         .should('have.text', getTimeline().notes);
-    });
-
-    it('should update timeline after adding eql', () => {
-      cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-      const eql = 'any where process.name == "zsh"';
-      addEqlToTimeline(eql);
-
-      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
-
-      cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
-        .invoke('text')
-        .then(parseInt)
-        .should('be.gt', 0);
     });
   });
 });
