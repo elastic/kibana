@@ -11659,7 +11659,6 @@
     "xpack.csp.vulnerabilityTable.column.version": "版本",
     "xpack.csp.vulnerabilityTable.column.vulnerability": "漏洞",
     "xpack.csp.vulnerabilityTable.panel.buttonText": "查看所有漏洞",
-    "xpack.csp.vulnerabilityTable.panel.tooltipText": "在结果中浏览",
     "xpack.csp.vulnMgmtIntegration.awsOption.nameTitle": "Amazon Web Services",
     "xpack.csp.vulnMgmtIntegration.azureOption.nameTitle": "Azure",
     "xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent": "即将推出",
