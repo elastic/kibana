@@ -311,9 +311,12 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies');
       login();
       visit(ENTITY_ANALYTICS_URL);
       waitForPageToBeLoaded();
+      cy.wait('@anomalies', { timeout: 30000 });
+      cy.wait('@anomalies', { timeout: 30000 });
     });
 
     it('renders table with pagination', () => {
@@ -332,10 +335,6 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('enables a job', () => {
-      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies');
-      cy.wait('@anomalies', { timeout: 10000 });
-      cy.wait('@anomalies', { timeout: 10000 });
-
       cy.get(ANOMALIES_TABLE_ROWS, { timeout: 30000 })
         .eq(5)
         .within(() => {
