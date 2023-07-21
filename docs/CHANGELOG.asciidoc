@@ -383,14 +383,14 @@ For the second scenario, refreshing the case fixes the issue.
 
 // tag::known-issue-158936[]
 [discrete]
-.Error when clicking link to Universal Profiling Agent integration.
+.Error when clicking link to Universal Profiling Agent integration
 [%collapsible]
 ====
 *Details* +
-From the *{agent} Integration* tab on the *Add profiling data* page, clicking *Manage Universal Profiling agent in Fleet* results in an error loading integration details. 
+Clicking *Manage Universal Profiling agent in Fleet* on the *Add profiling data* page under the *{agent} integration* tab results in an error loading integration details. 
 
 *Impact* +
-To access the Universal Profiling Agent integration:
+You can access the Universal Profiling Agent integration by doing the following:
 
 . Select *Integrations* from the left navigation.
 . Turn on *Display beta integrations* in the bottom-left corner of the Integrations page.
