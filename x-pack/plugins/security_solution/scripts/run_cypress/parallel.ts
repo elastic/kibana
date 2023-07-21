@@ -291,7 +291,10 @@ export const cli = () => {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
                   },
-                  env: customEnv,
+                  env: {
+                    ...customEnv,
+                    ...(argv.env ?? {}),
+                  },
                 },
               });
             } else {
@@ -307,7 +310,10 @@ export const cli = () => {
                       baseUrl: `http://localhost:${kibanaPort}`,
                     },
                     numTestsKeptInMemory: 0,
-                    env: customEnv,
+                    env: {
+                      ...customEnv,
+                      ...(argv.env ?? {}),
+                    },
                   },
                 });
               } catch (error) {
