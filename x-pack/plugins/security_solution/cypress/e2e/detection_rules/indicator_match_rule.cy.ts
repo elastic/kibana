@@ -101,7 +101,6 @@ import {
   SCHEDULE_LOOKBACK_UNITS_INPUT,
 } from '../../screens/create_new_rule';
 import { goBackToRuleDetails } from '../../tasks/edit_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
@@ -121,8 +120,8 @@ describe('indicator match', () => {
 
     before(() => {
       cleanKibana();
-      esArchiverLoad('threat_indicator');
-      esArchiverLoad('suspicious_source_event');
+      cy.task('esArchiverLoad', 'threat_indicator');
+      cy.task('esArchiverLoad', 'suspicious_source_event');
     });
 
     beforeEach(() => {
@@ -130,8 +129,8 @@ describe('indicator match', () => {
     });
 
     after(() => {
-      esArchiverUnload('threat_indicator');
-      esArchiverUnload('suspicious_source_event');
+      cy.task('esArchiverUnload', 'threat_indicator');
+      cy.task('esArchiverUnload', 'suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
