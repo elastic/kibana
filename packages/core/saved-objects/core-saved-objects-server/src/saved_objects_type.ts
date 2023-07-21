@@ -198,7 +198,7 @@ export interface SavedObjectsType<Attributes = any> {
    *     '8.7.0': migrateTo870,
    *   },
    *   modelVersions: {
-   *     '1': model_version_1
+   *     '1': modelVersion1
    *   }
    * }
    * ```
@@ -216,7 +216,7 @@ export interface SavedObjectsType<Attributes = any> {
    *     '8.10.0': migrateTo8_10, // error: migration registered for after the switch version
    *   },
    *   modelVersions: {
-   *     '1': model_version_1
+   *     '1': modelVersion1
    *   }
    * }
    * ```
