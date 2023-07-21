@@ -165,12 +165,12 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
 /**
  * Determine the Docker image from CLI options and defaults
  */
-const resolveDockerImage = ({
+export function resolveDockerImage({
   tag,
   image,
   repo,
   defaultImg,
-}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) => {
+}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) {
   if (image) {
     if (!image.includes(DOCKER_REGISTRY)) {
       throw createCliError(
@@ -184,7 +184,7 @@ const resolveDockerImage = ({
   }
 
   return defaultImg;
-};
+}
 
 /**
  * Verify that Docker is installed locally
@@ -363,7 +363,7 @@ function getDockerImage(options: DockerOptions) {
 /**
  * Resolve the full command to run Elasticsearch Docker container
  */
-const resolveDockerCmd = (options: DockerOptions) => {
+function resolveDockerCmd(options: DockerOptions) {
   if (options.dockerCmd) {
     return options.dockerCmd.split(' ');
   }
@@ -372,7 +372,7 @@ const resolveDockerCmd = (options: DockerOptions) => {
     resolveEsArgs(DEFAULT_DOCKER_ESARGS, options),
     getDockerImage(options)
   );
-};
+}
 
 /**
  *
