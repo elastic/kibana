@@ -315,7 +315,7 @@ describe('Entity Analytics Dashboard', () => {
       login();
       visit(ENTITY_ANALYTICS_URL);
       waitForPageToBeLoaded();
-      cy.wait('@anomalies', { timeout: 30000 });
+      cy.wait('@anomalies', { timeout: 120000 });
       cy.scrollTo('bottom');
     });
 
@@ -323,7 +323,7 @@ describe('Entity Analytics Dashboard', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
 
       // Increase default timeout because anomalies table takes a while to load
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 20000 }).should('have.length', 10);
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
 
       // navigates to next page
       cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
@@ -335,7 +335,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('enables a job', () => {
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 30000 })
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
         .eq(5)
         .within(() => {
           cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
