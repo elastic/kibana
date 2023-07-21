@@ -226,7 +226,7 @@ async function maybeCreateDockerNetwork(log: ToolingLog) {
 /**
  * Common setup for Docker and Serverless containers
  */
-async function setupDocker(log: ToolingLog) {
+export async function setupDocker(log: ToolingLog) {
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
 }
