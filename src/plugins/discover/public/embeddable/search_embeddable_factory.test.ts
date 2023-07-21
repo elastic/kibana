@@ -9,6 +9,7 @@
 import { discoverServiceMock } from '../__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { SearchByValueInput } from '@kbn/saved-search-plugin/public';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
@@ -29,7 +30,7 @@ const input = {
 const ErrorEmbeddableMock = ErrorEmbeddable as unknown as jest.Mock;
 
 describe('SearchEmbeddableFactory', () => {
-  it('should create factory correctly', async () => {
+  it('should create factory correctly from saved object', async () => {
     const mockUnwrap = jest
       .spyOn(discoverServiceMock.savedSearch.byValue.attributeService, 'unwrapAttributes')
       .mockClear();
@@ -43,6 +44,24 @@ describe('SearchEmbeddableFactory', () => {
 
     expect(mockUnwrap).toHaveBeenCalledTimes(1);
     expect(mockUnwrap).toHaveBeenLastCalledWith(input);
+    expect(embeddable).toBeDefined();
+  });
+
+  it('should create factory correctly from by value input', async () => {
+    const mockUnwrap = jest
+      .spyOn(discoverServiceMock.savedSearch.byValue.attributeService, 'unwrapAttributes')
+      .mockClear();
+
+    const factory = new SearchEmbeddableFactory(
+      () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),
+      () => Promise.resolve(discoverServiceMock)
+    );
+
+    const { savedObjectId, ...byValueInput } = input;
+    const embeddable = await factory.create(byValueInput as SearchByValueInput);
+
+    expect(mockUnwrap).toHaveBeenCalledTimes(1);
+    expect(mockUnwrap).toHaveBeenLastCalledWith(byValueInput);
     expect(embeddable).toBeDefined();
   });
 
