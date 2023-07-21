@@ -123,8 +123,10 @@ export const addNameAndDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled');
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
