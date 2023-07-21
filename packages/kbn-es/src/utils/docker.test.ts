@@ -11,29 +11,30 @@ import { existsSync } from 'fs';
 import { stat } from 'fs/promises';
 
 import {
-  resolveDockerImage,
   DOCKER_IMG,
+  resolveDockerCmd,
+  resolveDockerImage,
   resolveEsArgs,
   setupServerlessVolumes,
-  resolveDockerCmd,
+  verifyDockerInstalled,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
-const verifyDockerInstalledMock = jest.fn();
-const maybeCreateDockerNetworkMock = jest.fn();
+// const verifyDockerInstalledMock = jest.fn();
+// const maybeCreateDockerNetworkMock = jest.fn();
 
-jest.doMock('./docker', () => {
-  const original = jest.requireActual('./docker');
+// jest.doMock('./docker', () => {
+//   const original = jest.requireActual('./docker');
 
-  return {
-    ...original,
-    verifyDockerInstalled: verifyDockerInstalledMock,
-    maybeCreateDockerNetwork: maybeCreateDockerNetworkMock,
-  };
-});
+//   return {
+//     ...original,
+//     verifyDockerInstalled: verifyDockerInstalledMock,
+//     maybeCreateDockerNetwork: maybeCreateDockerNetworkMock,
+//   };
+// });
 
-// jest.mock('execa');
-// const execa = jest.requireMock('execa');
+jest.mock('execa');
+const execa = jest.requireMock('execa');
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
@@ -97,28 +98,52 @@ describe('resolveDockerImage()', () => {
   });
 });
 
-// TODO: setupDocker tests
-// describe('setupDocker()', () => {
-//   test('should log the Docker version when it is installed', async () => {
-//     verifyDockerInstalledMock.mockImplementationOnce(() =>
-//       log.info('Docker version 23.0.5, build bc4487c')
-//     );
+describe('verifyDockerInstalled()', () => {
+  test('should log the Docker version when it is installed', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'Docker Version 123' }));
 
-//     await setupDocker(log);
+    await verifyDockerInstalled(log);
 
-//     expect(logWriter.messages).toMatchInlineSnapshot(`
-//       Array [
-//         " [34minfo[39m [1mVerifying Docker is installed.[22m",
-//         "   │ [34minfo[39m Docker version 23.0.5, build bc4487a",
-//         " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
-//         "   │ [34minfo[39m Using existing network.",
-//       ]
-//     `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " [34minfo[39m [1mVerifying Docker is installed.[22m",
+        "   │ [34minfo[39m Docker Version 123",
+      ]
+    `);
 
-//     // expect(verifyDockerInstalledMock.mock.calls).toMatchInlineSnapshot(`Array []`);
-//     // expect(verifyDockerInstalled.mock.calls).toMatchInlineSnapshot(`Array []`);
-//   });
-// });
+    expect(execa.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "--version",
+          ],
+        ],
+      ]
+    `);
+  });
+
+  test('should reject when Docker is not installed', async () => {
+    execa.mockImplementationOnce(() => Promise.reject({ message: 'Hello World' }));
+
+    await expect(verifyDockerInstalled(log)).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Docker not found locally. Install it from: https://www.docker.com
+
+      Hello World"
+    `);
+
+    expect(execa.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "--version",
+          ],
+        ],
+      ]
+    `);
+  });
+});
 
 describe('resolveEsArgs()', () => {
   const defaultEsArgs: Array<[string, string]> = [

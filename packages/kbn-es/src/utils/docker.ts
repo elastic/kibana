@@ -189,7 +189,7 @@ export function resolveDockerImage({
 /**
  * Verify that Docker is installed locally
  */
-async function verifyDockerInstalled(log: ToolingLog) {
+export async function verifyDockerInstalled(log: ToolingLog) {
   log.info(chalk.bold('Verifying Docker is installed.'));
 
   const { stdout } = await execa('docker', ['--version']).catch((error) => {
@@ -226,7 +226,7 @@ async function maybeCreateDockerNetwork(log: ToolingLog) {
 /**
  * Common setup for Docker and Serverless containers
  */
-export async function setupDocker(log: ToolingLog) {
+async function setupDocker(log: ToolingLog) {
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
 }
