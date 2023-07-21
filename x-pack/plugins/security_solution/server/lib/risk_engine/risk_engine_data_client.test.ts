@@ -68,7 +68,7 @@ describe('RiskEngineDataClient', () => {
     });
   });
 
-  describe('initializeResources succes', () => {
+  describe('initializeResources success', () => {
     it('should initialize risk engine resources', async () => {
       await riskEngineDataClient.initializeResources({ namespace: 'default' });
 
@@ -152,7 +152,7 @@ describe('RiskEngineDataClient', () => {
                             "type": "keyword",
                           },
                           "risk_description": Object {
-                            "type": "float",
+                            "type": "keyword",
                           },
                           "risk_score": Object {
                             "type": "float",
@@ -205,7 +205,7 @@ describe('RiskEngineDataClient', () => {
                             "type": "keyword",
                           },
                           "risk_description": Object {
-                            "type": "float",
+                            "type": "keyword",
                           },
                           "risk_score": Object {
                             "type": "float",
