@@ -56,7 +56,7 @@ export function streamFactory<T = string>(
 ): StreamFactoryReturnType<T>;
 /**
  * Sets up a response stream with support for gzip compression depending on provided
- * request headers. Any non-string data pushed to the stream will be stream as NDJSON.
+ * request headers. Any non-string data pushed to the stream will be streamed as NDJSON.
  *
  * @param headers - Request headers.
  * @param logger - Kibana logger.

@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { getSnappedWindowParameters, getWindowParameters } from './src/get_window_parameters';
-export type { WindowParameters } from './src/get_window_parameters';
+export { useFetchStream } from './use_fetch_stream';
+export type {
+  UseFetchStreamCustomReducerParams,
+  UseFetchStreamParamsDefault,
+} from './use_fetch_stream';

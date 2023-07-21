@@ -4726,6 +4726,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-response-stream@link:x-pack/packages/ml/response_stream":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-route-utils@link:x-pack/packages/ml/route_utils":
   version "0.0.0"
   uid ""

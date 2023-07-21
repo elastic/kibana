@@ -23,7 +23,7 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/aiops-utils';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getSnappedWindowParameters, getWindowParameters } from './src/get_window_parameters';
-export type { WindowParameters } from './src/get_window_parameters';
+export { streamFactory } from './stream_factory';

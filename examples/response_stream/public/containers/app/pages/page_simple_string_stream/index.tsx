@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/aiops-utils';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
 
 import { ApiSimpleStringStream } from '../../../../../common/api';
 

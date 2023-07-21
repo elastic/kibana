@@ -7,7 +7,7 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { streamFactory } from '@kbn/aiops-utils';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import {
   errorAction,
