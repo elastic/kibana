@@ -11,10 +11,19 @@ import { KbnClient } from '@kbn/test';
 import { Role } from '@kbn/security-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
+import { AxiosError } from 'axios';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
 } from './kibana_roles';
+
+const igonoreHttp409Error = (error: AxiosError) => {
+  if (error?.response?.status === 409) {
+    return;
+  }
+
+  throw error;
+};
 
 export interface LoadedRoleAndUser {
   role: string;
@@ -53,12 +62,15 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
   private async createRole(role: Role): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
+    this.logger.debug(`creating role:`, roleDefinition);
+
     await this.kbnClient
       .request({
         method: 'PUT',
         path: `/api/security/role/${roleName}?createOnly=true`,
         body: roleDefinition,
       })
+      .catch(igonoreHttp409Error)
       .catch(this.logPromiseError);
   }
 
@@ -67,18 +79,23 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     password: string,
     roles: string[] = []
   ): Promise<void> {
+    const user = {
+      username,
+      password,
+      roles,
+      full_name: username,
+      email: '',
+    };
+
+    this.logger.debug(`creating user:`, user);
+
     await this.kbnClient
       .request({
         method: 'POST',
         path: `/internal/security/users/${username}`,
-        body: {
-          username,
-          password,
-          roles,
-          full_name: username,
-          email: '',
-        },
+        body: user,
       })
+      .catch(igonoreHttp409Error)
       .catch(this.logPromiseError);
   }
 }
