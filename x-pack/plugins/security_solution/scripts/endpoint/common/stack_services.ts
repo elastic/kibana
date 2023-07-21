@@ -9,6 +9,8 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
+import pRetry from 'p-retry';
+import nodeFetch from 'node-fetch';
 import { getLocalhostRealIp, isLocalhost } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
 
@@ -64,6 +66,8 @@ export const createRuntimeServices = async ({
   let password = _password;
 
   if (asSuperuser) {
+    await waitForKibana(kibanaUrl);
+
     const superuserResponse = await createSecuritySuperuser(
       createEsClient({
         url: elasticsearchUrl,
@@ -186,4 +190,30 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
   }
 
   return status.version.number;
+};
+
+/**
+ * Checks to ensure Kibana is up and running
+ * @param kbnUrl
+ */
+export const waitForKibana = async (kbnUrl: string): Promise<void> => {
+  const url = (() => {
+    const u = new URL(kbnUrl);
+    // This API seems to be available even if user is not authenticated
+    u.pathname = '/api/status';
+    return u.toString();
+  })();
+
+  await pRetry(
+    async () => {
+      const response = await nodeFetch(url);
+
+      if (response.status !== 200) {
+        throw new Error(
+          `Kibana not available. Returned: [${response.status}]: ${response.statusText}`
+        );
+      }
+    },
+    { maxTimeout: 10000 }
+  );
 };
