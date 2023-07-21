@@ -191,8 +191,13 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.type',
+        },
+        {
           type: 'click',
-          customSelector: 'button[title="agent.ephemeral_id"]',
+          customSelector: 'button[title="agent.type"]',
         },
         {
           type: 'click',
@@ -200,7 +205,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          customSelector: 'button[title="agent.ephemeral_id"]',
+          customSelector: 'button[title="agent.type"]',
         },
         {
           type: 'click',
@@ -215,7 +220,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.ephemeral_idIS endpoint',
+          value: 'AND agent.typeIS endpoint',
         },
       ],
     },
@@ -244,8 +249,13 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.name',
+        },
+        {
           type: 'click',
-          customSelector: 'button[title="agent.id"]',
+          customSelector: 'button[title="agent.name"]',
         },
         {
           type: 'input',
@@ -260,7 +270,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.idIS test',
+          value: 'AND agent.nameIS test',
         },
         {
           selector: 'EventFiltersListPage-card-header-title',

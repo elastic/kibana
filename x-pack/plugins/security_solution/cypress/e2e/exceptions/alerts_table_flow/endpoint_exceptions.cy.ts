@@ -54,7 +54,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
   const ITEM_NAME = 'Sample Exception List Item';
   const ITEM_NAME_EDIT = 'Sample Exception List Item';
-  const ADDITIONAL_ENTRY = 'host.hostname';
+  const ADDITIONAL_ENTRY = 'agent.id';
   beforeEach(() => {
     esArchiverResetKibana();
     login();
