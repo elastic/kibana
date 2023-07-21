@@ -18,11 +18,6 @@ import {
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
 } from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
@@ -51,14 +46,14 @@ describe('Add exception using data views from rule details', () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
-    esArchiverResetKibana();
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', 'exceptions');
     login();
     postDataView('exceptions-*');
   });
 
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   beforeEach(() => {
@@ -78,7 +73,7 @@ describe('Add exception using data views from rule details', () => {
   });
 
   afterEach(() => {
-    esArchiverUnload('exceptions_2');
+    cy.task('esArchiverUnload', 'exceptions_2');
   });
 
   it('Creates an exception item and close all matching alerts', () => {
@@ -119,7 +114,7 @@ describe('Add exception using data views from rule details', () => {
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // load more docs
-    esArchiverLoad('exceptions_2');
+    cy.task('esArchiverLoad', 'exceptions_2');
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
