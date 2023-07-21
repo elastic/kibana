@@ -153,7 +153,7 @@ export interface SavedObjectsType<Attributes = any> {
    *   name: 'foo',
    *   // other mandatory attributes...
    *   modelVersions: {
-   *     '1': model_version_1,
+   *     '1': modelVersion1,
    *     '2': modelVersion2,
    *     '3': modelVersion3,
    *   }
@@ -167,7 +167,7 @@ export interface SavedObjectsType<Attributes = any> {
    *   name: 'foo',
    *   // other mandatory attributes...
    *   modelVersions: {
-   *     '1': model_version_1,
+   *     '1': modelVersion1,
    *     '3': modelVersion3, // ERROR, no model version 2
    *     '3.1': modelVersion31, // ERROR, model version is a single numeric value
    *   }
