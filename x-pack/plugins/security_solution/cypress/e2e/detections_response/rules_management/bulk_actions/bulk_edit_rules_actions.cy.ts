@@ -6,17 +6,17 @@
  */
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ROLES } from '../../../common/test';
+import { ROLES } from '../../../../../common/test';
 
 import {
   RULES_BULK_EDIT_ACTIONS_INFO,
   RULES_BULK_EDIT_ACTIONS_WARNING,
   ADD_RULE_ACTIONS_MENU_ITEM,
-} from '../../screens/rules_bulk_edit';
-import { actionFormSelector } from '../../screens/common/rule_actions';
+} from '../../../../screens/rules_bulk_actions';
+import { actionFormSelector } from '../../../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
-import type { RuleActionCustomFrequency } from '../../tasks/common/rule_actions';
+import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/common';
+import type { RuleActionCustomFrequency } from '../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
   assertSlackRuleAction,
@@ -28,25 +28,25 @@ import {
   pickCustomFrequencyOption,
   pickPerRuleRunFrequencyOption,
   pickSummaryOfAlertsOption,
-} from '../../tasks/common/rule_actions';
+} from '../../../../tasks/common/rule_actions';
 import {
   waitForRulesTableToBeLoaded,
   selectNumberOfRules,
   goToEditRuleActionsSettingsOf,
-} from '../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
   submitBulkEditForm,
   checkOverwriteRuleActionsCheckbox,
   openBulkEditRuleActionsForm,
   openBulkActionsMenu,
-} from '../../tasks/rules_bulk_edit';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+} from '../../../../tasks/rules_bulk_actions';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 
-import { createRule } from '../../tasks/api_calls/rules';
-import { createSlackConnector } from '../../tasks/api_calls/connectors';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { createSlackConnector } from '../../../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
@@ -55,8 +55,8 @@ import {
   getNewThresholdRule,
   getMachineLearningRule,
   getNewTermsRule,
-} from '../../objects/rule';
-import { excessivelyInstallAllPrebuiltRules } from '../../tasks/api_calls/prebuilt_rules';
+} from '../../../../objects/rule';
+import { excessivelyInstallAllPrebuiltRules } from '../../../../tasks/api_calls/prebuilt_rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;
