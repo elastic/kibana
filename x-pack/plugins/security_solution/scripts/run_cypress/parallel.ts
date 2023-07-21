@@ -72,15 +72,17 @@ export const cli = () => {
         .coerce('env', (arg) =>
           arg.split(',').reduce((acc, curr) => {
             const [key, value] = curr.split('=');
-            acc[key] = value;
+            if (key === 'burn') {
+              acc[key] = parseInt(value, 10);
+            } else {
+              acc[key] = value;
+            }
             return acc;
           }, {})
         )
         .default({
           env: {},
         });
-
-      console.error('arggg', argv, argv.env);
 
       const isOpen = argv._[0] === 'open';
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
