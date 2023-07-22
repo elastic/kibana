@@ -316,10 +316,10 @@ export const cli = () => {
               const url = new URL('http://localhost');
 
               url.port = config.get(getKeyPath('port'));
-              url.protocol = config.get(getKeyPath('port'));
+              url.protocol = config.get(getKeyPath('protocol'));
               url.hostname = config.get(getKeyPath('hostname'));
 
-              return url.toString();
+              return url.toString().replace(/\/$/, '');
             };
 
             const baseUrl = createUrlFromFtrConfig('kibana');
@@ -337,6 +337,21 @@ export const cli = () => {
               ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
               ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
             };
+
+            log.debug(`
+----------------------------------------------
+Cypress setup for file: ${filePath}:
+----------------------------------------------
+
+FTR Config:
+${JSON.stringify(config.getAll(), null, 2)}
+
+
+Custom Env. Variables:
+${JSON.stringify(cyCustomEnv)}
+
+----------------------------------------------
+`);
 
             if (isOpen) {
               await cypress.open({

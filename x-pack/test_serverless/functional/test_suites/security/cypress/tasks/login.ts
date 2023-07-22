@@ -8,14 +8,20 @@
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 import { ServerlessRoleName } from '../../../../../shared/lib';
 
-export const login = (user?: ServerlessRoleName) => {
+export const login = (user: ServerlessRoleName | 'elastic' = 'elastic') => {
   const url = new URL(Cypress.config().baseUrl ?? '');
   url.pathname = '/internal/security/login';
 
   let username = Cypress.env('ELASTICSEARCH_USERNAME');
   let password = Cypress.env('ELASTICSEARCH_PASSWORD');
 
-  if (user) {
+  if (user && user === 'elastic' && user !== username) {
+    throw Error(
+      `Unable to login with user [${user}]. Username defined via [Cypress.env('ELASTICSEARCH_USERNAME')] is set to [${username}]`
+    );
+  }
+
+  if (user && user !== 'elastic') {
     cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
       username = loadedUser.username;
       password = loadedUser.password;
