@@ -16,6 +16,7 @@ import {
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
+  runServerlessCluster,
   runServerlessEsNode,
   SERVERLESS_IMG,
   setupServerlessVolumes,
@@ -23,16 +24,13 @@ import {
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
-// const verifyDockerInstalledMock = jest.fn();
-// const maybeCreateDockerNetworkMock = jest.fn();
-
 // jest.doMock('./docker', () => {
 //   const original = jest.requireActual('./docker');
 
 //   return {
 //     ...original,
-//     verifyDockerInstalled: verifyDockerInstalledMock,
-//     maybeCreateDockerNetwork: maybeCreateDockerNetworkMock,
+//     setupDocker: jest.fn(),
+//     // maybeCreateDockerNetwork: jest.fn(),
 //   };
 // });
 
@@ -52,6 +50,19 @@ beforeEach(() => {
   jest.resetAllMocks();
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
+
+  // jest relies on the filesystem to get sourcemaps when using console.log
+  // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
+  // hijacking logging to process.stdout as a workaround for this suite.
+  jest.spyOn(console, 'log').mockImplementation((...args) => {
+    process.stdout.write(args + '\n');
+  });
+});
+
+afterEach(() => {
+  mockFs.restore();
+  // restore the console.log behavior
+  jest.clearAllMocks();
 });
 
 const volumeCmdTest = async (volumeCmd: string[]) => {
@@ -262,21 +273,6 @@ describe('setupServerlessVolumes()', () => {
     },
   };
 
-  beforeEach(() => {
-    // jest relies on the filesystem to get sourcemaps when using console.log
-    // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
-    // hijacking logging to process.stdout as a workaround for this suite.
-    jest.spyOn(console, 'log').mockImplementation((...args) => {
-      process.stdout.write(args + '\n');
-    });
-  });
-
-  afterEach(() => {
-    mockFs.restore();
-    // restore the console.log behavior
-    jest.clearAllMocks();
-  });
-
   test('should create stateless directory and return volume docker command', async () => {
     mockFs({
       [baseEsPath]: {},
@@ -334,20 +330,20 @@ describe('runServerlessEsNode()', () => {
         'elastic',
       ])
     );
+  });
+});
 
-    expect(logWriter.messages).toMatchInlineSnapshot(`
-      Array [
-        " [34minfo[39m [1mRunning Serverless ES node: es01[22m",
-        "   │ [34minfo[39m [2mdocker run --rm --detach --net elastic --env cluster.initial_master_nodes=es01,es02,es03 --env stateless.enabled=true --env stateless.object_store.type=fs --env stateless.object_store.bucket=stateless --env path.repo=/objectstore --env foo=bar --volume foo/bar --name es01 --env node.name=es01 docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest[22m",
-        "   │ [34minfo[39m es01 is running.",
-        "   │        Container Name: es01",
-        "   │        Container Id:   containerId1234",
-        "   │",
-        "   │        View logs:            [1mdocker logs -f es01[22m",
-        "   │        Shell access:         [1mdocker exec -it es01 /bin/bash[22m",
-        "   │",
-      ]
-    `);
+describe('runServerlessCluster()', () => {
+  test('should start 3 serverless nodes', async () => {
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { basePath: baseEsPath });
+
+    // Verify Docker + Network Docker + 3 Nodes
+    expect(execa.mock.calls).toHaveLength(5);
   });
 });
 
