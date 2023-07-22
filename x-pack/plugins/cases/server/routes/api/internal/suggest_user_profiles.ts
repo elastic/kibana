@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UserProfileService } from '../../../services';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -24,15 +25,10 @@ export const suggestUserProfilesRoute = (userProfileService: UserProfileService)
     },
     handler: async ({ request, response }) => {
       try {
-        const body = request.body as userApiV1.SuggestUserProfilesRequest;
-
-        const res = await userProfileService.suggest({
-          ...request,
-          body,
-        });
+        const req = request as KibanaRequest<{}, {}, userApiV1.SuggestUserProfilesRequest>;
 
         return response.ok({
-          body: res,
+          body: await userProfileService.suggest(req),
         });
       } catch (error) {
         throw createCaseError({
