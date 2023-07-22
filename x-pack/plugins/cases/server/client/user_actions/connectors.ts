@@ -148,7 +148,7 @@ const getActionConnectors = async (
   ids: string[]
 ): Promise<ActionResult[]> => {
   try {
-    return await actionsClient.getBulk(ids);
+    return await actionsClient.getBulk({ ids });
   } catch (error) {
     // silent error and log it
     logger.error(`Failed to retrieve action connectors in the get case connectors route: ${error}`);

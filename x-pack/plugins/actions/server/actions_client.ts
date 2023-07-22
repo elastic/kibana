@@ -534,10 +534,13 @@ export class ActionsClient {
   /**
    * Get bulk actions with in-memory list
    */
-  public async getBulk(
-    ids: string[],
-    throwIfSystemAction: boolean = true
-  ): Promise<ActionResult[]> {
+  public async getBulk({
+    ids,
+    throwIfSystemAction = true,
+  }: {
+    ids: string[];
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult[]> {
     try {
       await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {

@@ -22,7 +22,12 @@ export async function denormalizeActions(
   if (alertActions.length) {
     const actionsClient = await context.getActionsClient();
     const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
-    const actionResults = await actionsClient.getBulk(actionIds);
+
+    const actionResults = await actionsClient.getBulk({
+      ids: actionIds,
+      throwIfSystemAction: false,
+    });
+
     const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
     actionTypeIds.forEach((id) => {
       // Notify action type usage via "isActionTypeEnabled" function
