@@ -273,6 +273,8 @@ describe('setupServerlessVolumes()', () => {
 
   afterEach(() => {
     mockFs.restore();
+    // restore the console.log behavior
+    jest.clearAllMocks();
   });
 
   test('should create stateless directory and return volume docker command', async () => {
@@ -332,6 +334,20 @@ describe('runServerlessEsNode()', () => {
         'elastic',
       ])
     );
+
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " [34minfo[39m [1mRunning Serverless ES node: es01[22m",
+        "   │ [34minfo[39m [2mdocker run --rm --detach --net elastic --env cluster.initial_master_nodes=es01,es02,es03 --env stateless.enabled=true --env stateless.object_store.type=fs --env stateless.object_store.bucket=stateless --env path.repo=/objectstore --env foo=bar --volume foo/bar --name es01 --env node.name=es01 docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest[22m",
+        "   │ [34minfo[39m es01 is running.",
+        "   │        Container Name: es01",
+        "   │        Container Id:   containerId1234",
+        "   │",
+        "   │        View logs:            [1mdocker logs -f es01[22m",
+        "   │        Shell access:         [1mdocker exec -it es01 /bin/bash[22m",
+        "   │",
+      ]
+    `);
   });
 });
 
