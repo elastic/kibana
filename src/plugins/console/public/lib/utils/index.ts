@@ -117,13 +117,14 @@ export const replaceVariables = (
   requests: RequestArgs['requests'],
   variables: DevToolsVariable[]
 ) => {
-  const urlRegex = /(\${\w+})/g;
-  const bodyRegex = /("\${\w+}")/g;
+
+  const urlRegex = /\${(\w+)}/g;
+  const bodyRegexSingleQuote = /(?<!")"\${(\w+)}"(?!")/g;
+  const bodyRegexTripleQuotes = /"""\${(\w+)}"""/g;
+
   return requests.map((req) => {
     if (urlRegex.test(req.url)) {
-      req.url = req.url.replaceAll(urlRegex, (match) => {
-        // Sanitize variable name
-        const key = match.replace('${', '').replace('}', '');
+      req.url = req.url.replaceAll(urlRegex, (match, key) => {
         const variable = variables.find(({ name }) => name === key);
 
         return variable?.value ?? match;
@@ -131,10 +132,8 @@ export const replaceVariables = (
     }
 
     if (req.data && req.data.length) {
-      if (bodyRegex.test(req.data[0])) {
-        const data = req.data[0].replaceAll(bodyRegex, (match) => {
-          // Sanitize variable name
-          const key = match.replace('"${', '').replace('}"', '');
+      if (bodyRegexSingleQuote.test(req.data[0])) {
+        const data = req.data[0].replaceAll(bodyRegexSingleQuote, (match, key) => {
           const variable = variables.find(({ name }) => name === key);
 
           if (variable) {
@@ -168,6 +167,15 @@ export const replaceVariables = (
           }
 
           return match;
+        });
+        req.data = [data];
+      }
+
+      if (bodyRegexTripleQuotes.test(req.data[0])) {
+        const data = req.data[0].replaceAll(bodyRegexTripleQuotes, (match, key) => {
+          const variable = variables.find(({ name }) => name === key);
+
+          return variable?.value ? '""' + JSON.stringify(variable?.value) + '""' : match;
         });
         req.data = [data];
       }
