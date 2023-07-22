@@ -300,29 +300,33 @@ describe('Entity Analytics Dashboard', () => {
     });
   });
 
-  // tracked by https://github.com/elastic/kibana/issues/161874
   describe('With anomalies data', () => {
     before(() => {
       cy.task('esArchiverLoad', 'network');
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'network');
-    });
-
-    beforeEach(() => {
       cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies');
       login();
       visit(ENTITY_ANALYTICS_URL);
       waitForPageToBeLoaded();
       cy.wait('@anomalies', { timeout: 120000 });
       cy.scrollTo('bottom');
+      cy.get(ANOMALIES_TABLE).should('be.visible');
     });
 
-    it('renders table with pagination', () => {
-      cy.get(ANOMALIES_TABLE).should('be.visible');
+    after(() => {
+      cy.task('esArchiverUnload', 'network');
+    });
 
-      // Increase default timeout because anomalies table takes a while to load
+    it('should enable a job and renders the table with pagination', () => {
+      // Enables the job and perform checks
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
+        .eq(5)
+        .within(() => {
+          cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
+          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
+          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
+        });
+
+      // Checks pagination
       cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
 
       // navigates to next page
@@ -332,16 +336,6 @@ describe('Entity Analytics Dashboard', () => {
       // updates rows per page to 25 items
       setRowsPerPageTo(25);
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
-    });
-
-    it('enables a job', () => {
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
-        .eq(5)
-        .within(() => {
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
-          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
-        });
     });
   });
 });
