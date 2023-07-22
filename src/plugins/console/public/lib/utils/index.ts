@@ -117,7 +117,6 @@ export const replaceVariables = (
   requests: RequestArgs['requests'],
   variables: DevToolsVariable[]
 ) => {
-
   const urlRegex = /\${(\w+)}/g;
   const bodyRegexSingleQuote = /(?<!")"\${(\w+)}"(?!")/g;
   const bodyRegexTripleQuotes = /"""\${(\w+)}"""/g;
