@@ -338,7 +338,7 @@ export const cli = () => {
               ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
             };
 
-            log.debug(`
+            log.info(`
 ----------------------------------------------
 Cypress setup for file: ${filePath}:
 ----------------------------------------------
