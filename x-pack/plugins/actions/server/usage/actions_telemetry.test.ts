@@ -483,6 +483,7 @@ describe('actions telemetry', () => {
         isDeprecated: false,
         isSystemAction: true,
         secrets: {},
+        config: {},
       },
     ]);
 

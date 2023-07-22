@@ -1250,6 +1250,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
@@ -1338,6 +1339,10 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
@@ -1392,10 +1397,8 @@ describe('create()', () => {
         enabled: true,
         legacyId: null,
         executionStatus: {
-          error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },

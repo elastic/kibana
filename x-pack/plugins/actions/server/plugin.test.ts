@@ -579,7 +579,7 @@ describe('Actions Plugin', () => {
             getConfig({
               preconfigured: {
                 preconfiguredServerLog: {
-                  actionTypeId: '.cases',
+                  actionTypeId: 'test.system-action',
                   name: 'preconfigured-system-action',
                   config: {},
                   secrets: {},
@@ -593,8 +593,8 @@ describe('Actions Plugin', () => {
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
           pluginSetup.registerType({
-            id: '.cases',
-            name: 'Cases',
+            id: 'test.system-action',
+            name: 'Test',
             minimumLicenseRequired: 'platinum',
             supportedFeatureIds: ['alerting'],
             validate: {
@@ -609,7 +609,7 @@ describe('Actions Plugin', () => {
           await expect(async () =>
             plugin.start(coreStart, pluginsStart)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Setting system action types in preconfigured connectors is not allowed"`
+            `"Setting system action types in preconfigured connectors are not allowed"`
           );
         });
       });
