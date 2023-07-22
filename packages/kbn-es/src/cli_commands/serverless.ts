@@ -30,7 +30,7 @@ export const serverless: Command = {
     Examples:
 
       es serverless --tag git-fec36430fba2-x86_64
-      es serverless --image local/repo:tag
+      es serverless --image docker.elastic.co/repo:tag
     `;
   },
   run: async (defaults = {}) => {

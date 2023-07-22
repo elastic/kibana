@@ -33,7 +33,7 @@ export const docker: Command = {
     Examples:
 
       es docker --tag master-SNAPSHOT-amd64
-      es docker --image local/repo:tag
+      es docker --image docker.elastic.co/repo:tag
       es docker -D 'start es01' 
     `;
   },
