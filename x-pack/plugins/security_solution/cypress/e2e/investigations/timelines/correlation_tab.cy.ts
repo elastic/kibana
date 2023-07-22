@@ -33,11 +33,11 @@ describe('Correlation tab', () => {
       visitWithoutDateRange(TIMELINES_URL);
       openTimeline(response.body.data.persistTimeline.timeline.savedObjectId);
       addEqlToTimeline(eql);
+      cy.wait('@updateTimeline');
     });
   });
 
   it('should update timeline after adding eql', () => {
-    cy.wait('@updateTimeline');
     cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
       .invoke('text')
       .then(parseInt)
@@ -45,7 +45,6 @@ describe('Correlation tab', () => {
   });
 
   it('should update timeline after removing eql', () => {
-    cy.wait('@updateTimeline');
     cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
     cy.get(TIMELINE_CORRELATION_INPUT).clear();
     cy.wait('@updateTimeline');
