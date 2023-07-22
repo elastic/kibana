@@ -379,12 +379,13 @@ exports.Cluster = class Cluster {
         filter: SettingsFilter.NonSecureOnly,
       }
     ).reduce(
-      (acc, [settingName, settingValue]) => acc.concat(['--E', `${settingName}=${settingValue}`]),
+      (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
       []
     );
 
     this._log.info('%s %s', ES_BIN, args.join(' '));
     const esJavaOpts = this.javaOptions(options);
+
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     this._process = execa(ES_BIN, args, {

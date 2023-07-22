@@ -25,16 +25,6 @@ import {
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
-// jest.doMock('./docker', () => {
-//   const original = jest.requireActual('./docker');
-
-//   return {
-//     ...original,
-//     setupDocker: jest.fn(),
-//     // maybeCreateDockerNetwork: jest.fn(),
-//   };
-// });
-
 jest.mock('execa');
 const execa = jest.requireMock('execa');
 
