@@ -542,6 +542,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
