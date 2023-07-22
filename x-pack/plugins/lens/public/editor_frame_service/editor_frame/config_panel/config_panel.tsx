@@ -14,8 +14,14 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
-import { AddLayerFunction, Visualization } from '../../../types';
+import { isEqual } from 'lodash';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import {
+  changeIndexPattern,
+  onDimensionDrop,
+  removeDimension,
+} from '../../../state_management/lens_slice';
+import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
@@ -26,7 +32,6 @@ import {
   removeOrClearLayer,
   cloneLayer,
   addLayer as addLayerAction,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
@@ -87,19 +92,28 @@ export function LayerPanels(
     () =>
       (datasourceId: string | undefined, newState: unknown, dontSyncLinkedDimensions?: boolean) => {
         if (datasourceId) {
+          const newDatasourceState =
+            typeof newState === 'function'
+              ? newState(datasourceStates[datasourceId].state)
+              : newState;
+
+          if (isEqual(newDatasourceState, datasourceStates[datasourceId].state)) {
+            return;
+          }
+
+          onUpdateStateCb?.(newDatasourceState, visualization.state);
+
           dispatchLens(
             updateDatasourceState({
-              updater: (prevState: unknown) =>
-                typeof newState === 'function' ? newState(prevState) : newState,
+              newDatasourceState,
               datasourceId,
               clearStagedPreview: false,
               dontSyncLinkedDimensions,
             })
           );
-          onUpdateStateCb?.(newState, visualization.state);
         }
       },
-    [dispatchLens, onUpdateStateCb, visualization.state]
+    [dispatchLens, onUpdateStateCb, visualization.state, datasourceStates]
   );
   const updateDatasourceAsync = useMemo(
     () => (datasourceId: string | undefined, newState: unknown) => {
@@ -107,7 +121,7 @@ export function LayerPanels(
       // which we don't want. The timeout lets user interaction have priority, then React updates.
       setTimeout(() => {
         updateDatasource(datasourceId, newState);
-      }, 0);
+      });
     },
     [updateDatasource]
   );
@@ -124,46 +138,44 @@ export function LayerPanels(
         // which we don't want. The timeout lets user interaction have priority, then React updates.
 
         setTimeout(() => {
+          const newDsState =
+            typeof newDatasourceState === 'function'
+              ? newDatasourceState(datasourceStates[datasourceId].state)
+              : newDatasourceState;
+
+          const newVisState =
+            typeof newVisualizationState === 'function'
+              ? newVisualizationState(visualization.state)
+              : newVisualizationState;
+
+          onUpdateStateCb?.(newDsState, newVisState);
+
           dispatchLens(
-            updateState({
-              updater: (prevState) => {
-                const updatedDatasourceState =
-                  typeof newDatasourceState === 'function'
-                    ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
-                    : newDatasourceState;
-
-                const updatedVisualizationState =
-                  typeof newVisualizationState === 'function'
-                    ? newVisualizationState(prevState.visualization.state)
-                    : newVisualizationState;
-
-                return {
-                  ...prevState,
-                  datasourceStates: {
-                    ...prevState.datasourceStates,
-                    [datasourceId]: {
-                      state: updatedDatasourceState,
-                      isLoading: false,
-                    },
-                  },
-                  visualization: {
-                    ...prevState.visualization,
-                    state: updatedVisualizationState,
-                  },
-                };
-              },
+            updateVisualizationState({
+              visualizationId: activeVisualization.id,
+              newState: newVisState,
+              dontSyncLinkedDimensions: true, // TODO: to refactor: this is quite brittle, we avoid to sync linked dimensions because we do it with datasourceState update
             })
           );
-          onUpdateStateCb?.(newDatasourceState, newVisualizationState);
+          dispatchLens(
+            updateDatasourceState({
+              newDatasourceState: newDsState,
+              datasourceId,
+              clearStagedPreview: false,
+            })
+          );
         }, 0);
       },
-    [dispatchLens, onUpdateStateCb]
+    [dispatchLens, onUpdateStateCb, visualization.state, datasourceStates, activeVisualization.id]
   );
 
-  const toggleFullscreen = useMemo(
-    () => () => {
-      dispatchLens(setToggleFullscreen());
-    },
+  const toggleFullscreen = useCallback(() => {
+    dispatchLens(setToggleFullscreen());
+  }, [dispatchLens]);
+
+  const handleDimensionDrop = useCallback(
+    (payload: { source: DragDropIdentifier; target: DragDropOperation; dropType: DropType }) =>
+      dispatchLens(onDimensionDrop(payload)),
     [dispatchLens]
   );
 
@@ -195,14 +207,24 @@ export function LayerPanels(
           layerIds,
         })
       );
+      if (activeDatasourceId && onUpdateStateCb) {
+        const newState = lensStore.getState().lens;
+        onUpdateStateCb(
+          newState.datasourceStates[activeDatasourceId].state,
+          newState.visualization.state
+        );
+      }
       removeLayerRef(layerToRemoveId);
     },
     [
+      activeDatasourceId,
       activeVisualization.id,
       datasourceMap,
       datasourceStates,
       dispatchLens,
       layerIds,
+      lensStore,
+      onUpdateStateCb,
       props.framePublicAPI.datasourceLayers,
       props.uiActions,
       removeLayerRef,
@@ -242,7 +264,16 @@ export function LayerPanels(
 
   const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
+
     dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
+
+    if (activeDatasourceId && onUpdateStateCb) {
+      const newState = lensStore.getState().lens;
+      onUpdateStateCb(
+        newState.datasourceStates[activeDatasourceId].state,
+        newState.visualization.state
+      );
+    }
     setNextFocusedLayerId(layerId);
   };
 
@@ -266,6 +297,7 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              onDimensionDrop={handleDimensionDrop}
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
               activeVisualization={activeVisualization}

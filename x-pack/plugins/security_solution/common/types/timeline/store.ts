@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { RowRendererId, TimelineTypeLiteral } from './api';
+import type { RowRendererId, TimelineTypeLiteral } from '../../api/timeline/model/api';
 
 import type { Direction } from '../../search_strategy';
 import type { ExpandedDetailTimeline } from '../detail_panel';

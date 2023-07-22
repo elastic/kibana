@@ -286,6 +286,7 @@ describe('actions telemetry', () => {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
@@ -425,6 +426,7 @@ describe('actions telemetry', () => {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
       {
         id: 'anotherServerLog',
@@ -434,6 +436,7 @@ describe('actions telemetry', () => {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
@@ -583,6 +586,7 @@ describe('actions telemetry', () => {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 

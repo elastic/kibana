@@ -53,6 +53,7 @@ export const DatasetsPopover = ({
           iconSide="right"
           onClick={onClick}
           fullWidth={isMobile}
+          data-test-subj={`${POPOVER_ID}-button`}
         >
           {iconType ? (
             <EuiIcon type={iconType} />
@@ -60,6 +61,7 @@ export const DatasetsPopover = ({
             <PackageIcon
               packageName={parentIntegration.name}
               version={parentIntegration.version}
+              icons={parentIntegration.icons}
               size="m"
               tryApi
             />

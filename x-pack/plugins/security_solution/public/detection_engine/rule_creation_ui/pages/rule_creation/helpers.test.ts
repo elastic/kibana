@@ -6,7 +6,7 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
   getListMock,
