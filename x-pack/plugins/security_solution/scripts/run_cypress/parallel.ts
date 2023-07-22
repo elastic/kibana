@@ -330,12 +330,22 @@ export const cli = () => {
 
             const cyCustomEnv = {
               ...ftrEnv,
+
               KIBANA_URL: baseUrl,
+              CYPRESS_KIBANA_URL: baseUrl,
+
               ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
+              CYPRESS_ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
+
               FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+              CYPRESS_FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+
               // Username/password used for both elastic and kibana
               ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+              CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+
               ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+              CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
             };
 
             log.info(`
@@ -347,8 +357,8 @@ FTR Config:
 ${JSON.stringify(config.getAll(), null, 2)}
 
 
-Custom Env. Variables:
-${JSON.stringify(cyCustomEnv)}
+Cypress Custom Env. Variables:
+${JSON.stringify(cyCustomEnv, null, 2)}
 
 ----------------------------------------------
 `);

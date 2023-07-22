@@ -9,6 +9,7 @@ import { EsArchiver } from '@kbn/es-archiver';
 import { KbnClient } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import { buildUrlWithCredentials } from '../../scripts/endpoint/common/stack_services';
 
 export const esArchiver = (
   on: Cypress.PluginEvents,
@@ -17,13 +18,21 @@ export const esArchiver = (
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
   const client = new Client({
-    node: config.env.ELASTICSEARCH_URL,
+    node: buildUrlWithCredentials(
+      config.env.ELASTICSEARCH_URL,
+      config.env.ELASTICSEARCH_USERNAME,
+      config.env.ELASTICSEARCH_PASSWORD
+    ),
     Connection: HttpConnection,
   });
 
   const kbnClient = new KbnClient({
     log,
-    url: config.env.CYPRESS_BASE_URL as string,
+    url: buildUrlWithCredentials(
+      config.env.CYPRESS_BASE_URL,
+      config.env.ELASTICSEARCH_USERNAME,
+      config.env.ELASTICSEARCH_PASSWORD
+    ),
   });
 
   const esArchiverInstance = new EsArchiver({
