@@ -263,5 +263,27 @@ describe('Utils class', () => {
         { url: 'test', data: ['{\n  "f": "9893617a-a08f-4e5c-bc41-95610dc2ded8"\n}'] }
       );
     });
+
+    it('with illegal double quotes should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v8}', data: ['{\n  "f": ""${v8}""\n}'] },
+        { name: 'v8', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": ""${v8}""\n}'],
+        }
+      );
+    });
+
+    it('with heredoc triple quotes should replace variables as strings in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v9}', data: ['{\n  "f": """${v9}"""\n}'] },
+        { name: 'v9', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": """0"""\n}'],
+        }
+      );
+    });
   });
 });
