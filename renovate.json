@@ -238,11 +238,8 @@
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": [
-        "eslint-plugin-cypress"
-      ],
       "matchPackagePatterns": [
-        "^cypress"
+        "cypress"
       ],
       "reviewers": [
         "Team:apm",
