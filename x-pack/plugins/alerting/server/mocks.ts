@@ -35,6 +35,7 @@ const createSetupMock = () => {
       enabled: jest.fn(),
       getContextInitializationPromise: jest.fn(),
     },
+    registerConnectorAdapter: jest.fn(),
   };
   return mock;
 };

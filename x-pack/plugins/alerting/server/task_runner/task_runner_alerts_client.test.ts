@@ -68,6 +68,7 @@ import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { AlertsService } from '../alerts_service';
 import { ReplaySubject } from 'rxjs';
 import { IAlertsClient } from '../alerts_client/types';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -135,6 +136,7 @@ describe('Task Runner', () => {
   const mockLegacyAlertsClient = legacyAlertsClientMock.create();
   const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
   const maintenanceWindowClient = maintenanceWindowClientMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -173,6 +175,7 @@ describe('Task Runner', () => {
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
     getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {

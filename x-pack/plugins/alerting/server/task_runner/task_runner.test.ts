@@ -82,6 +82,7 @@ import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -135,6 +136,7 @@ describe('Task Runner', () => {
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
   const maintenanceWindowClient = maintenanceWindowClientMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -173,6 +175,7 @@ describe('Task Runner', () => {
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
     getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+    connectorAdapterRegistry,
   };
 
   const ephemeralTestParams: Array<

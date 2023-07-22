@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from './connector_adapter_registry';
 import type { ConnectorAdapter } from './types';
 
 describe('ConnectorAdapterRegistry', () => {
-  const connectorAdapter: ConnectorAdapter = { connectorTypeId: '.test' };
+  const connectorAdapter: ConnectorAdapter = {
+    connectorTypeId: '.test',
+    ruleActionParamsSchema: schema.object({}),
+    buildActionParams: jest.fn(),
+  };
+
   let registry: ConnectorAdapterRegistry;
 
   beforeEach(() => {

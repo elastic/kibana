@@ -36,6 +36,7 @@ jest.mock('./alerts_service/alerts_service', () => ({
 }));
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { schema } from '@kbn/config-schema';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -246,7 +247,12 @@ describe('Alerting Plugin', () => {
       });
 
       it('should register a connector adapter', () => {
-        const adapter = { connectorTypeId: '.test' };
+        const adapter = {
+          connectorTypeId: '.test',
+          ruleActionParamsSchema: schema.object({}),
+          buildActionParams: jest.fn(),
+        };
+
         setup.registerConnectorAdapter(adapter);
 
         // @ts-expect-error: private properties cannot be accessed
