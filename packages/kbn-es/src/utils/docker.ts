@@ -302,7 +302,10 @@ function getServerlessImage(options: ServerlessOptions) {
 /**
  * Run a single node in the ES Serverless cluster
  */
-async function runServerlessEsNode(log: ToolingLog, { params, name, image }: ServerlessEsNodeArgs) {
+export async function runServerlessEsNode(
+  log: ToolingLog,
+  { params, name, image }: ServerlessEsNodeArgs
+) {
   const dockerCmd = SHARED_SERVERLESS_PARAMS.concat(
     params,
     ['--name', name, '--env', `node.name=${name}`],

@@ -16,6 +16,8 @@ import {
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
+  runServerlessEsNode,
+  SERVERLESS_IMG,
   setupServerlessVolumes,
   verifyDockerInstalled,
 } from './docker';
@@ -106,15 +108,15 @@ describe('verifyDockerInstalled()', () => {
     await verifyDockerInstalled(log);
 
     expect(execa.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "docker",
-        Array [
-          "--version",
-        ],
-      ],
-    ]
-  `);
+          Array [
+            Array [
+              "docker",
+              Array [
+                "--version",
+              ],
+            ],
+          ]
+      `);
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
@@ -303,8 +305,38 @@ describe('setupServerlessVolumes()', () => {
   });
 });
 
+describe('runServerlessEsNode()', () => {
+  const node = {
+    params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
+    name: 'es01',
+    image: SERVERLESS_IMG,
+  };
+
+  test('should call the correct Docker command', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'containerId1234' }));
+
+    await runServerlessEsNode(log, node);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(
+      expect.arrayContaining([
+        SERVERLESS_IMG,
+        ...node.params,
+        '--name',
+        node.name,
+        '--env',
+        `node.name=${node.name}`,
+        'run',
+        '--detach',
+        '--net',
+        'elastic',
+      ])
+    );
+  });
+});
+
 describe('resolveDockerCmd()', () => {
-  test('should return default command with no options', () => {
+  test('should return default command when no options', () => {
     const dockerCmd = resolveDockerCmd({});
 
     expect(dockerCmd).toEqual(expect.arrayContaining(['run', DOCKER_IMG]));
