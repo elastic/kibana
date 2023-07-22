@@ -329,10 +329,10 @@ describe('execute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -346,7 +346,7 @@ describe('execute()', () => {
       id: '123',
       type: 'action',
       attributes: {
-        actionTypeId: '.cases',
+        actionTypeId: 'test.system-action',
       },
       references: [],
     });
@@ -359,11 +359,11 @@ describe('execute()', () => {
     });
 
     await executeFn(savedObjectsClient, {
-      id: 'system-connector-.cases',
+      id: 'system-connector-test.system-action',
       params: { baz: false },
       spaceId: 'default',
       executionId: 'system-connector-.casesabc',
-      apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+      apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
       source: asSavedObjectExecutionSource(source),
     });
 
@@ -379,7 +379,7 @@ describe('execute()', () => {
             "actions",
           ],
           "state": Object {},
-          "taskType": "actions:.cases",
+          "taskType": "actions:test.system-action",
         },
       ]
     `);
@@ -387,11 +387,11 @@ describe('execute()', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'action_task_params',
       {
-        actionId: 'system-connector-.cases',
+        actionId: 'system-connector-test.system-action',
         params: { baz: false },
         executionId: 'system-connector-.casesabc',
         source: 'SAVED_OBJECT',
-        apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
       },
       {
         references: [
@@ -513,10 +513,10 @@ describe('execute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -530,7 +530,7 @@ describe('execute()', () => {
       id: '123',
       type: 'action',
       attributes: {
-        actionTypeId: '.cases',
+        actionTypeId: 'test.system-action',
       },
       references: [],
     });
@@ -541,10 +541,10 @@ describe('execute()', () => {
       references: [],
     });
     await executeFn(savedObjectsClient, {
-      id: 'system-connector-.cases',
+      id: 'system-connector-test.system-action',
       params: { baz: false },
       spaceId: 'default',
-      apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+      apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
       source: asSavedObjectExecutionSource(source),
       executionId: 'system-connector-.casesabc',
       relatedSavedObjects: [
@@ -568,7 +568,7 @@ describe('execute()', () => {
             "actions",
           ],
           "state": Object {},
-          "taskType": "actions:.cases",
+          "taskType": "actions:test.system-action",
         },
       ]
     `);
@@ -576,9 +576,9 @@ describe('execute()', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'action_task_params',
       {
-        actionId: 'system-connector-.cases',
+        actionId: 'system-connector-test.system-action',
         params: { baz: false },
-        apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         executionId: 'system-connector-.casesabc',
         source: 'SAVED_OBJECT',
         relatedSavedObjects: [
@@ -738,7 +738,7 @@ describe('execute()', () => {
     expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
   });
 
-  test('should skip ensure action type if action type is system action and license is valid', async () => {
+  test('should ensure if a system action type is enabled', async () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
@@ -746,10 +746,10 @@ describe('execute()', () => {
       actionTypeRegistry: mockedActionTypeRegistry,
       inMemoryConnectors: [
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -757,15 +757,20 @@ describe('execute()', () => {
         },
       ],
     });
-    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
+
+    mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
       type: 'action',
       attributes: {
-        actionTypeId: '.cases',
+        actionTypeId: 'test.system-action',
       },
       references: [],
     });
+
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '234',
       type: 'action_task_params',
@@ -773,16 +778,20 @@ describe('execute()', () => {
       references: [],
     });
 
-    await executeFn(savedObjectsClient, {
-      id: 'system-connector-.case',
-      params: { baz: false },
-      spaceId: 'default',
-      executionId: 'system-connector-.caseabc',
-      apiKey: null,
-      source: asHttpRequestExecutionSource(request),
-    });
+    await expect(
+      executeFn(savedObjectsClient, {
+        id: 'system-connector-test.system-action',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: 'system-connector-.test.system-action-abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
 
-    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
+    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith(
+      'test.system-action'
+    );
   });
 });
 
@@ -1155,10 +1164,10 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -1174,7 +1183,7 @@ describe('bulkExecute()', () => {
           id: '123',
           type: 'action',
           attributes: {
-            actionTypeId: '.cases',
+            actionTypeId: 'test.system-action',
           },
           references: [],
         },
@@ -1186,7 +1195,7 @@ describe('bulkExecute()', () => {
           id: '234',
           type: 'action_task_params',
           attributes: {
-            actionId: 'system-connector-.cases',
+            actionId: 'system-connector-test.system-action',
           },
           references: [],
         },
@@ -1194,11 +1203,11 @@ describe('bulkExecute()', () => {
     });
     await executeFn(savedObjectsClient, [
       {
-        id: 'system-connector-.cases',
+        id: 'system-connector-test.system-action',
         params: { baz: false },
         spaceId: 'default',
         executionId: 'system-connector-.casesabc',
-        apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
       },
     ]);
@@ -1215,7 +1224,7 @@ describe('bulkExecute()', () => {
               "actions",
             ],
             "state": Object {},
-            "taskType": "actions:.cases",
+            "taskType": "actions:test.system-action",
           },
         ],
       ]
@@ -1226,11 +1235,11 @@ describe('bulkExecute()', () => {
         {
           type: 'action_task_params',
           attributes: {
-            actionId: 'system-connector-.cases',
+            actionId: 'system-connector-test.system-action',
             params: { baz: false },
             executionId: 'system-connector-.casesabc',
             source: 'SAVED_OBJECT',
-            apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+            apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
           },
           references: [
             {
@@ -1370,10 +1379,10 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -1389,7 +1398,7 @@ describe('bulkExecute()', () => {
           id: '123',
           type: 'action',
           attributes: {
-            actionTypeId: '.cases',
+            actionTypeId: 'test.system-action',
           },
           references: [],
         },
@@ -1401,7 +1410,7 @@ describe('bulkExecute()', () => {
           id: '234',
           type: 'action_task_params',
           attributes: {
-            actionId: 'system-connector-.cases',
+            actionId: 'system-connector-test.system-action',
           },
           references: [],
         },
@@ -1409,10 +1418,10 @@ describe('bulkExecute()', () => {
     });
     await executeFn(savedObjectsClient, [
       {
-        id: 'system-connector-.cases',
+        id: 'system-connector-test.system-action',
         params: { baz: false },
         spaceId: 'default',
-        apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
         executionId: 'system-connector-.casesabc',
         relatedSavedObjects: [
@@ -1438,7 +1447,7 @@ describe('bulkExecute()', () => {
               "actions",
             ],
             "state": Object {},
-            "taskType": "actions:.cases",
+            "taskType": "actions:test.system-action",
           },
         ],
       ]
@@ -1449,9 +1458,9 @@ describe('bulkExecute()', () => {
         {
           type: 'action_task_params',
           attributes: {
-            actionId: 'system-connector-.cases',
+            actionId: 'system-connector-test.system-action',
             params: { baz: false },
-            apiKey: Buffer.from('system-connector-.cases:abc').toString('base64'),
+            apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
             executionId: 'system-connector-.casesabc',
             source: 'SAVED_OBJECT',
             relatedSavedObjects: [
@@ -1646,10 +1655,10 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: mockedActionTypeRegistry,
       inMemoryConnectors: [
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -1664,7 +1673,7 @@ describe('bulkExecute()', () => {
           id: '123',
           type: 'action',
           attributes: {
-            actionTypeId: '.cases',
+            actionTypeId: 'test.system-action',
           },
           references: [],
         },

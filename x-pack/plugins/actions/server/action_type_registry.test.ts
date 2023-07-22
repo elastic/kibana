@@ -49,10 +49,10 @@ describe('actionTypeRegistry', () => {
           isSystemAction: false,
         },
         {
-          actionTypeId: '.cases',
+          actionTypeId: 'test.system-action',
           config: {},
-          id: 'system-connector-.cases',
-          name: 'System action: .cases',
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
           secrets: {},
           isPreconfigured: false,
           isDeprecated: false,
@@ -393,7 +393,7 @@ describe('actionTypeRegistry', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       actionTypeRegistry.register({
-        id: '.cases',
+        id: 'test.system-action',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
@@ -410,7 +410,7 @@ describe('actionTypeRegistry', () => {
 
       expect(actionTypes).toEqual([
         {
-          id: '.cases',
+          id: 'test.system-action',
           name: 'Cases',
           enabled: true,
           enabledInConfig: true,
@@ -497,13 +497,16 @@ describe('actionTypeRegistry', () => {
       expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
     });
 
-    test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has system connectors', async () => {
+    test('should return false when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has system connectors', async () => {
       mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
       expect(
-        actionTypeRegistry.isActionExecutable('system-connector-.cases', 'system-action-type')
-      ).toEqual(true);
+        actionTypeRegistry.isActionExecutable(
+          'system-connector-test.system-action',
+          'system-action-type'
+        )
+      ).toEqual(false);
     });
 
     test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
@@ -662,7 +665,7 @@ describe('actionTypeRegistry', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
-        id: '.cases',
+        id: 'test.system-action',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
@@ -675,7 +678,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      const result = registry.isSystemActionType('.cases');
+      const result = registry.isSystemActionType('test.system-action');
       expect(result).toBe(true);
     });
 
@@ -720,7 +723,7 @@ describe('actionTypeRegistry', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
-        id: '.cases',
+        id: 'test.system-action',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
@@ -734,7 +737,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      const result = registry.getSystemActionKibanaPrivileges('.cases');
+      const result = registry.getSystemActionKibanaPrivileges('test.system-action');
       expect(result).toEqual(['test/create']);
     });
 
@@ -742,7 +745,7 @@ describe('actionTypeRegistry', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
-        id: '.cases',
+        id: 'test.system-action',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
@@ -755,7 +758,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      const result = registry.getSystemActionKibanaPrivileges('.cases');
+      const result = registry.getSystemActionKibanaPrivileges('test.system-action');
       expect(result).toEqual([]);
     });
 
@@ -784,7 +787,7 @@ describe('actionTypeRegistry', () => {
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
 
       registry.register({
-        id: '.cases',
+        id: 'test.system-action',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
@@ -798,7 +801,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      registry.getSystemActionKibanaPrivileges('.cases', { foo: 'bar' });
+      registry.getSystemActionKibanaPrivileges('test.system-action', { foo: 'bar' });
       expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
