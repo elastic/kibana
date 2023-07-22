@@ -322,7 +322,7 @@ export const cli = () => {
                     numTestsKeptInMemory: 0,
                     env: {
                       ...customEnv,
-                      ...argv.env,
+                      ...(argv.env ?? {}),
                     },
                   },
                 });
