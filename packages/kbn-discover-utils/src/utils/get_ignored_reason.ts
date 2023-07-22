@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 export enum IgnoredReason {
   IGNORE_ABOVE = 'ignore_above',
@@ -27,7 +27,7 @@ export enum IgnoredReason {
  */
 export function getIgnoredReason(
   field: DataViewField | string,
-  ignoredFields: estypes.SearchHit['_ignored']
+  ignoredFields: SearchHit['_ignored']
 ): IgnoredReason | undefined {
   const fieldName = typeof field === 'string' ? field : field.name;
   if (!ignoredFields?.includes(fieldName)) {

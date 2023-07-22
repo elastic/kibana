@@ -9,29 +9,28 @@ import {
   waitForRulesTableToBeLoaded,
   goToTheRuleDetailsOf,
   selectNumberOfRules,
-  duplicateSelectedRulesWithoutExceptions,
   expectManagementTableRules,
+} from '../../../../tasks/alerts_detection_rules';
+import {
+  duplicateSelectedRulesWithoutExceptions,
   duplicateSelectedRulesWithExceptions,
   duplicateSelectedRulesWithNonExpiredExceptions,
-} from '../../tasks/alerts_detection_rules';
+} from '../../../../tasks/rules_bulk_actions';
+import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../tasks/rule_details';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
 
-import { goToExceptionsTab, viewExpiredExceptionItems } from '../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import { getNewRule } from '../../../../objects/rule';
 
-import { getNewRule } from '../../objects/rule';
-
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-
-import { createRuleExceptionItem } from '../../tasks/api_calls/exceptions';
-import { EXCEPTION_CARD_ITEM_NAME } from '../../screens/exceptions';
+import { createRuleExceptionItem } from '../../../../tasks/api_calls/exceptions';
+import { EXCEPTION_CARD_ITEM_NAME } from '../../../../screens/exceptions';
 import {
   assertExceptionItemsExists,
   assertNumberOfExceptionItemsExists,
-} from '../../tasks/exceptions';
+} from '../../../../tasks/exceptions';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -60,7 +59,7 @@ describe('Detection rules, bulk duplicate', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })).then(
       (response) => {
         createRuleExceptionItem(response.body.id, [
