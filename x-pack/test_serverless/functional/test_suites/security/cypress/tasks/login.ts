@@ -12,12 +12,12 @@ export const login = (user: ServerlessRoleName | 'elastic' = 'elastic') => {
   const url = new URL(Cypress.config().baseUrl ?? '');
   url.pathname = '/internal/security/login';
 
-  let username = Cypress.env('ELASTICSEARCH_USERNAME');
-  let password = Cypress.env('ELASTICSEARCH_PASSWORD');
+  let username = Cypress.env('KIBANA_USERNAME');
+  let password = Cypress.env('KIBANA_PASSWORD');
 
   if (user && user === 'elastic' && user !== username) {
     throw Error(
-      `Unable to login with user [${user}]. Username defined via [Cypress.env('ELASTICSEARCH_USERNAME')] is set to [${username}]`
+      `Unable to login with user [${user}]. Username defined via [Cypress.env('KIBANA_USERNAME')] is set to [${username}]`
     );
   }
 

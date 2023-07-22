@@ -49,6 +49,10 @@ interface CreateRuntimeServicesOptions {
   fleetServerUrl?: string;
   username: string;
   password: string;
+  /** If undefined, ES username defaults to `username` */
+  esUsername?: string;
+  /** If undefined, ES password defaults to `password` */
+  esPassword?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
 }
@@ -59,6 +63,8 @@ export const createRuntimeServices = async ({
   fleetServerUrl = 'https://localhost:8220',
   username: _username,
   password: _password,
+  esUsername,
+  esPassword,
   log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
   asSuperuser = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
@@ -90,7 +96,12 @@ export const createRuntimeServices = async ({
 
   return {
     kbnClient: createKbnClient({ log, url: kibanaUrl, username, password }),
-    esClient: createEsClient({ log, url: elasticsearchUrl, username, password }),
+    esClient: createEsClient({
+      log,
+      url: elasticsearchUrl,
+      username: esUsername ?? username,
+      password: esPassword ?? password,
+    }),
     log,
     localhostRealIp: await getLocalhostRealIp(),
     user: {

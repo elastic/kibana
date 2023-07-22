@@ -14,7 +14,9 @@ export function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext)
   return {
     FORCE_COLOR: '1',
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-    ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+    KIBANA_USERNAME: config.get('servers.kibana.username'),
+    KIBANA_PASSWORD: config.get('servers.kibana.password'),
+    ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'), // TODO:PT look to set these to `servers.elasticsearch.*`
     ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
     FLEET_SERVER_URL: config.get('servers.fleetserver')
       ? Url.format(config.get('servers.fleetserver'))

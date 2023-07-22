@@ -102,6 +102,8 @@ function startFleetAgent(context: FtrProviderContext, cypressCommand: string) {
             hostname: config.get('servers.kibana.hostname'),
             port: config.get('servers.kibana.port'),
           }),
+          CYPRESS_KIBANA_USERNAME: config.get('servers.kibana.username'),
+          CYPRESS_KIBANA_PASSWORD: config.get('servers.kibana.password'),
           ...runnerEnv,
           ...process.env,
         },

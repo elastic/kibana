@@ -331,21 +331,15 @@ export const cli = () => {
             const cyCustomEnv = {
               ...ftrEnv,
 
+              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+
               KIBANA_URL: baseUrl,
-              CYPRESS_KIBANA_URL: baseUrl,
+              KIBANA_USERNAME: config.get('servers.kibana.username'),
+              KIBANA_PASSWORD: config.get('servers.kibana.password'),
 
               ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
-              CYPRESS_ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
-
-              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
-              CYPRESS_FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
-
-              // Username/password used for both elastic and kibana
-              ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
-              CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
-
-              ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
-              CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
+              ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+              ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
             };
 
             log.info(`

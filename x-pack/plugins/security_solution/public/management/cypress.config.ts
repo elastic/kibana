@@ -32,6 +32,8 @@ export default defineCypressConfig({
     ELASTICSEARCH_URL: 'http://localhost:9200',
     FLEET_SERVER_URL: 'https://localhost:8220',
     // Username/password used for both elastic and kibana
+    KIBANA_USERNAME: 'elastic',
+    KIBANA_PASSWORD: 'changeme',
     ELASTICSEARCH_USERNAME: 'elastic',
     ELASTICSEARCH_PASSWORD: 'changeme',
   },

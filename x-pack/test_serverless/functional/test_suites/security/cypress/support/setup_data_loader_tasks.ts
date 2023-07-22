@@ -17,8 +17,10 @@ export const setupDataLoaderTasks = (
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
     fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
 

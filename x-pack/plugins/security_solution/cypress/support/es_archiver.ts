@@ -29,9 +29,9 @@ export const esArchiver = (
   const kbnClient = new KbnClient({
     log,
     url: buildUrlWithCredentials(
-      config.env.CYPRESS_BASE_URL,
-      config.env.ELASTICSEARCH_USERNAME,
-      config.env.ELASTICSEARCH_PASSWORD
+      config.env.KIBANA_URL,
+      config.env.KIBANA_USERNAME,
+      config.env.KIBANA_PASSWORD
     ),
   });
 
