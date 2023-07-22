@@ -585,6 +585,6 @@ exports.Cluster = class Cluster {
       throw new Error('ES has already been started');
     }
 
-    await runDockerContainer(this._log, options);
+    this._process = await runDockerContainer(this._log, options);
   }
 };

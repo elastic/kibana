@@ -387,7 +387,7 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   const dockerCmd = resolveDockerCmd(options);
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-  await execa('docker', dockerCmd, {
+  return await execa('docker', dockerCmd, {
     // inherit is required to show Docker pull output and Java console output for pw, enrollment token, etc
     stdio: ['ignore', 'inherit', 'inherit'],
   });

@@ -16,6 +16,7 @@ import {
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
+  runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
   SERVERLESS_IMG,
@@ -342,7 +343,7 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { basePath: baseEsPath });
 
-    // Verify Docker + Network Docker + 3 Nodes
+    // Verify Docker and network then run three nodes
     expect(execa.mock.calls).toHaveLength(5);
   });
 });
@@ -365,5 +366,15 @@ describe('resolveDockerCmd()', () => {
         "es01",
       ]
     `);
+  });
+});
+
+describe('runDockerContainer()', () => {
+  test('should resolve', async () => {
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
+    // Verify Docker and network then run container
+    expect(execa.mock.calls).toHaveLength(3);
   });
 });
