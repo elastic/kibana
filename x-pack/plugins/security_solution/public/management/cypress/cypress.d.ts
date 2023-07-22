@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type {
@@ -34,6 +35,12 @@ import type {
 
 declare global {
   namespace Cypress {
+    interface SuiteConfigOverrides {
+      env: {
+        ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
+      };
+    }
+
     interface Chainable<Subject = any> {
       /**
        * Get Elements by `data-test-subj`

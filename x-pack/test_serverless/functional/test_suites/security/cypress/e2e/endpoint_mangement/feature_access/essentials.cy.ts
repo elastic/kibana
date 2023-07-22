@@ -12,8 +12,9 @@ describe(
   'Security Essential PLI',
   {
     env: {
-      // FIXME:PT implement `productTypes` in x-pack/plugins/security_solution/scripts/run_cypress/parallel.ts
-      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'essentials' }] },
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+      },
     },
   },
   () => {
