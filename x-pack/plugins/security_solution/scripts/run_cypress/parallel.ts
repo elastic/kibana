@@ -219,7 +219,13 @@ export const cli = () => {
                 }
 
                 if (configFromTestFile?.license) {
-                  vars.esTestCluster.license = configFromTestFile.license;
+                  if (vars.serverless) {
+                    log.warning(
+                      `'ftrConfig.license' ignored. Value does not apply to kibana when running in serverless.\nFile: ${filePath}`
+                    );
+                  } else {
+                    vars.esTestCluster.license = configFromTestFile.license;
+                  }
                 }
 
                 if (hasFleetServerArgs) {
@@ -229,10 +235,12 @@ export const cli = () => {
                 }
 
                 // Serverless Specific
-                if (vars.serverless === true) {
+                if (vars.serverless) {
+                  log.info(`Serverless mode detected`);
+
                   if (configFromTestFile?.productTypes) {
                     vars.kbnTestServer.serverArgs.push(
-                      `--xpack.securitySolutionServerless.productTypes: ${JSON.stringify(
+                      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify(
                         configFromTestFile.productTypes
                       )}`
                     );
