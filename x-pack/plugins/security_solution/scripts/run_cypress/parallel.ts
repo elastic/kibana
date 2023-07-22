@@ -69,8 +69,9 @@ export const cli = () => {
   run(
     async () => {
       const { argv } = yargs(process.argv.slice(2))
-        .coerce('env', (arg) =>
-          arg.split(',').reduce((acc, curr) => {
+        .coerce('env', (arg: string) =>
+          // @ts-expect-error update types
+          arg?.split(',').reduce((acc, curr) => {
             const [key, value] = curr.split('=');
             if (key === 'burn') {
               acc[key] = parseInt(value, 10);

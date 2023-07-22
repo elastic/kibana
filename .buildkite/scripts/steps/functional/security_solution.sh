@@ -10,6 +10,4 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Security Solution tests (Chrome)"
 
-yarn --cwd x-pack/plugins/security_solution changed
-
 yarn --cwd x-pack/plugins/security_solution cypress:run

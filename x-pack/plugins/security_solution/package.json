@@ -5,11 +5,11 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "changed": "CYPRESS_CONFIG_FILE=./cypress/cypress.config.ts ../../../node_modules/.bin/find-cypress-specs --branch main",
-    "cypress:burn": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts' --env burn=3; status=$?; yarn junit:merge && exit $status",
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../scripts/eslint ./public/detections/mitre/mitre_tactics_techniques.ts --fix",
     "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ../timelines/server/utils/beat_schema/fields.ts --fix",
     "cypress": "../../../node_modules/.bin/cypress",
+    "cypress:burn": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts' --env burn=2; status=$?; yarn junit:merge && exit $status",
+    "cypress:changed": "CYPRESS_CONFIG_FILE=./cypress/cypress.config.ts ../../../node_modules/.bin/find-cypress-specs --branch main",
     "cypress:open": "TZ=UTC node ./scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config",
     "cypress:open:ccs": "yarn cypress:open --config specPattern=./cypress/ccs_e2e/**/*.cy.ts",
     "cypress:open:upgrade": "yarn cypress:open --config specPattern=./cypress/upgrade_e2e/**/*.cy.ts",
