@@ -679,8 +679,8 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       expect(wrapper.find('button.euiFilterButton')).toHaveLength(2);
-      expect(wrapper.find('button.euiFilterButton [data-text="Types"]')).toHaveLength(1);
-      expect(wrapper.find('button.euiFilterButton [data-text="Tags"]')).toHaveLength(1);
+      expect(wrapper.find('button.euiFilterButton span[data-text="Types"]')).toHaveLength(1);
+      expect(wrapper.find('button.euiFilterButton span[data-text="Tags"]')).toHaveLength(1);
     });
 
     it('should not render filter buttons if disabled', async () => {

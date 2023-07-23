@@ -38,7 +38,7 @@ describe('GroupsFilterPopover', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="groups-filter-popover-button"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="groups-filter-popover-button"]').first().simulate('click');
     wrapper.update();
 
     wrapper.find('EuiFilterSelectItem').first().simulate('click');
