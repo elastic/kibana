@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-const path = require('path');
-
 module.exports = {
   preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../..'),
+  rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/observability_ai_assistant'],
+  setupFiles: ['<rootDir>/x-pack/plugins/observability_ai_assistant/.storybook/jest_setup.js'],
 };

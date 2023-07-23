@@ -60,8 +60,8 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
     assistant
       .chat({ messages, connectorId, signal: controller.signal })
       .then((response$) => {
-        return new Promise<void>((resolve, reject) => {
-          response$.pipe(delay(50)).subscribe({
+        new Promise<void>((resolve, reject) => {
+          const subscription = response$.pipe(delay(50)).subscribe({
             next: (chunk) => {
               partialResponse.content += chunk.choices[0].delta.content ?? '';
               partialResponse.function_call.name +=
@@ -76,6 +76,10 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
             complete: () => {
               resolve();
             },
+          });
+
+          controller.signal.addEventListener('abort', () => {
+            subscription.unsubscribe();
           });
         });
       })
