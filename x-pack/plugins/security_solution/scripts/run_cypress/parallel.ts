@@ -353,7 +353,7 @@ export const cli = () => {
 
               ...createCyEnvVar('ELASTICSEARCH_URL', createUrlFromFtrConfig('elasticsearch')),
               ...createCyEnvVar(
-                'ELASTIC_SEARCH_URL_WITH_AUTH',
+                'ELASTICSEARCH_URL_WITH_AUTH',
                 createUrlFromFtrConfig('elasticsearch', true)
               ),
               ...createCyEnvVar(
