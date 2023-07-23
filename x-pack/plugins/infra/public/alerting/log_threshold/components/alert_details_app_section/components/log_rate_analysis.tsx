@@ -176,10 +176,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const aiAssistant = useObservabilityAIAssistant();
 
-  const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
-
   const messages = useMemo<Message[] | undefined>(() => {
-    if (!logSpikeParams) {
+    const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
+    if (!hasLogSpikeParams) {
       return undefined;
     }
     const header = 'Field name,Field value,Doc count,p-value';
@@ -265,7 +264,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {aiAssistant.isEnabled() && hasLogSpikeParams ? (
+        {aiAssistant.isEnabled() && messages ? (
           <EuiFlexItem grow={false}>
             <ContextualInsight title={explainLogSpikeTitle} messages={messages} />
           </EuiFlexItem>
