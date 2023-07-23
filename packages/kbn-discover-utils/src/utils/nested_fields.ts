@@ -7,7 +7,7 @@
  */
 
 import { escapeRegExp } from 'lodash/fp';
-import { getFieldSubtypeNested } from '@kbn/data-views-plugin/public';
+import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 /**
@@ -52,7 +52,7 @@ export function isNestedFieldParent(fieldName: string, dataView: DataView): bool
     !!dataView.fields.getAll().find((patternField) => {
       // We only want to match a full path segment
       const nestedRootRegex = new RegExp(escapeRegExp(fieldName) + '(\\.|$)');
-      const subTypeNested = getFieldSubtypeNested(patternField);
+      const subTypeNested = getDataViewFieldSubtypeNested(patternField);
       return nestedRootRegex.test(subTypeNested?.nested.path ?? '');
     })
   );

@@ -22,7 +22,7 @@ import {
 import { emptyTitleText } from '@kbn/visualization-ui-components';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
+import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -388,4 +388,29 @@ export function getUniqueLabelGenerator() {
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
+}
+
+export function reorderElements(items: string[], targetId: string, sourceId: string) {
+  const result = items.filter((c) => c !== sourceId);
+  const targetIndex = items.findIndex((c) => c === sourceId);
+  const sourceIndex = items.findIndex((c) => c === targetId);
+
+  const targetPosition = result.indexOf(targetId);
+  result.splice(targetIndex < sourceIndex ? targetPosition + 1 : targetPosition, 0, sourceId);
+  return result;
+}
+
+export function shouldRemoveSource(
+  source: unknown,
+  dropType: DropType
+): source is DragDropOperation {
+  return (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  );
 }
