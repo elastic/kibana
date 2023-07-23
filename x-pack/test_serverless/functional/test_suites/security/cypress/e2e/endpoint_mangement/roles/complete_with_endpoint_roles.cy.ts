@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// FIXME:PT Delete when implemented
+export {};
+
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
