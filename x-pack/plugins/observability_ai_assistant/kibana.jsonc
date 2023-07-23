@@ -12,7 +12,11 @@
     ],
     "requiredPlugins": [
       "triggersActionsUi",
-      "actions"
+      "actions",
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

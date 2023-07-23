@@ -12,6 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import fnv from 'fnv-plus';
 import type { ObservabilityAIAssistantResourceNames } from './types';
 import { conversationComponentTemplate } from './conversation_component_template';
 import type { IObservabilityAIAssistantClient, IObservabilityAIAssistantService } from './types';
@@ -56,9 +57,7 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-      const fnv1a = await import('@sindresorhus/fnv1a');
-
-      const versionHash = fnv1a.default(stringify(conversationComponentTemplate), { size: 64 });
+      const versionHash = fnv.fast1a64(stringify(conversationComponentTemplate));
 
       await esClient.cluster.putComponentTemplate({
         create: false,
@@ -149,8 +148,9 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
         });
       }
     } catch (error) {
-      this.logger.error(`Failed to initialize CoPilotService: ${error.message}`);
+      this.logger.error(`Failed to initialize service: ${error.message}`);
       this.logger.debug(error);
+      throw error;
     }
   });
 
@@ -159,14 +159,14 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
   }: {
     request: KibanaRequest;
   }): Promise<IObservabilityAIAssistantClient> {
-    const [_, [coreStart, { security, actions }]] = await Promise.all([
+    const [_, [coreStart, plugins]] = await Promise.all([
       this.init(),
       this.core.getStartServices() as Promise<
         [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
       >,
     ]);
 
-    const user = security.authc.getCurrentUser(request);
+    const user = plugins.security.authc.getCurrentUser(request);
 
     if (!user) {
       throw Boom.forbidden(`User not found for current request`);
@@ -177,7 +177,7 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
 
     return new ObservabilityAIAssistantClient({
-      actionsClient: await actions.getActionsClientWithRequest(request),
+      actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       namespace: spaceId,
       esClient: coreStart.elasticsearch.client.asInternalUser,
       resources: this.resourceNames,

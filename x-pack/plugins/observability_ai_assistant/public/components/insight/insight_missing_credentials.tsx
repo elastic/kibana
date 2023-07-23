@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function InsightMissingCredentials() {
+interface Props {
+  connectorsManagementHref: string;
+}
+
+export function InsightMissingCredentials(props: Props) {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.observabilityAiAssistant.insight.missing.title', {
@@ -25,7 +29,7 @@ export function InsightMissingCredentials() {
 
       <EuiSpacer size="m" />
 
-      <EuiButton fill color="primary">
+      <EuiButton fill color="primary" href={props.connectorsManagementHref}>
         {i18n.translate('xpack.observabilityAiAssistant.insight.missing.buttonLabel', {
           defaultMessage: 'Connect Assistant',
         })}

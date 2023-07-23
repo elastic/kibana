@@ -6847,11 +6847,6 @@
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.27.8.tgz#6667fac16c436b5434a387a34dedb013198f6e6e"
   integrity sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==
 
-"@sindresorhus/fnv1a@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/fnv1a/-/fnv1a-3.0.0.tgz#e8ce2e7c7738ec8c354867d38e3bfcde622b87ca"
-  integrity sha512-M6pmbdZqAryzjZ4ELAzrdCMoMZk5lH/fshKrapfSeXdf2W+GDqZvPmfXaNTZp43//FVbSwkTPwpEMnehSyskkQ==
-
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ObservabilityAIAssistantPluginStart {}
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   actions: PluginSetupContract;
+  security: SecurityPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   actions: PluginStartContract;
+  security: SecurityPluginStart;
 }
