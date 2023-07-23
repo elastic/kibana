@@ -102,7 +102,7 @@ export const cleanKibana = () => {
 
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/.kibana_\*`;
 
   rootRequest({
     method: 'POST',
@@ -137,7 +137,7 @@ export const deleteAlertsAndRules = () => {
   rootRequest({
     method: 'POST',
     url: `${Cypress.env(
-      'ELASTICSEARCH_URL'
+      'ELASTICSEARCH_URL_WITH_AUTH'
     )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
     body: {
       query: {
@@ -148,7 +148,7 @@ export const deleteAlertsAndRules = () => {
 };
 
 export const deleteTimelines = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
@@ -178,7 +178,7 @@ export const deleteAlertsIndex = () => {
 };
 
 export const deleteCases = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
@@ -199,7 +199,7 @@ export const deleteCases = () => {
 };
 
 export const deleteConnectors = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
@@ -220,7 +220,7 @@ export const deleteConnectors = () => {
 };
 
 export const deletePrebuiltRulesAssets = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,

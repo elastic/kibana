@@ -303,7 +303,8 @@ export const cli = () => {
             );
 
             const createUrlFromFtrConfig = (
-              type: 'elasticsearch' | 'kibana' | 'fleetserver'
+              type: 'elasticsearch' | 'kibana' | 'fleetserver',
+              withAuth: boolean = false
             ): string => {
               const getKeyPath = (path: string = ''): string => {
                 return `servers.${type}${path ? `.${path}` : ''}`;
@@ -319,7 +320,19 @@ export const cli = () => {
               url.protocol = config.get(getKeyPath('protocol'));
               url.hostname = config.get(getKeyPath('hostname'));
 
+              if (withAuth) {
+                url.username = config.get(getKeyPath('username'));
+                url.password = config.get(getKeyPath('password'));
+              }
+
               return url.toString().replace(/\/$/, '');
+            };
+
+            const createCyEnvVar = (varName: string, varValue: string): Record<string, string> => {
+              return {
+                [varName]: varValue,
+                [`CYPRESS_${varName}`]: varValue,
+              };
             };
 
             const baseUrl = createUrlFromFtrConfig('kibana');
@@ -331,24 +344,26 @@ export const cli = () => {
             const cyCustomEnv = {
               ...ftrEnv,
 
-              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
-              CYPRESS_FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+              ...createCyEnvVar('FLEET_SERVER_URL', createUrlFromFtrConfig('fleetserver')),
 
-              KIBANA_URL: baseUrl,
-              KIBANA_USERNAME: config.get('servers.kibana.username'),
-              KIBANA_PASSWORD: config.get('servers.kibana.password'),
+              ...createCyEnvVar('KIBANA_URL', baseUrl),
+              ...createCyEnvVar('KIBANA_URL_WITH_AUTH', createUrlFromFtrConfig('kibana', true)),
+              ...createCyEnvVar('KIBANA_USERNAME', config.get('servers.kibana.username')),
+              ...createCyEnvVar('KIBANA_PASSWORD', config.get('servers.kibana.password')),
 
-              CYPRESS_KIBANA_URL: baseUrl,
-              CYPRESS_KIBANA_USERNAME: config.get('servers.kibana.username'),
-              CYPRESS_KIBANA_PASSWORD: config.get('servers.kibana.password'),
-
-              ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
-              ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-              ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-
-              CYPRESS_ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
-              CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-              CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+              ...createCyEnvVar('ELASTICSEARCH_URL', createUrlFromFtrConfig('elasticsearch')),
+              ...createCyEnvVar(
+                'ELASTIC_SEARCH_URL_WITH_AUTH',
+                createUrlFromFtrConfig('elasticsearch', true)
+              ),
+              ...createCyEnvVar(
+                'ELASTICSEARCH_USERNAME',
+                config.get('servers.elasticsearch.username')
+              ),
+              ...createCyEnvVar(
+                'ELASTICSEARCH_PASSWORD',
+                config.get('servers.elasticsearch.password')
+              ),
             };
 
             log.info(`

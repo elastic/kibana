@@ -81,7 +81,7 @@ export const createNewRuleAsset = ({
   index?: string;
   rule?: typeof SAMPLE_PREBUILT_RULE;
 }) => {
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
+  const url = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;
   cy.waitUntil(
@@ -107,7 +107,7 @@ export const bulkCreateRuleAssets = ({
   index?: string;
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
 }) => {
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk`;
+  const url = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/${index}/_bulk`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const indexOperation = {
@@ -124,7 +124,7 @@ export const bulkCreateRuleAssets = ({
 
   cy.request({
     method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_mapping`,
+    url: `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/${index}/_mapping`,
     body: {
       dynamic: true,
     },
@@ -150,7 +150,7 @@ export const bulkCreateRuleAssets = ({
 };
 
 export const getRuleAssets = (index: string | undefined = '.kibana_security_solution') => {
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search?size=10000`;
+  const url = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/${index}/_search?size=10000`;
   return cy.request({
     method: 'GET',
     url,
