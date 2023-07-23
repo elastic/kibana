@@ -5,6 +5,19 @@
  * 2.0.
  */
 
-describe('Security Complete PLI with Endpoint Complete addon', () => {
-  // FIXME:PT implement
-});
+describe(
+  'App Features for Complete PLI with Endpoint Complete',
+  {
+    env: {
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'security', product_tier: 'complete' },
+          { product_line: 'endpoint', product_tier: 'complete' },
+        ],
+      },
+    },
+  },
+  () => {
+    // FIXME:PT implement
+  }
+);

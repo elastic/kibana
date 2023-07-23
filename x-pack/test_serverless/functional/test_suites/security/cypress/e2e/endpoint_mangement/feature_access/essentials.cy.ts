@@ -9,7 +9,7 @@ import { login } from '../../../tasks/login';
 import { getEndpointManagementPageList } from '../../../lib';
 
 describe(
-  'Security Essential PLI',
+  'App Features for Essential PLI',
   {
     env: {
       ftrConfig: {

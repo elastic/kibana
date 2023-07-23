@@ -9,7 +9,7 @@ import { login } from '../../../tasks/login';
 import { getEndpointManagementPageList } from '../../../lib';
 
 describe(
-  'Security Complete PLI',
+  'App Features for Complete PLI',
   {
     env: {
       ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },

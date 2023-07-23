@@ -5,6 +5,19 @@
  * 2.0.
  */
 
-describe('Security Essential PLI with Endpoint Essentials addon', () => {
-  // FIXME:PT implement
-});
+describe(
+  'App Features for Essential PLI with Endpoint Essentials',
+  {
+    env: {
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
+      },
+    },
+  },
+  () => {
+    // FIXME:PT implement
+  }
+);

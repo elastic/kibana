@@ -14,19 +14,32 @@ import {
   APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_TRUSTED_APPS_PATH,
 } from '@kbn/security-solution-plugin/common/constants';
+import { keyBy } from 'lodash';
 
-export const getEndpointManagementPageList = (): Array<{
-  id: string;
+interface EndpointManagementPageMap {
+  endpointList: EndpointManagementPage;
+  policyList: EndpointManagementPage;
+  trustedApps: EndpointManagementPage;
+  eventFilters: EndpointManagementPage;
+  hostIsolationExceptions: EndpointManagementPage;
+  blocklist: EndpointManagementPage;
+  responseActionLog: EndpointManagementPage;
+}
+
+interface EndpointManagementPage {
+  id: keyof EndpointManagementPageMap;
   title: string;
   url: string;
-}> => {
+}
+
+export const getEndpointManagementPageList = (): EndpointManagementPage[] => {
   return [
     { id: 'endpointList', title: 'Endpoint list page', url: APP_ENDPOINTS_PATH },
     { id: 'policyList', title: 'Policy List page', url: APP_POLICIES_PATH },
     { id: 'trustedApps', title: 'Trusted Apps Page', url: APP_TRUSTED_APPS_PATH },
     { id: 'eventFilters', title: 'Event Filters page', url: APP_EVENT_FILTERS_PATH },
     {
-      id: 'HostIsolationExceptions',
+      id: 'hostIsolationExceptions',
       title: 'Host Isolation Exceptions page',
       url: APP_HOST_ISOLATION_EXCEPTIONS_PATH,
     },
@@ -37,4 +50,8 @@ export const getEndpointManagementPageList = (): Array<{
       url: APP_RESPONSE_ACTIONS_HISTORY_PATH,
     },
   ];
+};
+
+export const getEndpointManagementPageMap = (): EndpointManagementPageMap => {
+  return keyBy(getEndpointManagementPageList(), 'id') as unknown as EndpointManagementPageMap;
 };
