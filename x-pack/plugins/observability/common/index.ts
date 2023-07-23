@@ -68,5 +68,3 @@ export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
 export type { AlertsLocatorParams } from './locators/alerts';
-
-export { CoPilotPromptId, loadCoPilotPrompts } from './co_pilot';

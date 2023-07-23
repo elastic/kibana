@@ -86,7 +86,7 @@ export function ErrorSampleContextualInsight({
         <ContextualInsight
           messages={messages}
           title={i18n.translate(
-            'xpack.apm.errorGroupCoPilotPrompt.explainErrorTitle',
+            'xpack.apm.errorGroupContextualInsight.explainErrorTitle',
             { defaultMessage: "What's this error?" }
           )}
         />

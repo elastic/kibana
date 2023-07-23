@@ -60,7 +60,7 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
     assistant
       .chat({ messages, connectorId, signal: controller.signal })
       .then((response$) => {
-        new Promise<void>((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
           const subscription = response$.pipe(delay(50)).subscribe({
             next: (chunk) => {
               partialResponse.content += chunk.choices[0].delta.content ?? '';
