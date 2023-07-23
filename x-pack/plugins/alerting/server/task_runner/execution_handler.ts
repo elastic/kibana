@@ -175,6 +175,29 @@ export class ExecutionHandler<
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
     this.maintenanceWindowIds = maintenanceWindowIds ?? [];
+
+    /**
+     * Update rule actions to contain
+     * the system actions settings
+     */
+    this.rule.actions = this.getRuleActionsWithSystemActionsConfigured(rule.actions);
+  }
+
+  private getRuleActionsWithSystemActionsConfigured(actions: SanitizedRule<Params>['actions']) {
+    return actions.map((action) => {
+      if (!this.actionsClient.isSystemAction(action.id)) {
+        return action;
+      }
+
+      return Object.assign(action, {
+        group: 'default',
+        frequency: {
+          summary: true,
+          notifyWhen: 'onActiveAlert' as const,
+          throttle: null,
+        },
+      });
+    });
   }
 
   public async run(
@@ -452,7 +475,7 @@ export class ExecutionHandler<
 
     const connectorAdapterActionParams = connectorAdapter.buildActionParams({
       alerts: summarizedAlerts,
-      rule,
+      rule: { id: rule.id, tags: rule.tags, name: rule.name },
       ruleUrl,
       spaceId,
       params: action.params,

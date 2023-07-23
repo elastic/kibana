@@ -15,12 +15,17 @@ import { CombinedSummarizedAlerts } from '../types';
 
 type ActionTypeParams = Record<string, unknown>;
 
+type Rule<RuleParams extends RuleTypeParams = RuleTypeParams> = Pick<
+  SanitizedRule<RuleParams>,
+  'id' | 'name' | 'tags'
+>;
+
 interface BuildActionParamsArgs<
   RuleParams extends RuleTypeParams = RuleTypeParams,
   RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams
 > {
   alerts: CombinedSummarizedAlerts;
-  rule: SanitizedRule<RuleParams>;
+  rule: Rule<RuleParams>;
   params: RuleActionParams;
   spaceId: string;
   ruleUrl?: string;

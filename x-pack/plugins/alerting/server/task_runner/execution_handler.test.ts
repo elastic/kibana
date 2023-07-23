@@ -33,6 +33,7 @@ import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
 import { schema } from '@kbn/config-schema';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -116,6 +117,7 @@ const defaultExecutionParams = {
       },
     },
     actionsPlugin: mockActionsPlugin,
+    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   } as unknown as TaskRunnerContext,
   apiKey,
   ruleConsumer: 'rule-consumer',
@@ -1585,6 +1587,131 @@ describe('Execution Handler', () => {
       3,
       'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
+  });
+
+  describe('System actions', () => {
+    test('triggers system actions with summarization per rule run', async () => {
+      const actionsParams = { myParams: 'test' };
+
+      getSummarizedAlertsMock.mockResolvedValue({
+        new: {
+          count: 1,
+          data: [mockAAD],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+
+      const executorParams = generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              id: '1',
+              group: 'default',
+              actionTypeId: '.test-system-action',
+              params: actionsParams,
+            },
+          ],
+        },
+      });
+
+      const buildActionParams = jest.fn().mockReturnValue({ ...actionsParams, foo: 'bar' });
+
+      executorParams.taskRunnerContext.connectorAdapterRegistry.register({
+        connectorTypeId: '.test-system-action',
+        ruleActionParamsSchema: schema.object({}),
+        buildActionParams,
+      });
+
+      executorParams.actionsClient.isSystemAction.mockReturnValue(true);
+      executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+
+      const res = await executionHandler.run(generateAlert({ id: 1 }));
+
+      /**
+       * Verifies that notifyWhen is set to onActiveAlert
+       */
+      expect(res).toEqual({ throttledSummaryActions: {} });
+
+      /**
+       * Verifies that summary is set to true
+       * and without start and end dates
+       */
+      expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
+        executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        ruleId: '1',
+        spaceId: 'test1',
+        excludedAlertInstanceIds: [],
+        alertsFilter: undefined,
+      });
+
+      expect(buildActionParams).toHaveBeenCalledWith({
+        alerts: {
+          all: {
+            count: 1,
+            data: [mockAAD],
+          },
+          new: {
+            count: 1,
+            data: [mockAAD],
+          },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        },
+        params: actionsParams,
+        rule: {
+          id: rule.id,
+          name: rule.name,
+          tags: rule.tags,
+        },
+        ruleUrl:
+          'https://example.com/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
+        spaceId: 'test1',
+      });
+
+      expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+      expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "apiKey": "MTIzOmFiYw==",
+              "consumer": "rule-consumer",
+              "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+              "id": "1",
+              "params": Object {
+                "foo": "bar",
+                "myParams": "test",
+              },
+              "relatedSavedObjects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": "test1",
+                  "type": "alert",
+                  "typeId": "test",
+                },
+              ],
+              "source": Object {
+                "source": Object {
+                  "id": "1",
+                  "type": "alert",
+                },
+                "type": "SAVED_OBJECT",
+              },
+              "spaceId": "test1",
+            },
+          ],
+        ]
+      `);
+
+      expect(alertingEventLogger.logAction).toBeCalledWith({
+        alertSummary: { new: 1, ongoing: 0, recovered: 0 },
+        id: '1',
+        typeId: '.test-system-action',
+      });
+    });
   });
 
   describe('rule url', () => {
