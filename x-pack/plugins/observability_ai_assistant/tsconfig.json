@@ -22,7 +22,8 @@
     "@kbn/security-plugin",
     "@kbn/i18n",
     "@kbn/spaces-plugin",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",
