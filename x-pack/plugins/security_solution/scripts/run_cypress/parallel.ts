@@ -332,14 +332,23 @@ export const cli = () => {
               ...ftrEnv,
 
               FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+              CYPRESS_FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
 
               KIBANA_URL: baseUrl,
               KIBANA_USERNAME: config.get('servers.kibana.username'),
               KIBANA_PASSWORD: config.get('servers.kibana.password'),
 
+              CYPRESS_KIBANA_URL: baseUrl,
+              CYPRESS_KIBANA_USERNAME: config.get('servers.kibana.username'),
+              CYPRESS_KIBANA_PASSWORD: config.get('servers.kibana.password'),
+
               ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
               ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
               ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+
+              CYPRESS_ELASTICSEARCH_URL: createUrlFromFtrConfig('elasticsearch'),
+              CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+              CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
             };
 
             log.info(`

@@ -23,8 +23,8 @@ const primaryButton = 0;
 const dndSloppyClickDetectionThreshold = 5;
 
 export const API_AUTH = Object.freeze({
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
 export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
