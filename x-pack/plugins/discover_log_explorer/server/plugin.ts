@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './use_is_edit_flow';
-export * from './use_validate_field';
-export { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { Plugin } from '@kbn/core/server';
+
+export class DiscoverLogExplorerServerPlugin implements Plugin {
+  setup() {}
+
+  start() {}
+}

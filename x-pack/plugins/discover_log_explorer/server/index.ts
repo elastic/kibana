@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './use_is_edit_flow';
-export * from './use_validate_field';
-export { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { DiscoverLogExplorerServerPlugin } from './plugin';
+
+export { config } from './config';
+
+export const plugin = () => new DiscoverLogExplorerServerPlugin();
