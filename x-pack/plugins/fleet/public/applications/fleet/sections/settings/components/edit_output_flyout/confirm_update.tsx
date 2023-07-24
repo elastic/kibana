@@ -73,13 +73,13 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
           title={
             <FormattedMessage
               id="xpack.fleet.settings.updateOutput.warningTitle"
-              defaultMessage="Logstash output for agent integration is not supported for fleet server."
+              defaultMessage="Logstash output for agent integration is not supported for fleet server and synthetics."
             />
           }
         >
           <FormattedMessage
             id="xpack.fleet.settings.updateOutput.warningMessage"
-            defaultMessage="Fleet server policies will keep using the existing ES output."
+            defaultMessage="Fleet server and synthetics policies will keep using the existing ES output."
           />
         </EuiCallOut>{' '}
       </>

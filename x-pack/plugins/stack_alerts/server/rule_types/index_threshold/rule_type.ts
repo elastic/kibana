@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
@@ -49,7 +48,7 @@ export function getRuleType(
   const actionVariableContextDateLabel = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionVariableContextDateLabel',
     {
-      defaultMessage: 'The date the alert exceeded the threshold.',
+      defaultMessage: 'The date the alert met the threshold conditions.',
     }
   );
 
@@ -78,30 +77,93 @@ export function getRuleType(
     'xpack.stackAlerts.indexThreshold.actionVariableContextThresholdLabel',
     {
       defaultMessage:
-        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+        'An array of rule threshold values. For between and notBetween thresholds, there are two values.',
     }
   );
 
   const actionVariableContextThresholdComparatorLabel = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionVariableContextThresholdComparatorLabel',
     {
-      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
+      defaultMessage: 'The comparison function for the threshold.',
     }
   );
 
   const actionVariableContextConditionsLabel = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionVariableContextConditionsLabel',
     {
-      defaultMessage: 'A string describing the threshold comparator and threshold',
+      defaultMessage: 'A string describing the threshold comparator and threshold.',
     }
   );
 
-  const ruleParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
-    (propKey: string) => {
-      return {
-        name: propKey,
-        description: propKey,
-      };
+  const actionVariableContextIndexLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextIndexLabel',
+    {
+      defaultMessage: 'The indices the rule queries.',
+    }
+  );
+
+  const actionVariableContextTimeFieldLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTimeFieldLabel',
+    {
+      defaultMessage: 'The field that is used to calculate the time window.',
+    }
+  );
+
+  const actionVariableContextAggTypeLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextAggTypeLabel',
+    {
+      defaultMessage: 'The type of aggregation.',
+    }
+  );
+
+  const actionVariableContextAggFieldLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextAggFieldLabel',
+    {
+      defaultMessage: 'The field that is used in the aggregation.',
+    }
+  );
+
+  const actionVariableContextGroupByLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextGroupByLabel',
+    {
+      defaultMessage:
+        'Indicates whether the aggregation is applied over all documents or split into groups.',
+    }
+  );
+
+  const actionVariableContextTermFieldLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTermFieldLabel',
+    {
+      defaultMessage: 'The field that is used for grouping the aggregation.',
+    }
+  );
+
+  const actionVariableContextFilterKueryLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextFilterKueryLabel',
+    {
+      defaultMessage: 'A KQL expression that limits the scope of alerts.',
+    }
+  );
+
+  const actionVariableContextTermSizeLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTermSizeLabel',
+    {
+      defaultMessage: 'The number of groups that are checked against the threshold.',
+    }
+  );
+
+  const actionVariableContextTimeWindowSizeLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTimeWindowSizeLabel',
+    {
+      defaultMessage:
+        'The size of the time window, which determines how far back to search for documents.',
+    }
+  );
+
+  const actionVariableContextTimeWindowUnitLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTimeWindowUnitLabel',
+    {
+      defaultMessage: 'The type of units for the time window: seconds, minutes, hours, or days.',
     }
   );
 
@@ -125,7 +187,16 @@ export function getRuleType(
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        ...ruleParamsVariables,
+        { name: 'index', description: actionVariableContextIndexLabel },
+        { name: 'timeField', description: actionVariableContextTimeFieldLabel },
+        { name: 'aggType', description: actionVariableContextAggTypeLabel },
+        { name: 'aggField', description: actionVariableContextAggFieldLabel },
+        { name: 'groupBy', description: actionVariableContextGroupByLabel },
+        { name: 'termField', description: actionVariableContextTermFieldLabel },
+        { name: 'filterKuery', description: actionVariableContextFilterKueryLabel },
+        { name: 'termSize', description: actionVariableContextTermSizeLabel },
+        { name: 'timeWindowSize', description: actionVariableContextTimeWindowSizeLabel },
+        { name: 'timeWindowUnit', description: actionVariableContextTimeWindowUnitLabel },
       ],
     },
     minimumLicenseRequired: 'basic',

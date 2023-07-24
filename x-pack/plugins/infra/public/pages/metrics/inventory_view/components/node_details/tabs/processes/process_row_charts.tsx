@@ -19,11 +19,10 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { useIsDarkMode } from '../../../../../../../hooks/use_is_dark_mode';
+import { useTimelineChartTheme } from '../../../../../../../utils/use_timeline_chart_theme';
 import { Color } from '../../../../../../../../common/color_palette';
 import { createFormatter } from '../../../../../../../../common/formatters';
 import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
-import { getChartTheme } from '../../../../../../../utils/get_chart_theme';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
@@ -74,12 +73,12 @@ interface ProcessChartProps {
   label: string;
 }
 const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
+  const chartTheme = useTimelineChartTheme();
   const chartMetric = {
     color,
     aggregation: 'avg' as MetricsExplorerAggregation,
     label,
   };
-  const isDarkMode = useIsDarkMode();
 
   const dateFormatter = useMemo(() => {
     if (!timeseries) return () => '';
@@ -128,7 +127,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
           gridLine={{ visible: true }}
         />
         <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
-        <Settings theme={getChartTheme(isDarkMode)} />
+        <Settings baseTheme={chartTheme.baseTheme} theme={chartTheme.theme} />
       </Chart>
     </ChartContainer>
   );
