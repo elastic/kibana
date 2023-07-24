@@ -18,7 +18,8 @@ export const textBasedLanguagedEditorStyles = (
   editorHeight: number,
   isCodeEditorExpanded: boolean,
   hasErrors: boolean,
-  isCodeEditorExpandedFocused: boolean
+  isCodeEditorExpandedFocused: boolean,
+  renderRunButton?: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -72,7 +73,7 @@ export const textBasedLanguagedEditorStyles = (
           : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
-      paddingRight: euiTheme.size.base,
+      paddingRight: renderRunButton ? euiTheme.size.xs : euiTheme.size.base,
       paddingTop: euiTheme.size.xs,
       paddingBottom: euiTheme.size.xs,
       width: 'calc(100% + 2px)',

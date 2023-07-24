@@ -52,7 +52,7 @@ import './overwrite.scss';
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
   onTextLangQueryChange: (query: AggregateQuery) => void;
-  onTextLangQuerySubmit: () => void;
+  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   detectTimestamp?: boolean;
@@ -60,6 +60,8 @@ export interface TextBasedLanguagesEditorProps {
   isDisabled?: boolean;
   isDarkMode?: boolean;
   dataTestSubj?: string;
+  hideExpandButton?: boolean;
+  renderRunButton?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -92,6 +94,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
   isDisabled,
   isDarkMode,
+  hideExpandButton,
+  renderRunButton,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -117,7 +121,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     editorHeight,
     isCodeEditorExpanded,
     Boolean(errors?.length),
-    isCodeEditorExpandedFocused
+    isCodeEditorExpandedFocused,
+    renderRunButton
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -183,6 +188,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   };
 
+  const onQuerySubmit = useCallback(
+    (value?: string) => {
+      onTextLangQuerySubmit({ [language]: value } as AggregateQuery);
+    },
+    [language, onTextLangQuerySubmit]
+  );
+
   const restoreInitialMode = () => {
     setIsCodeEditorExpandedFocused(false);
     if (isCodeEditorExpanded) return;
@@ -222,7 +234,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       // on CMD/CTRL + Enter submit the query
       // eslint-disable-next-line no-bitwise
       editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
-        onTextLangQuerySubmit();
+        editor1.current?.getValue();
+        const currentValue = editor1.current?.getValue();
+        onQuerySubmit(currentValue);
       });
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);
@@ -423,33 +437,35 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.minimizeTooltip',
-                    {
-                      defaultMessage: 'Compact query editor',
-                    }
-                  )}
-                >
-                  <EuiButtonIcon
-                    iconType="minimize"
-                    color="text"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.MinimizeEditor',
+              {!Boolean(hideExpandButton) && (
+                <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+                  <EuiToolTip
+                    position="top"
+                    content={i18n.translate(
+                      'textBasedEditor.query.textBasedLanguagesEditor.minimizeTooltip',
                       {
-                        defaultMessage: 'Minimize editor',
+                        defaultMessage: 'Compact query editor',
                       }
                     )}
-                    data-test-subj="TextBasedLangEditor-minimize"
-                    onClick={() => {
-                      expandCodeEditor(false);
-                      updateLinesFromModel = false;
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
+                  >
+                    <EuiButtonIcon
+                      iconType="minimize"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'textBasedEditor.query.textBasedLanguagesEditor.MinimizeEditor',
+                        {
+                          defaultMessage: 'Minimize editor',
+                        }
+                      )}
+                      data-test-subj="TextBasedLangEditor-minimize"
+                      onClick={() => {
+                        expandCodeEditor(false);
+                        updateLinesFromModel = false;
+                      }}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <LanguageDocumentationPopover
                   language={String(language).toUpperCase()}
@@ -538,8 +554,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         containerCSS={styles.bottomContainer}
                         errors={editorErrors}
                         onErrorClick={onErrorClick}
-                        refreshErrors={onTextLangQuerySubmit}
+                        refreshErrors={onQuerySubmit}
                         detectTimestamp={detectTimestamp}
+                        renderRunButton={renderRunButton}
                       />
                     )}
                   </div>
@@ -610,8 +627,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           containerCSS={styles.bottomContainer}
           errors={editorErrors}
           onErrorClick={onErrorClick}
-          refreshErrors={onTextLangQuerySubmit}
+          refreshErrors={onQuerySubmit}
           detectTimestamp={detectTimestamp}
+          renderRunButton={renderRunButton}
         />
       )}
       {isCodeEditorExpanded && (

@@ -19,6 +19,7 @@ import {
   EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiButton,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -35,6 +36,7 @@ interface EditorFooterProps {
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
+  renderRunButton?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -42,6 +44,7 @@ export const EditorFooter = memo(function EditorFooter({
   containerCSS,
   errors,
   detectTimestamp,
+  renderRunButton,
   onErrorClick,
   refreshErrors,
 }: EditorFooterProps) {
@@ -187,27 +190,36 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
-                  defaultMessage: 'Run query',
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCode
-              transparentBackground
-              css={css`
-                font-size: 12px;
-              `}
-            >{`${COMMAND_KEY} + Enter`}</EuiCode>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {!Boolean(renderRunButton) && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <p>
+                  {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                    defaultMessage: 'Run query',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCode
+                transparentBackground
+                css={css`
+                  font-size: 12px;
+                `}
+              >{`${COMMAND_KEY} + Enter`}</EuiCode>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+      {Boolean(renderRunButton) && (
+        <EuiFlexItem grow={false}>
+          <EuiButton color="text" size="s" fill onClick={refreshErrors}>
+            Run query
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

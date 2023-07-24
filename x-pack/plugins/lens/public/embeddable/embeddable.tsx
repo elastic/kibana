@@ -801,6 +801,7 @@ export class Embeddable
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
           panelId={this.id}
+          canEditTextBasedQuery={this.isTextBasedLanguage()}
         />
       );
     }

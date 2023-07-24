@@ -55,6 +55,7 @@
       "embeddable",
       "fieldFormats",
       "charts",
+      "textBasedLanguages",
     ],
     "extraPublicDirs": [
       "common/constants"

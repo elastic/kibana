@@ -58,6 +58,7 @@ export function getEditLensConfiguration(
     datasourceId,
     adaptersTables,
     panelId,
+    canEditTextBasedQuery,
   }: EditLensConfigurationProps) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
@@ -138,6 +139,7 @@ export function getEditLensConfiguration(
       startDependencies,
       visualizationMap,
       datasourceMap,
+      canEditTextBasedQuery,
     };
 
     return getWrapper(

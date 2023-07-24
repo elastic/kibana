@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlyoutBody,
@@ -15,13 +15,18 @@ import {
   EuiFlexItem,
   useEuiTheme,
   EuiCallOut,
+  EuiFlyoutHeader,
+  EuiTitle,
+  // EuiAccordion,
 } from '@elastic/eui';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
@@ -43,11 +48,11 @@ export interface EditConfigPanelProps {
   panelId?: string;
   datasourceId: 'formBased' | 'textBased';
   adaptersTables?: Record<string, Datatable>;
+  canEditTextBasedQuery?: boolean;
 }
 
 export function LensEditConfigurationFlyout({
   attributes,
-  dataView,
   coreStart,
   startDependencies,
   visualizationMap,
@@ -56,11 +61,14 @@ export function LensEditConfigurationFlyout({
   updateAll,
   closeFlyout,
   adaptersTables,
+  canEditTextBasedQuery,
 }: EditConfigPanelProps) {
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { euiTheme } = useEuiTheme();
+  const query = attributes.state.query;
+  const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(query);
 
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
@@ -97,6 +105,17 @@ export function LensEditConfigurationFlyout({
   };
   return (
     <>
+      {canEditTextBasedQuery && isOfAggregateQueryType(query) && (
+        <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+          <EuiTitle size="xs">
+            <h2 id="Edit Lens configuration">
+              {i18n.translate('xpack.lens.config.editLabel', {
+                defaultMessage: 'Edit SQL visualization',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
@@ -105,17 +124,41 @@ export function LensEditConfigurationFlyout({
           }
         `}
       >
+        {datasourceId === 'textBased' && (
+          <EuiCallOut
+            size="s"
+            title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
+              defaultMessage: 'SQL currently offers limited configuration options',
+            })}
+            iconType="iInCircle"
+          />
+        )}
+        {canEditTextBasedQuery && isOfAggregateQueryType(queryTextBased) && (
+          <TextBasedLangEditor
+            query={queryTextBased}
+            onTextLangQueryChange={(q) => {}}
+            expandCodeEditor={(status: boolean) => {}}
+            isCodeEditorExpanded={true}
+            errors={[]}
+            hideExpandButton={true}
+            renderRunButton={true}
+            onTextLangQuerySubmit={(q) => {
+              if (q) {
+                setQueryTextBased(q);
+              }
+            }}
+            isDisabled={false}
+          />
+        )}
+        {/* <EuiAccordion
+          id="layer-configuration"
+          buttonContent={i18n.translate('xpack.lens.config.layerConfigurationLabel', {
+            defaultMessage: 'Layer configuration',
+          })}
+          initialIsOpen={true}
+        > */}
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            {datasourceId === 'textBased' && (
-              <EuiCallOut
-                size="s"
-                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                  defaultMessage: 'SQL currently offers limited configuration options',
-                })}
-                iconType="iInCircle"
-              />
-            )}
             <EuiSpacer size="m" />
             <VisualizationToolbar
               activeVisualization={activeVisualization}
@@ -126,6 +169,7 @@ export function LensEditConfigurationFlyout({
             <ConfigPanelWrapper {...layerPanelsProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {/* </EuiAccordion> */}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
