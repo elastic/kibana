@@ -14,22 +14,10 @@ import {
 import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metring';
 import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
 
-// Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
-const MAX_BUCKETS = 60 * 1000;
-
 const CSPM_CYCLE_SCAN_FREQUENT = '24h';
-const CSPM_METRING_TASK_NAME = 'cspm_usage_report';
-const CSPM_BUCKET_TYPE_NAME = 'cspm_resource';
+const CSPM_BUCKET_SUB_TYPE_NAME = 'CSPM';
 
-export interface Benchmarks {
-  benchmarks: {
-    buckets: BenchmarkBucket[];
-  };
-}
-
-interface BenchmarkBucket {
-  key: string; // benchmark name
-  doc_count: number;
+interface ResourceCountAggregation {
   min_timestamp: MinTimestamp;
   unique_resources: {
     value: number;
@@ -48,43 +36,27 @@ export const getCspmUsageRecord = async ({
   taskId,
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord | undefined> => {
   try {
-    const response = await esClient.search<unknown, Benchmarks>(getFindingsByResourceAggQuery());
+    const response = await esClient.search<unknown, ResourceCountAggregation>(
+      getFindingsByResourceAggQuery()
+    );
 
-    const cspmBenchmarks = response.aggregations?.benchmarks.buckets;
+    const cspmResourceCount = response.aggregations
+      ? response.aggregations.unique_resources.value
+      : 0;
 
-    const { benchmarks, sumResources, earliestTimestampArray } = cspmBenchmarks
-      ? cspmBenchmarks.reduce(
-          (accumulator, benchmarkBucket: BenchmarkBucket) => {
-            accumulator.benchmarks.push(benchmarkBucket.key);
-            accumulator.sumResources += benchmarkBucket.unique_resources.value;
-            accumulator.earliestTimestampArray.push(benchmarkBucket.min_timestamp);
-
-            return accumulator;
-          },
-          {
-            benchmarks: [] as string[],
-            sumResources: 0,
-            earliestTimestampArray: [] as MinTimestamp[],
-          }
-        )
-      : { benchmarks: [], sumResources: 0, earliestTimestampArray: undefined };
-
-    const minTimestamp: string =
-      earliestTimestampArray && earliestTimestampArray.length > 0
-        ? earliestTimestampArray.reduce((min, current) => {
-            return current.value < min.value ? current : min;
-          }, earliestTimestampArray[0]).value_as_string
-        : new Date().toISOString();
+    const minTimestamp = response.aggregations
+      ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
+      : new Date().toISOString();
 
     const usageRecords = {
-      id: CLOUD_SECURITY_TASK_TYPE + ':' + CSPM_METRING_TASK_NAME,
-      usage_timestamp: new Date(minTimestamp).toISOString(),
+      id: CLOUD_SECURITY_TASK_TYPE + ':' + CLOUD_SECURITY_TASK_TYPE,
+      usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
       usage: {
-        type: CSPM_BUCKET_TYPE_NAME,
-        quantity: sumResources,
+        type: CLOUD_SECURITY_TASK_TYPE,
+        sub_type: CSPM_BUCKET_SUB_TYPE_NAME,
+        quantity: cspmResourceCount,
         period_seconds: cloudSecurityMetringTaskProperties.periodSeconds,
-        cause: benchmarks.join(', '),
       },
       source: {
         id: taskId,
@@ -123,23 +95,15 @@ export const getFindingsByResourceAggQuery = () => ({
   },
   size: 0,
   aggs: {
-    benchmarks: {
-      terms: {
-        field: 'rule.benchmark.name',
-        size: MAX_BUCKETS,
+    unique_resources: {
+      cardinality: {
+        field: 'resource.id',
+        precision_threshold: 3000, // default = 3000  note note that even with a threshold as low as 100, the error remains very low 1-6% even when counting millions of items. https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate
       },
-      aggs: {
-        unique_resources: {
-          cardinality: {
-            field: 'resource.id',
-            precision_threshold: 3000, // default = 3000  note note that even with a threshold as low as 100, the error remains very low 1-6% even when counting millions of items. https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate
-          },
-        },
-        min_timestamp: {
-          min: {
-            field: '@timestamp',
-          },
-        },
+    },
+    min_timestamp: {
+      min: {
+        field: '@timestamp',
       },
     },
   },
