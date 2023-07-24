@@ -6,27 +6,27 @@
  */
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../../..';
 import { CancellationToken } from '@kbn/reporting-common';
-import { cryptoFactory } from '../../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { generatePngObservable } from '../../common';
-import { TaskPayloadPNG } from '../types';
-import { runTaskFnFactory } from '.';
+import { cryptoFactory } from '../../lib';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { generatePngObservable } from '../common';
+import { TaskPayloadPNG } from './types';
+import { PngV1ExportType } from './png';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 
-jest.mock('../../common/generate_png');
+jest.mock('../common/generate_png');
 
 let content: string;
-let mockReporting: ReportingCore;
+let mockPngExportType: PngV1ExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
 
-const getMockLogger = () => loggingSystemMock.createLogger();
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -40,15 +40,25 @@ beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
-  const mockReportingConfig = createMockConfigSchema({
-    encryptionKey: mockEncryptionKey,
-    queue: {
-      indexInterval: 'daily',
-      timeout: Infinity,
-    },
-  });
+  const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
+  const context = coreMock.createPluginInitializerContext(configType);
 
-  mockReporting = await createMockReportingCore(mockReportingConfig);
+  const mockCoreSetup = coreMock.createSetup();
+  const mockCoreStart = coreMock.createStart();
+  const mockReportingCore = await createMockReportingCore(createMockConfigSchema());
+
+  mockPngExportType = new PngV1ExportType(mockCoreSetup, configType, mockLogger, context);
+
+  mockPngExportType.setup({
+    basePath: { set: jest.fn() },
+  });
+  mockPngExportType.start({
+    esClient: elasticsearchServiceMock.createClusterClient(),
+    savedObjects: mockCoreStart.savedObjects,
+    uiSettings: mockCoreStart.uiSettings,
+    screenshotting: {} as unknown as ScreenshottingStart,
+    reporting: mockReportingCore.getContract(),
+  });
 });
 
 afterEach(() => (generatePngObservable as jest.Mock).mockReset());
@@ -57,9 +67,8 @@ test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
-  await runTask(
+  await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
       relativeUrl: '/app/kibana#/something',
@@ -82,12 +91,11 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
 
-  const { content_type: contentType } = await runTask(
+  const { content_type: contentType } = await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken,
@@ -100,9 +108,8 @@ test(`returns content of generatePng`, async () => {
   const testContent = 'raw string from get_screenhots';
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  await runTask(
+  await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
     cancellationToken,

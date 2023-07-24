@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { ReportingStart } from '../types';
 
-export const metadata = {
-  id: 'csv_searchsource',
-  name: CSV_JOB_TYPE,
+export const reportingMock = {
+  createStart: (): ReportingStart => ({
+    usesUiCapabilities: () => false,
+    registerExportTypes: () => {},
+    getSpaceId: jest.fn(),
+    getScreenshots: jest.fn(),
+  }),
 };

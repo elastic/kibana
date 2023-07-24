@@ -6,28 +6,30 @@
  */
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../..';
 import { CancellationToken } from '@kbn/reporting-common';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { ReportingCore } from '../..';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { generatePngObservable } from '../common';
-import { runTaskFnFactory } from './execute_job';
 import { TaskPayloadPNGV2 } from './types';
+import { PngExportType } from './png_v2';
 
 jest.mock('../common/generate_png');
 
 let content: string;
-let mockReporting: ReportingCore;
+let mockReportingCore: ReportingCore;
+let mockPngExportType: PngExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
 
-const getMockLogger = () => loggingSystemMock.createLogger();
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -41,7 +43,7 @@ beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
-  const mockReportingConfig = createMockConfigSchema({
+  const configType = createMockConfigSchema({
     encryptionKey: mockEncryptionKey,
     queue: {
       indexInterval: 'daily',
@@ -49,7 +51,23 @@ beforeEach(async () => {
     },
   });
 
-  mockReporting = await createMockReportingCore(mockReportingConfig);
+  mockReportingCore = await createMockReportingCore(configType);
+  const context = coreMock.createPluginInitializerContext(configType);
+
+  const mockCoreSetup = coreMock.createSetup();
+  const mockCoreStart = coreMock.createStart();
+
+  mockPngExportType = new PngExportType(mockCoreSetup, configType, mockLogger, context);
+  mockPngExportType.setup({
+    basePath: { set: jest.fn() },
+  });
+  mockPngExportType.start({
+    savedObjects: mockCoreStart.savedObjects,
+    uiSettings: mockCoreStart.uiSettings,
+    screenshotting: {} as unknown as ScreenshottingStart,
+    esClient: elasticsearchServiceMock.createClusterClient(),
+    reporting: mockReportingCore.getContract(),
+  });
 });
 
 afterEach(() => (generatePngObservable as jest.Mock).mockReset());
@@ -58,9 +76,8 @@ test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
-  await runTask(
+  await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
       forceNow: 'test',
@@ -89,12 +106,11 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
 
-  const { content_type: contentType } = await runTask(
+  const { content_type: contentType } = await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
@@ -110,9 +126,8 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'raw string from get_screenhots';
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  await runTask(
+  await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
