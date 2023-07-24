@@ -24,7 +24,7 @@ export const riskEngineInitRoute = (router: SecuritySolutionPluginRouter, logger
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const securitySolution =  await context.securitySolution;
+      const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
       const riskEgineClient = securitySolution.getRiskEngineDataClient();
 
