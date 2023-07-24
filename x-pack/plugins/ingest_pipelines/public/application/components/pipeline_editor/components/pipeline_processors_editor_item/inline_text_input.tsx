@@ -38,6 +38,9 @@ function _InlineTextInput({
       placeholder={placeholder}
       inputAriaLabel={ariaLabel}
       isReadOnly={disabled}
+      onSave={(newTextValue) => {
+        onChange(newTextValue);
+      }}
     />
   );
 }
