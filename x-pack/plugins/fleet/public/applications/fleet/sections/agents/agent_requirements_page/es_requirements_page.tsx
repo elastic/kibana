@@ -55,8 +55,8 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
 
   return (
     <WithoutHeaderLayout>
-      <EuiPageBody restrictWidth={820}>
-        <EuiPageSection bottomBorder={true}>
+      <EuiPageBody restrictWidth={820} style={{ border: '1px solid #d3dae6', borderRadius: '5px' }}>
+        <EuiPageSection color="transparent">
           <EuiCallOut
             title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
               defaultMessage: 'Missing security requirements',
