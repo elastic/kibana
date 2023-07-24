@@ -21,7 +21,7 @@ import { FunctionalTestRunner } from './functional_test_runner';
 export function runFtrCli() {
   const runStartTime = Date.now();
   const toolingLog = new ToolingLog({
-    level: 'info',
+    level: 'silent',
     writeTo: process.stdout,
   });
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
