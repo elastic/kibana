@@ -735,23 +735,30 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule }: SuccessfulRunResult) => {
-        this.onTaskEvent(
-          asTaskRunEvent(
-            this.id,
-            asOk({
-              task,
-              persistence:
-                schedule || task.schedule
-                  ? TaskPersistence.Recurring
-                  : TaskPersistence.NonRecurring,
-              result: await (runAt || schedule || task.schedule
-                ? this.processResultForRecurringTask(result)
-                : this.processResultWhenDone()),
-            }),
-            taskTiming
-          )
-        );
+      async ({ runAt, schedule, hasError }: SuccessfulRunResult) => {
+        const processedResult = {
+          task,
+          persistence:
+            schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
+          result: await (runAt || schedule || task.schedule
+            ? this.processResultForRecurringTask(result)
+            : this.processResultWhenDone()),
+        };
+
+        // Alerting task runner returns SuccessfulRunResult with hasError=true
+        // when the alerting task fails, so we check for this condition in order
+        // to emit the correct task run event for metrics collection
+        const taskRunEvent = hasError
+          ? asTaskRunEvent(
+              this.id,
+              asErr({
+                ...processedResult,
+                error: new Error(`Alerting task failed to run.`),
+              }),
+              taskTiming
+            )
+          : asTaskRunEvent(this.id, asOk(processedResult), taskTiming);
+        this.onTaskEvent(taskRunEvent);
       },
       async ({ error }: FailedRunResult) => {
         this.onTaskEvent(

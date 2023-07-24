@@ -1298,6 +1298,45 @@ describe('TaskManagerRunner', () => {
         );
       });
 
+      test('emits TaskEvent when a recurring task returns a success result with hasError=true', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {}, hasError: true };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+                error: new Error(`Alerting task failed to run.`),
+              })
+            )
+          )
+        );
+      });
+
       test('emits TaskEvent when a task run throws an error', async () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
