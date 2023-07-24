@@ -13,6 +13,7 @@ import moment from 'moment';
 import url from 'url';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
+import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
@@ -40,6 +41,9 @@ export const getSections = ({
   infraLocators,
   infraLinksAvailable,
   profilingLocators,
+  rangeFrom,
+  rangeTo,
+  environment,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -48,6 +52,9 @@ export const getSections = ({
   infraLocators: InfraLocators;
   infraLinksAvailable: boolean;
   profilingLocators?: ProfilingLocators;
+  rangeFrom: string;
+  rangeTo: string;
+  environment: Environment;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
@@ -57,12 +64,6 @@ export const getSections = ({
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
-
-  const routeParams = apmRouter.getParams(
-    '/services/{serviceName}/transactions/view',
-    location
-  );
-  const { rangeFrom, rangeTo, environment } = routeParams.query;
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),

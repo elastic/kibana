@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { esArchiver } from './support/es_archiver';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -26,5 +27,8 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
+    setupNodeEvents(on, config) {
+      esArchiver(on, config);
+    },
   },
 });

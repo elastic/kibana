@@ -54,6 +54,7 @@
       "packages/ml/data_grid",
       "packages/ml/date_picker",
       "packages/ml/trained_models_utils",
+      "packages/ml/category_validator",
       "plugins/ml"
     ],
     "xpack.monitoring": ["plugins/monitoring"],

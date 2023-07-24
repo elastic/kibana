@@ -165,6 +165,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
               color="text"
               onClick={handleCancelOnClick}
               data-test-subj="policyDetailsCancelButton"
+              disabled={isUpdating}
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.cancel"

@@ -8,7 +8,7 @@
 import { copyToClipboard, EuiButtonEmpty, EuiCopy } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { FLYOUT_URL_PARAM } from '../../url/use_sync_flyout_state_with_url';
+import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 import { FLYOUT_HEADER_SHARE_BUTTON_TEST_ID } from './test_ids';
 import { SHARE } from './translations';
 

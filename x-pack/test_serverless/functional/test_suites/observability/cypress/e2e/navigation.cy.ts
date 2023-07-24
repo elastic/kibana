@@ -76,8 +76,8 @@ describe('Serverless', () => {
     cy.contains('Anomaly detection').click();
     cy.url().should('include', '/app/ml/jobs');
 
-    cy.contains('Spike analysis').click();
-    cy.url().should('include', 'app/ml/aiops/explain_log_rate_spikes_index_select');
+    cy.contains('Log rate analysis').click();
+    cy.url().should('include', 'app/ml/aiops/log_rate_analysis_index_select');
 
     cy.contains('Change Point Detection').click();
     cy.url().should('include', 'app/ml/aiops/change_point_detection_index_select');
