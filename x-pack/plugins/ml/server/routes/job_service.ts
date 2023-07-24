@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
@@ -32,7 +33,6 @@ import {
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
-import { categorizationExamplesProvider } from '../models/job_service/new_job';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 

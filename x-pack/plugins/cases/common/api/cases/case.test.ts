@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../connectors';
+import { ConnectorTypes } from '../../types/domain/connector/v1';
 import {
   RelatedCaseInfoRt,
   SettingsRt,

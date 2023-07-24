@@ -36,10 +36,10 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';

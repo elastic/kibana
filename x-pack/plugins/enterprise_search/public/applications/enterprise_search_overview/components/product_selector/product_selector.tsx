@@ -9,16 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 
@@ -29,6 +20,8 @@ import {
 } from '../../../../../common/constants';
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { docLinks } from '../../../shared/doc_links';
+import { ErrorStateCallout } from '../../../shared/error_state';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -37,8 +30,6 @@ import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
-
-import illustration from './lock_light.svg';
 
 interface ProductSelectorProps {
   access: {
@@ -54,32 +45,53 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
 }) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
+
+  const showErrorConnecting = !!(config.host && errorConnectingMessage);
+  // The create index flow does not work without ent-search, when content is updated
+  // to no longer rely on ent-search we can always show the Add Content component
+  const showAddContent = config.host && !errorConnectingMessage;
 
   // If Enterprise Search hasn't been set up yet, show all products. Otherwise, only show products the user has access to
   const shouldShowAppSearchCard = (!config.host && config.canDeployEntSearch) || hasAppSearchAccess;
   const shouldShowWorkplaceSearchCard =
     (!config.host && config.canDeployEntSearch) || hasWorkplaceSearchAccess;
 
-  // If Enterprise Search has been set up and the user does not have access to either product, show a message saying they
-  // need to contact an administrator to get access to one of the products.
-  const shouldShowEnterpriseSearchCards =
-    shouldShowAppSearchCard || shouldShowWorkplaceSearchCard || !config.canDeployEntSearch;
-
   const WORKPLACE_SEARCH_URL = isWorkplaceSearchAdmin
     ? WORKPLACE_SEARCH_PLUGIN.URL
     : WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL;
 
-  const productCards = (
-    <>
-      <AddContentEmptyPrompt
-        title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
-          defaultMessage: 'Add data and start searching',
-        })}
-        buttonLabel={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptButtonLabel', {
-          defaultMessage: 'Create an Elasticsearch index',
-        })}
-      />
-      <EuiSpacer size="xxl" />
+  return (
+    <EnterpriseSearchOverviewPageTemplate
+      restrictWidth
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.overview.pageTitle', {
+          defaultMessage: 'Welcome to Search',
+        }),
+      }}
+    >
+      <SetPageChrome />
+      <SendTelemetry action="viewed" metric="overview" />
+      <TrialCallout />
+      {showAddContent && (
+        <>
+          <AddContentEmptyPrompt
+            title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
+              defaultMessage: 'Add data and start searching',
+            })}
+            buttonLabel={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptButtonLabel', {
+              defaultMessage: 'Create an Elasticsearch index',
+            })}
+          />
+          <EuiSpacer size="xxl" />
+        </>
+      )}
+      {showErrorConnecting && (
+        <>
+          <SendTelemetry action="error" metric="cannot_connect" />
+          <ErrorStateCallout />
+        </>
+      )}
       <EuiSpacer size="xxl" />
       <EuiTitle>
         <h3>
@@ -305,72 +317,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </>
-  );
-
-  const insufficientAccessMessage = (
-    <EuiEmptyPrompt
-      icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
-      title={
-        <h2>
-          {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsTitle', {
-            defaultMessage: 'Insufficient permissions',
-          })}
-        </h2>
-      }
-      layout="horizontal"
-      color="plain"
-      body={
-        <>
-          <p>
-            {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsBody', {
-              defaultMessage:
-                'You don’t have access to view this page. If you feel this may be an error, please contact your administrator.',
-            })}
-          </p>
-        </>
-      }
-      actions={
-        <EuiButton color="primary" fill href="/">
-          {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsButtonLabel', {
-            defaultMessage: 'Go to the Kibana dashboard',
-          })}
-        </EuiButton>
-      }
-      footer={
-        <>
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsFooterBody', {
-                defaultMessage: 'Go to the Kibana dashboard',
-              })}
-            </span>
-          </EuiTitle>{' '}
-          <EuiLink href={docLinks.kibanaSecurity} target="_blank">
-            {i18n.translate(
-              'xpack.enterpriseSearch.overview.insufficientPermissionsFooterLinkLabel',
-              {
-                defaultMessage: 'Read documentation',
-              }
-            )}
-          </EuiLink>
-        </>
-      }
-    />
-  );
-  return (
-    <EnterpriseSearchOverviewPageTemplate
-      restrictWidth
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.overview.pageTitle', {
-          defaultMessage: 'Welcome to Enterprise Search',
-        }),
-      }}
-    >
-      <SetPageChrome />
-      <SendTelemetry action="viewed" metric="overview" />
-      <TrialCallout />
-      {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
       <Chat />
     </EnterpriseSearchOverviewPageTemplate>
   );

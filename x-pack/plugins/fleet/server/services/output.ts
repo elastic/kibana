@@ -410,11 +410,11 @@ class OutputService {
     const data: OutputSOAttributes = { ...omit(output, 'ssl') };
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (output.type === outputType.Logstash) {
+    if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
       if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
         throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
-          'Logstash output needs encrypted saved object api key to be set'
+          `${output.type} output needs encrypted saved object api key to be set`
         );
       }
     }

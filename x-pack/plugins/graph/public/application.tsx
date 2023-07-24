@@ -30,7 +30,6 @@ import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/publi
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 
 import './index.scss';
-import('./font_awesome');
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';

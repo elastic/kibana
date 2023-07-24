@@ -9,7 +9,7 @@
 import { discoverServiceMock } from '../__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewMock } from '../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {

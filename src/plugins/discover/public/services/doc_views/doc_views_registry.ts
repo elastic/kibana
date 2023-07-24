@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DocView, DocViewInput, DocViewInputFn } from './doc_views_types';
-import { DataTableRecord } from '../../types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];

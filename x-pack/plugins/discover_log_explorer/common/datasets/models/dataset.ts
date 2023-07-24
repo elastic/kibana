@@ -11,6 +11,7 @@ import { IndexPattern } from '@kbn/io-ts-utils';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>;
+
 interface DatasetDeps extends DatasetType {
   iconType?: IconType;
 }
@@ -41,6 +42,12 @@ export class Dataset {
       : this.title;
   }
 
+  getDatasetWildcard(): IndexPattern {
+    const [type, dataset, _namespace] = this.name.split('-');
+
+    return `${type}-${dataset}-*` as IndexPattern;
+  }
+
   toDataviewSpec(): DataViewSpec {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
@@ -67,5 +74,16 @@ export class Dataset {
       title: 'All log datasets',
       iconType: 'editorChecklist',
     });
+  }
+
+  public static createWildcardDatasetsFrom(datasets: Dataset[]) {
+    // Gather unique list of wildcards
+    const wildcards = datasets.reduce(
+      (list, dataset) => list.add(dataset.getDatasetWildcard()),
+      new Set<IndexPattern>()
+    );
+
+    // Create new datasets for the retrieved wildcards
+    return Array.from(wildcards).map((wildcard) => Dataset.create({ name: wildcard }));
   }
 }
