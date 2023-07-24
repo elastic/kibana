@@ -26,11 +26,15 @@ const getMockContext = () =>
     core: coreMock.createRequestHandlerContext(),
   } as unknown as ReportingRequestHandlerContext);
 
-const getMockRequest = () =>
-  ({
-    url: { port: '5601', search: '', pathname: '/foo' },
-    route: { path: '/foo', options: {} },
-  } as KibanaRequest);
+const getMockRequest = (): KibanaRequest<
+  Readonly<{} & { exportType: string }>,
+  Readonly<{} & { jobParams: string }> | null,
+  Readonly<{ jobParams?: string | undefined } & {}> | null,
+  any
+> => ({
+  url: { port: '5601', search: '', pathname: '/foo' },
+  route: { path: '/foo', options: {} },
+});
 
 const getMockResponseFactory = () =>
   ({
@@ -47,11 +51,6 @@ const mockJobParams: JobParamsPDFDeprecated = {
   version: 'unknown',
   layout: { id: 'preserve_layout' },
   relativeUrls: [],
-};
-
-const mockCounters = {
-  usageCounter: jest.fn(),
-  errorCounter: jest.fn(),
 };
 
 describe('Handle request to generate', () => {
@@ -153,7 +152,7 @@ describe('Handle request to generate', () => {
   });
 
   test('disallows invalid export type', async () => {
-    expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams, mockCounters))
+    expect(await requestHandler.handleGenerateRequest('/api/reporting/generate', 'neanderthals'))
       .toMatchInlineSnapshot(`
       Object {
         "body": "Invalid export-type of neanderthals",
@@ -170,7 +169,7 @@ describe('Handle request to generate', () => {
     }));
 
     expect(
-      await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams, mockCounters)
+      await requestHandler.handleGenerateRequest('/api/reporting/generate', 'csv_searchsource')
     ).toMatchInlineSnapshot(`
       Object {
         "body": "seeing this means the license isn't supported",
@@ -187,14 +186,7 @@ describe('Handle request to generate', () => {
     }));
 
     expect(
-      await requestHandler.handleGenerateRequest(
-        'csv_searchsource',
-        {
-          ...mockJobParams,
-          browserTimezone: 'America/Amsterdam',
-        },
-        mockCounters
-      )
+      await requestHandler.handleGenerateRequest('/api/reporting/generate', 'csv_searchsource')
     ).toMatchInlineSnapshot(`
         Object {
           "body": "seeing this means the license isn't supported",
@@ -204,9 +196,8 @@ describe('Handle request to generate', () => {
 
   test('generates the download path', async () => {
     const response = (await requestHandler.handleGenerateRequest(
-      'csv_searchsource',
-      mockJobParams,
-      mockCounters
+      '/api/reporting/generate',
+      'csv_searchsource'
     )) as unknown as { body: { job: ReportApiJSON } };
     const { id, created_at: _created_at, ...snapObj } = response.body.job;
     expect(snapObj).toMatchInlineSnapshot(`
