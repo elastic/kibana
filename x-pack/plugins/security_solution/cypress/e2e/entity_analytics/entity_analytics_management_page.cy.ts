@@ -19,7 +19,6 @@ import {
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
@@ -28,7 +27,7 @@ import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 describe('Entity analytics management page', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('all_users');
+    cy.task('esArchiverLoad', 'all_users');
   });
 
   beforeEach(() => {
@@ -39,7 +38,7 @@ describe('Entity analytics management page', () => {
   });
 
   after(() => {
-    esArchiverUnload('all_users');
+    cy.task('esArchiverUnload', 'all_users');
   });
 
   it('renders page as expected', () => {

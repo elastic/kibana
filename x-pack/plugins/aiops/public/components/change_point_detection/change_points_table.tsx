@@ -148,12 +148,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
           })}
         >
           <span>
-            {i18n.translate(
-              'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel',
-              {
-                defaultMessage: 'p-value',
-              }
-            )}
+            {i18n.translate('xpack.aiops.changePointDetection.pValueLabel', {
+              defaultMessage: 'p-value',
+            })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>

@@ -313,7 +313,8 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
-  describe('filter activity', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152202
+  describe.skip('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -495,7 +496,8 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    describe('Reporter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152206
+    describe.skip('Reporter', () => {
       it('should render the reporter correctly', async () => {
         appMockRender = createAppMockRenderer();
         appMockRender.render(<CaseViewActivity {...caseProps} />);

@@ -7,7 +7,10 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "profiling"],
-    "optionalPlugins": ["spaces"],
+    "optionalPlugins": [
+      "spaces", 
+      "usageCollection"
+    ],
     "requiredPlugins": [
       "charts",
       "cloud",
