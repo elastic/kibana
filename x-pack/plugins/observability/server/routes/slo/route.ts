@@ -36,6 +36,7 @@ import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diag
 import { GetPreviewData } from '../../services/slo/get_preview_data';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { ManageSLO } from '../../services/slo/manage_slo';
+import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
 import { DefaultSummaryTransformInstaller } from '../../services/slo/summary_transform/summary_transform_installer';
 import {
   ApmTransactionDurationTransformGenerator,
@@ -239,7 +240,7 @@ const findSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: findSLOParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
@@ -249,8 +250,8 @@ const findSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const summaryClient = new DefaultSummaryClient(esClient);
-    const findSLO = new FindSLO(repository, summaryClient);
+    const summarySearchClient = new DefaultSummarySearchClient(esClient, logger);
+    const findSLO = new FindSLO(repository, summarySearchClient);
 
     const response = await findSLO.execute(params?.query ?? {});
 

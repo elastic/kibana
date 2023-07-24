@@ -29,5 +29,7 @@ export const SLO_SUMMARY_TRANSFORM_NAME_PREFIX = 'slo-summary-';
 export const SLO_SUMMARY_DESTINATION_INDEX_NAME = `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}-v${SLO_RESOURCES_VERSION}`;
 export const SLO_SUMMARY_DESTINATION_INDEX_PATTERN = `${SLO_SUMMARY_DESTINATION_INDEX_NAME}*`;
 
+export const SLO_SUMMARY_INGEST_PIPELINE_NAME = `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}.pipeline`;
+
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;

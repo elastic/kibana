@@ -11,11 +11,7 @@ import { debounce } from 'lodash';
 import { useIsMutating } from '@tanstack/react-query';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import {
-  FilterType,
-  SloListSearchFilterSortBar,
-  SortType,
-} from './slo_list_search_filter_sort_bar';
+import { SloListSearchFilterSortBar, SortField } from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
 
 export interface Props {
@@ -26,14 +22,13 @@ export function SloList({ autoRefresh }: Props) {
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortType>('creationTime');
-  const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
+  const [sort, setSort] = useState<SortField | undefined>('error_budget_remaining');
 
   const { isInitialLoading, isLoading, isRefetching, isError, sloList, refetch } = useFetchSloList({
     page: activePage + 1,
-    name: query,
+    kqlQuery: query,
     sortBy: sort,
-    indicatorTypes: indicatorTypeFilter,
+    sortDirection: 'desc',
     shouldRefetch: autoRefresh,
   });
 
@@ -53,16 +48,12 @@ export function SloList({ autoRefresh }: Props) {
     () =>
       debounce((e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value);
-      }, 300),
+      }, 800),
     []
   );
 
-  const handleChangeSort = (newSort: SortType) => {
+  const handleChangeSort = (newSort: SortField | undefined) => {
     setSort(newSort);
-  };
-
-  const handleChangeIndicatorTypeFilter = (newFilter: FilterType[]) => {
-    setIndicatorTypeFilter(newFilter);
   };
 
   return (
@@ -80,7 +71,6 @@ export function SloList({ autoRefresh }: Props) {
           }
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
-          onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
         />
       </EuiFlexItem>
 

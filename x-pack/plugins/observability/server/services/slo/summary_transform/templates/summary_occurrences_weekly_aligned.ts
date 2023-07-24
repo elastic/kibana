@@ -10,6 +10,7 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  SLO_SUMMARY_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../../../assets/constants';
 import { groupBy } from './common';
@@ -18,9 +19,16 @@ export const SUMMARY_OCCURRENCES_WEEKLY_ALIGNED: TransformPutTransformRequest = 
   transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}occurrences-weekly-aligned`,
   dest: {
     index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+    pipeline: SLO_SUMMARY_INGEST_PIPELINE_NAME,
   },
   source: {
     index: SLO_DESTINATION_INDEX_PATTERN,
+    runtime_mappings: {
+      errorBudgetEstimated: {
+        type: 'boolean',
+        script: 'emit(true)',
+      },
+    },
     query: {
       bool: {
         filter: [
@@ -105,7 +113,7 @@ export const SUMMARY_OCCURRENCES_WEEKLY_ALIGNED: TransformPutTransformRequest = 
           script: '1 - params.errorBudgetConsumed',
         },
       },
-      status: {
+      statusCode: {
         bucket_script: {
           buckets_path: {
             sliValue: 'sliValue',
