@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-export function validateHours(time: string) {
+import { RefinementCtx, z } from '@kbn/zod/src/zod';
+
+export function validateHours(time: string, ctx?: RefinementCtx) {
   if (/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
     return;
+  }
+  if (ctx) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.invalid_string,
+      validation: 'regex',
+      message: 'string is not a valid time in HH:mm format ' + time,
+    });
   }
   return 'string is not a valid time in HH:mm format ' + time;
 }

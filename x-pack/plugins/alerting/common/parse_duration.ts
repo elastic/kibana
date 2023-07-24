@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RefinementCtx, z } from '@kbn/zod/src/zod';
+
 const SECONDS_REGEX = /^[1-9][0-9]*s$/;
 const MINUTES_REGEX = /^[1-9][0-9]*m$/;
 const HOURS_REGEX = /^[1-9][0-9]*h$/;
@@ -52,7 +54,7 @@ export function getDurationUnitValue(duration: string): string {
   return duration.replace(durationNumber.toString(), '');
 }
 
-export function validateDurationSchema(duration: string) {
+export function validateDurationSchema(duration: string, ctx?: RefinementCtx) {
   if (duration.match(SECONDS_REGEX)) {
     return;
   }
@@ -63,6 +65,15 @@ export function validateDurationSchema(duration: string) {
     return;
   }
   if (duration.match(DAYS_REGEX)) {
+    return;
+  }
+
+  if (ctx) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.invalid_string,
+      validation: 'regex',
+      message: 'string is not a valid duration: ' + duration,
+    });
     return;
   }
   return 'string is not a valid duration: ' + duration;

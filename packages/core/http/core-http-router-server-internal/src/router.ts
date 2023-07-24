@@ -66,6 +66,10 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate !== false) {
+    if (route.validate.isZod) {
+      return RouteValidator.from(route.validate);
+    }
+
     Object.entries(route.validate).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(

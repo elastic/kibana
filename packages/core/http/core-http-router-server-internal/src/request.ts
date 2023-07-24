@@ -29,6 +29,7 @@ import {
   RawRequest,
   FakeRawRequest,
 } from '@kbn/core-http-server';
+import { ZodRouteValidatorConfig } from '@kbn/core-http-server/src/router/route';
 import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
@@ -55,7 +56,10 @@ export class CoreKibanaRequest<
    */
   public static from<P, Q, B>(
     req: RawRequest,
-    routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
+    routeSchemas:
+      | RouteValidator<P, Q, B>
+      | RouteValidatorFullConfig<P, Q, B>
+      | ZodRouteValidatorConfig<P, Q, B> = {},
     withoutSecretHeaders: boolean = true
   ) {
     const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);

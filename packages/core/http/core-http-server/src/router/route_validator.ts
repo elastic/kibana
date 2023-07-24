@@ -7,6 +7,7 @@
  */
 
 import { ObjectType, SchemaTypeError, Type } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 /**
  * Error to return when the validation is not successful.
@@ -79,7 +80,11 @@ export type RouteValidationFunction<T> = (
  *
  * @public
  */
-export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
+export type RouteValidationSpec<T> =
+  | ObjectType
+  | Type<T>
+  | RouteValidationFunction<T>
+  | z.ZodType<T>;
 
 /**
  * The configuration object to the RouteValidator class.
@@ -103,6 +108,7 @@ export interface RouteValidatorConfig<P, Q, B> {
    * @public
    */
   body?: RouteValidationSpec<B>;
+  isZod?: boolean;
 }
 
 /**

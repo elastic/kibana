@@ -17,6 +17,8 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
+import { instanceofZodType, z } from '@kbn/zod';
+import { ZodRouteValidatorConfig } from '@kbn/core-http-server/src/router/route';
 
 // Ugly as hell but we need this conditional typing to have proper type inference
 type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
@@ -34,7 +36,10 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
   public static from<_P = {}, _Q = {}, _B = {}>(
-    opts: RouteValidator<_P, _Q, _B> | RouteValidatorFullConfig<_P, _Q, _B>
+    opts:
+      | RouteValidator<_P, _Q, _B>
+      | RouteValidatorFullConfig<_P, _Q, _B>
+      | ZodRouteValidatorConfig<_P, _Q, _B>
   ) {
     if (opts instanceof RouteValidator) {
       return opts;
@@ -51,7 +56,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
   };
 
   private constructor(
-    private readonly config: RouteValidatorConfig<P, Q, B>,
+    private readonly config: RouteValidatorConfig<P, Q, B> | ZodRouteValidatorConfig<P, Q, B>,
     private readonly options: RouteValidatorOptions = {}
   ) {}
 
@@ -88,7 +93,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
   }
 
   private validate<T>(
-    validationRule?: RouteValidationSpec<T>,
+    validationRule?: RouteValidationSpec<T> | z.ZodType<T>,
     unsafe?: boolean,
     data?: unknown,
     namespace?: string
@@ -96,6 +101,15 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     if (typeof validationRule === 'undefined') {
       return {};
     }
+
+    if (instanceofZodType(validationRule)) {
+      try {
+        return validationRule.parse(data);
+      } catch (error) {
+        throw new ValidationError(new RouteValidationError(error.issues[0].message), namespace);
+      }
+    }
+
     let precheckedData = this.preValidateSchema(data).validate(data, {}, namespace);
 
     if (unsafe !== true) {

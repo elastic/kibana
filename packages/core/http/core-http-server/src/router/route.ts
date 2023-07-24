@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { z } from '@kbn/zod';
 import type { RouteValidatorFullConfig } from './route_validator';
 
 /**
@@ -94,6 +95,18 @@ export interface RouteConfigOptionsBody {
    */
   parse?: boolean | 'gunzip';
 }
+
+export interface ZodRouteValidatorConfig<P, Q, B> {
+  params?: z.ZodType<P>;
+  query?: z.ZodType<Q>;
+  body?: z.ZodType<B>;
+}
+
+type ZodRouteValidatorType<P, Q, B> = Omit<
+  RouteValidatorFullConfig<P, Q, B>,
+  'params' | 'query' | 'body'
+> &
+  ZodRouteValidatorConfig<P, Q, B>;
 
 /**
  * Additional route options.
@@ -234,7 +247,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidatorFullConfig<P, Q, B> | false;
+  validate: RouteValidatorFullConfig<P, Q, B> | ZodRouteValidatorType<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

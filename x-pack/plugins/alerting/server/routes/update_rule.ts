@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { UpdateOptions } from '../rules_client';
@@ -16,7 +16,6 @@ import {
   handleDisabledApiKeysError,
   rewriteActionsReq,
   rewriteActionsRes,
-  actionsSchema,
   rewriteRuleLastRun,
 } from './lib';
 import {
@@ -26,30 +25,78 @@ import {
   validateNotifyWhenType,
   PartialRule,
 } from '../types';
+import { validateHours } from './lib/validate_hours';
+import { validateTimezone } from './lib/validate_timezone';
 
-const paramSchema = schema.object({
-  id: schema.string(),
+const paramSchema = z.object({
+  id: z.string(),
 });
 
-const bodySchema = schema.object({
-  name: schema.string(),
-  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  schedule: schema.object({
-    interval: schema.string({ validate: validateDurationSchema }),
+const bodySchema = z.object({
+  name: z.string(),
+  tags: z.array(z.string()),
+  schedule: z.object({
+    interval: z.string().superRefine(validateDurationSchema),
   }),
-  throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: actionsSchema,
-  notify_when: schema.maybe(
-    schema.nullable(
-      schema.oneOf(
-        [
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ],
-        { validate: validateNotifyWhenType }
-      )
+  throttle: z.nullable(z.optional(z.string().superRefine(validateDurationSchema))),
+  params: z.record(z.string(), z.any()),
+  actions: z.array(
+    z.object({
+      group: z.string(),
+      id: z.string(),
+      frequency: z.optional(
+        z.object({
+          summary: z.boolean(),
+          notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
+          throttle: z.nullable(z.string().superRefine(validateDurationSchema)),
+        })
+      ),
+      params: z.record(z.string(), z.any()),
+      uuid: z.optional(z.string()),
+      alerts_filter: z.optional(
+        z.object({
+          query: z.optional(
+            z.object({
+              kql: z.string(),
+              filters: z.array(
+                z.object({
+                  query: z.optional(z.record(z.string(), z.any())),
+                  meta: z.record(z.string(), z.any()),
+                  state$: z.optional(z.object({ store: z.string() })),
+                })
+              ),
+              dsl: z.optional(z.string()),
+            })
+          ),
+          timeframe: z.optional(
+            z.object({
+              days: z.array(
+                z.union([
+                  z.literal(1),
+                  z.literal(2),
+                  z.literal(3),
+                  z.literal(4),
+                  z.literal(5),
+                  z.literal(6),
+                  z.literal(7),
+                ])
+              ),
+              hours: z.object({
+                start: z.string().superRefine(validateHours),
+                end: z.string().superRefine(validateHours),
+              }),
+              timezone: z.string().superRefine(validateTimezone),
+            })
+          ),
+        })
+      ),
+    })
+  ),
+  notify_when: z.optional(
+    z.nullable(
+      z
+        .enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'])
+        .refine(validateNotifyWhenType)
     )
   ),
 });
@@ -125,6 +172,7 @@ export const updateRuleRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       validate: {
+        isZod: true,
         body: bodySchema,
         params: paramSchema,
       },
