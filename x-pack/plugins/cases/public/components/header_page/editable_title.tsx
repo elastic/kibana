@@ -67,8 +67,11 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
             }}
             editModeProps={{
               formRowProps: { error: errors },
+              inputProps: { 'data-test-subj': 'editable-title-input-field' },
+              saveButtonProps: { 'data-test-subj': 'editable-title-submit-btn' },
               cancelButtonProps: {
                 onClick: () => onCancel(),
+                'data-test-subj': 'editable-title-cancel-btn',
               },
             }}
             inputAriaLabel="Editable title input field"
