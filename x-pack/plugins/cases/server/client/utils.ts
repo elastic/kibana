@@ -33,8 +33,12 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
 
-import { OWNER_FIELD, decodeWithExcessOrThrow } from '../../common/api';
-import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import { decodeWithExcessOrThrow } from '../../common/api';
+import {
+  CASE_SAVED_OBJECT,
+  NO_ASSIGNEES_FILTERING_KEYWORD,
+  OWNER_FIELD,
+} from '../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,

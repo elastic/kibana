@@ -25,8 +25,11 @@ import {
   UserActionTypes,
   AttachmentType,
 } from '../../../common/types/domain';
-import { OWNER_FIELD } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  OWNER_FIELD,
+} from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
