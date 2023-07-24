@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { useEqlPreview } from './use_eql_preview';
+require('../../../../../src/setup_node_env');
+require('./junit_transformer');
