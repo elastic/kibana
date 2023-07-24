@@ -140,8 +140,7 @@ export const NO_ASSIGNEES = i18n.translate(
 
 export const MAX_SELECTED_FILTER = (limit: number, field: string) =>
   i18n.translate('xpack.cases.userProfile.maxSelectedAssigneesFilter', {
-    defaultMessage:
-      "You've selected the maximum number of {count, plural, one {# {field}} other {# {field}s}} to filter",
+    defaultMessage: "You've selected the maximum number of {count} to filter {field}",
     values: { count: limit, field },
   });
 

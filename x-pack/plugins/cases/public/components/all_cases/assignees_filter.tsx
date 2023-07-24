@@ -74,7 +74,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   });
 
   const limitReachedMessage = useCallback(
-    (limit: number) => i18n.MAX_SELECTED_FILTER(limit, 'assignee'),
+    (limit: number) => i18n.MAX_SELECTED_FILTER(limit, 'assignees'),
     []
   );
 
@@ -123,8 +123,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         clearButtonLabel: i18n.CLEAR_FILTERS,
         emptyMessage: <EmptyMessage />,
         noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
-        // limit: MAX_ASSIGNEES_FILTER_LENGTH,
-        limit: 5,
+        limit: MAX_ASSIGNEES_FILTER_LENGTH,
         limitReachedMessage,
         singleSelection: false,
         nullOptionLabel: i18n.NO_ASSIGNEES,

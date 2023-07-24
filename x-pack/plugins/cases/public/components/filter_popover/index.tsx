@@ -69,8 +69,6 @@ export const FilterPopoverComponent = ({
     [selectedOptions, onSelectedOptionsChanged]
   );
 
-  console.log('filter popover', selectedOptions.length);
-
   return (
     <EuiPopover
       ownFocus
@@ -93,11 +91,13 @@ export const FilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-    {optionsMaxLEngth && optionsMaxLengthLabel && selectedOptions.length >= optionsMaxLEngth && (
+      {optionsMaxLEngth && optionsMaxLengthLabel && selectedOptions.length >= optionsMaxLEngth && (
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={true}>
-            <EuiPanel color='warning'>
-              <EuiText color='warning'>{optionsMaxLengthLabel}</EuiText>
+            <EuiPanel color="warning" paddingSize="s">
+              <EuiText size="s" color="warning" data-test-subj="maximum-length-warning">
+                {optionsMaxLengthLabel}
+              </EuiText>
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -106,7 +106,11 @@ export const FilterPopoverComponent = ({
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
-            disabled={selectedOptions.length >= 5 && !selectedOptions.includes(option)}
+            disabled={Boolean(
+              optionsMaxLEngth &&
+                selectedOptions.length >= optionsMaxLEngth &&
+                !selectedOptions.includes(option)
+            )}
             data-test-subj={`options-filter-popover-item-${option}`}
             key={`${index}-${option}`}
             onClick={toggleSelectedGroupCb.bind(null, option)}
