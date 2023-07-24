@@ -36,16 +36,14 @@ export const NAV_VERTICAL_LAYOUT = 'vertical';
 export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
 
 export const NavigationLayoutInfo: {
-  [id in NavigationLayoutType]: { icon: string; displayName: string };
+  [id in NavigationLayoutType]: { displayName: string };
 } = {
   [NAV_HORIZONTAL_LAYOUT]: {
-    icon: 'sortRight',
     displayName: i18n.translate('navigationEmbeddable.editor.horizontalLayout', {
       defaultMessage: 'Horizontal',
     }),
   },
   [NAV_VERTICAL_LAYOUT]: {
-    icon: 'sortDown',
     displayName: i18n.translate('navigationEmbeddable.editor.verticalLayout', {
       defaultMessage: 'Vertical',
     }),

@@ -148,7 +148,6 @@ const NavigationEmbeddablePanelEditor = ({
   const layoutOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
     return ([NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
       return {
-        // iconType: NavigationLayoutInfo[type].icon,
         id: type,
         label: NavigationLayoutInfo[type].displayName,
       };
@@ -180,8 +179,8 @@ const NavigationEmbeddablePanelEditor = ({
                       {orderedLinks.map((link, idx) => (
                         <EuiDraggable
                           spacing="m"
-                          key={link.id}
                           index={idx}
+                          key={link.id}
                           draggableId={link.id}
                           customDragHandle={true}
                           hasInteractiveChildren={true}

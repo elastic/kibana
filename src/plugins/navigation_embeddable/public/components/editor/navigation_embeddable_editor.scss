@@ -56,7 +56,7 @@
 
   &.linkError {
     background-color: tint($euiColorWarning, 95%);
-    border: 1px solid transparentize($euiColorWarningText, 0.7);
+    border: 1px solid transparentize($euiColorWarningText, .7);
     color: $euiColorWarningText;
 
     .navEmbeddableLinkText--noLabel {

@@ -4,13 +4,13 @@
   .navigationLink {
     &.dashboardLinkError {
       max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
-      
+
       &.dashboardLinkError--noLabel .euiListGroupItem__button {
-        font-style: italic; 
+        font-style: italic;
       }
 
       .dashboardLinkIcon {
-        margin-right: 6px;
+        margin-right: $euiSizeS;
       }
     }
 
@@ -33,7 +33,7 @@
       }
 
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 2px 0px 0px inset;
+        box-shadow: $euiColorPrimary 2px 0 0 inset;
       }
     }
   }
@@ -47,10 +47,10 @@
 
     .navigationLink {
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 0px -2px 0px inset;
+        box-shadow: $euiColorPrimary 0 -2px 0 inset;
 
         .euiListGroupItem__text {
-          padding-inline: 0px;
+          padding-inline: 0;
         }
       }
     }
