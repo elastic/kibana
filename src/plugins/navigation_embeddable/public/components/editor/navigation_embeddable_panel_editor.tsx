@@ -174,7 +174,7 @@ const NavigationEmbeddablePanelEditor = ({
           ) : (
             <>
               <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
-                <>
+                <div>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">
                       {orderedLinks.map((link, idx) => (
@@ -202,7 +202,7 @@ const NavigationEmbeddablePanelEditor = ({
                   <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={() => addOrEditLink()}>
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
-                </>
+                </div>
               </EuiFormRow>
               <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
                 <EuiButtonGroup

@@ -65,6 +65,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
       className={classNames('navigationLink', {
         navigationLinkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(error),
+        'dashboardLinkError--noLabel': !link.label,
       })}
       onClick={
         link.destination === parentDashboardId

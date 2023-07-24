@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -93,7 +94,11 @@ export const NavigationEmbeddablePanelEditorLink = ({
                 />
               </EuiFlexItem>
 
-              <EuiFlexItem className="navEmbeddableLinkText">
+              <EuiFlexItem
+                className={classNames('navEmbeddableLinkText', {
+                  'navEmbeddableLinkText--noLabel': !link.label,
+                })}
+              >
                 <EuiSkeletonTitle
                   size="xxxs"
                   isLoading={linkLabelLoading}
