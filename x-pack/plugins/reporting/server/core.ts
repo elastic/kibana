@@ -18,7 +18,7 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { ServiceStatusLevels } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -39,7 +39,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
@@ -182,7 +182,6 @@ export class ReportingCore {
     this.exportTypes.forEach((et) => {
       et.start({ ...startDeps, reporting: this.getContract() });
     });
-    await this.assertKibanaIsAvailable();
 
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;
@@ -198,16 +197,6 @@ export class ReportingCore {
     return this.kibanaShuttingDown$.pipe(take(1));
   }
 
-  private async assertKibanaIsAvailable(): Promise<void> {
-    const { status } = this.getPluginSetupDeps();
-
-    await status.overall$
-      .pipe(
-        filter((current) => current.level === ServiceStatusLevels.available),
-        first()
-      )
-      .toPromise();
-  }
   /*
    * Blocks the caller until setup is done
    */

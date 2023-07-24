@@ -63,8 +63,8 @@ import {
   selectNumberOfRules,
   checkDuplicatedRule,
   expectNumberOfRules,
-  duplicateSelectedRulesWithExceptions,
 } from '../../tasks/alerts_detection_rules';
+import { duplicateSelectedRulesWithExceptions } from '../../tasks/rules_bulk_actions';
 import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
