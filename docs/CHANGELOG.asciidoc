@@ -239,7 +239,7 @@ Cases::
 * Fixes a bug in the alerts table where you cannot create a new case when attaching alerts to a case from the cases modal {kibana-pull}160526[#160526]
 * Fixes an issue where the following special characters could not be included in the case tags: `\\():<>"*` because it resulted in a bug where the case would not be displayed in the cases table when filtered for those tags. These characters are now handled correctly and the cases will be shown in the table. {kibana-pull}159815[#159815]
 Dashboard::
-* Fixes an issue where it was possible for a URL update (redirecting to the alias) to happen in the middle of building the errored state of the Dashboard {kibana-pull}161043[#161043]
+* Fixes an issue where a Dashboard redirect alias displayed a blank screen instead of redirecting properly {kibana-pull}161043[#161043]
 * Fixes an issue where the time slider would override custom time ranges {kibana-pull}160938[#160938]
 * Fixes an issue where if the Reset button is clicked after changing the Title or Description in Panel settings before clicking Save, the Title or Description would revert to previous values {kibana-pull}159430[#159430]
 * Fixes dashboard reset when initial state has no controls {kibana-pull}159404[#159404]
