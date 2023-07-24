@@ -174,7 +174,7 @@ Dashboard::
 * Adds enhancements to the empty state screen in Dashboards {kibana-pull}158496[#158496]
 * Adds a query DSL documentation link to filters UI {kibana-pull}156543[#156543]
 * Adds a counter displaying the min/max values of the time series counter field in the field popover {kibana-pull}155499[#155499]
-* Adds ability to recover from non-fatal error state {kibana-pull}158087[#158087]
+* Adds the ability for Controls to recover from non-fatal error state {kibana-pull}158087[#158087]
 Discover::
 * Updates Discover sharing capabilities to enable sharing a link when using temporary data views {kibana-pull}154947[#154947]
 Elastic Security::
