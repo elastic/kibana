@@ -35,9 +35,8 @@ import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import {
-  type AiOpsPageUrlState,
-  getDefaultAiOpsListState,
-  isFullAiOpsListState,
+  type LogCategorizationPageUrlState,
+  getDefaultLogCategorizationAppState,
 } from '../../application/utils/url_state';
 import { FieldValidationCallout } from './category_validation_callout';
 
@@ -75,9 +74,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
   } = useCategorizeRequest();
-  const [aiopsListState] = usePageUrlState<AiOpsPageUrlState>(
-    'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState({
+  const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
+    'logCategorization',
+    getDefaultLogCategorizationAppState({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     })
   );
@@ -112,7 +111,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
     { dataView, savedSearch: selectedSavedSearch },
-    aiopsListState,
+    stateFromUrl,
     true
   );
 
@@ -263,13 +262,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           fieldSelected={selectedField !== null}
         />
 
-        {loading === false &&
-        data !== null &&
-        data.categories.length > 0 &&
-        isFullAiOpsListState(aiopsListState) ? (
+        {loading === false && data !== null && data.categories.length > 0 ? (
           <CategoryTable
             categories={data.categories}
-            aiopsListState={aiopsListState}
+            aiopsListState={stateFromUrl}
             dataViewId={dataView.id!}
             eventRate={eventRate}
             sparkLines={data.sparkLines}

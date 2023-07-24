@@ -24,7 +24,7 @@ import { Filter } from '@kbn/es-query';
 import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { AiOpsFullIndexBasedAppState } from '../../../application/utils/url_state';
+import type { LogCategorizationAppState } from '../../../application/utils/url_state';
 import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
 import { useTableState } from './use_table_state';
 import { getLabels } from './labels';
@@ -37,7 +37,7 @@ interface Props {
   dataViewId: string;
   selectedField: DataViewField | string | undefined;
   timefilter: TimefilterContract;
-  aiopsListState: AiOpsFullIndexBasedAppState;
+  aiopsListState: LogCategorizationAppState;
   pinnedCategory: Category | null;
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;

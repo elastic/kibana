@@ -40,7 +40,7 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
       const searchQuery = toElasticsearchQuery(ast);
 
       const appState = {
-        AIOPS_INDEX_VIEWER: {
+        logCategorization: {
           filters: data.query.filterManager.getFilters(),
           // QueryDslQueryContainer type triggers an error as being
           // not working with SerializableRecord, however, it works as expected.

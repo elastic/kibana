@@ -32,9 +32,8 @@ import { useSearch } from '../../hooks/use_search';
 import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
-  getDefaultAiOpsListState,
-  isFullAiOpsListState,
-  type AiOpsPageUrlState,
+  getDefaultLogCategorizationAppState,
+  type LogCategorizationPageUrlState,
 } from '../../application/utils/url_state';
 
 import { SearchPanel } from '../search_panel';
@@ -64,9 +63,9 @@ export const LogCategorizationPage: FC = () => {
   } = useCategorizeRequest();
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
-  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
-    'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState()
+  const [stateFromUrl, setUrlState] = usePageUrlState<LogCategorizationPageUrlState>(
+    'logCategorization',
+    getDefaultLogCategorizationAppState()
   );
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
@@ -117,20 +116,20 @@ export const LogCategorizationPage: FC = () => {
         setSelectedDataView(null);
       }
 
-      setAiopsListState({
-        ...aiopsListState,
+      setUrlState({
+        ...stateFromUrl,
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
       });
     },
-    [selectedSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, stateFromUrl, setUrlState]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
     { dataView, savedSearch: selectedSavedSearch },
-    aiopsListState
+    stateFromUrl
   );
 
   const { documentStats, timefilter, earliest, latest, intervalMs } = useData(
@@ -168,11 +167,14 @@ export const LogCategorizationPage: FC = () => {
 
   useEffect(
     function setSingleFieldAsSelected() {
-      if (fields.length === 1) {
+      const field = stateFromUrl.field;
+      if (field !== undefined && fields.find((f) => f.label === field)) {
+        // setSelectedField(field);
+      } else if (fields.length === 1) {
         setSelectedField(fields[0].label);
       }
     },
-    [fields]
+    [fields, stateFromUrl.field]
   );
 
   useEffect(() => {
@@ -254,7 +256,9 @@ export const LogCategorizationPage: FC = () => {
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
     setData(null);
-    setSelectedField(value && value.length ? value[0].label : undefined);
+    const field = value && value.length ? value[0].label : undefined;
+    setSelectedField(field);
+    setUrlState({ field });
   };
 
   return (
@@ -340,13 +344,10 @@ export const LogCategorizationPage: FC = () => {
         fieldSelected={selectedField !== null}
       />
 
-      {selectedField !== undefined &&
-      data !== null &&
-      data.categories.length > 0 &&
-      isFullAiOpsListState(aiopsListState) ? (
+      {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
         <CategoryTable
           categories={data.categories}
-          aiopsListState={aiopsListState}
+          aiopsListState={stateFromUrl}
           dataViewId={dataView.id!}
           eventRate={eventRate}
           sparkLines={data.sparkLines}
