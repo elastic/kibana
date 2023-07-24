@@ -213,6 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
           alertDetailsUrl: string;
           reason: string;
           value: string;
+          host: string;
         }>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
