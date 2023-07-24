@@ -12,9 +12,21 @@ import { RulePreview } from './components/rule_preview';
 import { RulePreviewFooter } from './components/rule_preview_footer';
 
 export type PreviewPanelType = Array<{
+  /**
+   * Id of the preview panel
+   */
   id: PreviewPanelPaths;
+  /**
+   * Panel name
+   */
   name: string;
+  /** 
+   * Main body component to be rendered in the panel 
+   */
   content: React.ReactElement;
+  /** 
+   * Footer section in the panel 
+   */
   footer: React.ReactElement;
 }>;
 

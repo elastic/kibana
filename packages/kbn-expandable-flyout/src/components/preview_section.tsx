@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+
+import { has } from 'lodash';
 import {
   PREVIEW_SECTION,
   PREVIEW_SECTION_BACK_BUTTON,
@@ -24,7 +26,31 @@ import {
   PREVIEW_SECTION_HEADER,
 } from './test_ids';
 import { useExpandableFlyoutContext } from '../..';
-import { BACK_BUTTON, CLOSE_BUTTON, DEFAULT_PREVIEW_TITLE_TEXT } from './translations';
+import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+
+export interface PreviewBanner {
+  /**
+  * Optional title to be shown
+  */
+ title?: string;
+ /**
+  * Optional string for background color
+  */
+ backgroundColor?: "primary" | "plain" | "warning" | "accent" | "success" | "danger" | "transparent" | "subdued";
+ /**
+  * Optional string for text color
+  */
+ textColor?: string;
+}
+
+/**
+ * Type guard to check the passed object is of preview banner type
+ * @param banner passed from panel params
+ * @returns a boolean to indicate whether the banner passed is a preview banner
+ */
+export const isPreviewBanner = (banner: unknown): banner is PreviewBanner => {
+  return has(banner, 'title') || has(banner, 'backgroundColor') || has(banner, 'textColor');
+}
 
 interface PreviewSectionProps {
   /**
@@ -40,9 +66,9 @@ interface PreviewSectionProps {
    */
   showBackButton: boolean;
   /**
-   * Preview banner text to be shown
+   * Preview banner shown at the top of preview panel
    */
-  banner?: string;
+  banner?: PreviewBanner;
 }
 
 /**
@@ -116,9 +142,9 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION}
       >
-        <EuiSplitPanel.Inner grow={false} color="warning" paddingSize="none">
-          <EuiText textAlign="center" color="warning" size="s">
-            {banner ?? DEFAULT_PREVIEW_TITLE_TEXT}
+        <EuiSplitPanel.Inner grow={false} color={banner?.backgroundColor} paddingSize="none">
+          <EuiText textAlign="center" color={banner?.textColor} size="s">
+            {banner?.title}
           </EuiText>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>

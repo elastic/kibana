@@ -25,10 +25,6 @@ export interface PreviewPanelContext {
    * Rule id if preview is rule details
    */
   ruleId: string;
-  /**
-   * Banner text to be shown on top of preview panel
-   */
-  banner: string | null;
 }
 
 export const PreviewPanelContext = createContext<PreviewPanelContext | undefined>(undefined);
@@ -38,14 +34,12 @@ export type PreviewPanelProviderProps = {
    * React components to render
    */
   children: React.ReactNode;
-} & Partial<PreviewPanelProps['params']> &
-  Partial<PreviewPanelProps>;
+} & Partial<PreviewPanelProps['params']>
 
 export const PreviewPanelProvider = ({
   id,
   indexName,
   scopeId,
-  banner,
   ruleId,
   children,
 }: PreviewPanelProviderProps) => {
@@ -56,11 +50,10 @@ export const PreviewPanelProvider = ({
             eventId: id,
             indexName,
             scopeId,
-            banner: banner ?? null,
             ruleId: ruleId ?? '',
           }
         : undefined,
-    [id, indexName, scopeId, banner, ruleId]
+    [id, indexName, scopeId, ruleId]
   );
 
   return (

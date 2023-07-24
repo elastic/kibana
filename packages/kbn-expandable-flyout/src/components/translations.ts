@@ -15,10 +15,3 @@ export const BACK_BUTTON = i18n.translate('expandableFlyout.previewSection.backB
 export const CLOSE_BUTTON = i18n.translate('expandableFlyout.previewSection.closeButton', {
   defaultMessage: 'Close',
 });
-
-export const DEFAULT_PREVIEW_TITLE_TEXT = i18n.translate(
-  'expandableFlyout.previewSection.previewTitleText',
-  {
-    defaultMessage: 'Preview',
-  }
-);

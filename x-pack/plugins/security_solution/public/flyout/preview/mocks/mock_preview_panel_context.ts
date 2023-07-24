@@ -15,5 +15,4 @@ export const mockContextValue: PreviewPanelContext = {
   indexName: 'index',
   scopeId: 'scopeId',
   ruleId: '',
-  banner: 'preview title',
 };

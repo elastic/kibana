@@ -59,7 +59,11 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
         id: eventId,
         indexName,
         scopeId,
-        banner: PREVIEW_RULE_DETAILS,
+        banner: {
+          title: PREVIEW_RULE_DETAILS,
+          backgroundColor: 'warning', 
+          textColor: 'warning',
+        },
         ruleId,
       },
     });
