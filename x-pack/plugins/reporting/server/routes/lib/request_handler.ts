@@ -6,18 +6,26 @@
  */
 
 import Boom from '@hapi/boom';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import rison from '@kbn/rison';
 import moment from 'moment';
 import type { ReportingCore } from '../..';
 import { PUBLIC_ROUTES } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
-import { Counters } from './get_counter';
+import { Counters, getCounters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
+};
+
+const validation = {
+  params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
+  body: schema.nullable(schema.object({ jobParams: schema.maybe(schema.string()) })),
+  query: schema.nullable(schema.object({ jobParams: schema.string({ defaultValue: '' }) })),
 };
 
 /**
@@ -28,7 +36,11 @@ export class RequestHandler {
     private reporting: ReportingCore,
     private user: ReportingUser,
     private context: ReportingRequestHandlerContext,
-    private req: KibanaRequest,
+    private req: KibanaRequest<
+      TypeOf<typeof validation['params']>,
+      TypeOf<typeof validation['query']>,
+      TypeOf<typeof validation['body']>
+    >,
     private res: KibanaResponseFactory,
     private logger: Logger
   ) {}
@@ -105,11 +117,64 @@ export class RequestHandler {
     return report;
   }
 
-  public async handleGenerateRequest(
-    exportTypeId: string,
-    jobParams: BaseParams,
-    counters: Counters
-  ) {
+  private getJobParams(): BaseParams {
+    let jobParamsRison: null | string = null;
+    const req = this.req;
+    const res = this.res;
+
+    if (req.body) {
+      const { jobParams: jobParamsPayload } = req.body;
+      jobParamsRison = jobParamsPayload ? jobParamsPayload : null;
+    } else if (req.query?.jobParams) {
+      const { jobParams: queryJobParams } = req.query;
+      if (queryJobParams) {
+        jobParamsRison = queryJobParams;
+      } else {
+        jobParamsRison = null;
+      }
+    }
+
+    if (!jobParamsRison) {
+      throw res.customError({
+        statusCode: 400,
+        body: 'A jobParams RISON string is required in the querystring or POST body',
+      });
+    }
+
+    let jobParams;
+
+    try {
+      jobParams = rison.decode(jobParamsRison) as BaseParams | null;
+      if (!jobParams) {
+        throw res.customError({
+          statusCode: 400,
+          body: 'Missing jobParams!',
+        });
+      }
+    } catch (err) {
+      throw res.customError({
+        statusCode: 400,
+        body: `invalid rison: ${jobParamsRison}`,
+      });
+    }
+
+    return jobParams;
+  }
+
+  public static getValidation() {
+    return validation;
+  }
+
+  public async handleGenerateRequest(path: string, exportTypeId: string) {
+    const req = this.req;
+    const reporting = this.reporting;
+
+    const counters = getCounters(
+      req.route.method,
+      path.replace(/{exportType}/, req.params.exportType),
+      reporting.getUsageCounter()
+    );
+
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -126,6 +191,7 @@ export class RequestHandler {
       return this.res.forbidden({ body: licenseResults.message });
     }
 
+    const jobParams = this.getJobParams();
     if (jobParams.browserTimezone && !moment.tz.zone(jobParams.browserTimezone)) {
       return this.res.badRequest({
         body: `Invalid timezone "${jobParams.browserTimezone ?? ''}".`,
