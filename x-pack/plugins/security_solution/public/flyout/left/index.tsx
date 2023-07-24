@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FlyoutPanel } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
@@ -24,7 +24,7 @@ export const LeftPanelVisualizeTabPath: LeftPanelProps['path'] = ['visualize'];
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
 export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
 
-export interface LeftPanelProps extends FlyoutPanel {
+export interface LeftPanelProps extends FlyoutPanelProps {
   key: 'document-details-left';
   path?: LeftPanelPaths[];
   params?: {
