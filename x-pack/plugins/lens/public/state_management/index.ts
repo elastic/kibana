@@ -63,7 +63,7 @@ type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: A
 
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
-  preloadedState: PreloadedState<LensState> | undefined,
+  preloadedState?: PreloadedState<LensState> | undefined,
   customMiddleware?: CustomMiddleware
 ) => {
   const middleware = [

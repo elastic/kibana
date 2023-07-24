@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -28,7 +28,6 @@ import {
   LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
-import type { LensAppServices } from '../../types';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -60,12 +59,19 @@ const updatingMiddleware =
     }
   };
 
-export function getEditLensConfiguration(
+export async function getEditLensConfiguration(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   visualizationMap?: VisualizationMap,
   datasourceMap?: DatasourceMap
 ) {
+  const { getLensServices, getLensAttributeService } = await import('../../../async_services');
+  const lensServices = await getLensServices(
+    coreStart,
+    startDependencies,
+    getLensAttributeService(coreStart, startDependencies)
+  );
+
   return ({
     attributes,
     dataView,
@@ -76,23 +82,6 @@ export function getEditLensConfiguration(
     adaptersTables,
     panelId,
   }: EditLensConfigurationProps) => {
-    const [lensServices, setLensServices] = useState<LensAppServices>();
-    useEffect(() => {
-      async function loadLensService() {
-        const { getLensServices, getLensAttributeService } = await import(
-          '../../../async_services'
-        );
-        const lensServicesT = await getLensServices(
-          coreStart,
-          startDependencies,
-          getLensAttributeService(coreStart, startDependencies)
-        );
-
-        setLensServices(lensServicesT);
-      }
-      loadLensService();
-    }, []);
-
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }

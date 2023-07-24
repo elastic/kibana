@@ -274,7 +274,7 @@ export async function mountApp(
     initialContext,
     initialStateFromLocator,
   };
-  const lensStore: LensRootStore = makeConfigureStore(storeDeps, undefined);
+  const lensStore: LensRootStore = makeConfigureStore(storeDeps);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
