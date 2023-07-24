@@ -10,9 +10,9 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { searchResponseTimeoutWarningMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { searchResponseTimeoutWarningMock } from '../../../__mocks__/search_response_warnings';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

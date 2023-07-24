@@ -19,7 +19,7 @@ import {
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { searchResponseWarningsMock } from '../../../__mocks__/search_response_warnings';
+import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
