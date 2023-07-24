@@ -12,6 +12,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { Filter } from '@kbn/es-query';
 
 const getUiSettingsMock = (value: boolean) => {
   return {
@@ -71,5 +72,21 @@ describe('updateVolatileSearchSource', () => {
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
+  });
+
+  test('should properly update the search source with the given custom filters', async () => {
+    const searchSource = createSearchSourceMock({});
+    discoverServiceMock.uiSettings = getUiSettingsMock(false);
+
+    const filter = { meta: { index: 'foo', key: 'bar' } } as Filter;
+
+    updateVolatileSearchSource(searchSource, {
+      dataView: dataViewMock,
+      services: discoverServiceMock,
+      sort: [] as SortOrder[],
+      customFilters: [filter],
+    });
+
+    expect(searchSource.getField('filter')).toEqual([filter]);
   });
 });
