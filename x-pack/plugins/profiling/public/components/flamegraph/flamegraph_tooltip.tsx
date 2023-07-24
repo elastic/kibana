@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';

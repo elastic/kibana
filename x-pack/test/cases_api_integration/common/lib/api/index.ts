@@ -34,7 +34,6 @@ import {
   CasesPatchRequest,
   CasesStatusResponse,
   AlertResponse,
-  ConnectorMappingsAttributes,
   CasesByAlertId,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
@@ -46,7 +45,11 @@ import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
-import { Configurations, Configuration } from '@kbn/cases-plugin/common/types/domain';
+import {
+  Configurations,
+  Configuration,
+  ConnectorMappingsAttributes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';

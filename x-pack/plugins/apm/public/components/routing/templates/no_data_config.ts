@@ -43,7 +43,7 @@ function getNoDataConfigDetails({
   if (hasApmIntegrations) {
     return {
       title: addDataTitle,
-      href: `${basePath}/app/home#/tutorial/apm`,
+      href: `${basePath}/app/apm/tutorial`,
       description,
     };
   }
