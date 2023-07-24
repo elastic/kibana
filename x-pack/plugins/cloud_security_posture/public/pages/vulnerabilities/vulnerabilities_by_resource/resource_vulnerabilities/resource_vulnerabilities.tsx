@@ -328,7 +328,18 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
       </Link>
       <EuiSpacer size="xs" />
       <PageTitle>
-        <PageTitleText title={data?.page[0]?.resource?.name || ''} />
+        <PageTitleText
+          title={i18n.translate(
+            'xpack.csp.vulnerabilities.resourceVulnerabilities.vulnerabilitiesPageTitle',
+            {
+              defaultMessage: '{resourceName} {hyphen} Vulnerabilities',
+              values: {
+                resourceName: data?.page[0]?.resource?.name,
+                hyphen: data?.page[0]?.resource?.name ? '-' : '',
+              },
+            }
+          )}
+        />
       </PageTitle>
       <EuiSpacer />
       <CspInlineDescriptionList
