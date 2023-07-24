@@ -31,7 +31,7 @@ export interface MetricsRouteParams {
 }
 
 const QuerySchema = schema.object({
-  reset: schema.boolean({ defaultValue: false }),
+  reset: schema.boolean({ defaultValue: true }),
 });
 
 export function metricsRoute(params: MetricsRouteParams) {
@@ -40,6 +40,7 @@ export function metricsRoute(params: MetricsRouteParams) {
   let lastMetrics: NodeMetrics | null = null;
 
   metrics$.subscribe((metrics) => {
+    // console.log(`${JSON.stringify(metrics)}`);
     lastMetrics = { process_uuid: taskManagerId, timestamp: new Date().toISOString(), ...metrics };
   });
 
