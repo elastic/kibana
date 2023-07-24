@@ -12,7 +12,7 @@ import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
 import { LocatorServicesDeps } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import { DiscoverAppLocatorParams, SORT_DEFAULT_ORDER_SETTING } from '../../common';
 import { getSortForSearchSource } from '../../common/utils/sorting';
 import { getColumns } from './columns_from_locator';
 
@@ -147,7 +147,16 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
 
     // Inject sort
     if (savedSearch.sort) {
-      const sort = getSortForSearchSource(savedSearch.sort as Array<[string, string]>, index, null); // TODO: is it correct that it was using a `desc` as default sort here?
+      const defaultSortingSetting = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
+      const uiSettingsSyncReplacement = {
+        get: (key: string) =>
+          key === SORT_DEFAULT_ORDER_SETTING ? defaultSortingSetting : undefined,
+      };
+      const sort = getSortForSearchSource(
+        savedSearch.sort as Array<[string, string]>,
+        index,
+        uiSettingsSyncReplacement
+      );
       searchSource.setField('sort', sort);
     }
 
