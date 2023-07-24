@@ -31,9 +31,9 @@ export const createUserRequests = (num: number): CommentRequestUserType[] => {
 export const createPersistableStateRequests = (
   num: number
 ): CommentRequestPersistableStateType[] => {
-  return [...Array(num).keys()].map((value) => {
+  return [...Array(num).keys()].map(() => {
     return {
-      persistableStateAttachmentTypeId: 'some-id',
+      persistableStateAttachmentTypeId: '.test',
       persistableStateAttachmentState: {},
       type: CommentType.persistableState as const,
       owner: 'test',
@@ -48,7 +48,7 @@ export const createExternalReferenceRequests = (
     return {
       type: CommentType.externalReference as const,
       owner: 'test',
-      externalReferenceAttachmentTypeId: 'doesnt-matter',
+      externalReferenceAttachmentTypeId: '.test',
       externalReferenceId: 'so-id',
       externalReferenceMetadata: {},
       externalReferenceStorage: {
