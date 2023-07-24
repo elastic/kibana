@@ -76,7 +76,6 @@ async function createSetupSideEffects(
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
-  //
   await cleanUpOldFileIndices(esClient, logger);
 
   await ensureFleetDirectories();
