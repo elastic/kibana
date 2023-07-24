@@ -1,0 +1,7 @@
+
+.lnsConfigPanel__overlay {
+  clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+  .kbnOverlayMountWrapper {
+    overflow: visible;
+  }
+}

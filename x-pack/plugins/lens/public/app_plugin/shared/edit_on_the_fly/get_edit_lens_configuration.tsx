@@ -137,6 +137,7 @@ export async function getEditLensConfiguration(
             hideCloseButton
             css={css`
               background: none;
+              clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
             `}
           >
             {children}

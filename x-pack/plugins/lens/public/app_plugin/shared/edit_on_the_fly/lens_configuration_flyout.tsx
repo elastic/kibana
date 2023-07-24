@@ -99,6 +99,13 @@ export function LensEditConfigurationFlyout({
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
+          // needed for extra drop targets to be displayed
+          overflow-y: visible;
+          .euiFlyoutBody__overflow {
+            overflow-y: visible;
+            overflow-x: visible;
+            -webkit-mask-image: inherit;
+          }
           .euiFlyoutBody__overflowContent {
             padding: ${euiTheme.size.s};
           }

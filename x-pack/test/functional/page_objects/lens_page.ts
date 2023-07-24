@@ -1459,7 +1459,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (!opts.keepOpen) {
-        await testSubjects.click('collapseFlyoutButton');
+        await this.closeDimensionEditor();
       }
     },
 
