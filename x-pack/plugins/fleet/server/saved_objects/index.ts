@@ -25,6 +25,8 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
+
 import {
   migrateAgentPolicyToV7100,
   migratePackagePolicyToV7100,
@@ -280,6 +282,9 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             backfillFn: migratePackagePolicyToV8100,
           },
         ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV8100,
+        },
       },
     },
     migrations: {

@@ -12,6 +12,7 @@ import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-obje
 import type { PackagePolicy } from '../../../../common';
 
 import { migratePackagePolicyToV8100 as migration } from './to_v8_10_0';
+import { migratePackagePolicyEvictionsFromV8100 as eviction } from './to_v8_10_0';
 
 describe('8.10.0 Endpoint Package Policy migration', () => {
   const policyDoc = ({ behaviorProtection = {} }) => {
@@ -74,7 +75,21 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
       behaviorProtection: { reputation_service: false },
     });
 
-    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual(migratedDoc);
+    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
+      attributes: {
+        inputs: migratedDoc.attributes.inputs,
+      },
+    });
+  });
+
+  it('removes reputation service field from behaviour protection', () => {
+    const initialDoc = policyDoc({
+      behaviorProtection: { reputation_service: true },
+    });
+
+    const migratedDoc = policyDoc({});
+
+    expect(eviction(initialDoc.attributes)).toEqual(migratedDoc.attributes);
   });
 
   it('does not modify non-endpoint package policies', () => {
@@ -139,8 +154,6 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
           },
         ],
       },
-      type: ' nested',
-      id: 'mock-saved-object-id',
     });
   });
 });

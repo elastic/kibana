@@ -9,6 +9,10 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 
+import { omit } from 'lodash';
+
+import type { SavedObjectModelVersionForwardCompatibilityFn } from '@kbn/core-saved-objects-server';
+
 import type { PackagePolicy } from '../../../../common';
 
 export const migratePackagePolicyToV8100: SavedObjectModelDataBackfillFn<
@@ -16,7 +20,7 @@ export const migratePackagePolicyToV8100: SavedObjectModelDataBackfillFn<
   PackagePolicy
 > = (packagePolicyDoc) => {
   if (packagePolicyDoc.attributes.package?.name !== 'endpoint') {
-    return packagePolicyDoc;
+    return { attributes: packagePolicyDoc.attributes };
   }
 
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
@@ -31,5 +35,35 @@ export const migratePackagePolicyToV8100: SavedObjectModelDataBackfillFn<
     policy.linux.behavior_protection.reputation_service = false;
   }
 
-  return updatedPackagePolicyDoc;
+  return {
+    attributes: {
+      inputs: updatedPackagePolicyDoc.attributes.inputs,
+    },
+  };
 };
+
+export const migratePackagePolicyEvictionsFromV8100: SavedObjectModelVersionForwardCompatibilityFn =
+  (unknownAttributes) => {
+    const attributes = unknownAttributes as PackagePolicy;
+    if (attributes.package?.name !== 'endpoint') {
+      return attributes;
+    }
+
+    const updatedAttributes = attributes;
+
+    const input = updatedAttributes.inputs[0];
+
+    if (input && input.config) {
+      const policy = input.config.policy.value;
+
+      policy.windows.behavior_protection = omit(policy.windows.behavior_protection, [
+        'reputation_service',
+      ]);
+      policy.linux.behavior_protection = omit(policy.linux.behavior_protection, [
+        'reputation_service',
+      ]);
+      policy.mac.behavior_protection = omit(policy.mac.behavior_protection, ['reputation_service']);
+    }
+
+    return updatedAttributes;
+  };
