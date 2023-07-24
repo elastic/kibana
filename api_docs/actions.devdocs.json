@@ -2678,6 +2678,52 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionType.getKibanaPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaPrivileges",
+            "description": [
+              "\nAdditional Kibana privileges to be checked by the actions framework.\nUse it if you want to perform extra authorization checks based on a Kibana feature.\nFor example, you can define the privileges a users needs to have to execute\na Case or OsQuery system action.\n\nThe list of the privileges follows the Kibana privileges format usually generated with `security.authz.actions.*.get(...)`.\n\nIt only works with system actions and only when executing an action.\nFor all other scenarios they will be ignored"
+            ],
+            "signature": [
+              "((args?: { params?: Params | undefined; } | undefined) => string[]) | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionType.getKibanaPrivileges.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "x-pack/plugins/actions/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.ActionType.getKibanaPrivileges.$1.params",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "params",
+                    "description": [],
+                    "signature": [
+                      "Params | undefined"
+                    ],
+                    "path": "x-pack/plugins/actions/server/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionType.renderParameterTemplates",
             "type": "Function",
             "tags": [],
@@ -3228,7 +3274,7 @@
         "label": "ActionsAuthorization",
         "description": [],
         "signature": [
-          "{ ensureAuthorized: (operation: string, actionTypeId?: string | undefined) => Promise<void>; }"
+          "{ ensureAuthorized: ({ operation, actionTypeId, additionalPrivileges, }: { operation: string; actionTypeId?: string | undefined; additionalPrivileges?: string[] | undefined; }) => Promise<void>; }"
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
@@ -3267,7 +3313,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; get: ({ id }: { id: string; }) => Promise<",
+          ">>; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3277,7 +3323,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; getAll: () => Promise<",
+          ">>; getAll: ({ includeSystemActions }?: GetAllOptions) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3285,7 +3331,7 @@
             "section": "def-server.FindActionResult",
             "text": "FindActionResult"
           },
-          "[]>; getBulk: (ids: string[]) => Promise<",
+          "[]>; getBulk: (ids: string[], throwIfSystemAction?: boolean) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3321,7 +3367,7 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: (featureId?: string | undefined) => Promise<",
+          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ListTypesOptions) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
