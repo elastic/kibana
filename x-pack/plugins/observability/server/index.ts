@@ -42,6 +42,9 @@ const configSchema = schema.object({
       uptime: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
+      observability: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
     }),
     thresholdRule: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
