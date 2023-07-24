@@ -71,7 +71,7 @@ const navigationTree: NavigationTreeDefinition = {
       children: [
         {
           id: 'search_getting_started',
-          title: 'Getting started,
+          title: 'Getting started',
           link: 'serverlessElasticsearch', // All **internal** links must be deepLinks
         },
         {
@@ -132,7 +132,7 @@ Once the navigation tree is defined we need to
 1. Pass it to the `<DefaultNavigation />` component
 2. Set your navigation component in the `serverless` plugin
 
-```ts
+```tsx
 import { DefaultNavigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
 
 const createServerlessSearchSideNavComponent =
@@ -156,10 +156,11 @@ serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
 
 ##### `NavigationTreeDefinition`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `body` | `RootNavigationItemDefinition[]` | The main content of the navigation, which can contain various types of items such as `cloudLink`, `recentlyAccessed`, or `navGroup`. |
-| `footer` | `RootNavigationItemDefinition[]` | The footer content of the navigation, which can contain additional items similar to the `body` section. |
+| Property | Type                             | Description                                                                                                                          |
+|----------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `body`   | `RootNavigationItemDefinition[]` | The main content of the navigation, which can contain various types of items such as `cloudLink`, `recentlyAccessed`, or `navGroup`. |
+| `footer` | `RootNavigationItemDefinition[]` | The footer content of the navigation, which can contain additional items similar to the `body` section.                              |
+
 
 Each item in the `body` or `footer` arrays can have its own unique structure defined by the `RootNavigationItemDefinition` interface.
 
@@ -172,34 +173,34 @@ The `RootNavigationItemDefinition` is one of:
 
 The `GroupDefinition` interface represents a group of items in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `'navGroup'` | Indicates that this item is a navigation group. |
-| `defaultIsCollapsed` | `boolean` | Determines if the group is initially collapsed or expanded. Use `undefined` (recommended) to open the group if any of its children nodes match the current URL, `false` to always open the group, or `true` to always collapse it. |
-| `preset` | `NavigationGroupPreset` | A preset value for the group, such as `'analytics'`, `'devtools'`, `'ml'`, or `'management'`. |
-| `id` | `Id` | Optional ID of the navigation node. |
-| `title` | `string` | Optional title of the navigation node. If not provided and a "link" is provided, the title will be the Deep link title. |
-| `link` | `LinkId` | Optional App ID or deep link ID for the navigation node. |
-| `cloudLink` | `CloudLinkId` | Optional cloud link ID for the navigation node. |
-| `icon` | `string` | Optional icon for the navigation node. Note that not all navigation depths will render the icon. |
-| `children` | `NodeDefinition[]` | Optional children of the navigation node. |
-| `href` | `string` | Use `href` for absolute links only. Internal links should use "link". |
-| `getIsActive` | `function` | Optional function to control the active state. This function is called whenever the location changes. |
-| `breadcrumbStatus` | `'hidden' | 'visible'` | An optional flag to indicate if the breadcrumb should be hidden when this node is active. The default value is `'visible'`. |
+| Property             | Type                    | Description                                                                                                                                                                                                                        |
+|----------------------|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `type`               | `'navGroup'`            | Indicates that this item is a navigation group.                                                                                                                                                                                    |
+| `defaultIsCollapsed` | `boolean \| undefined`  | Determines if the group is initially collapsed or expanded. Use `undefined` (recommended) to open the group if any of its children nodes match the current URL, `false` to always open the group, or `true` to always collapse it. |
+| `preset`             | `NavigationGroupPreset` | A preset value for the group, such as `'analytics'`, `'devtools'`, `'ml'`, or `'management'`.                                                                                                                                      |
+| `id`                 | `Id`                    | Optional ID of the navigation node.                                                                                                                                                                                                |
+| `title`              | `string`                | Optional title of the navigation node. If not provided and a "link" is provided, the title will be the Deep link title.                                                                                                            |
+| `link`               | `LinkId`                | Optional App ID or deep link ID for the navigation node.                                                                                                                                                                           |
+| `cloudLink`          | `CloudLinkId`           | Optional cloud link ID for the navigation node.                                                                                                                                                                                    |
+| `icon`               | `string`                | Optional icon for the navigation node. Note that not all navigation depths will render the icon.                                                                                                                                   |
+| `children`           | `NodeDefinition[]`      | Optional children of the navigation node.                                                                                                                                                                                          |
+| `href`               | `string`                | Use `href` for absolute links only. Internal links should use "link".                                                                                                                                                              |
+| `getIsActive`        | `function`              | Optional function to control the active state. This function is called whenever the location changes.                                                                                                                              |
+| `breadcrumbStatus`   | `'hidden'\|'visible'`   | An optional flag to indicate if the breadcrumb should be hidden when this node is active. The default value is `'visible'`.                                                                                                        |
 
 ##### `RecentlyAccessedDefinition`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `'recentlyAccessed'` | Indicates that this item represents the recently accessed section. |
-| `recentlyAccessed$` | `Observable<RecentItem[]>` | An optional observable for recently accessed items. If not provided, the recently accessed items from the Chrome service will be used. |
-| `defaultIsCollapsed` | `boolean` | If set to `true`, the recently accessed list will be collapsed by default. The default value is `false`. |
+| Property             | Type                       | Description                                                                                                                            |
+|----------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `type`               | `'recentlyAccessed'`       | Indicates that this item represents the recently accessed section.                                                                     |
+| `recentlyAccessed$`  | `Observable<RecentItem[]>` | An optional observable for recently accessed items. If not provided, the recently accessed items from the Chrome service will be used. |
+| `defaultIsCollapsed` | `boolean`                  | If set to `true`, the recently accessed list will be collapsed by default. The default value is `false`.                               |
 
 ### React components
 
 If you need other navigation sections in your navigation you will need to use our React components. They have the same properties as seen above with the exception of the `unstyled` prop that we will detail below.
 
-```ts
+```tsx
 import { NavigationKibanaProvider, Navigation } from '@kbn/shared-ux-chrome-navigation';
 
 const createServerlessSearchSideNavComponent =
@@ -247,7 +248,7 @@ serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
 
 If you want to completely customize your UI and just need to declare you navigation tree you can pass the `unstyled` property to your `<Navigation />`.
 
-```ts
+```tsx
 /**
  * This JSX will correctly declare your tree structure but will not have any UI applied.
  Tree generated:
