@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
-import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../../../common/components/landing_links/landing_links_images';
@@ -20,7 +28,25 @@ import * as i18n from './translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 import { DASHBOARDS_PAGE_TITLE } from '../translations';
 import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
-import { DashboardsTable } from '../../components/dashboards_table';
+import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
+import type { TagReference } from '../../context/dashboard_context';
+import { useSecurityTags } from '../../context/dashboard_context';
+
+const getInitialFilterString = (securityTags: TagReference[] | null | undefined) => {
+  if (!securityTags) {
+    return;
+  }
+  const uniqueQuerySet = securityTags?.reduce<Set<string>>((acc, { name }) => {
+    const nameString = `"${name}"`;
+    if (name && !acc.has(nameString)) {
+      acc.add(nameString);
+    }
+    return acc;
+  }, new Set());
+
+  const query = [...uniqueQuerySet].join(' or');
+  return `tag:(${query})`;
+};
 
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
@@ -57,7 +83,36 @@ export const DashboardsLandingPage = () => {
   const dashboardLinks = useRootNavLink(SecurityPageName.dashboards)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
+  const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const getSecuritySolutionDashboardUrl = useCallback(
+    (id: string) =>
+      `${getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: id,
+      })}`,
+    [getSecuritySolutionUrl]
+  );
+  const { isLoading: loadingCreateDashboardUrl, url: createDashboardUrl } =
+    useCreateSecurityDashboardLink();
 
+  const getHref = useCallback(
+    (id: string | undefined) => (id ? getSecuritySolutionDashboardUrl(id) : createDashboardUrl),
+    [createDashboardUrl, getSecuritySolutionDashboardUrl]
+  );
+
+  const goToDashboard = useCallback(
+    (dashboardId: string | undefined) => {
+      track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
+      navigateTo({ url: getHref(dashboardId) });
+    },
+    [getHref, navigateTo]
+  );
+
+  const securityTags = useSecurityTags();
+  const securityTagsExist = securityTags && securityTags?.length > 0;
+
+  const initialFilter = useMemo(() => getInitialFilterString(securityTags), [securityTags]);
   return (
     <SecuritySolutionPageWrapper>
       <Header canCreateDashboard={canCreateDashboard} />
@@ -68,17 +123,26 @@ export const DashboardsLandingPage = () => {
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <LandingImageCards items={dashboardLinks} />
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="m" />
 
-      {canReadDashboard && (
+      {canReadDashboard && securityTagsExist && initialFilter ? (
         <>
-          <EuiTitle size="xxxs">
-            <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
-          </EuiTitle>
-          <EuiHorizontalRule margin="s" />
-          <EuiSpacer size="m" />
-          <DashboardsTable />
+          <DashboardListingTable
+            disableCreateDashboardButton={loadingCreateDashboardUrl}
+            getDashboardUrl={getSecuritySolutionDashboardUrl}
+            goToDashboard={goToDashboard}
+            initialFilter={initialFilter}
+            urlStateEnabled={false}
+          >
+            <EuiTitle size="xxxs">
+              <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
+            </EuiTitle>
+            <EuiHorizontalRule margin="s" />
+            <EuiSpacer size="m" />
+          </DashboardListingTable>
         </>
+      ) : (
+        <EuiEmptyPrompt icon={<EuiLoadingSpinner size="l" />} />
       )}
 
       <SpyRoute pageName={SecurityPageName.dashboards} />
