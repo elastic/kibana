@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_CONNECTORS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { connectorApiV1 } from '../../../../common/types/api';
 
 export const getConnectorsRoute = createCasesRoute({
   method: 'get',
@@ -24,8 +25,11 @@ export const getConnectorsRoute = createCasesRoute({
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
 
+      const res: connectorApiV1.GetCaseConnectorsResponse =
+        await casesClient.userActions.getConnectors({ caseId });
+
       return response.ok({
-        body: await casesClient.userActions.getConnectors({ caseId }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({
