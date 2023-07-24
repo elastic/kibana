@@ -6,7 +6,3 @@
  */
 
 export { useFetchStream } from './use_fetch_stream';
-export type {
-  UseFetchStreamCustomReducerParams,
-  UseFetchStreamParamsDefault,
-} from './use_fetch_stream';

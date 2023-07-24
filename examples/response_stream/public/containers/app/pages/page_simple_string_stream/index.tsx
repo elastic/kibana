@@ -20,7 +20,7 @@ import {
 
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
-import { ApiSimpleStringStream } from '../../../../../common/api';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 
 import { useDeps } from '../../../../hooks/use_deps';
 import { Page } from '../../../../components/page';
@@ -30,16 +30,15 @@ export const PageSimpleStringStream: FC = () => {
 
   const [compressResponse, setCompressResponse] = useState(true);
 
-  const { dispatch, errors, start, cancel, data, isRunning } =
-    useFetchStream<ApiSimpleStringStream>(
-      core.http,
-      `/internal/response_stream/simple_string_stream`,
-      '1',
-      {
-        compressResponse,
-        timeout: 500,
-      }
-    );
+  const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream(
+    core.http,
+    RESPONSE_STREAM_API_ENDPOINT.SIMPLE_STRING_STREAM,
+    '1',
+    {
+      compressResponse,
+      timeout: 500,
+    }
+  );
 
   const onClickHandler = async () => {
     if (isRunning) {

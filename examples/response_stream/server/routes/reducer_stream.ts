@@ -17,12 +17,12 @@ import {
   deleteEntityAction,
   ReducerStreamApiAction,
 } from '../../common/api/reducer_stream';
-import { API_ENDPOINT } from '../../common/api';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .post({
-      path: API_ENDPOINT.REDUCER_STREAM,
+      path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
       access: 'internal',
     })
     .addVersion(

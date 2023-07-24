@@ -6,11 +6,9 @@
  */
 
 import startsWith from 'lodash/startsWith';
-import type { ReducerAction } from 'react';
+import type { Reducer, ReducerAction } from 'react';
 
 import type { HttpSetup } from '@kbn/core/public';
-
-import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
 type GeneratorError = string | null;
 
@@ -30,25 +28,18 @@ type GeneratorError = string | null;
  * @param abortCtrl    — Abort controller for cancelling the request.
  * @param body         — The request body. For now all requests are POST.
  * @param ndjson       — Boolean flag to receive the stream as a raw string or NDJSON.
- * @param bufferBounce — A buffer timeout which defaults to 100ms. This collects stream
- *                       chunks for the time of the timeout and only then yields/emits them.
- *                       This is useful so we are more in control of passing on data to
- *                       consuming React components and we won't hammer the DOM with
- *                       updates on every received chunk.
  *
  * @returns            - Yields/emits items in the format [error, value]
  *                       inspired by node's recommended error convention for callbacks.
  */
-export async function* fetchStream<I extends UseFetchStreamParamsDefault>(
+export async function* fetchStream<B extends object, R extends Reducer<any, any>>(
   http: HttpSetup,
-  endpoint: I['endpoint'],
+  endpoint: string,
   apiVersion: string | undefined,
   abortCtrl: React.MutableRefObject<AbortController>,
-  body: I['body'],
+  body?: B,
   ndjson = true
-): AsyncGenerator<
-  [GeneratorError, ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined]
-> {
+): AsyncGenerator<[GeneratorError, ReducerAction<R> | Array<ReducerAction<R>> | undefined]> {
   let stream: Readonly<Response> | undefined;
 
   try {
@@ -57,7 +48,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault>(
       version: apiVersion,
       asResponse: true,
       rawResponse: true,
-      ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
+      ...(body && Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
     });
 
     stream = response.response;
@@ -113,7 +104,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault>(
                 })
                 .filter((p) => p !== '[IGNORE]')
             : parts
-        ) as Array<ReducerAction<I['reducer']>>;
+        ) as Array<ReducerAction<R>>;
 
         yield [null, actions];
       } catch (error) {

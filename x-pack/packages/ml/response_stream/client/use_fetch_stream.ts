@@ -10,189 +10,68 @@ import {
   useReducer,
   useRef,
   useState,
-  Dispatch,
-  Reducer,
-  ReducerAction,
-  ReducerState,
+  type Reducer,
+  type ReducerAction,
+  type ReducerState,
 } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
 
 import type { HttpSetup } from '@kbn/core/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { fetchStream } from './fetch_stream';
-import { stringReducer, StringReducer } from './string_reducer';
+import { stringReducer, type StringReducer } from './string_reducer';
 
-/**
- * Custom hook type definition of the base params for an NDJSON stream with custom reducer.
- *
- * @export
- * @interface UseFetchStreamCustomReducerParams
- * @typedef {UseFetchStreamCustomReducerParams}
- */
-export interface UseFetchStreamCustomReducerParams {
+type CustomReducer<T> = T extends StringReducer
+  ? StringReducer
+  : T extends Reducer<any, any>
+  ? T
+  : never;
+
+interface FetchStreamOptions<T> {
   /**
-   * Kibana HTTP client
-   * @type {HttpSetup}
+   * Custom reducer
    */
-  http: HttpSetup;
+  reducer: CustomReducer<T>;
   /**
-   * API endpoint
-   * @type {string}
+   * Initial state
    */
-  endpoint: string;
-  /**
-   * API version
-   * @type {string}
-   */
-  apiVersion?: string;
-  /**
-   * Request body
-   * @type {object}
-   */
-  body: object;
-  /**
-   * Reducer function to be applied to response chunks.
-   * @type {Reducer<any, any>}
-   */
-  reducer: Reducer<any, any>;
+  initialState: ReducerState<CustomReducer<T>>;
 }
 
-/**
- * Custom hook type definition of the base params for a string base stream without a custom reducer.
- */
-export interface UseFetchStreamParamsDefault {
-  /**
-   * Kibana HTTP client
-   * @type {HttpSetup}
-   */
-  http: HttpSetup;
-  /**
-   * API endpoint
-   * @type {string}
-   */
-  endpoint: string;
-  /**
-   * API version
-   * @type {string}
-   */
-  apiVersion?: string;
-  /**
-   * Request body
-   * @type {object}
-   */
-  body: object;
-  /**
-   * Reducer function to be applied to response chunks.
-   * @type {StringReducer}
-   */
-  reducer: StringReducer;
+function isOptions<T>(arg: unknown): arg is CustomReducer<T> {
+  return isPopulatedObject(arg, ['reducer', 'initialState']);
 }
-
-/**
- * The return type of the `useFetchStream` hook.
- *
- * @interface UseFetchStreamReturnType
- * @typedef {UseFetchStreamReturnType}
- * @template Data
- * @template Action
- */
-interface UseFetchStreamReturnType<Data, Action> {
-  cancel: () => void;
-  data: Data;
-  dispatch: Dispatch<Action>;
-  errors: string[];
-  isCancelled: boolean;
-  isRunning: boolean;
-  start: () => Promise<void>;
-}
-
-/**
- * This overload allows us to fall back to a simple reducer that
- * just acts on a string as the reducer state if no options are supplied.
- *
- * @export
- * @template I
- * @param {I['http']} http - Kibana HTTP client.
- * @param {I['endpoint']} endpoint - API endpoint including Kibana base path.
- * @param {I['apiVersion']} apiVersion - API version.
- * @param {I['body']} body - API request body.
- * @returns {UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>} - An object with streaming data and methods to act on the stream.
- */
-export function useFetchStream<I extends UseFetchStreamParamsDefault>(
-  http: I['http'],
-  endpoint: I['endpoint'],
-  apiVersion: I['apiVersion'],
-  body: I['body']
-): UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>;
-
-/**
- * This overload covers passing in options and will use
- * a custom reducer with appropriate type support.
- *
- * @export
- * @template I
- * @param {I['http']} http - Kibana HTTP client.
- * @param {`${I['endpoint']}`} endpoint - API endpoint including Kibana base path.
- * @param {I['apiVersion']} apiVersion - API version.
- * @param {I['body']} body - API request body.
- * @param {{ reducer: I['reducer']; initialState: ReducerState<I['reducer']> }} options - Custom reducer and initial state.
- * @returns {UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>>} - An object with streaming data and methods to act on the stream.
- */
-export function useFetchStream<I extends UseFetchStreamCustomReducerParams>(
-  http: I['http'],
-  endpoint: I['endpoint'],
-  apiVersion: I['apiVersion'],
-  body: I['body'],
-  options: {
-    /**
-     * Custom reducer
-     * @type {I['reducer']}
-     */
-    reducer: I['reducer'];
-    /**
-     * Initial state
-     * @type {ReducerState<I['reducer']>}
-     */
-    initialState: ReducerState<I['reducer']>;
-  }
-): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>>;
 
 /**
  * Custom hook to receive streaming data.
  *
- * @param http - Kibana HTTP client.
- * @param endpoint - API endpoint including Kibana base path.
- * @param apiVersion - API version.
- * @param body - API request body.
- * @param options - Optional custom reducer and initial state.
+ * @param http Kibana HTTP client.
+ * @param endpoint API endpoint including Kibana base path.
+ * @param apiVersion Optional API version.
+ * @param body Optional API request body.
+ * @param options Optional custom reducer and initial state.
  * @returns An object with streaming data and methods to act on the stream.
  */
-export function useFetchStream<I extends UseFetchStreamParamsDefault>(
-  http: I['http'],
-  endpoint: I['endpoint'],
-  apiVersion: string,
-  body: I['body'],
-  options?: {
-    /**
-     * Custom reducer
-     * @type {I['reducer']}
-     */
-    reducer: I['reducer'];
-    /**
-     * Initial state
-     * @type {ReducerState<I['reducer']>}
-     */
-    initialState: ReducerState<I['reducer']>;
-  }
-): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>> {
+export function useFetchStream<B extends object, R extends Reducer<any, any>>(
+  http: HttpSetup,
+  endpoint: string,
+  apiVersion?: string,
+  body?: B,
+  options?: FetchStreamOptions<R>
+) {
   const [errors, setErrors] = useState<string[]>([]);
   const [isCancelled, setIsCancelled] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
-  const reducer = (options?.reducer ?? stringReducer) as I['reducer'];
-  const initialState = (options?.initialState ?? '') as ReducerState<I['reducer']>;
+  const optionsWithFallback = isOptions(options)
+    ? options
+    : ({ reducer: stringReducer, initialState: '' } as FetchStreamOptions<R>);
 
-  const [data, dispatch] = useReducer(reducer, initialState);
+  const [data, dispatch] = useReducer(
+    optionsWithFallback.reducer,
+    optionsWithFallback.initialState
+  );
   const dataThrottled = useThrottle(data, 100);
 
   const abortCtrl = useRef(new AbortController());
@@ -213,7 +92,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault>(
 
     abortCtrl.current = new AbortController();
 
-    for await (const [fetchStreamError, actions] of fetchStream<UseFetchStreamCustomReducerParams>(
+    for await (const [fetchStreamError, actions] of fetchStream<B, CustomReducer<R>>(
       http,
       endpoint,
       apiVersion,
@@ -223,8 +102,8 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault>(
     )) {
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
-      } else if (actions.length > 0) {
-        dispatch(actions as ReducerAction<I['reducer']>);
+      } else if (Array.isArray(actions) && actions.length > 0) {
+        dispatch(actions as ReducerAction<CustomReducer<R>>);
       }
     }
 
