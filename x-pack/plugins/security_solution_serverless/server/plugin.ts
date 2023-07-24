@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+} from '@kbn/core/server';
 import type { ServerlessSecurityConfig } from './config';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
@@ -26,9 +32,11 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityConfig;
+  private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+    this.logger = this.initializerContext.logger.get();
   }
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
@@ -36,6 +44,14 @@ export class SecuritySolutionServerlessPlugin
     // This check is an additional layer of security to prevent double registrations when
     // `plugins.forceEnableAllPlugins` flag is enabled).
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
+
+    this.logger.info(
+      `Security Solution running with product tiers:\n${JSON.stringify(
+        this.config.productTypes,
+        null,
+        2
+      )}`
+    );
 
     if (shouldRegister) {
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
