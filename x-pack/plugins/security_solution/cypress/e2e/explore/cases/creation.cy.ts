@@ -70,6 +70,8 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
+    // Explicitly fail this test
+    expect(true).toBe(false);
     loginWithUser({ username: 'elastic', password: 'changeme' });
     visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
