@@ -18,7 +18,6 @@ import type {
   SecurityUsageReportingTaskSetupContract,
 } from '../types';
 
-export const TASK_TYPE_PREFIX = 'serverless-security';
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
 

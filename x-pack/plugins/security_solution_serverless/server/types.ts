@@ -92,6 +92,12 @@ export interface MeteringCallbackInput {
   taskId: string;
   lastSuccessfulReport: Date;
 }
+
+export interface CloudSecurityMeteringCallbackInput
+  extends Omit<MeteringCallbackInput, 'cloudSetup'> {
+  projectId: string;
+}
+
 export interface MetringTaskProperties {
   taskType: string;
   taskTitle: string;

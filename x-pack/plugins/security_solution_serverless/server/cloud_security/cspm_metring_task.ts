@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { TASK_TYPE_PREFIX } from '../task_manager/usage_reporting_task';
-import { MeteringCallbackInput, UsageRecord } from '../types';
+import { CloudSecurityMeteringCallbackInput, UsageRecord } from '../types';
 import {
   CSPM_POLICY_TEMPLATE,
   CSP_LATEST_FINDINGS_DATA_VIEW,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { cspmMetringTaskProperties } from './metering_tasks_configs';
+
+import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metring';
+import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
 
 // Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
 const MAX_BUCKETS = 60 * 1000;
 
 const CSPM_CYCLE_SCAN_FREQUENT = '24h';
-const CSPM_METRING_TASK_NAME = 'cspm-usage-report';
-const CSPM_BUCKET_TYPE_NAME = 'cspm-resource';
+const CSPM_METRING_TASK_NAME = 'cspm_usage_report';
+const CSPM_BUCKET_TYPE_NAME = 'cspm_resource';
 
 export interface Benchmarks {
   benchmarks: {
@@ -40,16 +41,13 @@ interface MinTimestamp {
   value_as_string: string;
 }
 
-export const cspmMetringCallback = async ({
+export const getCspmUsageRecord = async ({
   esClient,
-  cloudSetup,
+  projectId,
   logger,
   taskId,
-}: MeteringCallbackInput): Promise<UsageRecord[]> => {
+}: CloudSecurityMeteringCallbackInput): Promise<UsageRecord | undefined> => {
   try {
-    const projectId = cloudSetup?.serverless?.projectId || 'missing project id';
-    logger.error('no project id found');
-
     const response = await esClient.search<unknown, Benchmarks>(getFindingsByResourceAggQuery());
 
     const cspmBenchmarks = response.aggregations?.benchmarks.buckets;
@@ -79,13 +77,13 @@ export const cspmMetringCallback = async ({
         : new Date().toISOString();
 
     const usageRecords = {
-      id: TASK_TYPE_PREFIX + ':' + CSPM_METRING_TASK_NAME,
+      id: CLOUD_SECURITY_TASK_TYPE + ':' + CSPM_METRING_TASK_NAME,
       usage_timestamp: new Date(minTimestamp).toISOString(),
       creation_timestamp: new Date().toISOString(),
       usage: {
         type: CSPM_BUCKET_TYPE_NAME,
         quantity: sumResources,
-        period_seconds: cspmMetringTaskProperties.periodSeconds,
+        period_seconds: cloudSecurityMetringTaskProperties.periodSeconds,
         cause: benchmarks.join(', '),
       },
       source: {
@@ -96,10 +94,10 @@ export const cspmMetringCallback = async ({
 
     logger.debug(`Fetched CSPM metring data`);
 
-    return [usageRecords];
+    return usageRecords;
   } catch (err) {
     logger.error(`Failed to fetch CSPM metering data ${err}`);
-    return [];
+    return;
   }
 };
 
