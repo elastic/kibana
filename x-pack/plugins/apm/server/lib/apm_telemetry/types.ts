@@ -109,6 +109,7 @@ export interface APMUsage {
     traces: TimeframeMap;
     services: TimeframeMap;
     environments: TimeframeMap1d;
+    spanDestinationServiceResource: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };

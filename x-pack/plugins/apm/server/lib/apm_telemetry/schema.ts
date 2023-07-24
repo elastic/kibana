@@ -211,6 +211,15 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         },
       },
     },
+    spanDestinationServiceResource: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'Total number of unique values of span.destination.service.resource within the last day',
+        },
+      },
+    },
   },
   cardinality: {
     client: { geo: { country_iso_code: { rum: timeframeMap1dSchema } } },
