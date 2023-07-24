@@ -964,11 +964,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "Sat Jul 15 2023",
+            "July 15, 2023",
           ],
           Array [
             "Item 2",
-            "Sat Jul 15 2023",
+            "July 15, 2023",
           ],
         ]
       `);
@@ -1040,11 +1040,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "Sat Jul 15 2023",
+            "July 15, 2023",
           ],
           Array [
             "Item 2",
-            "Sat Jul 15 2023",
+            "July 15, 2023",
           ],
         ]
       `);

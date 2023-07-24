@@ -14,7 +14,7 @@ import { LensAppServices } from '../../../app_plugin/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiFieldNumber } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -106,10 +106,10 @@ describe('FormatSelector', () => {
     });
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 0 } });
   });
-  it('updates the suffix', async () => {
+  it('updates the suffix', () => {
     const props = getDefaultProps();
     const component = mountWithServices(<FormatSelector {...props} />);
-    await act(async () => {
+    act(() => {
       component
         .find('[data-test-subj="indexPattern-dimension-formatSuffix"]')
         .last()
@@ -119,5 +119,56 @@ describe('FormatSelector', () => {
     });
     component.update();
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
+  });
+
+  describe('Duration', () => {
+    it('disables the decimals and compact controls for humanize approximate output', () => {
+      const originalProps = getDefaultProps();
+      let component = mountWithServices(
+        <FormatSelector
+          {...{
+            ...originalProps,
+            selectedColumn: {
+              ...originalProps.selectedColumn,
+              params: { format: { id: 'duration' } },
+            },
+          }}
+        />
+      );
+
+      expect(
+        component
+          .find('[data-test-subj="indexPattern-dimension-formatDecimals"]')
+          .last()
+          .prop('disabled')
+      ).toBe(true);
+      expect(
+        component
+          .find('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+
+      act(() => {
+        component
+          .find('[data-test-subj="indexPattern-dimension-duration-end"]')
+          .find(EuiComboBox)
+          .prop('onChange')!([{ label: 'Hours', value: 'asHours' }]);
+      });
+      component = component.update();
+
+      expect(
+        component
+          .find('[data-test-subj="indexPattern-dimension-formatDecimals"]')
+          .last()
+          .prop('disabled')
+      ).toBe(false);
+      expect(
+        component
+          .find('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')
+          .first()
+          .prop('disabled')
+      ).toBe(false);
+    });
   });
 });
