@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ROLES } from '../../../common/test';
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
-import { getNewRule } from '../../objects/rule';
-import { PAGE_TITLE } from '../../screens/common/page';
+import { ROLES } from '../../../../common/test';
+import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../../urls/navigation';
+import { getNewRule } from '../../../objects/rule';
+import { PAGE_TITLE } from '../../../screens/common/page';
 
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
-import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
+import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { createRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
+import { getCallOut, waitForCallOutToBeShown } from '../../../tasks/common/callouts';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);

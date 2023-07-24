@@ -6,8 +6,8 @@
  */
 
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
-import type { Rule } from '../../../public/detection_engine/rule_management/logic/types';
-import { createRuleAssetSavedObject } from '../../helpers/rules';
+import type { Rule } from '../../../../public/detection_engine/rule_management/logic/types';
+import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   GO_BACK_TO_RULES_TABLE_BUTTON,
   INSTALL_ALL_RULES_BUTTON,
@@ -17,21 +17,21 @@ import {
   RULES_UPDATES_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
-} from '../../screens/alerts_detection_rules';
-import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
+} from '../../../screens/alerts_detection_rules';
+import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import {
   getRuleAssets,
   createAndInstallMockedPrebuiltRules,
-} from '../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+} from '../../../tasks/api_calls/prebuilt_rules';
+import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
+import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
 import {
   addElasticRulesButtonClick,
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
-} from '../../tasks/prebuilt_rules';
+} from '../../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   beforeEach(() => {

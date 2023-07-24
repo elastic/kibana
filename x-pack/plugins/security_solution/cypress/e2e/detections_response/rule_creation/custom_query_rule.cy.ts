@@ -49,7 +49,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Rule creation, custom query rule', () => {
+describe('Custom query rule', () => {
   const expectedNumberOfRules = 1;
 
   before(() => {

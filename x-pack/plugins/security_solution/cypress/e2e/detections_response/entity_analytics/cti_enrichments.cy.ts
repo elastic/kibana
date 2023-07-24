@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
-import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../objects/rule';
+import { cleanKibana } from '../../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -18,15 +18,15 @@ import {
   INDICATOR_MATCH_ENRICHMENT_SECTION,
   INVESTIGATION_TIME_ENRICHMENT_SECTION,
   THREAT_DETAILS_ACCORDION,
-} from '../../screens/alerts_details';
-import { TIMELINE_FIELD } from '../../screens/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
-import { createRule } from '../../tasks/api_calls/rules';
-import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
+} from '../../../screens/alerts_details';
+import { TIMELINE_FIELD } from '../../../screens/rule_details';
+import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../../tasks/alerts';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { openJsonView, openThreatIndicatorDetails } from '../../../tasks/alerts_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { addsFieldsToTimeline } from '../../tasks/rule_details';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { addsFieldsToTimeline } from '../../../tasks/rule_details';
 
 describe('CTI Enrichment', () => {
   before(() => {

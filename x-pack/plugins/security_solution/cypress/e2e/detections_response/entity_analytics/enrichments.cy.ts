@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
+import { getNewRule } from '../../../objects/rule';
 import {
   HOST_RISK_HEADER_COLIMN,
   USER_RISK_HEADER_COLIMN,
@@ -13,22 +13,22 @@ import {
   USER_RISK_COLUMN,
   ACTION_COLUMN,
   ALERTS_COUNT,
-} from '../../screens/alerts';
-import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+} from '../../../screens/alerts';
+import { ENRICHED_DATA_ROW } from '../../../screens/alerts_details';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
   expandFirstAlert,
   scrollAlertTableColumnIntoView,
   closeAlertFlyout,
-} from '../../tasks/alerts';
+} from '../../../tasks/alerts';
 
-import { login, visit } from '../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Enrichment', () => {
   before(() => {

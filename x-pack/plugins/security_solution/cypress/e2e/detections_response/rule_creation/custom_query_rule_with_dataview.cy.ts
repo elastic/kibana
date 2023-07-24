@@ -29,7 +29,7 @@ import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visit } from '../../../tasks/login';
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Rule creation, custom query rule using data view', () => {
+describe('Custom query rule using data view', () => {
   const rule = getDataViewRule();
   const expectedNumberOfRules = 1;
 

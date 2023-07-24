@@ -42,7 +42,7 @@ const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
 const savedQueryFilterKey = 'testAgent.value';
 
-describe('Rule creation, saved_query rule', () => {
+describe('Custom query rule with saved_query', () => {
   before(() => {
     cleanKibana();
   });
