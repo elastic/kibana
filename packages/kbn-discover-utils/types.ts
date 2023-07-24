@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { DataTableRecord, EsHitRecord } from './src/types';
+export type {
+  DataTableRecord,
+  EsHitRecord,
+  IgnoredReason,
+  ShouldShowFieldInTableHandler,
+} from './src/types';

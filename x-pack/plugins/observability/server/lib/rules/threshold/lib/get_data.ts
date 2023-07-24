@@ -16,10 +16,10 @@ import {
 } from '../../../../../common/threshold_rule/types';
 
 import {
+  CONTAINER_ID,
   AdditionalContext,
   doFieldsExist,
   KUBERNETES_POD_UID,
-  termsAggField,
   UNGROUPED_FACTORY_KEY,
 } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
@@ -255,7 +255,7 @@ export const getData = async (
   };
 
   const fieldsExisted = groupBy?.includes(KUBERNETES_POD_UID)
-    ? await doFieldsExist(esClient, [termsAggField[KUBERNETES_POD_UID]], index)
+    ? await doFieldsExist(esClient, [CONTAINER_ID], index)
     : null;
 
   const request = {
