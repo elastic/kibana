@@ -49,10 +49,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: PreviewPanelKey,
     component: (props) => (
-      <PreviewPanelProvider
-        {...(props as PreviewPanelProps).params}
-        {...(props as PreviewPanelProps).state}
-      >
+      <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
         <PreviewPanel path={props.path as PreviewPanelProps['path']} />
       </PreviewPanelProvider>
     ),

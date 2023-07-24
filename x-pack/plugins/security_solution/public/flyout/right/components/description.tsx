@@ -55,11 +55,12 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
     openPreviewPanel({
       id: PreviewPanelKey,
       path: PreviewPanelRulePreview,
-      state: { title: PREVIEW_RULE_DETAILS, ruleId },
       params: {
         id: eventId,
         indexName,
         scopeId,
+        banner: PREVIEW_RULE_DETAILS,
+        ruleId,
       },
     });
   }, [eventId, openPreviewPanel, indexName, scopeId, ruleId]);

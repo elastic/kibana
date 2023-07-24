@@ -7,24 +7,22 @@
 
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { FlyoutPanel } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { panels } from './panels';
 
 export type PreviewPanelPaths = 'rule-preview';
 export const PreviewPanelKey: PreviewPanelProps['key'] = 'document-details-preview';
 
-export interface PreviewPanelProps extends FlyoutPanel {
+export interface PreviewPanelProps extends FlyoutPanelProps {
   key: 'document-details-preview';
   path?: PreviewPanelPaths[];
-  state?: {
-    title?: string;
-    ruleId?: string;
-  };
   params?: {
     id: string;
     indexName: string;
     scopeId: string;
+    banner?: string;
+    ruleId?: string;
   };
 }
 

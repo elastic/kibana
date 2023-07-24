@@ -42,7 +42,7 @@ interface PreviewSectionProps {
   /**
    * Preview banner text to be shown
    */
-  title?: string;
+  banner?: string;
 }
 
 /**
@@ -53,7 +53,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
   showBackButton,
   width,
-  title,
+  banner,
 }: PreviewSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutContext();
@@ -118,7 +118,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       >
         <EuiSplitPanel.Inner grow={false} color="warning" paddingSize="none">
           <EuiText textAlign="center" color="warning" size="s">
-            {title ?? DEFAULT_PREVIEW_TITLE_TEXT}
+            {banner ?? DEFAULT_PREVIEW_TITLE_TEXT}
           </EuiText>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>

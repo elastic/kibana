@@ -119,7 +119,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
           component={previewSection.component({ ...(mostRecentPreview as FlyoutPanelProps) })}
           showBackButton={showBackButton}
           width={previewSectionWidth}
-          title={previewTitle}
+          banner={previewTitle}
         />
       ) : null}
     </EuiFlyout>
