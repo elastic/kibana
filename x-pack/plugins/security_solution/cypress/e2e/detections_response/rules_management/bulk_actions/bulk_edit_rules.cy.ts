@@ -11,7 +11,7 @@ import {
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   MODAL_ERROR_BODY,
-} from '../../screens/alerts_detection_rules';
+} from '../../../../screens/alerts_detection_rules';
 
 import {
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
@@ -20,11 +20,11 @@ import {
   TAGS_RULE_BULK_MENU_ITEM,
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
-} from '../../screens/rules_bulk_edit';
+} from '../../../../screens/rules_bulk_actions';
 
-import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
+import { TIMELINE_TEMPLATE_DETAILS } from '../../../../screens/rule_details';
 
-import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
+import { EUI_FILTER_SELECT_ITEM } from '../../../../screens/common/controls';
 
 import {
   waitForRulesTableToBeLoaded,
@@ -38,7 +38,7 @@ import {
   clickErrorToastBtn,
   unselectRuleByName,
   cancelConfirmationModal,
-} from '../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 
 import {
   typeIndexPatterns,
@@ -69,15 +69,15 @@ import {
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
   assertDefaultValuesAreAppliedToScheduleFields,
-} from '../../tasks/rules_bulk_edit';
+} from '../../../../tasks/rules_bulk_actions';
 
-import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { hasIndexPatterns, getDetails } from '../../../../tasks/rule_details';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { createRule } from '../../tasks/api_calls/rules';
-import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { loadPrepackagedTimelineTemplates } from '../../../../tasks/api_calls/timelines';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -86,13 +86,13 @@ import {
   getNewThresholdRule,
   getMachineLearningRule,
   getNewTermsRule,
-} from '../../objects/rule';
+} from '../../../../objects/rule';
 
 import {
   getAvailablePrebuiltRulesCount,
   excessivelyInstallAllPrebuiltRules,
-} from '../../tasks/api_calls/prebuilt_rules';
-import { setRowsPerPageTo } from '../../tasks/table_pagination';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
