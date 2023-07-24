@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { DiscoverLogExplorerServerPlugin } from './plugin';
 
-export const metadata = {
-  id: 'csv_searchsource',
-  name: CSV_JOB_TYPE,
-};
+export { config } from './config';
+
+export const plugin = () => new DiscoverLogExplorerServerPlugin();

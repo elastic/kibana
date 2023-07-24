@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const metadata = {
-  id: 'png',
-  name: 'PNG',
-};
+import { Plugin } from '@kbn/core/server';
+
+export class DiscoverLogExplorerServerPlugin implements Plugin {
+  setup() {}
+
+  start() {}
+}

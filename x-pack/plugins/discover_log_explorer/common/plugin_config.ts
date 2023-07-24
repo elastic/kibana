@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const metadata = {
-  id: 'printablePdf',
-  name: 'PDF',
-};
+export interface DiscoverLogExplorerConfig {
+  featureFlags: {
+    deepLinkVisible: boolean;
+  };
+}

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { PNG_REPORT_TYPE_V2 } from '../../../common/constants';
+import { ReportingStart } from '../types';
 
-export const metadata = {
-  id: PNG_REPORT_TYPE_V2,
-  name: 'PNG',
+export const reportingMock = {
+  createStart: (): ReportingStart => ({
+    usesUiCapabilities: () => false,
+    registerExportTypes: () => {},
+    getSpaceId: jest.fn(),
+    getScreenshots: jest.fn(),
+  }),
 };
