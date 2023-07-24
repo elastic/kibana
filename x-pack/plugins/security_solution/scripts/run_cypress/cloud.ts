@@ -23,12 +23,12 @@ export const cli = () => {
         batchSize: 1,
         projectId: (argv.projectId as string) ?? 'security_solution',
         recordKey: 'xxx',
-        cloudServiceUrl: 'https://cypress-director.herokuapp.com',
+        cloudServiceUrl: 'https://cypress-dasbhoard-director-qup6nhupua-uc.a.run.app',
         configFile: path.resolve(argv.configFile as string),
         parallel: true,
         record: true,
         browser: 'chrome',
-        // headed: true,
+        headed: true,
         ciBuildId:
           process.env.BUILDKITE_STEP_ID ??
           `security_solution-${Math.random().toString(36).substring(2)}`,

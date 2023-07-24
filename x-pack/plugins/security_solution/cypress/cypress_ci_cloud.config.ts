@@ -16,6 +16,10 @@ import { isSkipped } from '../scripts/run_cypress/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: path.resolve(__dirname, './reporter_config.json'),
+  },
   defaultCommandTimeout: 150000,
   execTimeout: 150000,
   pageLoadTimeout: 150000,
@@ -25,7 +29,7 @@ export default defineCypressConfig({
   },
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
@@ -33,16 +37,13 @@ export default defineCypressConfig({
     baseUrl: 'http://google.com',
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
+    // specPattern: './cypress/e2e/urls/*.cy.ts',
     specPattern: ['./cypress/e2e', '!./cypress/e2e/investigations', '!./cypress/e2e/explore'],
     supportFile: './cypress/support/e2e_cloud.js',
     env: {
       FORCE_COLOR: '1',
-      CYPRESS_BASE_URL: 'http://elastic:changeme@localhost:5622',
-      CYPRESS_ELASTICSEARCH_URL: 'http://system_indices_superuser:changeme@localhost:9222',
-      CYPRESS_ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-      CYPRESS_ELASTICSEARCH_PASSWORD: 'changeme',
       baseUrl: 'http://elastic:changeme@localhost:5622',
-      BASE_URL: 'http://elastic:changeme@localhost:5622',
+      BASE_URL: 'http://localhost:5622',
       ELASTICSEARCH_URL: 'http://system_indices_superuser:changeme@localhost:9222',
       ELASTICSEARCH_USERNAME: 'system_indices_superuser',
       ELASTICSEARCH_PASSWORD: 'changeme',
@@ -105,6 +106,19 @@ export default defineCypressConfig({
           });
           processes = {};
         });
+      });
+
+      on('after:spec', (spec, results) => {
+        if (results && results.video) {
+          // Do we have failures for any retry attempts?
+          const failures = results.tests.some((test) =>
+            test.attempts.some((attempt) => attempt.state === 'failed')
+          );
+          if (!failures) {
+            // delete the video if the spec passed and no tests retried
+            fs.unlinkSync(results.video);
+          }
+        }
       });
 
       return cloudPlugin(on, config);

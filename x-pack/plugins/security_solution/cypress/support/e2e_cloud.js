@@ -29,7 +29,7 @@ Cypress.on('uncaught:exception', () => {
 });
 
 before(() => {
-  Cypress.config('baseUrl', 'http://elastic:changeme@localhost:5622');
-  // cy.request('GET', 'http://localhost:5622', { timeout: 60000 }).as('waitForKibana');
-  // cy.get('@waitForKibana').should('have.property', 'status', 200);
+  Cypress.config('baseUrl', Cypress.env('BASE_URL'));
+  cy.visit('/');
+  cy.location('origin').should('eq', Cypress.env('BASE_URL'));
 });
