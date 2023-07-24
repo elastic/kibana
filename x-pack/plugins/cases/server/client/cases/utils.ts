@@ -10,21 +10,23 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type {
+  ActionConnector,
+  ConnectorMappingSource,
+  ConnectorMappings,
+  ConnectorMappingTarget,
+} from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
-  ActionConnector,
   CaseFullExternalService,
   Case,
   Comment,
   User,
   CaseAttributes,
   CaseAssignees,
-  CaseField,
-  ThirdPartyField,
-  ConnectorMappings,
 } from '../../../common/api';
 import { CommentType, CaseStatuses } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -211,13 +213,13 @@ export const createIncident = async ({
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
-  caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
+  caseFields: Record<Exclude<ConnectorMappingSource, 'comments' | 'tags'>, unknown>,
   mapping: ConnectorMappings
-): Record<ThirdPartyField, unknown> => {
-  const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
+): Record<ConnectorMappingTarget, unknown> => {
+  const mappedCaseFields: Record<ConnectorMappingTarget, unknown> = {};
 
   for (const caseFieldKey of Object.keys(caseFields) as Array<
-    Exclude<CaseField, 'comments' | 'tags'>
+    Exclude<ConnectorMappingSource, 'comments' | 'tags'>
   >) {
     const mapDefinition = mapping.find(
       (mappingEntry) => mappingEntry.source === caseFieldKey && mappingEntry.target !== 'not_mapped'
