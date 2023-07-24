@@ -118,8 +118,8 @@ export const replaceVariables = (
   variables: DevToolsVariable[]
 ) => {
   const urlRegex = /\${(\w+)}/g;
-  const bodyRegexSingleQuote = /(?<![\\"])"\${(\w+)}"(?!")/g;
-  const bodyRegexTripleQuotes = /(?<![\\"])"""\${(\w+)}"""(?!")/g;
+  const bodyRegexSingleQuote = /([\\"]?)"\${(\w+)}"(?!")/g;
+  const bodyRegexTripleQuotes = /([\\"]?)"""\${(\w+)}"""(?!")/g;
 
   return requests.map((req) => {
     if (urlRegex.test(req.url)) {
@@ -132,10 +132,10 @@ export const replaceVariables = (
 
     if (req.data && req.data.length) {
       if (bodyRegexSingleQuote.test(req.data[0])) {
-        const data = req.data[0].replaceAll(bodyRegexSingleQuote, (match, key) => {
+        const data = req.data[0].replaceAll(bodyRegexSingleQuote, (match, lookbehind, key) => {
           const variable = variables.find(({ name }) => name === key);
 
-          if (variable) {
+          if (!lookbehind && variable) {
             // All values must be stringified to send a successful request to ES.
             const { value } = variable;
 
@@ -171,10 +171,12 @@ export const replaceVariables = (
       }
 
       if (bodyRegexTripleQuotes.test(req.data[0])) {
-        const data = req.data[0].replaceAll(bodyRegexTripleQuotes, (match, key) => {
+        const data = req.data[0].replaceAll(bodyRegexTripleQuotes, (match, lookbehind, key) => {
           const variable = variables.find(({ name }) => name === key);
 
-          return variable?.value ? '""' + JSON.stringify(variable?.value) + '""' : match;
+          return !lookbehind && variable?.value
+            ? '""' + JSON.stringify(variable?.value) + '""'
+            : match;
         });
         req.data = [data];
       }
