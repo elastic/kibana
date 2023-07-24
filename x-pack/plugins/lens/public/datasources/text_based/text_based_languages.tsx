@@ -546,7 +546,7 @@ export function getTextBasedDatasource({
           const allColumns = currentLayer.allColumns.filter((c) => c.columnId !== target.columnId);
           allColumns.push(newColumn);
 
-          props.setState({
+          return {
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -556,11 +556,10 @@ export function getTextBasedDatasource({
                 allColumns,
               },
             },
-          });
+          };
         });
-        return true;
       }
-      return false;
+      return undefined;
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {

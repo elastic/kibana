@@ -133,14 +133,6 @@ describe('utils', () => {
       expect(convertSortField('createdAt')).toBe('created_at');
     });
 
-    it('transforms created_at correctly', () => {
-      expect(convertSortField('created_at')).toBe('created_at');
-    });
-
-    it('transforms updated_at correctly', () => {
-      expect(convertSortField('updated_at')).toBe('updated_at');
-    });
-
     it('transforms updatedAt correctly', () => {
       expect(convertSortField('updatedAt')).toBe('updated_at');
     });
@@ -149,16 +141,12 @@ describe('utils', () => {
       expect(convertSortField('closedAt')).toBe('closed_at');
     });
 
-    it('transforms closed_at correctly', () => {
-      expect(convertSortField('closed_at')).toBe('closed_at');
-    });
-
     it('transforms title correctly', () => {
       expect(convertSortField('title')).toBe('title.keyword');
     });
 
     it('transforms default correctly', () => {
-      expect(convertSortField('not-exist')).toBe('created_at');
+      expect(convertSortField(undefined)).toBe('created_at');
     });
   });
 
