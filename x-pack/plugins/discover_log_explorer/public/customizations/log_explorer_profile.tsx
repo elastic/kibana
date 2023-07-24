@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { dynamic } from '../utils/dynamic';
@@ -22,10 +22,28 @@ interface CreateLogExplorerProfileCustomizationsDeps {
 export const createLogExplorerProfileCustomizations =
   ({ core, data }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
-    const { DatasetsService } = await import('../services/datasets');
+    // Lazy load dependencies
+    const datasetServiceModuleLoadable = import('../services/datasets');
+    const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
+
+    const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
+      await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
+
     const datasetsService = new DatasetsService().start({
       http: core.http,
     });
+
+    const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
+      stateContainer,
+      toasts: core.notifications.toasts,
+    });
+
+    //
+    /**
+     * Wait for the machine to be fully initialized to set the restored selection
+     * create the DataView and set it in the stateContainer from Discover
+     */
+    await waitForState(logExplorerProfileStateService, 'initialized');
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
@@ -35,7 +53,7 @@ export const createLogExplorerProfileCustomizations =
       CustomDataViewPicker: () => (
         <LazyCustomDatasetSelector
           datasetsClient={datasetsService.client}
-          stateContainer={stateContainer}
+          logExplorerProfileStateService={logExplorerProfileStateService}
         />
       ),
       PrependFilterBar: () => (
