@@ -9,10 +9,12 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { CaseStatuses } from '@kbn/cases-components';
 import { Case, AttachmentType } from '@kbn/cases-plugin/common';
 import { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
-import { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import {
+  ExternalReferenceSOAttachmentPayload,
+  CaseStatuses,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,

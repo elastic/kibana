@@ -11,10 +11,11 @@ import { useTimelineEventsDetails } from '../../../timelines/containers/details'
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useCorrelations, type UseCorrelationsResult } from '../../shared/hooks/use_correlations';
 import { CorrelationsDetails } from './correlations_details';
-import { type GetRelatedCasesByAlertResponse, CaseStatuses } from '@kbn/cases-plugin/common';
+import { type GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
 import type { SelectedDataView } from '../../../common/store/sourcerer/model';
 import { TestProviders } from '../../../common/mock';
 import { LeftPanelContext } from '../context';
+import { CaseStatuses } from '@kbn/cases-components';
 
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/containers/sourcerer');

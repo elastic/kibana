@@ -13,7 +13,8 @@ import {
   CorrelationsCasesTable,
   type CorrelationsCasesTableProps,
 } from './correlations_cases_table';
-import { CaseStatuses, type RelatedCase } from '@kbn/cases-plugin/common';
+import type { RelatedCase } from '@kbn/cases-plugin/common';
+import { CaseStatuses } from '@kbn/cases-components';
 
 jest.mock('../../../common/components/links', () => ({
   CaseDetailsLink: jest

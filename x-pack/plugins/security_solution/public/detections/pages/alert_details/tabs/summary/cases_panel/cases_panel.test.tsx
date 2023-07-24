@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CasesPanel, CASES_PANEL_CASES_COUNT_MAX } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import {
@@ -18,6 +17,7 @@ import {
 import { ERROR_LOADING_CASES, LOADING_CASES } from '../translation';
 import { useGetRelatedCasesByEvent } from '../../../../../../common/containers/cases/use_get_related_cases_by_event';
 import { useGetUserCasesPermissions } from '../../../../../../common/lib/kibana';
+import { CaseStatuses } from '@kbn/cases-components';
 
 jest.mock('../../../../../../common/containers/cases/use_get_related_cases_by_event');
 jest.mock('../../../../../../common/lib/kibana');
