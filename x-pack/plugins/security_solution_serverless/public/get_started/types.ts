@@ -28,7 +28,7 @@ export interface Badge {
   id: string;
 }
 
-export type StepId = IntroductionSteps;
+export type StepId = IntroductionSteps | ConfigureSteps | ExploreSteps;
 
 export interface Step {
   badges: Badge[];
@@ -60,14 +60,31 @@ export enum SectionId {
 }
 
 export enum GetSetUpCardId {
-  activateAndCreateRules = 'activateAndCreateRules',
-  bringInYourData = 'bringInYourData',
+  configure = 'configure',
   introduction = 'introduction',
-  protectYourEnvironmentInRealtime = 'protectYourEnvironmentInRealtime',
+  explore = 'explore',
+}
+
+export enum BadgeId {
+  analytics = 'analytics',
+  cloud = 'cloud',
+  edr = 'edr',
 }
 
 export enum IntroductionSteps {
-  watchOverviewVideo = 'watchOverviewVideo',
+  getToKnowElasticSecurity = 'getToKnowElasticSecurity',
+}
+
+export enum ConfigureSteps {
+  learnAbout = 'learnAbout',
+  deployElasticAgent = 'deployElasticAgent',
+  connectToDataSources = 'connectToDataSources',
+  enablePrebuiltRules = 'enablePrebuiltRules',
+}
+
+export enum ExploreSteps {
+  viewAlerts = 'viewAlerts',
+  analyzeData = 'analyzeData',
 }
 
 export enum GetMoreFromElasticSecurityCardId {

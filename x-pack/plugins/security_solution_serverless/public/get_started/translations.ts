@@ -91,14 +91,14 @@ export const GET_SET_UP_TITLE = i18n.translate(
 export const INTRODUCTION_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.title',
   {
-    defaultMessage: 'introduction',
+    defaultMessage: 'Introduction',
   }
 );
 
-export const WATCH_OVERVIEW_VIDEO_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.watchOverviewVideo.title',
+export const INTRODUCTION_STEP = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step',
   {
-    defaultMessage: 'Watch the overview video',
+    defaultMessage: 'Get to know Elastic Security',
   }
 );
 
@@ -151,17 +151,59 @@ export const WATCH_OVERVIEW_VIDEO_HEADER = i18n.translate(
   }
 );
 
-export const BRING_IN_YOUR_DATA_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.bringInYourData.title',
+export const CONFIGURE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.title',
   {
-    defaultMessage: 'Bring in your data',
+    defaultMessage: 'Configure',
   }
 );
 
-export const ACTIVATE_AND_CREATE_RULES_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.activateAndCreateRules.title',
+export const CONFIGURE_STEP1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1',
   {
-    defaultMessage: 'Activate and create rules',
+    defaultMessage: 'Learn about agent + policy',
+  }
+);
+
+export const CONFIGURE_STEP2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2',
+  {
+    defaultMessage: 'Deploy Elastic Agent to protect your endpoints',
+  }
+);
+
+export const CONFIGURE_STEP3 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3',
+  {
+    defaultMessage: 'Connect to existing data sources',
+  }
+);
+
+export const CONFIGURE_STEP4 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4',
+  {
+    defaultMessage: 'Enable pre-built rules',
+  }
+);
+
+export const EXPLORE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.title',
+  {
+    defaultMessage: 'Explore',
+  }
+);
+
+export const EXPLORE_STEP1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1',
+  {
+    defaultMessage: 'View alerts',
+  }
+);
+
+export const EXPLORE_STEP2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2',
+  {
+    defaultMessage: 'Analyze data dashboards',
   }
 );
 
@@ -218,14 +260,14 @@ export const CLOUD_SWITCH_LABEL = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.switch.cloud.label',
 
   {
-    defaultMessage: 'Cloud',
+    defaultMessage: 'Cloud Security',
   }
 );
 
 export const ENDPOINT_SWITCH_LABEL = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.switch.endpoint.label',
   {
-    defaultMessage: 'Endpoint',
+    defaultMessage: 'Endpoint Security',
   }
 );
 

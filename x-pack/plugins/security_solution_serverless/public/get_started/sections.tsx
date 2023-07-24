@@ -11,16 +11,33 @@ import {
   GetSetUpCardId,
   IntroductionSteps,
   type Section,
+  ConfigureSteps,
+  BadgeId,
+  ExploreSteps,
 } from './types';
 import * as i18n from './translations';
 import respond from './images/respond.svg';
-import protect from './images/protect.svg';
-import { ProductLine } from '../../common/product';
+import explore from './images/explore.svg';
+
+const analyticsBadge = {
+  id: BadgeId.analytics,
+  name: i18n.PRODUCT_BADGE_ANALYTICS,
+};
+
+const cloudBadge = {
+  id: BadgeId.cloud,
+  name: i18n.PRODUCT_BADGE_CLOUD,
+};
+
+const edrBadge = {
+  id: BadgeId.edr,
+  name: i18n.PRODUCT_BADGE_EDR,
+};
 
 export const introductionSteps = [
   {
-    id: IntroductionSteps.watchOverviewVideo,
-    title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
+    id: IntroductionSteps.getToKnowElasticSecurity,
+    title: i18n.INTRODUCTION_STEP,
     description: [
       i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
       i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
@@ -41,11 +58,43 @@ export const introductionSteps = [
       />
     ),
     timeInMinutes: 3,
-    badges: [
-      { id: 'analytics', name: i18n.PRODUCT_BADGE_ANALYTICS },
-      { id: 'cloud', name: i18n.PRODUCT_BADGE_CLOUD },
-      { id: 'edr', name: i18n.PRODUCT_BADGE_EDR },
-    ],
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+];
+
+const configureSteps = [
+  {
+    id: ConfigureSteps.learnAbout,
+    title: i18n.CONFIGURE_STEP1,
+    badges: [cloudBadge, edrBadge],
+  },
+  {
+    id: ConfigureSteps.deployElasticAgent,
+    title: i18n.CONFIGURE_STEP2,
+    badges: [cloudBadge, edrBadge],
+  },
+  {
+    id: ConfigureSteps.connectToDataSources,
+    title: i18n.CONFIGURE_STEP3,
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: ConfigureSteps.enablePrebuiltRules,
+    title: i18n.CONFIGURE_STEP4,
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+];
+
+const exploreSteps = [
+  {
+    id: ExploreSteps.viewAlerts,
+    title: i18n.EXPLORE_STEP1,
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: ExploreSteps.analyzeData,
+    title: i18n.EXPLORE_STEP2,
+    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
 ];
 
@@ -67,19 +116,15 @@ export const sections: Section[] = [
       },
       {
         icon: { type: 'agentApp', size: 'xl' },
-        title: i18n.BRING_IN_YOUR_DATA_TITLE,
-        id: GetSetUpCardId.bringInYourData,
+        title: i18n.CONFIGURE_TITLE,
+        id: GetSetUpCardId.configure,
+        steps: configureSteps,
       },
       {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
-        id: GetSetUpCardId.activateAndCreateRules,
-      },
-      {
-        icon: { type: protect, size: 'xl' },
-        title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-        productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+        icon: { type: explore, size: 'xl' },
+        title: i18n.EXPLORE_TITLE,
+        id: GetSetUpCardId.explore,
+        steps: exploreSteps,
       },
     ],
   },
