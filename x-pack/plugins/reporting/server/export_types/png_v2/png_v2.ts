@@ -35,10 +35,6 @@ import { decryptJobHeaders, ExportType, generatePngObservable } from '../common'
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 
-/*
- * @TODO move to be within @kbn/reporting-export-types
- */
-
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
   name = 'PNG';

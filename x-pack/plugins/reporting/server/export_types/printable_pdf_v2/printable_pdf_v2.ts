@@ -27,9 +27,6 @@ import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { generatePdfObservable } from './lib/generate_pdf';
 
-/**
- * @TODO move to be within @kbn-reporting-export-types
- */
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
