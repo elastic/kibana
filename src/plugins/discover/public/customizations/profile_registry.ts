@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppDeepLink, AppUpdater } from '@kbn/core/public';
+import type { AppDeepLink, AppUpdater } from '@kbn/core/public';
 import { map, Observable, BehaviorSubject } from 'rxjs';
 import type { RegisterCustomizationProfile, DiscoverProfile, DiscoverProfileId } from './types';
 
