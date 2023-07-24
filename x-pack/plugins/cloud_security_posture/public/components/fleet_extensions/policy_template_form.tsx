@@ -111,7 +111,7 @@ const getAwsAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
 ): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
 
-const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview24';
+const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0';
 
 const AwsAccountTypeSelect = ({
   input,
@@ -124,7 +124,7 @@ const AwsAccountTypeSelect = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
 }) => {
-  // This will disable the aws org option for any version LOWER than 1.5.0-preview24. newer previews or no preview suffix at all will not be disabled
+  // This will disable the aws org option for any version LOWER than 1.5.0
   const isValidSemantic = semverValid(packageInfo.version);
   const isAwsOrgDisabled = isValidSemantic
     ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
