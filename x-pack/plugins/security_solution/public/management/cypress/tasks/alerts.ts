@@ -15,7 +15,6 @@ import {
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
 import { request } from './common';
 import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
-import { KQL_INPUT, REFRESH_BUTTON } from '../../../../cypress/screens/security_header';
 
 const ES_URL = Cypress.env('ELASTICSEARCH_URL');
 
@@ -172,6 +171,8 @@ export const getEndpointDetectionAlertsQueryForAgentId = (endpointAgentId: strin
 };
 
 export const changeAlertsFilter = (text: string) => {
-  cy.get(KQL_INPUT).click().type(text);
-  cy.get(REFRESH_BUTTON).click();
+  cy.getByTestSubj('filters-global-container').within(() => {
+    cy.getByTestSubj('queryInput').click().type(text);
+    cy.getByTestSubj('querySubmitButton').click();
+  });
 };
