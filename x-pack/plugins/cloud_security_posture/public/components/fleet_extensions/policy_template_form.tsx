@@ -6,6 +6,7 @@
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -124,8 +125,10 @@ const AwsAccountTypeSelect = ({
   packageInfo: PackageInfo;
 }) => {
   // This will disable any version LOWER than 1.5.0-preview23. newer previews or no preview suffix at all will not be disabled
-  const isAwsOrgDisabled =
-    semverCompare(packageInfo.version || '', AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0;
+  const isValidSemantic = semverValid(packageInfo.version);
+  const isAwsOrgDisabled = isValidSemantic
+    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
+    : true;
 
   const awsAccountTypeOptions = getAwsAccountTypeOptions(isAwsOrgDisabled);
 
