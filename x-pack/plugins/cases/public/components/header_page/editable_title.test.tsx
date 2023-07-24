@@ -42,9 +42,9 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').prop('disabled')).toBe(
-      true
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').prop('disabled')
+    ).toBe(true);
   });
 
   it('shows the edit title input field', () => {
@@ -54,7 +54,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     expect(wrapper.find('[data-test-subj="euiInlineEditModeInput"]').first().exists()).toBe(true);
@@ -67,7 +67,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     expect(
@@ -82,7 +82,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     expect(
@@ -97,13 +97,13 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="euiInlineEditModeCancelButton"]').simulate('click');
 
-    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
-      true
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(true);
   });
 
   it('should change the title', () => {
@@ -115,7 +115,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -139,7 +139,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -151,7 +151,9 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="euiInlineEditModeCancelButton"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').text()).toEqual(title);
+    expect(wrapper.find('button[data-test-subj="editable-title-header-value"]').text()).toEqual(
+      title
+    );
   });
 
   it('submits the title', () => {
@@ -163,7 +165,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -176,9 +178,9 @@ describe('EditableTitle', () => {
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
-    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
-      true
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(true);
   });
 
   it('does not submit the title when the length is longer than 160 characters', () => {
@@ -190,7 +192,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -204,9 +206,9 @@ describe('EditableTitle', () => {
     );
 
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
-      false
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(false);
   });
 
   it('does not submit the title is empty', () => {
@@ -216,7 +218,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -229,9 +231,9 @@ describe('EditableTitle', () => {
     expect(wrapper.find('.euiFormErrorText').text()).toBe('A name is required.');
 
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').first().exists()).toBe(
-      false
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(false);
   });
 
   it('does not show an error after a previous edit error was displayed', () => {
@@ -244,7 +246,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     // simualte a long title
@@ -270,7 +272,7 @@ describe('EditableTitle', () => {
     wrapper.update();
 
     // edit again
-    wrapper.find('button[data-test-subj="euiInlineReadModeButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     // no error should appear

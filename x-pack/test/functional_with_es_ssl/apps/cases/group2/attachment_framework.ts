@@ -412,7 +412,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
 
-        const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);
 
         await testSubjects.existOrFail('comment-persistableState-.lens');

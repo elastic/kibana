@@ -61,7 +61,10 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
         <EuiFlexItem grow={true} css={releasePhase && { overflow: 'hidden' }}>
           <EuiInlineEditTitle
             defaultValue={title}
-            readModeProps={{ onClick: () => setEditMode(true) }}
+            readModeProps={{
+              onClick: () => setEditMode(true),
+              'data-test-subj': 'editable-title-header-value',
+            }}
             editModeProps={{
               formRowProps: { error: errors },
               cancelButtonProps: {
