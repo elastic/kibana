@@ -8,8 +8,7 @@
 import { Headers } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
+import { catchError, map, mergeMap, takeUntil, tap, of, fromEventPattern, Observable, firstValueFrom, throwError } from 'rxjs';
 import { Writable } from 'stream';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -27,9 +26,6 @@ import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { generatePdfObservable } from './lib/generate_pdf';
 
-/**
- * @TODO move to be within @kbn-reporting-export-types
- */
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
@@ -46,8 +42,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('pdf-export-v2');
+    this.logger = this.logger.get('pdf-export-v2');
   }
 
   /**
@@ -83,7 +78,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     let apmGeneratePdf: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
-    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
+    const process$: Observable<TaskRunResult> = of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers: Headers) => {
         const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
@@ -147,13 +142,13 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       })),
       catchError((err) => {
         jobLogger.error(err);
-        return Rx.throwError(() => err);
+        return throwError(() => err);
       })
     );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
+    const stop$ = fromEventPattern(cancellationToken.on);
 
     apmTrans?.end();
-    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
+    return firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

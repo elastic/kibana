@@ -38,13 +38,14 @@ const getMockFetchClients = (resp: any) => {
 };
 
 const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+let exportTypesRegistry: ExportTypesRegistry;
 
 describe('license checks', () => {
   describe('with a basic license', () => {
     let usageStats: any;
     beforeAll(async () => {
       const mockReporting = await createMockReportingCore(createMockConfigSchema());
-      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+      exportTypesRegistry = mockReporting.getExportTypesRegistry();
 
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
