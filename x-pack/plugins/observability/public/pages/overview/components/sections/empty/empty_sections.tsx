@@ -87,7 +87,7 @@ const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.apm.link', {
         defaultMessage: 'Install Agent',
       }),
-      href: http.basePath.prepend('/app/home#/tutorial/apm'),
+      href: http.basePath.prepend('/app/apm/tutorial'),
     },
     {
       id: 'infra_metrics',
@@ -130,7 +130,7 @@ const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.ux.link', {
         defaultMessage: 'Install RUM Agent',
       }),
-      href: http.basePath.prepend('/app/home#/tutorial/apm'),
+      href: http.basePath.prepend('/app/apm/tutorial'),
     },
     {
       id: 'alert',
