@@ -246,7 +246,7 @@ export const cli = () => {
                         // The `serverless.security.yml` file by default includes two product types as of this change.
                         // Because it's an array, we need to ensure that existing values are "removed" and the ones
                         // defined here are added. To do that, we duplicate the `productTypes` passed so that all array
-                        // elements in that ymal file are updated. The Security serverless plugin has code in place to
+                        // elements in that YAML file are updated. The Security serverless plugin has code in place to
                         // dedupe.
                         ...configFromTestFile.productTypes,
                       ])}`
