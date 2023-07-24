@@ -41,7 +41,6 @@ export const transformGeoProperty: SavedObjectModelTransformationFn<
     document: {
       ...privateLocationDoc,
       attributes: {
-        what: 1,
         locations: locations.map((location) => ({
           ...location,
           geo: {
