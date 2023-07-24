@@ -1608,7 +1608,6 @@ describe('Execution Handler', () => {
           actions: [
             {
               id: '1',
-              group: 'default',
               actionTypeId: '.test-system-action',
               params: actionsParams,
             },
@@ -1632,13 +1631,13 @@ describe('Execution Handler', () => {
       const res = await executionHandler.run(generateAlert({ id: 1 }));
 
       /**
-       * Verifies that notifyWhen is set to onActiveAlert
+       * Verifies that system actions are not throttled
        */
       expect(res).toEqual({ throttledSummaryActions: {} });
 
       /**
-       * Verifies that summary is set to true
-       * and without start and end dates
+       * Verifies that system actions
+       * work only with summarized alerts
        */
       expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
         executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

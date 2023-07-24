@@ -175,29 +175,6 @@ export class ExecutionHandler<
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
     this.maintenanceWindowIds = maintenanceWindowIds ?? [];
-
-    /**
-     * Update rule actions to contain
-     * the system actions settings
-     */
-    this.rule.actions = this.getRuleActionsWithSystemActionsConfigured(rule.actions);
-  }
-
-  private getRuleActionsWithSystemActionsConfigured(actions: SanitizedRule<Params>['actions']) {
-    return actions.map((action) => {
-      if (!this.actionsClient.isSystemAction(action.id)) {
-        return action;
-      }
-
-      return Object.assign(action, {
-        group: 'default',
-        frequency: {
-          summary: true,
-          notifyWhen: 'onActiveAlert' as const,
-          throttle: null,
-        },
-      });
-    });
   }
 
   public async run(
@@ -278,7 +255,7 @@ export class ExecutionHandler<
       ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-      const isSystemAction = this.actionsClient.isSystemAction(action.id);
+      const isSystemAction = this.isSystemAction(action.id);
 
       if (isSummaryAction(action) && summarizedAlerts && !isSystemAction) {
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runSummarizedAction({
@@ -297,6 +274,12 @@ export class ExecutionHandler<
         const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
           action.actionTypeId
         );
+
+        if (!connectorAdapter) {
+          this.logger.warn(
+            `Rule "${this.taskInstance.params.alertId}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
+          );
+        }
 
         /**
          * System actions without an adapter
@@ -689,6 +672,7 @@ export class ExecutionHandler<
 
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
+      const isSystemAction = this.isSystemAction(action.id);
       let summarizedAlerts = null;
 
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
@@ -697,7 +681,11 @@ export class ExecutionHandler<
           spaceId: this.taskInstance.params.spaceId,
           ruleId: this.taskInstance.params.alertId,
         });
-        if (!isSummaryActionOnInterval(action)) {
+
+        /**
+         * System actions cannot be throttled
+         */
+        if (!isSummaryActionOnInterval(action) || isSystemAction) {
           this.logNumberOfFilteredAlerts({
             numberOfAlerts: alertsArray.length,
             numberOfSummarizedAlerts: summarizedAlerts.all.count,
@@ -714,11 +702,13 @@ export class ExecutionHandler<
             this.taskInstance.params.alertId
           }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
         );
+
         continue;
-      } else if (isSummaryAction(action)) {
+      } else if (isSummaryAction(action) || isSystemAction) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
+
         continue;
       }
 
@@ -760,8 +750,9 @@ export class ExecutionHandler<
 
   private canFetchSummarizedAlerts(action: RuleAction) {
     const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
+    const isSystemAction = this.isSystemAction(action.id);
 
-    if (action.frequency?.summary && !hasGetSummarizedAlerts) {
+    if ((action.frequency?.summary || isSystemAction) && !hasGetSummarizedAlerts) {
       this.logger.error(
         `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
       );
@@ -778,6 +769,17 @@ export class ExecutionHandler<
   }) {
     if (!this.canFetchSummarizedAlerts(action)) {
       return false;
+    }
+
+    const isSystemAction = this.isSystemAction(action.id);
+
+    /**
+     * System action should always get summarized alerts.
+     * The above check ensures that the rule supports
+     * alerts-as-data which are needed by system actions.
+     */
+    if (isSystemAction) {
+      return true;
     }
 
     // we fetch summarizedAlerts to filter alerts in memory as well
@@ -864,5 +866,9 @@ export class ExecutionHandler<
     }
 
     return bulkActions;
+  }
+
+  private isSystemAction(connectorId: string): boolean {
+    return this.actionsClient.isSystemAction(connectorId);
   }
 }
