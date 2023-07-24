@@ -4,6 +4,26 @@ info:
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 paths:
+  /calculate:
+    post:
+      summary: Trigger calculation of Risk Scores
+      description: Calculates and persists a segment of Risk Scores, returning details about the calculation.
+      requestBody:
+        description: Details about the Risk Scores being calculated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskScoresCalculationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoresCalculationResponse'
+        '400':
+          description: Invalid request
   /preview:
     post:
       summary: Preview the calculation of Risk Scores
@@ -13,7 +33,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RiskScoresRequest'
+              $ref: '#/components/schemas/RiskScoresPreviewRequest'
         required: true
       responses:
         '200':
@@ -21,13 +41,45 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskScoresResponse'
+                $ref: '#/components/schemas/RiskScoresPreviewResponse'
         '400':
           description: Invalid request
 
 components:
   schemas:
-    RiskScoresRequest:
+    RiskScoresCalculationRequest:
+      type: object
+      required:
+        - data_view_id
+        - identifier_type
+        - range
+      properties:
+        after_keys:
+          description: Used to calculate a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
+          allOf:
+            - $ref: '#/components/schemas/AfterKeys'
+        data_view_id:
+          $ref: '#/components/schemas/DataViewId'
+          description: The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
+        debug:
+          description: If set to `true`, the internal ES requests/responses will be logged in Kibana.
+          type: boolean
+        filter:
+          $ref: '#/components/schemas/Filter'
+          description: An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores calculated.
+        page_size:
+          $ref: '#/components/schemas/PageSize'
+        identifier_type:
+          description: Used to restrict the type of risk scores calculated.
+          allOf:
+            - $ref: '#/components/schemas/IdentifierType'
+        range:
+          $ref: '#/components/schemas/DateRange'
+          description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
+        weights:
+          $ref: '#/components/schemas/RiskScoreWeights'
+
+    RiskScoresPreviewRequest:
       type: object
       required:
         - data_view_id
@@ -37,50 +89,51 @@ components:
           allOf:
             - $ref: '#/components/schemas/AfterKeys'
         data_view_id:
+          $ref: '#/components/schemas/DataViewId'
           description: The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
-          example: security-solution-default
-          type: string
         debug:
           description: If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
           type: boolean
         filter:
+          $ref: '#/components/schemas/Filter'
           description: An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.
-          $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
         page_size:
-          description: Specifies how many scores will be returned in a given response. Note that this value is per `identifier_type`, i.e. a value of 10 will return 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
-          default: 1000
-          type: number
+          $ref: '#/components/schemas/PageSize'
         identifier_type:
-          description: Used to restrict the type of risk scores being returned. If unspecified, both `host` and `user` scores will be returned.
+          description: Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
           allOf:
             - $ref: '#/components/schemas/IdentifierType'
         range:
+          $ref: '#/components/schemas/DateRange'
           description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
-          type: object
-          required:
-            - start
-            - end
-          properties:
-            start:
-              $ref: '#/components/schemas/KibanaDate'
-            end:
-              $ref: '#/components/schemas/KibanaDate'
         weights:
-          description: 'A list of weights to be applied to the scoring calculation.'
-          type: array
-          items:
-            $ref: '#/components/schemas/RiskScoreWeight'
-          example:
-            - type: 'risk_category'
-              value: 'category_1'
-              host: 0.8
-              user: 0.4
-            - type: 'global_identifier'
-              host: 0.5
-              user: 0.1
-    RiskScoresResponse:
+          $ref: '#/components/schemas/RiskScoreWeights'
+
+    RiskScoresCalculationResponse:
       type: object
       required:
+        - after_keys
+        - errors
+        - scores_written
+      properties:
+        after_keys:
+          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request.
+          allOf:
+            - $ref: '#/components/schemas/AfterKeys'
+        errors:
+          type: array
+          description: A list of errors encountered during the calculation.
+          items:
+            type: string
+        scores_written:
+          type: number
+          format: integer
+          description: The number of risk scores persisted to elasticsearch.
+
+    RiskScoresPreviewResponse:
+      type: object
+      required:
+        - after_keys
         - scores
       properties:
         after_keys:
@@ -117,6 +170,28 @@ components:
           'host.name': 'example.host'
         user:
           'user.name': 'example_user_name'
+    DataViewId:
+      description: The identifier of the Kibana data view to be used when generating risk scores.
+      example: security-solution-default
+      type: string
+    Filter:
+      description: An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
+      $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
+    PageSize:
+      description: Specifies how many scores will be involved in a given calculation. Note that this value is per `identifier_type`, i.e. a value of 10 will calculate 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
+      default: 1000
+      type: number
+    DateRange:
+      description: Defines the time period on which risk inputs will be filtered.
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          $ref: '#/components/schemas/KibanaDate'
+        end:
+          $ref: '#/components/schemas/KibanaDate'
     KibanaDate:
       type: string
       oneOf:
@@ -201,7 +276,7 @@ components:
           description: The risk category of the risk input document.
         risk_description:
           type: string
-          example: "Generated from Detection Engine Rule: Malware Prevention Alert"
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
           description: A human-readable description of the risk input document.
         risk_score:
           type: number
@@ -238,3 +313,16 @@ components:
         value: 'category_1'
         host: 0.8
         user: 0.4
+    RiskScoreWeights:
+      description: 'A list of weights to be applied to the scoring calculation.'
+      type: array
+      items:
+        $ref: '#/components/schemas/RiskScoreWeight'
+      example:
+        - type: 'risk_category'
+          value: 'category_1'
+          host: 0.8
+          user: 0.4
+        - type: 'global_identifier'
+          host: 0.5
+          user: 0.1
