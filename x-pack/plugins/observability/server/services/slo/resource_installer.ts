@@ -26,6 +26,7 @@ import {
   SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
   SLO_DESTINATION_INDEX_NAME,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  SLO_SUMMARY_INGEST_PIPELINE_NAME,
 } from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
@@ -35,6 +36,7 @@ import { getSLOSummaryMappingsTemplate } from '../../assets/component_templates/
 import { getSLOSummarySettingsTemplate } from '../../assets/component_templates/slo_summary_settings_template';
 import { getSLOSummaryIndexTemplate } from '../../assets/index_templates/slo_summary_index_templates';
 import { retryTransientEsErrors } from '../../utils/retry';
+import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 
 export interface ResourceInstaller {
   ensureCommonResourcesInstalled(): Promise<void>;
@@ -94,6 +96,10 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
       );
+
+      await this.createOrUpdateIngestPipelineTemplate(
+        getSLOSummaryPipelineTemplate(SLO_SUMMARY_INGEST_PIPELINE_NAME)
+      );
     } catch (err) {
       this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
@@ -149,7 +155,26 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       return false;
     }
 
-    return indexTemplateExists && summaryIndexTemplateExists && ingestPipelineExists;
+    let summaryIngestPipelineExists = false;
+    try {
+      const pipeline = await this.execute(() =>
+        this.esClient.ingest.getPipeline({ id: SLO_SUMMARY_INGEST_PIPELINE_NAME })
+      );
+
+      summaryIngestPipelineExists =
+        pipeline &&
+        // @ts-ignore _meta is not defined on the type
+        pipeline[SLO_SUMMARY_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
+    } catch (err) {
+      return false;
+    }
+
+    return (
+      indexTemplateExists &&
+      summaryIndexTemplateExists &&
+      ingestPipelineExists &&
+      summaryIngestPipelineExists
+    );
   }
 
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {

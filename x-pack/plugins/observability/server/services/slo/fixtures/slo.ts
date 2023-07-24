@@ -21,7 +21,6 @@ import {
   StoredSLO,
 } from '../../../domain/models';
 import { SO_SLO_TYPE } from '../../../saved_objects';
-import { Paginated } from '../slo_repository';
 import { twoMinute } from './duration';
 import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
 
@@ -186,17 +185,4 @@ export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO 
     timeWindow: weeklyCalendarAligned(),
     ...params,
   });
-};
-
-export const createPaginatedSLO = (
-  slo: SLO,
-  params: Partial<Paginated<SLO>> = {}
-): Paginated<SLO> => {
-  return {
-    page: 1,
-    perPage: 25,
-    total: 1,
-    results: [slo],
-    ...params,
-  };
 };

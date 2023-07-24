@@ -12,6 +12,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a 7 days rolling time window",
       "dest": Object {
         "index": ".slo-observability.summary-v2",
+        "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -60,7 +61,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -79,6 +80,11 @@ Array [
           },
         },
         "group_by": Object {
+          "errorBudgetEstimated": Object {
+            "terms": Object {
+              "field": "errorBudgetEstimated",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -189,6 +195,12 @@ Array [
             ],
           },
         },
+        "runtime_mappings": Object {
+          "errorBudgetEstimated": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
+        },
       },
       "sync": Object {
         "time": Object {
@@ -214,6 +226,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a 30 days rolling time window",
       "dest": Object {
         "index": ".slo-observability.summary-v2",
+        "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -262,7 +275,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -281,6 +294,11 @@ Array [
           },
         },
         "group_by": Object {
+          "errorBudgetEstimated": Object {
+            "terms": Object {
+              "field": "errorBudgetEstimated",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -391,6 +409,12 @@ Array [
             ],
           },
         },
+        "runtime_mappings": Object {
+          "errorBudgetEstimated": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
+        },
       },
       "sync": Object {
         "time": Object {
@@ -416,6 +440,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a 90 days rolling time window",
       "dest": Object {
         "index": ".slo-observability.summary-v2",
+        "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -464,7 +489,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -483,6 +508,11 @@ Array [
           },
         },
         "group_by": Object {
+          "errorBudgetEstimated": Object {
+            "terms": Object {
+              "field": "errorBudgetEstimated",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -593,6 +623,12 @@ Array [
             ],
           },
         },
+        "runtime_mappings": Object {
+          "errorBudgetEstimated": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
+        },
       },
       "sync": Object {
         "time": Object {
@@ -618,6 +654,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a weekly calendar aligned time window",
       "dest": Object {
         "index": ".slo-observability.summary-v2",
+        "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -681,7 +718,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -698,6 +735,11 @@ Array [
           },
         },
         "group_by": Object {
+          "errorBudgetEstimated": Object {
+            "terms": Object {
+              "field": "errorBudgetEstimated",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -808,6 +850,12 @@ Array [
             ],
           },
         },
+        "runtime_mappings": Object {
+          "errorBudgetEstimated": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
+        },
       },
       "sync": Object {
         "time": Object {
@@ -833,6 +881,7 @@ Array [
       "description": "Summarize every SLO with timeslices budgeting method and a monthly calendar aligned time window",
       "dest": Object {
         "index": ".slo-observability.summary-v2",
+        "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
       "pivot": Object {
@@ -911,7 +960,7 @@ Array [
               "script": "if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }",
             },
           },
-          "status": Object {
+          "statusCode": Object {
             "bucket_script": Object {
               "buckets_path": Object {
                 "errorBudgetRemaining": "errorBudgetRemaining",
@@ -928,6 +977,11 @@ Array [
           },
         },
         "group_by": Object {
+          "errorBudgetEstimated": Object {
+            "terms": Object {
+              "field": "errorBudgetEstimated",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -1036,6 +1090,12 @@ Array [
                 },
               },
             ],
+          },
+        },
+        "runtime_mappings": Object {
+          "errorBudgetEstimated": Object {
+            "script": "emit(false)",
+            "type": "boolean",
           },
         },
       },
