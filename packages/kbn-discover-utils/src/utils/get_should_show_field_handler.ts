@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 export type ShouldShowFieldInTableHandler = (fieldName: string) => boolean;
@@ -53,7 +53,7 @@ const canShowFieldInTable = (
     return { show: true };
   }
 
-  const subTypeMulti = getFieldSubtypeMulti(mapped.spec);
+  const subTypeMulti = getDataViewFieldSubtypeMulti(mapped.spec);
   const isMultiField = Boolean(subTypeMulti?.multi);
 
   return { show: !isMultiField, parentName: subTypeMulti?.multi?.parent };

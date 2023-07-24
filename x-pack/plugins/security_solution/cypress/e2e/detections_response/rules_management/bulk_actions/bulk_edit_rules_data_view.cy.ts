@@ -8,16 +8,16 @@
 import {
   RULES_BULK_EDIT_DATA_VIEWS_WARNING,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
-} from '../../screens/rules_bulk_edit';
+} from '../../../../screens/rules_bulk_actions';
 
-import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../screens/rule_details';
+import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../screens/rule_details';
 
 import {
   waitForRulesTableToBeLoaded,
   goToRuleDetails,
   selectNumberOfRules,
   goToTheRuleDetailsOf,
-} from '../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 
 import {
   typeIndexPatterns,
@@ -27,14 +27,18 @@ import {
   checkOverwriteIndexPatternsCheckbox,
   openBulkEditAddIndexPatternsForm,
   openBulkEditDeleteIndexPatternsForm,
-} from '../../tasks/rules_bulk_edit';
+} from '../../../../tasks/rules_bulk_actions';
 
-import { hasIndexPatterns, getDetails, assertDetailsNotExist } from '../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import {
+  hasIndexPatterns,
+  getDetails,
+  assertDetailsNotExist,
+} from '../../../../tasks/rule_details';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../tasks/common';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -42,7 +46,7 @@ import {
   getNewRule,
   getNewThresholdRule,
   getNewTermsRule,
-} from '../../objects/rule';
+} from '../../../../objects/rule';
 
 const DATA_VIEW_ID = 'auditbeat';
 

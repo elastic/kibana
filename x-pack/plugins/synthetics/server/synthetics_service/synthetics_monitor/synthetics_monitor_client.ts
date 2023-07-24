@@ -20,13 +20,11 @@ import {
   SyntheticsPrivateLocation,
 } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
-
 import {
   EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   MonitorServiceLocation,
-  PrivateLocation,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
@@ -35,6 +33,7 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../formatters/public_formatters/format_configs';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
@@ -49,7 +48,7 @@ export class SyntheticsMonitorClient {
     monitors: Array<{ monitor: MonitorFields; id: string }>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const privateConfigs: PrivateConfig[] = [];
@@ -94,7 +93,7 @@ export class SyntheticsMonitorClient {
       decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>,
     routeContext: RouteContext,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const { request } = routeContext;
@@ -216,14 +215,12 @@ export class SyntheticsMonitorClient {
   async syncGlobalParams({
     request,
     spaceId,
-    savedObjectsClient,
     allPrivateLocations,
     encryptedSavedObjects,
   }: {
     spaceId: string;
     request: KibanaRequest;
-    allPrivateLocations: PrivateLocation[];
-    savedObjectsClient: SavedObjectsClientContract;
+    allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
@@ -358,7 +355,7 @@ export class SyntheticsMonitorClient {
 
   async inspectMonitor(
     monitorObj: { monitor: MonitorFields; id: string },
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     hideParams: boolean,
     canSave: boolean
