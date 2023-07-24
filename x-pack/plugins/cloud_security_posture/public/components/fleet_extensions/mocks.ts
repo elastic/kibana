@@ -50,7 +50,7 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0-preview23') => {
+export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0-preview24') => {
   return {
     version: packageVersion,
     name: 'cspm',
