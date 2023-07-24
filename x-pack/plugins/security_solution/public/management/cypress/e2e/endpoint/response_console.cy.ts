@@ -68,6 +68,8 @@ describe('Response console', () => {
     });
 
     it('should isolate host from response console', () => {
+      // Explicitly fail this test
+      expect(true).toBe(false);
       const command = 'isolate';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
