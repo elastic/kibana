@@ -72,7 +72,7 @@ components:
             $ref: '#/components/schemas/RiskScoreWeight'
           example:
             - type: 'risk_category'
-              value: 'alerts'
+              value: 'category_1'
               host: 0.8
               user: 0.4
             - type: 'global_identifier'
@@ -133,53 +133,53 @@ components:
       type: object
       required:
         - '@timestamp'
-        - identifierField
-        - identifierValue
-        - level
-        - totalScore
-        - totalScoreNormalized
-        - alertsScore
-        - otherScore
-        - riskiestInputs
+        - identifier_field
+        - identifier_value
+        - calculated_level
+        - calculated_score
+        - calculated_score_norm
+        - category_1_score
+        - category_1_count
+        - riskiest_inputs
       properties:
         '@timestamp':
           type: string
           format: 'date-time'
           example: '2017-07-21T17:32:28Z'
           description: The time at which the risk score was calculated.
-        identifierField:
+        identifier_field:
           type: string
           example: 'host.name'
-          description: The identifier field defining this risk score. Coupled with `identifierValue`, uniquely identifies the entity being scored.
-        identifierValue:
+          description: The identifier field defining this risk score. Coupled with `identifier_value`, uniquely identifies the entity being scored.
+        identifier_value:
           type: string
           example: 'example.host'
-          description: The identifier value defining this risk score. Coupled with `identifierField`, uniquely identifies the entity being scored.
-        level:
+          description: The identifier value defining this risk score. Coupled with `identifier_field`, uniquely identifies the entity being scored.
+        calculated_level:
           type: string
           example: 'Critical'
           description: Lexical description of the entity's risk.
-        totalScore:
+        calculated_score:
           type: number
           format: double
           description: The raw numeric value of the given entity's risk score.
-        totalScoreNormalized:
+        calculated_score_norm:
           type: number
           format: double
           minimum: 0
           maximum: 100
           description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
-        alertsScore:
+        category_1_score:
           type: number
           format: double
-          description: The raw numeric risk score attributed to Security Alerts.
-        otherScore:
+          description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
+        category_1_count:
           type: number
-          format: double
-          description: The raw numeric risk score attributed to other data sources
-        riskiestInputs:
+          format: integer
+          description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
+        riskiest_inputs:
           type: array
-          description: A list of the 10 highest-risk documents contributing to this risk score. Useful for investigative purposes.
+          description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
 
@@ -190,16 +190,31 @@ components:
         id:
           type: string
           example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          description: The unique identifier (`_id`) of the original source document
         index:
           type: string
           example: .internal.alerts-security.alerts-default-000001
-        riskScore:
+          description: The unique index (`_index`) of the original source document
+        risk_category:
+          type: string
+          example: category_1
+          description: The risk category of the risk input document.
+        risk_description:
+          type: string
+          example: "Generated from Detection Engine Rule: Malware Prevention Alert"
+          description: A human-readable description of the risk input document.
+        risk_score:
           type: number
           format: double
           minimum: 0
           maximum: 100
+          description: The weighted risk score of the risk input document.
+        timestamp:
+          type: string
+          example: '2017-07-21T17:32:28Z'
+          description: The @timestamp of the risk input document.
     RiskScoreWeight:
-      description: "Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'alerts')."
+      description: "Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1')."
       type: object
       required:
         - type
@@ -220,6 +235,6 @@ components:
           maximum: 1
       example:
         type: 'risk_category'
-        value: 'alerts'
+        value: 'category_1'
         host: 0.8
         user: 0.4
