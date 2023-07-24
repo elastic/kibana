@@ -23,6 +23,7 @@ export const setupHealthRoute = (router: SecuritySolutionPluginRouter) => {
       validate: {},
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
     async (context, request, response) => {
