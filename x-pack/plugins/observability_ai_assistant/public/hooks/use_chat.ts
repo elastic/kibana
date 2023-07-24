@@ -7,7 +7,7 @@
 
 import { clone } from 'lodash';
 import { useEffect, useState } from 'react';
-import { delay } from 'rxjs';
+import { concatMap, delay, of } from 'rxjs';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '../../common/types';
@@ -61,22 +61,24 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
       .chat({ messages, connectorId, signal: controller.signal })
       .then((response$) => {
         return new Promise<void>((resolve, reject) => {
-          const subscription = response$.pipe(delay(50)).subscribe({
-            next: (chunk) => {
-              partialResponse.content += chunk.choices[0].delta.content ?? '';
-              partialResponse.function_call.name +=
-                chunk.choices[0].delta.function_call?.name ?? '';
-              partialResponse.function_call.args +=
-                chunk.choices[0].delta.function_call?.args ?? '';
-              setResponse(clone(partialResponse));
-            },
-            error: (err) => {
-              reject(err);
-            },
-            complete: () => {
-              resolve();
-            },
-          });
+          const subscription = response$
+            .pipe(concatMap((value) => of(value).pipe(delay(50))))
+            .subscribe({
+              next: (chunk) => {
+                partialResponse.content += chunk.choices[0].delta.content ?? '';
+                partialResponse.function_call.name +=
+                  chunk.choices[0].delta.function_call?.name ?? '';
+                partialResponse.function_call.args +=
+                  chunk.choices[0].delta.function_call?.args ?? '';
+                setResponse(clone(partialResponse));
+              },
+              error: (err) => {
+                reject(err);
+              },
+              complete: () => {
+                resolve();
+              },
+            });
 
           controller.signal.addEventListener('abort', () => {
             subscription.unsubscribe();

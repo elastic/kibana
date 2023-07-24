@@ -55,7 +55,8 @@ export function createService(coreStart: CoreStart): ObservabilityAIAssistantSer
       return readableStreamReaderIntoObservable(reader).pipe(
         map((line) => line.substring(6)),
         filter((line) => !!line && line !== '[DONE]'),
-        map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk)
+        map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk),
+        filter((line) => line.object === 'chat.completion.chunk')
       );
     },
     callApi: client,
