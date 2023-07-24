@@ -80,7 +80,6 @@ export const cli = () => {
         }, {} as Record<string, string | number>)
       );
 
-
       const isOpen = argv._[0] === 'open';
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
