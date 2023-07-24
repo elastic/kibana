@@ -28,6 +28,10 @@ export const SUMMARY_TIMESLICES_90D_ROLLING: TransformPutTransformRequest = {
         type: 'boolean',
         script: 'emit(false)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {

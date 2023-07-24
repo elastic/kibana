@@ -28,6 +28,10 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
         type: 'boolean',
         script: 'emit(false)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {

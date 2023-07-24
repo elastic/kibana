@@ -28,6 +28,10 @@ export const SUMMARY_OCCURRENCES_MONTHLY_ALIGNED: TransformPutTransformRequest =
         type: 'boolean',
         script: 'emit(true)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {
