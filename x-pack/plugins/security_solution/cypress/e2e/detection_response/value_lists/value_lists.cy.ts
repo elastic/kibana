@@ -53,6 +53,8 @@ describe('value lists', () => {
       });
 
       it('creates a "keyword" list from an uploaded file', () => {
+        // explicitly fail this test
+        expect(false).toBe(true);
         const listName = 'value_list.txt';
         selectValueListType('keyword');
         selectValueListsFile(listName);
