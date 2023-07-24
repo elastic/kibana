@@ -57,8 +57,15 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     return true;
   }
 
-  public async getExplicitInput(): Promise<Partial<any>> {
-    return Promise.resolve({});
+  public async getExplicitInput(): Promise<Partial<EmbeddableChangePointChartInput>> {
+    const [coreStart] = await this.getStartServices();
+
+    try {
+      const { resolveEmbeddableChangePointUserInput } = await import('./handle_explicit_input');
+      return await resolveEmbeddableChangePointUserInput(coreStart);
+    } catch (e) {
+      return Promise.reject();
+    }
   }
 
   getDisplayName() {

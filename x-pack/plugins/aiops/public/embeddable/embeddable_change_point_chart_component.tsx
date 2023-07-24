@@ -26,6 +26,7 @@ export interface EmbeddableChangePointChartProps {
   function: 'avg' | 'sum' | 'min' | 'max';
   metricField: string;
   partitionField?: string;
+  maxSeriesToPlot?: number;
 }
 
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
