@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiSelect,
   EuiCallOut,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
@@ -42,7 +43,7 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiSpacer size="l" />
+      <EuiHorizontalRule margin="xxl" />
       <EuiTitle size="s">
         <h2>
           <FormattedMessage

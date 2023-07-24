@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -22,6 +23,7 @@ import type {
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
+import { RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import {
@@ -72,6 +74,12 @@ interface IntegrationInfoFieldsProps {
   fields: Array<{ id: string; value: string; label: React.ReactNode; error: string[] | null }>;
   onChange(field: string, value: string): void;
 }
+
+type AwsAccountType = 'single_account' | 'organization_account';
+
+const getAwsAccountType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
+): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type'].value;
 
 const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
   <div>
@@ -205,6 +213,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       },
     ];
 
+    console.log({ input });
+
     return (
       <>
         {isEditPage && <EditScreenStepTitle />}
@@ -230,8 +240,39 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
-        {console.log(newPolicy, packageInfo)}
-        {newPolicy.vars?.deployment.value === 'aws' && <div>hi</div>}
+
+        {/* AWS account type selection box */}
+        {input.type === 'cloudbeat/cis_aws' && (
+          <>
+            <EuiText color="subdued" size="s">
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
+                defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+              />
+            </EuiText>
+            <EuiSpacer size="l" />
+            <RadioGroup
+              idSelected={getAwsAccountType(input) || ''}
+              options={[
+                { id: 'single_account', label: 'Single Account' },
+                { id: 'organization_account', label: 'AWS Organization' },
+              ]}
+              onChange={(accountType) => {
+                updatePolicy(
+                  getPosturePolicy(newPolicy, input.type, {
+                    'aws.account_type': {
+                      value: accountType,
+                      type: 'text',
+                    },
+                  })
+                );
+              }}
+              size="m"
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}
