@@ -13,6 +13,7 @@ import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
+  TelemetryUsageCounter,
 } from '../types';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerFlameChartSearchRoute } from './flamechart';
@@ -33,6 +34,7 @@ export interface RouteRegisterParameters {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
     config: ProfilingConfig;
+    telemetryUsageCounter?: TelemetryUsageCounter;
   };
   services: {
     createProfilingEsClient: (params: {
