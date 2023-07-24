@@ -7,8 +7,9 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingCore } from '../..';
-import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
+import { JobParamsPDFDeprecated } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
@@ -94,7 +95,7 @@ describe('Handle request to generate', () => {
 
   describe('Enqueue Job', () => {
     test('creates a report object to queue', async () => {
-      const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
+      const report = await requestHandler.enqueueJob('printablePdfV2', mockJobParams);
 
       const { _id, created_at: _created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
@@ -106,12 +107,12 @@ describe('Handle request to generate', () => {
           "completed_at": undefined,
           "created_by": "testymcgee",
           "execution_time_ms": undefined,
-          "jobtype": "printable_pdf",
+          "jobtype": "printable_pdf_v2",
           "kibana_id": undefined,
           "kibana_name": undefined,
           "max_attempts": undefined,
           "meta": Object {
-            "isDeprecated": true,
+            "isDeprecated": false,
             "layout": "preserve_layout",
             "objectType": "cool_object_type",
           },
@@ -125,17 +126,18 @@ describe('Handle request to generate', () => {
           "timeout": undefined,
         }
       `);
-      const { forceNow, ...snapPayload } = payload as TaskPayloadPDF;
+      const { forceNow, ...snapPayload } = payload as TaskPayloadPDFV2;
       expect(snapPayload).toMatchInlineSnapshot(`
         Object {
           "browserTimezone": "UTC",
           "headers": "hello mock cypher text",
-          "isDeprecated": true,
+          "isDeprecated": false,
           "layout": Object {
             "id": "preserve_layout",
           },
+          "locatorParams": undefined,
           "objectType": "cool_object_type",
-          "objects": Array [],
+          "relativeUrls": Array [],
           "spaceId": undefined,
           "title": "cool_title",
           "version": "unknown",
@@ -144,6 +146,7 @@ describe('Handle request to generate', () => {
     });
 
     test('provides a default kibana version field for older POST URLs', async () => {
+      // how do we handle the printable_pdf endpoint that isn't migrating to the class instance of export types?
       (mockJobParams as unknown as { version?: string }).version = undefined;
       const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
 

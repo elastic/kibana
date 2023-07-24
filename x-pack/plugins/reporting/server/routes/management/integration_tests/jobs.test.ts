@@ -24,8 +24,10 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
+import { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobInfoRoutes } from '../jobs';
+import { ExportType } from '../../../export_types/common';
+import { reportingMock } from '../../../mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -55,7 +57,7 @@ describe('GET /api/reporting/jobs/download', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: jest.fn(), registerExportTypes: jest.fn() })
+      () => reportingMock.createStart()
     );
 
     mockSetupDeps = createMockPluginSetup({
@@ -88,14 +90,14 @@ describe('GET /api/reporting/jobs/download', () => {
       jobType: 'unencodedJobType',
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition);
+    } as ExportType);
     exportTypesRegistry.register({
       id: 'base64Encoded',
       jobType: 'base64EncodedJobType',
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition);
+    } as ExportType);
     core.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
