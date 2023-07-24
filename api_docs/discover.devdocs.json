@@ -144,7 +144,7 @@
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
               },
-              " | undefined>; onCreateDefaultAdHocDataView: (dataViewSpec: ",
+              " | undefined>; createAndAppendAdHocDataView: (dataViewSpec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -152,7 +152,15 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ") => Promise<void>; onDataViewCreated: (dataView: ",
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">; onDataViewCreated: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
