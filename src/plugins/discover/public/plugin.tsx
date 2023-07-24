@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -72,8 +72,11 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import type { CustomizationCallback } from './customizations';
-import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
+import type { RegisterCustomizationProfile } from './customizations';
+import {
+  createRegisterCustomizationProfile,
+  createProfileRegistry,
+} from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 
 const DocViewerLegacyTable = React.lazy(
@@ -159,7 +162,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly customize: (profileName: string, callback: CustomizationCallback) => void;
+  readonly registerCustomizationProfile: RegisterCustomizationProfile;
 }
 
 /**
@@ -305,10 +308,23 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
+    const appStateUpdater$ = combineLatest([
+      this.appStateUpdater,
+      this.profileRegistry.getContributedAppState$(),
+    ]).pipe(
+      map(
+        ([urlAppStateUpdater, profileAppStateUpdater]): AppUpdater =>
+          (app) => ({
+            ...urlAppStateUpdater(app),
+            ...profileAppStateUpdater(app),
+          })
+      )
+    );
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
-      updater$: this.appStateUpdater.asObservable(),
+      updater$: appStateUpdater$,
       order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -416,7 +432,7 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      customize: createCustomizeFunction(this.profileRegistry),
+      registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
     };
   }
 
