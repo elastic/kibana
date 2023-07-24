@@ -11,11 +11,15 @@ import {
   IndicesGetIndexTemplateIndexTemplateItem,
   IndicesGetResponse,
   IngestGetPipelineResponse,
+  SecurityHasPrivilegesPrivileges,
 } from '@elastic/elasticsearch/lib/api/types';
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../settings/apm_indices/get_apm_indices';
 import { ApmEvent } from './bundle/get_apm_events';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
@@ -53,6 +57,14 @@ const getDiagnosticsRoute = createApmServerRoute({
       indices: IndicesGetResponse;
       ingestPipelines: IngestGetPipelineResponse;
     };
+    diagnosticsPrivileges: {
+      index: Record<string, SecurityHasPrivilegesPrivileges>;
+      cluster: Record<string, boolean>;
+      hasAllClusterPrivileges: boolean;
+      hasAllIndexPrivileges: boolean;
+      hasAllPrivileges: boolean;
+    };
+    apmIndices: ApmIndicesConfig;
     apmIndexTemplates: Array<{
       name: string;
       isNonStandard: boolean;

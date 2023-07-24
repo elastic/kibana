@@ -23,11 +23,12 @@ import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins } = useApmPluginContext();
+  const { core, plugins, config } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
   const { capabilities } = application;
+  const { featureFlags } = config;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
   const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
   const { isAlertingAvailable, canReadAlerts, canSaveAlerts } =
@@ -50,19 +51,22 @@ export function ApmHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       {isLabsButtonEnabled && <Labs />}
-      <EuiHeaderLink
-        color="text"
-        href={apmHref('/storage-explorer')}
-        data-test-subj="apmStorageExplorerHeaderLink"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-              defaultMessage: 'Storage Explorer',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHeaderLink>
+      {featureFlags.storageExplorerAvailable && (
+        <EuiHeaderLink
+          color="text"
+          href={apmHref('/storage-explorer')}
+          data-test-subj="apmStorageExplorerHeaderLink"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+                defaultMessage: 'Storage Explorer',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiHeaderLink>
+      )}
+
       {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
@@ -73,7 +77,7 @@ export function ApmHeaderActionMenu() {
       )}
       <EuiHeaderLink
         color="primary"
-        href={kibanaHref('/app/home#/tutorial/apm')}
+        href={kibanaHref('/app/apm/tutorial')}
         iconType="indexOpen"
         data-test-subj="apmAddDataHeaderLink"
       >

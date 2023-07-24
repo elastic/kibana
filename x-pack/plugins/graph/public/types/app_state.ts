@@ -7,13 +7,13 @@
 
 import { SimpleSavedObject } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FontawesomeIcon } from '../helpers/style_choices';
+import type { GenericIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
 
 export interface UrlTemplate {
   url: string;
   description: string;
-  icon: FontawesomeIcon | null;
+  icon: GenericIcon | null;
   encoder: OutlinkEncoder;
   isDefault?: boolean;
 }
@@ -23,7 +23,7 @@ export interface WorkspaceField {
   hopSize?: number;
   lastValidHopSize?: number; // TODO handle this by an "active" flag
   color: string;
-  icon: FontawesomeIcon;
+  icon: GenericIcon;
   selected: boolean;
   type: string;
   aggregatable: boolean;

@@ -140,6 +140,7 @@ def functionalXpack(Map params = [:]) {
       'x-pack/test/security_solution_cypress/',
       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
+      'x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressChrome', './test/scripts/jenkins_security_solution_cypress_chrome.sh'))

@@ -18,6 +18,10 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
     profileUrl: 'https://profile.url',
     snapshotsUrl: 'https://snapshots.url',
     registerCloudService: () => {},
+    isServerlessEnabled: false,
+    serverless: {
+      projectId: undefined,
+    },
   };
 
   return cloud;

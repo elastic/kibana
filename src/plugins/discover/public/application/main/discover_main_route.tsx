@@ -64,10 +64,11 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       services,
     })
   );
-  const customizationService = useDiscoverCustomizationService({
-    customizationCallbacks,
-    stateContainer,
-  });
+  const { customizationService, isInitialized: isCustomizationServiceInitialized } =
+    useDiscoverCustomizationService({
+      customizationCallbacks,
+      stateContainer,
+    });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -96,6 +97,9 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const checkData = useCallback(async () => {
     try {
+      if (savedSearchId) {
+        return true; // bypass NoData screen
+      }
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -124,7 +128,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev]);
+  }, [data.dataViews, isDev, savedSearchId]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
@@ -136,16 +140,13 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       }
       try {
         await stateContainer.actions.loadDataViewList();
-        // reset appState in case a saved search with id is loaded and the url is empty
-        // so the saved search is loaded in a clean state
-        // else it might be updated by the previous app state
-        const useAppState = !stateContainer.appState.isEmptyURL();
+
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
           savedSearchId,
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
-          useAppState,
         });
+
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -219,11 +220,17 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     [loadSavedSearch]
   );
 
-  // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
+    if (!isCustomizationServiceInitialized) return;
+
+    setLoading(true);
+    setHasESData(false);
+    setHasUserDataView(false);
+    setShowNoDataPage(false);
+    setError(undefined);
     // restore the previously selected data view for a new state
     loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [loadSavedSearch, savedSearchId, stateContainer]);
+  }, [isCustomizationServiceInitialized, loadSavedSearch, savedSearchId, stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -255,7 +262,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView />
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
       </AnalyticsNoDataPageKibanaProvider>
     );
   }

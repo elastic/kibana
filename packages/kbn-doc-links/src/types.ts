@@ -12,6 +12,7 @@
 export interface DocLinksMeta {
   version: string;
   elasticWebsiteUrl: string;
+  elasticGithubUrl: string;
   docsWebsiteUrl: string;
 }
 
@@ -122,6 +123,7 @@ export interface DocLinks {
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
     readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsGoogleDrive: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
@@ -160,7 +162,7 @@ export interface DocLinks {
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
-    readonly searchApplicationsGettingStarted: string;
+    readonly searchApplicationsSearch: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
@@ -284,6 +286,9 @@ export interface DocLinks {
   };
   readonly addData: string;
   readonly kibana: {
+    readonly askElastic: string;
+    readonly createGithubIssue: string;
+    readonly feedback: string;
     readonly guide: string;
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
@@ -397,6 +402,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    sloBurnRateRule: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
@@ -483,6 +489,8 @@ export interface DocLinks {
     datastreamsILM: string;
     datastreamsNamingScheme: string;
     datastreamsManualRollover: string;
+    datastreamsTSDS: string;
+    datastreamsTSDSMetrics: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;

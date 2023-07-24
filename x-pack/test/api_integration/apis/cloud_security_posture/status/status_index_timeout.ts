@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -105,10 +106,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.kspm.status).to.be('index-timeout');
+        expect(res.kspm.status).to.eql(
+          'index-timeout',
+          `expected kspm status to be index-timeout but got ${res.kspm.status} instead`
+        );
       });
 
       it(`Should return index-timeout when installed cspm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 10 minutes since the installation`, async () => {
@@ -131,10 +136,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.cspm.status).to.be('index-timeout');
+        expect(res.cspm.status).to.eql(
+          'index-timeout',
+          `expected cspm status to be index-timeout but got ${res.cspm.status} instead`
+        );
       });
 
       it(`Should return index-timeout when installed cnvm, has findings only on logs-cloud_security_posture.vulnerabilities-default* and it has been more than 4 hours minutes since the installation`, async () => {
@@ -157,10 +166,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.vuln_mgmt.status).to.be('index-timeout');
+        expect(res.vuln_mgmt.status).to.eql(
+          'index-timeout',
+          `expected vuln_mgmt status to be index-timeout but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
   });

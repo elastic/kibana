@@ -9,51 +9,17 @@
 import fs from 'fs';
 import Path, { join } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
+import { generateQueryParams } from './generate_query_params';
+import { generateAvailability } from './generate_availability';
+import type {
+  AutocompleteBodyParams,
+  AutocompleteDefinition,
+  AutocompleteUrlParams,
+  SpecificationTypes,
+} from './types';
+import { findTypeDefinition } from './utils';
 
-interface EndpointRequest {
-  name: string;
-  namespace: string;
-}
-
-interface Endpoint {
-  name: string;
-  urls: Array<{
-    methods: string[];
-    path: string;
-  }>;
-  docUrl: string;
-  request: null | EndpointRequest;
-}
-
-interface SchemaType {
-  name: {
-    name: string;
-    namespace: string;
-  };
-}
-
-interface Schema {
-  endpoints: Endpoint[];
-  types: SchemaType[];
-}
-
-interface UrlParams {
-  [key: string]: number | string;
-}
-
-interface BodyParams {
-  [key: string]: number | string;
-}
-
-interface Definition {
-  documentation?: string;
-  methods: string[];
-  patterns: string[];
-  url_params?: UrlParams;
-  data_autocomplete_rules?: BodyParams;
-}
-
-const generateMethods = (endpoint: Endpoint): string[] => {
+const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
   // this array consists of arrays of strings
   const methodsArray = endpoint.urls.map((url) => url.methods);
   // flatten to return array of strings
@@ -62,7 +28,7 @@ const generateMethods = (endpoint: Endpoint): string[] => {
   return [...new Set(flattenMethodsArray)];
 };
 
-const generatePatterns = (endpoint: Endpoint): string[] => {
+const generatePatterns = (endpoint: SpecificationTypes.Endpoint): string[] => {
   return endpoint.urls.map(({ path }) => {
     let pattern = path;
     // remove leading / if present
@@ -73,42 +39,37 @@ const generatePatterns = (endpoint: Endpoint): string[] => {
   });
 };
 
-const generateDocumentation = (endpoint: Endpoint): string => {
+const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string => {
   return endpoint.docUrl;
 };
 
 const generateParams = (
-  endpoint: Endpoint,
-  schema: Schema
-): { urlParams: UrlParams; bodyParams: BodyParams } | undefined => {
+  endpoint: SpecificationTypes.Endpoint,
+  schema: SpecificationTypes.Model
+): { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams } | undefined => {
   const { request } = endpoint;
   if (!request) {
     return;
   }
-  const requestType = schema.types.find(
-    ({ name: { name, namespace } }) => name === request.name && namespace === request.namespace
-  );
+  const requestType = findTypeDefinition(schema, request);
   if (!requestType) {
     return;
   }
-
-  const urlParams = generateUrlParams(requestType);
+  const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
   const bodyParams = generateBodyParams(requestType);
   return { urlParams, bodyParams };
 };
 
-const generateUrlParams = (requestType: SchemaType): UrlParams => {
-  return {};
-};
-
-const generateBodyParams = (requestType: SchemaType): BodyParams => {
+const generateBodyParams = (
+  requestType: SpecificationTypes.TypeDefinition
+): AutocompleteBodyParams => {
   return {};
 };
 
 const addParams = (
-  definition: Definition,
-  params: { urlParams: UrlParams; bodyParams: BodyParams }
-): Definition => {
+  definition: AutocompleteDefinition,
+  params: { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams }
+): AutocompleteDefinition => {
   const { urlParams, bodyParams } = params;
   if (urlParams && Object.keys(urlParams).length > 0) {
     definition.url_params = urlParams;
@@ -119,15 +80,20 @@ const addParams = (
   return definition;
 };
 
-const generateDefinition = (endpoint: Endpoint, schema: Schema): Definition => {
+const generateDefinition = (
+  endpoint: SpecificationTypes.Endpoint,
+  schema: SpecificationTypes.Model
+): AutocompleteDefinition => {
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
-  let definition: Definition = { methods, patterns, documentation };
+  const availability = generateAvailability(endpoint);
+  let definition: AutocompleteDefinition = {};
   const params = generateParams(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
+  definition = { ...definition, methods, patterns, documentation, availability };
 
   return definition;
 };
@@ -143,7 +109,7 @@ export function generateConsoleDefinitions({
 }) {
   const pathToSchemaFile = Path.resolve(specsRepo, 'output/schema/schema.json');
   log.info('loading the ES specification schema file');
-  const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as Schema;
+  const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as SpecificationTypes.Model;
 
   const { endpoints } = schema;
   log.info(`iterating over endpoints array: ${endpoints.length} endpoints`);
@@ -151,7 +117,7 @@ export function generateConsoleDefinitions({
     const { name } = endpoint;
     log.info(name);
     const definition = generateDefinition(endpoint, schema);
-    const fileContent: { [name: string]: Definition } = {
+    const fileContent: { [name: string]: AutocompleteDefinition } = {
       [name]: definition,
     };
     fs.writeFileSync(

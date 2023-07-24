@@ -13,10 +13,10 @@ import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { useExpandableFlyoutContext } from './context';
 import { PreviewSection } from './components/preview_section';
 import { RightSection } from './components/right_section';
-import type { FlyoutPanel, Panel } from './types';
+import type { FlyoutPanelProps, Panel } from './types';
 import { LeftSection } from './components/left_section';
 
-export interface ExpandableFlyoutProps extends EuiFlyoutProps {
+export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * List of all registered panels available for render
    */
@@ -26,6 +26,12 @@ export interface ExpandableFlyoutProps extends EuiFlyoutProps {
    */
   handleOnFlyoutClosed?: () => void;
 }
+
+const flyoutStyles = css`
+  overflow-y: scroll;
+`;
+
+const flyoutInnerStyles = { height: '100%' };
 
 /**
  * Expandable flyout UI React component.
@@ -65,9 +71,10 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     [mostRecentPreview, registeredPanels]
   );
 
-  // do not add the flyout to the dom if there aren't any panels to display
-  if (!left && !right && !preview.length) {
-    return <></>;
+  const hideFlyout = !left && !right && !preview.length;
+
+  if (hideFlyout) {
+    return null;
   }
 
   const flyoutWidth: string = leftSection && rightSection ? 'l' : 's';
@@ -77,9 +84,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 
   return (
     <EuiFlyout
-      css={css`
-        overflow-y: scroll;
-      `}
+      css={flyoutStyles}
       {...flyoutProps}
       size={flyoutWidth}
       ownFocus={false}
@@ -89,17 +94,17 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         direction={leftSection ? 'row' : 'column'}
         wrap={false}
         gutterSize="none"
-        style={{ height: '100%' }}
+        style={flyoutInnerStyles}
       >
         {leftSection && left ? (
           <LeftSection
-            component={leftSection.component({ ...(left as FlyoutPanel) })}
+            component={leftSection.component({ ...(left as FlyoutPanelProps) })}
             width={leftSectionWidth}
           />
         ) : null}
         {rightSection && right ? (
           <RightSection
-            component={rightSection.component({ ...(right as FlyoutPanel) })}
+            component={rightSection.component({ ...(right as FlyoutPanelProps) })}
             width={rightSectionWidth}
           />
         ) : null}
@@ -107,7 +112,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 
       {previewSection && preview ? (
         <PreviewSection
-          component={previewSection.component({ ...(mostRecentPreview as FlyoutPanel) })}
+          component={previewSection.component({ ...(mostRecentPreview as FlyoutPanelProps) })}
           showBackButton={showBackButton}
           width={previewSectionWidth}
         />
