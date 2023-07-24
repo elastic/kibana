@@ -10,4 +10,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Response Ops Cypress Tests on Security Solution"
 
-yarn --cwd x-pack/plugins/security_solution cypress:run:respops; status=$?; yarn junit:merge && exit $status
+cd x-pack/plugins/security_solution
+
+yarn cypress:run:respops; status=$?; yarn junit:merge && exit $status
