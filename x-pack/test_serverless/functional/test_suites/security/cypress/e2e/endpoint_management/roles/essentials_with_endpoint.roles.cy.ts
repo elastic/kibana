@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// FIXME:PT Delete when implemented
-export {};
+import { login } from '../../../tasks/login';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -21,24 +20,85 @@ describe(
     },
   },
   () => {
-    // FIXME:PT implement
+    describe('for role: t1_analyst', () => {
+      before(() => {
+        login('t1_analyst');
+      });
 
-    describe('for role: t1_analyst', () => {});
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
 
-    describe('for role: t2_analyst', () => {});
+    describe('for role: t2_analyst', () => {
+      before(() => {
+        login('t2_analyst');
+      });
 
-    describe('for role: t3_analyst', () => {});
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
 
-    describe('for role: threat_intelligence_analyst', () => {});
+    describe('for role: t3_analyst', () => {
+      before(() => {
+        login('t3_analyst');
+      });
 
-    describe('for role: rule_author', () => {});
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
 
-    describe('for role: soc_manager', () => {});
+    describe('for role: threat_intelligence_analyst', () => {
+      before(() => {
+        login('threat_intelligence_analyst');
+      });
 
-    describe('for role: detections_admin', () => {});
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
 
-    describe('for role: platform_engineer', () => {});
+    describe('for role: rule_author', () => {
+      before(() => {
+        login('rule_author');
+      });
 
-    describe('for role: endpoint_operations_manager', () => {});
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
+
+    describe('for role: soc_manager', () => {
+      before(() => {
+        login('soc_manager');
+      });
+
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
+
+    describe('for role: detections_admin', () => {
+      before(() => {
+        login('detections_admin');
+      });
+
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
+
+    describe('for role: platform_engineer', () => {
+      before(() => {
+        login('platform_engineer');
+      });
+
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
+
+    describe('for role: endpoint_operations_manager', () => {
+      before(() => {
+        login('endpoint_operations_manager');
+      });
+
+      // FIXME:PT implement
+      it('should do something', () => {});
+    });
   }
 );
