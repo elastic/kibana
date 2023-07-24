@@ -20,6 +20,7 @@ import {
   sendErrorTo,
   sendLoadingMsg,
   sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
@@ -163,6 +164,15 @@ export function fetchMoreDocuments(
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
+    const dataView = searchSource.getField('index')!;
+    const query = getAppState().query;
+    const recordRawType = getRawRecordType(query);
+
+    if (recordRawType === RecordRawType.PLAIN) {
+      // not supported yet
+      return Promise.resolve();
+    }
+
     const lastDocuments = dataSubjects.documents$.getValue().result || [];
     const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
 
@@ -172,15 +182,8 @@ export function fetchMoreDocuments(
 
     searchSource.setField('searchAfter', lastDocumentSort);
 
-    const dataView = searchSource.getField('index')!;
-    const query = getAppState().query;
-    const recordRawType = getRawRecordType(query);
-
-    if (recordRawType === RecordRawType.PLAIN) {
-      // not supported yet
-      // TODO?
-      return Promise.resolve();
-    }
+    // Mark subjects as loading
+    sendLoadingMoreMsg(dataSubjects.documents$);
 
     // Update the base searchSource, base for all child fetches
     updateVolatileSearchSource(searchSource, {
@@ -189,32 +192,24 @@ export function fetchMoreDocuments(
       sort: getAppState().sort as SortOrder[],
     });
 
-    // Mark subjects as loading
-    sendLoadingMoreMsg(dataSubjects.documents$);
-
     // Start fetching all required requests
     const response = fetchDocuments(searchSource, fetchDeps);
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns }) => {
-        dataSubjects.documents$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          result: [...(dataSubjects.documents$.getValue().result || []), ...records],
-          textBasedQueryColumns,
-          recordRawType,
-          query,
-        });
+      .then(({ records }) => {
+        sendLoadingMoreFinishedMsg(dataSubjects.documents$, records);
       })
       .catch((error) => {
-        // TODO?
         // eslint-disable-next-line no-console
         console.error(error);
+        sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
       });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
     // We also want to return a resolved promise in an error case, since it just indicates we're done with querying.
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
   }
   return Promise.resolve();
 }

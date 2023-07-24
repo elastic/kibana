@@ -7,6 +7,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,
@@ -16,6 +17,7 @@ import type {
   SavedSearchData,
 } from '../services/discover_data_state_container';
 import { RecordRawType } from '../services/discover_data_state_container';
+
 /**
  * Sends COMPLETE message to the main$ observable with the information
  * that no documents have been found, allowing Discover to show a no
@@ -80,6 +82,20 @@ export function sendLoadingMoreMsg<T extends DataMsg>(data$: BehaviorSubject<T>)
       ...data$.getValue(),
       fetchStatus: FetchStatus.LOADING_MORE,
     } as T);
+  }
+}
+
+/**
+ * Finishing LOADING_MORE message
+ */
+export function sendLoadingMoreFinishedMsg(data$: DataDocuments$, moreRecords: DataTableRecord[]) {
+  const currentValue = data$.getValue();
+  if (currentValue.fetchStatus === FetchStatus.LOADING_MORE) {
+    data$.next({
+      ...currentValue,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [...(currentValue.result || []), ...moreRecords],
+    });
   }
 }
 
