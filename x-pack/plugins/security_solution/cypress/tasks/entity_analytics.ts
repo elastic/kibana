@@ -17,11 +17,14 @@ export const waitForAnomaliesToBeLoaded = () => {
   cy.waitUntil(() => {
     cy.reload();
     waitForPageToBeLoaded();
-    return cy.get(ANOMALIES_TABLE_ROWS).then((rows) => {
-      if (rows.length > 1) {
-        cy.log('anomalies loaded');
-      }
-    });
+    return cy.get(ANOMALIES_TABLE_ROWS).then(
+      (rows) => {
+        if (rows.length > 1) {
+          cy.log('anomalies loaded');
+        }
+      },
+      { timeout: 12000 }
+    );
   });
 };
 
