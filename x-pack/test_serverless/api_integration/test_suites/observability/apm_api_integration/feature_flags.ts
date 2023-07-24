@@ -38,22 +38,54 @@ const sourceMapsResponse = {
   },
 };
 
+const SAMPLE_SOURCEMAP = {
+  version: 3,
+  file: 'out.js',
+  sourceRoot: '',
+  sources: ['foo.js', 'bar.js'],
+  sourcesContent: ['', null],
+  names: ['src', 'maps', 'are', 'fun'],
+  mappings: 'A,AAAB;;ABCDE;',
+};
+
+async function uploadSourcemap(apmApiClient: any) {
+  const response = await apmApiClient.slsUser({
+    endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
+    type: 'form-data',
+    params: {
+      body: {
+        service_name: 'uploading-test',
+        service_version: '1.0.0',
+        bundle_filepath: 'bar',
+        sourcemap: JSON.stringify(SAMPLE_SOURCEMAP),
+      },
+    },
+  });
+  return response.body;
+}
+
 export default function ({ getService }: APMFtrContextProvider) {
-  const svlCommonApi = getService('svlCommonApi');
   const apmApiClient = getService('apmApiClient');
-  const supertest = getService('supertest');
 
   describe('apm feature flags', () => {
     describe('fleet migrations', () => {
-      // TODO: @Miriam - This is a POST request, not a GET. Need to be fixed by adding proper params object. Skipping it for now
-      xit('rejects requests to save apm server schema', async () => {
-        const { body, status } = await apmApiClient.slsUser({
-          endpoint: 'GET /api/apm/fleet/apm_server_schema 2023-10-31',
-        });
-
-      //   expect(body).toEqual(fleetMigrationResponse);
-      //   expect(status).toBe(fleetMigrationResponse.statusCode);
-      // });
+      it('rejects requests to save apm server schema', async () => {
+        try {
+          await apmApiClient.slsUser({
+            endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
+            params: {
+              body: {
+                schema: {
+                  tail_sampling_enabled: true,
+                },
+              },
+            },
+          });
+        } catch (err) {
+          expect(err.res.status).toBe(fleetMigrationResponse.statusCode);
+          expect(err.res.body).toStrictEqual(fleetMigrationResponse);
+        }
+      });
 
       it('rejects requests to get unsupported apm server schema', async () => {
         try {
@@ -101,10 +133,17 @@ export default function ({ getService }: APMFtrContextProvider) {
         }
       });
 
-      it('rejects requests to delete agent configuration', async () => {
+      // Not possible to test the DELETE, as first we will need to get the service
+      xit('rejects requests to delete agent configuration', async () => {
         try {
           await apmApiClient.slsUser({
-            endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
+            endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
+            params: {
+              body: {
+                service: {},
+                settings: { transaction_sample_rate: '0.55' },
+              },
+            },
           });
         } catch (err) {
           expect(err.res.status).toBe(agentConfigurationResponse.statusCode);
@@ -112,11 +151,16 @@ export default function ({ getService }: APMFtrContextProvider) {
         }
       });
 
-      // TODO: @Miriam - Its a PUT request, which means we must test it with all required params else it will throw 400. We need a 404 here
-      xit('rejects requests to create/update agent configuration', async () => {
+      it('rejects requests to create/update agent configuration', async () => {
         try {
           await apmApiClient.slsUser({
             endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
+            params: {
+              body: {
+                service: {},
+                settings: { transaction_sample_rate: '0.55' },
+              },
+            },
           });
         } catch (err) {
           expect(err.res.status).toBe(agentConfigurationResponse.statusCode);
@@ -124,17 +168,24 @@ export default function ({ getService }: APMFtrContextProvider) {
         }
       });
 
-      // TODO: @Miriam - Its a POST request, which means we must test it with all required params else it will throw 400. We need a 404 here
-      xit('rejects requests to lookup single configuration', async () => {
-        const { body, status } = await supertest
-          .post('/api/apm/settings/agent-configuration/search 2023-10-31')
-          .set(svlCommonApi.getCommonRequestHeader());
-
-        expect(body).toEqual(agentConfigurationResponse);
-        expect(status).toBe(agentConfigurationResponse.statusCode);
+      it('rejects requests to lookup single configuration', async () => {
+        try {
+          await apmApiClient.slsUser({
+            endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-10-31',
+            params: {
+              body: {
+                service: { name: 'myservice', environment: 'development' },
+                etag: '7312bdcc34999629a3d39df24ed9b2a7553c0c39',
+              },
+            },
+          });
+        } catch (err) {
+          expect(err.res.status).toBe(agentConfigurationResponse.statusCode);
+          expect(err.res.body).toStrictEqual(agentConfigurationResponse);
+        }
       });
     });
-    // it's returning 404 but we expect 501 Not implemented
+
     describe('source maps', () => {
       it('rejects requests to list source maps', async () => {
         try {
@@ -147,24 +198,25 @@ export default function ({ getService }: APMFtrContextProvider) {
         }
       });
 
-      xit('rejects requests to upload source maps', async () => {
-        const { body, status } = await supertest
-          .post('/api/apm/sourcemaps 2023-10-31')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .auth('admin', 'changeme');
-
-        expect(body).toEqual(sourceMapsResponse);
-        expect(status).toBe(sourceMapsResponse.statusCode);
+      it('rejects requests to upload source maps', async () => {
+        try {
+          await uploadSourcemap(apmApiClient);
+        } catch (err) {
+          expect(err.res.status).toBe(sourceMapsResponse.statusCode);
+          expect(err.res.body).toStrictEqual(sourceMapsResponse);
+        }
       });
-
+      // Not possible to test the DELETE, as first we will need to get the id of a source map
       xit('rejects requests to delete source map', async () => {
-        const { body, status } = await supertest
-          .delete('/api/apm/sourcemaps/{id} 2023-10-31')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .auth('admin', 'changeme');
-
-        expect(body).toEqual(sourceMapsResponse);
-        expect(status).toBe(sourceMapsResponse.statusCode);
+        try {
+          await apmApiClient.slsUser({
+            endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
+            params: { path: { id: 'foo' } },
+          });
+        } catch (err) {
+          expect(err.res.status).toBe(sourceMapsResponse.statusCode);
+          expect(err.res.body).toStrictEqual(sourceMapsResponse);
+        }
       });
     });
   });
