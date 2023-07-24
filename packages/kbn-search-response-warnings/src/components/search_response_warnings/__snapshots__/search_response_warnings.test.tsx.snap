@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`WarningsCallout renders "badge" correctly 1`] = `
+exports[`SearchResponseWarnings renders "badge" correctly 1`] = `
 <div
   class="euiPopover emotion-euiPopover"
 >
@@ -31,194 +31,7 @@ exports[`WarningsCallout renders "badge" correctly 1`] = `
 </div>
 `;
 
-exports[`WarningsCallout renders "empty_prompt" correctly 1`] = `
-<div
-  class="euiPanel euiPanel--warning euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-warning"
->
-  <div
-    class="euiEmptyPrompt__main"
-  >
-    <div
-      class="euiEmptyPrompt__content"
-    >
-      <div
-        class="euiEmptyPrompt__contentInner"
-      >
-        <div
-          class="euiFlexGroup euiTitle emotion-euiFlexGroup-s-flexStart-center-row-euiTitle-m"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <span
-              color="warning"
-              data-euiicon-type="warning"
-            />
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-          >
-            <h2
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-            >
-              No results found
-            </h2>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiText emotion-euiText-m-euiTextColor-subdued"
-        >
-          <ul
-            class="eui-yScrollWithShadows"
-            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-          >
-            <li
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
-              >
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningTitle"
-                  >
-                    Data might be incomplete because your request timed out
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
-              >
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningTitle"
-                  >
-                    <strong>
-                      3 of 4 shards failed
-                    </strong>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningMessage"
-                  >
-                    <p>
-                      The data might be incomplete or wrong.
-                    </p>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <button>
-                    test1
-                  </button>
-                </div>
-              </div>
-            </li>
-            <li
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
-              >
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningTitle"
-                  >
-                    <strong>
-                      3 of 4 shards failed
-                    </strong>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningMessage"
-                  >
-                    <p>
-                      The data might be incomplete or wrong.
-                    </p>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <button>
-                    test2
-                  </button>
-                </div>
-              </div>
-            </li>
-            <li
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
-              >
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningTitle"
-                  >
-                    <strong>
-                      1 of 4 shards failed
-                    </strong>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <div
-                    class="euiText emotion-euiText-m"
-                    data-test-subj="test3_warningMessage"
-                  >
-                    <p>
-                      The data might be incomplete or wrong.
-                    </p>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  <button>
-                    test3
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`WarningsCallout renders "inline" correctly 1`] = `
+exports[`SearchResponseWarnings renders "callout" correctly 1`] = `
 <div>
   <ul
     class="eui-yScroll"
@@ -512,5 +325,192 @@ exports[`WarningsCallout renders "inline" correctly 1`] = `
       </div>
     </li>
   </ul>
+</div>
+`;
+
+exports[`SearchResponseWarnings renders "empty_prompt" correctly 1`] = `
+<div
+  class="euiPanel euiPanel--warning euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-warning"
+>
+  <div
+    class="euiEmptyPrompt__main"
+  >
+    <div
+      class="euiEmptyPrompt__content"
+    >
+      <div
+        class="euiEmptyPrompt__contentInner"
+      >
+        <div
+          class="euiFlexGroup euiTitle emotion-euiFlexGroup-s-flexStart-center-row-euiTitle-m"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <span
+              color="warning"
+              data-euiicon-type="warning"
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <h2
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              No results found
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiText emotion-euiText-m-euiTextColor-subdued"
+        >
+          <ul
+            class="eui-yScrollWithShadows"
+            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          >
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    Data might be incomplete because your request timed out
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    <strong>
+                      3 of 4 shards failed
+                    </strong>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningMessage"
+                  >
+                    <p>
+                      The data might be incomplete or wrong.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button>
+                    test1
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    <strong>
+                      3 of 4 shards failed
+                    </strong>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningMessage"
+                  >
+                    <p>
+                      The data might be incomplete or wrong.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button>
+                    test2
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    <strong>
+                      1 of 4 shards failed
+                    </strong>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningMessage"
+                  >
+                    <p>
+                      The data might be incomplete or wrong.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button>
+                    test3
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 `;
