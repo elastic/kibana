@@ -15,6 +15,7 @@ import {
   getAllDataTablesInStorage,
   addTableInStorage,
   migrateAlertTableStateToTriggerActionsState,
+  migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
 } from '.';
 
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
@@ -22,6 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { v88xAlertOrignalData, v89xAlertsOriginalData } from './test.data';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -788,7 +790,7 @@ describe('SiemLocalStorage', () => {
     });
   });
 
-  describe('Trigger Actions Alert Table Migration', () => {
+  describe('Trigger Actions Alert Table Migration -> Migration from 8.7', () => {
     const legacyDataTableState: DataTableState['dataTable']['tableById'] = {
       'alerts-page': {
         queryFields: [],
@@ -1483,6 +1485,46 @@ describe('SiemLocalStorage', () => {
           }
         }
       }
+    });
+  });
+
+  describe('should migrate Alert Table visible columns from v8.8.x', () => {
+    // PR: https://github.com/elastic/kibana/pull/161054
+    beforeEach(() => storage.clear());
+    it('should migrate correctly when upgrading from 8.8.x -> 8.9', () => {
+      Object.keys(v88xAlertOrignalData).forEach((k) => {
+        storage.set(k, v88xAlertOrignalData[k as keyof typeof v88xAlertOrignalData]);
+      });
+
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      Object.keys(v89xAlertsOriginalData).forEach((k) => {
+        const expectedResult = v89xAlertsOriginalData[k as keyof typeof v89xAlertsOriginalData];
+        expect(storage.get(k)).toMatchObject(expectedResult);
+      });
+    });
+    it('should be a no-op when reinstalling from 8.9 when data is already present.', () => {
+      Object.keys(v89xAlertsOriginalData).forEach((k) => {
+        storage.set(k, v89xAlertsOriginalData[k as keyof typeof v89xAlertsOriginalData]);
+      });
+
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      Object.keys(v89xAlertsOriginalData).forEach((k) => {
+        const expectedResult = v89xAlertsOriginalData[k as keyof typeof v89xAlertsOriginalData];
+        expect(storage.get(k)).toMatchObject(expectedResult);
+      });
+    });
+
+    it('should be a no-op when installing 8.9 for the first time', () => {
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      expect(
+        storage.get('detection-engine-alert-table-securitySolution-alerts-page-gridView')
+      ).toBeNull();
+      expect(
+        storage.get('detection-engine-alert-table-securitySolution-rule-details-gridView')
+      ).toBeNull();
     });
   });
 });

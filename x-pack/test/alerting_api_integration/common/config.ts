@@ -64,6 +64,8 @@ const enabledActionTypes = [
   'test.throw',
   'test.excluded',
   'test.capped',
+  'test.system-action',
+  'test.system-action-kibana-privileges',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {

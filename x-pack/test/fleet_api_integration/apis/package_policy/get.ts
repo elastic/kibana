@@ -152,6 +152,32 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a 404 with an invalid id', async function () {
         await supertest.get(`/api/fleet/package_policies/IS_NOT_PRESENT`).expect(404);
       });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .expect(200);
+
+        expect(Array.isArray(item.inputs)).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .expect(200);
+
+        expect(Array.isArray(item.inputs));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .expect(400);
+      });
     });
 
     describe('POST /api/fleet/package_policies/_bulk_get', async function () {
@@ -246,9 +272,10 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).eql(1);
+        expect(Array.isArray(items[0]));
       });
 
-      it('should return 404 with invvalid ids', async function () {
+      it('should return 404 with invalid ids', async function () {
         await supertest
           .post(`/api/fleet/package_policies/_bulk_get`)
           .set('kbn-xsrf', 'xxxx')
@@ -294,6 +321,40 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).eql(1);
+      });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=simplified`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+        expect(Array.isArray(items[0])).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=legacy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+        expect(Array.isArray(items[0]));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=foo`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(400);
       });
     });
 
@@ -363,6 +424,95 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body.items).to.have.length(1);
         expect(response.body.items[0].id).to.eql(packagePolicyId);
+      });
+    });
+
+    describe('get by kuery', async function () {
+      let agentPolicyId: string;
+      let endpointPackagePolicyId: string;
+
+      before(async function () {
+        if (!server.enabled) {
+          return;
+        }
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: endpointPackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          });
+        endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
+      });
+
+      after(async function () {
+        if (!server.enabled) {
+          return;
+        }
+
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [endpointPackagePolicyId] })
+          .expect(200);
+
+        // uninstall endpoint package
+        await supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      it('should return 200 if the passed kuery is correct', async () => {
+        const { body: packagePolicyResponse } = await supertest
+          .get(`/api/fleet/package_policies?kuery=ingest-package-policies.package.name:endpoint`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
+      });
+      it('should return 400 if the passed kuery does not have prefix ingest-package-policies', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery=package.name:endpoint`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(
+            `/api/fleet/package_policies?kuery=ingest-package-policies.non_existent_parameter:test`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
       });
     });
   });

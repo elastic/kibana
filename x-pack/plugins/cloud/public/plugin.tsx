@@ -22,27 +22,38 @@ export interface CloudConfigType {
   base_url?: string;
   profile_url?: string;
   deployment_url?: string;
+  billing_url?: string;
   organization_url?: string;
+  users_and_roles_url?: string;
+  performance_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  serverless?: {
+    project_id: string;
+  };
 }
 
 interface CloudUrls {
   deploymentUrl?: string;
   profileUrl?: string;
+  billingUrl?: string;
   organizationUrl?: string;
   snapshotsUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
+  private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: FC[] = [];
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
+    this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
   }
 
@@ -75,6 +86,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      isServerlessEnabled: this.isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.project_id,
+      },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
@@ -99,15 +114,36 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     };
 
-    const { deploymentUrl, profileUrl, organizationUrl } = this.getCloudUrls();
+    const {
+      deploymentUrl,
+      profileUrl,
+      billingUrl,
+      organizationUrl,
+      performanceUrl,
+      usersAndRolesUrl,
+    } = this.getCloudUrls();
+
+    let decodedId: DecodedCloudId | undefined;
+    if (this.config.id) {
+      decodedId = decodeCloudId(this.config.id, this.logger);
+    }
 
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
       cloudId: this.config.id,
+      billingUrl,
       deploymentUrl,
       profileUrl,
       organizationUrl,
+      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      kibanaUrl: decodedId?.kibanaUrl,
+      isServerlessEnabled: this.isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.project_id,
+      },
+      performanceUrl,
+      usersAndRolesUrl,
     };
   }
 
@@ -116,21 +152,30 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private getCloudUrls(): CloudUrls {
     const {
       profile_url: profileUrl,
+      billing_url: billingUrl,
       organization_url: organizationUrl,
       deployment_url: deploymentUrl,
       base_url: baseUrl,
+      performance_url: performanceUrl,
+      users_and_roles_url: usersAndRolesUrl,
     } = this.config;
 
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
+    const fullCloudBillingUrl = getFullCloudUrl(baseUrl, billingUrl);
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
+    const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
+    const fullCloudUsersAndRolesUrl = getFullCloudUrl(baseUrl, usersAndRolesUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
       deploymentUrl: fullCloudDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
+      billingUrl: fullCloudBillingUrl,
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
+      performanceUrl: fullCloudPerformanceUrl,
+      usersAndRolesUrl: fullCloudUsersAndRolesUrl,
     };
   }
 }

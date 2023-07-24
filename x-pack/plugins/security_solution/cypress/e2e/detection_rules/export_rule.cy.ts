@@ -17,27 +17,41 @@ import {
 import {
   filterByElasticRules,
   selectNumberOfRules,
-  bulkExportRules,
   selectAllRules,
   waitForRuleExecution,
   exportRule,
   importRules,
   expectManagementTableRules,
 } from '../../tasks/alerts_detection_rules';
+import { bulkExportRules } from '../../tasks/rules_bulk_actions';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
 import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import {
+  cleanKibana,
+  resetRulesTableState,
+  deleteAlertsAndRules,
+  reload,
+} from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import {
-  excessivelyInstallAllPrebuiltRules,
+  createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();
+
+const prebuiltRules = Array.from(Array(7)).map((_, i) => {
+  return createRuleAssetSavedObject({
+    name: `Test rule ${i + 1}`,
+    rule_id: `rule_${i + 1}`,
+  });
+});
 
 describe('Export rules', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
@@ -53,6 +67,8 @@ describe('Export rules', () => {
     deleteAlertsAndRules();
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
+    // Prevent installation of whole prebuilt rules package, use mock prebuilt rules instead
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createRule(getNewRule({ name: 'Rule to export' })).as('ruleResponse');
   });
@@ -83,23 +99,21 @@ describe('Export rules', () => {
   });
 
   it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
-    const expectedElasticRulesCount = 7;
-
-    excessivelyInstallAllPrebuiltRules();
+    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
 
     filterByElasticRules();
-    selectNumberOfRules(expectedElasticRulesCount);
+    selectNumberOfRules(prebuiltRules.length);
     bulkExportRules();
 
     cy.get(MODAL_CONFIRMATION_BODY).contains(
-      `${expectedElasticRulesCount} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
+      `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
     );
   });
 
   it('exports only custom rules', function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
-    excessivelyInstallAllPrebuiltRules();
+    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
 
     selectAllRules();
     bulkExportRules();
@@ -151,8 +165,8 @@ describe('Export rules', () => {
       // one rule with exception, one without it
       const expectedNumberCustomRulesToBeExported = 2;
 
-      excessivelyInstallAllPrebuiltRules();
-
+      createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+      reload();
       selectAllRules();
       bulkExportRules();
 

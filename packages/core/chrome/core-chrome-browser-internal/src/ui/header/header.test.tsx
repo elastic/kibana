@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { Header } from './header';
 
@@ -30,6 +31,7 @@ function mockProps() {
     isVisible$: new BehaviorSubject(true),
     customBranding$: new BehaviorSubject({}),
     kibanaDocLink: '/docs',
+    docLinks: docLinksServiceMock.createStartContract(),
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
@@ -87,6 +89,7 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
+        helpMenuLinks$={of([])}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();

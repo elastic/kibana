@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   DefaultNavigation,
   NavigationKibanaProvider,
-  NavigationTreeDefinition,
+  type NavigationTreeDefinition,
   getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -52,9 +53,25 @@ const navigationTree: NavigationTreeDefinition = {
             },
             {
               link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
             },
             {
               link: 'visualize',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
+              },
+            },
+            {
+              link: 'management:triggersActions',
+              title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
+                defaultMessage: 'Alerts',
+              }),
             },
           ],
         },
@@ -100,14 +117,53 @@ const navigationTree: NavigationTreeDefinition = {
         },
       ],
     },
+    {
+      type: 'navGroup',
+      ...getPresets('ml'),
+    },
+  ],
+  footer: [
+    {
+      type: 'navGroup',
+      id: 'project_settings_project_nav',
+      title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
+        defaultMessage: 'Project settings',
+      }),
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          children: [
+            {
+              link: 'management',
+              title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
+                defaultMessage: 'Management',
+              }),
+            },
+            {
+              id: 'cloudLinkUserAndRoles',
+              cloudLink: 'userAndRoles',
+            },
+            {
+              id: 'cloudLinkBilling',
+              cloudLink: 'billingAndSub',
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
 export const createServerlessSearchSideNavComponent =
-  (core: CoreStart, { serverless }: { serverless: ServerlessPluginStart }) =>
+  (
+    core: CoreStart,
+    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
+  ) =>
   () => {
     return (
-      <NavigationKibanaProvider core={core} serverless={serverless}>
+      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
         <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
       </NavigationKibanaProvider>
     );

@@ -12,7 +12,7 @@ import { TestNowResponse } from '../../../common/types';
 import {
   ConfigKey,
   MonitorFields,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
@@ -38,9 +38,12 @@ export const triggerTestNow = async (
   const encryptedClient = server.encryptedSavedObjects.getClient();
 
   const monitorWithSecrets =
-    await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+    await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       syntheticsMonitorType,
-      monitorId
+      monitorId,
+      {
+        namespace: spaceId,
+      }
     );
   const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
 

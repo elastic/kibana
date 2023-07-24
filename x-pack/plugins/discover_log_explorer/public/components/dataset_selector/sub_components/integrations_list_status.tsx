@@ -17,7 +17,7 @@ import {
   noIntegrationsLabel,
 } from '../constants';
 
-interface IntegrationsListStatusProps {
+export interface IntegrationsListStatusProps {
   integrations: Integration[] | null;
   error: Error | null;
   onRetry: ReloadIntegrations;

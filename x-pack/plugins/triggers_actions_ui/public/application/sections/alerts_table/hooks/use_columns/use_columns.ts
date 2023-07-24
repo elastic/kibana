@@ -29,7 +29,6 @@ export interface UseColumnsResp {
   visibleColumns: string[];
   isBrowserFieldDataLoading: boolean | undefined;
   browserFields: BrowserFields;
-  onColumnsChange: (newColumns: EuiDataGridColumn[]) => void;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onChangeVisibleColumns: (columnIds: string[]) => void;
@@ -166,15 +165,12 @@ export const useColumns = ({
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
     let cols = storageAlertsTable.current.columns;
-
-    if (cols && cols.length === 0) {
-      cols = defaultColumns;
-    }
     // before restoring from storage, enrich the column data
     if (initialBrowserFields && defaultColumns) {
       cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+    } else if (cols && cols.length === 0) {
+      cols = defaultColumns;
     }
-
     return cols;
   });
 
@@ -212,17 +208,17 @@ export const useColumns = ({
   }, [browserFields, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated, columns]);
 
   const setColumnsAndSave = useCallback(
-    (newColumns: EuiDataGridColumn[]) => {
+    (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
       setColumns(newColumns);
       persist({
         id,
         storage,
         storageAlertsTable,
         columns: newColumns,
-        visibleColumns,
+        visibleColumns: newVisibleColumns,
       });
     },
-    [id, storage, storageAlertsTable, visibleColumns]
+    [id, storage, storageAlertsTable]
   );
 
   const setColumnsByColumnIds = useCallback(
@@ -248,15 +244,24 @@ export const useColumns = ({
         columns,
         defaultColumns,
       });
-      setVisibleColumns(newColumns.map((nc) => nc.id));
-      setColumnsAndSave(newColumns);
+      let newVisibleColumns = visibleColumns;
+      if (visibleColumns.includes(columnId)) {
+        newVisibleColumns = visibleColumns.filter((vc) => vc !== columnId);
+      } else {
+        newVisibleColumns = [visibleColumns[0], columnId, ...visibleColumns.slice(1)];
+      }
+      setVisibleColumns(newVisibleColumns);
+      setColumnsAndSave(newColumns, newVisibleColumns);
     },
-    [browserFields, columns, defaultColumns, setColumnsAndSave]
+    [browserFields, columns, defaultColumns, setColumnsAndSave, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
     const populatedDefaultColumns = populateColumns(defaultColumns, browserFields, defaultColumns);
-    setColumnsAndSave(populatedDefaultColumns);
+    setColumnsAndSave(
+      populatedDefaultColumns,
+      populatedDefaultColumns.map((pdc) => pdc.id)
+    );
   }, [browserFields, defaultColumns, setColumnsAndSave]);
 
   const onColumnResize = useCallback(
@@ -264,10 +269,10 @@ export const useColumns = ({
       const colIndex = columns.findIndex((c) => c.id === columnId);
       if (colIndex > -1) {
         columns.splice(colIndex, 1, { ...columns[colIndex], initialWidth: width });
-        setColumnsAndSave(columns);
+        setColumnsAndSave(columns, visibleColumns);
       }
     },
-    [columns, setColumnsAndSave]
+    [columns, setColumnsAndSave, visibleColumns]
   );
 
   /*
@@ -283,16 +288,28 @@ export const useColumns = ({
     [columns]
   );
 
-  return {
-    columns,
-    visibleColumns,
-    isBrowserFieldDataLoading,
-    browserFields,
-    onColumnsChange: setColumnsAndSave,
-    onToggleColumn,
-    onResetColumns,
-    onChangeVisibleColumns: setColumnsByColumnIds,
-    onColumnResize,
-    fields: fieldsToFetch,
-  };
+  return useMemo(
+    () => ({
+      columns,
+      visibleColumns,
+      isBrowserFieldDataLoading,
+      browserFields,
+      onToggleColumn,
+      onResetColumns,
+      onChangeVisibleColumns: setColumnsByColumnIds,
+      onColumnResize,
+      fields: fieldsToFetch,
+    }),
+    [
+      browserFields,
+      columns,
+      fieldsToFetch,
+      isBrowserFieldDataLoading,
+      onColumnResize,
+      onResetColumns,
+      onToggleColumn,
+      setColumnsByColumnIds,
+      visibleColumns,
+    ]
+  );
 };

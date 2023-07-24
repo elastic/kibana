@@ -42,7 +42,6 @@ export function registerTopNFunctionsSearchRoute({
     async (context, request, response) => {
       try {
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
-
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
         const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
@@ -60,15 +59,16 @@ export function registerTopNFunctionsSearchRoute({
           });
 
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
-          return createTopNFunctions(
-            stackTraceEvents,
-            stackTraces,
-            stackFrames,
-            executables,
-            startIndex,
+          return createTopNFunctions({
             endIndex,
-            samplingRate
-          );
+            events: stackTraceEvents,
+            executables,
+            samplingRate,
+            stackFrames,
+            stackTraces,
+            startIndex,
+            totalSeconds: timeTo - timeFrom,
+          });
         });
 
         return response.ok({
