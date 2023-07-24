@@ -72,5 +72,6 @@ export type CasesFindQueryParams = Partial<
     | 'to'
     | 'assignees'
     | 'category'
-  > & { sortByField?: string; authorizationFilter?: KueryNode }
+    | 'sortField'
+  > & { authorizationFilter?: KueryNode }
 >;

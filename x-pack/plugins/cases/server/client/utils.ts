@@ -21,7 +21,7 @@ import type {
   CommentRequest,
   CaseSeverity,
   CommentRequestExternalReferenceType,
-  CasesFindRequest,
+  CasesFindRequestSortFields,
 } from '../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
@@ -339,7 +339,7 @@ export const constructQueryOptions = ({
   reporters,
   status,
   severity,
-  sortByField,
+  sortField,
   owner,
   authorizationFilter,
   from,
@@ -349,7 +349,7 @@ export const constructQueryOptions = ({
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
-  const sortField = convertSortField(sortByField);
+  const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
   const statusFilter = status != null ? addStatusFilter(status) : undefined;
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
@@ -370,7 +370,7 @@ export const constructQueryOptions = ({
 
   return {
     filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
-    sortField,
+    sortField: sortByField,
   };
 };
 
@@ -475,22 +475,21 @@ enum SortFieldCase {
   category = 'category',
 }
 
-export const convertSortField = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (
+  sortField: CasesFindRequestSortFields | undefined
+): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
     case 'createdAt':
-    case 'created_at':
       return SortFieldCase.createdAt;
     case 'closedAt':
-    case 'closed_at':
       return SortFieldCase.closedAt;
     case 'title':
       return SortFieldCase.title;
     case 'severity':
       return SortFieldCase.severity;
     case 'updatedAt':
-    case 'updated_at':
       return SortFieldCase.updatedAt;
     case 'category':
       return SortFieldCase.category;
@@ -503,7 +502,7 @@ export const constructSearch = (
   search: string | undefined,
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
+): { search: string; rootSearchFields?: string[] } | undefined => {
   if (!search) {
     return undefined;
   }
