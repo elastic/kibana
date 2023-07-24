@@ -37,12 +37,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           async () => await testSubjects.exists('elasticsearchProductCard')
         );
         await retry.waitFor(
-          'App Search product card visible',
-          async () => await testSubjects.exists('appSearchProductCard')
+          'Search Applications product card visible',
+          async () => await testSubjects.exists('enterpriseSearchApplicationsProductCard')
         );
         await retry.waitFor(
-          'Workplace Search product card visible',
-          async () => await testSubjects.exists('workplaceSearchProductCard')
+          'Behavioral Analytics product card visible',
+          async () => await testSubjects.exists('enterpriseSearchAnalyticsProductCard')
         );
         await a11y.testAppSnapshot();
       });
