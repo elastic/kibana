@@ -38,7 +38,7 @@ export const cloudSecurityMetringCallback = async ({
 
     return cloudSecurityUsageRecords;
   } catch (err) {
-    logger.error(`Failed to fetch CSPM metering data ${err}`);
+    logger.error(`Failed to fetch Cloud Security metering data ${err}`);
     return [];
   }
 };
