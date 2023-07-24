@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import {
   ApmUsername,
   APM_TEST_PASSWORD,
@@ -113,7 +113,7 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
   body: APIReturnType<TEndpoint>;
 }
 
-export async function getApmTestService({ getService }: FtrConfigProviderContext) {
+export async function getApmTestService({ getService }: FtrProviderContext) {
   const svlSharedConfig = getService('config');
   const kibanaServer = svlSharedConfig.get('servers.kibana');
 
