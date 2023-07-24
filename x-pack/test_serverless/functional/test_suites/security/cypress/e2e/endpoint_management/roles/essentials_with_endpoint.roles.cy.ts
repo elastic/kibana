@@ -17,6 +17,7 @@ import { ensurePermissionDeniedScreen, visitFleetAgentList } from '../../../scre
 import { visitEndpointList } from '../../../screens/endpoint_management/endpoint_list';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import { getArtifactListEmptyStateAddButton } from '../../../screens/endpoint_management/artifacts';
+import { visitPolicyList } from '../../../screens/endpoint_management';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -149,8 +150,34 @@ describe(
         login('rule_author');
       });
 
-      // FIXME:PT implement
-      it('should do something', () => {});
+      for (const { id, url, title } of artifactPagesFullAccess) {
+        it(`should have CRUD access to: ${title}`, () => {
+          cy.visit(url);
+          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+        });
+      }
+
+      it('should have access to Endpoint list page', () => {
+        visitEndpointList();
+        getNoPrivilegesPage().should('not.exist');
+      });
+
+      it('should have access to policy management', () => {
+        visitPolicyList();
+        getNoPrivilegesPage().should('not.exist');
+      });
+
+      it(`should have Read access only to: Host Isolation Exceptions`, () => {
+        cy.visit(pageById.hostIsolationExceptions.url);
+        getArtifactListEmptyStateAddButton(
+          pageById.hostIsolationExceptions.id as EndpointArtifactPageId
+        ).should('not.exist');
+      });
+
+      it('should NOT have access to Fleet', () => {
+        visitFleetAgentList();
+        ensurePermissionDeniedScreen();
+      });
     });
 
     describe('for role: soc_manager', () => {

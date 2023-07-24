@@ -10,6 +10,6 @@ import { EndpointManagementPageMap, getEndpointManagementPageMap } from '../../l
 
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();
 
-export const visitEndpointList = (): Cypress.Chainable => {
-  return cy.visit(pageById.endpointList.url);
+export const visitPolicyList = (): Cypress.Chainable => {
+  return cy.visit(pageById.policyList);
 };
