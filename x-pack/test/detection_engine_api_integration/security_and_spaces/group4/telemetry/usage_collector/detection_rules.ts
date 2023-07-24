@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { isEqual } from 'lodash';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
   ThreatMatchRuleCreateProps,
@@ -468,10 +469,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           };
-          // eslint-disable-next-line no-console
-          console.error(`expected: ${JSON.stringify(expected)}`);
-          // eslint-disable-next-line no-console
-          console.error(`stats: ${JSON.stringify(stats)}`);
+          if (!isEqual(expected, stats)) {
+            expect(JSON.stringify(expected)).to.eql(JSON.stringify(stats));
+          }
           expect(stats).to.eql(expected);
         });
       });
