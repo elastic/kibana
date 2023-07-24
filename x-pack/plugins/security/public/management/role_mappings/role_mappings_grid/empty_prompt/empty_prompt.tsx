@@ -11,7 +11,6 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
 interface EmptyPromptProps {
@@ -38,7 +37,6 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
             defaultMessage="Create your first role mapping"
           />
         )}
-
       </h1>
     }
     body={
@@ -50,6 +48,5 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
       </p>
     }
     actions={readOnly ? null : <CreateRoleMappingButton history={history} />}
-
   />
 );

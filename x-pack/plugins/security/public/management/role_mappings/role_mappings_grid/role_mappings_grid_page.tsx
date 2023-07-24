@@ -136,9 +136,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     }
 
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
-      return (
-        <EmptyPrompt history={this.props.history} readOnly={this.props.readOnly} />
-      );
+      return <EmptyPrompt history={this.props.history} readOnly={this.props.readOnly} />;
     }
 
     return (
