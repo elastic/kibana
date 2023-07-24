@@ -285,5 +285,38 @@ describe('Utils class', () => {
         }
       );
     });
+
+    it('with illegal quadruple quotes should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v10}', data: ['{\n  "f": """"${v10}""""\n}'] },
+        { name: 'v10', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": """"${v10}""""\n}'],
+        }
+      );
+    });
+
+    it('with escaped pre quote should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v11}', data: ['{\n  "f": "\\"${v11}"\n}'] },
+        { name: 'v11', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": "\\"${v11}"\n}'],
+        }
+      );
+    });
+
+    it('with escaped pre triple quotes should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v12}', data: ['{\n  "f": "\\"""${v12}"""\n}'] },
+        { name: 'v12', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": "\\"""${v12}"""\n}'],
+        }
+      );
+    });
   });
 });

@@ -118,8 +118,8 @@ export const replaceVariables = (
   variables: DevToolsVariable[]
 ) => {
   const urlRegex = /\${(\w+)}/g;
-  const bodyRegexSingleQuote = /(?<!")"\${(\w+)}"(?!")/g;
-  const bodyRegexTripleQuotes = /"""\${(\w+)}"""/g;
+  const bodyRegexSingleQuote = /(?<![\\"])"\${(\w+)}"(?!")/g;
+  const bodyRegexTripleQuotes = /(?<![\\"])"""\${(\w+)}"""(?!")/g;
 
   return requests.map((req) => {
     if (urlRegex.test(req.url)) {
