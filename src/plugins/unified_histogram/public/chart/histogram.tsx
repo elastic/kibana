@@ -101,10 +101,10 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      // Lens will swallow shard failures and return `isLoading: false` because it displays
-      // its own errors, but this causes us to emit onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 0).
-      // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.
-      if (requestFailed || response?._shards.failed) {
+      // The response can have `response?._shards.failed` but we should still be able to show hits number
+      // TODO: show shards warnings as a badge next to the total hits number
+
+      if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;

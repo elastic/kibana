@@ -38,6 +38,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import type { SearchResponseInterceptedWarning } from '../types';
@@ -66,7 +67,6 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
-import { getSearchResponseInterceptedWarnings } from '../utils/get_search_response_intercepted_warnings';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
