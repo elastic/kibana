@@ -22,6 +22,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import styled from 'styled-components';
+
 import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
 import { useStartServices } from '../../../hooks';
@@ -48,14 +50,20 @@ export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = 
   );
 };
 
+const borderColor = '#d3dae6';
+
+const StyledPageBody = styled(EuiPageBody)`
+  border: 1px solid ${borderColor};
+  border-radius: 5px;
+`;
+
 export const MissingESRequirementsPage: React.FunctionComponent<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
 }> = ({ missingRequirements }) => {
   const { docLinks } = useStartServices();
-
   return (
     <WithoutHeaderLayout>
-      <EuiPageBody restrictWidth={820} style={{ border: '1px solid #d3dae6', borderRadius: '5px' }}>
+      <StyledPageBody restrictWidth={820}>
         <EuiPageSection color="transparent">
           <EuiCallOut
             title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
@@ -142,7 +150,7 @@ xpack.security.authc.api_key.enabled: true`}
             }}
           />
         </EuiPageSection>
-      </EuiPageBody>
+      </StyledPageBody>
     </WithoutHeaderLayout>
   );
 };
