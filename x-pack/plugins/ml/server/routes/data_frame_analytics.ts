@@ -69,6 +69,22 @@ function getExtendedMap(
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
+function getExtendedModelsMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: ExtendAnalyticsMapArgs
+) {
+  const analytics = new AnalyticsManager(mlClient, client);
+
+  console.log(`--@@idOptions`, idOptions);
+  return analytics.extendModelsMap(idOptions);
+}
+
+export function getAnalyticsManager(mlClient: MlClient, client: IScopedClusterClient) {
+  const analytics = new AnalyticsManager(mlClient, client);
+  return analytics;
+}
+
 // replace the recursive field and agg references with a
 // map of ids to allow it to be stringified for transportation
 // over the network.
@@ -793,8 +809,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
               index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
             });
           } else {
-            // @ts-expect-error never used as analyticsId
-            results = await getAnalyticsMap(mlClient, client, {
+            results = await getExtendedModelsMap(mlClient, client, {
               analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
               modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
             });

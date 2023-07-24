@@ -18,7 +18,7 @@ interface AnalyticsMapArg {
 interface GetAnalyticsJobIdArg extends AnalyticsMapArg {
   modelId?: never;
 }
-interface GetAnalyticsModelIdArg {
+export interface GetAnalyticsModelIdArg {
   analyticsId?: never;
   modelId: string;
 }
