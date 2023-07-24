@@ -34,7 +34,7 @@ describe('Capture URL view routes', () => {
   });
 
   it('correctly defines route.', () => {
-    expect(routeConfig.options).toEqual({ authRequired: false });
+    expect(routeConfig.options).toEqual({ access: 'public', authRequired: false });
 
     expect(routeConfig.validate).toEqual({
       body: undefined,
