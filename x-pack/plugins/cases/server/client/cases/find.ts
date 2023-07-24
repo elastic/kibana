@@ -79,7 +79,7 @@ export const find = async (
     const queryArgs: CasesFindQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
-      sortByField: queryParams.sortField,
+      sortField: queryParams.sortField,
       status: queryParams.status,
       severity: queryParams.severity,
       owner: queryParams.owner,
