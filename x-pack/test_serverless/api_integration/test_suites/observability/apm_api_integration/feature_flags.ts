@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { APMFtrContextProvider } from './common/services';
 
 const fleetMigrationResponse = {
   statusCode: 404,
@@ -38,7 +38,7 @@ const sourceMapsResponse = {
   },
 };
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: APMFtrContextProvider) {
   const svlCommonApi = getService('svlCommonApi');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');

@@ -5,17 +5,25 @@
  * 2.0.
  */
 
+import { GenericFtrProviderContext } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { services as xpackApiIntegrationServices } from '../../../test/api_integration/services';
 import { services as svlSharedServices } from '../../shared/services';
-import { getApmTestService } from '../test_suites/observability/apm_api_integration/common/apm_api_supertest';
 
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 
 export const services = {
   ...xpackApiIntegrationServices,
   ...svlSharedServices,
-  apmApiClient: getApmTestService,
 
   svlCommonApi: SvlCommonApiServiceProvider,
 };
+
+export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+
+export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  {}
+>
+  ? TServices
+  : {};

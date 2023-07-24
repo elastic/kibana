@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import {
   ApmUsername,
   APM_TEST_PASSWORD,
@@ -19,6 +18,7 @@ import type {
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
+import { InheritedFtrProviderContext } from '../../../../services';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
@@ -113,7 +113,12 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
   body: APIReturnType<TEndpoint>;
 }
 
-export async function getApmTestService({ getService }: FtrProviderContext) {
+type ApmApiClientKey = 'slsUser';
+export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+
+export async function getApmTestService({
+  getService,
+}: InheritedFtrProviderContext): Promise<ApmApiClient> {
   const svlSharedConfig = getService('config');
   const kibanaServer = svlSharedConfig.get('servers.kibana');
 
