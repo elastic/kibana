@@ -89,7 +89,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
         }),
-        disabled: true,
+        disabled: false,
         icon: 'logoGCP',
         tooltip: i18n.translate('xpack.csp.cspmIntegration.gcpOption.tooltipContent', {
           defaultMessage: 'Coming soon',

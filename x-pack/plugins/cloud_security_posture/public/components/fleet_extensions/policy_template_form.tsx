@@ -230,6 +230,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
+        {console.log(newPolicy, packageInfo)}
+        {newPolicy.vars?.deployment.value === 'aws' && <div>hi</div>}
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}
