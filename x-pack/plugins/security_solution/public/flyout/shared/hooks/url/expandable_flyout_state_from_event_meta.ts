@@ -6,7 +6,7 @@
  */
 
 import type { ExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RightPanelKey } from '../right';
+import { RightPanelKey } from '../../../right';
 
 interface RedirectParams {
   index: string;

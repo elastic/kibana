@@ -9,7 +9,7 @@ import { useCallback, useRef } from 'react';
 import type { ExpandableFlyoutApi, ExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useSyncToUrl } from '@kbn/url-state';
 import last from 'lodash/last';
-import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 
 export const FLYOUT_URL_PARAM = URL_PARAM_KEY.eventFlyout;
 
