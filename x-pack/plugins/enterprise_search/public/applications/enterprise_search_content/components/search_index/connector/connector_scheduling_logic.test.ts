@@ -7,14 +7,18 @@
 
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
+import { SyncJobType } from '../../../../../../common/types/connectors';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
 describe('ConnectorSchedulingLogic', () => {
   const { mount } = new LogicMounter(ConnectorSchedulingLogic);
   const DEFAULT_VALUES = {
+    hasAccessSyncChanges: false,
     hasChanges: false,
+    hasFullSyncChanges: false,
+    hasIncrementalSyncChanges: false,
+    makeRequestType: null,
   };
 
   beforeEach(() => {
@@ -26,23 +30,40 @@ describe('ConnectorSchedulingLogic', () => {
   });
 
   describe('reducers', () => {
-    describe('hasChanges', () => {
-      it('should set false on apiSuccess', () => {
-        ConnectorSchedulingLogic.actions.setHasChanges(true);
-        UpdateConnectorSchedulingApiLogic.actions.apiSuccess({
-          enabled: false,
-          interval: '',
+    describe('hasFullSyncChanges', () => {
+      const expectedChanges = {
+        [SyncJobType.FULL]: {
+          hasFullSyncChanges: true,
+        },
+
+        [SyncJobType.INCREMENTAL]: {
+          hasIncrementalSyncChanges: true,
+        },
+
+        [SyncJobType.ACCESS_CONTROL]: {
+          hasAccessSyncChanges: true,
+        },
+      };
+      [SyncJobType.FULL, SyncJobType.INCREMENTAL, SyncJobType.ACCESS_CONTROL].forEach((type) => {
+        it(`sets related flag when setHasChanges called with ${type} `, () => {
+          ConnectorSchedulingLogic.actions.setHasChanges(type);
+          expect(ConnectorSchedulingLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            hasChanges: true,
+            ...expectedChanges[type],
+          });
         });
-        expect(ConnectorSchedulingLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          hasChanges: false,
-        });
-      });
-      it('should set hasChanges on setHasChanges', () => {
-        ConnectorSchedulingLogic.actions.setHasChanges(true);
-        expect(ConnectorSchedulingLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          hasChanges: true,
+        it(`sets related flag false when clearHasChanges called with ${type}`, () => {
+          ConnectorSchedulingLogic.actions.setHasChanges(type);
+          expect(ConnectorSchedulingLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            hasChanges: true,
+            ...expectedChanges[type],
+          });
+          ConnectorSchedulingLogic.actions.clearHasChanges(type);
+          expect(ConnectorSchedulingLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+          });
         });
       });
     });

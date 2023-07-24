@@ -17,7 +17,6 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import {
   GetSummarizedAlertsFnOpts,
   parseDuration,
-  RawRule,
   CombinedSummarizedAlerts,
   ThrottledActions,
 } from '../types';
@@ -36,6 +35,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
+  RuleAlertData,
 } from '../../common';
 import {
   generateActionHash,
@@ -64,7 +64,8 @@ export class ExecutionHandler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -76,12 +77,13 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
   private ruleRunMetricsStore: RuleRunMetricsStore;
-  private apiKey: RawRule['apiKey'];
+  private apiKey: string | null;
   private ruleConsumer: string;
   private executionId: string;
   private ruleLabel: string;
@@ -116,7 +118,8 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >) {
     this.logger = logger;
     this.alertingEventLogger = alertingEventLogger;
@@ -216,12 +219,12 @@ export class ExecutionHandler<
             this.rule.schedule,
             this.previousStartedAt
           );
+          const ruleUrl = this.buildRuleUrl(spaceId, start, end);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
               actionParams: transformSummaryActionParams({
                 alerts: summarizedAlerts,
                 rule: this.rule,
@@ -232,7 +235,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId, start, end),
+                ruleUrl,
               }),
             }),
           };
@@ -257,12 +260,12 @@ export class ExecutionHandler<
           });
         } else {
           const executableAlert = alert!;
+          const ruleUrl = this.buildRuleUrl(spaceId);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
               actionParams: transformActionParams({
                 actionsPlugin,
                 alertId: ruleId,
@@ -282,7 +285,7 @@ export class ExecutionHandler<
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 flapping: executableAlert.getFlapping(),
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl,
               }),
             }),
           };
@@ -440,8 +443,12 @@ export class ExecutionHandler<
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
+      const basePathname = new URL(this.taskRunnerContext.kibanaBaseUrl).pathname;
+      const basePathnamePrefix = basePathname !== '/' ? `${basePathname}` : '';
+      const spaceIdSegment = spaceId !== 'default' ? `/s/${spaceId}` : '';
+
       const ruleUrl = new URL(
-        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
+        [basePathnamePrefix, spaceIdSegment, relativePath].join(''),
         this.taskRunnerContext.kibanaBaseUrl
       );
 

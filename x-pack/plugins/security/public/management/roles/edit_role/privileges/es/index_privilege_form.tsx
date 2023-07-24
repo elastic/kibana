@@ -227,7 +227,12 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private loadFLSOptions = (indexNames: string[], force = false) => {
-    if (!force && (this.isFieldListLoading || indexNames.length === 0)) return;
+    if (
+      this.props.indexType === 'remote_indices' ||
+      (!force && (this.isFieldListLoading || indexNames.length === 0))
+    ) {
+      return;
+    }
 
     this.isFieldListLoading = true;
     this.setState({

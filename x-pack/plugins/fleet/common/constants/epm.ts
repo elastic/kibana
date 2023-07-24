@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AllowedAssetTypes } from '../types/models';
+import { ElasticsearchAssetType, KibanaAssetType } from '../types/models';
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
@@ -17,13 +19,20 @@ export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
 export const FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE = 'profiler_symbolizer';
+export const FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE = 'profiler_collector';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
 export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
+export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
+export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
+export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 
 export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
+
+export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
+
 /*
  Package rules:
 |               | autoUpdatePackages |
@@ -75,3 +84,12 @@ export const installationStatuses = {
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
 } as const;
+
+export const allowedAssetTypes: AllowedAssetTypes = [
+  KibanaAssetType.dashboard,
+  KibanaAssetType.search,
+  KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform,
+];
+
+export const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);

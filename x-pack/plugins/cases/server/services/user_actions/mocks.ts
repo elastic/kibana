@@ -7,10 +7,12 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
+import { alertComment, comment } from '../../mocks';
 
 export const casePayload: CasePostRequest = {
   title: 'Case SIR',
@@ -101,23 +103,6 @@ export const updatedTagsCases = [
     },
   },
 ];
-
-export const comment = {
-  comment: 'a comment',
-  type: CommentType.user as const,
-  owner: SECURITY_SOLUTION_OWNER,
-};
-
-const alertComment = {
-  alertId: 'alert-id-1',
-  index: 'alert-index-1',
-  rule: {
-    id: 'rule-id-1',
-    name: 'rule-name-1',
-  },
-  type: CommentType.alert as const,
-  owner: SECURITY_SOLUTION_OWNER,
-};
 
 export const attachments = [
   { id: '1', attachment: { ...comment }, owner: SECURITY_SOLUTION_OWNER },

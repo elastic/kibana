@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -125,7 +125,10 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: patchedCases[0].version,
-                connector: { ...jiraConnector, fields: { ...jiraConnector.fields, urgency: '1' } },
+                connector: {
+                  ...jiraConnector,
+                  fields: { ...jiraConnector.fields, issueType: 'Bug' },
+                },
               },
             ],
           },

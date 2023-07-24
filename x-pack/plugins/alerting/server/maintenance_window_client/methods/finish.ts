@@ -105,7 +105,8 @@ async function finishWithOCC(
       {
         events: eventsWithFinishedEvent,
         expirationDate: expirationDate.toISOString(),
-        ...modificationMetadata,
+        updatedAt: modificationMetadata.updatedAt,
+        updatedBy: modificationMetadata.updatedBy,
       },
       {
         version,

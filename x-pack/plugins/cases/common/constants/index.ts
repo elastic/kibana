@@ -10,6 +10,7 @@ import type { CasesFeaturesAllRequired } from '../ui/types';
 export * from './owners';
 export * from './files';
 export * from './application';
+export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -81,6 +82,7 @@ export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
+export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 
 /**
  * Action routes
@@ -99,15 +101,32 @@ export const MAX_ALERTS_PER_CASE = 1000 as const;
  * Searching
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
-export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
+export const MAX_BULK_GET_ATTACHMENTS = 100 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
+export const MAX_COMMENTS_PER_PAGE = 100 as const;
+export const MAX_CASES_PER_PAGE = 100 as const;
+export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
+export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
+export const MAX_TAGS_FILTER_LENGTH = 100 as const;
+export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
+export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
+export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
  * Validation
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_CATEGORY_LENGTH = 50 as const;
+export const MAX_DESCRIPTION_LENGTH = 30000 as const;
+export const MAX_COMMENT_LENGTH = 30000 as const;
+export const MAX_LENGTH_PER_TAG = 256 as const;
+export const MAX_TAGS_PER_CASE = 200 as const;
+export const MAX_DELETE_IDS_LENGTH = 100 as const;
+export const MAX_SUGGESTED_PROFILES = 10 as const;
+export const MAX_CASES_TO_UPDATE = 100 as const;
+export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 
 /**
  * Cases features
@@ -173,3 +192,9 @@ export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
 };
+
+/**
+ * Connectors
+ */
+
+export const NONE_CONNECTOR_ID: string = 'none';

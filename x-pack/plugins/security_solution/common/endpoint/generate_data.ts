@@ -1615,6 +1615,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
       agents: 0,
+      is_protected: false,
     };
   }
 

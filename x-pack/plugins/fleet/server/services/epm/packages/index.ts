@@ -22,10 +22,12 @@ export {
   getInstallations,
   getPackageInfo,
   getPackages,
+  getInstalledPackages,
   getLimitedPackages,
 } from './get';
 
 export { getBundledPackages } from './bundled_packages';
+export { getBulkAssets } from './get_bulk_assets';
 
 export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';

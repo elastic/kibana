@@ -17,6 +17,7 @@ import {
   isEqualState,
 } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 
@@ -43,25 +44,37 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = appState.getPrevious();
+    const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
-    if (isEqualState(prevState, nextState)) {
+    const prevQuery = savedSearch.searchSource.getField('query');
+    const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+    if (isEqualState(prevState, nextState) && !queryChanged) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } = appState.getPrevious();
+    const { hideChart, interval, breakdownField, sort, index } = prevState;
+
+    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
+    if (isTextBasedQueryLang) {
+      const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
+      if (!isTextBasedQueryLangPrev) {
+        savedSearchState.update({ nextState });
+        dataState.reset(savedSearch);
+      }
+    }
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
-    const chartIntervalChanged = nextState.interval !== interval;
+    const chartIntervalChanged = nextState.interval !== interval && !isTextBasedQueryLang;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
-    const docTableSortChanged = !isEqual(nextState.sort, sort);
-    const dataViewChanged = !isEqual(nextState.index, index);
+    const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
+    const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
     let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: nextState.index, savedSearch },
+        { id: nextState.index, savedSearch, isTextBasedQuery: isTextBasedQuery(nextState?.query) },
         { internalStateContainer: internalState, services }
       );
 
@@ -89,9 +102,33 @@ export const buildStateSubscribe =
       chartIntervalChanged ||
       breakdownFieldChanged ||
       docTableSortChanged ||
-      dataViewChanged
+      dataViewChanged ||
+      queryChanged
     ) {
-      addLog('[appstate] subscribe triggers data fetching');
+      const logData = {
+        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
+        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
+        breakdownFieldChanged: logEntry(
+          breakdownFieldChanged,
+          breakdownField,
+          nextState.breakdownField
+        ),
+        docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
+        dataViewChanged: logEntry(dataViewChanged, index, nextState.index),
+        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+      };
+
+      addLog(
+        '[buildStateSubscribe] state changes triggers data fetching',
+        JSON.stringify(logData, null, 2)
+      );
+
       dataState.fetch();
     }
   };
+
+const logEntry = <T>(changed: boolean, prevState: T, nextState: T) => ({
+  changed,
+  prevState,
+  nextState,
+});

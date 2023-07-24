@@ -45,10 +45,8 @@ export const ScreenReaderRouteAnnouncements: FC<{
 
   // 1. Canvas dynamically updates breadcrumbs *and* page title/history on every name onChange,
   // which leads to focus fighting if this is enabled
-  // 2. Discover has custom h1 focus behavior on route change, which should probably
-  // be removed in favor of this for a more consistent SR experience
   const appId = useObservable(appId$);
-  const disableFocusForApps = ['canvas', 'discover'];
+  const disableFocusForApps = ['canvas'];
   const focusRegionOnTextChange = !disableFocusForApps.includes(appId || '');
 
   return (

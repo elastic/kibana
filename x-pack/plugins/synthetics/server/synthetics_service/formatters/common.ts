@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import { arrayFormatter } from './formatting_utils';
-import { commonFormatters as commonBasicFormatters } from '../../../common/formatters/common/formatters';
-import { CommonFields, ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/constants/monitor_management';
 
-export type FormattedValue =
-  | boolean
-  | number
-  | string
-  | string[]
-  | Record<string, unknown>
-  | null
-  | Function;
-
-export type Formatter =
-  | null
-  | ((fields: Partial<MonitorFields>, key: ConfigKey) => FormattedValue)
-  | Function;
-
-export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
-export const commonFormatters: CommonFormatMap = {
-  ...commonBasicFormatters,
-  [ConfigKey.SCHEDULE]: (fields) =>
-    `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
-  [ConfigKey.TAGS]: arrayFormatter,
-};
+export const PARAMS_KEYS_TO_SKIP = [
+  'secrets',
+  'fields',
+  ConfigKey.PARAMS,
+  ConfigKey.PROJECT_ID,
+  ConfigKey.JOURNEY_ID,
+  ConfigKey.CONFIG_HASH,
+  ConfigKey.MONITOR_QUERY_ID,
+  ConfigKey.LOCATIONS,
+  ConfigKey.TLS_VERSION,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.SOURCE_INLINE,
+  ConfigKey.RESPONSE_JSON_CHECK,
+  ConfigKey.CUSTOM_HEARTBEAT_ID,
+];

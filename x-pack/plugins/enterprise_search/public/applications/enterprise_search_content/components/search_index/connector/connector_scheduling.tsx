@@ -5,66 +5,84 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSwitch,
-  EuiPanel,
   EuiSpacer,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
+  EuiSplitPanel,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../../common/types/api';
-import { ConnectorStatus } from '../../../../../../common/types/connectors';
-import { ConnectorIndex } from '../../../../../../common/types/indices';
-import { CronEditor } from '../../../../shared/cron_editor';
-import { Frequency } from '../../../../shared/cron_editor/types';
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
-import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
-import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/connectors';
+
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
+import { LicensingLogic } from '../../../../shared/licensing';
+import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
+import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { IngestionStatus } from '../../../types';
-import { isConnectorIndex } from '../../../utils/indices';
-
+import * as indices from '../../../utils/indices';
 import { IndexViewLogic } from '../index_view_logic';
 
 import { SearchIndexTabId } from '../search_index';
 
+import { ConnectorContentScheduling } from './connector_scheduling/full_content';
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
+interface SchedulePanelProps {
+  description: string;
+  title: string;
+}
+export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+  return (
+    <>
+      <EuiSplitPanel.Outer>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle>
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
+          <EuiFlexItem>
+            <EuiText size="s">{description}</EuiText>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          {children}
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </>
+  );
+};
+
 export const ConnectorSchedulingComponent: React.FC = () => {
-  const { index, ingestionStatus } = useValues(IndexViewLogic);
-  const { status } = useValues(UpdateConnectorSchedulingApiLogic);
-  const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
+  const { productFeatures } = useValues(KibanaLogic);
+  const { ingestionStatus, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(IndexViewLogic);
+  const { index } = useValues(IndexViewLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
-  const { setHasChanges } = useActions(ConnectorSchedulingLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  // Need to do this ugly casting because we can't check this after the below typecheck, because useState can't be used after an if
-  const schedulingInput = (index as ConnectorIndex)?.connector?.scheduling;
-  const [scheduling, setScheduling] = useState(schedulingInput);
-  const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
-  const [simpleCron, setSimpleCron] = useState<{
-    expression: string;
-    frequency: Frequency;
-  }>({
-    expression: schedulingInput?.interval ?? '',
-    frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
-  });
-
-  if (!isConnectorIndex(index)) {
+  const shouldShowIncrementalSync =
+    hasIncrementalSyncFeature && productFeatures.hasIncrementalSyncEnabled;
+  const shouldShowAccessControlSync =
+    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
+  if (!indices.isConnectorIndex(index)) {
     return <></>;
   }
+
+  const isDocumentLevelSecurityDisabled =
+    !index.connector.configuration.use_document_level_security?.value;
 
   if (
     index.connector.status === ConnectorStatus.CREATED ||
@@ -112,7 +130,6 @@ export const ConnectorSchedulingComponent: React.FC = () => {
       </>
     );
   }
-
   return (
     <>
       <UnsavedChangesPrompt
@@ -122,107 +139,132 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           { defaultMessage: 'You have not saved your changes, are you sure you want to leave?' }
         )}
       />
-      <EuiSpacer />
-      <EuiPanel hasShadow={false} hasBorder className="schedulingPanel">
-        <EuiFlexGroup direction="column">
-          {ingestionStatus === IngestionStatus.ERROR ? (
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              title={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.error.title',
-                { defaultMessage: 'Review your connector configuration for reported errors.' }
-              )}
-            />
-          ) : (
-            <></>
-          )}
-          <EuiFlexItem>
-            <EuiSwitch
-              checked={scheduling.enabled}
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.label',
-                { defaultMessage: 'Enable recurring syncs with the following schedule' }
-              )}
-              onChange={(e) => {
-                setScheduling({ ...scheduling, enabled: e.target.checked });
-                setHasChanges(true);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description',
-                {
-                  defaultMessage:
-                    'Your connector is configured and deployed. Configure a one-time sync by clicking the Sync button, or enable a recurring sync schedule. The connector uses UTC as its timezone. ',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <CronEditor
-              data-telemetry-id="entSearchContent-connector-scheduling-editSchedule"
-              disabled={!scheduling.enabled}
-              fieldToPreferredValueMap={fieldToPreferredValueMap}
-              cronExpression={simpleCron.expression}
-              frequency={simpleCron.frequency}
-              onChange={({
-                cronExpression: expression,
-                frequency,
-                fieldToPreferredValueMap: newFieldToPreferredValueMap,
-              }) => {
-                setSimpleCron({
-                  expression,
-                  frequency,
-                });
-                setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-                setScheduling({ ...scheduling, interval: expression });
-                setHasChanges(true);
-              }}
-              frequencyBlockList={['MINUTE']}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-telemetry-id="entSearchContent-connector-scheduling-resetSchedule"
-                  disabled={!hasChanges || status === Status.LOADING}
-                  onClick={() => {
-                    setScheduling(schedulingInput);
-                    setSimpleCron({
-                      expression: schedulingInput?.interval ?? '',
-                      frequency: schedulingInput?.interval
-                        ? cronToFrequency(schedulingInput.interval)
-                        : 'HOUR',
-                    });
-                    setHasChanges(false);
-                  }}
-                >
+
+      <EuiSpacer size="l" />
+      {ingestionStatus === IngestionStatus.ERROR ? (
+        <>
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.error.title',
+              { defaultMessage: 'Review your connector configuration for reported errors.' }
+            )}
+          />
+          <EuiSpacer size="l" />
+        </>
+      ) : (
+        <></>
+      )}
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.indices.connectorScheduling.page.description"
+            defaultMessage="Your connector is now deployed. Schedule recurring content and access control syncs here. If you want to run a quick test, launch a one-time sync using the {sync} button."
+            values={{
+              sync: (
+                <b>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.connectorScheduling.resetButton.label',
-                    { defaultMessage: 'Reset' }
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.page.sync.label',
+                    {
+                      defaultMessage: 'Sync',
+                    }
                   )}
-                </EuiButtonEmpty>
+                </b>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <SchedulePanel
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.contentSync.title',
+              { defaultMessage: 'Content sync' }
+            )}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.contentSync.description',
+              { defaultMessage: 'Fetch content to create or update your Elasticsearch documents.' }
+            )}
+          >
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <ConnectorContentScheduling type={SyncJobType.FULL} index={index} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-telemetry-id="entSearchContent-connector-scheduling-saveSchedule"
-                  disabled={!hasChanges || status === Status.LOADING}
-                  onClick={() => makeRequest({ connectorId: index.connector.id, scheduling })}
+              {shouldShowIncrementalSync && (
+                <EuiFlexItem>
+                  <ConnectorContentScheduling type={SyncJobType.INCREMENTAL} index={index} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </SchedulePanel>
+        </EuiFlexItem>
+        {shouldShowAccessControlSync && (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <SchedulePanel
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.title',
+                    { defaultMessage: 'Document Level Security' }
+                  )}
+                  description={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.description',
+                    {
+                      defaultMessage:
+                        'Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date.',
+                    }
+                  )}
                 >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.connectorScheduling.saveButton.label',
-                    { defaultMessage: 'Save' }
-                  )}
-                </EuiButton>
+                  <ConnectorContentScheduling
+                    type={SyncJobType.ACCESS_CONTROL}
+                    index={index}
+                    hasPlatinumLicense={hasPlatinumLicense}
+                  />
+                </SchedulePanel>
               </EuiFlexItem>
+              {isDocumentLevelSecurityDisabled && (
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.title',
+                      { defaultMessage: 'Access control syncs not allowed' }
+                    )}
+                    color="warning"
+                    iconType="iInCircle"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.text"
+                        defaultMessage="{link} for this connector to activate these options."
+                        values={{
+                          link: (
+                            <EuiLinkTo
+                              to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                                indexName: index.name,
+                                tabId: SearchIndexTabId.CONFIGURATION,
+                              })}
+                            >
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.link',
+                                {
+                                  defaultMessage: 'Enable document level security',
+                                }
+                              )}
+                            </EuiLinkTo>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+        )}
+      </EuiFlexGroup>
     </>
   );
 };
@@ -231,27 +273,4 @@ export interface Schedule {
   days: string;
   hours: string;
   minutes: string;
-}
-
-function cronToFrequency(cron: string): Frequency {
-  const fields = cron.split(' ');
-  if (fields.length < 4) {
-    return 'YEAR';
-  }
-  if (fields[1] === '*') {
-    return 'MINUTE';
-  }
-  if (fields[2] === '*') {
-    return 'HOUR';
-  }
-  if (fields[3] === '*') {
-    return 'DAY';
-  }
-  if (fields[4] === '?') {
-    return 'WEEK';
-  }
-  if (fields[4] === '*') {
-    return 'MONTH';
-  }
-  return 'YEAR';
 }

@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type {
   SavedObject,
@@ -36,14 +33,12 @@ import {
   CasesRt,
   CaseStatuses,
   CommentType,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
-  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
 import { arraysDifference, getCaseToUpdate } from '../utils';
@@ -63,6 +58,7 @@ import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -73,24 +69,6 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
-  }
-}
-
-/**
- * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
- */
-function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidTitle = requests.filter(
-    ({ updateReq }) => updateReq.title !== undefined && updateReq.title.length > MAX_TITLE_LENGTH
-  );
-
-  if (requestsInvalidTitle.length > 0) {
-    const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -317,12 +295,9 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
   try {
+    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
@@ -391,7 +366,6 @@ export const update = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
-    throwIfTitleIsInvalid(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
@@ -436,12 +410,12 @@ export const update = async (
         return flattenCases;
       }
 
-      return [
-        ...flattenCases,
+      flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
-        }),
-      ];
+        })
+      );
+      return flattenCases;
     }, [] as Case[]);
 
     await userActionService.creator.bulkCreateUpdateCase({
@@ -458,7 +432,7 @@ export const update = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return CasesRt.encode(returnUpdatedCase);
+    return decodeOrThrow(CasesRt)(returnUpdatedCase);
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,

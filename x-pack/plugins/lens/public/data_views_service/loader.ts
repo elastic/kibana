@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNestedField } from '@kbn/data-views-plugin/common';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
@@ -30,7 +30,7 @@ export function convertDataViewIntoLensIndexPattern(
   restrictionRemapper: (name: string) => string = onRestrictionMapping
 ): IndexPattern {
   const newFields = dataView.fields
-    .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
+    .filter(isFieldLensCompatible)
     .map((field): IndexPatternField => {
       // Convert the getters on the index pattern service into plain JSON
       const base = {

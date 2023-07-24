@@ -196,6 +196,14 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
+          selector: 'fieldAutocompleteComboBox',
+        },
+        {
+          type: 'click',
+          customSelector: 'button[title="agent.type"]',
+        },
+        {
+          type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {

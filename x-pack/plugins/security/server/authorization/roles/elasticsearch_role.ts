@@ -261,13 +261,11 @@ function transformRoleApplicationsToKibanaPrivileges(
           ),
           feature: featurePrivileges.reduce((acc, privilege) => {
             const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-            return {
-              ...acc,
-              [featurePrivilege.featureId]: getUniqueList([
-                ...(acc[featurePrivilege.featureId] || []),
-                featurePrivilege.privilege,
-              ]),
-            };
+            acc[featurePrivilege.featureId] = getUniqueList([
+              ...(acc[featurePrivilege.featureId] || []),
+              featurePrivilege.privilege,
+            ]);
+            return acc;
           }, {} as RoleKibanaPrivilege['feature']),
           spaces: ['*'],
         };
@@ -285,13 +283,11 @@ function transformRoleApplicationsToKibanaPrivileges(
         ),
         feature: featurePrivileges.reduce((acc, privilege) => {
           const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-          return {
-            ...acc,
-            [featurePrivilege.featureId]: getUniqueList([
-              ...(acc[featurePrivilege.featureId] || []),
-              featurePrivilege.privilege,
-            ]),
-          };
+          acc[featurePrivilege.featureId] = getUniqueList([
+            ...(acc[featurePrivilege.featureId] || []),
+            featurePrivilege.privilege,
+          ]);
+          return acc;
         }, {} as RoleKibanaPrivilege['feature']),
         spaces: resources.map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
       };

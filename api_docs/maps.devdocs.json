@@ -1813,7 +1813,7 @@
             "label": "mbFeature",
             "description": [],
             "signature": [
-              "maplibregl.GeoJSONFeature & { layer: Omit<maplibregl.LayerSpecification, \"source\"> & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
+              "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -3035,29 +3035,13 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.showJoinEditor",
+            "id": "def-public.IVectorSource.supportsJoins",
             "type": "Function",
             "tags": [],
-            "label": "showJoinEditor",
+            "label": "supportsJoins",
             "description": [],
             "signature": [
               "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getJoinsDisabledReason",
-            "type": "Function",
-            "tags": [],
-            "label": "getJoinsDisabledReason",
-            "description": [],
-            "signature": [
-              "() => string | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -3074,7 +3058,13 @@
             "description": [],
             "signature": [
               "(dataFilters: ",
-              "DataFilters",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.DataFilters",
+                "text": "DataFilters"
+              },
               ") => object | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -3089,7 +3079,13 @@
                 "label": "dataFilters",
                 "description": [],
                 "signature": [
-                  "DataFilters"
+                  {
+                    "pluginId": "maps",
+                    "scope": "common",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-common.DataFilters",
+                    "text": "DataFilters"
+                  }
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
@@ -3097,22 +3093,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getFieldNames",
-            "type": "Function",
-            "tags": [],
-            "label": "getFieldNames",
-            "description": [],
-            "signature": [
-              "() => string[]"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -3307,29 +3287,13 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getDefaultFields",
-            "type": "Function",
-            "tags": [],
-            "label": "getDefaultFields",
-            "description": [],
-            "signature": [
-              "() => Promise<Record<string, Record<string, string>>>"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
             "id": "def-public.IVectorSource.addFeature",
             "type": "Function",
             "tags": [],
             "label": "addFeature",
             "description": [],
             "signature": [
-              "(geometry: GeoJSON.Geometry | GeoJSON.Position[], defaultFields: Record<string, Record<string, string>>) => Promise<void>"
+              "(geometry: GeoJSON.Geometry | GeoJSON.Position[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -3344,21 +3308,6 @@
                 "description": [],
                 "signature": [
                   "GeoJSON.Geometry | GeoJSON.Position[]"
-                ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.IVectorSource.addFeature.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "defaultFields",
-                "description": [],
-                "signature": [
-                  "Record<string, Record<string, string>>"
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
@@ -3453,56 +3402,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "maps",
-        "id": "def-public.PreIndexedShape",
-        "type": "Interface",
-        "tags": [],
-        "label": "PreIndexedShape",
-        "description": [],
-        "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.PreIndexedShape.index",
-            "type": "string",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.PreIndexedShape.id",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | number"
-            ],
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.PreIndexedShape.path",
-            "type": "string",
-            "tags": [],
-            "label": "path",
-            "description": [],
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4137,7 +4036,7 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ currentLayerType: string; numberOfJoins: number; onChange: (...args: ",
+          "{ currentLayerType: string; hasSpatialJoins: boolean; numberOfJoins: number; onChange: (...args: ",
           "OnSourceChangeArgs",
           "[]) => Promise<void>; onStyleDescriptorChange: (styleDescriptor: ",
           "StyleDescriptor",
@@ -4569,6 +4468,83 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-common.DataFilters",
+        "type": "Type",
+        "tags": [],
+        "label": "DataFilters",
+        "description": [],
+        "signature": [
+          "{ buffer?: ",
+          "MapExtent",
+          " | undefined; extent?: ",
+          "MapExtent",
+          " | undefined; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined; embeddableSearchContext?: { query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; } | undefined; searchSessionId?: string | undefined; timeFilters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          "; timeslice?: ",
+          "Timeslice",
+          " | undefined; zoom: number; isReadOnly: boolean; joinKeyFilter?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          " | undefined; executionContext: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.DECIMAL_DEGREES_PRECISION",
         "type": "number",
         "tags": [],
@@ -4609,7 +4585,7 @@
           "AbstractSourceDescriptor",
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
-          "[]; } & { term: string; whereQuery?: ",
+          "[]; } & { whereQuery?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4617,7 +4593,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; size?: number | undefined; type: ",
+          " | undefined; } & { term: string; size?: number | undefined; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -4829,9 +4805,9 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".MVT_VECTOR; joins?: ",
+          ".MVT_VECTOR; joins?: Partial<",
           "JoinDescriptor",
-          "[] | undefined; style: ",
+          ">[] | undefined; style: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -4854,7 +4830,13 @@
         "label": "VectorSourceRequestMeta",
         "description": [],
         "signature": [
-          "DataFilters",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.DataFilters",
+            "text": "DataFilters"
+          },
           " & { applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; sourceQuery?: ",
           {
             "pluginId": "@kbn/es-query",

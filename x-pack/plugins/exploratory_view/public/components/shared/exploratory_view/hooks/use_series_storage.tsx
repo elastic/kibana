@@ -8,8 +8,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { ChartTimeRange } from '../header/last_updated';
-import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
   ReportViewType,

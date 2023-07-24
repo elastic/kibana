@@ -36,17 +36,19 @@ const initialValue: Authorization = {
 export const AuthorizationContext = createContext<Authorization>({ ...initialValue });
 
 interface Props {
-  privilegesEndpoint: string;
+  privilegesEndpoint: { path: string; version: string };
   children: React.ReactNode;
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
+  const { path, version } = privilegesEndpoint;
   const {
     isLoading,
     error,
     data: privilegesData,
   } = useRequest({
-    path: privilegesEndpoint,
+    path,
+    version,
     method: 'get',
   });
 

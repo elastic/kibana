@@ -14,7 +14,8 @@ import useInterval from 'react-use/lib/useInterval';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
@@ -24,7 +25,6 @@ import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../shared/page_template';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';

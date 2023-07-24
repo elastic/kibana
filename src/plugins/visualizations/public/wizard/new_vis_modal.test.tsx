@@ -17,7 +17,8 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
-    hidden: false,
+    disableCreate: false,
+    disableEdit: false,
     requiresSearch: false,
   };
   const _visTypes = [

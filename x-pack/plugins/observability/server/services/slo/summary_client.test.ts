@@ -7,12 +7,11 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
-
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
-import { DefaultSummaryClient } from './summary_client';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
+import { DefaultSummaryClient } from './summary_client';
 
 const commonEsResponse = {
   took: 100,
@@ -60,7 +59,7 @@ describe('SummaryClient', () => {
         expect(result[slo.id]).toMatchSnapshot();
         // @ts-ignore
         expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          { index: SLO_DESTINATION_INDEX_PATTERN },
           {
             size: 0,
             query: {
@@ -88,7 +87,7 @@ describe('SummaryClient', () => {
     describe('with calendar aligned and occurrences SLO', () => {
       it('returns the summary', async () => {
         const slo = createSLO({
-          timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
+          timeWindow: weeklyCalendarAligned(),
         });
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
@@ -97,7 +96,7 @@ describe('SummaryClient', () => {
 
         // @ts-ignore
         expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          { index: SLO_DESTINATION_INDEX_PATTERN },
           {
             size: 0,
             query: {
@@ -144,7 +143,7 @@ describe('SummaryClient', () => {
         expect(result[slo.id]).toMatchSnapshot();
         // @ts-ignore searches not typed properly
         expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          { index: SLO_DESTINATION_INDEX_PATTERN },
           {
             size: 0,
             query: {
@@ -186,7 +185,7 @@ describe('SummaryClient', () => {
             timesliceTarget: 0.9,
             timesliceWindow: new Duration(10, DurationUnit.Minute),
           },
-          timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
+          timeWindow: weeklyCalendarAligned(),
         });
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
@@ -196,7 +195,7 @@ describe('SummaryClient', () => {
         expect(result[slo.id]).toMatchSnapshot();
         // @ts-ignore searches not typed properly
         expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
-          { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+          { index: SLO_DESTINATION_INDEX_PATTERN },
           {
             size: 0,
             query: {

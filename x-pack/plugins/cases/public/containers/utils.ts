@@ -11,16 +11,15 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
+import type { CaseUserActionStatsResponse } from '../../common/types/api';
+import type { Configuration, Configurations, UserActions } from '../../common/types/domain';
+import { ConfigurationRt, ConfigurationsRt, UserActionsRt } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
-  CasesConfigurationsResponse,
-  CasesConfigureResponse,
-  UserActions,
   CasePatchRequest,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
   User,
-  CaseUserActionStatsResponse,
   Case,
   Cases,
 } from '../../common/api';
@@ -28,16 +27,13 @@ import {
   CaseRt,
   CasesRt,
   throwErrors,
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
-  UserActionsRt,
   CommentType,
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
-  CaseUserActionStatsResponseRt,
 } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
+import { CaseUserActionStatsResponseRt } from '../../common/types/api';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -67,18 +63,15 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
 export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
+export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(
-    CaseConfigurationsResponseRt.decode(respCase),
+    ConfigurationsRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 };
 
-export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
-  pipe(
-    CaseConfigureResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeCaseConfigureResponse = (respCase?: Configuration) =>
+  pipe(ConfigurationRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseUserActionsResponse = (respUserActions?: UserActions) =>
   pipe(UserActionsRt.decode(respUserActions), fold(throwErrors(createToasterPlainError), identity));

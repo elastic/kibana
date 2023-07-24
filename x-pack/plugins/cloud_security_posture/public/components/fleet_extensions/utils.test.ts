@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPostureInputHiddenVars, getPosturePolicy } from './utils';
+import { getMaxPackageName, getPostureInputHiddenVars, getPosturePolicy } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
 
 describe('getPosturePolicy', () => {
@@ -15,7 +15,7 @@ describe('getPosturePolicy', () => {
     ['cloudbeat/cis_k8s', getMockPolicyK8s, null],
   ] as const) {
     it(`updates package policy with hidden vars for ${name}`, () => {
-      const inputVars = getPostureInputHiddenVars(name);
+      const inputVars = getPostureInputHiddenVars(name, {} as any);
       const policy = getPosturePolicy(getPolicy(), name, inputVars);
 
       const enabledInputs = policy.inputs.filter(
@@ -61,5 +61,65 @@ describe('getPosturePolicy', () => {
 
     expect(enabledInputs.length).toBe(1);
     expect(enabledInputs.map((v) => v.type)[0]).toBe('cloudbeat/cis_k8s');
+  });
+});
+
+describe('getMaxPackageName', () => {
+  it('should correctly increment cspm package name', () => {
+    const packageName = 'cspm';
+    const packagePolicies = [
+      { name: 'kspm-1' },
+      { name: 'kspm-2' },
+      { name: 'cspm-3' },
+      { name: 'vuln_mgmt-1' },
+    ];
+
+    const result = getMaxPackageName(packageName, packagePolicies);
+
+    expect(result).toBe('cspm-4');
+  });
+
+  it('should return correctly increment vuln_mgmt package name', () => {
+    const packageName = 'vuln_mgmt';
+    const packagePolicies = [
+      { name: 'vuln_mgmt-1' },
+      { name: 'vuln_mgmt-2' },
+      { name: 'vuln_mgmt-3' },
+      { name: 'cspm-1' },
+      { name: 'kspm-1' },
+    ];
+
+    const result = getMaxPackageName(packageName, packagePolicies);
+
+    expect(result).toBe('vuln_mgmt-4');
+  });
+
+  it('should return correctly increment kspm package name', () => {
+    const packageName = 'kspm';
+    const packagePolicies = [
+      { name: 'vuln_mgmt-1' },
+      { name: 'vuln_mgmt-2' },
+      { name: 'vuln_mgmt-3' },
+      { name: 'cspm-1' },
+      { name: 'kspm-1' },
+    ];
+
+    const result = getMaxPackageName(packageName, packagePolicies);
+
+    expect(result).toBe('kspm-2');
+  });
+
+  it('should return package name with -1 when no matching package policies are found', () => {
+    const packageName = 'kspm';
+    const packagePolicies = [
+      { name: 'vuln_mgmt-1' },
+      { name: 'vuln_mgmt-2' },
+      { name: 'vuln_mgmt-3' },
+      { name: 'cspm-1' },
+    ];
+
+    const result = getMaxPackageName(packageName, packagePolicies);
+
+    expect(result).toBe('kspm-1');
   });
 });

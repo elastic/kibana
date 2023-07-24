@@ -22,13 +22,14 @@ import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { getPaginationQuery } from '../../../common/hooks/use_cloud_posture_table/utils';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
+  useHistory: () => ({ push: jest.fn(), location: { pathname: '' } }),
   useLocation: jest.fn(),
 }));
 
@@ -63,6 +64,7 @@ describe('<LatestFindingsContainer />', () => {
           discover: discoverPluginMock.createStartContract(),
           fleet: fleetMock.createStartMock(),
           licensing: licensingMock.createStart(),
+          share: sharePluginMock.createStartContract(),
         }}
       >
         <LatestFindingsContainer dataView={dataView} />

@@ -28,8 +28,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { withTheme } from '@kbn/kibana-react-plugin/common';
-import { useLinkProps } from '@kbn/observability-plugin/public';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
@@ -109,7 +108,7 @@ const AnomalyActionMenu = ({
       legend: { palette: 'cool', reverseColors: false, steps: 10 },
       time: startTime,
     };
-    onViewChange(anomalyViewParams);
+    onViewChange({ attributes: anomalyViewParams });
     closeFlyout();
   }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
@@ -436,17 +435,16 @@ export const AnomaliesTable = (props: Props) => {
   }, [getAnomalies, search, hostName]);
 
   return (
-    <div>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiSuperDatePicker
-            start={start}
-            end={end}
-            showUpdateButton={false}
-            onTimeChange={onTimeChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={1}>
+        <EuiSuperDatePicker
+          start={start}
+          end={end}
+          showUpdateButton={false}
+          onTimeChange={onTimeChange}
+          width="full"
+        />
+      </EuiFlexItem>
 
       {!hostName && (
         <EuiFlexGroup alignItems="center">
@@ -505,6 +503,6 @@ export const AnomaliesTable = (props: Props) => {
         page={page}
         isLoading={isLoading}
       />
-    </div>
+    </EuiFlexGroup>
   );
 };

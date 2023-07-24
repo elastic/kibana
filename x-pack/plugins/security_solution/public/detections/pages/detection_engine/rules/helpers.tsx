@@ -21,9 +21,9 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
+import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
@@ -287,45 +287,6 @@ export type PrePackagedTimelineInstallationStatus =
   | 'timelineNeedUpdate'
   | 'unknown';
 
-export const getPrePackagedRuleInstallationStatus = (
-  rulesInstalled?: number,
-  rulesNotInstalled?: number,
-  rulesNotUpdated?: number
-): PrePackagedRuleInstallationStatus => {
-  if (
-    rulesNotInstalled != null &&
-    rulesInstalled === 0 &&
-    rulesNotInstalled > 0 &&
-    rulesNotUpdated === 0
-  ) {
-    return 'ruleNotInstalled';
-  } else if (
-    rulesInstalled != null &&
-    rulesInstalled > 0 &&
-    rulesNotInstalled === 0 &&
-    rulesNotUpdated === 0
-  ) {
-    return 'ruleInstalled';
-  } else if (
-    rulesInstalled != null &&
-    rulesNotInstalled != null &&
-    rulesInstalled > 0 &&
-    rulesNotInstalled > 0 &&
-    rulesNotUpdated === 0
-  ) {
-    return 'someRuleUninstall';
-  } else if (
-    rulesInstalled != null &&
-    rulesNotInstalled != null &&
-    rulesNotUpdated != null &&
-    rulesInstalled > 0 &&
-    rulesNotInstalled >= 0 &&
-    rulesNotUpdated > 0
-  ) {
-    return 'ruleNeedUpdate';
-  }
-  return 'unknown';
-};
 export const getPrePackagedTimelineInstallationStatus = (
   timelinesInstalled?: number,
   timelinesNotInstalled?: number,

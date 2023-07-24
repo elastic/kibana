@@ -125,7 +125,7 @@ export class AuthorizationService {
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
     const mode = authorizationModeFactory(license);
-    const actions = new Actions(packageVersion);
+    const actions = new Actions();
     this.privileges = privilegesFactory(actions, features, license);
 
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(

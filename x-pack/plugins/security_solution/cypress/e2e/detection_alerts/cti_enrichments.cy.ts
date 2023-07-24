@@ -7,7 +7,6 @@
 
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   JSON_TEXT,
@@ -31,18 +30,19 @@ import { addsFieldsToTimeline } from '../../tasks/rule_details';
 describe('CTI Enrichment', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('threat_indicator');
-    esArchiverLoad('suspicious_source_event');
+    cy.task('esArchiverLoad', 'threat_indicator');
+    cy.task('esArchiverLoad', 'suspicious_source_event');
     login();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
   });
 
   after(() => {
-    esArchiverUnload('threat_indicator');
-    esArchiverUnload('suspicious_source_event');
+    cy.task('esArchiverUnload', 'threat_indicator');
+    cy.task('esArchiverUnload', 'suspicious_source_event');
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
   });
@@ -152,11 +152,17 @@ describe('CTI Enrichment', () => {
 
   describe('with additional indicators', () => {
     before(() => {
-      esArchiverLoad('threat_indicator2');
+      cy.task('esArchiverLoad', 'threat_indicator2');
+    });
+
+    beforeEach(() => {
+      login();
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
     });
 
     after(() => {
-      esArchiverUnload('threat_indicator2');
+      cy.task('esArchiverUnload', 'threat_indicator2');
     });
 
     it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {

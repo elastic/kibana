@@ -18,7 +18,7 @@ import {
   requestDiagnosticsBatch,
 } from './request_diagnostics_action_runner';
 
-const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 1000; // 3 hours;
+const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 3 * 60 * 1000; // 3 hours;
 
 export async function requestDiagnostics(
   esClient: ElasticsearchClient,

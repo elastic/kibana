@@ -7,7 +7,10 @@
 
 import { createAction } from '@reduxjs/toolkit';
 import { UpsertMonitorError, UpsertMonitorRequest, UpsertMonitorResponse } from '..';
-import { MonitorManagementListResult } from '../../../../../common/runtime_types';
+import {
+  MonitorManagementListResult,
+  MonitorFiltersResult,
+} from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 import { MonitorListPageState } from './models';
@@ -42,3 +45,7 @@ export const updateManagementPageStateAction = createAction<Partial<MonitorListP
 );
 
 export const cleanMonitorListState = createAction('cleanMonitorListState');
+
+export const fetchMonitorFiltersAction = createAsyncAction<void, MonitorFiltersResult>(
+  'fetchMonitorFiltersAction'
+);

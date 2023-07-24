@@ -709,7 +709,7 @@ When a user is granted the `all` role in the Alerting Framework, they will be ab
 
 Finally, all users, whether they're granted any role or not, are privileged to call the following:
 
-- `listAlertTypes`, but the output is limited to displaying the rule types the user is privileged to `get`.
+- `listRuleTypes`, but the output is limited to displaying the rule types the user is privileged to `get`.
 
 Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error thrown by the RulesClient.
 
@@ -874,7 +874,7 @@ Below is an example of a rule that takes advantage of templating:
         "from": "example@elastic.co",
         "to": ["destination@elastic.co"],
         "subject": "A notification about {{context.server}}",
-        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alertInstanceId}} was created by the rule {{alertId}} {{alertName}}."
+        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alert.id}} was created by the rule {{rule.id}} {{rule.name}}."
       }
     }
   ]

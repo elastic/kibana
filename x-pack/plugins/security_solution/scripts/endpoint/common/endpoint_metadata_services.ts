@@ -30,6 +30,9 @@ export const fetchEndpointMetadata = async (
     await kbnClient.request<HostInfo>({
       method: 'GET',
       path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
+      headers: {
+        'Elastic-Api-Version': '2023-10-31',
+      },
     })
   ).data;
 };
@@ -42,6 +45,9 @@ export const fetchEndpointMetadataList = async (
     await kbnClient.request<MetadataListResponse>({
       method: 'GET',
       path: HOST_METADATA_LIST_ROUTE,
+      headers: {
+        'Elastic-Api-Version': '2023-10-31',
+      },
       query: {
         page,
         pageSize,
@@ -152,7 +158,7 @@ export const waitForEndpointToStreamData = async (
   let found: HostInfo | undefined;
 
   while (!found && !hasTimedOut()) {
-    found = await fetchEndpointMetadata(kbnClient, 'invalid-id-test').catch((error) => {
+    found = await fetchEndpointMetadata(kbnClient, endpointAgentId).catch((error) => {
       // Ignore `not found` (404) responses. Endpoint could be new and thus documents might not have
       // been streamed yet.
       if (error?.response?.status === 404) {

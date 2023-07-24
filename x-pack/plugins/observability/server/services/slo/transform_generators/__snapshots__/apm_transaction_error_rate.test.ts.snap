@@ -5,25 +5,16 @@ Object {
   "bool": Object {
     "filter": Array [
       Object {
-        "terms": Object {
-          "processor.event": Array [
-            "metric",
-          ],
-        },
-      },
-      Object {
         "term": Object {
           "metricset.name": "transaction",
         },
       },
       Object {
-        "exists": Object {
-          "field": "transaction.duration.histogram",
-        },
-      },
-      Object {
-        "exists": Object {
-          "field": "transaction.result",
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
         },
       },
       Object {
@@ -116,25 +107,16 @@ Object {
   "bool": Object {
     "filter": Array [
       Object {
-        "terms": Object {
-          "processor.event": Array [
-            "metric",
-          ],
-        },
-      },
-      Object {
         "term": Object {
           "metricset.name": "transaction",
         },
       },
       Object {
-        "exists": Object {
-          "field": "transaction.duration.histogram",
-        },
-      },
-      Object {
-        "exists": Object {
-          "field": "transaction.result",
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
         },
       },
       Object {
@@ -165,15 +147,15 @@ Object {
   "pivot": Object {
     "aggregations": Object {
       "slo.denominator": Object {
-        "value_count": Object {
-          "field": "transaction.duration.histogram",
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "slo.isGoodSlice": Object {
         "bucket_script": Object {
           "buckets_path": Object {
             "goodEvents": "slo.numerator>_count",
-            "totalEvents": "slo.denominator.value",
+            "totalEvents": "slo.denominator>_count",
           },
           "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
         },
@@ -181,23 +163,11 @@ Object {
       "slo.numerator": Object {
         "filter": Object {
           "bool": Object {
-            "should": Array [
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 2xx",
-                },
+            "should": Object {
+              "match": Object {
+                "event.outcome": "success",
               },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 3xx",
-                },
-              },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 4xx",
-                },
-              },
-            ],
+            },
           },
         },
       },
@@ -230,25 +200,16 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "metric",
-              ],
-            },
-          },
-          Object {
             "term": Object {
               "metricset.name": "transaction",
             },
           },
           Object {
-            "exists": Object {
-              "field": "transaction.duration.histogram",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "transaction.result",
+            "terms": Object {
+              "event.outcome": Array [
+                "success",
+                "failure",
+              ],
             },
           },
           Object {
@@ -322,30 +283,18 @@ Object {
   "pivot": Object {
     "aggregations": Object {
       "slo.denominator": Object {
-        "value_count": Object {
-          "field": "transaction.duration.histogram",
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "slo.numerator": Object {
         "filter": Object {
           "bool": Object {
-            "should": Array [
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 2xx",
-                },
+            "should": Object {
+              "match": Object {
+                "event.outcome": "success",
               },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 3xx",
-                },
-              },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 4xx",
-                },
-              },
-            ],
+            },
           },
         },
       },
@@ -378,25 +327,16 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "metric",
-              ],
-            },
-          },
-          Object {
             "term": Object {
               "metricset.name": "transaction",
             },
           },
           Object {
-            "exists": Object {
-              "field": "transaction.duration.histogram",
-            },
-          },
-          Object {
-            "exists": Object {
-              "field": "transaction.result",
+            "terms": Object {
+              "event.outcome": Array [
+                "success",
+                "failure",
+              ],
             },
           },
           Object {
@@ -451,38 +391,5 @@ Object {
     },
   },
   "transform_id": Any<String>,
-}
-`;
-
-exports[`APM Transaction Error Rate Transform Generator uses default values when 'good_status_codes' is not specified 1`] = `
-Object {
-  "slo.denominator": Object {
-    "value_count": Object {
-      "field": "transaction.duration.histogram",
-    },
-  },
-  "slo.numerator": Object {
-    "filter": Object {
-      "bool": Object {
-        "should": Array [
-          Object {
-            "match": Object {
-              "transaction.result": "HTTP 2xx",
-            },
-          },
-          Object {
-            "match": Object {
-              "transaction.result": "HTTP 3xx",
-            },
-          },
-          Object {
-            "match": Object {
-              "transaction.result": "HTTP 4xx",
-            },
-          },
-        ],
-      },
-    },
-  },
 }
 `;

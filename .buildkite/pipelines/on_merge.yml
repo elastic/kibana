@@ -86,6 +86,14 @@ steps:
     agents:
       queue: 'kibana-default'
 
+  - command: '.buildkite/scripts/steps/functional/on_merge_serverless_ftrs.sh'
+    label: Trigger serverless ftr tests
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+    agents:
+      queue: 'kibana-default'
+
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
@@ -131,7 +139,7 @@ steps:
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
-      queue: n2-4-spot
+      queue: n2-8-spot
     key: storybooks
     timeout_in_minutes: 60
     retry:

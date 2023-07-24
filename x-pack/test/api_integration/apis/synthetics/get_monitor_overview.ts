@@ -10,11 +10,12 @@ import {
   ConfigKey,
   SyntheticsMonitor,
   MonitorFields,
+  MonitorOverviewItem,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetMonitorsOverview', function () {
@@ -36,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     const deleteMonitor = async (id: string) => {
       try {
         await supertest
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${id}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       } catch (e) {
@@ -47,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveMonitor = async (monitor: MonitorFields) => {
       const res = await supertest
-        .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set('kbn-xsrf', 'true')
         .send(monitor);
 
@@ -55,7 +56,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       await security.role.create(roleName, {
         kibana: [
@@ -73,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
         full_name: 'a kibana user',
       });
       const { body } = await supertest
-        .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
       await Promise.all([
@@ -172,7 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
           .query({ sortField: 'status' });
-        expect(apiResponse.body.monitors).eql([
+
+        const expected: MonitorOverviewItem[] = [
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[0].id,
@@ -191,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -210,6 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -229,6 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -248,8 +256,11 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
-        ]);
+        ];
+
+        expect(apiResponse.body.monitors).eql(expected);
         expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
       } finally {
         await Promise.all(

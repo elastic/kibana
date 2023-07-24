@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { CaseConnector } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import type {
   CaseAttributes,
-  CaseConnector,
   CaseExternalServiceBasic,
   CaseFullExternalService,
 } from '../../common/api';
-import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { CaseSeverity, CaseStatuses } from '../../common/api';
+import {
+  CASE_SAVED_OBJECT,
+  NONE_CONNECTOR_ID,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import { getNoneCaseConnector } from '../common/utils';
 import type { ConnectorPersistedFields } from '../common/types/connectors';
 import type { CasePersistedAttributes } from '../common/types/case';
@@ -128,6 +139,7 @@ export const basicESCaseFields: CasePersistedAttributes = {
   assignees: [],
   total_alerts: -1,
   total_comments: -1,
+  category: null,
 };
 
 export const basicCaseFields: CaseAttributes = {
@@ -158,6 +170,7 @@ export const basicCaseFields: CaseAttributes = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  category: null,
 };
 
 export const createCaseSavedObjectResponse = ({
@@ -251,3 +264,17 @@ export const createSOFindResponse = <T>(savedObjects: Array<SavedObjectsFindResu
   per_page: savedObjects.length,
   page: 1,
 });
+
+export const mockPointInTimeFinder =
+  (unsecuredSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>) =>
+  (soFindRes: SavedObjectsFindResponse) => {
+    unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
+      close: jest.fn(),
+      // @ts-expect-error
+      find: function* asyncGenerator() {
+        yield {
+          ...soFindRes,
+        };
+      },
+    });
+  };

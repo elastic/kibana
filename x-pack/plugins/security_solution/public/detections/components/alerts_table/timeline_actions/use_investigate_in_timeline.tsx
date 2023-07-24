@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { EuiContextMenuItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -18,7 +16,8 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
@@ -178,14 +177,13 @@ export const useInvestigateInTimeline = ({
 
   const investigateInTimelineActionItems = useMemo(
     () => [
-      <EuiContextMenuItem
-        key="investigate-in-timeline-action-item"
-        data-test-subj="investigate-in-timeline-action-item"
-        disabled={ecsRowData == null}
-        onClick={investigateInTimelineAlertClick}
-      >
-        {ACTION_INVESTIGATE_IN_TIMELINE}
-      </EuiContextMenuItem>,
+      {
+        key: 'investigate-in-timeline-action-item',
+        'data-test-subj': 'investigate-in-timeline-action-item',
+        disabled: ecsRowData == null,
+        onClick: investigateInTimelineAlertClick,
+        name: ACTION_INVESTIGATE_IN_TIMELINE,
+      },
     ],
     [ecsRowData, investigateInTimelineAlertClick]
   );

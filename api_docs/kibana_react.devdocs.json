@@ -1233,18 +1233,6 @@
             "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
           },
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
           },
@@ -1317,18 +1305,6 @@
             "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/agent_logs.tsx"
           },
@@ -1363,6 +1339,18 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
           {
             "plugin": "apm",
@@ -1406,30 +1394,6 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
           },
           {
@@ -1455,6 +1419,30 @@
           {
             "plugin": "upgradeAssistant",
             "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "ux",
@@ -1505,43 +1493,6 @@
               "React.PropsWithChildren<RedirectCrossAppLinksProps>"
             ],
             "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Route",
-        "type": "Function",
-        "tags": [],
-        "label": "Route",
-        "description": [
-          "\nIt's a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
-        ],
-        "signature": [
-          "({ children, component: Component, render, ...rest }: ",
-          "RouteProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/router/router.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Route.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children, component: Component, render, ...rest }",
-            "description": [],
-            "signature": [
-              "RouteProps"
-            ],
-            "path": "src/plugins/kibana_react/public/router/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1928,6 +1879,30 @@
           "> & Extra>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useKibanaTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "useKibanaTheme",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          }
+        ],
+        "path": "src/plugins/kibana_react/public/theme/use_theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2538,7 +2513,7 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactOverlays.openFlyout.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -3398,6 +3373,21 @@
           "\"hjson\""
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"grok\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

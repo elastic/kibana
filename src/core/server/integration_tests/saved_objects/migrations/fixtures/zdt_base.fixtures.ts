@@ -8,31 +8,38 @@
 
 import { SavedObjectsModelVersion, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
 import { createType } from '../test_utils';
-import { type KibanaMigratorTestKitParams } from '../kibana_migrator_test_kit';
+import { type KibanaMigratorTestKitParams, currentVersion } from '../kibana_migrator_test_kit';
 
 export const getBaseMigratorParams = ({
+  migrationAlgorithm = 'zdt',
   // default to true here as most tests need to run the full migration
   runOnNonMigratorNodes = true,
+  kibanaVersion = currentVersion,
 }: {
   runOnNonMigratorNodes?: boolean;
+  migrationAlgorithm?: 'v2' | 'zdt';
+  kibanaVersion?: string;
 } = {}): KibanaMigratorTestKitParams => ({
   kibanaIndex: '.kibana',
-  kibanaVersion: '8.8.0',
+  kibanaVersion,
   settings: {
     migrations: {
-      algorithm: 'zdt',
+      algorithm: migrationAlgorithm,
       zdt: {
         metaPickupSyncDelaySec: 5,
-        runOnNonMigratorNodes,
+        runOnRoles: runOnNonMigratorNodes ? ['ui', 'migrator'] : ['migrator'],
       },
     },
   },
 });
 
 export const dummyModelVersion: SavedObjectsModelVersion = {
-  modelChange: {
-    type: 'expansion',
-  },
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {},
+    },
+  ],
 };
 
 export const noopMigration: SavedObjectMigrationFn = (doc) => doc;

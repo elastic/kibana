@@ -8,35 +8,22 @@
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
-import { DateRange, toMomentUnitOfTime } from '../models';
 
+import { DateRange, toMomentUnitOfTime } from '../models';
 import type { TimeWindow } from '../models/time_window';
 
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
-    const now = moment.utc(currentDate).startOf('minute');
-    const startTime = moment.utc(timeWindow.calendar.startTime);
-
-    const differenceInUnit = now.diff(startTime, unit);
-    if (differenceInUnit < 0) {
-      throw new Error('Cannot compute date range with future starting time');
-    }
-
-    const from = startTime
-      .clone()
-      .add(
-        Math.floor(differenceInUnit / timeWindow.duration.value) * timeWindow.duration.value,
-        unit
-      );
-    const to = from.clone().add(timeWindow.duration.value, unit);
+    const from = moment.utc(currentDate).startOf(unit);
+    const to = moment.utc(currentDate).endOf(unit);
 
     return { from: from.toDate(), to: to.toDate() };
   }
 
   if (rollingTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
-    const now = moment(currentDate).startOf('minute');
+    const now = moment.utc(currentDate).startOf('minute');
 
     return {
       from: now.clone().subtract(timeWindow.duration.value, unit).toDate(),

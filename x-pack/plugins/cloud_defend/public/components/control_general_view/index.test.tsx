@@ -16,7 +16,7 @@ import {
   MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
 } from '../../test/mocks';
 import { ControlGeneralView } from '.';
-import { getInputFromPolicy } from '../../common/utils';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
 describe('<ControlGeneralView />', () => {
@@ -47,7 +47,7 @@ describe('<ControlGeneralView />', () => {
       const json = yaml.load(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
-      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
       expect(json.file.selectors.length).toBe(3);
       expect(json.file.responses.length).toBe(2);
     } catch (err) {
@@ -93,7 +93,31 @@ describe('<ControlGeneralView />', () => {
     try {
       const json = yaml.load(configuration);
 
-      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
+    } catch (err) {
+      throw err;
+    }
+  });
+
+  it('allows a user to add a process response', async () => {
+    const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
+
+    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+
+    rerender(<WrappedComponent policy={policy} />);
+
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.load(configuration);
+
+      expect(json.process.responses.length).toBe(
+        getAllByTestId('cloud-defend-process-response').length
+      );
     } catch (err) {
       throw err;
     }
@@ -130,6 +154,26 @@ describe('<ControlGeneralView />', () => {
     expect(getByTitle('Remove excludeCustomNginxBuild3 from selection in this group')).toBeTruthy();
   });
 
+  it('removes a selector from a match/exclude list of a response if it is deleted', async () => {
+    const { getByTestId, getAllByTestId } = render(<WrappedComponent />);
+    const btnSelectorPopover = getAllByTestId('cloud-defend-btnselectorpopover')[0];
+    btnSelectorPopover.click();
+
+    await waitFor(() => getByTestId('cloud-defend-btndeleteselector').click());
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.load(configuration);
+
+      expect(json.file.responses[0].match).toHaveLength(1);
+    } catch (err) {
+      throw err;
+    }
+  });
+
   it('doesnt blow up if invalid yaml passed in', async () => {
     const { queryAllByTestId } = render(
       <WrappedComponent policy={getCloudDefendNewPolicyMock(MOCK_YAML_INVALID_CONFIGURATION)} />
@@ -148,5 +192,25 @@ describe('<ControlGeneralView />', () => {
 
     userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
     expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
+  });
+
+  it('allows the user to duplicate the selector', async () => {
+    const { getByTestId, getAllByTestId } = render(<WrappedComponent />);
+    const btnSelectorPopover = getAllByTestId('cloud-defend-btnselectorpopover')[0];
+    btnSelectorPopover.click();
+
+    await waitFor(() => getByTestId('cloud-defend-btnduplicateselector').click());
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.load(configuration);
+
+      expect(json.file.selectors).toHaveLength(4);
+      expect(json.file.selectors[3].name).toEqual(json.file.selectors[0].name + '1');
+    } catch (err) {
+      throw err;
+    }
   });
 });

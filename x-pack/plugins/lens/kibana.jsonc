@@ -33,9 +33,9 @@
       "expressionMetricVis",
       "expressionHeatmap",
       "expressionXY",
+      "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList",
       "contentManagement"
     ],
     "optionalPlugins": [
@@ -55,7 +55,6 @@
       "embeddable",
       "fieldFormats",
       "charts",
-      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common/constants"

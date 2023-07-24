@@ -9,9 +9,10 @@ import { useQuery } from '@tanstack/react-query';
 import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export interface UseFetchHistoricalSummaryResponse {
-  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse | undefined;
+  data: FetchHistoricalSummaryResponse | undefined;
   isInitialLoading: boolean;
   isRefetching: boolean;
   isLoading: boolean;
@@ -32,7 +33,7 @@ export function useFetchHistoricalSummary({
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: ['fetchHistoricalSummary', sloIds],
+    queryKey: sloKeys.historicalSummary(sloIds),
     queryFn: async ({ signal }) => {
       try {
         const response = await http.post<FetchHistoricalSummaryResponse>(
@@ -54,7 +55,7 @@ export function useFetchHistoricalSummary({
   });
 
   return {
-    sloHistoricalSummaryResponse: data,
+    data,
     isLoading,
     isRefetching,
     isInitialLoading,

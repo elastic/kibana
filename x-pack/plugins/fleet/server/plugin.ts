@@ -58,8 +58,14 @@ import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, INTEGRATIONS_PLUGIN_ID } from '../common';
+import {
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INTEGRATIONS_PLUGIN_ID,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+} from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
@@ -115,7 +121,13 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
-import { getRequestStore } from './services/request_store';
+import {
+  UninstallTokenService,
+  type UninstallTokenServiceInterface,
+} from './services/security/uninstall_token_service';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
+import type { FilesClientFactory } from './services/files/types';
+import { PolicyWatcher } from './services/agent_policy_watch';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -160,6 +172,7 @@ export interface FleetAppContext {
   bulkActionsResolver: BulkActionsResolver;
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export type FleetSetupContract = void;
@@ -208,7 +221,17 @@ export interface FleetStartContract {
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 
+  /**
+   * Create a Fleet Files client instance
+   * @param packageName
+   * @param type
+   * @param maxSizeBytes
+   */
+  createFilesClient: Readonly<FilesClientFactory>;
+
   messageSigningService: MessageSigningServiceInterface;
+  uninstallTokenService: UninstallTokenServiceInterface;
+  createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
 }
 
 export class FleetPlugin
@@ -234,6 +257,7 @@ export class FleetPlugin
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
+  private policyWatcher?: PolicyWatcher;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -368,42 +392,38 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-        const requestStore = getRequestStore();
+        return {
+          get agentClient() {
+            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
-        return requestStore.run(request, () => {
-          return {
-            get agentClient() {
-              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+            return {
+              asCurrentUser: agentService.asScoped(request),
+              asInternalUser: agentService.asInternalUser,
+            };
+          },
+          get packagePolicyService() {
+            const service = plugin.setupPackagePolicyService();
 
-              return {
-                asCurrentUser: agentService.asScoped(request),
-                asInternalUser: agentService.asInternalUser,
-              };
-            },
-            get packagePolicyService() {
-              const service = plugin.setupPackagePolicyService();
+            return {
+              asCurrentUser: service.asScoped(request),
+              asInternalUser: service.asInternalUser,
+            };
+          },
+          authz,
+          get internalSoClient() {
+            // Use a lazy getter to avoid constructing this client when not used by a request handler
+            return getInternalSoClient();
+          },
+          get spaceId() {
+            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+          },
 
-              return {
-                asCurrentUser: service.asScoped(request),
-                asInternalUser: service.asInternalUser,
-              };
-            },
-            authz,
-            get internalSoClient() {
-              // Use a lazy getter to avoid constructing this client when not used by a request handler
-              return getInternalSoClient();
-            },
-            get spaceId() {
-              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-            },
-
-            get limitedToPackages() {
-              if (routeAuthz && routeAuthz.granted) {
-                return routeAuthz.scopeDataToPackages;
-              }
-            },
-          };
-        });
+          get limitedToPackages() {
+            if (routeAuthz && routeAuthz.granted) {
+              return routeAuthz.scopeDataToPackages;
+            }
+          },
+        };
       }
     );
 
@@ -441,6 +461,11 @@ export class FleetPlugin
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+    const uninstallTokenService = new UninstallTokenService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
 
     appContextService.start({
       elasticsearch: core.elasticsearch,
@@ -465,9 +490,9 @@ export class FleetPlugin
       telemetryEventsSender: this.telemetryEventsSender,
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
+      uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
@@ -475,6 +500,10 @@ export class FleetPlugin
     startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
+
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+
+    this.policyWatcher.start(licenseService);
 
     const fleetSetupPromise = (async () => {
       try {
@@ -551,12 +580,23 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      createFilesClient: Object.freeze(
+        getFilesClientFactory({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.initializerContext.logger,
+        })
+      ),
       messageSigningService,
+      uninstallTokenService,
+      createFleetActionsClient(packageName: string) {
+        return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
+      },
     };
   }
 
   public async stop() {
     appContextService.stop();
+    this.policyWatcher?.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
     this.fleetStatus$.complete();

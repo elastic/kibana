@@ -12,6 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
 import {
@@ -32,6 +33,7 @@ import {
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
+jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
@@ -59,6 +61,12 @@ describe('<ComplianceDashboard />', () => {
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
       })

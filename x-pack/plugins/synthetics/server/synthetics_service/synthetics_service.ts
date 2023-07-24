@@ -19,35 +19,35 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { syntheticsParamType } from '../../common/types/saved_objects';
+import { SyntheticsServerSetup } from '../types';
+import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient, ServiceData } from './service_api_client';
-import {
-  ConfigData,
-  formatHeartbeatRequest,
-  formatMonitorConfigFields,
-  mixParamsWithGlobalParams,
-} from './formatters/format_configs';
+
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecrets,
-  SyntheticsParamSO,
+  SyntheticsMonitorWithSecretsAttributes,
+  SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import {
+  ConfigData,
+  formatHeartbeatRequest,
+  formatMonitorConfigFields,
+  mixParamsWithGlobalParams,
+} from './formatters/public_formatters/format_configs';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -57,7 +57,7 @@ const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 export class SyntheticsService {
   private logger: Logger;
   private esClient?: ElasticsearchClient;
-  private readonly server: UptimeServerSetup;
+  private readonly server: SyntheticsServerSetup;
   public apiClient: ServiceAPIClient;
 
   private readonly config: ServiceConfig;
@@ -76,7 +76,7 @@ export class SyntheticsService {
 
   public invalidApiKeyError?: boolean;
 
-  constructor(server: UptimeServerSetup) {
+  constructor(server: SyntheticsServerSetup) {
     this.logger = server.logger;
     this.server = server;
     this.config = server.config.service ?? {};
@@ -158,6 +158,7 @@ export class SyntheticsService {
 
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
     const service = this;
+    const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     taskManager.registerTaskDefinitions({
       [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
@@ -194,7 +195,7 @@ export class SyntheticsService {
                 service.logger.error(e);
               }
 
-              return { state };
+              return { state, schedule: { interval } };
             },
             async cancel() {
               service.logger?.warn(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} timed out`);
@@ -211,7 +212,6 @@ export class SyntheticsService {
     const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     try {
-      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
       const taskInstance = await taskManager.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
@@ -238,9 +238,10 @@ export class SyntheticsService {
         stackVersion: this.server.stackVersion,
       });
 
+      this.logger?.error(e);
+
       this.logger?.error(
-        `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-        e?.message ?? e
+        `Error running synthetics syncs task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, ${e?.message}`
       );
 
       return null;
@@ -297,6 +298,24 @@ export class SyntheticsService {
       hosts: this.esHosts,
       api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
     };
+  }
+
+  async inspectConfig(config?: ConfigData) {
+    if (!config) {
+      return null;
+    }
+    const monitors = this.formatConfigs(config);
+    const license = await this.getLicense();
+
+    const output = await this.getOutput();
+    if (output) {
+      return await this.apiClient.inspect({
+        monitors,
+        output,
+        license,
+      });
+    }
+    return null;
   }
 
   async addConfigs(configs: ConfigData[]) {
@@ -488,7 +507,7 @@ export class SyntheticsService {
 
     const paramsBySpace = await this.getSyntheticsParams();
 
-    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitor>({
+    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
       type: syntheticsMonitorType,
       perPage: 100,
       namespaces: [ALL_SPACES_ID],
@@ -520,7 +539,7 @@ export class SyntheticsService {
   }
 
   async decryptMonitors(
-    monitors: Array<SavedObject<EncryptedSyntheticsMonitor>>,
+    monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
     encryptedClient: EncryptedSavedObjectsClient
   ) {
     const start = performance.now();
@@ -530,7 +549,7 @@ export class SyntheticsService {
       (monitor) =>
         new Promise((resolve) => {
           encryptedClient
-            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
               syntheticsMonitorType,
               monitor.id,
               {
@@ -564,17 +583,24 @@ export class SyntheticsService {
     });
 
     return decryptedMonitors.filter((monitor) => monitor !== null) as Array<
-      SavedObject<SyntheticsMonitorWithSecrets>
+      SavedObject<SyntheticsMonitorWithSecretsAttributes>
     >;
   }
 
-  async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
+  async getSyntheticsParams({
+    spaceId,
+    hideParams = false,
+    canSave = true,
+  }: { spaceId?: string; canSave?: boolean; hideParams?: boolean } = {}) {
+    if (!canSave) {
+      return Object.create(null);
+    }
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
     const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParamSO>({
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>({
         type: syntheticsParamType,
         perPage: 1000,
         namespaces: spaceId ? [spaceId] : undefined,
@@ -586,7 +612,9 @@ export class SyntheticsService {
           if (!paramsBySpace[namespace]) {
             paramsBySpace[namespace] = Object.create(null);
           }
-          paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
+          paramsBySpace[namespace][param.attributes.key] = hideParams
+            ? '"*******"'
+            : param.attributes.value;
         });
       });
     }

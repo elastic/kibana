@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingSetup, StackAlertsStartDeps } from '../../types';
+import type { RegisterRuleTypesParams } from '../types';
 import { getRuleType } from './rule_type';
 
 // future enhancement: make these configurable?
@@ -13,12 +13,7 @@ export const MAX_INTERVALS = 1000;
 export const MAX_GROUPS = 1000;
 export const DEFAULT_GROUPS = 100;
 
-interface RegisterParams {
-  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
-  alerting: AlertingSetup;
-}
-
-export function register(params: RegisterParams) {
+export function register(params: RegisterRuleTypesParams) {
   const { data, alerting } = params;
   alerting.registerType(getRuleType(data));
 }

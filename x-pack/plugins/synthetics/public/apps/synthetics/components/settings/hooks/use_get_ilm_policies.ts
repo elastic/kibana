@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { getIlmPolicies, getIndicesData } from './api';
 

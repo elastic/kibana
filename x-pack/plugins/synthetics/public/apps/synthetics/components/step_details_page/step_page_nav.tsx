@@ -11,7 +11,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiText,
   EuiPopover,
 } from '@elastic/eui';
@@ -21,8 +21,8 @@ import { useSelectedLocation } from '../monitor_details/hooks/use_selected_locat
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { getTestRunDetailLink } from '../common/links/test_details_link';
 import { useStepDetailLink } from './hooks/use_step_detail_page';
-import { useFormatTestRunAt } from '../../utils/monitor_test_result/test_time_formats';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { useDateFormat } from '../../../../hooks/use_date_format';
 
 export const StepRunDate = () => {
   return (
@@ -40,10 +40,11 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data } = useJourneySteps();
+  const formatter = useDateFormat();
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
 
-  let startedAt: string | ReactElement = useFormatTestRunAt(data?.details?.timestamp);
+  let startedAt: string | ReactElement = formatter(data?.details?.timestamp);
 
   const { stepIndex, monitorId } = useParams<{ stepIndex: string; monitorId: string }>();
 
@@ -77,7 +78,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
   }
 
   if (!startedAt) {
-    startedAt = <EuiLoadingContent lines={1} />;
+    startedAt = <EuiSkeletonText lines={1} />;
   }
 
   return (

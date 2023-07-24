@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { v4 as uuidv4 } from 'uuid';
-import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -19,7 +19,7 @@ import {
   createSignalsIndex,
   deleteAllRules,
   deleteAllEventLogExecutionEvents,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {

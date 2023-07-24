@@ -18,8 +18,8 @@ jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollections: je
 describe('add analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      transport: {
-        request: jest.fn(),
+      searchApplication: {
+        putBehavioralAnalytics: jest.fn(),
       },
     },
     asInternalUser: {},
@@ -34,7 +34,7 @@ describe('add analytics collection lib function', () => {
   });
 
   it('should add analytics collection', async () => {
-    mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+    mockClient.asCurrentUser.searchApplication.putBehavioralAnalytics.mockImplementation(() => ({
       acknowledged: true,
       name: `example`,
     }));
@@ -57,9 +57,8 @@ describe('add analytics collection lib function', () => {
       name: 'example',
     });
 
-    expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-      method: 'PUT',
-      path: '/_application/analytics/example',
+    expect(mockClient.asCurrentUser.searchApplication.putBehavioralAnalytics).toHaveBeenCalledWith({
+      name: 'example',
     });
 
     expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith(
@@ -74,7 +73,7 @@ describe('add analytics collection lib function', () => {
   });
 
   it('should reject if analytics collection already exists', async () => {
-    mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+    mockClient.asCurrentUser.searchApplication.putBehavioralAnalytics.mockImplementation(() =>
       Promise.reject({
         meta: {
           body: {

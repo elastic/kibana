@@ -8,7 +8,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';

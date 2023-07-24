@@ -18,7 +18,7 @@ import { buildRelatedIntegrationsDescription } from '../related_integrations/int
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -48,6 +48,7 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
 } from './helpers';
+import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
@@ -200,6 +201,8 @@ export const getDescriptionItem = (
       savedQueryName,
       indexPatterns,
     });
+  } else if (field === 'responseActions') {
+    return [];
   } else if (field === 'groupByFields') {
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, license);
@@ -283,8 +286,6 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
-  } else if (field === 'dataViewId') {
-    return [];
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
@@ -292,6 +293,10 @@ export const getDescriptionItem = (
     if (get('dataViewId', data)) {
       return [];
     }
+  } else if (field === 'isBuildingBlock') {
+    return get('isBuildingBlock', data)
+      ? [{ title: i18n.BUILDING_BLOCK_LABEL, description: i18n.BUILDING_BLOCK_DESCRIPTION }]
+      : [];
   }
 
   const description: string = get(field, data);

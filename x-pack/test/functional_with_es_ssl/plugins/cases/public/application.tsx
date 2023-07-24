@@ -16,7 +16,7 @@ import {
   EuiButton,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';

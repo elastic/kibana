@@ -81,26 +81,24 @@ describe('ZDT upgrades - basic document migration', () => {
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    someAddedField: `${doc.attributes.keyword}-mig`,
-                  },
+                attributes: {
+                  someAddedField: `${doc.attributes.keyword}-mig`,
                 },
               };
             },
-            down: jest.fn(),
           },
-          addedMappings: {
-            someAddedField: { type: 'keyword' },
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              someAddedField: { type: 'keyword' },
+            },
           },
-        },
+        ],
       },
     };
 
@@ -109,42 +107,32 @@ describe('ZDT upgrades - basic document migration', () => {
     typeB.modelVersions = {
       ...typeB.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    text2: `${doc.attributes.text2} - mig2`,
-                  },
+                attributes: {
+                  text2: `${doc.attributes.text2} - mig2`,
                 },
               };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
       '3': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    text2: `${doc.attributes.text2} - mig3`,
-                  },
+                attributes: {
+                  text2: `${doc.attributes.text2} - mig3`,
                 },
               };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     };
 

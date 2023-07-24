@@ -111,10 +111,11 @@ const defaultProps: Props = {
   getGroupByFieldsOnClick: jest.fn(),
   ilmPhase: 'hot',
   indexName: 'auditbeat-custom-index-1',
+  isAssistantEnabled: true,
   openCreateCaseFlyout: jest.fn(),
   pattern,
   patternRollup,
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
   updatePatternRollup: jest.fn(),
 };
 

@@ -36,11 +36,13 @@ export function registerAlertsTableConfiguration({
         id: '@timestamp',
         displayAsText: 'Last updated',
         initialWidth: 250,
+        schema: 'datetime',
       },
       {
         id: 'kibana.alert.duration.us',
         displayAsText: 'Duration',
         initialWidth: 150,
+        schema: 'numeric',
       },
       {
         id: 'kibana.alert.reason',

@@ -16,6 +16,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItem, FilterItemProps } from './filter_item';
 import type { IUnifiedSearchPluginServices } from '../../types';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 /**
  * Properties for the filter items component, which will render a single filter pill for every filter that is sent in
@@ -39,12 +40,14 @@ export interface FilterItemsProps {
   filtersForSuggestions?: Filter[];
   /** Array of panel options that controls the styling of each filter pill */
   hiddenPanelOptions?: FilterItemProps['hiddenPanelOptions'];
+  /** Array of suggestion abstraction that controls the render of the field */
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
+  const { appName, usageCollection, uiSettings, docLinks } = kibana.services;
   const { readOnly = false } = props;
 
   if (!uiSettings) return null;
@@ -74,10 +77,12 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          docLinks={docLinks}
           hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           filtersForSuggestions={props.filtersForSuggestions}
           readOnly={readOnly}
+          suggestionsAbstraction={props.suggestionsAbstraction}
         />
       </EuiFlexItem>
     ));

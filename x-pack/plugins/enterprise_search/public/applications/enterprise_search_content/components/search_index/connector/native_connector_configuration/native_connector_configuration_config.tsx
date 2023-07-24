@@ -33,7 +33,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
           {
             defaultMessage:
-              'Encryption for data source credentials is unavailable in this beta. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
+              'Encryption for data source credentials is unavailable in this version. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
           }
         )}
       </EuiText>
@@ -75,8 +75,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
               {
-                defaultMessage:
-                  'Your connector {name} has connected to Enterprise Search successfully.',
+                defaultMessage: 'Your connector {name} has connected to Search successfully.',
                 values: { name: nativeConnector.name },
               }
             )}

@@ -9,11 +9,15 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 
 export interface ObservabilitySharedStart {
+  spaces?: SpacesPluginStart;
+  cases: CasesUiStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   setIsSidebarEnabled: (isEnabled: boolean) => void;
 }
@@ -53,6 +57,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     return {
       navigation: {
         PageTemplate,
+        registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
       setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),

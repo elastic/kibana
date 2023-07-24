@@ -50,7 +50,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
     chainingSystem: deepEqual,
     ignoreParentSettings: deepEqual,
   };
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.controlGroup
       .getInput$()
       .pipe(
@@ -83,7 +83,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   };
 
   // pass down any pieces of input needed to refetch or force refetch data for the controls
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(
         distinctUntilChanged((a, b) =>
@@ -106,7 +106,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   );
 
   // when control group outputs filters, force a refresh!
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -118,7 +118,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
       .subscribe(() => this.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
   );
 
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -134,7 +134,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   );
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.getAnyChildOutputChange$().subscribe(() => {
       if (!this.controlGroup) {
         return;

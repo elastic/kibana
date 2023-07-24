@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { SyntheticsParamRequest, SyntheticsParamSO } from '../../../../../common/runtime_types';
+import {
+  DeleteParamsResponse,
+  SyntheticsParamRequest,
+  SyntheticsParams,
+  SyntheticsParamsCodec,
+  SyntheticsParamsReadonlyCodec,
+} from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
-export const getGlobalParams = async (): Promise<Array<SavedObject<SyntheticsParamSO>>> => {
-  const result = (await apiService.get(SYNTHETICS_API_URLS.PARAMS)) as {
-    data: Array<SavedObject<SyntheticsParamSO>>;
-  };
-  return result.data;
+export const getGlobalParams = async (): Promise<SyntheticsParams[]> => {
+  return apiService.get<SyntheticsParams[]>(
+    SYNTHETICS_API_URLS.PARAMS,
+    undefined,
+    SyntheticsParamsReadonlyCodec
+  );
 };
 
 export const addGlobalParam = async (
   paramRequest: SyntheticsParamRequest
-): Promise<SyntheticsParamSO> => {
-  return apiService.post(SYNTHETICS_API_URLS.PARAMS, paramRequest);
-};
+): Promise<SyntheticsParams> =>
+  apiService.post(SYNTHETICS_API_URLS.PARAMS, paramRequest, SyntheticsParamsCodec);
 
 export const editGlobalParam = async ({
   paramRequest,
@@ -29,9 +34,17 @@ export const editGlobalParam = async ({
 }: {
   id: string;
   paramRequest: SyntheticsParamRequest;
-}): Promise<SyntheticsParamSO> => {
-  return apiService.put(SYNTHETICS_API_URLS.PARAMS, {
-    id,
-    ...paramRequest,
+}): Promise<SyntheticsParams> =>
+  apiService.put<SyntheticsParams>(
+    SYNTHETICS_API_URLS.PARAMS,
+    {
+      id,
+      ...paramRequest,
+    },
+    SyntheticsParamsCodec
+  );
+
+export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> =>
+  apiService.delete(SYNTHETICS_API_URLS.PARAMS, {
+    ids: JSON.stringify(ids),
   });
-};

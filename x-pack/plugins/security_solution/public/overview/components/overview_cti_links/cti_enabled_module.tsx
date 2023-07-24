@@ -20,7 +20,7 @@ export const CtiEnabledModuleComponent: React.FC<ThreatIntelLinkPanelProps> = (p
     setQuery,
     deleteQuery,
   });
-  const { listItems } = useCtiDashboardLinks({ to, from, tiDataSources });
+  const { listItems } = useCtiDashboardLinks({ tiDataSources });
 
   return <ThreatIntelPanelView listItems={listItems} totalCount={totalCount} />;
 };

@@ -13,7 +13,7 @@ import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
 import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
 import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
-import { request } from './common';
+import { request, loadPage } from './common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '../../../../scripts/endpoint/common/roles_users/hunter';
@@ -206,14 +206,10 @@ export const loginWithRole = async (role: ROLE) => {
 
 export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   createCustomRoleAndUser(role, rolePrivileges);
-  const theUrl = Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: Cypress.env(ELASTICSEARCH_PASSWORD),
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
-  } as UrlObject);
+  const theUrl = new URL(String(Cypress.config().baseUrl));
+  theUrl.username = role;
+  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
+
   cy.log(`origin: ${theUrl}`);
   request({
     body: {
@@ -346,7 +342,7 @@ export const getEnvAuth = (): User => {
  */
 export const loginAndWaitForPage = (url: string) => {
   login();
-  cy.visit(url);
+  loadPage(url);
 };
 
 export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {

@@ -13,11 +13,10 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   setSignalStatus,
   getQuerySignalIds,
   deleteAllRules,
@@ -26,6 +25,7 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
+  deleteAllAlerts,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('open_close_signals', () => {
     describe('tests with auditbeat data', () => {
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

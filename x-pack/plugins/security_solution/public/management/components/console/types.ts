@@ -46,8 +46,9 @@ export interface CommandArgDefinition {
    *   the value entered will first be `trim()`'d.
    * - `number`: user's value will be converted to a Number and ensured to be a `safe integer`
    * - `number-greater-than-zero`: user's value must be a number greater than zero
+   * - `truthy`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
    */
-  mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero';
+  mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero' | 'truthy';
   exclusiveOr?: boolean;
   /**
    * Validate the individual values given to this argument.

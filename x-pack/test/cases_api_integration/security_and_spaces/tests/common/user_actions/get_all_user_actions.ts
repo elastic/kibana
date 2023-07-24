@@ -11,11 +11,11 @@ import {
   Case,
   CaseSeverity,
   CaseStatuses,
+  CommentRequestUserType,
   CommentType,
-  ConnectorTypes,
   getCaseUserActionUrl,
 } from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+import { CreateCaseUserAction, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+      const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
 
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');
@@ -332,11 +332,20 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
       const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
+      const castedUserComment = restComment as CommentRequestUserType;
+
       expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('delete');
       expect(commentUserAction.comment_id).to.eql(id);
-      expect(commentUserAction.payload).to.eql({ comment: restComment });
+
+      expect(commentUserAction.payload).to.eql({
+        comment: {
+          comment: castedUserComment.comment,
+          type: castedUserComment.type,
+          owner: castedUserComment.owner,
+        },
+      });
     });
 
     describe('rbac', () => {

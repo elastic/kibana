@@ -109,6 +109,7 @@ export const createNewTermsAlertType = (
           unprocessedExceptions,
           alertTimestampOverride,
           publicBaseUrl,
+          inputIndexFields,
         },
         services,
         params,
@@ -132,6 +133,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
+        fields: inputIndexFields,
       });
 
       const parsedHistoryWindowSize = parseDateString({

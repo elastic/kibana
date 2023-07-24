@@ -35,12 +35,13 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import {
@@ -259,7 +260,7 @@ export class SavedSearchEmbeddable
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;
-        this.searchProps!.isSortEnabled = false;
+        this.searchProps!.isSortEnabled = true;
         return;
       }
 
@@ -400,6 +401,7 @@ export class SavedSearchEmbeddable
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
       },
+      cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -557,17 +559,23 @@ export class SavedSearchEmbeddable
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
+    const query = this.savedSearch.searchSource.getField('query');
+
     const props = {
       savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
+      query,
     };
     if (searchProps.services) {
+      const { getTriggerCompatibleActions } = searchProps.services.uiActions;
       ReactDOM.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
-              <SavedSearchEmbeddableComponent {...props} />
+              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+                <SavedSearchEmbeddableComponent {...props} />
+              </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>
         </I18nProvider>,

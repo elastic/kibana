@@ -2,10 +2,10 @@
 [[drilldowns]]
 == Make dashboards interactive
 
-:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, range slider, options list, author, drilldowns
-:description: Add interactive capabilities to your dashboard, such as controls that allow \
-you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
-dashboards and external websites.
+:frontmatter-description: Add interactive filter and navigation capabilities to your dashboard.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [analyze, visualize]
 
 Add interactive capabilities to your dashboard, such as interactive filter controls, and drilldowns that allow you to navigate to *Discover*, other dashboards, and external websites. 
 

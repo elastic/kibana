@@ -5,218 +5,437 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, useState } from 'react';
 import {
-  EuiTitle,
-  EuiText,
+  EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiHorizontalRule,
+  EuiIconTip,
+  EuiLink,
   EuiSpacer,
-  EuiCard,
-  EuiIcon,
-  EuiIconProps,
+  EuiText,
+  EuiTextArea,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
+import React, { useState } from 'react';
+import { useWizard } from '.';
+import { OptionalFormRow } from '../../../shared/optional_form_row';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
-import { useWizard } from '.';
+import { BackButton } from './back_button';
+import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
+  const [datasetNameTouched, setDatasetNameTouched] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
   const { goToStep, goBack, getState, setState } = useWizard();
   const wizardState = getState();
-  const [logsType, setLogsType] = useState(wizardState.logsType);
-  const [uploadType, setUploadType] = useState(wizardState.uploadType);
+  const [datasetName, setDatasetName] = useState(wizardState.datasetName);
+  const [serviceName, setServiceName] = useState(wizardState.serviceName);
+  const [logFilePaths, setLogFilePaths] = useState(wizardState.logFilePaths);
+  const [namespace, setNamespace] = useState(wizardState.namespace);
+  const [customConfigurations, setCustomConfigurations] = useState(
+    wizardState.customConfigurations
+  );
+
+  const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
 
   function onContinue() {
-    if (logsType && uploadType) {
-      setState({ ...getState(), logsType, uploadType });
-      goToStep('installElasticAgent');
+    setState((state) => ({
+      ...state,
+      datasetName,
+      serviceName,
+      logFilePaths: logFilePaths.filter((filepath) => !!filepath),
+      namespace,
+      customConfigurations,
+    }));
+    goToStep('installElasticAgent');
+  }
+
+  function addLogFilePath() {
+    setLogFilePaths((prev) => [...prev, '']);
+  }
+
+  function removeLogFilePath(index: number) {
+    setLogFilePaths((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function onLogFilePathChanges(
+    index: number,
+    event: React.FormEvent<HTMLInputElement>
+  ) {
+    const filepath = event.currentTarget?.value;
+    setLogFilePaths((prev) =>
+      prev.map((path, i) => (i === index ? filepath : path))
+    );
+
+    if (index === 0) {
+      setDatasetName(getFilename(filepath));
     }
   }
 
-  function createLogsTypeToggle(type: NonNullable<typeof logsType>) {
-    return () => {
-      if (type === logsType) {
-        setLogsType(undefined);
-      } else {
-        setLogsType(type);
-      }
-    };
-  }
+  const isDatasetNameInvalid = datasetNameTouched && isEmpty(datasetName);
 
-  function createUploadToggle(type: NonNullable<typeof uploadType>) {
-    return () => {
-      if (type === uploadType) {
-        setUploadType(undefined);
-      } else {
-        setUploadType(type);
-      }
-    };
-  }
-
-  function onBack() {
-    goBack();
-  }
+  const datasetNameError = i18n.translate(
+    'xpack.observability_onboarding.configureLogs.dataset.error',
+    { defaultMessage: 'A dataset name is required.' }
+  );
 
   return (
     <StepPanel
-      title="Choose what logs to collect"
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="ghost" fill onClick={onBack}>
-              Back
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiButton
               color="primary"
               fill
               onClick={onContinue}
-              isDisabled={!(logsType && uploadType)}
+              isDisabled={
+                logFilePathNotConfigured || !datasetName || !namespace
+              }
             >
-              Continue
+              {i18n.translate('xpack.observability_onboarding.steps.continue', {
+                defaultMessage: 'Continue',
+              })}
             </EuiButton>,
           ]}
         />
       }
     >
       <StepPanelContent>
-        <LogsTypeSection
-          title="System logs"
-          description="The quickest way to start using Elastic is to start uploading logs from your system."
-        >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream system logs"
-                iconType="document"
-                onClick={createLogsTypeToggle('system')}
-                isSelected={logsType === 'system'}
-              />
+        <EuiText color="subdued">
+          <p>
+            {i18n.translate(
+              'xpack.observability_onboarding.configureLogs.description',
+              {
+                defaultMessage:
+                  'Fill the paths to the log files on your hosts.',
+              }
+            )}
+          </p>
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiForm fullWidth>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.observability_onboarding.configureLogs.logFile.path',
+              {
+                defaultMessage: 'Log file path',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.observability_onboarding.configureLogs.logFile.helper',
+              {
+                defaultMessage: 'You can use a log file path or a log pattern.',
+              }
+            )}
+          >
+            <>
+              {logFilePaths.map((filepath, index) => (
+                <div key={index}>
+                  {index > 0 && <EuiSpacer size="s" />}
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiFieldText
+                        placeholder={i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.logFile.placeholder',
+                          {
+                            defaultMessage: 'Example: /var/log/application.*',
+                          }
+                        )}
+                        value={filepath}
+                        onChange={(ev) => onLogFilePathChanges(index, ev)}
+                      />
+                    </EuiFlexItem>
+                    {index > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="trash"
+                          aria-label="Delete"
+                          onClick={() => removeLogFilePath(index)}
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </div>
+              ))}
+            </>
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            alignItems="flexStart"
+            direction="column"
+            gutterSize="xs"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="plusInCircle" onClick={addLogFilePath}>
+                {i18n.translate(
+                  'xpack.observability_onboarding.configureLogs.logFile.addRow',
+                  {
+                    defaultMessage: 'Add row',
+                  }
+                )}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem />
           </EuiFlexGroup>
-        </LogsTypeSection>
-        <EuiHorizontalRule margin="l" />
-        <LogsTypeSection
-          title="Custom logs"
-          description="Stream custom logs files from your data sink to Elastic."
-        >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream sys logs"
-                iconType="package"
-                onClick={createLogsTypeToggle('sys')}
-                isSelected={logsType === 'sys'}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream HTTP Endpoint logs"
-                iconType="package"
-                onClick={createLogsTypeToggle('http-endpoint')}
-                isSelected={logsType === 'http-endpoint'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.dataset.name',
+                    {
+                      defaultMessage: 'Dataset name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.dataset.name.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide a dataset name to help identify the source of your logs in future uses. Defaults to the name of the log file.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            helpText={i18n.translate(
+              'xpack.observability_onboarding.configureLogs.dataset.helper',
+              {
+                defaultMessage:
+                  "All lowercase, max 100 chars, special characters will be replaced with '_'.",
+              }
+            )}
+            isInvalid={isDatasetNameInvalid}
+            error={datasetNameError}
+          >
+            <EuiFieldText
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.configureLogs.dataset.placeholder',
+                {
+                  defaultMessage: 'Give your logs a name',
+                }
+              )}
+              value={datasetName}
+              onChange={(event) =>
+                setDatasetName(replaceSpecialChars(event.target.value))
+              }
+              isInvalid={isDatasetNameInvalid}
+              onInput={() => setDatasetNameTouched(true)}
+            />
+          </EuiFormRow>
           <EuiSpacer size="m" />
-        </LogsTypeSection>
-        <EuiHorizontalRule margin="l" />
-        <LogsTypeSection title="Stream logs" description="Lorem ipsum">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream log file"
-                iconType="document"
-                onClick={createLogsTypeToggle('log-file')}
-                isSelected={logsType === 'log-file'}
+          <OptionalFormRow
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.serviceName',
+                    {
+                      defaultMessage: 'Service name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.serviceName.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide a service name to allow for distributed services running on multiple hosts to correlate the related instances.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.observability_onboarding.configureLogs.serviceName.helper"
+                defaultMessage="Name the service your data is collected from."
               />
+            }
+          >
+            <EuiFieldText
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
+                {
+                  defaultMessage: 'Give your service a name',
+                }
+              )}
+              value={serviceName}
+              onChange={(event) => setServiceName(event.target.value)}
+            />
+          </OptionalFormRow>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="flexStart"
+            direction="column"
+            gutterSize="xs"
+          >
+            <EuiFlexItem style={{ width: '100%' }}>
+              <EuiAccordion
+                id="advancedSettingsAccordion"
+                css={{
+                  '.euiAccordion__buttonContent': {
+                    color: euiTheme.colors.primaryText,
+                    fontSize: xsFontSize,
+                  },
+                  '.euiAccordion__iconButton svg': {
+                    stroke: euiTheme.colors.primary,
+                    width: euiTheme.size.m,
+                    height: euiTheme.size.m,
+                  },
+                }}
+                buttonContent={i18n.translate(
+                  'xpack.observability_onboarding.configureLogs.advancedSettings',
+                  {
+                    defaultMessage: 'Advanced settings',
+                  }
+                )}
+              >
+                <EuiSpacer size="l" />
+                <EuiFormRow
+                  label={
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.namespace',
+                          {
+                            defaultMessage: 'Namespace',
+                          }
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.observability_onboarding.configureLogs.namespace.tooltip',
+                            {
+                              defaultMessage:
+                                'Provide a namespace to customize the grouping of your logs. Defaults to the default namespace.',
+                            }
+                          )}
+                          position="right"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.observability_onboarding.configureLogs.namespace.helper"
+                      defaultMessage="This setting changes the name of the integration's data stream. {learnMoreLink}"
+                      values={{
+                        learnMoreLink: (
+                          <EuiLink
+                            external
+                            target="_blank"
+                            href={
+                              'https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme'
+                            }
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.configureLogs.learnMore',
+                              {
+                                defaultMessage: 'Learn more',
+                              }
+                            )}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  }
+                >
+                  <EuiFieldText
+                    placeholder={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.namespace.placeholder',
+                      {
+                        defaultMessage: 'Namespace',
+                      }
+                    )}
+                    value={namespace}
+                    onChange={(event) => setNamespace(event.target.value)}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="l" />
+                <OptionalFormRow
+                  label={i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.customConfig',
+                    {
+                      defaultMessage: 'Custom configurations',
+                    }
+                  )}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.observability_onboarding.configureLogs.customConfig.helper"
+                      defaultMessage="Here YAML configuration options can be used to be added to your configuration. Be careful using this as it might break your configuration file. {learnMoreLink}"
+                      values={{
+                        learnMoreLink: (
+                          <EuiLink
+                            external
+                            target="_blank"
+                            href={
+                              'https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html'
+                            }
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.configureLogs.learnMore',
+                              {
+                                defaultMessage: 'Learn more',
+                              }
+                            )}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  }
+                >
+                  <EuiTextArea
+                    value={customConfigurations}
+                    onChange={(event) =>
+                      setCustomConfigurations(event.target.value)
+                    }
+                  />
+                </OptionalFormRow>
+              </EuiAccordion>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <OptionCard
-                title="Send it from my service"
-                iconType="document"
-                onClick={createLogsTypeToggle('service')}
-                isSelected={logsType === 'service'}
-              />
-            </EuiFlexItem>
+            <EuiSpacer size="s" />
           </EuiFlexGroup>
-        </LogsTypeSection>
-        <EuiHorizontalRule margin="l" />
-        <LogsTypeSection
-          title="Log files"
-          description="Upload your custom logs files to start analyzing it with Elastic."
-        >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <OptionCard
-                title="Upload log file"
-                iconType="document"
-                onClick={createUploadToggle('log-file')}
-                isSelected={uploadType === 'log-file'}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <OptionCard
-                title="Get an API key"
-                iconType="document"
-                onClick={createUploadToggle('api-key')}
-                isSelected={uploadType === 'api-key'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </LogsTypeSection>
+        </EuiForm>
       </StepPanelContent>
     </StepPanel>
-  );
-}
-
-function LogsTypeSection({
-  title,
-  description,
-  children,
-}: PropsWithChildren<{ title: string; description: string }>) {
-  return (
-    <>
-      <EuiTitle size="s">
-        <h3>{title}</h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiText color="subdued">
-        <p>{description}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      {children}
-    </>
-  );
-}
-
-function OptionCard({
-  title,
-  iconType,
-  onClick,
-  isSelected,
-}: {
-  title: string;
-  iconType: EuiIconProps['type'];
-  onClick: () => void;
-  isSelected: boolean;
-}) {
-  return (
-    <EuiCard
-      layout="horizontal"
-      icon={<EuiIcon type={iconType} size="l" />}
-      title={title}
-      titleSize="xs"
-      paddingSize="m"
-      style={{ height: 56 }}
-      onClick={onClick}
-      hasBorder={true}
-      display={isSelected ? 'primary' : undefined}
-    />
   );
 }

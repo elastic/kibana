@@ -30,12 +30,8 @@ import {
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
-import {
-  ControlGeneralViewResponseDeps,
-  ResponseAction,
-  Response,
-  ControlFormErrorMap,
-} from '../../types';
+import { ControlGeneralViewResponseDeps, ControlFormErrorMap } from '../../types';
+import { Response, ResponseAction } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 import {
   getSelectorTypeIcon,
@@ -255,7 +251,7 @@ export const ControlGeneralViewResponse = ({
       id={'response_' + index}
       forceState={accordionState}
       onToggle={onToggleAccordion}
-      data-test-subj="cloud-defend-response"
+      data-test-subj={`cloud-defend-${response.type}-response`}
       paddingSize="m"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -405,20 +401,18 @@ export const ControlGeneralViewResponse = ({
                 onChange={onToggleAction}
               />
             </EuiFlexItem>
-            {response.type === 'file' && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.actionBlockHelp}>
-                  <EuiCheckbox
-                    id={`response_${index}_block`}
-                    data-test-subj="cloud-defend-chkblockaction"
-                    label={i18n.actionBlock}
-                    checked={blockSelected}
-                    onChange={onToggleAction}
-                    disabled={!alertSelected}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.actionBlockHelp}>
+                <EuiCheckbox
+                  id={`response_${index}_block`}
+                  data-test-subj="cloud-defend-chkblockaction"
+                  label={i18n.actionBlock}
+                  checked={blockSelected}
+                  onChange={onToggleAction}
+                  disabled={!alertSelected}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
       </EuiForm>

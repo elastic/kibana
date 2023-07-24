@@ -9,35 +9,32 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
 import {
-  ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { toMicroseconds as toMicrosecondsUtil } from '../../../../../common/utils/formatters';
+import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
+import { EuiCallOut } from '@elastic/eui';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import FailedTransactionChart from './failed_transaction_chart';
 import { getAggsTypeFromRule } from './helpers';
 import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
-import LatencyChart from './latency_chart/latency_chart';
+import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import {
   AlertDetailsAppSectionProps,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from './types';
-
-const toMicroseconds = (value?: number) =>
-  value ? toMicrosecondsUtil(value, 'milliseconds') : value;
 
 export function AlertDetailsAppSection({
   rule,
@@ -68,7 +65,7 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(
           alert?.fields[ALERT_RULE_TYPE_ID],
-          toMicroseconds(alert?.fields[ALERT_EVALUATION_THRESHOLD])
+          alert?.fields[ALERT_EVALUATION_THRESHOLD]
         ),
       },
       {
@@ -93,53 +90,20 @@ export function AlertDetailsAppSection({
     setAlertSummaryFields(alertSummaryFields);
   }, [alert?.fields, setAlertSummaryFields]);
 
-  const params = rule.params;
-  const environment = alert.fields[SERVICE_ENVIRONMENT];
-  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
-
-  // duration is us, convert it to MS
-  const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
-
-  const serviceName = String(alert.fields[SERVICE_NAME]);
-
-  // Currently, we don't use comparisonEnabled nor offset.
-  // But providing them as they are required for the chart.
-  const comparisonEnabled = false;
-  const offset = '1d';
-  const ruleWindowSizeMS = moment
-    .duration(rule.params.windowSize, rule.params.windowUnit)
-    .asMilliseconds();
-
-  const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
-  /**
-   * This is part or the requirements (RFC).
-   * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
-   * IE. The user set "FOR THE LAST 5 minutes" at a minimum we should show 100 minutes.
-   */
-  const rangeFrom =
-    alertDurationMS < TWENTY_TIMES_RULE_WINDOW_MS
-      ? moment(alert.start)
-          .subtract(TWENTY_TIMES_RULE_WINDOW_MS, 'millisecond')
-          .toISOString()
-      : moment(alert.start)
-          .subtract(ruleWindowSizeMS, 'millisecond')
-          .toISOString();
-
-  const rangeTo = alert.active
-    ? // Add one minute to chart range to ensure that the active alert annotation is shown when seconds are involved.
-      moment().add(1, 'minute').toISOString()
-    : moment(alert.fields[ALERT_END])
-        .add(ruleWindowSizeMS, 'millisecond')
-        .toISOString();
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const transactionType = alert.fields[TRANSACTION_TYPE];
-  const comparisonChartTheme = getComparisonChartTheme();
-
   const {
     services: { uiSettings },
   } = useKibana();
 
+  const params = rule.params;
+  const environment = alert.fields[SERVICE_ENVIRONMENT];
+  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
+  const serviceName = String(alert.fields[SERVICE_NAME]);
+  const timeRange = getPaddedAlertTimeRange(
+    alert.fields[ALERT_START]!,
+    alert.fields[ALERT_END]
+  );
+  const transactionType = alert.fields[TRANSACTION_TYPE];
+  const comparisonChartTheme = getComparisonChartTheme();
   const historicalRange = useMemo(() => {
     return {
       start: moment().subtract(30, 'days').toISOString(),
@@ -147,11 +111,34 @@ export function AlertDetailsAppSection({
     };
   }, []);
 
+  const { from, to } = timeRange;
+  if (!from || !to) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.apm.alertDetails.error.toastTitle"
+            defaultMessage="An error occurred when identifying the alert time range."
+          />
+        }
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.apm.alertDetails.error.toastDescription"
+            defaultMessage="Unable to load the alert details page's charts. Please try to refresh the page if the alert is newly created"
+          />
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <TimeRangeMetadataContextProvider
-        start={start}
-        end={end}
+        start={from}
+        end={to}
         kuery=""
         useSpanName={false}
         uiSettings={uiSettings!}
@@ -163,13 +150,13 @@ export function AlertDetailsAppSection({
               transactionType={transactionType}
               serviceName={serviceName}
               environment={environment}
-              start={start}
-              end={end}
+              start={from}
+              end={to}
               comparisonChartTheme={comparisonChartTheme}
               timeZone={timeZone}
               latencyAggregationType={latencyAggregationType}
-              comparisonEnabled={comparisonEnabled}
-              offset={offset}
+              comparisonEnabled={false}
+              offset={''}
             />
             <EuiSpacer size="s" />
             <EuiFlexGroup direction="row" gutterSize="s">
@@ -177,19 +164,19 @@ export function AlertDetailsAppSection({
                 transactionType={transactionType}
                 serviceName={serviceName}
                 environment={environment}
-                start={start}
-                end={end}
+                start={from}
+                end={to}
                 comparisonChartTheme={comparisonChartTheme}
-                comparisonEnabled={comparisonEnabled}
-                offset={offset}
+                comparisonEnabled={false}
+                offset={''}
                 timeZone={timeZone}
               />
               <FailedTransactionChart
                 transactionType={transactionType}
                 serviceName={serviceName}
                 environment={environment}
-                start={start}
-                end={end}
+                start={from}
+                end={to}
                 comparisonChartTheme={comparisonChartTheme}
                 timeZone={timeZone}
               />

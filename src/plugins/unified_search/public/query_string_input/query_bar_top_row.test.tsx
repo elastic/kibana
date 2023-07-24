@@ -115,6 +115,7 @@ describe('QueryBarTopRowTopRow', () => {
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
+  const TEXT_BASED_EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -293,20 +294,72 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should NOT render query input bar if on text based languages mode', () => {
-    const component = shallow(
+    const component = mount(
       wrapQueryBarTopRowInContext({
         query: sqlQuery,
         isDirty: false,
         screenTitle: 'SQL Screen',
         timeHistory: mockTimeHistory,
         indexPatterns: [stubIndexPattern],
-        showDatePicker: false,
+        showDatePicker: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
       })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
+    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(true);
+    expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toBe(false);
+  });
+
+  it('Should render disabled date picker if on text based languages mode and no timeFieldName', () => {
+    const dataView = {
+      ...stubIndexPattern,
+      timeFieldName: undefined,
+      isPersisted: () => false,
+    };
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        query: sqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [dataView],
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
+    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(false);
+    expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toMatchInlineSnapshot(`
+      Object {
+        "display": <span
+          data-test-subj="kbnQueryBar-datePicker-disabled"
+        >
+          All time
+        </span>,
+      }
+    `);
+  });
+
+  it('Should render custom data view picker', () => {
+    const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
+    const { getByTestId } = render(
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        screenTitle: 'Another Screen',
+        isDirty: false,
+        indexPatterns: [stubIndexPattern],
+        timeHistory: mockTimeHistory,
+        dataViewPickerOverride,
+      })
+    );
+
+    expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
   });
 });
 

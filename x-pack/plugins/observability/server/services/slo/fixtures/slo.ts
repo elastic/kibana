@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
+import { sloSchema, CreateSLOParams, HistogramIndicator } from '@kbn/slo-schema';
 
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import {
@@ -18,11 +18,12 @@ import {
   DurationUnit,
   Indicator,
   KQLCustomIndicator,
+  MetricCustomIndicator,
   SLO,
   StoredSLO,
 } from '../../../domain/models';
 import { Paginated } from '../slo_repository';
-import { sevenDays, twoMinute } from './duration';
+import { oneWeek, twoMinute } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
@@ -34,7 +35,6 @@ export const createAPMTransactionErrorRateIndicator = (
     service: 'irrelevant',
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
-    goodStatusCodes: ['2xx', '3xx', '4xx'],
     index: 'metrics-apm*',
     ...params,
   },
@@ -64,6 +64,53 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createMetricCustomIndicator = (
+  params: Partial<MetricCustomIndicator['params']> = {}
+): MetricCustomIndicator => ({
+  type: 'sli.metric.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      metrics: [
+        { name: 'A', aggregation: 'sum', field: 'total' },
+        { name: 'B', aggregation: 'sum', field: 'processed' },
+      ],
+      equation: 'A - B',
+    },
+    total: {
+      metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
+      equation: 'A',
+    },
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createHistogramIndicator = (
+  params: Partial<HistogramIndicator['params']> = {}
+): HistogramIndicator => ({
+  type: 'sli.histogram.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      field: 'latency',
+      aggregation: 'range',
+      from: 0,
+      to: 100,
+      filter: '',
+    },
+    total: {
+      field: 'latency',
+      aggregation: 'value_count',
+      filter: '',
+    },
     timestampField: 'log_timestamp',
     ...params,
   },
@@ -138,8 +185,8 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
     timeWindow: {
-      duration: sevenDays(),
-      calendar: { startTime: new Date('2022-10-01T00:00:00.000Z') },
+      duration: oneWeek(),
+      type: 'calendarAligned',
     },
     ...params,
   });

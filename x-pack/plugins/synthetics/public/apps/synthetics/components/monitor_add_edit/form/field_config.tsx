@@ -28,6 +28,7 @@ import {
   EuiButtonGroupProps,
   EuiHighlight,
   EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   PROFILE_OPTIONS,
@@ -60,7 +61,7 @@ import {
   ThrottlingWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
-import { useMonitorName } from '../hooks/use_monitor_name';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
   DataStream,
@@ -76,6 +77,7 @@ import {
   ResponseBodyIndexPolicy,
   ResponseCheckJSON,
   ThrottlingConfig,
+  RequestBodyCheck,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -123,7 +125,7 @@ export const MONITOR_TYPE_CONFIG = {
           'Navigate through multiple steps or pages to test key user flows from a real browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
     beta: false,
   },
@@ -147,7 +149,7 @@ export const MONITOR_TYPE_CONFIG = {
           'Test a single page load including all objects on the page from a real web browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
     beta: false,
   },
@@ -165,7 +167,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -183,7 +185,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -201,7 +203,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -408,36 +410,71 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           label: locations?.find((loc) => location.id === loc.id)?.label || '',
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
+          isInvalid: location.isInvalid,
+          disabled: location.isInvalid,
         })),
         selectedOptions: Object.values(field?.value || {}).map((location) => ({
-          color: locations.some((s) => s.id === location.id)
-            ? location.isServiceManaged
+          color:
+            location.isInvalid || !locations.some((s) => s.id === location.id)
+              ? 'danger'
+              : location.isServiceManaged
               ? 'default'
-              : 'primary'
-            : 'danger',
+              : 'primary',
           label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
         onChange: (updatedValues: FormLocation[]) => {
-          setValue(ConfigKey.LOCATIONS, updatedValues, {
+          const valuesToSave = updatedValues.map(({ id, label, isServiceManaged }) => ({
+            id,
+            label,
+            isServiceManaged,
+          }));
+          setValue(ConfigKey.LOCATIONS, valuesToSave, {
             shouldValidate: Boolean(formState.submitCount > 0),
           });
         },
         isDisabled: readOnly,
         renderOption: (option: FormLocation, searchValue: string) => {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              </EuiFlexItem>
-              {!option.isServiceManaged && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">Private</EuiBadge>
+            <EuiToolTip
+              anchorProps={{
+                style: { width: '100%' },
+              }}
+              content={
+                option.isInvalid
+                  ? i18n.translate('xpack.synthetics.monitorConfig.locations.attachedPolicy', {
+                      defaultMessage:
+                        'The attached agent policy for this location has been deleted.',
+                    })
+                  : ''
+              }
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                {option.isInvalid && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="danger">
+                      {i18n.translate('xpack.synthetics.monitorConfig.locations.invalid', {
+                        defaultMessage: 'Invalid',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {!option.isServiceManaged && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="primary">
+                      {i18n.translate('xpack.synthetics.monitorConfig.locations.private', {
+                        defaultMessage: 'Private',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiToolTip>
           );
         },
       };
@@ -446,20 +483,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.ENABLED]: {
     fieldKey: ConfigKey.ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
-      defaultMessage: 'Enable Monitor',
-    }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
+      defaultMessage: `When disabled, the monitor doesn't run any tests. You can enable it at any time.`,
+    }),
+    props: ({ setValue, field }): EuiSwitchProps => ({
       id: 'syntheticsMontiorConfigIsEnabled',
-      label: isEdit
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
-            defaultMessage: 'Disabled monitors do not run tests.',
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.enabled.label', {
-            defaultMessage:
-              'Disabled monitors do not run tests. You can create a disabled monitor and enable it later.',
-          }),
+      label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+        defaultMessage: 'Enable Monitor',
+      }),
       checked: field?.value || false,
       onChange: (event) => {
         setValue(ConfigKey.ENABLED, !!event.target.checked);
@@ -472,22 +504,41 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [AlertConfigKey.STATUS_ENABLED]: {
     fieldKey: AlertConfigKey.STATUS_ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-      defaultMessage: 'Enable status alerts',
-    }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    props: ({ setValue, field }): EuiSwitchProps => ({
       id: 'syntheticsMonitorConfigIsAlertEnabled',
-      label: isEdit
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
-            defaultMessage: 'Disabling will stop alerting on this monitor.',
+      label: field?.value
+        ? i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
+            defaultMessage: 'Disable status alerts on this monitor',
           })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
-            defaultMessage: 'Enable status alerts on this monitor.',
+        : i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
+            defaultMessage: 'Enable status alerts on this monitor',
           }),
       checked: field?.value || false,
       onChange: (event) => {
         setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
+      },
+      'data-test-subj': 'syntheticsAlertStatusSwitch',
+      // alert config is an allowed field for read only
+      // isDisabled: readOnly,
+    }),
+  },
+  [AlertConfigKey.TLS_ENABLED]: {
+    fieldKey: AlertConfigKey.TLS_ENABLED,
+    component: Switch,
+    controlled: true,
+    props: ({ setValue, field }): EuiSwitchProps => ({
+      id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
+      label: field?.value
+        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
+            defaultMessage: 'Disable TLS alerts on this monitor.',
+          })
+        : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
+            defaultMessage: 'Enable TLS alerts on this monitor.',
+          }),
+      checked: field?.value || false,
+      onChange: (event) => {
+        setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);
       },
       'data-test-subj': 'syntheticsAlertStatusSwitch',
       // alert config is an allowed field for read only
@@ -578,7 +629,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
+          href="https://www.elastic.co/guide/en/fleet/current/data-streams.html"
+          target="_blank"
+        >
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
@@ -709,12 +764,20 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: (headers) => !validateHeaders(headers),
     }),
+    dependencies: [ConfigKey.REQUEST_BODY_CHECK],
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
+    // contentMode is optional for other implementations, but required for this implemention of this field
+    props: ({
+      dependencies,
+    }): HeaderFieldProps & { contentMode: HeaderFieldProps['contentMode'] } => {
+      const [requestBody] = dependencies;
+      return {
+        readOnly,
+        contentMode: (requestBody as RequestBodyCheck).type,
+      };
+    },
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,
@@ -1163,7 +1226,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"
-              href={'https://github.com/elastic/synthetics/blob/main/THROTTLING.md'}
+              href={'https://github.com/elastic/synthetics/blob/main/docs/throttling.md'}
               target="_blank"
             >
               {i18n.translate('xpack.synthetics.monitorConfig.throttlingDisabled.link', {

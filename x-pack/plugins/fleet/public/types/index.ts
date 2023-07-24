@@ -108,8 +108,6 @@ export type {
   PackageListItem,
   PackagesGroupedByStatus,
   RequirementsByServiceName,
-  RequirementVersion,
-  ScreenshotItem,
   ServiceName,
   GetCategoriesRequest,
   GetCategoriesResponse,
@@ -120,7 +118,6 @@ export type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
-  DetailViewPanelName,
   InstallationStatus,
   Installable,
   RegistryRelease,
@@ -135,6 +132,9 @@ export type {
   PostHealthCheckResponse,
   PostRetrieveAgentsByActionsRequest,
   PostRetrieveAgentsByActionsResponse,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
+  KibanaSavedObjectType,
 } from '../../common/types';
 export {
   entries,

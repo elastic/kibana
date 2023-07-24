@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateUpdateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
-import { RuleUpdateProps } from '../../../../../../../common/detection_engine/rule_schema';
+import { validateUpdateRuleProps } from '../../../../../../../common/api/detection_engine/rule_management';
+import { RuleUpdateProps } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -17,7 +17,7 @@ import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 
 import { getIdError } from '../../../utils/utils';
-import { transformValidate } from '../../../utils/validate';
+import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 import { updateRules } from '../../../logic/crud/update_rules';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 
@@ -70,6 +70,8 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           ruleId: request.body.rule_id,
           id: request.body.id,
         });
+
+        await validateResponseActionsPermissions(ctx.securitySolution, request.body, existingRule);
 
         const rule = await updateRules({
           rulesClient,

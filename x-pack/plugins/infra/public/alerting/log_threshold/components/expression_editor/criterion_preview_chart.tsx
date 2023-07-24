@@ -17,11 +17,12 @@ import {
   Settings,
   RectAnnotation,
   LineAnnotation,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
@@ -32,7 +33,6 @@ import {
   getDomain,
   tooltipProps,
   useDateFormatter,
-  getChartTheme,
   yAxisFormatter,
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
@@ -46,7 +46,7 @@ import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api/log_alerts';
+} from '../../../../../common/http_api';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
@@ -142,8 +142,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   annotations,
   filterSeriesByGroupName,
 }) => {
-  const { uiSettings } = useKibana().services;
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const chartTheme = useTimelineChartTheme();
   const timezone = useKibanaTimeZoneSetting();
 
   const {
@@ -331,7 +330,8 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings baseTheme={chartTheme.baseTheme} />
+          <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>
       {!executionTimeRange && (

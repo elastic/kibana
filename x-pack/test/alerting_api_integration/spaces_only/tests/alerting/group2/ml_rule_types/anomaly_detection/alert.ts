@@ -133,11 +133,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(1);
       for (const doc of docs) {
-        const { name, message } = doc._source.params;
+        const { name, message, anomalyExplorerUrl } = doc._source.params;
 
         expect(name).to.be('Test AD job');
         expect(message).to.be(
           'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.'
+        );
+        // check only part of the URL as time bounds vary based on the anomaly
+        expect(anomalyExplorerUrl).to.contain(
+          '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
         );
       }
     });
@@ -164,8 +168,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
               source: ES_TEST_INDEX_SOURCE,
               reference: ES_TEST_INDEX_REFERENCE,
               params: {
-                name: '{{{alertName}}}',
+                name: '{{{rule.name}}}',
                 message: '{{{context.message}}}',
+                anomalyExplorerUrl: '{{{context.anomalyExplorerUrl}}}',
               },
             },
           ],

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../../../../../common/detection_engine/schemas/common';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -13,7 +12,9 @@ import type {
   RuleExecutionEventType,
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { SortOrder } from '../../../../../../../common/api/detection_engine';
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:
@@ -36,7 +37,7 @@ export interface IRuleExecutionLogForRoutes {
 
 export interface GetExecutionEventsArgs {
   /** Saved object id of the rule (`rule.id`). */
-  ruleId: string;
+  ruleId: RuleObjectId;
 
   /** Include events of the specified types. If empty, all types of events will be included. */
   eventTypes: RuleExecutionEventType[];
@@ -56,7 +57,7 @@ export interface GetExecutionEventsArgs {
 
 export interface GetExecutionResultsArgs {
   /** Saved object id of the rule (`rule.id`). */
-  ruleId: string;
+  ruleId: RuleObjectId;
 
   /** Start of daterange to filter to. */
   start: string;

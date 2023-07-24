@@ -9,11 +9,11 @@ import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { useCurrentThemeVars, useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { Controls, Cytoscape, JobMapLegend } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
+import { EuiThemeType } from '../../../components/color_range_legend';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
@@ -65,7 +65,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
     },
   } = useMlKibana();
   const locator = useMlLocator()!;
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
   const refresh = useRefresh();
 
   const redirectToAnalyticsManagementPage = async () => {

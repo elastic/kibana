@@ -88,6 +88,15 @@ export async function createOrUpdatePreconfiguredOutputs(
       }
 
       const isCreate = !existingOutput;
+
+      // field in allow edit are not updated through preconfiguration
+      if (!isCreate && output.allow_edit) {
+        for (const key of output.allow_edit) {
+          // @ts-expect-error
+          data[key] = existingOutput[key];
+        }
+      }
+
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
 
@@ -181,6 +190,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)
+    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? [])
   );
 }

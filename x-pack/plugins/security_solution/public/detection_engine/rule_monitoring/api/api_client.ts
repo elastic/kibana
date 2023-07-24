@@ -12,11 +12,12 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
-} from '../../../../common/detection_engine/rule_monitoring';
+  SETUP_HEALTH_URL,
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 import type {
   FetchRuleExecutionEventsArgs,
@@ -25,6 +26,12 @@ import type {
 } from './api_client_interface';
 
 export const api: IRuleMonitoringApiClient = {
+  setupDetectionEngineHealthApi: async (): Promise<void> => {
+    await http().fetch(SETUP_HEALTH_URL, {
+      method: 'POST',
+    });
+  },
+
   fetchRuleExecutionEvents: (
     args: FetchRuleExecutionEventsArgs
   ): Promise<GetRuleExecutionEventsResponse> => {

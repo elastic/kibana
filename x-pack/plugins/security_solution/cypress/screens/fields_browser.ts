@@ -43,9 +43,8 @@ export const FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON = `${FIELDS_BROWSER_CONTAIN
 export const FIELDS_BROWSER_CATEGORIES_COUNT = `${FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON} span.euiNotificationBadge`;
 
 export const FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="category-badges"]`;
-export const FIELDS_BROWSER_CATEGORY_BADGE = (id: string) => {
-  return `${FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES} [data-test-subj="category-badge-${id}"]`;
-};
+export const FIELDS_BROWSER_CATEGORY_BADGE = (id: string) =>
+  `${FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES} [data-test-subj="category-badge-${id}"]`;
 
 export const FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER =
   '[data-test-subj="categories-selector-container"]';

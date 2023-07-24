@@ -23,6 +23,7 @@ export interface UseGetGroupSelectorArgs {
   groupingId: string;
   groupingState: GroupMap;
   maxGroupingLevels?: number;
+  onOptionsChange?: (newOptions: GroupOption[]) => void;
   onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
   tracker?: (
     type: UiCounterMetricType,
@@ -30,6 +31,48 @@ export interface UseGetGroupSelectorArgs {
     count?: number | undefined
   ) => void;
 }
+
+interface UseGetGroupSelectorStateless
+  extends Pick<
+    UseGetGroupSelectorArgs,
+    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels'
+  > {
+  onGroupChange: (selectedGroups: string[]) => void;
+}
+
+// only use this component to use a group selector that displays when isNoneGroup is true
+// by selecting a group with the groupSelectorStateless component
+// the contents are within the grouping component and from that point
+// the grouping component will handle the group selector. When the group selector is set back to none,
+// the consumer can again use the groupSelectorStateless component to select a new group
+export const useGetGroupSelectorStateless = ({
+  defaultGroupingOptions,
+  groupingId,
+  fields,
+  onGroupChange,
+  maxGroupingLevels,
+}: UseGetGroupSelectorStateless) => {
+  const onChange = useCallback(
+    (groupSelection: string) => {
+      onGroupChange([groupSelection]);
+    },
+    [onGroupChange]
+  );
+
+  return (
+    <GroupSelector
+      {...{
+        groupingId,
+        groupsSelected: ['none'],
+        'data-test-subj': 'alerts-table-group-selector',
+        onGroupChange: onChange,
+        fields,
+        maxGroupingLevels,
+        options: defaultGroupingOptions,
+      }}
+    />
+  );
+};
 
 export const useGetGroupSelector = ({
   defaultGroupingOptions,
@@ -39,6 +82,7 @@ export const useGetGroupSelector = ({
   groupingState,
   maxGroupingLevels = 1,
   onGroupChange,
+  onOptionsChange,
   tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
@@ -59,8 +103,9 @@ export const useGetGroupSelector = ({
   const setOptions = useCallback(
     (newOptions: GroupOption[]) => {
       dispatch(groupActions.updateGroupOptions({ id: groupingId, newOptionList: newOptions }));
+      onOptionsChange?.(newOptions);
     },
-    [dispatch, groupingId]
+    [dispatch, groupingId, onOptionsChange]
   );
 
   const onChange = useCallback(
@@ -92,7 +137,7 @@ export const useGetGroupSelector = ({
   );
 
   useEffect(() => {
-    if (options.length === 0) {
+    if (options.length === 0 && defaultGroupingOptions.length > 0) {
       return setOptions(
         defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
           ? defaultGroupingOptions

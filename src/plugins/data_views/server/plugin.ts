@@ -14,12 +14,14 @@ import { capabilitiesProvider } from './capabilities_provider';
 import { getIndexPatternLoad } from './expressions';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
 } from './types';
+import { DataViewsStorage } from './content_management';
 
 export class DataViewsServerPlugin
   implements
@@ -38,7 +40,7 @@ export class DataViewsServerPlugin
 
   public setup(
     core: CoreSetup<DataViewsServerPluginStartDependencies, DataViewsServerPluginStart>,
-    { expressions, usageCollection }: DataViewsServerPluginSetupDependencies
+    { expressions, usageCollection, contentManagement }: DataViewsServerPluginSetupDependencies
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -49,6 +51,14 @@ export class DataViewsServerPlugin
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
     core.deprecations.registerDeprecations(createScriptedFieldsDeprecationsConfig(core));
+
+    contentManagement.register({
+      id: DATA_VIEW_SAVED_OBJECT_TYPE,
+      storage: new DataViewsStorage(),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
 
     return {};
   }

@@ -189,6 +189,112 @@ describe('createOrUpdateComponentTemplate', () => {
     });
   });
 
+  it(`should update index template field limit and retry if putTemplate throws error with field limit error when there are malformed index templates`, async () => {
+    clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
+      new EsErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: {
+              root_cause: [
+                {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                },
+              ],
+              type: 'illegal_argument_exception',
+              reason:
+                'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason:
+                  'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
+                  caused_by: {
+                    type: 'illegal_argument_exception',
+                    reason: 'Limit of total fields [1900] has been exceeded',
+                  },
+                },
+              },
+            },
+          },
+        })
+      )
+    );
+    const existingIndexTemplate = {
+      name: 'test-template',
+      index_template: {
+        index_patterns: ['test*'],
+        composed_of: ['test-mappings'],
+        template: {
+          settings: {
+            auto_expand_replicas: '0-1',
+            hidden: true,
+            'index.lifecycle': {
+              name: '.alerts-ilm-policy',
+              rollover_alias: `.alerts-empty-default`,
+            },
+            'index.mapping.total_fields.limit': 1800,
+          },
+          mappings: {
+            dynamic: false,
+          },
+        },
+      },
+    };
+
+    clusterClient.indices.getIndexTemplate.mockResolvedValueOnce({
+      index_templates: [
+        existingIndexTemplate,
+        {
+          name: 'lyndon',
+          // @ts-expect-error
+          index_template: {
+            index_patterns: ['intel*'],
+          },
+        },
+        {
+          name: 'sample_ds',
+          // @ts-expect-error
+          index_template: {
+            index_patterns: ['sample_ds-*'],
+            data_stream: {
+              hidden: false,
+              allow_custom_routing: false,
+            },
+          },
+        },
+      ],
+    });
+
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+      name: existingIndexTemplate.name,
+      body: {
+        ...existingIndexTemplate.index_template,
+        template: {
+          ...existingIndexTemplate.index_template.template,
+          settings: {
+            ...existingIndexTemplate.index_template.template?.settings,
+            'index.mapping.total_fields.limit': 2500,
+          },
+        },
+      },
+    });
+  });
+
   it(`should retry getIndexTemplate and putIndexTemplate on transient ES errors`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
       new EsErrors.ResponseError(

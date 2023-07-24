@@ -7,15 +7,28 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/150772
-  describe.skip('aggregate', () => {
+  const getEventLogWithRetry = async (id: string) => {
+    await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id,
+        provider: 'alerting',
+        actions: new Map([['execute', { equal: 1 }]]),
+      });
+    });
+  };
+
+  describe('aggregate', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -59,82 +72,85 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       const NumActiveAlerts = 1;
       const NumErrorAlerts = 2;
 
+      const okAlertIds: string[] = [];
+      const activeAlertIds: string[] = [];
+      const errorAlertIds: string[] = [];
+
       await Promise.all(
         [...Array(NumOkAlerts)].map(async () => {
-          const okAlertId = await createTestAlert(
-            {
-              rule_type_id: 'test.noop',
-              schedule: { interval: '1s' },
-            },
-            'ok'
-          );
+          const okAlertId = await createTestAlert({
+            rule_type_id: 'test.noop',
+            schedule: { interval: '24h' },
+          });
+          okAlertIds.push(okAlertId);
           objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
         })
       );
 
+      await Promise.all(okAlertIds.map((id) => getEventLogWithRetry(id)));
+
       await Promise.all(
         [...Array(NumActiveAlerts)].map(async () => {
-          const activeAlertId = await createTestAlert(
-            {
-              rule_type_id: 'test.patternFiring',
-              schedule: { interval: '1s' },
-              params: {
-                pattern: { instance: new Array(100).fill(true) },
-              },
+          const activeAlertId = await createTestAlert({
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '24h' },
+            params: {
+              pattern: { instance: new Array(100).fill(true) },
             },
-            'active'
-          );
+          });
+          activeAlertIds.push(activeAlertId);
           objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
         })
       );
+
+      await Promise.all(activeAlertIds.map((id) => getEventLogWithRetry(id)));
 
       await Promise.all(
         [...Array(NumErrorAlerts)].map(async () => {
-          const activeAlertId = await createTestAlert(
-            {
-              rule_type_id: 'test.throw',
-              schedule: { interval: '1s' },
-            },
-            'error'
-          );
-          objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+          const errorAlertId = await createTestAlert({
+            rule_type_id: 'test.throw',
+            schedule: { interval: '24h' },
+          });
+          errorAlertIds.push(errorAlertId);
+          objectRemover.add(Spaces.space1.id, errorAlertId, 'rule', 'alerting');
         })
       );
 
-      // Adding delay to allow ES refresh cycle to run. Even when the waitForStatus
-      // calls are successful, the call to aggregate may return stale totals if called
-      // too early.
-      await delay(1000);
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
-      );
-      expect(response.status).to.eql(200);
-      expect(response.body).to.eql({
-        rule_enabled_status: {
-          disabled: 0,
-          enabled: 7,
-        },
-        rule_execution_status: {
-          ok: NumOkAlerts,
-          active: NumActiveAlerts,
-          error: NumErrorAlerts,
-          pending: 0,
-          unknown: 0,
-          warning: 0,
-        },
-        rule_last_run_outcome: {
-          succeeded: 5,
-          warning: 0,
-          failed: 2,
-        },
-        rule_muted_status: {
-          muted: 0,
-          unmuted: 7,
-        },
-        rule_snoozed_status: {
-          snoozed: 0,
-        },
-        rule_tags: ['foo'],
+      await Promise.all(errorAlertIds.map((id) => getEventLogWithRetry(id)));
+
+      await retry.try(async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.eql({
+          rule_enabled_status: {
+            disabled: 0,
+            enabled: 7,
+          },
+          rule_execution_status: {
+            ok: NumOkAlerts,
+            active: NumActiveAlerts,
+            error: NumErrorAlerts,
+            pending: 0,
+            unknown: 0,
+            warning: 0,
+          },
+          rule_last_run_outcome: {
+            succeeded: 5,
+            warning: 0,
+            failed: 2,
+          },
+          rule_muted_status: {
+            muted: 0,
+            unmuted: 7,
+          },
+          rule_snoozed_status: {
+            snoozed: 0,
+          },
+          rule_tags: ['foo'],
+        });
       });
     });
 
@@ -145,16 +161,13 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
         await Promise.all(
           [...Array(numOfAlerts)].map(async (_, alertIndex) => {
-            const okAlertId = await createTestAlert(
-              {
-                rule_type_id: 'test.noop',
-                schedule: { interval: '1s' },
-                tags: [...Array(numOfTagsPerAlert)].map(
-                  (__, i) => `tag-${i + numOfTagsPerAlert * alertIndex}`
-                ),
-              },
-              'ok'
-            );
+            const okAlertId = await createTestAlert({
+              rule_type_id: 'test.noop',
+              schedule: { interval: '24h' },
+              tags: [...Array(numOfTagsPerAlert)].map(
+                (__, i) => `tag-${i + numOfTagsPerAlert * alertIndex}`
+              ),
+            });
             objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
           })
         );
@@ -173,137 +186,96 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         const NumActiveAlerts = 1;
         const NumErrorAlerts = 2;
 
+        const okAlertIds: string[] = [];
+        const activeAlertIds: string[] = [];
+        const errorAlertIds: string[] = [];
+
         await Promise.all(
           [...Array(NumOkAlerts)].map(async () => {
-            const okAlertId = await createTestAlert(
-              {
-                rule_type_id: 'test.noop',
-                schedule: { interval: '1s' },
-                tags: ['a', 'b'],
-              },
-              'ok'
-            );
+            const okAlertId = await createTestAlert({
+              rule_type_id: 'test.noop',
+              schedule: { interval: '24h' },
+              tags: ['a', 'b'],
+            });
+            okAlertIds.push(okAlertId);
             objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
           })
         );
+        await Promise.all(okAlertIds.map((id) => getEventLogWithRetry(id)));
 
         await Promise.all(
           [...Array(NumActiveAlerts)].map(async () => {
-            const activeAlertId = await createTestAlert(
-              {
-                rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                params: {
-                  pattern: { instance: new Array(100).fill(true) },
-                },
-                tags: ['a', 'c', 'f'],
+            const activeAlertId = await createTestAlert({
+              rule_type_id: 'test.patternFiring',
+              schedule: { interval: '24h' },
+              params: {
+                pattern: { instance: new Array(100).fill(true) },
               },
-              'active'
-            );
+              tags: ['a', 'c', 'f'],
+            });
+            activeAlertIds.push(activeAlertId);
             objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
           })
         );
+        await Promise.all(activeAlertIds.map((id) => getEventLogWithRetry(id)));
 
         await Promise.all(
           [...Array(NumErrorAlerts)].map(async () => {
-            const activeAlertId = await createTestAlert(
-              {
-                rule_type_id: 'test.throw',
-                schedule: { interval: '1s' },
-                tags: ['b', 'c', 'd'],
-              },
-              'error'
-            );
-            objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+            const errorAlertId = await createTestAlert({
+              rule_type_id: 'test.throw',
+              schedule: { interval: '24h' },
+              tags: ['b', 'c', 'd'],
+            });
+            errorAlertIds.push(errorAlertId);
+            objectRemover.add(Spaces.space1.id, errorAlertId, 'rule', 'alerting');
           })
         );
+        await Promise.all(errorAlertIds.map((id) => getEventLogWithRetry(id)));
 
-        // Adding delay to allow ES refresh cycle to run. Even when the waitForStatus
-        // calls are successful, the call to aggregate may return stale totals if called
-        // too early.
-        await delay(1000);
-        const reponse = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
-        );
+        await retry.try(async () => {
+          const response = await supertest.get(
+            `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
+          );
 
-        expect(reponse.status).to.eql(200);
-        expect(reponse.body).to.eql({
-          alertExecutionStatus: {
-            ok: NumOkAlerts,
-            active: NumActiveAlerts,
-            error: NumErrorAlerts,
-            pending: 0,
-            unknown: 0,
-            warning: 0,
-          },
-          ruleEnabledStatus: {
-            disabled: 0,
-            enabled: 7,
-          },
-          ruleLastRunOutcome: {
-            succeeded: 5,
-            warning: 0,
-            failed: 2,
-          },
-          ruleMutedStatus: {
-            muted: 0,
-            unmuted: 7,
-          },
-          ruleSnoozedStatus: {
-            snoozed: 0,
-          },
-          ruleTags: ['a', 'b', 'c', 'd', 'f'],
+          expect(response.status).to.eql(200);
+          expect(response.body).to.eql({
+            alertExecutionStatus: {
+              ok: NumOkAlerts,
+              active: NumActiveAlerts,
+              error: NumErrorAlerts,
+              pending: 0,
+              unknown: 0,
+              warning: 0,
+            },
+            ruleEnabledStatus: {
+              disabled: 0,
+              enabled: 7,
+            },
+            ruleLastRunOutcome: {
+              succeeded: 5,
+              warning: 0,
+              failed: 2,
+            },
+            ruleMutedStatus: {
+              muted: 0,
+              unmuted: 7,
+            },
+            ruleSnoozedStatus: {
+              snoozed: 0,
+            },
+            ruleTags: ['a', 'b', 'c', 'd', 'f'],
+          });
         });
       });
     });
   });
 
-  const WaitForStatusIncrement = 500;
-
-  async function waitForStatus(
-    id: string,
-    statuses: Set<string>,
-    waitMillis: number = 10000
-  ): Promise<Record<string, any>> {
-    if (waitMillis < 0) {
-      expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
-    }
-
-    const response = await supertest.get(
-      `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${id}`
-    );
-    expect(response.status).to.eql(200);
-
-    const { execution_status: executionStatus } = response.body || {};
-    const { status } = executionStatus || {};
-
-    const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
-      executionStatus
-    )}`;
-
-    if (statuses.has(status)) {
-      return executionStatus;
-    }
-
-    // eslint-disable-next-line no-console
-    console.log(`${message}, retrying`);
-
-    await delay(WaitForStatusIncrement);
-    return await waitForStatus(id, statuses, waitMillis - WaitForStatusIncrement);
-  }
-
-  async function delay(millis: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, millis));
-  }
-
-  async function createTestAlert(testAlertOverrides = {}, status: string) {
+  async function createTestAlert(testAlertOverrides = {}) {
     const { body: createdAlert } = await supertest
       .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestRuleData(testAlertOverrides))
       .expect(200);
-
-    await waitForStatus(createdAlert.id, new Set([status]));
     return createdAlert.id;
   }
 }

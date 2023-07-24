@@ -108,14 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const trendLineData = await inspector.getTableDataWithId('inspectorTableChooser1');
       expect(trendLineData).to.eql(inspectorTrendlineData);
       await inspector.close();
-      await PageObjects.lens.openDimensionEditor(
-        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
-      );
-
-      await testSubjects.click('lnsMetric_supporting_visualization_none');
-      await PageObjects.lens.closeDimensionEditor();
-
-      await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
     it('should enable metric with breakdown', async () => {
@@ -127,63 +119,74 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.waitForVisualization('mtrVis');
+      const data = await PageObjects.lens.getMetricVisualizationData();
 
-      expect(await PageObjects.lens.getMetricVisualizationData()).to.eql([
+      const expectedData = [
         {
           title: '97.220.3.248',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 19.76K',
-          value: '19.76K',
+          extraText: 'Average of bytes 19,755',
+          value: '19,755',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          showingTrendline: true,
           showingBar: false,
         },
         {
           title: '169.228.188.120',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 18.99K',
-          value: '18.99K',
+          extraText: 'Average of bytes 18,994',
+          value: '18,994',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          showingTrendline: true,
           showingBar: false,
         },
         {
           title: '78.83.247.30',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 17.25K',
-          value: '17.25K',
+          extraText: 'Average of bytes 17,246',
+          value: '17,246',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          showingTrendline: true,
           showingBar: false,
         },
         {
           title: '226.82.228.233',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 15.69K',
-          value: '15.69K',
+          extraText: 'Average of bytes 15,687',
+          value: '15,687',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          showingTrendline: true,
           showingBar: false,
         },
         {
           title: '93.28.27.24',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 15.61K',
-          value: '15.61K',
+          extraText: 'Average of bytes 15,614.333',
+          value: '15,614.333',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          showingTrendline: true,
           showingBar: false,
         },
         {
           title: 'Other',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 5.72K',
-          value: '5.72K',
+          extraText: 'Average of bytes 5,722.775',
+          value: '5,722.775',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          showingTrendline: true,
           showingBar: false,
         },
-      ]);
+      ];
+      expect(data).to.eql(expectedData);
+
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      await testSubjects.click('lnsMetric_supporting_visualization_none');
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
     it('should enable bar with max dimension', async () => {
@@ -341,6 +344,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.typeFormula('');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
+    });
+
+    it('does carry custom formatting when transitioning from other visualization', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+      // await PageObjects.lens.clickLegacyMetric();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+        keepOpen: true,
+      });
+      await PageObjects.lens.editDimensionFormat('Number', { decimals: 3, prefix: ' blah' });
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.switchToVisualization('lnsMetric', 'Metric');
+      await PageObjects.lens.waitForVisualization('mtrVis');
+      const [{ value }] = await PageObjects.lens.getMetricVisualizationData();
+      expect(value).contain('blah');
+
+      // Extract the numeric decimals from the value without any compact suffix like k or m
+      const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[0];
+      expect(decimals).have.length(3);
     });
   });
 }

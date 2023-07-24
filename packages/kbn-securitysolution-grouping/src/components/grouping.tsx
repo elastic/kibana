@@ -17,19 +17,19 @@ import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
-import { createGroupFilter, getNullGroupFilter } from './accordion_panel/helpers';
+import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { GroupingAggregation, GroupPanelRenderer } from './types';
-import { GroupStatsRenderer, OnGroupToggle } from './types';
+import type { ParsedGroupingAggregation, GroupPanelRenderer } from './types';
+import { GroupingBucket, GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
   activePage: number;
-  data?: GroupingAggregation<T>;
+  data?: ParsedGroupingAggregation<T>;
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
@@ -92,7 +92,7 @@ const GroupingComponent = <T,>({
 
   const groupPanels = useMemo(
     () =>
-      data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
+      data?.groupByFields?.buckets?.map((groupBucket: GroupingBucket<T>, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
         const isNullGroup = groupBucket.isNullGroup ?? false;
@@ -101,7 +101,7 @@ const GroupingComponent = <T,>({
           : undefined;
 
         return (
-          <span key={groupKey}>
+          <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
             <GroupPanel
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
@@ -112,7 +112,10 @@ const GroupingComponent = <T,>({
                   groupFilter={
                     isNullGroup
                       ? getNullGroupFilter(selectedGroup)
-                      : createGroupFilter(selectedGroup, group)
+                      : createGroupFilter(
+                          selectedGroup,
+                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key]
+                        )
                   }
                   groupNumber={groupNumber}
                   statRenderers={
@@ -218,7 +221,7 @@ const GroupingComponent = <T,>({
           <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
         )}
         {groupCount > 0 ? (
-          <>
+          <span data-test-subj={`grouping-level-${groupingLevel}`}>
             {groupPanels}
             {groupCount > 0 && (
               <>
@@ -243,7 +246,7 @@ const GroupingComponent = <T,>({
                 />
               </>
             )}
-          </>
+          </span>
         ) : (
           <EmptyGroupingComponent />
         )}

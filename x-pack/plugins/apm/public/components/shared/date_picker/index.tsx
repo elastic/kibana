@@ -25,7 +25,7 @@ export function DatePicker({
   rangeTo?: string;
   refreshPaused?: boolean;
   refreshInterval?: number;
-  onTimeRangeRefresh: (range: { start: string; end: string }) => void;
+  onTimeRangeRefresh: () => void;
 }) {
   const history = useHistory();
   const location = useLocation();
@@ -93,9 +93,9 @@ export function DatePicker({
       isPaused={refreshPaused}
       refreshInterval={refreshInterval}
       onTimeChange={onTimeChange}
-      onRefresh={({ start, end }) => {
+      onRefresh={() => {
         clearCache();
-        onTimeRangeRefresh({ start, end });
+        onTimeRangeRefresh();
       }}
       onRefreshChange={({
         isPaused: nextRefreshPaused,

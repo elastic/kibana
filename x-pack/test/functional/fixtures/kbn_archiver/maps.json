@@ -77,7 +77,7 @@
 
 {
   "attributes": {
-    "description": "",
+    "description": null,
     "layerListJSON": "[{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[\"name\"],\"applyGlobalQuery\":false,\"indexPatternRefName\":\"layer_1_source_index_pattern\",\"scalingType\":\"LIMIT\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3},\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.runtime_shape_name\",\"name\":\"__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"runtime_shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}],\"applyGlobalQuery\":true,\"indexPatternRefName\":\"layer_1_join_0_index_pattern\",\"type\":\"ES_TERM_SOURCE\"}}]}]",
     "mapStateJSON": "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-17m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"settings\":{\"autoFitToDataBounds\":false}}",
     "title": "join example",
@@ -203,12 +203,11 @@
 {
   "attributes": {
     "description": "",
-    "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
     },
-    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[{\"version\":\"7.0.0-alpha1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":20,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_0\"},{\"version\":\"7.0.0-alpha1\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":20,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.9.0\",\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":20,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{},\"mapCenter\":{\"lat\":-0.34992,\"lon\":81.04245,\"zoom\":3.39},\"mapBuffer\":{\"minLon\":45,\"minLat\":-40.9799,\"maxLon\":112.5,\"maxLat\":21.94305},\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"isMovementSynchronized\":false},\"panelRefName\":\"panel_1\"},{\"version\":\"8.9.0\",\"type\":\"map\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":20,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{},\"mapCenter\":{\"lat\":41.20492,\"lon\":-99.45039,\"zoom\":3.67},\"mapBuffer\":{\"minLon\":-135,\"minLat\":21.94305,\"maxLon\":-67.5,\"maxLat\":55.77657},\"isLayerTOCOpen\":true,\"openTOCDetails\":[],\"hiddenLayers\":[],\"isMovementSynchronized\":false},\"panelRefName\":\"panel_2\"}]",
     "refreshInterval": {
       "pause": true,
       "value": 1000
@@ -219,26 +218,26 @@
     "title": "map embeddable example",
     "version": 1
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-06-02T16:00:38.547Z",
   "id": "19906970-2e40-11e9-85cb-6965aae20f13",
-  "migrationVersion": {
-    "dashboard": "7.14.0"
-  },
+  "managed": false,
   "references": [
     {
       "id": "1649cc70-f736-11e8-8ce0-9723965e01e3",
-      "name": "panel_0",
+      "name": "1:panel_1",
       "type": "map"
     },
     {
       "id": "88845ec0-03ae-11e9-83d4-5b39b6575325",
-      "name": "panel_1",
+      "name": "2:panel_2",
       "type": "map"
     }
   ],
   "type": "dashboard",
-  "updated_at": "2018-04-11T21:57:52.253Z",
-  "version": "WzY1LDJd"
+  "typeMigrationVersion": "8.7.0",
+  "updated_at": "2023-06-02T16:00:38.547Z",
+  "version": "Wzc5LDFd"
 }
 
 {

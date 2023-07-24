@@ -12,15 +12,15 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import type { ActionConnector, ConfigurationAttributes } from '../../../common/types/domain';
+import { UserActionTypes } from '../../../common/types/domain';
 import type {
-  ActionConnector,
   Case,
   ExternalServiceResponse,
-  CasesConfigureAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
-import { CaseRt, CaseStatuses, ActionTypes, OWNER_FIELD, CommentType } from '../../../common/api';
+import { CaseRt, CaseStatuses, OWNER_FIELD, CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
@@ -30,18 +30,18 @@ import {
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import type { ICaseResponse } from '../typedoc_interfaces';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
+  configureSettings: SavedObjectsFindResponse<ConfigurationAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
@@ -95,8 +95,7 @@ export interface PushParams {
 export const push = async (
   { connectorId, caseId }: PushParams,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
-  casesClientInternal: CasesClientInternal
+  casesClient: CasesClient
 ): Promise<Case> => {
   const {
     unsecuredSavedObjectsClient,
@@ -253,7 +252,7 @@ export const push = async (
 
     if (shouldMarkAsClosed) {
       await userActionService.creator.createUserAction({
-        type: ActionTypes.status,
+        type: UserActionTypes.status,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -267,7 +266,7 @@ export const push = async (
     }
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.pushed,
+      type: UserActionTypes.pushed,
       payload: { externalService },
       user,
       caseId,
@@ -275,37 +274,36 @@ export const push = async (
     });
 
     /* End of update case with push information */
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...myCase,
+        ...updatedCase,
+        attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+        references: myCase.references,
+      },
+      comments: comments.saved_objects.map((origComment) => {
+        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        return {
+          ...origComment,
+          ...updatedComment,
+          attributes: {
+            ...origComment.attributes,
+            ...updatedComment?.attributes,
+          } as CommentAttributes,
+          version: updatedComment?.version ?? origComment.version,
+          references: origComment?.references ?? [],
+        };
+      }),
+    });
 
-    return CaseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: {
-          ...myCase,
-          ...updatedCase,
-          attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-          references: myCase.references,
-        },
-        comments: comments.saved_objects.map((origComment) => {
-          const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
-          return {
-            ...origComment,
-            ...updatedComment,
-            attributes: {
-              ...origComment.attributes,
-              ...updatedComment?.attributes,
-            } as CommentAttributes,
-            version: updatedComment?.version ?? origComment.version,
-            references: origComment?.references ?? [],
-          };
-        }),
-      })
-    );
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }
 };
 
 const getProfiles = async (
-  caseInfo: ICaseResponse,
+  caseInfo: Case,
   securityStartPlugin: SecurityPluginStart
 ): Promise<Map<string, UserProfile> | undefined> => {
   const uids = new Set([

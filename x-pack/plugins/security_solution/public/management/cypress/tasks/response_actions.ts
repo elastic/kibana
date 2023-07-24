@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { request } from './common';
+import { request, loadPage } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
@@ -32,7 +32,7 @@ export const focusAndOpenCommandDropdown = (number = 0) => {
   });
 };
 export const fillUpNewRule = (name = 'Test', description = 'Test') => {
-  cy.visit('app/security/rules/management');
+  loadPage('app/security/rules/management');
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('queryInput').first().type('_id:*{enter}');
@@ -48,19 +48,12 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('schedule-continue').click();
 };
 export const visitRuleActions = (ruleId: string) => {
-  cy.visit(`app/security/rules/id/${ruleId}/edit`);
+  loadPage(`app/security/rules/id/${ruleId}/edit`);
   cy.getByTestSubj('edit-rule-actions-tab').should('exist');
-  // strange rerendering behaviour. the following make sure the test doesn't fail
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-test-subj="globalLoadingIndicator"]').length) {
-      cy.getByTestSubj('globalLoadingIndicator').should('exist');
-      cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-    }
-    cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-  });
-
-  cy.getByTestSubj('edit-rule-actions-tab').click();
+  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
+  cy.getByTestSubj('stepPanelProgress').should('not.exist');
 };
+
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
     cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
@@ -81,7 +74,7 @@ export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
  */
 export const waitForActionToComplete = (
   actionId: string,
-  timeout = 60000
+  timeout = 120000
 ): Cypress.Chainable<ActionDetails> => {
   let action: ActionDetails | undefined;
 
@@ -91,6 +84,9 @@ export const waitForActionToComplete = (
         return request<ActionDetailsApiResponse>({
           method: 'GET',
           url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
+          headers: {
+            'Elastic-Api-Version': '2023-10-31',
+          },
         }).then((response) => {
           if (response.body.data.isCompleted) {
             action = response.body.data;

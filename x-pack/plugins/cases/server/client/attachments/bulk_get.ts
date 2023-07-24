@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { partition } from 'lodash';
-import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
 } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import type { CasesClientArgs, SOWithErrors } from '../types';
+import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';
 import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
 import type { CasesClient } from '../client';
-import type { AttachmentSavedObject } from '../../common/types';
+import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
-type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
+type AttachmentSavedObjectWithErrors = Array<SOWithErrors<CommentAttributes>>;
 
 /**
  * Retrieves multiple attachments by id.
@@ -46,12 +40,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      excess(BulkGetAttachmentsRequestRt).decode({ ids: attachmentIDs }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    throwErrorIfIdsExceedTheLimit(request.ids);
+    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
 
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
@@ -74,10 +63,12 @@ export async function bulkGet(
       caseId: caseID,
     });
 
-    return BulkGetAttachmentsResponseRt.encode({
+    const res = {
       attachments: flattenCommentSavedObjects(authorizedAttachments),
       errors,
-    });
+    };
+
+    return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
@@ -86,14 +77,6 @@ export async function bulkGet(
     });
   }
 }
-
-const throwErrorIfIdsExceedTheLimit = (ids: string[]) => {
-  if (ids.length > MAX_BULK_GET_ATTACHMENTS) {
-    throw Boom.badRequest(
-      `Maximum request limit of ${MAX_BULK_GET_ATTACHMENTS} attachments reached`
-    );
-  }
-};
 
 interface PartitionedAttachments {
   validAttachments: AttachmentSavedObject[];

@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type {
-  Comment,
-  CommentResponseAlertsType,
-  ConnectorMappingsAttributes,
-  CaseUserActionsDeprecatedResponse,
-} from '../../../common/api';
-import {
-  CommentType,
-  ConnectorTypes,
-  Actions,
-  ExternalReferenceStorageType,
-} from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import { ConnectorTypes, UserActionActions } from '../../../common/types/domain';
+import type { Comment, CommentResponseAlertsType } from '../../../common/api';
+import { CommentType, ExternalReferenceStorageType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export const updateUser = {
@@ -242,27 +234,9 @@ export const basicParams = {
   ...entity,
 };
 
-export const mappings: ConnectorMappingsAttributes[] = [
-  {
-    source: 'title',
-    target: 'short_description',
-    action_type: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    action_type: 'append',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    action_type: 'append',
-  },
-];
-
 export const userActions: CaseUserActionsDeprecatedResponse = [
   {
-    action: Actions.create,
+    action: UserActionActions.create,
     type: 'create_case',
     created_at: '2021-02-03T17:41:03.771Z',
     created_by: {
@@ -301,7 +275,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'pushed',
-    action: Actions.push_to_service,
+    action: UserActionActions.push_to_service,
     created_at: '2021-02-03T17:41:26.108Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -327,7 +301,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:44:21.067Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -350,7 +324,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:44:33.078Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -373,7 +347,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -395,7 +369,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -417,7 +391,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -439,7 +413,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -464,7 +438,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -486,7 +460,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'pushed',
-    action: Actions.push_to_service,
+    action: UserActionActions.push_to_service,
     created_at: '2021-02-03T17:45:29.400Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -512,7 +486,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',

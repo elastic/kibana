@@ -142,6 +142,15 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`options-filter-popover-item-${tag}`);
     },
 
+    async filterByCategory(category: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Categories',
+        `options-filter-popover-item-${category}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${category}`);
+    },
+
     async filterByStatus(status: CaseStatuses) {
       await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
 
@@ -183,7 +192,10 @@ export function CasesTableServiceProvider(
 
       const row = rows[index];
       await row.click();
-      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+      await retry.waitFor(
+        'popover-action-exists',
+        async () => await find.existsByCssSelector('[data-test-subj*="case-action-popover-"')
+      );
     },
 
     async openAssigneesPopover() {
@@ -214,6 +226,7 @@ export function CasesTableServiceProvider(
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
@@ -231,6 +244,7 @@ export function CasesTableServiceProvider(
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {

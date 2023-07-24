@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { eventHasNotes, getPinTooltip } from '../../../timelines/components/timeline/body/helpers';
-import type { TimelineType } from '../../../../common/types';
+import type { TimelineType } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { Pin } from '../../../timelines/components/timeline/pin';

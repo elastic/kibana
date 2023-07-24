@@ -34,7 +34,8 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.description',
       {
-        defaultMessage: 'Discover, extract, index, and sync all of your website content',
+        defaultMessage:
+          'Discover, extract, and index searchable content from websites and knowledge bases',
       }
     ),
     footer: {
@@ -42,6 +43,12 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
         'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.label',
         {
           defaultMessage: 'Use a web crawler',
+        }
+      ),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.nocodeLabel',
+        {
+          defaultMessage: 'No code',
         }
       ),
     },
@@ -55,7 +62,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
       'xpack.enterpriseSearch.content.newIndex.methodCard.connector.description',
       {
         defaultMessage:
-          'Use the connector framework to quickly build connectors for custom data sources',
+          'Extract, transform, index and sync data from a data source via native or customized connectors',
       }
     ),
     footer: {

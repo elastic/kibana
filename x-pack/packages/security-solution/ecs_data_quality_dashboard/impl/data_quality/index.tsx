@@ -11,6 +11,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -42,6 +43,7 @@ interface Props {
   };
   httpFetch: HttpHandler;
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -52,7 +54,8 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 /** Renders the `Data Quality` dashboard content */
@@ -64,11 +67,13 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
   setLastChecked,
   theme,
+  baseTheme,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -91,11 +96,13 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
         lastChecked={lastChecked}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         setLastChecked={setLastChecked}
         theme={theme}
+        baseTheme={baseTheme}
       />
     </DataQualityProvider>
   );

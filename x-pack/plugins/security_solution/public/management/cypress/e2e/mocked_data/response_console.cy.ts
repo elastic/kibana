@@ -29,7 +29,7 @@ describe('Response console', () => {
     login();
   });
 
-  describe('Isolate command', () => {
+  describe('`isolate` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let isolateRequestResponse: ActionDetails;
@@ -71,7 +71,7 @@ describe('Response console', () => {
     });
   });
 
-  describe('Release command', () => {
+  describe('`release` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let releaseRequestResponse: ActionDetails;
@@ -110,7 +110,7 @@ describe('Response console', () => {
     });
   });
 
-  describe('Processes command', () => {
+  describe('`processes` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let processesRequestResponse: ActionDetails;
@@ -150,7 +150,7 @@ describe('Response console', () => {
     });
   });
 
-  describe('Kill process command', () => {
+  describe('`kill-process` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let killProcessRequestResponse: ActionDetails;
@@ -189,7 +189,7 @@ describe('Response console', () => {
     });
   });
 
-  describe('Suspend process command', () => {
+  describe('`suspend-process` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let suspendProcessRequestResponse: ActionDetails;
@@ -225,6 +225,94 @@ describe('Response console', () => {
         sendActionResponse(suspendProcessRequestResponse);
       });
       cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+    });
+  });
+
+  describe('`get-file` command', () => {
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let endpointHostname: string;
+    let getFileRequestResponse: ActionDetails;
+
+    before(() => {
+      indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
+        (indexEndpoints) => {
+          endpointData = indexEndpoints;
+          endpointHostname = endpointData.data.hosts[0].host.name;
+        }
+      );
+    });
+
+    after(() => {
+      if (endpointData) {
+        endpointData.cleanup();
+        // @ts-expect-error ignore setting to undefined
+        endpointData = undefined;
+      }
+    });
+
+    it('should get file from response console', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`get-file --path /test/path/test.txt`);
+
+      interceptActionRequests((responseBody) => {
+        getFileRequestResponse = responseBody;
+      }, 'get-file');
+      submitCommand();
+      cy.contains('Retrieving the file from host.').should('exist');
+      cy.wait('@get-file').then(() => {
+        sendActionResponse(getFileRequestResponse);
+      });
+      cy.getByTestSubj('getFileSuccess').within(() => {
+        cy.contains('File retrieved from the host.');
+        cy.contains('(ZIP file passcode: elastic)');
+        cy.contains(
+          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+        cy.contains('Click here to download').click();
+      });
+
+      const downloadsFolder = Cypress.config('downloadsFolder');
+      cy.readFile(`${downloadsFolder}/upload.zip`);
+    });
+  });
+
+  describe('`execute` command', () => {
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let endpointHostname: string;
+    let executeRequestResponse: ActionDetails;
+
+    before(() => {
+      indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
+        (indexEndpoints) => {
+          endpointData = indexEndpoints;
+          endpointHostname = endpointData.data.hosts[0].host.name;
+        }
+      );
+    });
+
+    after(() => {
+      if (endpointData) {
+        endpointData.cleanup();
+        // @ts-expect-error ignore setting to undefined
+        endpointData = undefined;
+      }
+    });
+
+    it('should execute a command from response console', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`execute --command "ls -al"`);
+
+      interceptActionRequests((responseBody) => {
+        executeRequestResponse = responseBody;
+      }, 'execute');
+      submitCommand();
+      cy.contains('Action pending.').should('exist');
+      cy.wait('@execute').then(() => {
+        sendActionResponse(executeRequestResponse);
+      });
+      cy.contains('Command execution was successful', { timeout: 120000 }).should('exist');
     });
   });
 });

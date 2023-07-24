@@ -15,7 +15,7 @@ import {
   getDeletedConnectorError,
   getCaseClosedInfo,
 } from './helpers';
-import type { CaseConnector } from '../../../common/api';
+import type { CaseConnector } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/api';
 import type { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
@@ -50,7 +50,7 @@ export const usePushToService = ({
   isValidConnector,
 }: UsePushToService): ReturnUsePushToService => {
   const { permissions } = useCasesContext();
-  const { isLoading, pushCaseToExternalService } = usePostPushToService();
+  const { isLoading, mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const { isLoading: isLoadingLicense, data: actionLicense = null } = useGetActionLicense();

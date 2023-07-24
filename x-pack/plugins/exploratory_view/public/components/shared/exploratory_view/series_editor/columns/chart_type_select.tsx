@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
 import { SeriesUrl } from '../../../../..';
 import { SeriesConfig } from '../../types';

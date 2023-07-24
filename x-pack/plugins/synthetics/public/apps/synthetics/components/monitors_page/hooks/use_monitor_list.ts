@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
+import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
@@ -17,7 +18,6 @@ import {
   updateManagementPageStateAction,
 } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
-import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
 export function useMonitorList() {
   const dispatch = useDispatch();
@@ -40,7 +40,7 @@ export function useMonitorList() {
   // Periodically refresh
   useEffect(() => {
     if (!isInitialMount.current) {
-      dispatch(quietFetchMonitorListAction(pageState));
+      dispatch(quietFetchMonitorListAction({ ...pageState }));
     }
     // specifically only want to run this on refreshInterval change
     // eslint-disable-next-line react-hooks/exhaustive-deps

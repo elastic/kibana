@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { DistributiveOmit } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SavedObjectReference } from '@kbn/core/public';
-import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-common';
+import { v4 as uuidv4 } from 'uuid';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { validateQuery } from '@kbn/visualization-ui-components/public';
+import fastIsEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
+import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
-import type { FramePublicAPI, DatasourcePublicAPI, VisualizeEditorContext } from '../../types';
+import { FramePublicAPI, DatasourcePublicAPI, AnnotationGroups } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -24,8 +29,21 @@ import {
   XYState,
   XYPersistedState,
   XYAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
 } from './types';
-import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
+import {
+  getDataLayers,
+  isAnnotationsLayer,
+  isDataLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  isPersistedAnnotationsLayer,
+} from './visualization_helpers';
+import { nonNullable } from '../../utils';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -65,7 +83,7 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
-  if (isDataLayer(layer) && layer.splitAccessor) {
+  if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
     return null;
   }
   return (
@@ -117,64 +135,177 @@ function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;
 }
 
-export function extractReferences(state: XYState) {
+export const annotationLayerHasUnsavedChanges = (layer: XYAnnotationLayerConfig) => {
+  if (!isByReferenceAnnotationsLayer(layer)) {
+    return false;
+  }
+
+  type PropsToCompare = Pick<
+    EventAnnotationGroupConfig,
+    'annotations' | 'ignoreGlobalFilters' | 'indexPatternId'
+  >;
+
+  const currentConfig: PropsToCompare = {
+    annotations: layer.annotations,
+    ignoreGlobalFilters: layer.ignoreGlobalFilters,
+    indexPatternId: layer.indexPatternId,
+  };
+
+  const savedConfig: PropsToCompare = {
+    annotations: layer.__lastSaved.annotations,
+    ignoreGlobalFilters: layer.__lastSaved.ignoreGlobalFilters,
+    indexPatternId: layer.__lastSaved.indexPatternId,
+  };
+
+  return !fastIsEqual(currentConfig, savedConfig);
+};
+
+export function getPersistableState(state: XYState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  const persistableLayers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>> = [];
+  const persistableLayers: XYPersistedLayerConfig[] = [];
   state.layers.forEach((layer) => {
-    if (isAnnotationsLayer(layer)) {
-      const { indexPatternId, ...persistableLayer } = layer;
-      savedObjectReferences.push({
-        type: 'index-pattern',
-        id: indexPatternId,
-        name: getLayerReferenceName(layer.layerId),
-      });
-      persistableLayers.push(persistableLayer);
-    } else {
+    if (!isAnnotationsLayer(layer)) {
       persistableLayers.push(layer);
+    } else {
+      if (isByReferenceAnnotationsLayer(layer)) {
+        const referenceName = `ref-${uuidv4()}`;
+        savedObjectReferences.push({
+          type: EVENT_ANNOTATION_GROUP_TYPE,
+          id: layer.annotationGroupId,
+          name: referenceName,
+        });
+
+        if (!annotationLayerHasUnsavedChanges(layer)) {
+          const persistableLayer: XYPersistedByReferenceAnnotationLayerConfig = {
+            persistanceType: 'byReference',
+            layerId: layer.layerId,
+            layerType: layer.layerType,
+            annotationGroupRef: referenceName,
+          };
+
+          persistableLayers.push(persistableLayer);
+        } else {
+          const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
+            persistanceType: 'linked',
+            layerId: layer.layerId,
+            layerType: layer.layerType,
+            annotationGroupRef: referenceName,
+            annotations: layer.annotations,
+            ignoreGlobalFilters: layer.ignoreGlobalFilters,
+          };
+          persistableLayers.push(persistableLayer);
+
+          savedObjectReferences.push({
+            type: 'index-pattern',
+            id: layer.indexPatternId,
+            name: getLayerReferenceName(layer.layerId),
+          });
+        }
+      } else {
+        const { indexPatternId, ...persistableLayer } = layer;
+        savedObjectReferences.push({
+          type: 'index-pattern',
+          id: indexPatternId,
+          name: getLayerReferenceName(layer.layerId),
+        });
+        persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
+      }
     }
   });
   return { savedObjectReferences, state: { ...state, layers: persistableLayers } };
 }
 
 export function isPersistedState(state: XYPersistedState | XYState): state is XYPersistedState {
-  const annotationLayers = state.layers.filter((l) => isAnnotationsLayer(l));
-  return annotationLayers.some((l) => !('indexPatternId' in l));
+  return state.layers.some(isPersistedAnnotationsLayer);
 }
 
 export function injectReferences(
   state: XYPersistedState,
-  references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  annotationGroups?: AnnotationGroups,
+  references?: SavedObjectReference[]
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;
   }
 
-  const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+  if (!annotationGroups) {
+    throw new Error(
+      'xy visualization: injecting references relies on annotation groups but they were not provided'
+    );
+  }
+
+  // called on-demand since indexPattern reference won't be here on the vis if its a by-reference group
+  const getIndexPatternIdFromReferences = (annotationLayerId: string) => {
+    const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+    return (
+      references.find(({ name }) => name === getLayerReferenceName(annotationLayerId))?.id ||
+      fallbackIndexPatternId
+    );
+  };
+
   return {
     ...state,
-    layers: state.layers.map((layer) => {
-      if (!isAnnotationsLayer(layer)) {
-        return layer as XYLayerConfig;
-      }
-      return {
-        ...layer,
-        indexPatternId:
-          getIndexPatternIdFromInitialContext(layer, initialContext) ||
-          references.find(({ name }) => name === getLayerReferenceName(layer.layerId))?.id ||
-          fallbackIndexPatternId,
-      };
-    }),
-  };
-}
+    layers: state.layers
+      .map((persistedLayer) => {
+        if (!isPersistedAnnotationsLayer(persistedLayer)) {
+          return persistedLayer as XYLayerConfig;
+        }
 
-function getIndexPatternIdFromInitialContext(
-  layer: XYAnnotationLayerConfig,
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext
-) {
-  if (initialContext && 'isVisualizeAction' in initialContext) {
-    return layer && 'indexPatternId' in layer ? layer.indexPatternId : undefined;
-  }
+        let injectedLayer: XYAnnotationLayerConfig;
+
+        if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
+          injectedLayer = {
+            ...persistedLayer,
+            indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
+          };
+        } else {
+          const annotationGroupId = references?.find(
+            ({ name }) => name === persistedLayer.annotationGroupRef
+          )?.id;
+
+          const annotationGroup = annotationGroupId
+            ? annotationGroups[annotationGroupId]
+            : undefined;
+
+          if (!annotationGroupId || !annotationGroup) {
+            return undefined; // the annotation group this layer was referencing is gone, so remove the layer
+          }
+
+          // declared as a separate variable for type checking
+          const commonProps: Pick<
+            XYByReferenceAnnotationLayerConfig,
+            'layerId' | 'layerType' | 'annotationGroupId' | '__lastSaved'
+          > = {
+            layerId: persistedLayer.layerId,
+            layerType: persistedLayer.layerType,
+            annotationGroupId,
+            __lastSaved: annotationGroup,
+          };
+
+          if (isPersistedByReferenceAnnotationsLayer(persistedLayer)) {
+            // a clean by-reference layer inherits everything from the library annotation group
+            injectedLayer = {
+              ...commonProps,
+              ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
+              indexPatternId: annotationGroup.indexPatternId,
+              annotations: cloneDeep(annotationGroup.annotations),
+            };
+          } else {
+            // a linked by-value layer gets settings from visualization state while
+            // still maintaining the reference to the library annotation group
+            injectedLayer = {
+              ...commonProps,
+              ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
+              indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
+              annotations: cloneDeep(persistedLayer.annotations),
+            };
+          }
+        }
+
+        return injectedLayer;
+      })
+      .filter(nonNullable),
+  };
 }
 
 export function getAnnotationLayerErrors(

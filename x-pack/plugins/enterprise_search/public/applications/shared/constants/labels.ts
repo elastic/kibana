@@ -27,6 +27,10 @@ export const BETA_LABEL = i18n.translate('xpack.enterpriseSearch.betaLabel', {
   defaultMessage: 'Beta',
 });
 
+export const NATIVE_LABEL = i18n.translate('xpack.enterpriseSearch.nativeLabel', {
+  defaultMessage: 'Native',
+});
+
 export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.nameLabel', {
   defaultMessage: 'Name',
 });

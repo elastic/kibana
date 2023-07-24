@@ -166,7 +166,7 @@ Object {
         },
       ],
       "legend": Object {
-        "isVisible": true,
+        "isVisible": false,
         "position": "right",
       },
       "preferredSeriesType": "area",

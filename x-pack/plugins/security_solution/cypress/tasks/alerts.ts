@@ -6,6 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
+import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '../../common/utils/format_page_filter_search_param';
 import { TOP_N_CONTAINER } from '../screens/network/flows';
 import {
@@ -45,7 +46,9 @@ import {
   ALERTS_HISTOGRAM_LEGEND,
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
-  CLOSE_OVERLAY,
+  ALERT_TAGGING_CONTEXT_MENU_ITEM,
+  ALERT_TAGGING_CONTEXT_MENU,
+  ALERT_TAGGING_UPDATE_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -58,18 +61,17 @@ import {
   CELL_EXPAND_VALUE,
   CELL_EXPANSION_POPOVER,
   USER_DETAILS_LINK,
-  ALERT_FLYOUT,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
+  CONTROL_FRAME_TITLE,
   DETECTION_PAGE_FILTERS_LOADING,
-  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
-  OPTION_LISTS_EXISTS,
   OPTION_LISTS_LOADING,
   OPTION_LIST_VALUES,
+  OPTION_LIST_CLEAR_BTN,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
@@ -77,10 +79,10 @@ import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import type { FilterItemObj } from '../../public/common/components/filter_group/types';
 import { visit } from './login';
+import { openFilterGroupContextMenu } from './common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).should('be.visible');
   cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
@@ -88,86 +90,56 @@ export const addExceptionFromFirstAlert = () => {
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_ENDPOINT_EXCEPTION_BTN).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  cy.get(ADD_ENDPOINT_EXCEPTION_BTN).click();
+  cy.get(FIELD_INPUT).should('be.visible');
 };
 
-export const openAddExceptionFromAlertDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
+export const openAddRuleExceptionFromAlertActionButton = () => {
+  cy.get(TAKE_ACTION_BTN).click();
+  cy.get(TAKE_ACTION_MENU).should('be.visible');
 
-  cy.root()
-    .pipe(($el) => {
-      $el.find(TAKE_ACTION_BTN).trigger('click');
-      return $el.find(TAKE_ACTION_MENU);
-    })
-    .should('be.visible');
-
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTION_BTN).trigger('click');
-      return $el.find(ADD_EXCEPTION_BTN);
-    })
-    .should('not.be.visible');
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
 };
 
+export const openAddEndpointExceptionFromAlertActionButton = () => {
+  cy.get(TAKE_ACTION_BTN).click();
+  cy.get(TAKE_ACTION_MENU).should('be.visible');
+  cy.get(ADD_ENDPOINT_EXCEPTION_BTN, { timeout: 10000 }).first().click();
+};
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(CLOSE_ALERT_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
+  cy.get(CLOSE_ALERT_BTN).click();
+  cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 
 export const closeAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN)
-    .first()
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.visible');
-
-  cy.get(CLOSE_SELECTED_ALERTS_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.be.visible');
+  cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
+  cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.be.visible');
 };
 
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
-  let count = 0;
-
-  const click = ($el: JQuery<HTMLElement>) => {
-    count++;
-    return $el.trigger('click');
+  const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+    cy.get(TIMELINE_CONTEXT_MENU_BTN)
+      .first()
+      .should('be.visible')
+      .then(($btnEl) => {
+        if ($btnEl.attr('data-popover-open') !== 'true') {
+          cy.log(`${TIMELINE_CONTEXT_MENU_BTN} was flaky, attempting to re-open popover`);
+          togglePopover();
+        }
+      });
   };
-
-  /*
-   *
-   * Sometimes it takes some time for UI to attach event listener to
-   * TIMELINE_CONTEXT_MENU_BTN and cypress is too fast to click.
-   * Becuase of this popover does not open when click.
-   * pipe().should() makes sure that pipe function is repeated until should becomes true
-   *
-   * */
-
-  cy.get(TIMELINE_CONTEXT_MENU_BTN)
-    .first()
-    .should('be.visible')
-    .pipe(click)
-    .should('have.attr', 'data-popover-open', 'true')
-    .then(() => {
-      cy.log(`Clicked ${count} times`);
-    });
+  togglePopover();
 };
 
 export const expandFirstAlert = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(EXPAND_ALERT_BTN).trigger('click');
-      return $el.find(ALERT_FLYOUT);
-    })
-    .should('be.visible');
+  cy.get(EXPAND_ALERT_BTN).should('be.visible');
+  cy.get(EXPAND_ALERT_BTN).first().click();
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
@@ -201,51 +173,33 @@ export const togglePageFilterPopover = (filterIndex: number) => {
 
 export const openPageFilterPopover = (filterIndex: number) => {
   cy.log(`Opening Page filter popover for index ${filterIndex}`);
-  cy.get(OPTION_LIST_VALUES(filterIndex))
-    .pipe(($el) => $el.trigger('click'))
-    .should('have.class', 'euiFilterButton-isSelected');
-  // cy.root().then(($el) => {
-  // const existsOption = $el.find(OPTION_LISTS_EXISTS);
-  // const optionsList = $el.find(OPTION_LIST_VALUES(filterIndex));
-  // if (!existsOption || existsOption.length === 0) {
-  // optionsList.trigger('click');
-  // }
-  // });
-  // cy.get(OPTION_LISTS_EXISTS).should('be.visible');
+
+  cy.get(OPTION_LIST_VALUES(filterIndex)).click();
+  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.class', 'euiFilterButton-isSelected');
 };
 
 export const closePageFilterPopover = (filterIndex: number) => {
   cy.log(`Closing Page filter popover for index ${filterIndex}`);
-  cy.get(OPTION_LIST_VALUES(filterIndex))
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.have.class', 'euiFilterButton-isSelected');
-  // cy.root().then(($el) => {
-  // const existsOption = $el.find(OPTION_LISTS_EXISTS);
-  // if (existsOption.length > 0) {
-  // const optionsList = $el.find(OPTION_LIST_VALUES(filterIndex));
-  // optionsList.trigger('click');
-  // }
-  // });
-  // cy.get(OPTION_LISTS_EXISTS).should('not.be.visible');
+
+  cy.get(OPTION_LIST_VALUES(filterIndex)).click();
+  cy.get(OPTION_LIST_VALUES(filterIndex)).should('not.have.class', 'euiFilterButton-isSelected');
 };
 
-export const clearAllSelections = () => {
-  cy.get(OPTION_LISTS_EXISTS)
-    .click({ force: true })
-    .then(($el) => {
-      if ($el.attr('aria-checked', 'false')) {
-        // check it
-        $el.trigger('click');
-      }
-      // uncheck it
-      $el.trigger('click');
-    });
+export const clearAllSelections = (filterIndex: number) => {
+  recurse(
+    () => {
+      cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
+      return cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex);
+    },
+    ($el) => $el.is(':visible')
+  );
+  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).should('be.visible').trigger('click');
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
   refreshAlertPageFilter();
+  clearAllSelections(filterIndex);
   openPageFilterPopover(filterIndex);
-  clearAllSelections();
   values.forEach((value) => {
     cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
   });
@@ -278,7 +232,7 @@ export const goToClosedAlerts = () => {
 };
 
 export const goToManageAlertsDetectionRules = () => {
-  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
+  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click();
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
@@ -304,7 +258,8 @@ export const goToOpenedAlerts = () => {
 
 export const openFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(OPEN_ALERT_BTN).should('be.visible').click({ force: true });
+  cy.get(OPEN_ALERT_BTN).should('be.visible');
+  cy.get(OPEN_ALERT_BTN).click({ force: true });
 };
 
 export const openAlerts = () => {
@@ -366,10 +321,6 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const closeAnalyzer = () => {
-  cy.get(CLOSE_OVERLAY).should('be.visible').trigger('click');
-};
-
 export const clickAlertsHistogramLegend = () => {
   cy.get(ALERTS_HISTOGRAM_LEGEND).click();
 };
@@ -429,7 +380,8 @@ export const waitForAlerts = () => {
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
-  cy.get(columnSelector).eq(1).focus().find(CELL_EXPAND_VALUE).click({ force: true });
+  cy.get(columnSelector).eq(1).realHover();
+  cy.get(columnSelector).eq(1).find(CELL_EXPAND_VALUE).click();
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
@@ -463,9 +415,10 @@ export const waitForPageFilters = () => {
 };
 
 export const resetFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  openFilterGroupContextMenu();
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).trigger('click');
   waitForPageFilters();
+  cy.log('Resetting filters complete');
 };
 
 export const parseAlertsCountToInt = (count: string | number) =>
@@ -478,6 +431,7 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
   cy.get(ALERT_EMBEDDABLE_PROGRESS_BAR)
     .should('not.exist')
     .then(() => {
+      // eslint-disable-next-line cypress/unsafe-to-chain-command
       cy.get(alertCountColumn)
         .each((row) => {
           sumOfEachRow += parseInt(row.text(), 10);
@@ -489,7 +443,8 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView().click({ force: true });
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click({ force: true });
 };
 
 export const selectAllAlerts = () => {
@@ -504,10 +459,23 @@ export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) =
 };
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {
-  cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).should('be.visible');
-  cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).trigger('click');
+  cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).click();
 };
 
-export const closeSessionViewerFromAlertTable = () => {
-  cy.get(CLOSE_OVERLAY).trigger('click');
+export const openAlertTaggingContextMenu = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
+};
+
+export const openAlertTaggingBulkActionMenu = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
+  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
+};
+
+export const clickAlertTag = (tag: string) => {
+  cy.get(ALERT_TAGGING_CONTEXT_MENU).contains(tag).click();
+};
+
+export const updateAlertTags = () => {
+  cy.get(ALERT_TAGGING_UPDATE_BUTTON).click();
 };

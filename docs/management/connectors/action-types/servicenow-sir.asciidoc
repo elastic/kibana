@@ -49,7 +49,7 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 . Configure the rule as follows:
 * *Name*: Name the rule.
 * *REST API*: Set the rule to use the Elastic SecOps API by choosing `Elastic SIR API [x_elas2_sir_int/elastic_api]`.
-* *Domain*: Enter the Kibana URL.
+* *Domain*: Enter the Kibana URL, including the port number.
 . Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
 

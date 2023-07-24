@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
@@ -69,6 +71,26 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_object.typeMigrationVersion).to.be.ok();
             expect(resp.body.saved_object.managed).to.not.be.ok();
           }));
+
+      it('should migrate saved object before returning', async () => {
+        await es.update({
+          index: MAIN_SAVED_OBJECT_INDEX,
+          id: 'config:7.0.0-alpha1',
+          doc: {
+            coreMigrationVersion: '7.0.0',
+            typeMigrationVersion: '7.0.0',
+          },
+        });
+
+        const { body } = await supertest
+          .get(`/api/saved_objects/resolve/config/7.0.0-alpha1`)
+          .expect(200);
+
+        expect(body.saved_object.coreMigrationVersion).to.be.ok();
+        expect(body.saved_object.coreMigrationVersion).not.to.be('7.0.0');
+        expect(body.saved_object.typeMigrationVersion).to.be.ok();
+        expect(body.saved_object.typeMigrationVersion).not.to.be('7.0.0');
+      });
 
       describe('doc does not exist', () => {
         it('should return same generic error as when index does not exist', async () =>

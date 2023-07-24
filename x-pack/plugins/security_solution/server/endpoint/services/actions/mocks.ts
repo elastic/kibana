@@ -214,6 +214,7 @@ export const generateFileMetadataDocumentMock = (
     transithash: {
       sha256: 'a0d6d6a2bb73340d4a0ed32b2a46272a19dd111427770c072918aed7a8565010',
     },
+    '@timestamp': new Date().toISOString(),
 
     ...overrides,
   };

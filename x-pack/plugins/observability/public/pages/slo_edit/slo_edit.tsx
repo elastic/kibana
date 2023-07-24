@@ -8,16 +8,17 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
-import { SloEditForm } from './components/slo_edit_form';
-import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
+import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
+import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
   const {
@@ -25,25 +26,41 @@ export function SloEditPage() {
     http: { basePath },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
+  const { isError: hasErrorInGlobalDiagnosis } = useFetchSloGlobalDiagnosis();
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
-
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.observability.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.sloEditLinkText', {
+      text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
     },
+    ...(!!slo
+      ? [
+          {
+            href: basePath.prepend(paths.observability.sloDetails(slo!.id)),
+            text: slo!.name,
+          },
+        ]
+      : []),
+    {
+      text: slo
+        ? i18n.translate('xpack.observability.breadcrumbs.sloEditLabel', {
+            defaultMessage: 'Edit',
+          })
+        : i18n.translate('xpack.observability.breadcrumbs.sloCreateLabel', {
+            defaultMessage: 'Create',
+          }),
+    },
   ]);
 
-  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
-
-  if (hasRightLicense === false || !hasWriteCapabilities) {
+  if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 

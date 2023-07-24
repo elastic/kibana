@@ -8,8 +8,14 @@
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
+import type {
+  LinkCategory as BaseLinkCategory,
+  LinkCategories as BaseLinkCategories,
+} from '@kbn/security-solution-side-nav';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityPageName } from '../../../common/constants';
+import type { UpsellingService } from '../lib/upsellings';
+import type { RequiredCapabilities } from '../lib/capabilities';
 
 /**
  * Permissions related parameters needed for the links to be filtered
@@ -17,15 +23,12 @@ import type { SecurityPageName } from '../../../common/constants';
 export interface LinksPermissions {
   capabilities: Capabilities;
   experimentalFeatures: Readonly<ExperimentalFeatures>;
+  upselling: UpsellingService;
   license?: ILicense;
 }
 
-export interface LinkCategory {
-  label: string;
-  linkIds: readonly SecurityPageName[];
-}
-
-export type LinkCategories = Readonly<LinkCategory[]>;
+export type LinkCategory = BaseLinkCategory<SecurityPageName>;
+export type LinkCategories = BaseLinkCategories<SecurityPageName>;
 
 export interface LinkItem {
   /**
@@ -41,7 +44,7 @@ export interface LinkItem {
    * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
    * features: [feature1]
    */
-  capabilities?: string | Array<string | string[]>;
+  capabilities?: RequiredCapabilities;
   /**
    * Categories to display in the navigation
    */
@@ -117,6 +120,10 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
+   * Icon that is displayed on the side navigation menu.
+   */
+  sideNavIcon?: IconType;
+  /**
    * Disables the state query string in the URL. Defaults to false.
    */
   skipUrlState?: boolean;
@@ -124,6 +131,10 @@ export interface LinkItem {
    * Title of the link
    */
   title: string;
+  /**
+   * Reserved for links management, this property is set automatically
+   * */
+  unauthorized?: boolean;
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
@@ -136,12 +147,14 @@ export interface NavigationLink {
   categories?: LinkCategories;
   description?: string;
   disabled?: boolean;
-  icon?: IconType;
   id: SecurityPageName;
+  landingIcon?: IconType;
+  landingImage?: string;
   links?: NavigationLink[];
-  image?: string;
   title: string;
+  sideNavIcon?: IconType;
   skipUrlState?: boolean;
+  unauthorized?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;

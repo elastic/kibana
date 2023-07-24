@@ -6,7 +6,7 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -105,7 +105,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    describe('from the Endpoint list and details', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/155451
+    describe.skip('from the Endpoint list and details', () => {
       before(async () => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
@@ -177,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(MAX_WAIT_FOR_ALERTS_TIMEOUT);
 
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
@@ -217,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.detections.navigateToAlerts(
           `query=(language:kuery,query:'host.hostname: "${hostname}" ')`
         );
-        await pageObjects.detections.waitForListToHaveAlerts();
+        await pageObjects.detections.waitForListToHaveAlerts(MAX_WAIT_FOR_ALERTS_TIMEOUT);
         await pageObjects.detections.openFirstAlertDetailsForHostName(hostname);
         await pageObjects.detections.openResponseConsoleFromAlertDetails();
         await performResponderSanityChecks();

@@ -27,6 +27,7 @@ import type {
   ChromeBreadcrumb,
   ChromeNavControl,
   ChromeNavLink,
+  ChromeHelpMenuLink,
   ChromeRecentlyAccessedHistoryItem,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
@@ -34,6 +35,7 @@ import type {
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { LoadingIndicator } from '../loading_indicator';
 import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
@@ -42,7 +44,7 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
-import { HeaderActionMenu } from './header_action_menu';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
@@ -59,12 +61,14 @@ export interface HeaderProps {
   homeHref: string;
   isVisible$: Observable<boolean>;
   kibanaDocLink: string;
+  docLinks: DocLinksStart;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
@@ -79,6 +83,7 @@ export interface HeaderProps {
 export function Header({
   kibanaVersion,
   kibanaDocLink,
+  docLinks,
   application,
   basePath,
   onIsLockedUpdate,
@@ -92,6 +97,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
+  const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
 
   if (!isVisible) {
     return (
@@ -162,7 +168,9 @@ export function Header({
                     globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
+                    defaultContentLinks$={observables.helpMenuLinks$}
                     kibanaDocLink={kibanaDocLink}
+                    docLinks={docLinks}
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
                   />,
@@ -235,7 +243,7 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem border="none">
-                <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+                <HeaderActionMenu mounter={headerActionMenuMounter} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

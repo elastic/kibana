@@ -9,13 +9,12 @@ import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type {
-  CaseConnector,
   Case,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
 } from '../../common/api';
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
+import { CaseSeverity, CommentType } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -32,10 +31,15 @@ import {
   transformNewCase,
   getApplicationRoute,
   getCaseViewPath,
+  isSOError,
+  countUserAttachments,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import { mockCases, mockCaseComments } from '../mocks';
+import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
+import type { CaseConnector } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
 
 interface CommentReference {
   ids: string[];
@@ -105,6 +109,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -158,6 +163,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -215,6 +221,7 @@ describe('common utils', () => {
               "uid": "1",
             },
           ],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -275,6 +282,7 @@ describe('common utils', () => {
           "cases": Array [
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -316,6 +324,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -357,6 +366,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -402,6 +412,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -472,6 +483,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -529,6 +541,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -587,6 +600,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -668,6 +682,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -1308,6 +1323,34 @@ describe('common utils', () => {
           owner: SECURITY_SOLUTION_OWNER,
         })
       ).toBe('https://example.com/s/test-space/app/security/cases/my-case-id');
+    });
+  });
+
+  describe('isSOError', () => {
+    it('returns true if the SO is an error', () => {
+      expect(isSOError({ error: { statusCode: '404' } })).toBe(true);
+    });
+
+    it('returns false if the SO is not an error', () => {
+      expect(isSOError({})).toBe(false);
+    });
+  });
+
+  describe('countUserAttachments', () => {
+    it('returns 0 for an empty array', () => {
+      expect(countUserAttachments([])).toBe(0);
+    });
+
+    it('returns 1 when there is only 1 user attachment', () => {
+      const attachments = [createUserAttachment(), createAlertAttachment()];
+
+      expect(countUserAttachments(attachments)).toBe(1);
+    });
+
+    it('returns 0 when there is only alert attachments', () => {
+      const attachments = [createAlertAttachment()];
+
+      expect(countUserAttachments(attachments)).toBe(0);
     });
   });
 });

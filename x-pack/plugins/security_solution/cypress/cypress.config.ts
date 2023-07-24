@@ -6,18 +6,25 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { esArchiver } from './support/es_archiver';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,
+  responseTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
+  numTestsKeptInMemory: 10,
   e2e: {
-    baseUrl: 'http://localhost:5601',
+    experimentalRunAllSpecs: true,
+    experimentalMemoryManagement: true,
+    setupNodeEvents(on, config) {
+      esArchiver(on, config);
+    },
   },
 });

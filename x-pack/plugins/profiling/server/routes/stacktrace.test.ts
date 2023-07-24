@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import LRUCache from 'lru-cache';
-import { createStackFrameID, StackFrame, StackFrameID, StackTrace } from '../../common/profiling';
+import { createStackFrameID, StackTrace } from '../../common/profiling';
 import { runLengthEncode } from '../../common/run_length_encoding';
-import { decodeStackTrace, EncodedStackTrace, updateStackFrameMap } from './stacktrace';
+import { decodeStackTrace, EncodedStackTrace } from './stacktrace';
 
 enum fileID {
   A = 'aQpJmTLWydNvOapSFZOwKg',
@@ -85,111 +84,5 @@ describe('Stack trace operations', () => {
     for (const t of tests) {
       expect(decodeStackTrace(t.original)).toEqual(t.expected);
     }
-  });
-});
-
-describe('Stack frame operations', () => {
-  test('updateStackFrameMap with no frames', () => {
-    const stackFrameMap = new Map<StackFrameID, StackFrame>();
-    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
-
-    const hits = updateStackFrameMap([], stackFrameMap, stackFrameCache);
-
-    expect(hits).toEqual(0);
-    expect(stackFrameMap.size).toEqual(0);
-    expect(stackFrameCache.length).toEqual(0);
-  });
-
-  test('updateStackFrameMap with missing frames', () => {
-    const stackFrameMap = new Map<StackFrameID, StackFrame>();
-    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
-
-    const stackFrames = [
-      {
-        _index: 'profiling-stackframes',
-        _id: 'stackframe-001',
-        found: false,
-      },
-    ];
-
-    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
-
-    expect(hits).toEqual(0);
-    expect(stackFrameMap.size).toEqual(1);
-    expect(stackFrameCache.length).toEqual(1);
-  });
-
-  test('updateStackFrameMap with one partial non-inlined frame', () => {
-    const stackFrameMap = new Map<StackFrameID, StackFrame>();
-    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
-
-    const id = 'stackframe-001';
-    const source = {
-      'ecs.version': '1.0.0',
-      'Stackframe.function.name': 'calloc',
-    };
-    const expected = {
-      FileName: undefined,
-      FunctionName: 'calloc',
-      FunctionOffset: undefined,
-      LineNumber: undefined,
-      SourceType: undefined,
-    };
-
-    const stackFrames = [
-      {
-        _index: 'profiling-stackframes',
-        _id: id,
-        _version: 1,
-        _seq_no: 1,
-        _primary_term: 1,
-        found: true,
-        _source: source,
-      },
-    ];
-
-    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
-
-    expect(hits).toEqual(1);
-    expect(stackFrameMap.size).toEqual(1);
-    expect(stackFrameCache.length).toEqual(1);
-    expect(stackFrameMap.get(id)).toEqual(expected);
-  });
-
-  test('updateStackFrameMap with one partial inlined frame', () => {
-    const stackFrameMap = new Map<StackFrameID, StackFrame>();
-    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
-
-    const id = 'stackframe-001';
-    const source = {
-      'ecs.version': '1.0.0',
-      'Stackframe.function.name': ['calloc', 'memset'],
-    };
-    const expected = {
-      FileName: undefined,
-      FunctionName: 'calloc',
-      FunctionOffset: undefined,
-      LineNumber: undefined,
-      SourceType: undefined,
-    };
-
-    const stackFrames = [
-      {
-        _index: 'profiling-stackframes',
-        _id: id,
-        _version: 1,
-        _seq_no: 1,
-        _primary_term: 1,
-        found: true,
-        _source: source,
-      },
-    ];
-
-    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
-
-    expect(hits).toEqual(1);
-    expect(stackFrameMap.size).toEqual(1);
-    expect(stackFrameCache.length).toEqual(1);
-    expect(stackFrameMap.get(id)).toEqual(expected);
   });
 });

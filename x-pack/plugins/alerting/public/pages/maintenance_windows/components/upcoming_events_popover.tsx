@@ -21,6 +21,7 @@ import {
   formatDate,
 } from '@elastic/eui';
 import * as i18n from '../translations';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { recurringSummary } from '../helpers/recurring_summary';
 import { getPresets } from '../helpers/get_presets';
 import { MaintenanceWindowFindResponse } from '../types';
@@ -107,7 +108,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="s">
-                    {formatDate(event.gte, 'MM/DD/YY HH:mm A')}
+                    {formatDate(event.gte, MAINTENANCE_WINDOW_DATE_FORMAT)}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>

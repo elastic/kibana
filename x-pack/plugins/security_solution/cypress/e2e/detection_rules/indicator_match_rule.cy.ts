@@ -63,8 +63,8 @@ import {
   selectNumberOfRules,
   checkDuplicatedRule,
   expectNumberOfRules,
-  duplicateSelectedRulesWithExceptions,
 } from '../../tasks/alerts_detection_rules';
+import { duplicateSelectedRulesWithExceptions } from '../../tasks/rules_bulk_actions';
 import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -101,7 +101,6 @@ import {
   SCHEDULE_LOOKBACK_UNITS_INPUT,
 } from '../../screens/create_new_rule';
 import { goBackToRuleDetails } from '../../tasks/edit_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
@@ -121,19 +120,23 @@ describe('indicator match', () => {
 
     before(() => {
       cleanKibana();
-      esArchiverLoad('threat_indicator');
-      esArchiverLoad('suspicious_source_event');
+      cy.task('esArchiverLoad', 'threat_indicator');
+      cy.task('esArchiverLoad', 'suspicious_source_event');
+    });
+
+    beforeEach(() => {
       login();
     });
 
     after(() => {
-      esArchiverUnload('threat_indicator');
-      esArchiverUnload('suspicious_source_event');
+      cy.task('esArchiverUnload', 'threat_indicator');
+      cy.task('esArchiverUnload', 'suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
       describe('Index patterns', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -157,6 +160,7 @@ describe('indicator match', () => {
 
       describe('Indicator index patterns', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -178,6 +182,7 @@ describe('indicator match', () => {
 
       describe('custom query input', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -194,6 +199,7 @@ describe('indicator match', () => {
 
       describe('custom indicator query input', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -210,6 +216,7 @@ describe('indicator match', () => {
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
+          login();
           const rule = getNewThreatIndicatorRule();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
@@ -405,6 +412,7 @@ describe('indicator match', () => {
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
@@ -420,6 +428,7 @@ describe('indicator match', () => {
 
     describe('Generating signals', () => {
       beforeEach(() => {
+        login();
         deleteAlertsAndRules();
       });
 
@@ -458,7 +467,7 @@ describe('indicator match', () => {
           });
           getDetails(TAGS_DETAILS).should('have.text', expectedTags);
         });
-        cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+        cy.get(INVESTIGATION_NOTES_TOGGLE).click();
         cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
 
         cy.get(DEFINITION_DETAILS).within(() => {
@@ -530,6 +539,7 @@ describe('indicator match', () => {
 
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
+        login();
         deleteAlertsAndRules();
         createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true }));
         visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

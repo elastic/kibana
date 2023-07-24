@@ -12,6 +12,11 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
+import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -22,7 +27,6 @@ import { validateTimeRange } from '../utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
-import { DataTableRecord } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -136,11 +140,13 @@ export function getDataStateContainer({
   searchSessionManager,
   getAppState,
   getSavedSearch,
+  setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => DiscoverAppState;
   getSavedSearch: () => SavedSearch;
+  setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -227,15 +233,19 @@ export function getDataStateContainer({
         return;
       }
 
-      abortControllerFetchMore?.abort();
-
       abortController?.abort();
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
-      await fetchAll(dataSubjects, options.reset, {
+      const fetchAllStartTime = window.performance.now();
+      await fetchAll(dataSubjects, reset, {
         abortController,
         ...commonFetchDeps,
+      });
+      const fetchAllDuration = window.performance.now() - fetchAllStartTime;
+      reportPerformanceMetricEvent(services.analytics, {
+        eventName: 'discoverFetchAll',
+        duration: fetchAllDuration,
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -254,7 +264,17 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = (resetQuery?: boolean) => {
+  const fetchQuery = async (resetQuery?: boolean) => {
+    const query = getAppState().query;
+    const currentDataView = getSavedSearch().searchSource.getField('index');
+
+    if (isTextBasedQuery(query)) {
+      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+      if (nextDataView !== currentDataView) {
+        setDataView(nextDataView);
+      }
+    }
+
     if (resetQuery) {
       refetch$.next('reset');
     } else {

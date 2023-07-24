@@ -33,10 +33,8 @@ export const openEventsViewerFieldsBrowser = () => {
 };
 
 export const opensInspectQueryModal = () => {
-  cy.get(INSPECT_QUERY)
-    .should('exist')
-    .trigger('mousemove', { force: true })
-    .click({ force: true });
+  cy.get(INSPECT_QUERY).should('exist').trigger('mousemove', { force: true });
+  cy.get(INSPECT_QUERY).should('exist').click({ force: true });
 };
 
 export const waitsForEventsToBeLoaded = () => {

@@ -24,9 +24,7 @@ jest.mock('../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('../../hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   useLoadRuleTypes: jest.fn(),
@@ -42,6 +40,16 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+      },
+      thresholdRule: { enabled: false },
+    },
+    compositeSlo: {
+      enabled: false,
+    },
+    aiAssistant: {
+      enabled: false,
+      feedback: {
+        enabled: false,
       },
     },
   },

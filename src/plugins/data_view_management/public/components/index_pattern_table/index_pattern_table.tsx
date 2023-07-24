@@ -233,9 +233,9 @@ export const IndexPatternTable = ({
             </>
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
-            <>
-              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
-            </>
+            <span key={tagKey}>
+              &emsp;<EuiBadge>{tagName}</EuiBadge>
+            </span>
           ))}
         </div>
       ),

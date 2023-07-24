@@ -14,14 +14,16 @@ describe('TopN function operations', () => {
   test('1', () => {
     const maxTopN = 5;
     const totalSamples = sum([...events.values()]);
-    const topNFunctions = createTopNFunctions(
+    const topNFunctions = createTopNFunctions({
       events,
       stackTraces,
       stackFrames,
       executables,
-      0,
-      maxTopN
-    );
+      startIndex: 0,
+      endIndex: maxTopN,
+      samplingRate: 1.0,
+      totalSeconds: 900,
+    });
 
     expect(topNFunctions.TotalCount).toEqual(totalSamples);
     expect(topNFunctions.TopN.length).toEqual(maxTopN);

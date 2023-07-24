@@ -23,7 +23,7 @@ import {
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
@@ -92,7 +92,7 @@ describe(`UserActions`, () => {
     jest.clearAllMocks();
     useUpdateCommentMock.mockReturnValue({
       isLoadingIds: [],
-      patchComment,
+      mutate: patchComment,
     });
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
@@ -149,7 +149,7 @@ describe(`UserActions`, () => {
   });
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -184,7 +184,7 @@ describe(`UserActions`, () => {
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -222,18 +222,21 @@ describe(`UserActions`, () => {
         ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
 
-      expect(patchComment).toBeCalledWith({
-        commentUpdate: sampleData.content,
-        caseId: 'case-id',
-        commentId: defaultProps.data.comments[0].id,
-        version: defaultProps.data.comments[0].version,
-      });
+      expect(patchComment).toBeCalledWith(
+        {
+          commentUpdate: sampleData.content,
+          caseId: 'case-id',
+          commentId: defaultProps.data.comments[0].id,
+          version: defaultProps.data.comments[0].version,
+        },
+        { onSuccess: expect.anything(), onError: expect.anything() }
+      );
     });
   });
 
   it('shows quoted text in last MarkdownEditorTextArea', async () => {
     const quoteableText = `> Solve this fast! \n\n`;
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -277,7 +280,7 @@ describe(`UserActions`, () => {
   it('it should persist the draft of new comment while existing old comment is updated', async () => {
     const editedComment = 'it is an edited comment';
     const newComment = 'another cool comment';
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -509,13 +512,13 @@ describe(`UserActions`, () => {
     it('shows more button visible 21st user action added', async () => {
       const mockUserActions = [
         ...caseUserActions,
-        getUserAction('comment', Actions.create),
-        getUserAction('comment', Actions.update),
-        getUserAction('comment', Actions.create),
-        getUserAction('comment', Actions.update),
-        getUserAction('comment', Actions.create),
-        getUserAction('comment', Actions.update),
-        getUserAction('comment', Actions.create),
+        getUserAction('comment', UserActionActions.create),
+        getUserAction('comment', UserActionActions.update),
+        getUserAction('comment', UserActionActions.create),
+        getUserAction('comment', UserActionActions.update),
+        getUserAction('comment', UserActionActions.create),
+        getUserAction('comment', UserActionActions.update),
+        getUserAction('comment', UserActionActions.create),
       ];
       useInfiniteFindCaseUserActionsMock.mockReturnValue({
         ...defaultInfiniteUseFindCaseUserActions,
@@ -569,7 +572,7 @@ describe(`UserActions`, () => {
               total: 21,
               page: 2,
               perPage: 10,
-              userActions: [getUserAction('comment', Actions.create)],
+              userActions: [getUserAction('comment', UserActionActions.create)],
             },
           ],
         },

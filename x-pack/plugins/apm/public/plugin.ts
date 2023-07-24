@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -44,10 +45,10 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import {
   FetchDataParams,
-  METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import { METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -58,6 +59,17 @@ import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import {
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+} from '@kbn/profiling-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -77,22 +89,27 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
+  uiActions: UiActionsSetup;
+  profiling?: ProfilingPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -106,11 +123,13 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
+  profiling?: ProfilingPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -152,15 +171,25 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
+const apmTutorialTitle = i18n.translate(
+  'xpack.apm.navigation.apmTutorialTitle',
+  {
+    defaultMessage: 'Tutorial',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
   }
+
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
+
+    const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
       pluginSetupDeps.home.environment.update({ apmUi: true });
@@ -267,6 +296,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       () => import('./tutorial/config_agent/rum_script')
     );
 
+    pluginSetupDeps.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.ApmTransactionContextMenu,
+    });
+
+    pluginSetupDeps.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.ApmErrorContextMenu,
+    });
+
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
@@ -301,6 +338,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: AppNavLinkStatus.visible,
       deepLinks: [
         {
           id: 'service-groups-list',
@@ -311,20 +349,35 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
-        { id: 'traces', title: tracesTitle, path: '/traces' },
+        {
+          id: 'traces',
+          title: tracesTitle,
+          path: '/traces',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
+        },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
+          searchable: featureFlags.storageExplorerAvailable,
         },
+        { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -355,6 +408,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       locator,
     };
   }
+
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
     if (fleet) {

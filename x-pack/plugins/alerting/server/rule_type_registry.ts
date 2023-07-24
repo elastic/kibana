@@ -13,6 +13,7 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { rawRuleSchema } from './raw_rule_schema';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -28,6 +29,7 @@ import {
   ActionGroup,
   validateDurationSchema,
   parseDuration,
+  RuleAlertData,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
@@ -60,6 +62,7 @@ export interface RegistryRuleType
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
+    | 'fieldsForAAD'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -92,7 +95,8 @@ export type NormalizedRuleType<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > = {
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
@@ -103,7 +107,8 @@ export type NormalizedRuleType<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >,
   'recoveryActionGroup' | 'actionGroups'
 > &
@@ -116,7 +121,8 @@ export type NormalizedRuleType<
         InstanceState,
         InstanceContext,
         ActionGroupIds,
-        RecoveryActionGroupId
+        RecoveryActionGroupId,
+        AlertData
       >
     >,
     'recoveryActionGroup'
@@ -129,7 +135,8 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   string,
-  string
+  string,
+  RuleAlertData
 >;
 
 export class RuleTypeRegistry {
@@ -178,7 +185,8 @@ export class RuleTypeRegistry {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: RuleType<
       Params,
@@ -187,7 +195,8 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >
   ) {
     if (this.has(ruleType.id)) {
@@ -258,7 +267,8 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >(ruleType);
 
     this.ruleTypes.set(
@@ -278,11 +288,17 @@ export class RuleTypeRegistry {
             InstanceState,
             InstanceContext,
             ActionGroupIds,
-            RecoveryActionGroupId | RecoveredActionGroupId
+            RecoveryActionGroupId | RecoveredActionGroupId,
+            AlertData
           >(normalizedRuleType, context, this.inMemoryMetrics),
+        paramsSchema: schema.object({
+          alertId: schema.string(),
+          spaceId: schema.string(),
+          consumer: schema.maybe(schema.string()),
+        }),
+        indirectParamsSchema: rawRuleSchema,
       },
     });
-
     if (this.alertsService && ruleType.alerts) {
       this.alertsService.register(ruleType.alerts);
     }
@@ -303,7 +319,8 @@ export class RuleTypeRegistry {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
-    RecoveryActionGroupId extends string = string
+    RecoveryActionGroupId extends string = string,
+    AlertData extends RuleAlertData = RuleAlertData
   >(
     id: string
   ): NormalizedRuleType<
@@ -313,7 +330,8 @@ export class RuleTypeRegistry {
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   > {
     if (!this.has(id)) {
       throw Boom.badRequest(
@@ -337,7 +355,8 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >;
   }
 
@@ -360,6 +379,7 @@ export class RuleTypeRegistry {
             doesSetRecoveryContext,
             alerts,
             getSummarizedAlerts,
+            fieldsForAAD,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -380,6 +400,7 @@ export class RuleTypeRegistry {
             minimumLicenseRequired
           ).isValid,
           hasGetSummarizedAlerts: !!getSummarizedAlerts,
+          hasFieldsForAAD: Boolean(fieldsForAAD),
           ...(alerts ? { alerts } : {}),
         })
       )
@@ -406,7 +427,8 @@ function augmentActionGroupsWithReserved<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 >(
   ruleType: RuleType<
     Params,
@@ -415,7 +437,8 @@ function augmentActionGroupsWithReserved<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >
 ): NormalizedRuleType<
   Params,
@@ -424,7 +447,8 @@ function augmentActionGroupsWithReserved<
   InstanceState,
   InstanceContext,
   ActionGroupIds,
-  RecoveredActionGroupId | RecoveryActionGroupId
+  RecoveredActionGroupId | RecoveryActionGroupId,
+  AlertData
 > {
   const reservedActionGroups = getBuiltinActionGroups(ruleType.recoveryActionGroup);
   const { id, actionGroups, recoveryActionGroup } = ruleType;

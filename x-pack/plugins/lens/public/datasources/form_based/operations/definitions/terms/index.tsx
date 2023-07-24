@@ -60,6 +60,12 @@ export function supportsRarityRanking(field?: IndexPatternField) {
     ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
   );
 }
+export function supportsSignificantRanking(field?: IndexPatternField) {
+  return field?.esTypes?.some((esType) => esType === 'keyword');
+}
+function isRareOrSignificant(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
+  return orderBy.type === 'rare' || orderBy.type === 'significant';
+}
 export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -70,11 +76,20 @@ function ofName(
   name?: string,
   secondaryFieldsCount: number = 0,
   rare: boolean = false,
+  significant: boolean = false,
   termsSize: number = 0
 ) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
       defaultMessage: 'Rare values of {name}',
+      values: {
+        name: name ?? missingFieldLabel,
+      },
+    });
+  }
+  if (significant) {
+    return i18n.translate('xpack.lens.indexPattern.significantTermsOf', {
+      defaultMessage: 'Significant values of {name}',
       values: {
         name: name ?? missingFieldLabel,
       },
@@ -149,7 +164,7 @@ export const termsOperation: OperationDefinition<
     return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    if (targetColumn.params.orderBy.type === 'rare') {
+    if (isRareOrSignificant(targetColumn.params.orderBy)) {
       return false;
     }
     // collect the fields from the targetColumn
@@ -168,10 +183,16 @@ export const termsOperation: OperationDefinition<
   getDefaultVisualSettings: (column) => ({
     truncateText: Boolean(!column.params?.secondaryFields?.length),
   }),
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedTypes.has(type) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
       return {
@@ -258,6 +279,30 @@ export const termsOperation: OperationDefinition<
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+
+    // To get more accurate results, we set shard_size to a minimum of 1000
+    // The other calculation matches the current Elasticsearch shard_size default,
+    // but they may diverge in the future
+    const shardSize = column.params.accuracyMode
+      ? Math.max(1000, column.params.size * 1.5 + 10)
+      : undefined;
+
+    if (column.params?.orderBy.type === 'significant') {
+      return buildExpressionFunction<AggFunctionsMapping['aggSignificantTerms']>(
+        'aggSignificantTerms',
+        {
+          id: columnId,
+          enabled: true,
+          schema: 'segment',
+          field: column.sourceField,
+          size: column.params.size,
+          shardSize,
+          ...(column.params.include?.length && { include: column.params.include as string[] }),
+          ...(column.params.exclude?.length && { exclude: column.params.exclude as string[] }),
+        }
+      ).toAst();
+    }
+
     let orderBy = '_key';
 
     if (column.params?.orderBy.type === 'column') {
@@ -268,13 +313,6 @@ export const termsOperation: OperationDefinition<
         orderBy = '_key';
       }
     }
-
-    // To get more accurate results, we set shard_size to a minimum of 1000
-    // The other calculation matches the current Elasticsearch shard_size default,
-    // but they may diverge in the future
-    const shardSize = column.params.accuracyMode
-      ? Math.max(1000, column.params.size * 1.5 + 10)
-      : undefined;
 
     const orderAggColumn = column.params.orderAgg;
     let orderAgg;
@@ -346,6 +384,7 @@ export const termsOperation: OperationDefinition<
       indexPattern.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
       column.params.orderBy.type === 'rare',
+      column.params.orderBy.type === 'significant',
       column.params.size
     ),
   onFieldChange: (oldColumn, field, params) => {
@@ -358,7 +397,10 @@ export const termsOperation: OperationDefinition<
       delete newParams.format;
     }
     newParams.parentFormat = getParentFormatter(newParams);
-    if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
+    if (
+      (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') ||
+      (!supportsSignificantRanking(field) && newParams.orderBy.type === 'significant')
+    ) {
       newParams.orderBy = { type: 'alphabetical' };
     }
 
@@ -371,6 +413,7 @@ export const termsOperation: OperationDefinition<
             field.displayName,
             newParams.secondaryFields?.length,
             newParams.orderBy.type === 'rare',
+            newParams.orderBy.type === 'significant',
             newParams.size
           ),
       sourceField: field.name,
@@ -438,7 +481,10 @@ export const termsOperation: OperationDefinition<
           delete newParams.format;
         }
         const mainField = indexPattern.getFieldByName(sourcefield);
-        if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
+        if (
+          (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') ||
+          (!supportsSignificantRanking(mainField) && newParams.orderBy.type === 'significant')
+        ) {
           newParams.orderBy = { type: 'alphabetical' };
         }
         // in single field mode, allow the automatic switch of the function to
@@ -476,6 +522,7 @@ export const termsOperation: OperationDefinition<
                     mainField?.displayName,
                     fields.length - 1,
                     newParams.orderBy.type === 'rare',
+                    newParams.orderBy.type === 'significant',
                     newParams.size
                   ),
               params: {
@@ -588,6 +635,9 @@ The top values of a specified field ranked by the chosen metric.
       if (value === 'rare') {
         return { type: 'rare', maxDocCount: DEFAULT_MAX_DOC_COUNT };
       }
+      if (value === 'significant') {
+        return { type: 'significant' };
+      }
       if (value === 'custom') {
         return { type: 'custom' };
       }
@@ -623,6 +673,17 @@ The top values of a specified field ranked by the chosen metric.
         }),
       });
     }
+    if (
+      !currentColumn.params.secondaryFields?.length &&
+      supportsSignificantRanking(indexPattern.getFieldByName(currentColumn.sourceField))
+    ) {
+      orderOptions.push({
+        value: toValue({ type: 'significant' }),
+        text: i18n.translate('xpack.lens.indexPattern.terms.orderSignificant', {
+          defaultMessage: 'Significance',
+        }),
+      });
+    }
     orderOptions.push({
       value: toValue({ type: 'custom' }),
       text: i18n.translate('xpack.lens.indexPattern.terms.orderCustomMetric', {
@@ -654,6 +715,7 @@ The top values of a specified field ranked by the chosen metric.
                         indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
                         secondaryFieldsCount,
                         currentColumn.params.orderBy.type === 'rare',
+                        currentColumn.params.orderBy.type === 'significant',
                         value
                       ),
                   params: {
@@ -889,7 +951,7 @@ The top values of a specified field ranked by the chosen metric.
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
               defaultMessage: 'Rank direction',
             })}
-            isDisabled={currentColumn.params.orderBy.type === 'rare'}
+            isDisabled={isRareOrSignificant(currentColumn.params.orderBy)}
             options={[
               {
                 id: `${idPrefix}asc`,
@@ -964,7 +1026,7 @@ The top values of a specified field ranked by the chosen metric.
                 disabled={
                   !currentColumn.params.otherBucket ||
                   indexPattern.getFieldByName(currentColumn.sourceField)?.type !== 'string' ||
-                  currentColumn.params.orderBy.type === 'rare'
+                  isRareOrSignificant(currentColumn.params.orderBy)
                 }
                 data-test-subj="indexPattern-terms-missing-bucket"
                 checked={Boolean(currentColumn.params.missingBucket)}
@@ -991,7 +1053,7 @@ The top values of a specified field ranked by the chosen metric.
                 compressed
                 data-test-subj="indexPattern-terms-other-bucket"
                 checked={Boolean(currentColumn.params.otherBucket)}
-                disabled={currentColumn.params.orderBy.type === 'rare'}
+                disabled={isRareOrSignificant(currentColumn.params.orderBy)}
                 onChange={(e: EuiSwitchEvent) =>
                   paramEditorUpdater(
                     updateColumnParam({

@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
-import { Response, Selector } from '../../types';
+import { Response, Selector } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
@@ -24,7 +24,7 @@ describe('<ControlGeneralViewSelector />', () => {
   const mockSelector: Selector = {
     type: 'file',
     name: 'mock',
-    operation: ['createExecutable'],
+    operation: ['createFile'],
   };
 
   const mockSelector2: Selector = {
@@ -33,10 +33,23 @@ describe('<ControlGeneralViewSelector />', () => {
     operation: ['modifyExecutable'],
   };
 
+  const mockSelector3: Selector = {
+    type: 'file',
+    name: 'mock3',
+    operation: ['createFile'],
+    targetFilePath: ['/**'],
+  };
+
   const mockExclude: Selector = {
     type: 'file',
     name: 'mockExclude',
     containerImageName: ['nginx'],
+  };
+
+  const mockProcessSelector: Selector = {
+    type: 'process',
+    name: 'mockProcess',
+    operation: ['exec'],
   };
 
   const mockResponse: Response = {
@@ -51,6 +64,18 @@ describe('<ControlGeneralViewSelector />', () => {
     actions: ['alert', 'block'],
   };
 
+  const mockResponse3: Response = {
+    type: 'file',
+    match: [mockSelector3.name],
+    actions: ['alert', 'block'],
+  };
+
+  const mockProcessResponse: Response = {
+    type: 'process',
+    match: [mockProcessSelector.name],
+    actions: ['alert', 'block'],
+  };
+
   const WrappedComponent = ({
     response = { ...mockResponse },
     responses,
@@ -62,9 +87,9 @@ describe('<ControlGeneralViewSelector />', () => {
       <TestProvider params={params}>
         <ControlGeneralViewResponse
           index={0}
-          selectors={[mockSelector, mockSelector2, mockExclude]}
+          selectors={[mockSelector, mockSelector2, mockSelector3, mockExclude]}
           response={response}
-          responses={responses || [response, mockResponse2]}
+          responses={responses || [response, mockResponse2, mockResponse3]}
           onChange={onChange}
           onRemove={onRemove}
           onDuplicate={onDuplicate}
@@ -94,7 +119,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const options = getByTestId(
       'comboBoxOptionsList cloud-defend-responsematch-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
     expect(options[0].textContent).toBe('mock2');
 
     userEvent.click(options[0]);
@@ -110,8 +135,9 @@ describe('<ControlGeneralViewSelector />', () => {
     const updatedOptions = getByTestId(
       'comboBoxOptionsList cloud-defend-responsematch-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(updatedOptions).toHaveLength(1);
-    expect(updatedOptions[0].textContent).toContain('mockExclude');
+    expect(updatedOptions).toHaveLength(2);
+    expect(updatedOptions[0].textContent).toContain('mock3');
+    expect(updatedOptions[1].textContent).toContain('mockExclude');
   });
 
   it('ensures there is at least 1 selector to match', () => {
@@ -141,11 +167,12 @@ describe('<ControlGeneralViewSelector />', () => {
         '.euiComboBoxOption__content'
       )
     );
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
     expect(options[0].textContent).toBe('mock2');
-    expect(options[1].textContent).toBe('mockExclude');
+    expect(options[1].textContent).toBe('mock3');
+    expect(options[2].textContent).toBe('mockExclude');
 
-    userEvent.click(options[1]);
+    userEvent.click(options[2]);
 
     updatedResponse = onChange.mock.calls[0][0];
     rerender(<WrappedComponent response={updatedResponse} />);
@@ -158,7 +185,7 @@ describe('<ControlGeneralViewSelector />', () => {
     options = getByTestId(
       'comboBoxOptionsList cloud-defend-responsematch-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(options).toHaveLength(1);
+    expect(options).toHaveLength(2);
     expect(options[0].textContent).toBe('mock2');
   });
 
@@ -173,6 +200,25 @@ describe('<ControlGeneralViewSelector />', () => {
     const response: Response = onChange.mock.calls[0][0];
     expect(response.actions).toContain('alert');
     expect(response.actions).toContain('block');
+  });
+
+  it('doesnt show block action for process responses', () => {
+    const { findByTestId } = render(<WrappedComponent response={mockProcessResponse} />);
+    const checkBox = findByTestId('cloud-defend-chkblockaction');
+
+    expect(checkBox).toMatchObject({});
+  });
+
+  it('shows an error if user is using block w/o targetFilePath', () => {
+    const { getByText } = render(<WrappedComponent response={mockResponse2} />);
+
+    expect(getByText(i18n.errorBlockActionRequiresTargetFilePath)).toBeTruthy();
+  });
+
+  it('shows a warning if user is using block w targetFilePath /**', () => {
+    const { getByText } = render(<WrappedComponent response={mockResponse3} />);
+
+    expect(getByText(i18n.warningFIMUsingSlashStarStarTitle)).toBeTruthy();
   });
 
   it('allows the user to remove the response', async () => {

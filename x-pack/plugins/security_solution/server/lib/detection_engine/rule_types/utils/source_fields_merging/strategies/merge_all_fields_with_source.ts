@@ -17,6 +17,7 @@ import { isPrimitive } from '../utils/is_primitive';
 import { isArrayOfPrimitives } from '../utils/is_array_of_primitives';
 import { isTypeObject } from '../utils/is_type_object';
 import { isPathValid } from '../utils/is_path_valid';
+import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
 
 /**
  * Merges all of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -33,9 +34,12 @@ export const mergeAllFieldsWithSource: MergeStrategyFunction = ({ doc, ignoreFie
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
   const filteredEntries = filterFieldEntries(fieldEntries, ignoreFields);
+  const fieldsKeyMap = buildFieldsKeyAsArrayMap(source);
 
   const transformedSource = filteredEntries.reduce(
-    (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {
+    (merged, [fieldsKeyAsString, fieldsValue]: [string, FieldsType]) => {
+      const fieldsKey = fieldsKeyMap[fieldsKeyAsString] ?? fieldsKeyAsString;
+
       if (
         hasEarlyReturnConditions({
           fieldsValue,
@@ -101,7 +105,7 @@ const hasEarlyReturnConditions = ({
   merged,
 }: {
   fieldsValue: FieldsType;
-  fieldsKey: string;
+  fieldsKey: string[] | string;
   merged: SignalSource;
 }) => {
   const valueInMergedDocument = get(fieldsKey, merged);

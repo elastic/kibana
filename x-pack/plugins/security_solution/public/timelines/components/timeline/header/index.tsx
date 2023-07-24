@@ -13,8 +13,8 @@ import { DataProviders } from '../data_providers';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 
 import * as i18n from './translations';
-import type { TimelineStatusLiteralWithNull } from '../../../../../common/types/timeline';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import type { TimelineStatusLiteralWithNull } from '../../../../../common/api/timeline';
+import { TimelineStatus } from '../../../../../common/api/timeline';
 
 interface Props {
   filterManager: FilterManager;

@@ -9,7 +9,14 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'share',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const dataGrid = getService('dataGrid');
   const a11y = getService('a11y');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
@@ -68,14 +75,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on open sidenav filter', async () => {
-      await PageObjects.discover.openSidebarFieldFilter();
+      await PageObjects.unifiedFieldList.openSidebarFieldFilter();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.closeSidebarFieldFilter();
+      await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
     });
 
     it('a11y test on tables with columns view', async () => {
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemToggle(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemToggle(columnName);
       }
       await a11y.testAppSnapshot();
     });

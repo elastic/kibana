@@ -31,6 +31,13 @@ export const SEVERITY_TITLE = i18n.translate(
   }
 );
 
+export const STATUS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
   {
@@ -38,12 +45,19 @@ export const RISK_SCORE_TITLE = i18n.translate(
   }
 );
 
-/* Description section */
-
-export const DESCRIPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.descriptionTitle',
+export const VIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.viewRuleText',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'View rule',
+  }
+);
+
+/* About section */
+
+export const ABOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.aboutTitle',
+  {
+    defaultMessage: 'About',
   }
 );
 
@@ -118,6 +132,16 @@ export const INSIGHTS_TITLE = i18n.translate(
   { defaultMessage: 'Insights' }
 );
 
+export const CORRELATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlationsTitle',
+  { defaultMessage: 'Correlations' }
+);
+
+export const PREVALENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
+  { defaultMessage: 'Prevalence' }
+);
+
 export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
   { defaultMessage: 'Technical Preview' }
@@ -173,6 +197,80 @@ export const THREAT_ENRICHMENTS = i18n.translate(
   }
 );
 
+export const CORRELATIONS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText',
+  {
+    defaultMessage: 'fields of correlation',
+  }
+);
+
+export const CORRELATIONS_ANCESTRY_ALERT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlert',
+  {
+    defaultMessage: 'alert related by ancestry',
+  }
+);
+
+export const CORRELATIONS_ANCESTRY_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlerts',
+  {
+    defaultMessage: 'alerts related by ancestry',
+  }
+);
+export const CORRELATIONS_SAME_SOURCE_EVENT_ALERT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlert',
+  {
+    defaultMessage: 'alert related by the same source event',
+  }
+);
+
+export const CORRELATIONS_SAME_SOURCE_EVENT_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlerts',
+  {
+    defaultMessage: 'alerts related by the same source event',
+  }
+);
+export const CORRELATIONS_SAME_SESSION_ALERT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlert',
+  {
+    defaultMessage: 'alert related by session',
+  }
+);
+
+export const CORRELATIONS_SAME_SESSION_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlerts',
+  {
+    defaultMessage: 'alerts related by session',
+  }
+);
+export const CORRELATIONS_RELATED_CASE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCase',
+  {
+    defaultMessage: 'related case',
+  }
+);
+
+export const CORRELATIONS_RELATED_CASES = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCases',
+  {
+    defaultMessage: 'related cases',
+  }
+);
+
+export const PREVALENCE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
+  {
+    defaultMessage: 'fields of prevalence',
+  }
+);
+
+export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
+  {
+    defaultMessage: 'is uncommon',
+  }
+);
+
 export const VIEW_ALL = (text: string) =>
   i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
     values: { text },
@@ -192,5 +290,51 @@ export const ANALYZER_PREVIEW_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.analyzerPreviewText',
   {
     defaultMessage: 'analyzer preview.',
+  }
+);
+
+export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
+  defaultMessage: 'Share Alert',
+});
+
+export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  {
+    defaultMessage: 'Investigation guide',
+  }
+);
+
+export const SESSION_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
+  {
+    defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_PROCESS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.processText',
+  {
+    defaultMessage: 'started',
+  }
+);
+
+export const SESSION_PREVIEW_TIME_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.timeText',
+  {
+    defaultMessage: 'at',
+  }
+);
+
+export const SESSION_PREVIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.ruleText',
+  {
+    defaultMessage: 'with rule',
+  }
+);
+
+export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText',
+  {
+    defaultMessage: 'by',
   }
 );

@@ -47,7 +47,7 @@ export const healthRoute = (
         try {
           const alertingContext = await context.alerting;
           // Verify that user has access to at least one rule type
-          const ruleTypes = Array.from(await alertingContext.getRulesClient().listAlertTypes());
+          const ruleTypes = Array.from(await alertingContext.getRulesClient().listRuleTypes());
           if (ruleTypes.length > 0) {
             const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 

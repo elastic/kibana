@@ -45,7 +45,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
@@ -218,17 +218,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should bulk create 100 file attachments when there is another attachment type in the request', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [postExternalReferenceSOReq, ...fileRequests],
-          });
-        });
-
         it('should bulk create 99 file attachments when the case has a file associated to it', async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
@@ -376,6 +365,23 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('400s when attempting to add more than 100 attachments', async () => {
+        const comment = {
+          type: CommentType.user,
+          comment: 'test',
+          owner: 'securitySolutionFixture',
+        };
+
+        const attachments = Array(101).fill(comment);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: 'test-case-id',
+          params: attachments,
+          expectedHttpCode: 400,
+        });
+      });
+
       it('400s when attempting to create a comment with a different owner than the case', async () => {
         const postedCase = await createCase(
           supertest,
@@ -435,6 +441,23 @@ export default ({ getService }: FtrProviderContext): void => {
             // @ts-expect-error
             {
               type: CommentType.user,
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when comment is too long', async () => {
+        const longComment = 'x'.repeat(30001);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: 'case-id',
+          params: [
+            {
+              type: CommentType.user,
+              comment: longComment,
+              owner: 'securitySolutionFixture',
             },
           ],
           expectedHttpCode: 400,
@@ -704,7 +727,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });

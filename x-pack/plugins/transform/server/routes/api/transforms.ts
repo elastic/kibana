@@ -22,7 +22,7 @@ import {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
 } from '../../../common/api_schemas/reauthorize_transforms';
-import { TRANSFORM_STATE } from '../../../common/constants';
+import { addInternalBasePath, TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
   ResponseStatus,
@@ -67,8 +67,6 @@ import {
 
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '..';
-
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { registerTransformNodesRoutes } from './transforms_nodes';
@@ -90,88 +88,154 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
-   * @api {get} /api/transform/transforms Get transforms
+   * @api {get} /internal/transform/transforms Get transforms
    * @apiName GetTransforms
    * @apiDescription Returns transforms
    *
    * @apiSchema (params) jobAuditMessagesJobIdSchema
    * @apiSchema (query) jobAuditMessagesQuerySchema
    */
-  router.get(
-    { path: addBasePath('transforms'), validate: false },
-    license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
-      async (ctx, req, res) => {
-        try {
-          const esClient = (await ctx.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.transform.getTransform({
-            size: 1000,
-            ...req.params,
-          });
-
-          const alerting = await ctx.alerting;
-          if (alerting) {
-            const transformHealthService = transformHealthServiceProvider({
-              esClient: esClient.asCurrentUser,
-              rulesClient: alerting.getRulesClient(),
+  router.versioned
+    .get({
+      path: addInternalBasePath('transforms'),
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
+        async (ctx, req, res) => {
+          try {
+            const esClient = (await ctx.core).elasticsearch.client;
+            const body = await esClient.asCurrentUser.transform.getTransform({
+              size: 1000,
+              ...req.params,
             });
 
-            // @ts-ignore
-            await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
-          }
+            const alerting = await ctx.alerting;
+            if (alerting) {
+              const transformHealthService = transformHealthServiceProvider({
+                esClient: esClient.asCurrentUser,
+                rulesClient: alerting.getRulesClient(),
+              });
 
-          return res.ok({ body });
-        } catch (e) {
-          return res.customError(wrapError(wrapEsError(e)));
+              // @ts-ignore
+              await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
+            }
+
+            return res.ok({ body });
+          } catch (e) {
+            return res.customError(wrapError(wrapEsError(e)));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {get} /api/transform/transforms/:transformId Get transform
+   * @api {get} /internal/transform/transforms/:transformId Get transform
    * @apiName GetTransform
    * @apiDescription Returns a single transform
    *
    * @apiSchema (params) transformIdParamSchema
    */
-  router.get<TransformIdParamSchema, undefined, undefined>(
-    {
-      path: addBasePath('transforms/{transformId}'),
-      validate: { params: transformIdParamSchema },
-    },
-    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
-      const { transformId } = req.params;
-      try {
-        const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.transform.getTransform({
-          transform_id: transformId,
-        });
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
-      }
+  router.versioned
+    .get({
+      path: addInternalBasePath('transforms/{transformId}'),
+      access: 'internal',
     })
-  );
+    .addVersion<TransformIdParamSchema, undefined, undefined>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: transformIdParamSchema,
+          },
+        },
+      },
+      license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
+        const { transformId } = req.params;
+        try {
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.getTransform({
+            transform_id: transformId,
+          });
+          return res.ok({ body });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
+      })
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {get} /api/transform/transforms/_stats Get transforms stats
+   * @api {get} /internal/transform/transforms/_stats Get transforms stats
    * @apiName GetTransformsStats
    * @apiDescription Returns transforms stats
    */
-  router.get(
-    { path: addBasePath('transforms/_stats'), validate: false },
-    license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
-      async (ctx, req, res) => {
+  router.versioned
+    .get({
+      path: addInternalBasePath('transforms/_stats'),
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
+        async (ctx, req, res) => {
+          try {
+            const esClient = (await ctx.core).elasticsearch.client;
+            const body = await esClient.asCurrentUser.transform.getTransformStats(
+              {
+                size: 1000,
+                transform_id: '_all',
+              },
+              { maxRetries: 0 }
+            );
+            return res.ok({ body });
+          } catch (e) {
+            return res.customError(wrapError(wrapEsError(e)));
+          }
+        }
+      )
+    );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /internal/transform/transforms/:transformId/_stats Get transform stats
+   * @apiName GetTransformStats
+   * @apiDescription Returns stats for a single transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   */
+  router.versioned
+    .get({
+      path: addInternalBasePath('transforms/{transformId}/_stats'),
+      access: 'internal',
+    })
+    .addVersion<TransformIdParamSchema, undefined, undefined>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: transformIdParamSchema,
+          },
+        },
+      },
+      license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
+        const { transformId } = req.params;
         try {
           const esClient = (await ctx.core).elasticsearch.client;
           const body = await esClient.asCurrentUser.transform.getTransformStats(
             {
-              size: 1000,
-              transform_id: '_all',
+              transform_id: transformId,
             },
             { maxRetries: 0 }
           );
@@ -179,354 +243,385 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         } catch (e) {
           return res.customError(wrapError(wrapEsError(e)));
         }
-      }
-    )
-  );
+      })
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {get} /api/transform/transforms/:transformId/_stats Get transform stats
-   * @apiName GetTransformStats
-   * @apiDescription Returns stats for a single transform
-   *
-   * @apiSchema (params) transformIdParamSchema
-   */
-  router.get<TransformIdParamSchema, undefined, undefined>(
-    {
-      path: addBasePath('transforms/{transformId}/_stats'),
-      validate: { params: transformIdParamSchema },
-    },
-    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
-      const { transformId } = req.params;
-      try {
-        const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.transform.getTransformStats(
-          {
-            transform_id: transformId,
-          },
-          { maxRetries: 0 }
-        );
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {put} /api/transform/transforms/:transformId Put transform
+   * @api {put} /internal/transform/transforms/:transformId Put transform
    * @apiName PutTransform
    * @apiDescription Creates a transform
    *
    * @apiSchema (params) transformIdParamSchema
    * @apiSchema (body) putTransformsRequestSchema
    */
-  router.put<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
-    {
-      path: addBasePath('transforms/{transformId}'),
-      validate: {
-        params: transformIdParamSchema,
-        body: putTransformsRequestSchema,
+  router.versioned
+    .put({
+      path: addInternalBasePath('transforms/{transformId}'),
+      access: 'internal',
+    })
+    .addVersion<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: transformIdParamSchema,
+            body: putTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
-      async (ctx, req, res) => {
-        const { transformId } = req.params;
+      license.guardApiRoute<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
+        async (ctx, req, res) => {
+          const { transformId } = req.params;
 
-        const response: PutTransformsResponseSchema = {
-          transformsCreated: [],
-          errors: [],
-        };
+          const response: PutTransformsResponseSchema = {
+            transformsCreated: [],
+            errors: [],
+          };
 
-        const esClient = (await ctx.core).elasticsearch.client;
-        await esClient.asCurrentUser.transform
-          .putTransform({
-            // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
-            body: req.body,
-            transform_id: transformId,
-          })
-          .then(() => {
-            response.transformsCreated.push({ transform: transformId });
-          })
-          .catch((e) =>
-            response.errors.push({
-              id: transformId,
-              error: wrapEsError(e),
+          const esClient = (await ctx.core).elasticsearch.client;
+          await esClient.asCurrentUser.transform
+            .putTransform({
+              // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
+              body: req.body,
+              transform_id: transformId,
             })
-          );
+            .then(() => {
+              response.transformsCreated.push({ transform: transformId });
+            })
+            .catch((e) =>
+              response.errors.push({
+                id: transformId,
+                error: wrapEsError(e),
+              })
+            );
 
-        return res.ok({ body: response });
-      }
-    )
-  );
+          return res.ok({ body: response });
+        }
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/transforms/:transformId/_update Post transform update
+   * @api {post} /internal/transform/transforms/:transformId/_update Post transform update
    * @apiName PostTransformUpdate
    * @apiDescription Updates a transform
    *
    * @apiSchema (params) transformIdParamSchema
    * @apiSchema (body) postTransformsUpdateRequestSchema
    */
-  router.post<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
-    {
-      path: addBasePath('transforms/{transformId}/_update'),
-      validate: {
-        params: transformIdParamSchema,
-        body: postTransformsUpdateRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('transforms/{transformId}/_update'),
+      access: 'internal',
+    })
+    .addVersion<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: transformIdParamSchema,
+            body: postTransformsUpdateRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
-      async (ctx, req, res) => {
-        const { transformId } = req.params;
+      license.guardApiRoute<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+        async (ctx, req, res) => {
+          const { transformId } = req.params;
 
-        try {
-          const esClient = (await ctx.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.transform.updateTransform({
-            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
-            body: req.body,
-            transform_id: transformId,
-          });
-          return res.ok({
-            body,
-          });
-        } catch (e) {
-          return res.customError(wrapError(e));
+          try {
+            const esClient = (await ctx.core).elasticsearch.client;
+            const body = await esClient.asCurrentUser.transform.updateTransform({
+              // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+              body: req.body,
+              transform_id: transformId,
+            });
+            return res.ok({
+              body,
+            });
+          } catch (e) {
+            return res.customError(wrapError(e));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Reauthorize transforms with API key generated from currently logged in user
-   * @api {post} /api/transform/reauthorize_transforms Post reauthorize transforms
+   * @api {post} /internal/transform/reauthorize_transforms Post reauthorize transforms
    * @apiName Reauthorize Transforms
    * @apiDescription Reauthorize transforms by generating an API Key for current user
    * and update transform's es-secondary-authorization headers with the generated key,
    * then start the transform.
    * @apiSchema (body) reauthorizeTransformsRequestSchema
    */
-  router.post<undefined, undefined, StartTransformsRequestSchema>(
-    {
-      path: addBasePath('reauthorize_transforms'),
-      validate: {
-        body: reauthorizeTransformsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('reauthorize_transforms'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, StartTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: reauthorizeTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
-      async (ctx, req, res) => {
-        try {
-          const transformsInfo = req.body;
-          const { elasticsearch } = coreStart;
-          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+      license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+        async (ctx, req, res) => {
+          try {
+            const transformsInfo = req.body;
+            const { elasticsearch } = coreStart;
+            const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
-          let apiKeyWithCurrentUserPermission;
+            let apiKeyWithCurrentUserPermission;
 
-          // If security is not enabled or available, user should not have the need to reauthorize
-          // in that case, start anyway
-          if (securityStart) {
-            apiKeyWithCurrentUserPermission = await securityStart.authc.apiKeys.grantAsInternalUser(
-              req,
+            // If security is not enabled or available, user should not have the need to reauthorize
+            // in that case, start anyway
+            if (securityStart) {
+              apiKeyWithCurrentUserPermission =
+                await securityStart.authc.apiKeys.grantAsInternalUser(req, {
+                  name: `auto-generated-transform-api-key`,
+                  role_descriptors: {},
+                });
+            }
+            const secondaryAuth = generateTransformSecondaryAuthHeaders(
+              apiKeyWithCurrentUserPermission
+            );
+
+            const authorizedTransforms = await reauthorizeAndStartTransforms(
+              transformsInfo,
+              esClient,
               {
-                name: `auto-generated-transform-api-key`,
-                role_descriptors: {},
+                ...(secondaryAuth ? secondaryAuth : {}),
               }
             );
+            return res.ok({ body: authorizedTransforms });
+          } catch (e) {
+            return res.customError(wrapError(wrapEsError(e)));
           }
-          const secondaryAuth = generateTransformSecondaryAuthHeaders(
-            apiKeyWithCurrentUserPermission
-          );
-
-          const authorizedTransforms = await reauthorizeAndStartTransforms(
-            transformsInfo,
-            esClient,
-            {
-              ...(secondaryAuth ? secondaryAuth : {}),
-            }
-          );
-          return res.ok({ body: authorizedTransforms });
-        } catch (e) {
-          return res.customError(wrapError(wrapEsError(e)));
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/delete_transforms Post delete transforms
+   * @api {post} /internal/transform/delete_transforms Post delete transforms
    * @apiName DeleteTransforms
    * @apiDescription Deletes transforms
    *
    * @apiSchema (body) deleteTransformsRequestSchema
    */
-  router.post<undefined, undefined, DeleteTransformsRequestSchema>(
-    {
-      path: addBasePath('delete_transforms'),
-      validate: {
-        body: deleteTransformsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('delete_transforms'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, DeleteTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: deleteTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
-      async (ctx, req, res) => {
-        try {
-          const { savedObjects, elasticsearch } = coreStart;
-          const savedObjectsClient = savedObjects.getScopedClient(req);
-          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+      license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
+        async (ctx, req, res) => {
+          try {
+            const { savedObjects, elasticsearch } = coreStart;
+            const savedObjectsClient = savedObjects.getScopedClient(req);
+            const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
-          const dataViewsService = await dataViews.dataViewsServiceFactory(
-            savedObjectsClient,
-            esClient,
-            req
-          );
-          const body = await deleteTransforms(req.body, ctx, res, dataViewsService);
+            const dataViewsService = await dataViews.dataViewsServiceFactory(
+              savedObjectsClient,
+              esClient,
+              req
+            );
+            const body = await deleteTransforms(req.body, ctx, res, dataViewsService);
 
-          if (body && body.status) {
-            if (body.status === 404) {
-              return res.notFound();
+            if (body && body.status) {
+              if (body.status === 404) {
+                return res.notFound();
+              }
+              if (body.status === 403) {
+                return res.forbidden();
+              }
             }
-            if (body.status === 403) {
-              return res.forbidden();
-            }
+
+            return res.ok({
+              body,
+            });
+          } catch (e) {
+            return res.customError(wrapError(wrapEsError(e)));
           }
-
-          return res.ok({
-            body,
-          });
-        } catch (e) {
-          return res.customError(wrapError(wrapEsError(e)));
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/reset_transforms Post reset transforms
+   * @api {post} /internal/transform/reset_transforms Post reset transforms
    * @apiName ResetTransforms
    * @apiDescription resets transforms
    *
    * @apiSchema (body) resetTransformsRequestSchema
    */
-  router.post<undefined, undefined, ResetTransformsRequestSchema>(
-    {
-      path: addBasePath('reset_transforms'),
-      validate: {
-        body: resetTransformsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('reset_transforms'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, ResetTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: resetTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, ResetTransformsRequestSchema>(
-      async (ctx, req, res) => {
-        try {
-          const body = await resetTransforms(req.body, ctx, res);
+      license.guardApiRoute<undefined, undefined, ResetTransformsRequestSchema>(
+        async (ctx, req, res) => {
+          try {
+            const body = await resetTransforms(req.body, ctx, res);
 
-          if (body && body.status) {
-            if (body.status === 404) {
-              return res.notFound();
+            if (body && body.status) {
+              if (body.status === 404) {
+                return res.notFound();
+              }
+              if (body.status === 403) {
+                return res.forbidden();
+              }
             }
-            if (body.status === 403) {
-              return res.forbidden();
-            }
+
+            return res.ok({
+              body,
+            });
+          } catch (e) {
+            return res.customError(wrapError(wrapEsError(e)));
           }
-
-          return res.ok({
-            body,
-          });
-        } catch (e) {
-          return res.customError(wrapError(wrapEsError(e)));
         }
-      }
-    )
-  );
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/transforms/_preview Preview transform
+   * @api {post} /internal/transform/transforms/_preview Preview transform
    * @apiName PreviewTransform
    * @apiDescription Previews transform
    *
    * @apiSchema (body) postTransformsPreviewRequestSchema
    */
-  router.post<undefined, undefined, PostTransformsPreviewRequestSchema>(
-    {
-      path: addBasePath('transforms/_preview'),
-      validate: {
-        body: postTransformsPreviewRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('transforms/_preview'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, PostTransformsPreviewRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: postTransformsPreviewRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, PostTransformsPreviewRequestSchema>(
-      previewTransformHandler
-    )
-  );
+      license.guardApiRoute<undefined, undefined, PostTransformsPreviewRequestSchema>(
+        previewTransformHandler
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/start_transforms Start transforms
+   * @api {post} /internal/transform/start_transforms Start transforms
    * @apiName PostStartTransforms
    * @apiDescription Starts transform
    *
    * @apiSchema (body) startTransformsRequestSchema
    */
-  router.post<undefined, undefined, StartTransformsRequestSchema>(
-    {
-      path: addBasePath('start_transforms'),
-      validate: {
-        body: startTransformsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('start_transforms'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, StartTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: startTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
-      startTransformsHandler
-    )
-  );
+      license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+        startTransformsHandler
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/stop_transforms Stop transforms
+   * @api {post} /internal/transform/stop_transforms Stop transforms
    * @apiName PostStopTransforms
    * @apiDescription Stops transform
    *
    * @apiSchema (body) stopTransformsRequestSchema
    */
-  router.post<undefined, undefined, StopTransformsRequestSchema>(
-    {
-      path: addBasePath('stop_transforms'),
-      validate: {
-        body: stopTransformsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('stop_transforms'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, StopTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: stopTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(stopTransformsHandler)
-  );
+      license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(
+        stopTransformsHandler
+      )
+    );
 
   /**
    * @apiGroup Transforms
    *
-   * @api {post} /api/transform/schedule_now_transforms Schedules transforms now
+   * @api {post} /internal/transform/schedule_now_transforms Schedules transforms now
    * @apiName PostScheduleNowTransforms
    * @apiDescription Schedules transforms now
    *
    * @apiSchema (body) scheduleNowTransformsRequestSchema
    */
-  router.post<undefined, undefined, ScheduleNowTransformsRequestSchema>(
-    {
-      path: addBasePath('schedule_now_transforms'),
-      validate: {
-        body: scheduleNowTransformsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('schedule_now_transforms'),
+      access: 'internal',
+    })
+    .addVersion<undefined, undefined, ScheduleNowTransformsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: scheduleNowTransformsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<undefined, undefined, ScheduleNowTransformsRequestSchema>(
-      scheduleNowTransformsHandler
-    )
-  );
+      license.guardApiRoute<undefined, undefined, ScheduleNowTransformsRequestSchema>(
+        scheduleNowTransformsHandler
+      )
+    );
 
   registerTransformsAuditMessagesRoutes(routeDependencies);
   registerTransformNodesRoutes(routeDependencies);

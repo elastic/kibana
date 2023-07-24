@@ -75,6 +75,14 @@ export function buildDefaultSettings({
           }),
       // What should be our default for the compression?
       codec: 'best_compression',
+      // setting `ignore_malformed` only for data_stream for logs
+      ...(type === 'logs'
+        ? {
+            mapping: {
+              ignore_malformed: true,
+            },
+          }
+        : {}),
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise
       // this setting is skipped.

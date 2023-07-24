@@ -202,6 +202,56 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.inRangeFromStringRt",
+        "type": "Function",
+        "tags": [],
+        "label": "inRangeFromStringRt",
+        "description": [],
+        "signature": [
+          "(start: number, end: number) => ",
+          "Type",
+          "<number, unknown, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeFromStringRt.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeFromStringRt.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.inRangeRt",
         "type": "Function",
         "tags": [],
@@ -209,18 +259,8 @@
         "description": [],
         "signature": [
           "(start: number, end: number) => ",
-          "BrandC",
-          "<",
-          "NumberC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.InRangeBrand",
-            "text": "InRangeBrand"
-          },
-          ">"
+          "Type",
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
@@ -584,10 +624,10 @@
     "misc": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-common.IndexPatternType",
+        "id": "def-common.IndexPattern",
         "type": "Type",
         "tags": [],
-        "label": "IndexPatternType",
+        "label": "IndexPattern",
         "description": [],
         "signature": [
           "string & ",
@@ -678,6 +718,22 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.datemathStringRt",
+        "type": "Object",
+        "tags": [],
+        "label": "datemathStringRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/datemath_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.dateRt",

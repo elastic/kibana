@@ -6,10 +6,12 @@
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
+import type { State } from '../../common/store/types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import type {
+  AnalyzerById,
   ResolverState,
   IsometricTaxiLayout,
   DataState,
@@ -18,6 +20,16 @@ import type {
 } from '../types';
 import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
+
+export const selectAnalyzerById = (state: State): AnalyzerById => state.analyzer.analyzerById;
+
+export const selectAnalyzer = (state: State, id: string): ResolverState =>
+  state.analyzer.analyzerById[id];
+
+export const analyzerByIdSelector = createSelector(
+  selectAnalyzerById,
+  (analyzerById: AnalyzerById) => analyzerById
+);
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.

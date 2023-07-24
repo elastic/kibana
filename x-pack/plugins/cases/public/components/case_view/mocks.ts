@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import {
   alertComment,
   basicCase,
@@ -96,7 +96,7 @@ export const defaultUpdateCaseState = {
   isLoading: false,
   isError: false,
   updateKey: null,
-  updateCaseProperty: jest.fn(),
+  mutate: jest.fn(),
 };
 
 export const defaultUseFindCaseUserActions = {

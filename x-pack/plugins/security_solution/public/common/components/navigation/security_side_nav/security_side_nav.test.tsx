@@ -12,14 +12,15 @@ import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
-import type { NavLinkItem } from '../types';
+import type { NavigationLink } from '../../../links/types';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
+import { CATEGORIES } from './categories';
 
-const manageNavLink: NavLinkItem = {
+const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,
-  title: 'manage',
-  description: 'manage description',
+  title: 'Settings',
+  description: 'Settings description',
   categories: [{ label: 'test category', linkIds: [SecurityPageName.endpoints] }],
   links: [
     {
@@ -30,7 +31,7 @@ const manageNavLink: NavLinkItem = {
     },
   ],
 };
-const alertsNavLink: NavLinkItem = {
+const alertsNavLink: NavigationLink = {
   id: SecurityPageName.alerts,
   title: 'alerts',
   description: 'alerts description',
@@ -38,6 +39,7 @@ const alertsNavLink: NavLinkItem = {
 
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({
+  ...jest.requireActual('@kbn/security-solution-side-nav'),
   SolutionSideNav: (props: SolutionSideNavProps) => mockSolutionSideNav(props),
 }));
 jest.mock('../../../lib/kibana');
@@ -80,7 +82,7 @@ const renderNav = () =>
 describe('SecuritySideNav', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseNavLinks.mockReturnValue([alertsNavLink, manageNavLink]);
+    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
@@ -96,9 +98,10 @@ describe('SecuritySideNav', () => {
           id: SecurityPageName.alerts,
           label: 'alerts',
           href: '/alerts',
+          position: 'top',
         },
       ],
-      footerItems: [],
+      categories: CATEGORIES,
       tracker: track,
     });
   });
@@ -121,22 +124,21 @@ describe('SecuritySideNav', () => {
   });
 
   it('should render footer items', () => {
-    mockUseNavLinks.mockReturnValue([manageNavLink]);
+    mockUseNavLinks.mockReturnValue([settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [],
-        footerItems: [
+        items: [
           {
             id: SecurityPageName.administration,
-            label: 'manage',
+            label: 'Settings',
             href: '/administration',
-            categories: manageNavLink.categories,
+            categories: settingsNavLink.categories,
+            position: 'bottom',
             items: [
               {
                 id: SecurityPageName.endpoints,
                 label: 'title 2',
-                description: 'description 2',
                 href: '/endpoints',
                 isBeta: true,
               },
@@ -148,12 +150,11 @@ describe('SecuritySideNav', () => {
   });
 
   it('should not render disabled items', () => {
-    mockUseNavLinks.mockReturnValue([{ ...alertsNavLink, disabled: true }, manageNavLink]);
+    mockUseNavLinks.mockReturnValue([{ ...alertsNavLink, disabled: true }, settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [],
-        footerItems: [
+        items: [
           expect.objectContaining({
             id: SecurityPageName.administration,
           }),
@@ -162,17 +163,18 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render custom item', () => {
-    mockUseNavLinks.mockReturnValue([{ id: SecurityPageName.landing, title: 'get started' }]);
+  it('should render get started item', () => {
+    mockUseNavLinks.mockReturnValue([
+      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'launch' },
+    ]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [],
-        footerItems: [
+        items: [
           expect.objectContaining({
             id: SecurityPageName.landing,
-            label: 'GET STARTED',
-            labelSize: 'xs',
+            label: 'Get started',
+            position: 'bottom',
             iconType: 'launch',
             appendSeparator: true,
           }),

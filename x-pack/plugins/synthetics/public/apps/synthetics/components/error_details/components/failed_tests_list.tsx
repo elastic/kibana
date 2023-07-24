@@ -7,14 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
-import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
-import {
-  getTestRunDetailRelativeLink,
-  TestDetailsLink,
-} from '../../common/links/test_details_link';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const FailedTestsList = ({
@@ -33,21 +32,28 @@ export const FailedTestsList = ({
 
   const items = failedTests.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
+  const { basePath } = useSyntheticsSettingsContext();
+
   const history = useHistory();
   const selectedLocation = useSelectedLocation();
+
+  const formatter = useDateFormat();
 
   const columns = [
     {
       field: '@timestamp',
       name: TIMESTAMP_LABEL,
       sortable: true,
-      render: (value: string, item: Ping) => (
-        <TestDetailsLink
-          isBrowserMonitor={item.monitor.type === 'browser'}
-          timestamp={value}
-          ping={item}
-        />
-      ),
+      render: (value: string, item: Ping) => {
+        return (
+          <EuiLink
+            data-test-subj="failed-test-link"
+            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
+          >
+            {formatter(value)}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'monitor.duration.us',

@@ -35,7 +35,6 @@ import { SOURCERER } from '../../screens/sourcerer';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../tasks/timeline';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const usersToCreate = [secReadCasesAllUser];
 const rolesToCreate = [secReadCasesAll];
@@ -44,7 +43,7 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer', () => {
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
   describe('permissions', () => {
@@ -59,11 +58,9 @@ describe('Sourcerer', () => {
   });
 
   describe('Default scope', () => {
-    before(() => {
-      login();
-    });
     beforeEach(() => {
       cy.clearLocalStorage();
+      login();
       visit(HOSTS_URL);
     });
 
@@ -134,11 +131,9 @@ describe('Sourcerer', () => {
   });
 });
 describe('Timeline scope', () => {
-  before(() => {
-    login();
-  });
   beforeEach(() => {
     cy.clearLocalStorage();
+    login();
     visit(TIMELINES_URL);
   });
 
@@ -201,10 +196,13 @@ describe('Timeline scope', () => {
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
       );
     });
+
     beforeEach(() => {
+      login();
       visit(TIMELINES_URL);
       refreshUntilAlertsIndexExists();
     });
+
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
       openTimelineById(this.timelineId).then(() => {
         cy.get(SOURCERER.badgeAlerts).should(`not.exist`);

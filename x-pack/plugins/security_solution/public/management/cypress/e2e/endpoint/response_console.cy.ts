@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Agent } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
@@ -15,103 +16,122 @@ import {
   waitForEndpointListPageToBeLoaded,
 } from '../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  getAgentByHostName,
-  getEndpointIntegrationVersion,
-  reassignAgentPolicy,
-} from '../../tasks/fleet';
+import { getEndpointIntegrationVersion, createAgentPolicyTask } from '../../tasks/fleet';
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
-  createAgentPolicyTask,
 } from '../../tasks/isolate';
+
 import { login } from '../../tasks/login';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
 describe('Response console', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
-
   beforeEach(() => {
     login();
   });
 
   describe('User journey for Isolate command: isolate and release an endpoint', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 
     it('should isolate host from response console', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      const command = 'isolate';
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
-      performCommandInputChecks('isolate');
+      performCommandInputChecks(command);
       submitCommand();
-      waitForCommandToBeExecuted();
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForCommandToBeExecuted(command);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyIsolatedHosts();
     });
 
     it('should release host from response console', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      const command = 'release';
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
-      performCommandInputChecks('release');
+      performCommandInputChecks(command);
       submitCommand();
-      waitForCommandToBeExecuted();
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForCommandToBeExecuted(command);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
 
-  describe('User journey for Processes commands: list, kill and suspend process.', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
+  describe('User journey for Processes operations: list, kill and suspend process', () => {
     let cronPID: string;
     let newCronPID: string;
 
-    before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
+    before(() => {
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 
     it('"processes" - should obtain a list of processes', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('processes');
       submitCommand();
@@ -136,11 +156,11 @@ describe('Response console', () => {
     });
 
     it('"kill-process --pid" - should kill a process', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`kill-process --pid ${cronPID}`);
       submitCommand();
-      waitForCommandToBeExecuted();
+      waitForCommandToBeExecuted('kill-process');
 
       performCommandInputChecks('processes');
       submitCommand();
@@ -160,53 +180,148 @@ describe('Response console', () => {
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
       submitCommand();
-      waitForCommandToBeExecuted();
+      waitForCommandToBeExecuted('suspend-process');
     });
   });
 
-  describe('document signing', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
+  describe('File operations: get-file and execute', () => {
+    const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
+
+    const fileContent = 'This is a test file for the get-file command.';
+    const filePath = `${homeFilePath}/test_file.txt`;
+
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
       getEndpointIntegrationVersion().then((version) =>
         createAgentPolicyTask(version).then((data) => {
-          response = data;
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
         })
       );
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
       }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      }
+    });
+
+    it('"get-file --path" - should retrieve a file', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      cy.task('createFileOnEndpoint', {
+        hostname: createdHost.hostname,
+        path: filePath,
+        content: fileContent,
+      });
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`get-file --path ${filePath}`);
+      submitCommand();
+      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+        cy.contains('File retrieved from the host.');
+        cy.contains('(ZIP file passcode: elastic)');
+        cy.contains(
+          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+        cy.contains('Click here to download').click();
+        const downloadsFolder = Cypress.config('downloadsFolder');
+        cy.readFile(`${downloadsFolder}/upload.zip`);
+
+        cy.task('uploadFileToEndpoint', {
+          hostname: createdHost.hostname,
+          srcPath: `${downloadsFolder}/upload.zip`,
+          destPath: `${homeFilePath}/upload.zip`,
+        });
+
+        cy.task('readZippedFileContentOnEndpoint', {
+          hostname: createdHost.hostname,
+          path: `${homeFilePath}/upload.zip`,
+          password: 'elastic',
+        }).then((unzippedFileContent) => {
+          expect(unzippedFileContent).to.equal(fileContent);
+        });
+      });
+    });
+
+    it('"execute --command" - should execute a command', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
+      submitCommand();
+      waitForCommandToBeExecuted('execute');
+    });
+  });
+
+  describe('document signing', () => {
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+    let policy: PolicyData;
+    let createdHost: CreateAndEnrollEndpointHostResponse;
+
+    before(() => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
+          indexedPolicy = data;
+          policy = indexedPolicy.integrationPolicies[0];
+
+          return enableAllPolicyProtections(policy.id).then(() => {
+            // Create and enroll a new Endpoint host
+            return createEndpointHost(policy.policy_id).then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+          });
+        })
+      );
+    });
+
+    after(() => {
+      if (createdHost) {
+        cy.task('destroyEndpointHost', createdHost);
+      }
+
+      if (indexedPolicy) {
+        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+      }
+
+      if (createdHost) {
+        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
     });
 
     it('should fail if data tampered', () => {
-      waitForEndpointListPageToBeLoaded(endpointHostname);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('isolate');
 
       // stop host so that we ensure tamper happens before endpoint processes the action
-      cy.task('stopEndpointHost');
+      cy.task('stopEndpointHost', createdHost.hostname);
       // get action doc before we submit command so we know when the new action doc is indexed
       cy.task('getLatestActionDoc').then((previousActionDoc) => {
         submitCommand();
         cy.task('tamperActionDoc', previousActionDoc);
       });
-      cy.task('startEndpointHost');
+      cy.task('startEndpointHost', createdHost.hostname);
 
       const actionValidationErrorMsg =
         'Fleet action response error: Failed to validate action signature; check Endpoint logs for details';

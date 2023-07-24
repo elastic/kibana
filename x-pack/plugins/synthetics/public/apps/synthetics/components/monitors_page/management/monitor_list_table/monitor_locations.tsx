@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
 import { ServiceLocations, OverviewStatusState } from '../../../../../../../common/runtime_types';
 import { LocationsStatus, useLocations } from '../../../../hooks';

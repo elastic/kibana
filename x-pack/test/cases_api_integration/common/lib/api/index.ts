@@ -24,19 +24,16 @@ import {
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  CasesConfigureResponse,
   Case,
   CaseStatuses,
   Cases,
   CasesFindResponse,
   CasesPatchRequest,
-  CasesConfigurePatch,
   CasesStatusResponse,
-  CasesConfigurationsResponse,
   AlertResponse,
-  ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
@@ -47,7 +44,13 @@ import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_en
 import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
-import type { ConfigurePersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
+import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
+import {
+  Configurations,
+  Configuration,
+  ConnectorMappingsAttributes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -282,7 +285,7 @@ export const ensureSavedObjectIsAuthorized = (
 };
 
 interface ConnectorMappingsSavedObject {
-  'cases-connector-mappings': ConnectorMappings;
+  'cases-connector-mappings': ConnectorMappingsAttributes;
 }
 
 /**
@@ -312,7 +315,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
 };
 
 interface ConfigureSavedObject {
-  'cases-configure': ConfigurePersistedAttributes;
+  'cases-configure': ConfigurationPersistedAttributes;
 }
 
 /**
@@ -446,7 +449,7 @@ export const getConfiguration = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CasesConfigurationsResponse> => {
+}): Promise<Configurations> => {
   const { body: configuration } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
     .auth(auth.user.username, auth.user.password)
@@ -464,11 +467,11 @@ export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
 export const updateConfiguration = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string,
-  req: CasesConfigurePatch,
+  req: ConfigurationPatchRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
-): Promise<CasesConfigureResponse> => {
+): Promise<Configuration> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
 
   setupAuth({ apiCall, headers, auth });
@@ -652,6 +655,27 @@ export const getReporters = async ({
 }): Promise<CasesFindResponse> => {
   const { body: res } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_REPORTERS_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query({ ...query })
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const getCategories = async ({
+  supertest,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_GET_CASE_CATEGORIES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query({ ...query })

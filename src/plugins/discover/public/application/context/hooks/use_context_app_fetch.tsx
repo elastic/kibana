@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import {
@@ -20,7 +21,6 @@ import {
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../../types';
 import {
   getTieBreakerField,
   getEsQuerySort,

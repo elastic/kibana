@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { decodeStackTraceResponse } from './search_stacktraces';
+import { decodeStackTraceResponse, makeFrameID } from './search_stacktraces';
 import { StackTraceResponse } from '../../common/stack_traces';
 
 describe('Stack trace response operations', () => {
   test('empty stack trace response', () => {
     const original: StackTraceResponse = {
       total_frames: 0,
+      sampling_rate: 1.0,
     };
 
     const expected = {
@@ -47,10 +48,10 @@ describe('Stack trace response operations', () => {
       },
       stack_traces: {
         a: {
-          file_ids: ['abc'],
-          frame_ids: ['abc123'],
-          address_or_lines: [123],
-          type_ids: [0],
+          file_ids: ['abc', 'def'],
+          frame_ids: ['abc123', 'def456'],
+          address_or_lines: [123, 456],
+          type_ids: [0, 1],
         },
       },
       stack_frames: {
@@ -60,11 +61,19 @@ describe('Stack trace response operations', () => {
           function_offset: [0],
           line_number: [0],
         },
+        def: {
+          file_name: ['def.c'],
+          function_name: ['main', 'inlined'],
+          function_offset: [1, 2],
+          line_number: [3, 4],
+        },
       },
       executables: {
         abc: 'pthread.c',
+        def: 'def.c',
       },
       total_frames: 1,
+      sampling_rate: 1.0,
     };
 
     const expected = {
@@ -73,10 +82,10 @@ describe('Stack trace response operations', () => {
         [
           'a',
           {
-            FileIDs: ['abc'],
-            FrameIDs: ['abc123'],
-            AddressOrLines: [123],
-            Types: [0],
+            FileIDs: ['abc', 'def', 'def'],
+            FrameIDs: ['abc123', makeFrameID('def456', 0), makeFrameID('def456', 1)],
+            AddressOrLines: [123, 456, 456],
+            Types: [0, 1, 1],
           },
         ],
       ]),
@@ -90,18 +99,40 @@ describe('Stack trace response operations', () => {
             LineNumber: 0,
           },
         ],
+        [
+          makeFrameID('def456', 0),
+          {
+            FileName: 'def.c',
+            FunctionName: 'main',
+            FunctionOffset: 1,
+            LineNumber: 3,
+          },
+        ],
+        [
+          makeFrameID('def456', 1),
+          {
+            FileName: 'def.c',
+            FunctionName: 'inlined',
+            FunctionOffset: 2,
+            LineNumber: 4,
+          },
+        ],
       ]),
-      executables: new Map([['abc', { FileName: 'pthread.c' }]]),
+      executables: new Map([
+        ['abc', { FileName: 'pthread.c' }],
+        ['def', { FileName: 'def.c' }],
+      ]),
       totalFrames: 1,
+      samplingRate: 1.0,
     };
 
     const decoded = decodeStackTraceResponse(original);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
-    expect(decoded.executables.size).toEqual(1);
+    expect(decoded.executables.size).toEqual(2);
 
     expect(decoded.stackFrames.size).toEqual(expected.stackFrames.size);
-    expect(decoded.stackFrames.size).toEqual(1);
+    expect(decoded.stackFrames.size).toEqual(3);
 
     expect(decoded.stackTraces.size).toEqual(expected.stackTraces.size);
     expect(decoded.stackTraces.size).toEqual(1);
@@ -118,6 +149,7 @@ describe('Stack trace response operations', () => {
       stack_trace_events: {
         a: 1,
       },
+      sampling_rate: 1.0,
       stack_traces: {
         a: {
           file_ids: ['abc'],

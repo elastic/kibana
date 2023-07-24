@@ -25,8 +25,9 @@ export const getJobsSummary = async ({
   jobIds,
   signal,
 }: GetJobsSummaryArgs): Promise<MlSummaryJob[]> =>
-  KibanaServices.get().http.fetch<MlSummaryJob[]>('/api/ml/jobs/jobs_summary', {
+  KibanaServices.get().http.fetch<MlSummaryJob[]>('/internal/ml/jobs/jobs_summary', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({ jobIds: jobIds ?? [] }),
     asSystemRequest: true,
     signal,

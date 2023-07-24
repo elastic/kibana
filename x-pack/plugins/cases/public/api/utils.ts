@@ -7,6 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
+import type { UserActions } from '../../common/types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -14,7 +15,6 @@ import {
 import type {
   CasesFindResponse,
   Case,
-  UserActions,
   CommentRequest,
   Comment,
   CaseResolveResponse,
@@ -32,12 +32,13 @@ import type {
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {
-      return [...acc, convertArrayToCamelCase(value)];
+      acc.push(convertArrayToCamelCase(value));
     } else if (isObject(value)) {
-      return [...acc, convertToCamelCase(value)];
+      acc.push(convertToCamelCase(value));
     } else {
-      return [...acc, value];
+      acc.push(value);
     }
+    return acc;
   }, []);
 
 export const convertToCamelCase = <T, U extends {}>(obj: T): U =>

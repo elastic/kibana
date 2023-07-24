@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {
@@ -48,18 +48,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
-      let allFields = await PageObjects.discover.getAllFieldNames();
+      let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
       // message is a mapped field
       expect(allFields.includes('message')).to.be(true);
       // sender is not a mapped field
       expect(allFields.includes('sender')).to.be(false);
 
-      await PageObjects.discover.toggleSidebarSection('unmapped');
+      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
 
-      allFields = await PageObjects.discover.getAllFieldNames();
+      allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
       expect(allFields.includes('sender')).to.be(true); // now visible under Unmapped section
 
-      await PageObjects.discover.toggleSidebarSection('unmapped');
+      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
     });
 
     it('unmapped fields exist on an existing saved search', async () => {
@@ -68,20 +68,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
-      let allFields = await PageObjects.discover.getAllFieldNames();
+      let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
       expect(allFields.includes('message')).to.be(true);
       expect(allFields.includes('sender')).to.be(false);
       expect(allFields.includes('receiver')).to.be(false);
 
-      await PageObjects.discover.toggleSidebarSection('unmapped');
+      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
 
-      allFields = await PageObjects.discover.getAllFieldNames();
+      allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
 
       // now visible under Unmapped section
       expect(allFields.includes('sender')).to.be(true);
       expect(allFields.includes('receiver')).to.be(true);
 
-      await PageObjects.discover.toggleSidebarSection('unmapped');
+      await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
     });
   });
 }

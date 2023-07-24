@@ -30,6 +30,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  measureElu?: () => void;
 }
 
 /**

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import {
@@ -68,6 +69,47 @@ export const createDashboardSavedObjectType = ({
       title: { type: 'text' },
       version: { type: 'integer' },
     },
+  },
+  schemas: {
+    '8.9.0': schema.object({
+      // General
+      title: schema.string(),
+      description: schema.string({ defaultValue: '' }),
+
+      // Search
+      kibanaSavedObjectMeta: schema.object({
+        searchSourceJSON: schema.maybe(schema.string()),
+      }),
+
+      // Time
+      timeRestore: schema.maybe(schema.boolean()),
+      timeFrom: schema.maybe(schema.string()),
+      timeTo: schema.maybe(schema.string()),
+      refreshInterval: schema.maybe(
+        schema.object({
+          pause: schema.boolean(),
+          value: schema.number(),
+          display: schema.maybe(schema.string()),
+          section: schema.maybe(schema.number()),
+        })
+      ),
+
+      // Dashboard Content
+      controlGroupInput: schema.maybe(
+        schema.object({
+          panelsJSON: schema.maybe(schema.string()),
+          controlStyle: schema.maybe(schema.string()),
+          chainingSystem: schema.maybe(schema.string()),
+          ignoreParentSettingsJSON: schema.maybe(schema.string()),
+        })
+      ),
+      panelsJSON: schema.string({ defaultValue: '[]' }),
+      optionsJSON: schema.string({ defaultValue: '{}' }),
+
+      // Legacy
+      hits: schema.maybe(schema.number()),
+      version: schema.maybe(schema.number()),
+    }),
   },
   migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),
 });

@@ -5,24 +5,25 @@
  * 2.0.
  */
 import React from 'react';
-
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { DashboardsLandingPage } from './landing_page';
 import { DashboardView } from './details';
 import { DASHBOARDS_PATH } from '../../../common/constants';
+import { DashboardContextProvider } from '../context/dashboard_context';
 
 const DashboardsContainerComponent = () => {
   return (
-    <Switch>
-      <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
-        <DashboardView />
-      </Route>
-      <Route path={`${DASHBOARDS_PATH}`}>
-        <DashboardsLandingPage />
-      </Route>
-    </Switch>
+    <DashboardContextProvider>
+      <Routes>
+        <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
+          <DashboardView />
+        </Route>
+        <Route path={`${DASHBOARDS_PATH}`}>
+          <DashboardsLandingPage />
+        </Route>
+      </Routes>
+    </DashboardContextProvider>
   );
 };
 export const DashboardsContainer = React.memo(DashboardsContainerComponent);

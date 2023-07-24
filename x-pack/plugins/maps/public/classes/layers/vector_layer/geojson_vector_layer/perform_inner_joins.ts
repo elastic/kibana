@@ -115,7 +115,7 @@ export async function performInnerJoins(
             values: { leftFieldName },
           })
         : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
-            defaultMessage: `Left field does not match right field. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
+            defaultMessage: `Left field values do not match right field values. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
             values: {
               leftFieldName,
               leftFieldValues: prettyPrintArray(joinStatus.keys),

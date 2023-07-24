@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllRules, deleteSignalsIndex } from '../../utils';
+import { createSignalsIndex, deleteAllRules, deleteAllAlerts } from '../../utils';
 
 const spaceId = '714-space';
 
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'
@@ -138,9 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
             references: [],
             namespaces: [spaceId],
             originId: 'c364e1e0-2615-11ec-811e-db7211397897',
-            migrationVersion: {
-              alert: '8.0.0',
-            },
+            typeMigrationVersion: '8.0.0',
             coreMigrationVersion: '8.0.0',
             updated_at: '2021-10-05T19:52:56.014Z',
           },

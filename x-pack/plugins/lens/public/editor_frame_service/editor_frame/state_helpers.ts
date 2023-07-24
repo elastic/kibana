@@ -12,7 +12,12 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  type EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-common';
 import type {
   Datasource,
   DatasourceMap,
@@ -32,12 +37,13 @@ import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_servic
 import { getDatasourceLayers } from '../../state_management/utils';
 
 function getIndexPatterns(
+  annotationGroupDataviewIds: string[],
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   initialId?: string,
   adHocDataviews?: string[]
 ) {
-  const indexPatternIds = [];
+  const indexPatternIds = [...annotationGroupDataviewIds];
 
   // use the initialId only when no context is passed over
   if (!initialContext && initialId) {
@@ -96,6 +102,7 @@ export async function initializeDataViews(
     references,
     initialContext,
     adHocDataViews: persistedAdHocDataViews,
+    annotationGroups,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -105,6 +112,7 @@ export async function initializeDataViews(
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    annotationGroups: Record<string, EventAnnotationGroupConfig>;
   },
   options?: InitializationOptions
 ) {
@@ -114,6 +122,14 @@ export async function initializeDataViews(
       return [id, spec];
     })
   );
+
+  const annotationGroupValues = Object.values(annotationGroups);
+  for (const group of annotationGroupValues) {
+    if (group.dataViewSpec?.id) {
+      adHocDataViews[group.dataViewSpec.id] = group.dataViewSpec;
+    }
+  }
+
   const { isFullEditor } = options ?? {};
 
   // make it explicit or TS will infer never[] and break few lines down
@@ -133,6 +149,7 @@ export async function initializeDataViews(
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
   const usedIndexPatternsIds = getIndexPatterns(
+    annotationGroupValues.map((group) => group.indexPatternId),
     references,
     initialContext,
     initialId,
@@ -163,12 +180,32 @@ export async function initializeDataViews(
   };
 }
 
+const initializeEventAnnotationGroups = async (
+  eventAnnotationService: EventAnnotationServiceType,
+  references?: SavedObjectReference[]
+) => {
+  const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
+
+  await Promise.allSettled(
+    (references || [])
+      .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
+      .map(({ id }) =>
+        eventAnnotationService.loadAnnotationGroup(id).then((group) => {
+          annotationGroups[id] = group;
+        })
+      )
+  );
+
+  return annotationGroups;
+};
+
 /**
  * This function composes both initializeDataViews & initializeDatasources into a single call
  */
 export async function initializeSources(
   {
     dataViews,
+    eventAnnotationService,
     datasourceMap,
     visualizationMap,
     visualizationState,
@@ -180,6 +217,7 @@ export async function initializeSources(
     adHocDataViews,
   }: {
     dataViews: DataViewsContract;
+    eventAnnotationService: EventAnnotationServiceType;
     datasourceMap: DatasourceMap;
     visualizationMap: VisualizationMap;
     visualizationState: VisualizationState;
@@ -192,6 +230,11 @@ export async function initializeSources(
   },
   options?: InitializationOptions
 ) {
+  const annotationGroups = await initializeEventAnnotationGroups(
+    eventAnnotationService,
+    references
+  );
+
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
     {
       datasourceMap,
@@ -202,12 +245,15 @@ export async function initializeSources(
       defaultIndexPatternId,
       references,
       adHocDataViews,
+      annotationGroups,
     },
     options
   );
+
   return {
     indexPatterns,
     indexPatternRefs,
+    annotationGroups,
     datasourceStates: initializeDatasources({
       datasourceMap,
       datasourceStates,
@@ -221,6 +267,7 @@ export async function initializeSources(
       visualizationState,
       references,
       initialContext,
+      annotationGroups,
     }),
   };
 }
@@ -229,12 +276,13 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
-  initialContext,
+  annotationGroups,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   references?: SavedObjectReference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  annotationGroups: Record<string, EventAnnotationGroupConfig>;
 }) {
   if (visualizationState?.activeId) {
     return (
@@ -242,8 +290,8 @@ export function initializeVisualization({
         () => '',
         visualizationState.state,
         undefined,
-        references,
-        initialContext
+        annotationGroups,
+        references
       ) ?? visualizationState.state
     );
   }
@@ -282,6 +330,13 @@ export function initializeDatasources({
   return states;
 }
 
+export interface DocumentToExpressionReturnType {
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+  activeVisualizationState: unknown;
+}
+
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
@@ -291,12 +346,10 @@ export async function persistedStateToExpression(
     storage: IStorageWrapper;
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
+    nowProvider: DataPublicPluginStart['nowProvider'];
+    eventAnnotationService: EventAnnotationServiceType;
   }
-): Promise<{
-  ast: Ast | null;
-  indexPatterns: IndexPatternMap;
-  indexPatternRefs: IndexPatternRef[];
-}> {
+): Promise<DocumentToExpressionReturnType> {
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -310,15 +363,22 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
-    return { ast: null, indexPatterns: {}, indexPatternRefs: [] };
+    return { ast: null, indexPatterns: {}, indexPatternRefs: [], activeVisualizationState: null };
   }
+
+  const annotationGroups = await initializeEventAnnotationGroups(
+    services.eventAnnotationService,
+    references
+  );
+
   const visualization = visualizations[visualizationType!];
-  const visualizationState = initializeVisualization({
+  const activeVisualizationState = initializeVisualization({
     visualizationMap: visualizations,
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
     },
+    annotationGroups,
     references: [...references, ...(internalReferences || [])],
   });
   const datasourceStatesFromSO = Object.fromEntries(
@@ -336,6 +396,7 @@ export async function persistedStateToExpression(
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
       adHocDataViews,
+      annotationGroups,
     },
     { isFullEditor: false }
   );
@@ -355,6 +416,7 @@ export async function persistedStateToExpression(
       ast: null,
       indexPatterns,
       indexPatternRefs,
+      activeVisualizationState,
     };
   }
 
@@ -365,13 +427,15 @@ export async function persistedStateToExpression(
       title,
       description,
       visualization,
-      visualizationState,
+      visualizationState: activeVisualizationState,
       datasourceMap,
       datasourceStates,
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+      nowInstant: services.nowProvider.get(),
     }),
+    activeVisualizationState,
     indexPatterns,
     indexPatternRefs,
   };

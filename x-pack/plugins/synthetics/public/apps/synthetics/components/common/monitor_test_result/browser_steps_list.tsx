@@ -201,6 +201,7 @@ export const BrowserStepsList = ({
       name: RESULT_LABEL,
       render: (pingStatus: string, item: JourneyStep) => (
         <ResultDetails
+          testNowMode={testNowMode}
           step={item}
           pingStatus={pingStatus}
           isExpanded={Boolean(itemIdToExpandedRowMap[item._id]) && !testNowMode}
@@ -362,6 +363,7 @@ const MobileRowDetails = ({
                 title: RESULT_LABEL,
                 description: (
                   <ResultDetails
+                    testNowMode={isTestNowMode}
                     step={journeyStep}
                     pingStatus={journeyStep?.synthetics?.step?.status ?? 'skipped'}
                     isExpanded={isExpanded && !isTestNowMode}

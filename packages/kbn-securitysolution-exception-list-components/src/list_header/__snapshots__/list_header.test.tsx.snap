@@ -73,7 +73,7 @@ Object {
                     >
                       <button
                         aria-label="Edit Text List Header"
-                        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                         data-test-subj="TitleEditIcon"
                         type="button"
                       >
@@ -115,7 +115,7 @@ Object {
                         >
                           <button
                             aria-label="Edit Text List Header"
-                            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                             data-test-subj="DescriptionEditIcon"
                             type="button"
                           >
@@ -152,7 +152,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -175,8 +175,8 @@ Object {
                         class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -205,7 +205,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -244,7 +244,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -356,22 +356,22 @@ Object {
             class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="editModalCancelBtn"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"
@@ -460,7 +460,7 @@ Object {
                   >
                     <button
                       aria-label="Edit Text List Header"
-                      class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                       data-test-subj="TitleEditIcon"
                       type="button"
                     >
@@ -502,7 +502,7 @@ Object {
                       >
                         <button
                           aria-label="Edit Text List Header"
-                          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                           data-test-subj="DescriptionEditIcon"
                           type="button"
                         >
@@ -539,7 +539,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -562,8 +562,8 @@ Object {
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -592,7 +592,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >
@@ -743,7 +743,7 @@ Object {
                     >
                       <button
                         aria-label="Edit Text List Header"
-                        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                         data-test-subj="TitleEditIcon"
                         type="button"
                       >
@@ -785,7 +785,7 @@ Object {
                         >
                           <button
                             aria-label="Edit Text List Header"
-                            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                             data-test-subj="DescriptionEditIcon"
                             type="button"
                           >
@@ -822,7 +822,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -845,8 +845,8 @@ Object {
                         class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -875,7 +875,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -969,7 +969,7 @@ Object {
                   >
                     <button
                       aria-label="Edit Text List Header"
-                      class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                       data-test-subj="TitleEditIcon"
                       type="button"
                     >
@@ -1011,7 +1011,7 @@ Object {
                       >
                         <button
                           aria-label="Edit Text List Header"
-                          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                           data-test-subj="DescriptionEditIcon"
                           type="button"
                         >
@@ -1048,7 +1048,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1071,8 +1071,8 @@ Object {
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -1101,7 +1101,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >
@@ -1303,7 +1303,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1326,8 +1326,8 @@ Object {
                         class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -1356,7 +1356,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 disabled=""
                                 type="button"
@@ -1502,7 +1502,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1525,8 +1525,8 @@ Object {
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -1555,7 +1555,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               disabled=""
                               type="button"
@@ -1758,7 +1758,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1792,7 +1792,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -2039,7 +2039,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -2073,7 +2073,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >

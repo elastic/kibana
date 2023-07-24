@@ -43,7 +43,7 @@ export class AlertService {
       const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
 
       const builtAggs = aggregationBuilders.reduce((acc, agg) => {
-        return { ...acc, ...agg.build() };
+        return Object.assign(acc, agg.build());
       }, {});
 
       const res = await this.scopedClusterClient.search({

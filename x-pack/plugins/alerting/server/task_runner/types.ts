@@ -21,6 +21,7 @@ import {
   SanitizedRule,
   RuleTypeState,
   RuleAction,
+  RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
@@ -31,16 +32,12 @@ export interface RuleTaskRunResult {
   state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
+  hasError: boolean;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
 export type RuleTaskStateAndMetrics = RuleTaskState & {
   metrics: RuleRunMetrics;
-};
-
-export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
-  rulesClient: RulesClientApi;
-  stateWithMetrics: RuleTaskStateAndMetrics;
 };
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
@@ -64,7 +61,8 @@ export interface ExecutionHandlerOptions<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -73,7 +71,8 @@ export interface ExecutionHandlerOptions<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   logger: Logger;
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;

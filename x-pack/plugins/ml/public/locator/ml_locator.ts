@@ -87,8 +87,8 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
       case ML_PAGES.AIOPS:
-      case ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES:
-      case ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT:
+      case ML_PAGES.AIOPS_LOG_RATE_ANALYSIS:
+      case ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT:
       case ML_PAGES.AIOPS_LOG_CATEGORIZATION:
       case ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT:
       case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
@@ -99,7 +99,6 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
       case ML_PAGES.CALENDARS_NEW:
-      case ML_PAGES.ACCESS_DENIED:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:

@@ -43,10 +43,15 @@ export interface FleetConfigType {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
+    testSecretsIndex?: string;
   };
   internal?: {
     disableILMPolicies: boolean;
+    disableProxies: boolean;
+    fleetServerStandalone: boolean;
+    activeAgentsSoftLimit?: number;
   };
+  createArtifactsBulkBatchSize?: number;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

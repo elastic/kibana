@@ -51,11 +51,14 @@ async function updateWithOCC(
   const { id, title, enabled, duration, rRule } = params;
 
   try {
-    const { attributes, id: fetchedId } =
-      await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
-        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        id
-      );
+    const {
+      attributes,
+      id: fetchedId,
+      version,
+    } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      id
+    );
 
     if (moment.utc(attributes.expirationDate).isBefore(new Date())) {
       throw Boom.badRequest('Cannot edit archived maintenance windows');
@@ -74,8 +77,6 @@ async function updateWithOCC(
       events = mergeEvents({ oldEvents: attributes.events, newEvents: events });
     }
 
-    await savedObjectsClient.delete(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE, fetchedId);
-
     const updatedAttributes = {
       ...attributes,
       ...(title ? { title } : {}),
@@ -84,7 +85,8 @@ async function updateWithOCC(
       ...(typeof enabled === 'boolean' ? { enabled } : {}),
       expirationDate,
       events,
-      ...modificationMetadata,
+      updatedBy: modificationMetadata.updatedBy,
+      updatedAt: modificationMetadata.updatedAt,
     };
 
     // We are deleting and then creating rather than updating because SO.update
@@ -95,6 +97,8 @@ async function updateWithOCC(
       updatedAttributes,
       {
         id: fetchedId,
+        version,
+        overwrite: true,
       }
     );
 

@@ -53,7 +53,6 @@ describe('GetSLO', () => {
             service: 'irrelevant',
             transactionName: 'irrelevant',
             transactionType: 'irrelevant',
-            goodStatusCodes: ['2xx', '3xx', '4xx'],
             index: 'metrics-apm*',
           },
           type: 'sli.apm.transactionErrorRate',
@@ -63,7 +62,7 @@ describe('GetSLO', () => {
         },
         timeWindow: {
           duration: '7d',
-          isRolling: true,
+          type: 'rolling',
         },
         settings: {
           syncDelay: '1m',

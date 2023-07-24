@@ -71,23 +71,18 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
     switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    newField2: `new2 ${doc.id}`,
-                  },
+                attributes: {
+                  newField2: `new2 ${doc.id}`,
                 },
               };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     },
   });

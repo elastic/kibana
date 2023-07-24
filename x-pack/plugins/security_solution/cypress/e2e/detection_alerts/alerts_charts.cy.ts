@@ -24,10 +24,14 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
-describe('Histogram legend hover actions', { testIsolation: false }, () => {
+describe('Histogram legend hover actions', () => {
   const ruleConfigs = getNewRule();
+
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
@@ -52,7 +56,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
     );
     cy.get(ALERTS_COUNT).should('not.exist');
 
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).trigger('click');
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).click();
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
   });
 

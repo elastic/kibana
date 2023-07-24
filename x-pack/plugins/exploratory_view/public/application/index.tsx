@@ -8,9 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
@@ -22,13 +21,12 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { PluginContext } from '../context/plugin_context';
 import { routes } from '../routes';
-import { HasDataContextProvider } from '../context/has_data_context';
 import { ExploratoryViewPublicPluginsStart } from '../plugin';
 
 function App() {
   return (
     <>
-      <Switch>
+      <Routes>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
@@ -37,7 +35,7 @@ function App() {
           };
           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}
-      </Switch>
+      </Routes>
     </>
   );
 }
@@ -93,9 +91,7 @@ export const renderApp = ({
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <i18nCore.Context>
                     <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                      <HasDataContextProvider>
-                        <App />
-                      </HasDataContextProvider>
+                      <App />
                     </RedirectAppLinks>
                   </i18nCore.Context>
                 </EuiThemeProvider>

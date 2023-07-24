@@ -13,7 +13,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { MemoryRouter } from 'react-router-dom';
 import { casesFeatureId, sloFeatureId } from '../../common';
-import { PluginContext } from '../context/plugin_context';
+import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 
@@ -31,6 +31,14 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+      },
+      thresholdRule: { enabled: false },
+    },
+    compositeSlo: { enabled: false },
+    aiAssistant: {
+      enabled: false,
+      feedback: {
+        enabled: false,
       },
     },
   };

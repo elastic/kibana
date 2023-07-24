@@ -20,6 +20,7 @@ import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
@@ -69,9 +70,11 @@ const CasesTableFiltersComponent = ({
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
+  const [selectedCategories, setSelectedCategories] = useState(initial.category);
   const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
   const { data: tags = [] } = useGetTags();
+  const { data: categories = [] } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
   const handleSelectedAssignees = useCallback(
@@ -104,6 +107,16 @@ const CasesTableFiltersComponent = ({
       }
     },
     [onFilterChanged, selectedOwner]
+  );
+
+  const handleSelectedCategories = useCallback(
+    (newCategories) => {
+      if (!isEqual(newCategories, selectedCategories)) {
+        setSelectedCategories(newCategories);
+        onFilterChanged({ category: newCategories });
+      }
+    },
+    [onFilterChanged, selectedCategories]
   );
 
   useEffect(() => {
@@ -214,6 +227,13 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedTags}
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
+          />
+          <FilterPopover
+            buttonLabel={i18n.CATEGORIES}
+            onSelectedOptionsChanged={handleSelectedCategories}
+            selectedOptions={selectedCategories}
+            options={categories}
+            optionsEmptyLabel={i18n.NO_CATEGORIES_AVAILABLE}
           />
           {availableSolutions.length > 1 && (
             <SolutionFilter
