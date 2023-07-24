@@ -26,6 +26,7 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
           ),
         }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler((context, request, response) => {
       const respectLicenseLevel = request.query.respectLicenseLevel !== 'false'; // if undefined resolve to true by default

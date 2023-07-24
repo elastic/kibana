@@ -33,7 +33,7 @@ export function defineInvalidateSessionsRoutes({ router, getSession }: RouteDefi
           ),
         }),
       },
-      options: { tags: ['access:sessionManagement'] },
+      options: { tags: ['access:sessionManagement'], access: 'public' },
     },
     async (_context, request, response) => {
       return response.ok({

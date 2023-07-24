@@ -24,7 +24,7 @@ export function defineAccessAgreementRoutes({
   const canHandleRequest = () => license.getFeatures().allowAccessAgreement;
 
   httpResources.register(
-    { path: '/security/access_agreement', validate: false },
+    { path: '/security/access_agreement', validate: false, options: { access: 'public' } },
     createLicensedRouteHandler(async (context, request, response) =>
       canHandleRequest()
         ? response.renderCoreApp()
@@ -35,7 +35,11 @@ export function defineAccessAgreementRoutes({
   );
 
   router.get(
-    { path: '/internal/security/access_agreement/state', validate: false },
+    {
+      path: '/internal/security/access_agreement/state',
+      validate: false,
+      options: { access: 'public' },
+    },
     createLicensedRouteHandler(async (context, request, response) => {
       if (!canHandleRequest()) {
         return response.forbidden({

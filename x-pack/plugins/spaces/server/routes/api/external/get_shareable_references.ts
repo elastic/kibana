@@ -22,6 +22,7 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
           objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
         }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const [startServices] = await getStartServices();

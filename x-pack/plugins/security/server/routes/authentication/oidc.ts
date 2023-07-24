@@ -37,7 +37,7 @@ export function defineOIDCRoutes({
       {
         path,
         validate: false,
-        options: { authRequired: false },
+        options: { authRequired: false, access: 'public' },
       },
       (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -106,7 +106,11 @@ export function defineOIDCRoutes({
             { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false, tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW] },
+        options: {
+          authRequired: false,
+          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+          access: 'public',
+        },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -187,6 +191,7 @@ export function defineOIDCRoutes({
           authRequired: false,
           xsrfRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+          access: 'public',
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
@@ -229,6 +234,7 @@ export function defineOIDCRoutes({
       options: {
         authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        access: 'public',
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

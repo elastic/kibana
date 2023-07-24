@@ -26,6 +26,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
         }),
         body: spaceSchema,
       },
+      options: { access: 'public' }, // will be made configurable by https://github.com/elastic/kibana/pull/162087
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spacesClient = getSpacesService().createSpacesClient(request);

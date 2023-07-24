@@ -17,7 +17,7 @@ export function defineGetAllRolesRoutes({
   logger,
 }: RouteDefinitionParams) {
   router.get(
-    { path: '/api/security/role', validate: false },
+    { path: '/api/security/role', validate: false, options: { access: 'public' } },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;

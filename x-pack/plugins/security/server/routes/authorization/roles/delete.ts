@@ -18,6 +18,7 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1 }) }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {

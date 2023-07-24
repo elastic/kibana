@@ -35,6 +35,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
           ),
         }),
       },
+      options: { access: 'public' }, // will be made configurable by https://github.com/elastic/kibana/pull/162087
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);

@@ -18,7 +18,7 @@ export interface ViewRouteDeps {
 
 export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
   deps.httpResources.register(
-    { path: '/spaces/space_selector', validate: false },
+    { path: '/spaces/space_selector', validate: false, options: { access: 'public' } },
     (context, request, response) => response.renderCoreApp()
   );
 

@@ -56,6 +56,7 @@ export function definePutRolesRoutes({
           };
         }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { name } = request.params;

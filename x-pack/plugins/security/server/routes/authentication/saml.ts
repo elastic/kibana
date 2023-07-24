@@ -35,6 +35,7 @@ export function defineSAMLRoutes({
           authRequired: false,
           xsrfRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+          access: 'public',
         },
       },
       async (context, request, response) => {

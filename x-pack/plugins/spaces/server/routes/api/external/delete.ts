@@ -25,6 +25,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
           id: schema.string(),
         }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spacesClient = getSpacesService().createSpacesClient(request);

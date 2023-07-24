@@ -40,6 +40,7 @@ export function defineKeyRotationRoutes({
       },
       options: {
         tags: ['access:rotateEncryptionKey'],
+        access: 'public',
       },
     },
     async (context, request, response) => {

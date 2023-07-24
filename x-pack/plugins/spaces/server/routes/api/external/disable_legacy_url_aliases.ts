@@ -29,6 +29,7 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
           ),
         }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
       const spacesClient = getSpacesService().createSpacesClient(request);

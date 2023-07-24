@@ -23,6 +23,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
           id: schema.string(),
         }),
       },
+      options: { access: 'public' }, // will be made configurable by https://github.com/elastic/kibana/pull/162087
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;

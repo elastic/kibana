@@ -43,6 +43,7 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
           spacesToRemove: spacesSchema,
         }),
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
       const [startServices] = await getStartServices();
