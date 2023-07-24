@@ -311,7 +311,9 @@ export const createMetricThresholdExecutor = ({
         );
 
         const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
-          acc.push(result[group].currentValue);
+          if (result[group]) {
+            acc.push(result[group].currentValue);
+          }
           return acc;
         }, []);
 

@@ -55,6 +55,7 @@
     "@kbn/unified-field-list",
     "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
