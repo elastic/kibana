@@ -53,6 +53,7 @@ import {
   ensurePreconfiguredFleetServerHosts,
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
+import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -74,6 +75,8 @@ async function createSetupSideEffects(
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
+
+  await cleanUpOldFileIndices(esClient, logger);
 
   await ensureFleetDirectories();
 
