@@ -41,21 +41,17 @@ export const PageReducerStream: FC = () => {
     core: { http, notifications },
   } = useDeps();
 
-  const basePath = http?.basePath.get() ?? '';
-
   const [simulateErrors, setSimulateErrors] = useState(false);
   const [compressResponse, setCompressResponse] = useState(true);
 
-  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream<
-    ApiReducerStream,
-    typeof basePath
-  >(
-    http,
-    `${basePath}/internal/response_stream/reducer_stream`,
-    '1',
-    { compressResponse, simulateErrors },
-    { reducer: reducerStreamReducer, initialState }
-  );
+  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } =
+    useFetchStream<ApiReducerStream>(
+      http,
+      `/internal/response_stream/reducer_stream`,
+      '1',
+      { compressResponse, simulateErrors },
+      { reducer: reducerStreamReducer, initialState }
+    );
 
   const { progress, entities } = data;
 

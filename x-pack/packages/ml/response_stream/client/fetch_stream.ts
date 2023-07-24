@@ -39,9 +39,9 @@ type GeneratorError = string | null;
  * @returns            - Yields/emits items in the format [error, value]
  *                       inspired by node's recommended error convention for callbacks.
  */
-export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+export async function* fetchStream<I extends UseFetchStreamParamsDefault>(
   http: HttpSetup,
-  endpoint: `${BasePath}${I['endpoint']}`,
+  endpoint: I['endpoint'],
   apiVersion: string | undefined,
   abortCtrl: React.MutableRefObject<AbortController>,
   body: I['body'],

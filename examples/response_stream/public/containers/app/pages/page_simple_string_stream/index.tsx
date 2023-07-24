@@ -27,17 +27,19 @@ import { Page } from '../../../../components/page';
 
 export const PageSimpleStringStream: FC = () => {
   const { core } = useDeps();
-  const basePath = core.http?.basePath.get() ?? '';
 
   const [compressResponse, setCompressResponse] = useState(true);
 
-  const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream<
-    ApiSimpleStringStream,
-    typeof basePath
-  >(core.http, `${basePath}/internal/response_stream/simple_string_stream`, '1', {
-    compressResponse,
-    timeout: 500,
-  });
+  const { dispatch, errors, start, cancel, data, isRunning } =
+    useFetchStream<ApiSimpleStringStream>(
+      core.http,
+      `/internal/response_stream/simple_string_stream`,
+      '1',
+      {
+        compressResponse,
+        timeout: 500,
+      }
+    );
 
   const onClickHandler = async () => {
     if (isRunning) {

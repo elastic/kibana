@@ -22,7 +22,7 @@ On the client, the custom hook is used like this:
 
 ```ts
 const { errors, start, cancel, data, isRunning } = useFetchStream<
-    ApiSimpleStringStream, typeof basePath
->(`${basePath}/internal/response_stream/simple_string_stream`);
+    ApiSimpleStringStream
+>('/internal/response_stream/simple_string_stream');
 ```
 

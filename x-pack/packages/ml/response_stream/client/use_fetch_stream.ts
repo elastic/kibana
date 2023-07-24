@@ -112,16 +112,15 @@ interface UseFetchStreamReturnType<Data, Action> {
  *
  * @export
  * @template I
- * @template BasePath
  * @param {I['http']} http - Kibana HTTP client.
- * @param {`${I['endpoint']}`} endpoint - API endpoint including Kibana base path.
+ * @param {I['endpoint']} endpoint - API endpoint including Kibana base path.
  * @param {I['apiVersion']} apiVersion - API version.
  * @param {I['body']} body - API request body.
  * @returns {UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>} - An object with streaming data and methods to act on the stream.
  */
-export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+export function useFetchStream<I extends UseFetchStreamParamsDefault>(
   http: I['http'],
-  endpoint: `${BasePath}${I['endpoint']}`,
+  endpoint: I['endpoint'],
   apiVersion: I['apiVersion'],
   body: I['body']
 ): UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>;
@@ -132,7 +131,6 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
  *
  * @export
  * @template I
- * @template BasePath
  * @param {I['http']} http - Kibana HTTP client.
  * @param {`${I['endpoint']}`} endpoint - API endpoint including Kibana base path.
  * @param {I['apiVersion']} apiVersion - API version.
@@ -140,12 +138,9 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
  * @param {{ reducer: I['reducer']; initialState: ReducerState<I['reducer']> }} options - Custom reducer and initial state.
  * @returns {UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>>} - An object with streaming data and methods to act on the stream.
  */
-export function useFetchStream<
-  I extends UseFetchStreamCustomReducerParams,
-  BasePath extends string
->(
+export function useFetchStream<I extends UseFetchStreamCustomReducerParams>(
   http: I['http'],
-  endpoint: `${BasePath}${I['endpoint']}`,
+  endpoint: I['endpoint'],
   apiVersion: I['apiVersion'],
   body: I['body'],
   options: {
@@ -172,9 +167,9 @@ export function useFetchStream<
  * @param options - Optional custom reducer and initial state.
  * @returns An object with streaming data and methods to act on the stream.
  */
-export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+export function useFetchStream<I extends UseFetchStreamParamsDefault>(
   http: I['http'],
-  endpoint: `${BasePath}${I['endpoint']}`,
+  endpoint: I['endpoint'],
   apiVersion: string,
   body: I['body'],
   options?: {
@@ -208,7 +203,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
 
   const start = async () => {
     if (isRunning) {
-      addError('Restart not supported yet.');
+      addError('Instant restart while running not supported yet.');
       return;
     }
 
@@ -218,10 +213,14 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
 
     abortCtrl.current = new AbortController();
 
-    for await (const [fetchStreamError, actions] of fetchStream<
-      UseFetchStreamCustomReducerParams,
-      BasePath
-    >(http, endpoint, apiVersion, abortCtrl, body, options !== undefined)) {
+    for await (const [fetchStreamError, actions] of fetchStream<UseFetchStreamCustomReducerParams>(
+      http,
+      endpoint,
+      apiVersion,
+      abortCtrl,
+      body,
+      options !== undefined
+    )) {
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
       } else if (actions.length > 0) {

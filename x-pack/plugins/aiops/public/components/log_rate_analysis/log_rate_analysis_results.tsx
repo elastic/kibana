@@ -117,7 +117,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onAnalysisCompleted,
 }) => {
   const { http } = useAiopsAppContext();
-  const basePath = http.basePath.get() ?? '';
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
@@ -158,9 +157,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<AiopsApiLogRateAnalysis, typeof basePath>(
+  } = useFetchStream<AiopsApiLogRateAnalysis>(
     http,
-    `${basePath}/internal/aiops/log_rate_analysis`,
+    '/internal/aiops/log_rate_analysis',
     '1',
     {
       start: earliest,
