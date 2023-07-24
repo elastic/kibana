@@ -468,8 +468,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           };
-          window.console.error(`expected: ${JSON.stringify(expected)}`);
-          window.console.error(`stats: ${JSON.stringify(stats)}`);
+          // eslint-disable-next-line no-console
+          console.error(`expected: ${JSON.stringify(expected)}`);
+          // eslint-disable-next-line no-console
+          console.error(`stats: ${JSON.stringify(stats)}`);
           expect(stats).to.eql(expected);
         });
       });
