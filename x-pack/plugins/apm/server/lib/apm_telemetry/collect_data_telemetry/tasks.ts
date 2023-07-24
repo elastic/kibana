@@ -776,28 +776,31 @@ export const tasks: TelemetryTask[] = [
         })
       ).hits.total.value;
 
-      const servicesCount = (
-        await telemetryClient.search({
-          index: [indices.transaction, indices.error, indices.metric],
-          body: {
-            track_total_hits: false,
-            size: 0,
-            timeout,
-            query: {
-              bool: {
-                filter: [range1d],
+      const servicesAndEnvironmentsCount = await telemetryClient.search({
+        index: [indices.transaction, indices.error, indices.metric],
+        body: {
+          track_total_hits: false,
+          size: 0,
+          timeout,
+          query: {
+            bool: {
+              filter: [range1d],
+            },
+          },
+          aggs: {
+            service_name: {
+              cardinality: {
+                field: SERVICE_NAME,
               },
             },
-            aggs: {
-              service_name: {
-                cardinality: {
-                  field: SERVICE_NAME,
-                },
+            service_environments: {
+              cardinality: {
+                field: SERVICE_ENVIRONMENT,
               },
             },
           },
-        })
-      ).aggregations?.service_name.value;
+        },
+      });
 
       return {
         counts: {
@@ -811,7 +814,14 @@ export const tasks: TelemetryTask[] = [
             '1d': tracesPerDayCount || 0,
           },
           services: {
-            '1d': servicesCount || 0,
+            '1d':
+              servicesAndEnvironmentsCount.aggregations?.service_name.value ||
+              0,
+          },
+          environments: {
+            '1d':
+              servicesAndEnvironmentsCount.aggregations?.service_environments
+                .value || 0,
           },
         },
       };
