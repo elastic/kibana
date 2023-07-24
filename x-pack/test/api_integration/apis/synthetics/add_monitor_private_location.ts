@@ -13,7 +13,6 @@ import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -35,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     const security = getService('security');
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
+      await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
 
       _httpMonitorJson = getFixtureJson('http_monitor');
@@ -70,12 +69,12 @@ export default function ({ getService }: FtrProviderContext) {
         {
           concurrentMonitors: 1,
           id: testFleetPolicyID,
-          isInvalid: false,
           isServiceManaged: false,
+          isInvalid: false,
           label: 'Test private location 0',
           geo: {
-            lat: '',
-            lon: '',
+            lat: 0,
+            lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
         },
@@ -85,26 +84,26 @@ export default function ({ getService }: FtrProviderContext) {
     it('does not add a monitor if there is an error in creating integration', async () => {
       const newMonitor = { ...httpMonitorJson };
 
-      const invalidName = '!@#$%^&*()_++[\\-\\]- wow';
+      const invalidLocation = testFleetPolicyID + '1';
+      const invalidName = 'invalid name';
 
-      newMonitor.locations.push({
-        id: testFleetPolicyID,
+      const location = {
+        id: invalidLocation,
         label: 'Test private location 0',
         isServiceManaged: false,
-      });
+      };
 
       newMonitor.name = invalidName;
 
       const apiResponse = await supertestAPI
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
-        .send(newMonitor)
+        .send({ ...newMonitor, locations: [location, ...newMonitor.locations] })
         .expect(500);
 
       expect(apiResponse.body).eql({
         statusCode: 500,
-        message:
-          'YAMLException: unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w,"\n                                     ^',
+        message: `Unable to find Synthetics private location for agentId ${invalidLocation}`,
         error: 'Internal Server Error',
       });
 

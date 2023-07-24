@@ -13,7 +13,7 @@ import {
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
   BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type {

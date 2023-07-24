@@ -26,7 +26,7 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
     it('creates doc, returns a 200 with settings', async () => {
       const { supertest } = getServices();
 
-      const { body } = await supertest('get', '/api/kibana/settings').expect(200);
+      const { body } = await supertest('get', '/internal/kibana/settings').expect(200);
 
       expect(body).toMatchObject({
         settings: {
@@ -47,7 +47,7 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
       const { supertest } = getServices();
       const defaultIndex = chance.word();
 
-      const { body } = await supertest('post', '/api/kibana/settings/defaultIndex')
+      const { body } = await supertest('post', '/internal/kibana/settings/defaultIndex')
         .send({
           value: defaultIndex,
         })
@@ -76,7 +76,7 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
       const defaultIndex = chance.word();
 
-      const { body } = await supertest('post', '/api/kibana/settings')
+      const { body } = await supertest('post', '/internal/kibana/settings')
         .send({
           changes: { defaultIndex },
         })
@@ -103,7 +103,9 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
     it('creates doc, returns a 200 with just buildNum', async () => {
       const { supertest } = getServices();
 
-      const { body } = await supertest('delete', '/api/kibana/settings/defaultIndex').expect(200);
+      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex').expect(
+        200
+      );
 
       expect(body).toMatchObject({
         settings: {
