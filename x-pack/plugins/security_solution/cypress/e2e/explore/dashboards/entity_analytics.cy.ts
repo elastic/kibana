@@ -28,8 +28,6 @@ import {
   USERS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ALERT_CELL,
   HOSTS_TABLE,
-  ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
-  ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../../screens/entity_analytics';
@@ -45,6 +43,11 @@ import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import {
+  enableJob,
+  navigateToNextPage,
+  waitForAnomaliesToBeLoaded,
+} from '../../../tasks/entity_analytics';
 
 const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';
@@ -303,13 +306,13 @@ describe('Entity Analytics Dashboard', () => {
   describe('With anomalies data', () => {
     before(() => {
       cy.task('esArchiverLoad', 'network');
-      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies');
+      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies1');
+      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies2');
       login();
       visit(ENTITY_ANALYTICS_URL);
       waitForPageToBeLoaded();
-      cy.wait('@anomalies', { timeout: 120000 });
-      cy.scrollTo('bottom');
       cy.get(ANOMALIES_TABLE).should('be.visible');
+      waitForAnomaliesToBeLoaded();
     });
 
     after(() => {
@@ -321,7 +324,7 @@ describe('Entity Analytics Dashboard', () => {
       cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
         .eq(5)
         .within(() => {
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
+          enableJob();
           cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
           cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
         });
@@ -330,7 +333,7 @@ describe('Entity Analytics Dashboard', () => {
       cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
 
       // navigates to next page
-      cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
+      navigateToNextPage();
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
 
       // updates rows per page to 25 items
