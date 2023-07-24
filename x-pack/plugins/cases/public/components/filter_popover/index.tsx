@@ -32,6 +32,12 @@ const ScrollableDiv = styled.div`
   overflow: auto;
 `;
 
+const WarningPanel = styled(EuiPanel)`
+  ${({ theme }) => `
+    border: 1px solid ${theme.eui.euiColorLightShade};
+  `}
+`;
+
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
   if (selectedGroupIndex >= 0) {
@@ -94,11 +100,11 @@ export const FilterPopoverComponent = ({
       {optionsMaxLEngth && optionsMaxLengthLabel && selectedOptions.length >= optionsMaxLEngth && (
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={true}>
-            <EuiPanel color="warning" paddingSize="s">
+            <WarningPanel color="warning" paddingSize="s">
               <EuiText size="s" color="warning" data-test-subj="maximum-length-warning">
                 {optionsMaxLengthLabel}
               </EuiText>
-            </EuiPanel>
+            </WarningPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
