@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridRefProps, EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useRef } from 'react';
 import { GridOnScrollProps } from 'react-window';
 import { TopNFunctionSortField } from '../../../../common/functions';
@@ -17,6 +25,8 @@ import {
 } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
+import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';
+import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -178,15 +188,28 @@ export function DifferentialTopNFunctionsView() {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <PrimaryAndComparisonSearchBar />
+          <EuiPanel hasShadow={false} color="subdued">
+            <PrimaryAndComparisonSearchBar />
+            <EuiHorizontalRule />
+            <NormalizationMenu
+              mode={normalizationMode}
+              options={normalizationOptions}
+              onChange={onChangeNormalizationMode}
+            />
+            <EuiSpacer />
+            <TopNFunctionsSummary
+              baselineTopNFunctions={state.data}
+              comparisonTopNFunctions={comparisonState.data}
+              baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+              comparisonScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+              isLoading={
+                state.status === AsyncStatus.Loading ||
+                comparisonState.status === AsyncStatus.Loading
+              }
+            />
+          </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NormalizationMenu
-            mode={normalizationMode}
-            options={normalizationOptions}
-            onChange={onChangeNormalizationMode}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>

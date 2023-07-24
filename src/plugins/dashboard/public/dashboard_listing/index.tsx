@@ -10,7 +10,7 @@ import React, { Suspense } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 
 import { servicesReady } from '../plugin';
-import { DashboardListingProps } from './dashboard_listing';
+import { DashboardListingProps } from './types';
 
 const ListingTableLoadingIndicator = () => {
   return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="l" />} />;
@@ -18,11 +18,11 @@ const ListingTableLoadingIndicator = () => {
 
 const LazyDashboardListing = React.lazy(() =>
   (async () => {
-    const modulePromise = import('./dashboard_listing');
+    const modulePromise = import('./dashboard_listing_table');
     const [module] = await Promise.all([modulePromise, servicesReady]);
 
     return {
-      default: module.DashboardListing,
+      default: module.DashboardListingTable,
     };
   })().then((module) => module)
 );
