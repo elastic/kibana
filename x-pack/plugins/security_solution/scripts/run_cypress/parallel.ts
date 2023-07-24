@@ -68,7 +68,18 @@ const retrieveIntegrations = (
 export const cli = () => {
   run(
     async () => {
-      const { argv } = yargs(process.argv.slice(2));
+      const { argv } = yargs(process.argv.slice(2)).coerce('env', (arg: string) =>
+        arg.split(',').reduce((acc, curr) => {
+          const [key, value] = curr.split('=');
+          if (key === 'burn') {
+            acc[key] = parseInt(value, 10);
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        }, {} as Record<string, string | number>)
+      );
+
 
       const isOpen = argv._[0] === 'open';
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
@@ -292,7 +303,10 @@ export const cli = () => {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
                   },
-                  env: customEnv,
+                  env: {
+                    ...customEnv,
+                    ...(argv.env ?? {}),
+                  },
                 },
               });
             } else {
@@ -308,7 +322,10 @@ export const cli = () => {
                       baseUrl: `http://localhost:${kibanaPort}`,
                     },
                     numTestsKeptInMemory: 0,
-                    env: customEnv,
+                    env: {
+                      ...customEnv,
+                      ...(argv.env ?? {}),
+                    },
                   },
                 });
               } catch (error) {
