@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import startsWith from 'lodash/startsWith';
 import type { ReducerAction } from 'react';
 
 import type { HttpSetup } from '@kbn/core/public';
@@ -25,7 +26,7 @@ type GeneratorError = string | null;
  * ```
  *
  * @param endpoint     — The API endpoint including the Kibana basepath.
- * @param apiVersion   - The API version to be used.
+ * @param apiVersion   - Optional API version to be used.
  * @param abortCtrl    — Abort controller for cancelling the request.
  * @param body         — The request body. For now all requests are POST.
  * @param ndjson       — Boolean flag to receive the stream as a raw string or NDJSON.
@@ -41,11 +42,10 @@ type GeneratorError = string | null;
 export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   http: HttpSetup,
   endpoint: `${BasePath}${I['endpoint']}`,
-  apiVersion: string,
+  apiVersion: string | undefined,
   abortCtrl: React.MutableRefObject<AbortController>,
   body: I['body'],
-  ndjson = true,
-  bufferBounce = 100
+  ndjson = true
 ): AsyncGenerator<
   [GeneratorError, ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined]
 > {
@@ -84,8 +84,6 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
     const reader = stream.body.getReader();
 
     let partial = '';
-    let actionBuffer: Array<ReducerAction<I['reducer']>> = [];
-    let lastCall = 0;
 
     while (true) {
       try {
@@ -100,52 +98,30 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
 
         partial = last ?? '';
 
-        const actions = (ndjson ? parts.map((p) => JSON.parse(p)) : parts) as Array<
-          ReducerAction<I['reducer']>
-        >;
-        actionBuffer.push(...actions);
+        const actions = (
+          ndjson
+            ? parts
+                .map((p) => {
+                  // Check if the response is an `event: ` or `data: ` prefixed SSE event.
+                  // Note this is a workaround, we don't have actual support for SSE events yet.
+                  if (p === '' || startsWith(p, 'event: ') || p === 'data: [DONE]') {
+                    return '[IGNORE]';
+                  } else if (startsWith(p, 'data: ')) {
+                    return JSON.parse(p.split('data: ')[1]);
+                  }
+                  return JSON.parse(p);
+                })
+                .filter((p) => p !== '[IGNORE]')
+            : parts
+        ) as Array<ReducerAction<I['reducer']>>;
 
-        const now = Date.now();
-
-        if (now - lastCall >= bufferBounce && actionBuffer.length > 0) {
-          yield [null, actionBuffer];
-          actionBuffer = [];
-          lastCall = now;
-
-          // In cases where the next chunk takes longer to be received than the `bufferBounce` timeout,
-          // we trigger this client side timeout to clear a potential intermediate buffer state.
-          // Since `yield` cannot be passed on to other scopes like callbacks,
-          // this pattern using a Promise is used to wait for the timeout.
-          yield new Promise<
-            [
-              GeneratorError,
-              ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined
-            ]
-          >((resolve) => {
-            setTimeout(() => {
-              if (actionBuffer.length > 0) {
-                resolve([null, actionBuffer]);
-                actionBuffer = [];
-                lastCall = now;
-              } else {
-                resolve([null, []]);
-              }
-            }, bufferBounce + 10);
-          });
-        }
+        yield [null, actions];
       } catch (error) {
         if (error.name !== 'AbortError') {
           yield [error.toString(), undefined];
         }
         break;
       }
-    }
-
-    // The stream reader might finish with a partially filled actionBuffer so
-    // we need to clear it once more after the request is done.
-    if (actionBuffer.length > 0) {
-      yield [null, actionBuffer];
-      actionBuffer.length = 0;
     }
   }
 }

@@ -15,6 +15,7 @@ import {
   ReducerAction,
   ReducerState,
 } from 'react';
+import useThrottle from 'react-use/lib/useThrottle';
 
 import type { HttpSetup } from '@kbn/core/public';
 
@@ -43,7 +44,7 @@ export interface UseFetchStreamCustomReducerParams {
    * API version
    * @type {string}
    */
-  apiVersion: string;
+  apiVersion?: string;
   /**
    * Request body
    * @type {object}
@@ -74,7 +75,7 @@ export interface UseFetchStreamParamsDefault {
    * API version
    * @type {string}
    */
-  apiVersion: string;
+  apiVersion?: string;
   /**
    * Request body
    * @type {object}
@@ -197,6 +198,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
   const initialState = (options?.initialState ?? '') as ReducerState<I['reducer']>;
 
   const [data, dispatch] = useReducer(reducer, initialState);
+  const dataThrottled = useThrottle(data, 100);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -243,7 +245,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
 
   return {
     cancel,
-    data,
+    data: dataThrottled,
     dispatch,
     errors,
     isCancelled,
