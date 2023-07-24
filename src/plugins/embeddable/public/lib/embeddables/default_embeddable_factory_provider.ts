@@ -7,13 +7,13 @@
  */
 
 import { SavedObjectAttributes } from '@kbn/core/public';
-import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 
 import { IContainer } from '..';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableStateWithType } from '../../../common/types';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { migrateEmbeddableInput } from '../migrate_embeddable_input';
 
 export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
@@ -38,25 +38,8 @@ export const defaultEmbeddableFactoryProvider = <
         },
     create: (...args) => {
       const [initialInput, ...otherArgs] = args;
-      const factoryMigrations =
-        typeof def?.migrations === 'function' ? def?.migrations() : def?.migrations || {};
-      const migratedInput = migrateToLatest(
-        factoryMigrations ?? {},
-        {
-          state: {
-            ...initialInput,
-            type: def.type,
-          },
-          // any embeddable with no version set is considered to require all clientside migrations
-          version: initialInput.version ?? '0',
-        },
-        true
-      );
-      const { type, ...input } = migratedInput;
-      const createdEmbeddable = def.create.bind(def)(
-        { ...input, version: def.latestVersion } as unknown as I,
-        ...otherArgs
-      );
+      const input = migrateEmbeddableInput(initialInput, def);
+      const createdEmbeddable = def.create.bind(def)(input as unknown as I, ...otherArgs);
       return createdEmbeddable;
     },
     type: def.type,

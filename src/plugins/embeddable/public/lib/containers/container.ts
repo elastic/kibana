@@ -468,19 +468,21 @@ export abstract class Container<
       },
     } as Partial<TContainerOutput>);
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
-    const inputForChild = this.getInputForChild(embeddableId);
+    const explicitInputForChild = this.getInput().panels[embeddableId].explicitInput;
     try {
       const factory = this.getFactory(panel.type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      // in anticipation of the clientside embeddable migrations being run, the container needs to be aware of the latest version
-
       // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
-      embeddable = isSavedObjectEmbeddableInput(inputForChild)
-        ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
-        : await factory.create(inputForChild, this);
+      embeddable = isSavedObjectEmbeddableInput(explicitInputForChild)
+        ? await factory.createFromSavedObject(
+            explicitInputForChild.savedObjectId,
+            explicitInputForChild,
+            this
+          )
+        : await factory.create(explicitInputForChild, this);
     } catch (e) {
       embeddable = new ErrorEmbeddable(e, { id: embeddableId }, this);
     }
@@ -497,23 +499,32 @@ export abstract class Container<
 
     /**
      * If the embeddable's version is different than the version that this container initialized it with, that means
-     * there has been a migration for this embeddable. The container needs to update this panel's version.
+     * there has been a migration for this embeddable. The container needs to keep track of the migrated input instead
+     * of the input it was created with.
      */
-    if (embeddable.getInput().version !== inputForChild.version) {
+    // console.log(
+    //   embeddable.type,
+    //   'is version',
+    //   embeddable.getInput().version,
+    //   'and ours is version',
+    //   explicitInputForChild.version ?? 'NONE'
+    // );
+    if (embeddable.getInput().version !== explicitInputForChild.version) {
       const currentPanels = this.getInput().panels;
       this.updateInput({
         panels: {
           ...currentPanels,
           [embeddableId]: {
             ...currentPanels[embeddableId],
-            explicitInput: {
-              ...currentPanels[embeddableId].explicitInput,
-              version: embeddable.getInput().version,
-            },
+            explicitInput: embeddable.getInput(),
           },
         },
       } as Partial<TContainerInput>);
     }
+
+    /**
+     * Set up this Embeddable's connection with its parent.
+     */
     embeddable.initializeParentSubscription(this);
     if (!embeddable.deferEmbeddableLoad) {
       this.setChildLoaded(embeddable);
