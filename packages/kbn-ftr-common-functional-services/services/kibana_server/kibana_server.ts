@@ -19,7 +19,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
   const defaults = config.get('uiSettings.defaults');
 
   const kbn = new KbnClient({
-    log,
+    log: Object.assign({}, log, { info: () => {}, debug: () => {} }),
     url,
     certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
     uiSettingDefaults: defaults,
