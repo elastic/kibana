@@ -211,7 +211,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         },
       },
     },
-    spanDestinationServiceResource: {
+    span_destination_service_resource: {
       '1d': {
         ...long,
         _meta: {

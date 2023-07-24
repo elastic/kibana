@@ -850,7 +850,7 @@ export const tasks: TelemetryTask[] = [
               servicesAndEnvironmentsCount.aggregations?.service_environments
                 .value || 0,
           },
-          spanDestinationServiceResource: {
+          span_destination_service_resource: {
             '1d': spanDestinationServiceResourceCount || 0,
           },
         },
