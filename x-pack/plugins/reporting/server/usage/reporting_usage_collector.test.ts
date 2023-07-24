@@ -74,9 +74,6 @@ describe('license checks', () => {
   describe('with no license', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const mockReporting = await createMockReportingCore(createMockConfigSchema());
-      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
-
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('none'),
@@ -104,9 +101,6 @@ describe('license checks', () => {
   describe('with gold license', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const mockReporting = await createMockReportingCore(createMockConfigSchema());
-      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
-
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('gold'),
@@ -134,9 +128,6 @@ describe('license checks', () => {
   describe('with no usage data', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const mockReporting = await createMockReportingCore(createMockConfigSchema());
-      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
-
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('basic'),
@@ -159,12 +150,6 @@ describe('license checks', () => {
 });
 
 describe('data modeling', () => {
-  let exportTypesRegistry: ExportTypesRegistry;
-  beforeAll(async () => {
-    const mockReporting = await createMockReportingCore(createMockConfigSchema());
-    exportTypesRegistry = mockReporting.getExportTypesRegistry();
-  });
-
   test('with usage data from the reporting/archived_reports es archive', async () => {
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
