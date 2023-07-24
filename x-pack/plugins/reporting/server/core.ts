@@ -133,7 +133,7 @@ export class ReportingCore {
     this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
     this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
     this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
-    
+
     // deprecated export types for tests
     this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
     this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
