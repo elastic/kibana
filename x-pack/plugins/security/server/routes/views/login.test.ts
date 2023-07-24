@@ -52,7 +52,7 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: 'optional' });
+      expect(routeConfig.options).toEqual({ access: 'public', authRequired: 'optional' });
 
       expect(routeConfig.validate).toEqual({
         body: undefined,

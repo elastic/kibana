@@ -43,7 +43,10 @@ describe('Key rotation routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ tags: ['access:rotateEncryptionKey'] });
+      expect(routeConfig.options).toEqual({
+        access: 'public',
+        tags: ['access:rotateEncryptionKey'],
+      });
       expect(routeConfig.validate).toEqual({
         body: undefined,
         query: expect.any(Type),

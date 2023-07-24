@@ -68,7 +68,7 @@ describe('Access agreement view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.options).toEqual({ access: 'public' });
       expect(routeConfig.validate).toBe(false);
     });
 
@@ -109,7 +109,7 @@ describe('Access agreement view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.options).toEqual({ access: 'public' });
       expect(routeConfig.validate).toBe(false);
     });
 
