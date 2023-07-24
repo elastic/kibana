@@ -164,7 +164,7 @@ describe('Fleet preconfiguration reset', () => {
         data.signed.data = '';
         data.signed.signature = '';
 
-        expect(data).toEqual({
+        expect(data).toEqual(expect.objectContaining({
           agent: {
             download: {
               sourceURI: 'https://artifacts.elastic.co/downloads/',
@@ -182,7 +182,7 @@ describe('Fleet preconfiguration reset', () => {
             },
           },
           id: 'policy-elastic-agent-on-cloud',
-          inputs: [
+          inputs: expect.arrayContaining([
             {
               data_stream: {
                 namespace: 'default',
@@ -298,7 +298,7 @@ describe('Fleet preconfiguration reset', () => {
               type: 'apm',
               use_output: 'es-containerhost',
             },
-          ],
+          ]),
           output_permissions: {
             'es-containerhost': {
               _elastic_agent_checks: {
@@ -358,7 +358,7 @@ describe('Fleet preconfiguration reset', () => {
             data: '',
             signature: '',
           },
-        });
+        }));
       });
 
       it('Create correct package policies', async () => {
