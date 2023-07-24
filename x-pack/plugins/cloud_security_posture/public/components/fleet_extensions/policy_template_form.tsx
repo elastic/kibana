@@ -108,7 +108,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean) => {
 
 const getAwsAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
-): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type'].value;
+): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
 
 const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview23';
 

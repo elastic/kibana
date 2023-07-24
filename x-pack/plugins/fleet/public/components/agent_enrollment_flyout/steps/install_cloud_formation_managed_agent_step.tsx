@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
+import type { AgentPolicy } from '../../../../common';
+
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
 import { CloudFormationInstructions } from '../cloud_formation_instructions';
@@ -21,15 +23,22 @@ export const InstallCloudFormationManagedAgentStep = ({
   enrollToken,
   isComplete,
   cloudFormationTemplateUrl,
+  agentPolicy,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   enrollToken?: string;
   isComplete?: boolean;
   cloudFormationTemplateUrl: string;
+  agentPolicy?: AgentPolicy;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
+
+  const cloudSecurityPackagePolicy = agentPolicy?.package_policies?.find(
+    (p) => p.package?.name === 'cloud_security_posture'
+  );
+
   return {
     status,
     title: i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.stepEnrollAndRunAgentTitle', {
@@ -40,6 +49,7 @@ export const InstallCloudFormationManagedAgentStep = ({
         <CloudFormationInstructions
           cloudFormationTemplateUrl={cloudFormationTemplateUrl}
           enrollmentAPIKey={enrollToken}
+          packagePolicy={cloudSecurityPackagePolicy}
         />
       ) : (
         <React.Fragment />
