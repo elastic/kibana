@@ -176,7 +176,7 @@ Dashboard::
 * Adds a counter displaying the min/max values of the time series counter field in the field popover {kibana-pull}155499[#155499]
 * Adds ability to recover from non-fatal error state {kibana-pull}158087[#158087]
 Discover::
-* Updates Discover sharing capabilities to enable sharing a link to Discover when using ad-hoc (temporary) data views {kibana-pull}154947[#154947]
+* Updates Discover sharing capabilities to enable sharing a link when using temporary data views {kibana-pull}154947[#154947]
 Elastic Security::
 For the Elastic Security 8.9.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Enterprise Search::
