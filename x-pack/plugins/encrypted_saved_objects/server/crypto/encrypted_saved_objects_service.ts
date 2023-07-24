@@ -289,7 +289,7 @@ export class EncryptedSavedObjectsService {
         overwrite: true,
         managed: true,
       })
-      .catch((err) => {
+      ?.catch((err) => {
         this.options.logger.fatal(
           `Failed to create versioned encryption descriptors: ${err.message ?? err}`
         );

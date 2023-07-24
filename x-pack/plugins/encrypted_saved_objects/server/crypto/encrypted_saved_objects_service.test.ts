@@ -84,7 +84,7 @@ function setup(types?: EncryptedSavedObjectTypeRegistration[]) {
   types?.forEach((esoType) => service.registerType(esoType));
 
   // simulate plugin start phase
-  if (!!types) {
+  if (types) {
     service.initializeVersionedMetadata(mockSavedObjects);
     expect(mockSavedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
   }
@@ -2475,6 +2475,11 @@ describe('Embedding excluded AAD fields POC', () => {
         attributesToExcludeFromAAD: ['attrOne', 'attrFour'],
       },
     };
+    // SavedObjectsBulkResponse<T = unknown> {
+    //  /** array of saved objects */
+    //  saved_objects: Array<SavedObject<T>>;
+    // }
+    mockSavedObjectsRepo.bulkCreate.mockResolvedValue({ saved_objects: [] });
     expect(mockSavedObjectsRepo.bulkCreate).toHaveBeenCalledTimes(1);
     expect(mockSavedObjectsRepo.bulkCreate).toHaveBeenLastCalledWith([metadataSO], {
       overwrite: true,
