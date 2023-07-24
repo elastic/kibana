@@ -69,11 +69,11 @@ server.versioned.strictClientVersionCheck: false
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
 
-# Disable Spaces Public HTTP API
-xpack.spaces.enablePublicApi: false
-
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+
+# FOR LOCAL TESTING - AWAITING MERGE OF https://github.com/elastic/kibana/pull/162149
+server.restrictInternalApis: true

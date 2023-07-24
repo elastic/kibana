@@ -28,7 +28,7 @@ import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { initConfigurableSpacesApi, initExternalSpacesApi } from './routes/api/external';
+import { initConfigurableSpacesApi, initPublicSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
 import { SpacesSavedObjectsService } from './saved_objects';
@@ -103,7 +103,7 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
@@ -148,13 +148,10 @@ export class SpacesPlugin
       logger: this.log,
     });
 
-    let routeConfig: ConfigType | undefined;
-    this.config$.subscribe((config) => {
-      routeConfig = config;
-    });
+    const buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
     const router = core.http.createRouter<SpacesRequestHandlerContext>();
-    if (routeConfig?.enablePublicApi) {
-      initExternalSpacesApi({
+    if (buildFlavor !== 'serverless') {
+      initPublicSpacesApi({
         router,
         log: this.log,
         getStartServices: core.getStartServices,
@@ -162,13 +159,14 @@ export class SpacesPlugin
         usageStatsServicePromise,
       });
     }
+    const configuredAccess = buildFlavor === 'serverless' ? 'internal' : 'public';
     initConfigurableSpacesApi({
       router,
       log: this.log,
       getStartServices: core.getStartServices,
       getSpacesService,
       usageStatsServicePromise,
-      config: routeConfig,
+      access: configuredAccess,
     });
     initInternalSpacesApi({
       router,

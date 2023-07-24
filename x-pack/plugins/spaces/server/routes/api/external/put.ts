@@ -15,7 +15,7 @@ import { spaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPutSpacesApi(deps: ConfigurableRouteDeps) {
-  const { router, getSpacesService, config } = deps;
+  const { router, getSpacesService, access } = deps;
 
   router.put(
     {
@@ -26,7 +26,7 @@ export function initPutSpacesApi(deps: ConfigurableRouteDeps) {
         }),
         body: spaceSchema,
       },
-      options: { access: config?.enablePublicApi ? 'public' : 'internal' },
+      options: { access },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spacesClient = getSpacesService().createSpacesClient(request);

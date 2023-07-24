@@ -29,7 +29,6 @@ import { spacesManagementApp } from './spaces_management_app';
 const config: ConfigType = {
   maxSpaces: 1000,
   allowFeatureVisibility: true,
-  enablePublicApi: true,
 };
 
 async function mountApp(basePath: string, pathname: string, spaceId?: string) {

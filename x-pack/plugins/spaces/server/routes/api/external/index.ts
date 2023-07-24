@@ -7,7 +7,6 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
-import type { ConfigType } from '../../../config';
 import type { SpacesServiceStart } from '../../../spaces_service';
 import type { SpacesRouter } from '../../../types';
 import type { UsageStatsServiceSetup } from '../../../usage_stats';
@@ -30,10 +29,10 @@ export interface ExternalRouteDeps {
 }
 
 export interface ConfigurableRouteDeps extends ExternalRouteDeps {
-  config?: ConfigType;
+  access: 'internal' | 'public';
 }
 
-export function initExternalSpacesApi(deps: ExternalRouteDeps) {
+export function initPublicSpacesApi(deps: ExternalRouteDeps) {
   initDeleteSpacesApi(deps);
   initPostSpacesApi(deps);
   initCopyToSpacesApi(deps);

@@ -13,7 +13,7 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ConfigurableRouteDeps) {
-  const { router, getSpacesService, config } = deps;
+  const { router, getSpacesService, access } = deps;
 
   router.get(
     {
@@ -23,7 +23,7 @@ export function initGetSpaceApi(deps: ConfigurableRouteDeps) {
           id: schema.string(),
         }),
       },
-      options: { access: config?.enablePublicApi ? 'public' : 'internal' },
+      options: { access },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;

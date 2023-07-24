@@ -22,7 +22,6 @@ const createMockConfig = (
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
-    enablePublicApi: true,
   }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
@@ -218,7 +217,6 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
-      enablePublicApi: true,
     });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
@@ -249,7 +247,6 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
-      enablePublicApi: true,
     });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
@@ -280,7 +277,6 @@ describe('#create', () => {
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
-        enablePublicApi: false, // has to be false because allowFeatureVisibility false sets the serverless context to true
       });
 
       const client = new SpacesClient(
@@ -316,7 +312,6 @@ describe('#create', () => {
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
-        enablePublicApi: false, // has to be false because allowFeatureVisibility false sets the serverless context to true
       });
 
       const client = new SpacesClient(
@@ -398,7 +393,6 @@ describe('#update', () => {
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
-        enablePublicApi: false, // has to be false because allowFeatureVisibility false sets the serverless context to true
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -423,7 +417,6 @@ describe('#update', () => {
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
-        enablePublicApi: false, // has to be false because allowFeatureVisibility false sets the serverless context to true
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
