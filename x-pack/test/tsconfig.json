@@ -137,6 +137,5 @@
     "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin",
     "@kbn/ml-category-validator",
-    "@kbn/cases-components"
   ]
 }
