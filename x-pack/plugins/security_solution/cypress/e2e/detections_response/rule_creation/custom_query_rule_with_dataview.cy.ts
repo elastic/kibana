@@ -9,12 +9,10 @@ import { getDataViewRule } from '../../../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
-  RISK_SCORE,
   RULE_NAME,
   RULES_ROW,
   RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
-  SEVERITY,
 } from '../../../screens/alerts_detection_rules';
 import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -56,8 +54,6 @@ describe('Custom query rule using data view', () => {
 
     cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
     cy.get(RULE_NAME).should('have.text', rule.name);
-    cy.get(RISK_SCORE).should('have.text', rule.risk_score);
-    cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();

@@ -6,90 +6,36 @@
  */
 
 import {
-  deleteRuleFromDetailsPage,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../../tasks/alerts_detection_rules';
-import {
-  CUSTOM_RULES_BTN,
-  RULES_MANAGEMENT_TABLE,
-  RULES_ROW,
-} from '../../../screens/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
 import { getDetails } from '../../../tasks/rule_details';
-import { ruleFields } from '../../../data/detection_engine';
-import { getTimeline } from '../../../objects/timeline';
 import { getNewRule } from '../../../objects/rule';
 
 import {
-  ABOUT_DETAILS,
-  ABOUT_INVESTIGATION_NOTES,
-  ABOUT_RULE_DESCRIPTION,
-  ADDITIONAL_LOOK_BACK_DETAILS,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
-  FALSE_POSITIVES_DETAILS,
   INDEX_PATTERNS_DETAILS,
-  INVESTIGATION_NOTES_MARKDOWN,
-  INVESTIGATION_NOTES_TOGGLE,
-  REFERENCE_URLS_DETAILS,
-  removeExternalLinkText,
-  RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
-  RUNS_EVERY_DETAILS,
-  SCHEDULE_DETAILS,
-  SEVERITY_DETAILS,
-  TAGS_DETAILS,
-  THREAT_SUBTECHNIQUE,
-  THREAT_TACTIC,
-  THREAT_TECHNIQUE,
-  TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
-describe('Rule details, custom query rule', () => {
+// Only testing components in the rule details page unique to rules using index patterns
+describe('Custom query rule', () => {
+  const rule = getNewRule();
+
   before(() => {
     cleanKibana();
   });
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createTimeline(getTimeline()).then((response) => {
-      return createRule({
-        ...getNewRule({
-          rule_id: 'rulez',
-          description: ruleFields.ruleDescription,
-          name: ruleFields.ruleName,
-          severity: ruleFields.ruleSeverity,
-          risk_score: ruleFields.riskScore,
-          tags: ruleFields.ruleTags,
-          false_positives: ruleFields.falsePositives,
-          note: ruleFields.investigationGuide,
-          timeline_id: response.body.data.persistTimeline.timeline.savedObjectId,
-          timeline_title: response.body.data.persistTimeline.timeline.title ?? '',
-          interval: ruleFields.ruleInterval,
-          from: `now-1h`,
-          query: ruleFields.ruleQuery,
-          enabled: false,
-          threat: [
-            {
-              ...ruleFields.threat,
-              technique: [
-                {
-                  ...ruleFields.threatTechnique,
-                  subtechnique: [ruleFields.threatSubtechnique],
-                },
-              ],
-            },
-          ],
-        }),
-      });
-    });
+    createRule(rule);
     login();
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
     waitForRulesTableToBeLoaded();
@@ -98,77 +44,12 @@ describe('Rule details, custom query rule', () => {
   it('Displays rule details', function () {
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', ruleFields.ruleDescription);
-    cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS)
-        .invoke('text')
-        .then((text) => {
-          cy.wrap(text.toLowerCase()).should('equal', ruleFields.ruleSeverity);
-        });
-      getDetails(RISK_SCORE_DETAILS).should('have.text', ruleFields.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
-        expect(removeExternalLinkText(details.text())).equal(ruleFields.referenceUrls.join(''));
-      });
-      getDetails(FALSE_POSITIVES_DETAILS).should('have.text', ruleFields.falsePositives.join(''));
-      getDetails(TAGS_DETAILS).should('have.text', ruleFields.ruleTags.join(''));
-    });
-    cy.get(THREAT_TACTIC).should(
-      'contain',
-      `${ruleFields.threat.tactic.name} (${ruleFields.threat.tactic.id})`
-    );
-    cy.get(THREAT_TECHNIQUE).should(
-      'contain',
-      `${ruleFields.threatTechnique.name} (${ruleFields.threatTechnique.id})`
-    );
-    cy.get(THREAT_SUBTECHNIQUE).should(
-      'contain',
-      `${ruleFields.threatSubtechnique.name} (${ruleFields.threatSubtechnique.id})`
-    );
-    cy.get(INVESTIGATION_NOTES_TOGGLE).click();
-    cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
+    cy.get(RULE_NAME_HEADER).should('contain', rule.name);
+
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should(
-        'have.text',
-        ruleFields.defaultIndexPatterns.join('')
-      );
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', ruleFields.ruleQuery);
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', (rule.index ?? []).join(''));
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
-      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'Security Timeline');
     });
-    cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should('have.text', ruleFields.ruleInterval);
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', '55m');
-    });
-  });
-
-  it('Deletes one rule from detail page', () => {
-    cy.get(RULES_MANAGEMENT_TABLE)
-      .find(RULES_ROW)
-      .then((rules) => {
-        const initialNumberOfRules = rules.length;
-        const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
-
-        goToRuleDetails();
-        cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
-
-        deleteRuleFromDetailsPage();
-
-        // @ts-expect-error update types
-        cy.waitFor('@deleteRule').then(() => {
-          cy.get(RULES_MANAGEMENT_TABLE).should('exist');
-          cy.get(RULES_MANAGEMENT_TABLE)
-            .find(RULES_ROW)
-            .should('have.length', expectedNumberOfRulesAfterDeletion);
-          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-            const numberOfRules = body.data.length;
-            expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
-          });
-          cy.get(CUSTOM_RULES_BTN).should(
-            'have.text',
-            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-          );
-        });
-      });
   });
 });

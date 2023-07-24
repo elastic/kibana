@@ -27,7 +27,8 @@ const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
 const savedQueryFilterKey = 'testAgent.value';
 
-describe('Rule details, saved_query rule', () => {
+// Only testing components in the rule details page unique to saved query rules
+describe('Saved_query rule', () => {
   const rule = getSavedQueryRule();
 
   before(() => {
