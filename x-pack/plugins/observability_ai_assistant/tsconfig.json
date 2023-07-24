@@ -23,7 +23,8 @@
     "@kbn/i18n",
     "@kbn/spaces-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/stack-connectors-plugin"
   ],
   "exclude": [
     "target/**/*",
