@@ -9,16 +9,14 @@
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
-import { dashboardContentManagementServiceCache } from '../dashboard_content_management_service';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export const deleteDashboards = async (
   ids: string[],
   contentManagement: DashboardStartDependencies['contentManagement']
 ) => {
   const deletePromises = ids.map((id) => {
-    if (dashboardContentManagementServiceCache[id]) {
-      delete dashboardContentManagementServiceCache[id];
-    }
+    dashboardContentManagementCache.deleteDashboard(id);
     return contentManagement.client.delete<
       DashboardCrudTypes['DeleteIn'],
       DashboardCrudTypes['DeleteOut']

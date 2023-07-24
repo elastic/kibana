@@ -15,7 +15,7 @@ import {
 } from '../../../../common/content_management';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { dashboardContentManagementServiceCache } from '../dashboard_content_management_service';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];
@@ -72,30 +72,23 @@ export async function findDashboardById(
   contentManagement: DashboardStartDependencies['contentManagement'],
   id: string
 ): Promise<FindDashboardsByIdResponse> {
-  // console.log('checking cache', id, dashboardContentManagementServiceCache);
-  if (
-    dashboardContentManagementServiceCache[id] &&
-    Math.abs(+new Date() - +dashboardContentManagementServiceCache[id].lastFetched) < 300000 // 5 minutes
-  ) {
-    // this dashboard already exists in the cache and the cache hasn't timed out, so just return the cached version
-    // console.log('...found in cache!');
+  /** If the dashboard exists in the cache, then return the result from that */
+  const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+  if (cachedDashboard) {
     return {
       id,
       status: 'success',
-      attributes: dashboardContentManagementServiceCache[id].item.attributes,
+      attributes: cachedDashboard.item.attributes,
     };
   }
+  /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   const response = await contentManagement.client
     .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     })
     .then((result) => {
-      dashboardContentManagementServiceCache[id] = {
-        item: result.item,
-        meta: result.meta,
-        lastFetched: new Date(),
-      };
+      dashboardContentManagementCache.addDashboard(result);
       return { id, status: 'success', attributes: result.item.attributes };
     })
     .catch((e) => ({ status: 'error', error: e.body, id }));
