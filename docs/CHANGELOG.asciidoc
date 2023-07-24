@@ -247,7 +247,6 @@ Design::
 * Accessibility: Make links on job validation step distinguished from surrounding text {kibana-pull}160608[#160608]
 * Fixes the range slider rendering issues and performance improvements {kibana-pull}159271[#159271]
 Discover::
-* Fixes documents request missing pinned filters {kibana-pull}160693[#160693]
 * Fixes refresh fields when entering Discover {kibana-pull}160195[#160195]
 Elastic Security::
 For the Elastic Security 8.9.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
