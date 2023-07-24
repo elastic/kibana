@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-// FIXME:PT Delete when implemented
-export {};
+import { login } from '../../../tasks/login';
+import { getEndpointManagementPageMap } from '../../../lib';
 
 describe(
-  'App Features for Essential PLI with Endpoint Essentials',
+  'App Features for Essentials PLI with Endpoint Essentials',
   {
     env: {
       ftrConfig: {
@@ -21,6 +21,32 @@ describe(
     },
   },
   () => {
-    // FIXME:PT implement
+    beforeEach(() => {
+      login();
+    });
+
+    const allPages = getEndpointManagementPageMap();
+    const allowedPages = [
+      allPages.endpointList,
+      allPages.policyList,
+      allPages.trustedApps,
+      allPages.blocklist,
+      allPages.eventFilters,
+    ];
+    const deniedPages = [allPages.hostIsolationExceptions, allPages.responseActionLog];
+
+    for (const { url, title, pageTestSubj } of allowedPages) {
+      it(`should allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj(pageTestSubj).should('exist');
+      });
+    }
+
+    for (const { url, title } of deniedPages) {
+      it(`should NOT allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj('noPrivilegesPage').should('exist');
+      });
+    }
   }
 );

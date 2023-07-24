@@ -30,24 +30,52 @@ interface EndpointManagementPage {
   id: keyof EndpointManagementPageMap;
   title: string;
   url: string;
+  pageTestSubj: string;
 }
 
 export const getEndpointManagementPageList = (): EndpointManagementPage[] => {
   return [
-    { id: 'endpointList', title: 'Endpoint list page', url: APP_ENDPOINTS_PATH },
-    { id: 'policyList', title: 'Policy List page', url: APP_POLICIES_PATH },
-    { id: 'trustedApps', title: 'Trusted Apps Page', url: APP_TRUSTED_APPS_PATH },
-    { id: 'eventFilters', title: 'Event Filters page', url: APP_EVENT_FILTERS_PATH },
+    {
+      id: 'endpointList',
+      title: 'Endpoint list page',
+      url: APP_ENDPOINTS_PATH,
+      pageTestSubj: 'endpointPage',
+    },
+    {
+      id: 'policyList',
+      title: 'Policy List page',
+      url: APP_POLICIES_PATH,
+      pageTestSubj: 'policyListPage',
+    },
+    {
+      id: 'trustedApps',
+      title: 'Trusted Apps Page',
+      url: APP_TRUSTED_APPS_PATH,
+      pageTestSubj: 'trustedAppsListPage-container',
+    },
+    {
+      id: 'eventFilters',
+      title: 'Event Filters page',
+      url: APP_EVENT_FILTERS_PATH,
+      pageTestSubj: 'EventFiltersListPage-container',
+    },
     {
       id: 'hostIsolationExceptions',
       title: 'Host Isolation Exceptions page',
       url: APP_HOST_ISOLATION_EXCEPTIONS_PATH,
+      pageTestSubj: 'hostIsolationExceptionsListPage-container',
     },
-    { id: 'blocklist', title: 'Blocklist page', url: APP_BLOCKLIST_PATH },
+    {
+      id: 'blocklist',
+      title: 'Blocklist page',
+      url: APP_BLOCKLIST_PATH,
+      pageTestSubj: 'blocklistPage-container',
+    },
     {
       id: 'responseActionLog',
       title: 'Response Actions History Log page',
       url: APP_RESPONSE_ACTIONS_HISTORY_PATH,
+      pageTestSubj: 'responseActionsPage',
     },
   ];
 };
