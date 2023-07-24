@@ -6,7 +6,11 @@
  */
 
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ClusterPutComponentTemplateRequest,
+  TransformGetTransformStatsResponse,
+  TransformGetTransformStatsTransformStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIlmPolicy,
@@ -14,7 +18,8 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+
 import {
   riskScoreFieldMap,
   getIndexPattern,
@@ -26,6 +31,19 @@ import {
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
+import { riskEngineConfigurationTypeName } from './saved_object';
+import { RiskEngineStatus } from './types';
+import {
+  getRiskScorePivotTransformId,
+  getRiskScoreLatestTransformId,
+} from '../../../common/utils/risk_score_modules';
+import { RiskScoreEntity } from '../../../common/search_strategy';
+interface SavedObjectsClients {
+  savedObjectsClient: SavedObjectsClientContract;
+}
+interface InitOpts extends SavedObjectsClients {
+  namespace?: string;
+}
 
 interface InitializeRiskEngineResourcesOpts {
   namespace?: string;
@@ -37,9 +55,18 @@ interface RiskEngineDataClientOpts {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
+interface Configuration {
+  enable: boolean;
+}
+
 export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
+
+  public async init({ namespace, savedObjectsClient }: InitOpts) {
+    await this.initializeResources({ namespace });
+    return this.initSavedObjects({ savedObjectsClient });
+  }
 
   public async getWriter({ namespace }: { namespace: string }): Promise<Writer> {
     if (this.writerCache.get(namespace)) {
@@ -57,8 +84,98 @@ export class RiskEngineDataClient {
       index,
       logger: this.options.logger,
     });
+
     this.writerCache.set(namespace, writer);
     return writer;
+  }
+
+  public async getStatus({
+    savedObjectsClient,
+    namespace,
+  }: SavedObjectsClients & {
+    namespace: string;
+  }) {
+    const riskEgineStatus = await this.getCurrentStatus({ savedObjectsClient });
+    const legacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
+    return { riskEgineStatus, legacyRiskEgineStatus };
+  }
+
+  private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {
+    const configuration = await this.getConfiguration({ savedObjectsClient });
+
+    if (configuration) {
+      return configuration.enable ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
+    }
+
+    return RiskEngineStatus.NOT_INSTALLED;
+  }
+
+  private async getLegacyStatus({ namespace }: { namespace: string }) {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const getTransformStatsRequests: Array<Promise<TransformGetTransformStatsResponse>> = [];
+    [RiskScoreEntity.host, RiskScoreEntity.user].forEach((entity) => {
+      getTransformStatsRequests.push(
+        esClient.transform.getTransformStats({
+          transform_id: getRiskScorePivotTransformId(entity, namespace),
+        })
+      );
+      getTransformStatsRequests.push(
+        esClient.transform.getTransformStats({
+          transform_id: getRiskScoreLatestTransformId(entity, namespace),
+        })
+      );
+    });
+
+    const result = await Promise.allSettled(getTransformStatsRequests);
+
+    const fulfuletGetTransformStats = result
+      .filter((r) => r.status === 'fulfilled')
+      .map((r) => (r as PromiseFulfilledResult<TransformGetTransformStatsResponse>).value);
+
+    const transforms = fulfuletGetTransformStats.reduce((acc, val) => {
+      return [...acc, ...val.transforms];
+    }, [] as TransformGetTransformStatsTransformStats[]);
+
+    if (transforms.length === 0) {
+      return RiskEngineStatus.NOT_INSTALLED;
+    }
+
+    const notStoppedTransformsExisted = transforms.some((t) => t.state !== 'stopped');
+
+    if (notStoppedTransformsExisted) {
+      return RiskEngineStatus.ENABLED;
+    }
+
+    return RiskEngineStatus.DISABLED;
+  }
+
+  private async getConfiguration({
+    savedObjectsClient,
+  }: SavedObjectsClients): Promise<Configuration | null> {
+    try {
+      const savedObjectsResponse = await savedObjectsClient.find({
+        type: riskEngineConfigurationTypeName,
+      });
+      const configuration = savedObjectsResponse.saved_objects?.[0]?.attributes;
+
+      if (configuration) {
+        return configuration as Configuration;
+      }
+
+      return null;
+    } catch (e) {
+      this.options.logger.error(`Can't get saved object configuration: ${e.message}`);
+      return null;
+    }
+  }
+
+  private async initSavedObjects({
+    savedObjectsClient,
+  }: {
+    savedObjectsClient: SavedObjectsClientContract;
+  }) {
+    return savedObjectsClient.create(riskEngineConfigurationTypeName, { enable: false });
   }
 
   public async initializeResources({

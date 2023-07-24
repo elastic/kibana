@@ -23,6 +23,7 @@ import {
 } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useRiskEningeStatus } from '../api/hooks/use_risk_engine_status';
+import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 
 const docsLinks = [
   {
@@ -44,6 +45,7 @@ const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 export const RiskScoreEnableSection = () => {
   const [checked, setChecked] = useState(false);
   const { data: riskEngineStatus, isLoading, isError } = useRiskEningeStatus();
+  const initRiskEngineMutation = useInitRiskEngineMutation();
   console.log('riskEngineStatus', riskEngineStatus);
 
   return (
@@ -70,7 +72,10 @@ export const RiskScoreEnableSection = () => {
                   <EuiSwitch
                     label={''}
                     checked={checked}
-                    onChange={(e) => setChecked(e.target.checked)}
+                    onChange={(e) => {
+                      setChecked(e.target.checked);
+                      initRiskEngineMutation.mutate();
+                    }}
                     compressed
                     aria-describedby={'switchRiskModule'}
                   />

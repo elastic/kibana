@@ -12,8 +12,6 @@ import { RISK_ENGINE_STATUS_URL } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-import { riskScoreService } from '../risk_score_service';
-
 export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
@@ -25,16 +23,23 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+      const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
-      const siemClient = (await context.securitySolution).getAppClient();
-      const riskScore = riskScoreService({
-        esClient,
-        logger,
-      });
+      const riskEgineClient = securitySolution.getRiskEngineDataClient();
+      const spaceId = securitySolution.getSpaceId();
 
       try {
-        return response.ok({ body: { isOK: 'ok' } });
+        const result = await riskEgineClient.getStatus({
+          savedObjectsClient: soClient,
+          namespace: spaceId,
+        });
+        return response.ok({
+          body: {
+            risk_engine_status: result.riskEgineStatus,
+            legacy_risk_engine_status: result.legacyRiskEgineStatus,
+          },
+        });
       } catch (e) {
         const error = transformError(e);
 
