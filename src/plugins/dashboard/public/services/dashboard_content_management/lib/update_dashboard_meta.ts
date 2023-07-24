@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainerInput, extractReferences } from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
@@ -29,7 +29,7 @@ export const updateDashboardMeta = async (
 ) => {
   const [dashboard] = await findDashboardsByIds(contentManagement, [id]);
   if (dashboard.status === 'error') {
-    return '';
+    return;
   }
 
   const references =
@@ -37,7 +37,7 @@ export const updateDashboardMeta = async (
       ? savedObjectsTagging.updateTagsReferences(dashboard.references, tags)
       : dashboard.references;
 
-  return await contentManagement.client.update<
+  await contentManagement.client.update<
     DashboardCrudTypes['UpdateIn'],
     DashboardCrudTypes['UpdateOut']
   >({
