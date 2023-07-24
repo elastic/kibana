@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { FlyoutPanel } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from './context';
 import { PanelHeader } from './header';
@@ -21,7 +21,7 @@ export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const RightPanelKey: RightPanelProps['key'] = 'document-details-right';
 export const RightPanelTableTabPath: RightPanelProps['path'] = ['table'];
 
-export interface RightPanelProps extends FlyoutPanel {
+export interface RightPanelProps extends FlyoutPanelProps {
   key: 'document-details-right';
   path?: RightPanelPaths[];
   params?: {
