@@ -114,22 +114,19 @@ export const EsQueryExpression: React.FC<
     setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
   };
 
-  const getRuntimeFields = useCallback(
-    (xjson: string) => {
-      let runtimeMappings;
-      try {
-        runtimeMappings = get(JSON.parse(xjson), 'runtime_mappings');
-      } catch (e) {
-        // ignore error
-      }
-      if (runtimeMappings) {
-        const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
-        setRuntimeFields(currentRuntimeFields);
-        setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
-      }
-    },
-    [esFields]
-  );
+  const getRuntimeFields = (xjson: string) => {
+    let runtimeMappings;
+    try {
+      runtimeMappings = get(JSON.parse(xjson), 'runtime_mappings');
+    } catch (e) {
+      // ignore error
+    }
+    if (runtimeMappings) {
+      const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
+      setRuntimeFields(currentRuntimeFields);
+      setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
+    }
+  };
 
   const onTestQuery = useCallback(async () => {
     const isGroupAgg = isGroupAggregation(termField);
@@ -193,15 +190,6 @@ export const EsQueryExpression: React.FC<
     threshold,
     thresholdComparator,
   ]);
-
-  const onChange = useCallback(
-    (xjson: string) => {
-      setXJson(xjson);
-      setParam('esQuery', convertToJson(xjson));
-      getRuntimeFields(xjson);
-    },
-    [convertToJson, getRuntimeFields, setParam, setXJson]
-  );
 
   return (
     <Fragment>
@@ -279,10 +267,10 @@ export const EsQueryExpression: React.FC<
           width="100%"
           height="200px"
           value={xJson}
-          onChange={onChange}
-          editorDidMount={(editor) => {
-            // captures changes on copy/paste
-            editor.onDidPaste(() => onChange(editor.getValue()));
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            setParam('esQuery', convertToJson(xjson));
+            getRuntimeFields(xjson);
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
