@@ -23,7 +23,7 @@ const INDEX_TEMPLATE_TO_CLEAN = [
 ];
 
 /**
- * In 8.10 upload feature moved from using index to datastreams, that function allow to clean those old indices
+ * In 8.10 upload feature moved from using index to datastreams, this function allows to clean those old indices.
  */
 export async function cleanUpOldFileIndices(esClient: ElasticsearchClient, logger: Logger) {
   try {
