@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
-  exposeToBrowser: { poll: true, roles: true },
+  exposeToBrowser: { poll: true, roles: true, export_types: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
