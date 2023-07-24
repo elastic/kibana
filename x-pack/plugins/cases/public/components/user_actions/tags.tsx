@@ -8,21 +8,23 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { TagsUserAction } from '../../../common/api';
-import { Actions } from '../../../common/api';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { TagsUserAction } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
+import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';
 import * as i18n from './translations';
 
-const getLabelTitle = (userAction: UserActionResponse<TagsUserAction>) => {
+const getLabelTitle = (userAction: SnakeToCamelCase<TagsUserAction>) => {
   const tags = userAction.payload.tags ?? [];
 
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
-        {userAction.action === Actions.add && i18n.ADDED_FIELD}
-        {userAction.action === Actions.delete && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+        {userAction.action === UserActionActions.add && i18n.ADDED_FIELD}
+        {userAction.action === UserActionActions.delete && i18n.REMOVED_FIELD}{' '}
+        {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Tags tags={tags} gutterSize="xs" color="hollow" />
@@ -37,7 +39,7 @@ export const createTagsUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const tagsUserAction = userAction as UserActionResponse<TagsUserAction>;
+    const tagsUserAction = userAction as SnakeToCamelCase<TagsUserAction>;
     const label = getLabelTitle(tagsUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,

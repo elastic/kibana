@@ -9,11 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
 import { fetchIndexInfo, getRandomDocsRequest } from './fetch_index_info';
 
-const params: AiopsExplainLogRateSpikesSchema = {
+const params: AiopsLogRateAnalysisSchema = {
   index: 'the-index',
   timeFieldName: 'the-time-field-name',
   start: 1577836800000,
