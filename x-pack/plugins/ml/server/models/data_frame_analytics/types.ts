@@ -15,7 +15,7 @@ import type {
 interface AnalyticsMapArg {
   analyticsId: string;
 }
-interface GetAnalyticsJobIdArg extends AnalyticsMapArg {
+export interface GetAnalyticsJobIdArg extends AnalyticsMapArg {
   modelId?: never;
 }
 export interface GetAnalyticsModelIdArg {

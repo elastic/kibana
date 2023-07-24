@@ -34,7 +34,6 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.euiSizeL}`,
   marginTop: 0,
 });
 

@@ -18,12 +18,10 @@ import {
   type AnalyticsMapNodeElement,
   type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { isDefined } from '@kbn/ml-is-defined';
 import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
 import { flatten } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { modelsProvider } from '../model_management';
-import type { PipelineDefinition } from '../../../common/types/trained_models';
 import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,
@@ -35,12 +33,10 @@ import {
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
   NextLinkReturnType,
+  GetAnalyticsJobIdArg,
   GetAnalyticsModelIdArg,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
-
-type ModelId = string;
-type PipelineId = string;
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
@@ -225,126 +221,6 @@ export class AnalyticsManager {
    * Prepares the initial elements for incoming modelId
    * @param modelId
    */
-  public async getMapWithInferredPipelinesAndIndices(
-    modelId: string,
-    pipelinesResponse: Map<ModelId, Record<PipelineId, PipelineDefinition> | null>,
-    pipelineIdsToDestinationIndices: Record<PipelineId, string>
-  ): Promise<InitialElementsReturnType> {
-    const resultElements = [];
-    const modelElements = [];
-    const details: any = {};
-    let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary;
-    // fetch model data and create model elements
-    data = this.findTrainedModel(modelId);
-    const modelNodeId = `${data.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
-    // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-    const sourceJobId = data?.metadata?.analytics_config?.id;
-    let nextLinkId: string | undefined;
-    let nextType: JobMapNodeTypes | undefined;
-    let previousNodeId: string | undefined;
-
-    modelElements.push({
-      data: {
-        id: modelNodeId,
-        label: data.model_id,
-        type: JOB_MAP_NODE_TYPES.TRAINED_MODEL,
-        isRoot: true,
-      },
-    });
-
-    details[modelNodeId] = data;
-    // fetch source job data and create elements
-    if (sourceJobId !== undefined) {
-      try {
-        data = this.findJob(sourceJobId);
-
-        nextLinkId = data?.source?.index[0];
-        nextType = JOB_MAP_NODE_TYPES.INDEX;
-
-        previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
-
-        resultElements.push({
-          data: {
-            id: previousNodeId,
-            label: data.id,
-            type: JOB_MAP_NODE_TYPES.ANALYTICS,
-            analysisType: getAnalysisType(data?.analysis),
-          },
-        });
-        // Create edge between job and model
-        modelElements.push({
-          data: {
-            id: `${previousNodeId}~${modelNodeId}`,
-            source: previousNodeId,
-            target: modelNodeId,
-          },
-        });
-
-        details[previousNodeId] = data;
-      } catch (error) {
-        // fail silently if job doesn't exist
-        if (error.statusCode !== 404) {
-          throw error.body ?? error;
-        }
-      }
-    }
-
-    const pipelinesLinkedToModelId = pipelinesResponse.get(modelId);
-    if (isDefined(pipelinesLinkedToModelId)) {
-      Object.entries(pipelinesLinkedToModelId).forEach(([pipelineId, pipelineDetails]) => {
-        const pipelineNodeId = `${pipelineId}-${JOB_MAP_NODE_TYPES.PIPELINE}`;
-
-        // Create connection edge between model to pipeline
-        modelElements.push({
-          data: {
-            id: `${modelNodeId}~${pipelineNodeId}`,
-            source: modelNodeId,
-            target: pipelineNodeId,
-          },
-        });
-
-        // Create items for pipeline
-        modelElements.push({
-          data: pipelineDetails,
-          details: {},
-          resultsElements: [],
-          modelElements: [],
-          nextLinkId: pipelineIdsToDestinationIndices[pipelineId],
-          previousNodeId: modelNodeId,
-        });
-
-        // Find destination index associated with pipeline
-        const destinationIndex = pipelineIdsToDestinationIndices[pipelineId];
-        if (destinationIndex) {
-          const destinationIndexNodeId = `${destinationIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
-          modelElements.push({
-            data: {
-              id: `${pipelineNodeId}~${destinationIndexNodeId}`,
-              source: pipelineNodeId,
-              target: destinationIndexNodeId,
-            },
-          });
-
-          // Create items for pipeline
-          modelElements.push({
-            data: pipelineDetails,
-            details: {},
-            resultsElements: [],
-            modelElements: [],
-            nextLinkId: pipelineIdsToDestinationIndices[pipelineId],
-            previousNodeId: modelNodeId,
-          });
-        }
-      });
-    }
-
-    return { data, details, resultElements, modelElements, nextLinkId, nextType, previousNodeId };
-  }
-
-  /**
-   * Prepares the initial elements for incoming modelId
-   * @param modelId
-   */
   public async getInitialElementsModelRoot(modelId: string): Promise<InitialElementsReturnType> {
     const resultElements = [];
     const modelElements = [];
@@ -369,8 +245,6 @@ export class AnalyticsManager {
     });
 
     details[modelNodeId] = data;
-
-    // If model is tied to an data frame analytics job
     // fetch source job data and create elements
     if (sourceJobId !== undefined) {
       try {
@@ -677,10 +551,19 @@ export class AnalyticsManager {
     }
   }
 
+  /**
+   * Expanded wrapper of getAnalyticsMap, which also handles generic models that are not tied to an analytics job
+   * Retrieves info about model and ingest pipeline, index, and transforms associated with the model
+   * @param analyticsId
+   * @param modelId
+   */
   public async extendModelsMap({
     analyticsId,
     modelId,
-  }: ExtendAnalyticsMapArgs & GetAnalyticsModelIdArg): Promise<AnalyticsMapReturnType> {
+  }: {
+    analyticsId?: string;
+    modelId?: string;
+  }): Promise<AnalyticsMapReturnType> {
     const result: AnalyticsMapReturnType = {
       elements: [],
       details: {},
@@ -691,7 +574,7 @@ export class AnalyticsManager {
         return this.getAnalyticsMap({
           analyticsId,
           modelId,
-        });
+        } as GetAnalyticsJobIdArg);
       }
 
       await this.initData();
@@ -704,11 +587,8 @@ export class AnalyticsManager {
         return this.getAnalyticsMap({
           analyticsId,
           modelId,
-        });
+        } as GetAnalyticsModelIdArg);
       }
-
-      let rootIndex;
-      let rootIndexNodeId;
 
       if (modelId && model) {
         // First, find information about the trained model
@@ -729,14 +609,14 @@ export class AnalyticsManager {
         if (pipelines) {
           const pipelineIds = new Set(Object.keys(pipelines));
           pipelineIds.forEach((pipelineId) => {
-            const pipelineNodeId = `${pipelineId}-${JOB_MAP_NODE_TYPES.PIPELINE}`;
+            const pipelineNodeId = `${pipelineId}-${JOB_MAP_NODE_TYPES.INGEST_PIPELINE}`;
             result.details[pipelineNodeId] = pipelines[pipelineId];
 
             result.elements.push({
               data: {
                 id: pipelineNodeId,
                 label: pipelineId,
-                type: JOB_MAP_NODE_TYPES.PIPELINE,
+                type: JOB_MAP_NODE_TYPES.INGEST_PIPELINE,
               },
             });
 
@@ -765,7 +645,7 @@ export class AnalyticsManager {
           });
 
           for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
-            const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.PIPELINE);
+            const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);
 
             for (const destinationIndexId of indexIds) {
               const destinationIndexNodeId = this.getNodeId(
@@ -858,47 +738,6 @@ export class AnalyticsManager {
             }
           }
         }
-      } else {
-        const jobData = this.findJob(modelId);
-
-        const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
-        rootIndex = Array.isArray(jobData?.dest?.index)
-          ? jobData?.dest?.index[0]
-          : jobData?.dest?.index;
-        rootIndexNodeId = `${rootIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
-
-        // Fetch trained model for incoming job id and add node and edge
-        const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
-          modelId,
-          jobData.create_time!
-        );
-        if (isAnalyticsMapNodeElement(modelElement)) {
-          result.elements.push(modelElement);
-          result.details[modelElement.data.id] = modelDetails;
-        }
-        if (isAnalyticsMapEdgeElement(edgeElement)) {
-          result.elements.push(edgeElement);
-        }
-
-        // If rootIndex node has not been created, create it
-        const rootIndexDetails = await this.getIndexData(rootIndex);
-        result.elements.push({
-          data: {
-            id: rootIndexNodeId,
-            label: rootIndex,
-            type: JOB_MAP_NODE_TYPES.INDEX,
-          },
-        });
-        result.details[rootIndexNodeId] = rootIndexDetails;
-
-        // Connect incoming job to rootIndex
-        result.elements.push({
-          data: {
-            id: `${currentJobNodeId}~${rootIndexNodeId}`,
-            source: currentJobNodeId,
-            target: rootIndexNodeId,
-          },
-        });
       }
     } catch (error) {
       result.error = error.message || 'An error occurred fetching map';

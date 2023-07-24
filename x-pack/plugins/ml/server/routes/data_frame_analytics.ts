@@ -30,10 +30,7 @@ import {
   analyticsNewJobCapsParamsSchema,
   analyticsNewJobCapsQuerySchema,
 } from './schemas/data_analytics_schema';
-import type {
-  GetAnalyticsMapArgs,
-  ExtendAnalyticsMapArgs,
-} from '../models/data_frame_analytics/types';
+import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { DataViewHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
@@ -51,15 +48,6 @@ function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: 
   return iph.deleteDataViewById(dataViewId);
 }
 
-function getAnalyticsMap(
-  mlClient: MlClient,
-  client: IScopedClusterClient,
-  idOptions: GetAnalyticsMapArgs
-) {
-  const analytics = new AnalyticsManager(mlClient, client);
-  return analytics.getAnalyticsMap(idOptions);
-}
-
 function getExtendedMap(
   mlClient: MlClient,
   client: IScopedClusterClient,
@@ -72,11 +60,12 @@ function getExtendedMap(
 function getExtendedModelsMap(
   mlClient: MlClient,
   client: IScopedClusterClient,
-  idOptions: ExtendAnalyticsMapArgs
+  idOptions: {
+    analyticsId?: string;
+    modelId?: string;
+  }
 ) {
   const analytics = new AnalyticsManager(mlClient, client);
-
-  console.log(`--@@idOptions`, idOptions);
   return analytics.extendModelsMap(idOptions);
 }
 

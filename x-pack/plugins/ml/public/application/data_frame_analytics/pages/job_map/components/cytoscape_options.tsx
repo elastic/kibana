@@ -34,7 +34,7 @@ function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShape
       return MAP_SHAPES.DIAMOND;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return MAP_SHAPES.TRIANGLE;
-    case JOB_MAP_NODE_TYPES.PIPELINE:
+    case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
       return MAP_SHAPES.ROUND_RECTANGLE;
 
     default:
@@ -73,7 +73,7 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
       return theme.euiColorVis2;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return theme.euiColorVis3;
-    case JOB_MAP_NODE_TYPES.PIPELINE:
+    case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
       return theme.euiColorVis7;
 
     default:

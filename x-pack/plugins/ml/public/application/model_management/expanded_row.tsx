@@ -463,6 +463,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     pipelines,
     restMetaData,
     stats,
+    item.model_id,
   ]);
 
   const initialSelectedTab =
