@@ -148,8 +148,7 @@ describe('ExportTypesRegistry', function () {
         { id: 'foo', jobtType: prop },
         { id: 'bar', jobType: prop },
       ].forEach((obj) => exportTypesRegistry.register(obj));
-      expect(() => 
-        exportTypesRegistry.getByJobType('foo')).toThrow();
+      expect(() => exportTypesRegistry.getByJobType('foo')).toThrow();
     });
   });
 });

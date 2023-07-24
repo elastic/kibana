@@ -44,12 +44,12 @@ export class ExportTypesRegistry {
   }
 
   getByJobType(jobType: ExportType['jobType']): ExportType {
-    let result; 
+    let result;
     for (const value of this._map.values()) {
       if (value.jobType !== jobType) {
         continue;
       }
-      const foundJobType = value
+      const foundJobType = value;
 
       if (result) {
         throw new Error('Found multiple items matching predicate.');
@@ -64,7 +64,6 @@ export class ExportTypesRegistry {
 
     return result;
   }
-
 
   get(findType: GetCallbackFn): ExportType {
     let result;
