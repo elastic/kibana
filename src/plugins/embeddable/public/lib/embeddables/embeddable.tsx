@@ -62,8 +62,21 @@ export abstract class Embeddable<
 
   protected destroyed: boolean = false;
 
+  private initializeInputAndOutputStreams() {
+    this.inputSubject.next(this.input);
+    this.outputSubject.next(this.output);
+
+    this.getOutput$()
+      .pipe(
+        map(({ title }) => title || ''),
+        distinctUntilChanged()
+      )
+      .subscribe((title) => this.renderComplete.setTitle(title));
+  }
+
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
+    this.input = input;
 
     this.output = {
       title: getPanelTitle(input, output),
@@ -76,24 +89,16 @@ export abstract class Embeddable<
           }),
       ...output,
     };
-    this.input = {
-      viewMode: ViewMode.EDIT,
-      ...input,
-    };
     this.parent = parent;
 
-    this.inputSubject.next(this.input);
-    this.outputSubject.next(this.output);
-
-    this.getOutput$()
-      .pipe(
-        map(({ title }) => title || ''),
-        distinctUntilChanged()
-      )
-      .subscribe((title) => this.renderComplete.setTitle(title));
+    if (!this.parent) {
+      this.initializeInputAndOutputStreams();
+    }
   }
 
   public initializeParentSubscription(parent: IContainer) {
+    this.input = { viewMode: ViewMode.EDIT, ...parent.getInputForChild<TEmbeddableInput>(this.id) };
+    this.initializeInputAndOutputStreams();
     this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
       // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
       if (!parent.getInput().panels[this.id]) return;
@@ -162,13 +167,14 @@ export abstract class Embeddable<
     lastExplicitInput: Partial<TEmbeddableInput>
   ): Promise<boolean> {
     const currentExplicitInput = this.getExplicitInput();
-    return (
+    const isEqual =
       genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput) &&
       fastIsEqual(
         omitGenericEmbeddableInput(lastExplicitInput),
         omitGenericEmbeddableInput(currentExplicitInput)
-      )
-    );
+      );
+
+    return isEqual;
   }
 
   public getExplicitInput() {

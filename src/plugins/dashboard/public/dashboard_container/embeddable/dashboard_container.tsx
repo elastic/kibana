@@ -7,7 +7,6 @@
  */
 
 import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import { Subject, Subscription } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 
@@ -47,8 +46,8 @@ import {
 
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
+import { navigateToDashboard } from './create/create_dashboard';
 import { pluginServices } from '../../services/plugin_services';
-import { initializeDashboard } from './create/create_dashboard';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
@@ -101,6 +100,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public integrationSubscriptions: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
+  public creationOptions?: DashboardCreationOptions;
 
   public searchSessionId?: string;
 
@@ -117,7 +117,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private allDataViews: DataView[] = [];
 
   // Services that are used in the Dashboard container code
-  private creationOptions?: DashboardCreationOptions;
   private analyticsService: DashboardAnalyticsService;
   private theme$;
   private chrome;
@@ -308,6 +307,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public runSaveAs = runSaveAs;
   public runQuickSave = runQuickSave;
 
+  public navigateToDashboard = navigateToDashboard;
+
   public showSettings = showSettings;
   public addFromLibrary = addFromLibrary;
 
@@ -354,51 +355,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
     }
   }
-
-  public navigateToDashboard = async (
-    newSavedObjectId?: string,
-    newCreationOptions?: Partial<DashboardCreationOptions>
-  ) => {
-    this.integrationSubscriptions.unsubscribe();
-    this.integrationSubscriptions = new Subscription();
-    this.stopSyncingWithUnifiedSearch?.();
-
-    const {
-      dashboardContentManagement: { loadDashboardState },
-    } = pluginServices.getServices();
-    if (newCreationOptions) {
-      this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
-    }
-    const loadDashboardReturn = await loadDashboardState({ id: newSavedObjectId });
-
-    const dashboardContainerReady$ = new Subject<DashboardContainer>();
-    const untilDashboardReady = () =>
-      new Promise<DashboardContainer>((resolve) => {
-        const subscription = dashboardContainerReady$.subscribe((container) => {
-          subscription.unsubscribe();
-          resolve(container);
-        });
-      });
-
-    const initializeResult = await initializeDashboard({
-      creationOptions: this.creationOptions,
-      controlGroup: this.controlGroup,
-      untilDashboardReady,
-      loadDashboardReturn,
-    });
-    if (!initializeResult) return;
-    const { input: newInput, searchSessionId } = initializeResult;
-
-    this.searchSessionId = searchSessionId;
-
-    this.updateInput(newInput);
-    batch(() => {
-      this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
-      this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
-      this.dispatch.setLastSavedId(newSavedObjectId);
-    });
-    dashboardContainerReady$.next(this);
-  };
 
   /**
    * Gets all the dataviews that are actively being used in the dashboard

@@ -87,7 +87,9 @@ const getPanelsAreEqual = (
           newPanels[panelId]
         )
       : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
-    if (!panelIsEqual) return false;
+    if (!panelIsEqual) {
+      return false;
+    }
   }
   return true;
 };
