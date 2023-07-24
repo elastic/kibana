@@ -173,7 +173,7 @@ const NavigationEmbeddablePanelEditor = ({
             <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
           ) : (
             <>
-              <EuiFormRow label="Links">
+              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">

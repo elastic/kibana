@@ -33,7 +33,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
          * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
          * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
          */
-        const dashboard = await fetchDashboard(link.destination).catch((error) => setError(error));
+        const dashboard = await fetchDashboard(link.destination).catch((e) => setError(e));
         return dashboard;
       }
     }, [link, parentDashboardId]);
@@ -56,7 +56,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
   ) : (
     <EuiListGroupItem
       size="s"
-      color="primary"
+      color="text"
       showToolTip={Boolean(error)}
       isDisabled={Boolean(error)}
       id={`dashboardLink--${link.id}`}
@@ -64,6 +64,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
       iconProps={{ className: 'dashboardLinkIcon' }}
       className={classNames('navigationLink', {
         navigationLinkCurrent: link.destination === parentDashboardId,
+        dashboardLinkError: Boolean(error),
       })}
       onClick={
         link.destination === parentDashboardId

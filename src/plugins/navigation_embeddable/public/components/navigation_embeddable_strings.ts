@@ -31,6 +31,10 @@ export const NavEmbeddableStrings = {
         defaultMessage: 'Close',
       }),
     panelEditor: {
+      getLinksTitle: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.linksTitle', {
+          defaultMessage: 'Links',
+        }),
       getEmptyLinksMessage: () =>
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksMessage', {
           defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',

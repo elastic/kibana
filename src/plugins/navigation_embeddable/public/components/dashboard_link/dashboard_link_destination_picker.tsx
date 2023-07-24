@@ -54,7 +54,10 @@ export const DashboardLinkDestinationPicker = ({
   useMount(async () => {
     if (initialSelection) {
       const dashboard = await fetchDashboard(initialSelection).catch(() => {
-        // swallow the error that is thrown, since this means the selected dashboard was deleted
+        /**
+         * Swallow the error that is thrown, since this just means the selected dashboard was deleted and
+         * so we should treat this the same as "no previous selection."
+         */
       });
       if (dashboard) {
         onDestinationPicked(dashboard);

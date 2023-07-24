@@ -170,9 +170,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
               value={currentLinkLabel}
-              onChange={(e) => {
-                setCurrentLinkLabel(e.target.value);
-              }}
+              onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>
         </EuiForm>

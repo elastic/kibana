@@ -2,21 +2,22 @@
   font-weight: $euiFontWeightRegular;
 
   .navigationLink {
-    .dashboardLinkIcon {
-      margin-right: 6px;
-    }    
+    &.dashboardLinkError {
+      max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
+      .dashboardLinkIcon {
+        margin-right: 6px;
+      }
+    }
 
     &.navigationLinkCurrent {
       border-radius: 0;
-  
       .euiListGroupItem__text {
         cursor: default;
         font-weight: $euiFontWeightSemiBold;
-        color: $euiTextColor;
+        color: $euiColorPrimary;
       }
     }
   }
-
 
   .verticalLayoutWrapper {
     .navigationLink {
@@ -27,7 +28,7 @@
       }
 
       &.navigationLinkCurrent {
-        box-shadow: $euiTextColor 2px 0px 0px inset;
+        box-shadow: $euiColorPrimary 2px 0px 0px inset;
       }
     }
   }
@@ -40,10 +41,8 @@
     flex-direction: row;
 
     .navigationLink {
-      // min-width: 50px;
-
       &.navigationLinkCurrent {
-        box-shadow: $euiTextColor 0px -2px 0px inset;
+        box-shadow: $euiColorPrimary 0px -2px 0px inset;
 
         .euiListGroupItem__text {
           padding-inline: 0px;
