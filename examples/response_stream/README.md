@@ -21,8 +21,12 @@ The request's headers get passed on to automatically identify if compression is 
 On the client, the custom hook is used like this:
 
 ```ts
-const { errors, start, cancel, data, isRunning } = useFetchStream<
-    ApiSimpleStringStream
->('/internal/response_stream/simple_string_stream');
+const {
+  errors,
+  start,
+  cancel,
+  data,
+  isRunning
+} = useFetchStream('/internal/response_stream/simple_string_stream');
 ```
 

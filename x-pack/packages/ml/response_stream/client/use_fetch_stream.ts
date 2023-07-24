@@ -22,24 +22,25 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { fetchStream } from './fetch_stream';
 import { stringReducer, type StringReducer } from './string_reducer';
 
+// This pattern with a dual ternary allows us to default to StringReducer
+// and if a custom reducer is supplied fall back to that one instead.
+// The complexity in here allows us to create a simpler API surface where
+// these generics can be infered from the arguments and don't have to be
+// supplied additionally.
 type CustomReducer<T> = T extends StringReducer
   ? StringReducer
   : T extends Reducer<any, any>
   ? T
   : never;
 
-interface FetchStreamOptions<T> {
-  /**
-   * Custom reducer
-   */
+// Wrapped reducer options in the format they need to be passed in as arguments.
+interface FetchStreamCustomReducer<T> {
   reducer: CustomReducer<T>;
-  /**
-   * Initial state
-   */
   initialState: ReducerState<CustomReducer<T>>;
 }
 
-function isOptions<T>(arg: unknown): arg is CustomReducer<T> {
+// Type guard for custom reducer hook argument
+function isReducerOptions<T>(arg: unknown): arg is CustomReducer<T> {
   return isPopulatedObject(arg, ['reducer', 'initialState']);
 }
 
@@ -50,7 +51,7 @@ function isOptions<T>(arg: unknown): arg is CustomReducer<T> {
  * @param endpoint API endpoint including Kibana base path.
  * @param apiVersion Optional API version.
  * @param body Optional API request body.
- * @param options Optional custom reducer and initial state.
+ * @param customReducer Optional custom reducer and initial state.
  * @returns An object with streaming data and methods to act on the stream.
  */
 export function useFetchStream<B extends object, R extends Reducer<any, any>>(
@@ -58,19 +59,19 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
   endpoint: string,
   apiVersion?: string,
   body?: B,
-  options?: FetchStreamOptions<R>
+  customReducer?: FetchStreamCustomReducer<R>
 ) {
   const [errors, setErrors] = useState<string[]>([]);
   const [isCancelled, setIsCancelled] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
-  const optionsWithFallback = isOptions(options)
-    ? options
-    : ({ reducer: stringReducer, initialState: '' } as FetchStreamOptions<R>);
+  const reducerWithFallback = isReducerOptions(customReducer)
+    ? customReducer
+    : ({ reducer: stringReducer, initialState: '' } as FetchStreamCustomReducer<R>);
 
   const [data, dispatch] = useReducer(
-    optionsWithFallback.reducer,
-    optionsWithFallback.initialState
+    reducerWithFallback.reducer,
+    reducerWithFallback.initialState
   );
   const dataThrottled = useThrottle(data, 100);
 
@@ -98,7 +99,7 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
       apiVersion,
       abortCtrl,
       body,
-      options !== undefined
+      customReducer !== undefined
     )) {
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
