@@ -10,6 +10,7 @@ import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin
 import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
@@ -17,7 +18,6 @@ import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import type { SearchResponseInterceptedWarning } from '../../../types';
 import type { SurrDocType } from '../services/context';
 import type { DiscoverServices } from '../../../build_services';
-import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 
 interface RangeQuery {
   format: string;

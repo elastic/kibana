@@ -11,10 +11,10 @@ import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
-import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 import { FetchDeps } from './fetch_all';
 
 /**
