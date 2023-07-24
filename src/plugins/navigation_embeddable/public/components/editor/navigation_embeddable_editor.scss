@@ -52,8 +52,10 @@
 
 .navEmbeddableLinkPanel {
   padding: $euiSizeXS $euiSizeS;
+  color: $euiTextColor;
 
   &.linkError {
+    background-color: tint($euiColorWarning, 95%);
     border: 1px solid transparentize($euiColorWarningText, 0.7);
     color: $euiColorWarningText;
   }

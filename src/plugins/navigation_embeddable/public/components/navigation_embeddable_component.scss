@@ -2,6 +2,10 @@
   font-weight: $euiFontWeightRegular;
 
   .navigationLink {
+    .dashboardLinkIcon {
+      margin-right: 6px;
+    }    
+
     &.navigationLinkCurrent {
       border-radius: 0;
   

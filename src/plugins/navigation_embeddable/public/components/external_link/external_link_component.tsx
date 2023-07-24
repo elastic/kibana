@@ -11,10 +11,9 @@ import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { NavigationEmbeddableLink } from '../../embeddable/types';
 
-export const ExternalLinkComponent = ({ link, ...other }: { link: NavigationEmbeddableLink }) => {
+export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   return (
     <EuiListGroupItem
-      {...other}
       size="s"
       color="primary"
       className={'navigationLink'}

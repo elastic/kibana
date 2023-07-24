@@ -29,6 +29,7 @@ import {
 } from '../../embeddable/types';
 import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 
 export const NavigationEmbeddablePanelEditorLink = ({
   link,
@@ -43,34 +44,33 @@ export const NavigationEmbeddablePanelEditorLink = ({
   parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
-  const [errorState, setErrorState] = useState<Error | undefined>();
+  const [dashboardError, setDashboardError] = useState<Error | undefined>();
   const parentDashboardTitle = parentDashboard?.select((state) => state.explicitInput.title);
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
-    let label = link.label;
     if (link.type === DASHBOARD_LINK_TYPE) {
-      if (!label && parentDashboardId === link.destination) {
-        return parentDashboardTitle;
+      if (parentDashboardId === link.destination) {
+        return link.label || parentDashboardTitle;
+      } else {
+        const dashboard = await fetchDashboard(link.destination).catch((error) =>
+          setDashboardError(error)
+        );
+        return (
+          link.label ||
+          (dashboard ? dashboard.attributes.title : DashboardLinkStrings.getDashboardErrorLabel())
+        );
       }
-
-      await fetchDashboard(link.destination)
-        .then((dashboard) => {
-          label = dashboard.attributes.title;
-        })
-        .catch((error) => {
-          setErrorState(error);
-          label = link.label || 'Error fetching dashboard';
-        });
+    } else {
+      return link.label || link.destination;
     }
-    return label || link.destination;
   }, [link]);
 
   return (
     <EuiPanel
       hasBorder
       hasShadow={false}
-      className={`navEmbeddableLinkPanel ${errorState ? 'linkError' : ''}`}
+      className={`navEmbeddableLinkPanel ${dashboardError ? 'linkError' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -84,12 +84,12 @@ export const NavigationEmbeddablePanelEditorLink = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem className="navEmbeddableLinkText">
-          <EuiToolTip content={errorState ? errorState.message : ''} display="block">
+          <EuiToolTip content={dashboardError ? dashboardError.message : ''} display="block">
             <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiIcon
-                  type={errorState ? 'warning' : NavigationLinkInfo[link.type].icon}
-                  color={errorState ? 'warning' : 'text'}
+                  type={dashboardError ? 'warning' : NavigationLinkInfo[link.type].icon}
+                  color={dashboardError ? 'warning' : 'text'}
                 />
               </EuiFlexItem>
 

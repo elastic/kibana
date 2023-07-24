@@ -15,12 +15,12 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { fetchDashboard } from './dashboard_link_tools';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { DashboardItem, NavigationEmbeddableLink } from '../../embeddable/types';
+import { NavigationEmbeddableLink } from '../../embeddable/types';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
-export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmbeddableLink }) => {
+export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();
-  const [errorState, setErrorState] = useState<Error | undefined>();
+  const [error, setError] = useState<Error | undefined>();
 
   const dashboardContainer = navEmbeddable.parent as DashboardContainer;
   const parentDashboardTitle = dashboardContainer.select((state) => state.explicitInput.title);
@@ -33,11 +33,7 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
          * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
          * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
          */
-        const dashboard: DashboardItem | void = await fetchDashboard(link.destination).catch(
-          (error: Error) => {
-            setErrorState(error);
-          }
-        );
+        const dashboard = await fetchDashboard(link.destination).catch((error) => setError(error));
         return dashboard;
       }
     }, [link, parentDashboardId]);
@@ -52,20 +48,20 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
   }, [link, destinationDashboard, parentDashboardId, parentDashboardTitle]);
 
   return loadingDestinationDashboard ? (
-    <li {...other} id={`dashboardLink--${link.id}--loading`}>
+    <li id={`dashboardLink--${link.id}--loading`}>
       <EuiButtonEmpty size="s" isLoading={true}>
         {DashboardLinkStrings.getLoadingDashboardLabel()}
       </EuiButtonEmpty>
     </li>
   ) : (
     <EuiListGroupItem
-      {...other}
       size="s"
       color="primary"
-      showToolTip={Boolean(errorState)}
-      isDisabled={Boolean(errorState)}
+      showToolTip={Boolean(error)}
+      isDisabled={Boolean(error)}
       id={`dashboardLink--${link.id}`}
-      iconType={errorState ? 'warning' : undefined}
+      iconType={error ? 'warning' : undefined}
+      iconProps={{ className: 'dashboardLinkIcon' }}
       className={classNames('navigationLink', {
         navigationLinkCurrent: link.destination === parentDashboardId,
       })}
@@ -77,7 +73,7 @@ export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmb
             }
       }
       label={linkLabel}
-      toolTipText={errorState ? errorState.message : undefined}
+      toolTipText={error ? error.message : undefined}
     />
   );
 };
