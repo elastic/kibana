@@ -36,15 +36,15 @@ const getInitialFilterString = (securityTags: TagReference[] | null | undefined)
   if (!securityTags) {
     return;
   }
-  const uniqueQueryArray = securityTags?.reduce<string[]>((acc, { name }) => {
+  const uniqueQuerySet = securityTags?.reduce<Set<string>>((acc, { name }) => {
     const nameString = `"${name}"`;
-    if (name && acc.indexOf(nameString) === -1) {
-      acc.push(nameString);
+    if (name && !acc.has(nameString)) {
+      acc.add(nameString);
     }
     return acc;
-  }, []);
+  }, new Set());
 
-  const query = [uniqueQueryArray].join(' or');
+  const query = [...uniqueQuerySet].join(' or');
   return `tag:(${query})`;
 };
 
