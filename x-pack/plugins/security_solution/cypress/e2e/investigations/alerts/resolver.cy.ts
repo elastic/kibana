@@ -30,6 +30,8 @@ describe('Analyze events view for alerts', () => {
   });
 
   it('should render when button is clicked', () => {
+    // Explicitly fail this test
+    expect(true).toBe(false);
     openAnalyzerForFirstAlertInTimeline();
     cy.get(ANALYZER_NODE).first().should('be.visible');
   });
