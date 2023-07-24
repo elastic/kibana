@@ -31,7 +31,7 @@ function _InlineTextInput({
   disabled = false,
   onChange,
 }: Props): React.ReactElement<any, any> | null {
-  const euiInlineEdit = (
+  return (
     <EuiInlineEditText
       size="s"
       defaultValue={text || ''}
@@ -40,8 +40,6 @@ function _InlineTextInput({
       isReadOnly={disabled}
     />
   );
-
-  return euiInlineEdit;
 }
 
 export const InlineTextInput = memo(_InlineTextInput);
