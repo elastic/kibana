@@ -50,6 +50,16 @@ To learn more, check out cases in the {observability-guide}/create-cases.html[{o
 image::images/wildcard-search.png[Example of new string search]
 
 [discrete]
+=== Maps
+
+[discrete]
+==== Spatial join
+**Maps** now supports grouping documents by geospatial relationships using a new layer wizard named **Spatial join**. Useful for tracking moving objects in relation to static ones. For example, tracking bicycle courier in relation to stores. 
+
+[role="screenshot"]
+image::images/currierlocation.png[Example of currier locations in relations to stores]
+
+[discrete]
 === Lens
 
 [discrete]
