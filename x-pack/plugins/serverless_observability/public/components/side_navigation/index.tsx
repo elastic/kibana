@@ -64,10 +64,18 @@ const navigationTree: NavigationTreeDefinition = {
                   }),
                   link: 'ml:logRateAnalysis',
                   icon: 'beaker',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+                  },
                 },
                 {
                   link: 'ml:changePointDetections',
                   icon: 'beaker',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(
+                      prepend('/app/ml/aiops/change_point_detection')
+                    );
+                  },
                 },
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
@@ -90,12 +98,23 @@ const navigationTree: NavigationTreeDefinition = {
               children: [
                 {
                   link: 'apm:services',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/apm/services')) ||
+                      pathNameSerialized.startsWith(prepend('/app/apm/service-map')) ||
+                      pathNameSerialized.startsWith(prepend('/app/apm/service-groups')) ||
+                      pathNameSerialized.startsWith(prepend('/app/apm/mobile-services'))
+                    );
+                  },
                 },
                 {
                   link: 'apm:traces',
                 },
                 {
                   link: 'apm:dependencies',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                  },
                 },
               ],
             },
