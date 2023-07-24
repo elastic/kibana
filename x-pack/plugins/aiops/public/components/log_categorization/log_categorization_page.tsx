@@ -49,6 +49,7 @@ import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 
 const BAR_TARGET = 20;
+const MESSAGE_FIELD = 'message';
 
 export const LogCategorizationPage: FC = () => {
   const {
@@ -165,18 +166,6 @@ export const LogCategorizationPage: FC = () => {
     [dataView]
   );
 
-  useEffect(
-    function setSingleFieldAsSelected() {
-      const field = stateFromUrl.field;
-      if (field !== undefined && fields.find((f) => f.label === field)) {
-        setSelectedField(field);
-      } else if (fields.length === 1) {
-        setSelectedField(fields[0].label);
-      }
-    },
-    [fields, stateFromUrl.field]
-  );
-
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
       randomSampler.setDocCount(documentStats.totalCount);
@@ -208,6 +197,7 @@ export const LogCategorizationPage: FC = () => {
     const index = getIndexPattern();
 
     if (selectedField === undefined || timeField === undefined) {
+      setLoading(false);
       return;
     }
 
@@ -253,6 +243,27 @@ export const LogCategorizationPage: FC = () => {
     intervalMs,
     toasts,
   ]);
+
+  useEffect(
+    function autoSelectField() {
+      if (selectedField !== undefined) {
+        return;
+      }
+
+      const field = stateFromUrl.field;
+      if (field !== undefined && fields.find((f) => f.label === field)) {
+        // select field from URL, if it exists
+        setSelectedField(field);
+      } else if (fields.length === 1) {
+        // otherwise, if there is only one field in the list, select it
+        setSelectedField(fields[0].label);
+      } else if (fields.find((f) => f.label === MESSAGE_FIELD)) {
+        // otherwise, if there is a field called `message`, select it
+        setSelectedField(MESSAGE_FIELD);
+      }
+    },
+    [fields, loadCategories, selectedField, stateFromUrl.field]
+  );
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
     setData(null);
