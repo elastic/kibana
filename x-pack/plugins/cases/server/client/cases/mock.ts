@@ -228,13 +228,13 @@ export const commentPersistableState: Comment = {
   version: 'WzEsMV0=',
 };
 
-export const commentFilePersistableState: Comment = {
+export const commentFileExternalReference: Comment = {
   ...commentExternalReference,
   externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
   externalReferenceMetadata: { files: [{ name: '', extension: '', mimeType: '', created: '' }] },
   externalReferenceStorage: {
     type: ExternalReferenceStorageType.savedObject as const,
-    soType: 'iuhu',
+    soType: 'file',
   },
 };
 

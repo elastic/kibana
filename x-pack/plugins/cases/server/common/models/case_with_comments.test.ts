@@ -13,7 +13,7 @@ import { CaseCommentModel } from './case_with_comments';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../common/constants';
 import {
   commentExternalReference,
-  commentFilePersistableState,
+  commentFileExternalReference,
   commentPersistableState,
 } from '../../client/cases/mock';
 
@@ -313,7 +313,7 @@ describe('CaseCommentModel', () => {
         await expect(
           model.createComment({
             id: 'comment-1',
-            commentReq: commentFilePersistableState,
+            commentReq: commentFileExternalReference,
             createdDate,
           })
         ).resolves.not.toThrow();
@@ -613,7 +613,7 @@ describe('CaseCommentModel', () => {
 
         await expect(
           model.bulkCreate({
-            attachments: [commentFilePersistableState],
+            attachments: [commentFileExternalReference],
           })
         ).resolves.not.toThrow();
       });

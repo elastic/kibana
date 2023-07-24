@@ -6,7 +6,7 @@
  */
 
 import { createAttachmentServiceMock } from '../../../services/mocks';
-import { PersistableStateAndExternalReferencesLimiter } from './persistableStateAndExternalReferences';
+import { PersistableStateAndExternalReferencesLimiter } from './persistable_state_and_external_references';
 import {
   createExternalReferenceRequests,
   createFileRequests,
@@ -18,11 +18,7 @@ import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../commo
 describe('PersistableStateAndExternalReferencesLimiter', () => {
   const caseId = 'test-id';
   const attachmentService = createAttachmentServiceMock();
-  attachmentService.countPersistableStateAndExternalReferenceAttachments.mockImplementation(
-    async () => {
-      return 1;
-    }
-  );
+  attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(1);
 
   const limiter = new PersistableStateAndExternalReferencesLimiter(attachmentService);
 
@@ -31,13 +27,13 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
   });
 
   describe('public fields', () => {
-    it('sets the errorMessage to the 1k limit', () => {
+    it('sets the errorMessage to the 100 limit', () => {
       expect(limiter.errorMessage).toMatchInlineSnapshot(
         `"Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments."`
       );
     });
 
-    it('sets the limit to 1k', () => {
+    it('sets the limit to 100', () => {
       expect(limiter.limit).toBe(MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES);
     });
   });
@@ -66,6 +62,11 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
         limiter.countOfItemsInRequest([
           createPersistableStateRequests(1)[0],
           createExternalReferenceRequests(1)[0],
+          createUserRequests(1)[0],
+          createFileRequests({
+            numRequests: 1,
+            numFiles: 1,
+          })[0],
         ])
       ).toBe(2);
     });
