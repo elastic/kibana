@@ -436,8 +436,8 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               <EuiTitle size={'xs'}>
                 <h5>
                   <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle"
-                    defaultMessage="Models map"
+                    id="xpack.ml.trainedModels.modelsList.expandedRow.mapViewTitle"
+                    defaultMessage="Map"
                   />
                 </h5>
               </EuiTitle>
