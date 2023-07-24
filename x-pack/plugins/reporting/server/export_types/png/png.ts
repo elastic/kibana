@@ -97,7 +97,7 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
         return generatePngObservable(
           () =>
-            this.getScreenshots({
+            this.startDeps.reporting.getScreenshots({
               headers,
               urls: [url],
               browserTimezone: job.browserTimezone,

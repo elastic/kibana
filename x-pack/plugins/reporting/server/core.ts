@@ -18,7 +18,6 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -127,16 +126,21 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
+    // Export Type declarations
     this.exportTypes.push(
       new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
     );
     this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
     this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
     this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+      =
+    // deprecated export types for tests
     this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
     this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
 
-    this.exportTypes.forEach((et) => this.exportTypesRegistry.register(et));
+    this.exportTypes.forEach((et) => {
+      this.exportTypesRegistry.register(et);
+    });
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -163,7 +167,9 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.exportTypes.forEach((et) => et.setup(setupDeps));
+    this.exportTypes.forEach((et) => {
+      et.setup(setupDeps);
+    });
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({

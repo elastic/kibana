@@ -27,10 +27,6 @@ import { ReportingRequestHandlerContext } from '../../types';
 import { getFieldFormats } from '../../services';
 import { decryptJobHeaders } from '../common/decrypt_job_headers';
 
-/*
- * @TODO move to be within @kbn/reporitng-export-types
- */
-
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;

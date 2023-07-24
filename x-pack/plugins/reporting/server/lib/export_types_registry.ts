@@ -43,6 +43,28 @@ export class ExportTypesRegistry {
     return this._map.get(id) as ExportType;
   }
 
+  getByJobType(jobType: ExportType['jobType']): ExportType {
+    let result;
+    for (const value of this._map.values()) {
+      if (value.jobType !== jobType) {
+        continue;
+      }
+      const foundJobType = value;
+
+      if (result) {
+        throw new Error('Found multiple items matching predicate.');
+      }
+
+      result = foundJobType;
+    }
+
+    if (!result) {
+      throw new Error('Found no items matching predicate');
+    }
+
+    return result;
+  }
+
   get(findType: GetCallbackFn): ExportType {
     let result;
     for (const value of this._map.values()) {
