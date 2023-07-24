@@ -6,6 +6,7 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
+import type { Crypto } from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
 import type {
@@ -57,10 +58,27 @@ export class EncryptedSavedObjectsPlugin
 {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
-  private esoService!: EncryptedSavedObjectsService;
+  private readonly primaryCrypto: Crypto | undefined;
+  private readonly decryptionOnlyCryptos: Crypto[];
+  private readonly esoService: EncryptedSavedObjectsService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
+    const config = this.initializerContext.config.get<ConfigType>();
+
+    this.primaryCrypto = config.encryptionKey
+      ? nodeCrypto({ encryptionKey: config.encryptionKey })
+      : undefined;
+    this.decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
+      nodeCrypto({ encryptionKey: decryptionKey })
+    );
+
+    // Embedding excluded AAD fields POC rev2
+    this.esoService = new EncryptedSavedObjectsService({
+      primaryCrypto: this.primaryCrypto,
+      decryptionOnlyCryptos: this.decryptionOnlyCryptos,
+      logger: this.logger,
+    });
   }
 
   public setup(core: CoreSetup, deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
@@ -80,21 +98,6 @@ export class EncryptedSavedObjectsPlugin
         `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: ${hashedEncryptionKey}`
       );
     }
-
-    const primaryCrypto = config.encryptionKey
-      ? nodeCrypto({ encryptionKey: config.encryptionKey })
-      : undefined;
-    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
-      nodeCrypto({ encryptionKey: decryptionKey })
-    );
-
-    // Embedding excluded AAD fields POC rev2
-    // Could no longer freeze - what is the risk?
-    this.esoService = new EncryptedSavedObjectsService({
-      primaryCrypto,
-      decryptionOnlyCryptos,
-      logger: this.logger,
-    });
 
     this.savedObjectsSetup = setupSavedObjects({
       service: this.esoService,
@@ -125,8 +128,8 @@ export class EncryptedSavedObjectsPlugin
         this.esoService,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({
-            primaryCrypto,
-            decryptionOnlyCryptos,
+            primaryCrypto: this.primaryCrypto,
+            decryptionOnlyCryptos: this.decryptionOnlyCryptos,
             logger: this.logger,
           });
           serviceForMigration.registerType(typeRegistration);
