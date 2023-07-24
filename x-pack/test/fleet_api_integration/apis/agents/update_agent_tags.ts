@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const verifyActionResult = async () => {
           const { body } = await supertest
-            .get(`/api/fleet/agents?kuery=tags:newTag`)
+            .get(`/api/fleet/agents?kuery=fleet-agents.tags:newTag`)
             .set('kbn-xsrf', 'xxx');
           expect(body.total).to.eql(4);
         };
@@ -134,7 +134,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const verifyActionResult = async () => {
           const { body } = await supertest
-            .get(`/api/fleet/agents?kuery=tags:existingTag`)
+            .get(`/api/fleet/agents?kuery=fleet-agents.tags:existingTag`)
             .set('kbn-xsrf', 'xxx');
           expect(body.total).to.eql(0);
         };
@@ -142,7 +142,35 @@ export default function (providerContext: FtrProviderContext) {
         await pollResult(actionId, 2, verifyActionResult);
       });
 
-      it('should return a 403 if user lacks fleet all permissions', async () => {
+      it('should return 200 also if the kuery is valid', async () => {
+        await supertest
+          .get(`/api/fleet/agents?kuery=tags:fleet-agents.existingTag`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 200 also if the kuery does not have prefix fleet-agents', async () => {
+        await supertest
+          .get(`/api/fleet/agents?kuery=tags:existingTag`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:existingTag`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/agents?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return a 403 if user lacks "fleet all" permissions', async () => {
         await supertestWithoutAuth
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
