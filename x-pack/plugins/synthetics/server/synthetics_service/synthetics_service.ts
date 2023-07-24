@@ -30,12 +30,12 @@ import { ServiceAPIClient, ServiceData } from './service_api_client';
 
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
   SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
@@ -507,7 +507,7 @@ export class SyntheticsService {
 
     const paramsBySpace = await this.getSyntheticsParams();
 
-    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitor>({
+    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
       type: syntheticsMonitorType,
       perPage: 100,
       namespaces: [ALL_SPACES_ID],
@@ -539,7 +539,7 @@ export class SyntheticsService {
   }
 
   async decryptMonitors(
-    monitors: Array<SavedObject<EncryptedSyntheticsMonitor>>,
+    monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
     encryptedClient: EncryptedSavedObjectsClient
   ) {
     const start = performance.now();
@@ -549,7 +549,7 @@ export class SyntheticsService {
       (monitor) =>
         new Promise((resolve) => {
           encryptedClient
-            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+            .getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
               syntheticsMonitorType,
               monitor.id,
               {
@@ -583,7 +583,7 @@ export class SyntheticsService {
     });
 
     return decryptedMonitors.filter((monitor) => monitor !== null) as Array<
-      SavedObject<SyntheticsMonitorWithSecrets>
+      SavedObject<SyntheticsMonitorWithSecretsAttributes>
     >;
   }
 

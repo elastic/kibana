@@ -69,11 +69,11 @@ import {
 import {
   deleteFirstRule,
   deleteRuleFromDetailsPage,
-  deleteSelectedRules,
   editFirstRule,
   goToRuleDetails,
   selectNumberOfRules,
 } from '../../tasks/alerts_detection_rules';
+import { deleteSelectedRules } from '../../tasks/rules_bulk_actions';
 import { createRule } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';

@@ -58,6 +58,7 @@ describe('Screenshot Observable Pipeline', () => {
       dist: false,
       version: '5000.0.0',
       buildDate: new Date('2023-05-15T23:12:09.000Z'),
+      buildFlavor: 'traditional',
     };
     options = {
       browserTimezone: 'UTC',

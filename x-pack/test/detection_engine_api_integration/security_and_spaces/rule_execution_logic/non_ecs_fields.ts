@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
-  describe.skip('Non ECS fields in alert document source', () => {
+  describe('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
       // invalid ECS field is getting removed
       expect(alertSource).toHaveProperty('threat.enrichments', []);
 
-      expect(alertSource).toHaveProperty('threat.indicator.port', 443);
+      expect(alertSource).toHaveProperty(['threat', 'indicator.port'], 443);
     });
 
     // source client.bytes is text, ECS mapping for client.bytes is long
@@ -271,8 +271,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { errors } = await indexAndCreatePreviewAlert(document);
 
-      expect(errors).toContain(
-        'Bulk Indexing of signals failed: failed to parse field [client.geo.location] of type [geo_point]'
+      expect(errors[0]).toContain('Bulk Indexing of signals failed');
+      expect(errors[0]).toContain(
+        'failed to parse field [client.geo.location] of type [geo_point]'
       );
     });
 

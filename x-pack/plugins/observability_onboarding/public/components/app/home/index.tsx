@@ -61,7 +61,7 @@ export function Home() {
     navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   };
   const handleClickApmSetupGuide = () => {
-    navigateToKibanaUrl('/app/home#/tutorial/apm');
+    navigateToKibanaUrl('/app/apm/tutorial');
   };
   const handleClickKubernetesSetupGuide = () => {
     navigateToKibanaUrl('/app/integrations/detail/kubernetes');
