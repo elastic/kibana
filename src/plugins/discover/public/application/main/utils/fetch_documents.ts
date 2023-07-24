@@ -23,6 +23,7 @@ export const fetchDocuments = (
   searchSource: ISearchSource,
   { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
+  // TODO: for "Load more" do we want to keep this value or override it with a fixed value (200)?
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
