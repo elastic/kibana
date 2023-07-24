@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { throttledActionSchema, rawAlertInstance } from './alert_instance';
-import { DateFromString } from './date_from_string';
 
 export enum ActionsCompletion {
   COMPLETE = 'complete',
@@ -20,7 +19,7 @@ export const ruleStateSchema = t.partial({
   alertInstances: t.record(t.string, rawAlertInstance),
   // tracks the recovered alerts for flapping purposes
   alertRecoveredInstances: t.record(t.string, rawAlertInstance),
-  previousStartedAt: t.union([t.null, DateFromString]),
+  previousStartedAt: t.union([t.null, t.string]),
   summaryActions: throttledActionSchema,
 });
 

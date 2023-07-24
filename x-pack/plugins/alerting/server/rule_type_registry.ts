@@ -9,11 +9,10 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
-import { intersection } from 'lodash';
+import { intersection, max } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { rawRuleSchema } from './raw_rule_schema';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -62,7 +61,6 @@ export interface RegistryRuleType
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
-    | 'fieldsForAAD'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -276,10 +274,112 @@ export class RuleTypeRegistry {
       /** stripping the typing is required in order to store the RuleTypes in a Map */
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
+
+    let alertStateSchema = schema.maybe(schema.any());
+    if (ruleType.alertStateSchemaByVersion) {
+      const versions = Object.keys(ruleType.alertStateSchemaByVersion).map((key) =>
+        parseInt(key, 10)
+      );
+      const latest = max(versions);
+      if (latest !== undefined) {
+        alertStateSchema = ruleType.alertStateSchemaByVersion[latest].extends({
+          start: schema.maybe(schema.string()),
+          duration: schema.maybe(schema.string()),
+          end: schema.maybe(schema.string()),
+        });
+      }
+    }
+
+    const rawAlertInstanceSchema = schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          meta: schema.maybe(
+            schema.object({
+              lastScheduledActions: schema.maybe(
+                schema.object({
+                  subgroup: schema.maybe(schema.string()),
+                  group: schema.string(),
+                  date: schema.string(),
+                  actions: schema.maybe(
+                    schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
+                  ),
+                })
+              ),
+              flappingHistory: schema.maybe(schema.arrayOf(schema.boolean())),
+              flapping: schema.maybe(schema.boolean()),
+              maintenanceWindowIds: schema.maybe(schema.arrayOf(schema.string())),
+              pendingRecoveredCount: schema.maybe(schema.number()),
+              uuid: schema.maybe(schema.string()),
+            })
+          ),
+          // Places using alert state:
+          // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
+          // x-pack/examples/alerting_example/server/alert_types/astros.ts
+          // x-pack/plugins/alerting/server/lib/get_alerts_for_notification.ts
+          // x-pack/plugins/alerting/server/lib/process_alerts.ts
+          // x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts
+          // x-pack/plugins/monitoring/server/alerts/base_rule.ts
+          // x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts
+          // x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts
+          // x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/notifications/schedule_notification_actions.ts
+          // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
+          // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
+          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
+          // x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts
+          // x-pack/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts
+          state: alertStateSchema,
+        })
+      )
+    );
+
+    let ruleStateSchema = schema.maybe(schema.any());
+    if (ruleType.ruleStateSchemaByVersion) {
+      const versions = Object.keys(ruleType.ruleStateSchemaByVersion).map((key) =>
+        parseInt(key, 10)
+      );
+      const latest = max(versions);
+      if (latest !== undefined) {
+        ruleStateSchema = ruleType.ruleStateSchemaByVersion[latest];
+      }
+    }
+
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
+        stateSchemaByVersion: {
+          1: {
+            up: (state) => state,
+            schema: schema.object({
+              // Places using rule state:
+              // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
+              // x-pack/examples/alerting_example/server/alert_types/astros.ts
+              // x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts
+              // x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts
+              // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
+              // x-pack/plugins/stack_alerts/server/rule_types/geo_containment/geo_containment.ts
+              // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
+              // x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+              // x-pack/test/rule_registry/spaces_only/tests/trial/get_summarized_alerts.ts
+              // x-pack/test/rule_registry/spaces_only/tests/trial/lifecycle_executor.ts
+              alertTypeState: ruleStateSchema,
+              alertInstances: rawAlertInstanceSchema,
+              alertRecoveredInstances: rawAlertInstanceSchema,
+              previousStartedAt: schema.maybe(schema.nullable(schema.string())),
+              summaryActions: schema.maybe(
+                schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
+              ),
+            }),
+          },
+        },
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
@@ -291,14 +391,9 @@ export class RuleTypeRegistry {
             RecoveryActionGroupId | RecoveredActionGroupId,
             AlertData
           >(normalizedRuleType, context, this.inMemoryMetrics),
-        paramsSchema: schema.object({
-          alertId: schema.string(),
-          spaceId: schema.string(),
-          consumer: schema.maybe(schema.string()),
-        }),
-        indirectParamsSchema: rawRuleSchema,
       },
     });
+
     if (this.alertsService && ruleType.alerts) {
       this.alertsService.register(ruleType.alerts);
     }
@@ -379,7 +474,6 @@ export class RuleTypeRegistry {
             doesSetRecoveryContext,
             alerts,
             getSummarizedAlerts,
-            fieldsForAAD,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -400,7 +494,6 @@ export class RuleTypeRegistry {
             minimumLicenseRequired
           ).isValid,
           hasGetSummarizedAlerts: !!getSummarizedAlerts,
-          hasFieldsForAAD: Boolean(fieldsForAAD),
           ...(alerts ? { alerts } : {}),
         })
       )

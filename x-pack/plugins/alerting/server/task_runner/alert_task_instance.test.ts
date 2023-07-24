@@ -42,7 +42,7 @@ const alert: SanitizedRule<{
 
 describe('Alert Task Instance', () => {
   test(`validates that a TaskInstance has valid Alert Task State`, () => {
-    const lastScheduledActionsDate = new Date();
+    const lastScheduledActionsDate = new Date().toISOString();
     const taskInstance: ConcreteTaskInstance = {
       id: uuidv4(),
       attempts: 0,
@@ -62,7 +62,7 @@ describe('Alert Task Instance', () => {
             meta: {
               lastScheduledActions: {
                 group: 'first_group',
-                date: lastScheduledActionsDate.toISOString(),
+                date: lastScheduledActionsDate,
               },
             },
           },

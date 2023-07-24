@@ -1588,7 +1588,7 @@ describe('Task Runner', () => {
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
       );
       expect(result.state.summaryActions).toEqual({
-        '111-111': { date: new Date(DATE_1970) },
+        '111-111': { date: new Date(DATE_1970).toISOString() },
       });
     }
   );
@@ -1858,9 +1858,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult.state.previousStartedAt).toEqual(
-      new Date(originalAlertSate.previousStartedAt)
-    );
+    expect(runnerResult.state.previousStartedAt).toEqual(originalAlertSate.previousStartedAt);
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -2768,7 +2766,7 @@ describe('Task Runner', () => {
             meta: {
               uuid: expect.any(String),
               lastScheduledActions: {
-                date: new Date(DATE_1970),
+                date: new Date(DATE_1970).toISOString(),
                 group: 'default',
               },
               flappingHistory: [true],
@@ -2938,7 +2936,7 @@ describe('Task Runner', () => {
             meta: {
               uuid: expect.any(String),
               lastScheduledActions: {
-                date: new Date(DATE_1970),
+                date: new Date(DATE_1970).toISOString(),
                 group: 'default',
               },
               flappingHistory: [true],
@@ -2955,7 +2953,7 @@ describe('Task Runner', () => {
             meta: {
               uuid: expect.any(String),
               lastScheduledActions: {
-                date: new Date(DATE_1970),
+                date: new Date(DATE_1970).toISOString(),
                 group: 'default',
               },
               flappingHistory: [true],

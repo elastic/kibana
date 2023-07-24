@@ -437,17 +437,12 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(taskManager.registerTaskDefinitions.mock.calls[0]).toEqual([
-        {
-          'alerting:test': {
-            createTaskRunner: expect.any(Function),
-            paramsSchema: expect.any(Object),
-            indirectParamsSchema: rawRuleSchema,
-            timeout: '20m',
-            title: 'Test',
-          },
+      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
+        'alerting:test': {
+          timeout: '20m',
+          title: 'Test',
         },
-      ]);
+      });
     });
 
     test('shallow clones the given rule type', () => {
@@ -707,7 +702,6 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
-            "hasFieldsForAAD": false,
             "hasGetSummarizedAlerts": false,
             "id": "test",
             "isExportable": true,
