@@ -46,6 +46,7 @@ import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
   roles: { enabled: boolean };
+  export_types: { pdf: { enabled: boolean }, png: { enabled: boolean }, csv: { enabled: boolean }}
 }
 
 function getStored(): JobId[] {
@@ -233,6 +234,7 @@ export class ReportingPublicPlugin
             application,
             usesUiCapabilities,
             theme: core.theme,
+            enable: this.config.export_types.csv.enabled
           })
         );
 
@@ -245,6 +247,7 @@ export class ReportingPublicPlugin
             application,
             usesUiCapabilities,
             theme: core.theme,
+            enable: this.config.export_types.pdf.enabled || this.config.export_types.png.enabled,
           })
         );
       });
