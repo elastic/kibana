@@ -203,8 +203,8 @@ export const DataComparisonPage: FC = () => {
     dataView,
     'data_drift',
     searchQuery,
-    setGlobalState,
     randomSampler,
+    setGlobalState,
     undefined
   );
 

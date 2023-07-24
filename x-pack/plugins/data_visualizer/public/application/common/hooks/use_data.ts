@@ -27,8 +27,8 @@ export const useData = (
   selectedDataView: DataView,
   contextId: string,
   searchQuery: estypes.QueryDslQueryContainer,
+  randomSampler: RandomSampler,
   onUpdate?: (params: Dictionary<unknown>) => void,
-  randomSampler?: RandomSampler,
   barTarget: number = DEFAULT_BAR_TARGET,
   timeRange?: { min: Moment; max: Moment }
 ) => {

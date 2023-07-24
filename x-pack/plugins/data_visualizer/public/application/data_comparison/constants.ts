@@ -55,8 +55,22 @@ export const DATA_COMPARISON_TYPE_LABEL = {
 
 export const DRIFT_P_VALUE_THRESHOLD = 0.05;
 /**
- * Table generated from https://github.com/elastic/kibana-drift-data-generation/blob/main/notebooks/chi_squared.ipynb
- * until we find a low size replacement for doing chi2test
+ * Table generated from following python code
+ df = range(1,100)
+
+ # levels of significance
+ significance_levels = np.concatenate((np.logspace(-6, -3, 3), np.linspace(0.01, 0.99, 99)))
+
+ # create the table
+ table = []
+ for d in df:
+   row = []
+   for l in significance_levels:
+     row.append(round(stats.chi2.ppf(1 - l, d), 2))
+   table.append(row)
+
+ critical_value_table = np.array(table)
+ * until we find a low size replacement for doing chi2test in js
  */
 export const CRITICAL_VALUES_TABLE = [
   [
