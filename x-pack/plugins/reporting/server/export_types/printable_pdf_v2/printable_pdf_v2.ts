@@ -8,7 +8,18 @@
 import { Headers } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import { catchError, map, mergeMap, takeUntil, tap, of, fromEventPattern, Observable, firstValueFrom, throwError } from 'rxjs';
+import {
+  catchError,
+  map,
+  mergeMap,
+  takeUntil,
+  tap,
+  of,
+  fromEventPattern,
+  Observable,
+  firstValueFrom,
+  throwError,
+} from 'rxjs';
 import { Writable } from 'stream';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
