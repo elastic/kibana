@@ -24,10 +24,6 @@ describe('Export timelines', () => {
   before(() => {
     cleanKibana();
     login();
-    cy.intercept({
-      method: 'POST',
-      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
-    }).as('export');
     createTimeline(getTimeline()).then((response) => {
       cy.wrap(response).as('timelineResponse1');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId1');
@@ -42,6 +38,10 @@ describe('Export timelines', () => {
   beforeEach(() => {
     login();
     visitWithoutDateRange(TIMELINES_URL);
+    cy.intercept({
+      method: 'POST',
+      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
+    }).as('export');
   });
 
   it('Exports custom timeline(s)', function () {

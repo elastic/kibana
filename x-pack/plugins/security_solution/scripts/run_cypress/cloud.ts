@@ -29,6 +29,7 @@ export const cli = () => {
         record: true,
         browser: 'chrome',
         headed: true,
+        spec: argv.spec as string,
         ciBuildId:
           process.env.BUILDKITE_STEP_ID ??
           `security_solution-${Math.random().toString(36).substring(2)}`,

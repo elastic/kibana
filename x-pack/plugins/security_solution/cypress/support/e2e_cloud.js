@@ -29,7 +29,11 @@ Cypress.on('uncaught:exception', () => {
 });
 
 before(() => {
-  Cypress.config('baseUrl', Cypress.env('BASE_URL'));
-  cy.visit('/');
-  cy.location('origin').should('eq', Cypress.env('BASE_URL'));
+  cy.task('isSkipped', Cypress.spec.absolute).then((isSkippedSpec) => {
+    if (!isSkippedSpec) {
+      Cypress.config('baseUrl', Cypress.env('BASE_URL'));
+      cy.visit('/');
+      cy.location('origin').should('eq', Cypress.env('BASE_URL'));
+    }
+  });
 });

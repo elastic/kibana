@@ -54,6 +54,10 @@ export default defineCypressConfig({
 
       let processes: Record<string, ChildProcess> = {};
 
+      on('task', {
+        isSkipped,
+      });
+
       on('before:spec', (spec) => {
         const isSkippedSpec = isSkipped(spec.absolute);
 
@@ -100,16 +104,14 @@ export default defineCypressConfig({
             });
           }
         }
-
-        on('after:spec', () => {
-          Object.values(processes).forEach((child) => {
-            child.kill();
-          });
-          processes = {};
-        });
       });
 
       on('after:spec', (spec, results) => {
+        Object.values(processes).forEach((child) => {
+          child.kill();
+        });
+        processes = {};
+
         if (results && results.video) {
           // Do we have failures for any retry attempts?
           const failures = results.tests.some((test) =>
