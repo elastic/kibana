@@ -255,6 +255,16 @@ export const cli = () => {
               }
             );
 
+            log.info(`
+----------------------------------------------
+Cypress FTR setup for file: ${filePath}:
+----------------------------------------------
+
+${JSON.stringify(config.getAll(), null, 2)}
+
+----------------------------------------------
+`);
+
             const lifecycle = new Lifecycle(log);
 
             const providers = new ProviderCollection(log, [
@@ -368,14 +378,9 @@ export const cli = () => {
 
             log.info(`
 ----------------------------------------------
-Cypress setup for file: ${filePath}:
+Cypress run ENV for file: ${filePath}:
 ----------------------------------------------
 
-FTR Config:
-${JSON.stringify(config.getAll(), null, 2)}
-
-
-Cypress Custom Env. Variables:
 ${JSON.stringify(cyCustomEnv, null, 2)}
 
 ----------------------------------------------
