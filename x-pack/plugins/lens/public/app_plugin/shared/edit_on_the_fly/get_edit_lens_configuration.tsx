@@ -111,7 +111,7 @@ export function getEditLensConfiguration(
             onClose={() => {
               closeFlyout?.();
             }}
-            aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+            aria-labelledby={i18n.translate('xpack.lens.config.editConfigurationLabel', {
               defaultMessage: 'Edit configuration',
             })}
             size="s"
