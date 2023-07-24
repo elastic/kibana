@@ -26,7 +26,8 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addFilter,
-  addNameAndDescriptionToTimelineTemplate,
+  addNameToTimeline,
+  addDescriptionToTimeline,
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
@@ -59,7 +60,8 @@ describe('Timeline Templates', () => {
     cy.get(PIN_EVENT).should('be.visible');
     cy.get(LOCKED_ICON).should('be.visible');
 
-    addNameAndDescriptionToTimelineTemplate(getTimeline());
+    addNameToTimeline(getTimeline().title);
+    addDescriptionToTimeline(getTimeline().description);
 
     cy.wait('@timeline').then(({ response }) => {
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;

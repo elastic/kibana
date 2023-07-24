@@ -82,7 +82,6 @@ import {
   TIMELINE_QUERY,
   PROVIDER_BADGE,
   PROVIDER_BADGE_DELETE,
-  TIMELINE_PROGRESS_BAR,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -98,8 +97,11 @@ export const addDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
+  cy.intercept('PATCH', ' /api/timeline').as('update');
+  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled');
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
+  cy.wait('@update', { timeout: 12000 });
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
@@ -108,11 +110,12 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_PROGRESS_BAR).should('exist');
-  cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
+  cy.intercept('PATCH', ' /api/timeline').as('update');
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.wait('@update', { timeout: 12000 });
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
