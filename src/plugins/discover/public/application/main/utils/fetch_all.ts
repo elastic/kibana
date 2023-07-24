@@ -198,7 +198,7 @@ export function fetchMoreDocuments(
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records }) => {
-        sendLoadingMoreFinishedMsg(dataSubjects.documents$, records);
+        sendLoadingMoreFinishedMsg(dataSubjects.documents$, records); // TODO: surface shard failures
       })
       .catch((error) => {
         // eslint-disable-next-line no-console

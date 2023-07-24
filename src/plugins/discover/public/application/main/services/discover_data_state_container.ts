@@ -238,7 +238,7 @@ export function getDataStateContainer({
       const prevAutoRefreshDone = autoRefreshDone;
 
       const fetchAllStartTime = window.performance.now();
-      await fetchAll(dataSubjects, reset, {
+      await fetchAll(dataSubjects, options.reset, {
         abortController,
         ...commonFetchDeps,
       });
