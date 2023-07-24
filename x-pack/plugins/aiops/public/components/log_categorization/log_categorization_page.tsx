@@ -169,7 +169,7 @@ export const LogCategorizationPage: FC = () => {
     function setSingleFieldAsSelected() {
       const field = stateFromUrl.field;
       if (field !== undefined && fields.find((f) => f.label === field)) {
-        // setSelectedField(field);
+        setSelectedField(field);
       } else if (fields.length === 1) {
         setSelectedField(fields[0].label);
       }
