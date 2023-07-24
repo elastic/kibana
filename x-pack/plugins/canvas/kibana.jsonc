@@ -41,7 +41,6 @@
       "savedObjects",
     ],
     "requiredBundles": [
-      "discover",
       "kibanaReact",
       "kibanaUtils",
       "lens",
