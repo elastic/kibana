@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import classnames from 'classnames';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { MAX_LOADED_GRID_ROWS } from '../../../common/constants';
 
 export interface DiscoverGridFooterProps {
   isLoadingMore: boolean;
@@ -31,6 +32,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
     totalHits = 0,
     onFetchMoreRecords,
   } = props;
+  const { euiTheme } = useEuiTheme();
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
   if (!isOnLastPage) {
@@ -39,23 +41,25 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
 
   // allow to fetch more records on Discover page
   if (onFetchMoreRecords) {
-    // TODO: define a limit
-    if (rowCount <= 3000 - sampleSize) {
+    if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
       return (
         <DiscoverGridFooterContainer hasButton={true} {...props}>
           <>
-            {' '}
             <EuiButtonEmpty
               isLoading={isLoadingMore}
               flush="both"
               data-test-subj="dscGridSampleSizeFetchMoreLink"
               onClick={onFetchMoreRecords}
+              css={css`
+                margin-left: ${euiTheme.size.xs};
+              `}
             >
               <FormattedMessage
                 id="discover.gridSampleSize.fetchMoreLinkLabel"
                 defaultMessage="Load more"
               />
             </EuiButtonEmpty>
+            {'.'}
           </>
         </DiscoverGridFooterContainer>
       );
@@ -81,30 +85,44 @@ const DiscoverGridFooterContainer: React.FC<DiscoverGridFooterContainerProps> = 
   rowCount,
   children,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <p
-      className={classnames('dscDiscoverGrid__footer', {
-        'dscDiscoverGrid__footer--withButton': hasButton,
-      })}
       data-test-subj="discoverTableFooter"
+      css={css`
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background-color: ${euiTheme.colors.lightestShade};
+        padding: ${hasButton
+          ? `0 ${euiTheme.size.base}`
+          : `${euiTheme.size.s} ${euiTheme.size.base}`};
+        margin-top: ${euiTheme.size.xs};
+        text-align: center;
+      `}
     >
-      {hasButton ? (
-        <FormattedMessage
-          id="discover.gridSampleSize.lastPageDescription"
-          defaultMessage="Search results are limited to {rowCount} documents."
-          values={{
-            rowCount,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="discover.gridSampleSize.limitDescription"
-          defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
-          values={{
-            sampleSize: rowCount,
-          }}
-        />
-      )}
+      <span>
+        {hasButton ? (
+          <FormattedMessage
+            id="discover.gridSampleSize.lastPageDescription"
+            defaultMessage="Search results are limited to {rowCount} documents."
+            values={{
+              rowCount,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="discover.gridSampleSize.limitDescription"
+            defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
+            values={{
+              sampleSize: rowCount,
+            }}
+          />
+        )}
+      </span>
       {children}
     </p>
   );
