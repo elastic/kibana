@@ -14,7 +14,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type {
   MeteringCallback,
-  SecurityMetadataTaskStartContract,
+  SecurityUsageReportingTaskStartContract,
   SecurityUsageReportingTaskSetupContract,
 } from '../types';
 
@@ -60,7 +60,6 @@ export class SecurityUsageReportingTask {
               run: async () => {
                 return this.runTask(taskInstance, core, meteringCallback);
               },
-              // TODO
               cancel: async () => {},
             };
           },
@@ -72,7 +71,7 @@ export class SecurityUsageReportingTask {
     }
   }
 
-  public start = async ({ taskManager, interval }: SecurityMetadataTaskStartContract) => {
+  public start = async ({ taskManager, interval }: SecurityUsageReportingTaskStartContract) => {
     if (!taskManager) {
       return;
     }
@@ -105,6 +104,7 @@ export class SecurityUsageReportingTask {
   ) => {
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
+      this.logger.debug('[runTask()] Aborted. Task not started yet');
       return;
     }
     // Check that this task is current
@@ -125,13 +125,13 @@ export class SecurityUsageReportingTask {
       taskId: this.taskId,
       lastSuccessfulReport,
     });
-    this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
+    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
     try {
       usageReportResponse = await usageReportingService.reportUsage(usageRecords);
-      this.logger.info(`usage records report was sent successfully`);
+      this.logger.info(`usage records report was sent successfully ${usageReportResponse}`);
     } catch (err) {
       this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
     }

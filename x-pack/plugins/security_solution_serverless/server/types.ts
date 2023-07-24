@@ -76,7 +76,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   meteringCallback: MeteringCallback;
 }
 
-export interface SecurityMetadataTaskStartContract {
+export interface SecurityUsageReportingTaskStartContract {
   taskManager: TaskManagerStartContract;
   interval: string;
 }
