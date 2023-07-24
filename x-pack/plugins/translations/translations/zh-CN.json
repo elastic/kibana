@@ -27330,7 +27330,6 @@
     "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel} 启用服务事务指标，这种是低基数指标，可供某些视图（如服务库存）使用来加快加载速度。",
     "xpack.observability.apmProgressiveLoadingDescription": "{technicalPreviewLabel} 是否以渐进方式为 APM 视图加载数据。可以先以较低的采样速率请求数据，这样的准确性较低，但响应时间更快，同时在后台加载未采样数据",
     "xpack.observability.apmServiceInventoryOptimizedSortingDescription": "{technicalPreviewLabel} 默认 APM 服务库存和 Storage Explorer 页面排序（对于未应用 Machine Learning 的服务）将按服务名称排序。",
-    "xpack.observability.apmTraceExplorerTabDescription": "{technicalPreviewLabel} 启用 APM Trace Explorer 功能，它允许您通过 KQL 或 EQL 搜索和检查跟踪。",
     "xpack.observability.enableAgentExplorerDescription": "{betaLabel} 启用代理浏览器视图。",
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} 在服务指标选项卡中显示 Amazon Lambda 指标。",
     "xpack.observability.enableCriticalPathDescription": "{technicalPreviewLabel}（可选）显示跟踪的关键路径。",
