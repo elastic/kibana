@@ -473,7 +473,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
        * where this test randomly reproduces thus making the test flaky.
        * Skipping for now until we fix it.
        */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
+      it('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -889,7 +889,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       // there are no alerts in stack management yet
-      it.skip("shows the 'alerts' tab when clicked", async () => {
+      it("shows the 'alerts' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
       });

@@ -18,7 +18,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
   const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/153112
-  describe.skip('getGlobalExecutionKpi', () => {
+  describe('getGlobalExecutionKpi', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
