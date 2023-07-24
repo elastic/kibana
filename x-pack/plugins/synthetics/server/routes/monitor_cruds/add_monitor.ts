@@ -19,15 +19,15 @@ import { triggerTestNow } from '../synthetics_service/test_now_monitor';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
-import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitorAttributes,
-  PrivateLocation,
 } from '../../../common/runtime_types';
+import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
@@ -71,7 +71,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const normalizedMonitor = validationResult.decodedMonitor;
 
-    const privateLocations: PrivateLocation[] = await getPrivateLocations(
+    const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
       normalizedMonitor
     );
@@ -171,7 +171,7 @@ export const syncNewMonitor = async ({
   id?: string;
   normalizedMonitor: SyntheticsMonitor;
   routeContext: RouteContext;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
 }) => {
   const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
@@ -267,7 +267,7 @@ export const deleteMonitorIfCreated = async ({
   }
 };
 
-export const getPrivateLocations = async (
+export const getPrivateLocationsForMonitor = async (
   soClient: SavedObjectsClientContract,
   normalizedMonitor: SyntheticsMonitor
 ) => {
@@ -276,7 +276,7 @@ export const getPrivateLocations = async (
   if (hasPrivateLocation.length === 0) {
     return [];
   }
-  return await getSyntheticsPrivateLocations(soClient);
+  return await getPrivateLocations(soClient);
 };
 
 export const getMonitorNamespace = (

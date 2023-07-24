@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock } from '../__mocks__';
 import { formatHit } from './format_hit';
-import { discoverServiceMock } from '../__mocks__/services';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { DataTableRecord, EsHitRecord } from '../types';
+import { buildDataTableRecord } from './build_data_record';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
@@ -32,17 +32,13 @@ describe('formatHit', () => {
     });
   });
 
-  afterEach(() => {
-    (discoverServiceMock.uiSettings.get as jest.Mock).mockReset();
-  });
-
   it('formats a document as expected', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
       (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
       220,
-      discoverServiceMock.fieldFormats
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png'],
@@ -67,7 +63,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
       220,
-      discoverServiceMock.fieldFormats
+      fieldFormatsMock
     );
     expect(formatted.map(([fieldName]) => fieldName)).toEqual([
       'message',
@@ -84,7 +80,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
       2,
-      discoverServiceMock.fieldFormats
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png'],
@@ -99,7 +95,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['message', 'object.value'].includes(fieldName),
       220,
-      discoverServiceMock.fieldFormats
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['message', 'formatted:foobar'],
@@ -115,7 +111,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['bytes'].includes(fieldName),
       220,
-      discoverServiceMock.fieldFormats
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['bytesDisplayName', 'formatted:123'],
