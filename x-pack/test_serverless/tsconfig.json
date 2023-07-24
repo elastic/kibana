@@ -30,5 +30,10 @@
     "@kbn/observability-plugin",
     "@kbn/infra-forge",
     "@kbn/ftr-common-functional-services",
+    "@kbn/core-chrome-browser",
+    "@kbn/default-nav-ml",
+    "@kbn/default-nav-analytics",
+    "@kbn/default-nav-management",
+    "@kbn/default-nav-devtools",
   ]
 }

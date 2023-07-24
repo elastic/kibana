@@ -28,7 +28,7 @@ import {
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
+import { CisKubernetesIcons, CspFlyoutMarkdown, CodeBlock } from './findings_flyout';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -102,7 +102,7 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
 export const getRemediationList = (rule: CspFinding['rule']) => [
   {
     title: '',
-    description: <Markdown>{rule.remediation}</Markdown>,
+    description: <CspFlyoutMarkdown>{rule.remediation}</CspFlyoutMarkdown>,
   },
   ...(rule.impact
     ? [
@@ -110,7 +110,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
           title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
             defaultMessage: 'Impact',
           }),
-          description: <Markdown>{rule.impact}</Markdown>,
+          description: <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown>,
         },
       ]
     : []),
@@ -120,7 +120,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
           title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
             defaultMessage: 'Default Value',
           }),
-          description: <Markdown>{rule.default_value}</Markdown>,
+          description: <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>,
         },
       ]
     : []),
@@ -128,7 +128,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
       defaultMessage: 'Rationale',
     }),
-    description: <Markdown>{rule.rationale}</Markdown>,
+    description: <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown>,
   },
 ];
 
