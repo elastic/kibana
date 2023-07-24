@@ -112,5 +112,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
+
+    describe('Search Applications', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/applications');
+      });
+
+      it('loads search applications list', async function () {
+        await retry.waitFor(
+          'search apps docs link',
+          async () => await testSubjects.exists('search-applications-documentation-link')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+    describe('Behavioral Analytics', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/analytics');
+      });
+
+      it('loads Behavioral Analytics page', async function () {
+        await retry.waitFor(
+          'create collections button',
+          async () => await testSubjects.exists('create-analytics-collection-btn')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+    describe('Vector Search', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/vector_search');
+      });
+
+      it('loads Vector Search page', async function () {
+        await retry.waitFor(
+          'vector search documentation link',
+          async () => await testSubjects.exists('vector-search-documentation-link')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+    describe('ESRE', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/esre');
+      });
+
+      it('loads ESRE page', async function () {
+        await retry.waitFor(
+          'esre header description',
+          async () => await testSubjects.exists('esre-description-text')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
   });
 }
