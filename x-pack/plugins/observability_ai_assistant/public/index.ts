@@ -29,6 +29,12 @@ export { useObservabilityAIAssistant } from './hooks/use_observability_ai_assist
 export type { Conversation, Message } from '../common';
 export { MessageRole } from '../common';
 
+export type {
+  ObservabilityAIAssistantAPIClientRequestParamsOf,
+  ObservabilityAIAssistantAPIEndpoint,
+  APIReturnType,
+} from './api';
+
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
