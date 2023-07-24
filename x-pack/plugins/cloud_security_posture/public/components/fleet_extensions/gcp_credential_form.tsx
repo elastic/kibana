@@ -77,7 +77,7 @@ const CredentialJSONText = i18n.translate(
 );
 const CredentialSelectBoxTitle = i18n.translate(
   'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
-  { defaultMessage: 'JSON blob containing the credentials and key used to subscribe' }
+  { defaultMessage: 'Credential' }
 );
 
 type GcpCredentialsType = 'credentials_file' | 'credentials_json';
