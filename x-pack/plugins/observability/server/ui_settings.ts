@@ -186,13 +186,16 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.',
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        link: traceExplorerDocsLink({
+          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
+        }),
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
@@ -367,5 +370,12 @@ function throttlingDocsLink({ href }: { href: string }) {
   return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
     'xpack.observability.uiSettings.throttlingDocsLinkText',
     { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}
+
+function traceExplorerDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank">${i18n.translate(
+    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
+    { defaultMessage: 'Learn more.' }
   )}</a>`;
 }
