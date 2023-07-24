@@ -35,6 +35,7 @@ function _InlineTextInput({
     <EuiInlineEditText
       size="s"
       defaultValue={text || ''}
+      readModeProps={{ 'data-test-subj': 'inlineTextInputNonEditableText' }}
       placeholder={placeholder}
       inputAriaLabel={ariaLabel}
       isReadOnly={disabled}
