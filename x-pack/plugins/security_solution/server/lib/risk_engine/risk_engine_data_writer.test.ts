@@ -271,5 +271,33 @@ describe('RiskEngineDataWriter', () => {
 
       expect(docsWritten).toEqual(2);
     });
+
+    describe('when some documents failed to be written', () => {
+      beforeEach(() => {
+        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+          errors: true,
+          items: [
+            { create: { status: 201 } },
+            { create: { status: 500, error: { reason: 'something went wrong' } } },
+          ],
+        });
+      });
+
+      it('returns the number of docs written', async () => {
+        const { docs_written: docsWritten } = await writer.bulk({
+          host: [riskScoreServiceMock.createRiskScore()],
+        });
+
+        expect(docsWritten).toEqual(1);
+      });
+
+      it('returns the errors', async () => {
+        const { errors } = await writer.bulk({
+          host: [riskScoreServiceMock.createRiskScore()],
+        });
+
+        expect(errors).toEqual(['something went wrong']);
+      });
+    });
   });
 });
