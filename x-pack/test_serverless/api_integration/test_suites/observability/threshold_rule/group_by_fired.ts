@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import { Aggregators, Comparator } from '@kbn/observability-plugin/common/threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/threshold/threshold_executor';
@@ -19,13 +20,19 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
-import { waitForAlertInIndex, waitForRuleStatus } from '../helpers/alerting_wait_for_helpers';
+import {
+  waitForAlertInIndex,
+  waitForDocumentInIndex,
+  waitForRuleStatus,
+} from '../helpers/alerting_wait_for_helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  let alertId: string;
+  let startedAt: string;
 
   describe('Threshold rule - GROUP_BY - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -100,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               index: DATA_VIEW_ID,
             },
-            groupBy: ['host.name', 'labels.groupId'],
+            groupBy: ['host.name'],
           },
           actions: [
             {
@@ -110,6 +117,10 @@ export default function ({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
+                    host: '{{context.host}}',
                   },
                 ],
               },
@@ -140,6 +151,8 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
+        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
@@ -160,10 +173,18 @@ export default function ({ getService }: FtrProviderContext) {
           .contain('observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.action_group', 'threshold.fired');
         expect(resp.hits.hits[0]._source).property('tags').contain('observability');
-        expect(resp.hits.hits[0]._source).property('kibana.alert.instance.id', 'host-0,group-0');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.instance.id', 'host-0');
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
+
+        expect(resp.hits.hits[0]._source).property('host.name', 'host-0');
+        expect(resp.hits.hits[0]._source)
+          .property('host.mac')
+          .eql(['00-00-5E-00-53-23', '00-00-5E-00-53-24']);
+        expect(resp.hits.hits[0]._source).property('container.id', 'container-0');
+        expect(resp.hits.hits[0]._source).property('container.name', 'container-name');
+        expect(resp.hits.hits[0]._source).not.property('container.cpu');
 
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
@@ -181,8 +202,33 @@ export default function ({ getService }: FtrProviderContext) {
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
-            groupBy: ['host.name', 'labels.groupId'],
+            groupBy: ['host.name'],
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
+        const resp = await waitForDocumentInIndex<{
+          ruleType: string;
+          alertDetailsUrl: string;
+          reason: string;
+          value: string;
+        }>({
+          esClient,
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          'Custom equation is 0.8 in the last 1 min for host-0. Alert when >= 0.2.'
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('0.8');
+        expect(resp.hits.hits[0]._source?.host).eql(
+          '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
+        );
       });
     });
   });
