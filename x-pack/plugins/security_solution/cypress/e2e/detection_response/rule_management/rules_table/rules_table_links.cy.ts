@@ -25,6 +25,8 @@ describe('Rules table: links', () => {
   });
 
   it('should render correct link for rule name - rules', () => {
+    // Explicitly fail this test
+    expect(true).toBe(false);
     cy.get(RULE_NAME).first().click();
     cy.url().should('contain', 'rules/id/');
   });
