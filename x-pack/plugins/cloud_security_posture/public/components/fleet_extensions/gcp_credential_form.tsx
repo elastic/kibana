@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import semverLt from 'semver/functions/lt';
+import semverCoerce from 'semver/functions/coerce';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -188,7 +189,8 @@ export const GcpCredentialsForm = ({
   onChange,
 }: GcpFormProps) => {
   const fields = getInputVarsFields(input, gcpField.fields);
-  const isInvalid = semverLt(packageInfo.version.split('-')[0], MIN_VERSION_GCP_CIS);
+  const integrationVersionNumberOnly = semverCoerce(packageInfo.version) || '';
+  const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   useEffect(() => {
     setIsValid(!isInvalid);
 
