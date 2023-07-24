@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { cloudPlugin } from 'cypress-cloud/plugin';
 import path from 'path';
