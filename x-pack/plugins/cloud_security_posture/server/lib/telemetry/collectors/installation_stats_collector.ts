@@ -34,7 +34,7 @@ export const getInstallationStats = async (
     isPluginInitialized,
   };
 
-  const getInstalledPackagePolicies = async (
+  const getInstalledPackagePolicies = (
     packagePolicies: PackagePolicy[],
     agentPolicies: AgentPolicy[]
   ) => {
@@ -71,7 +71,7 @@ export const getInstallationStats = async (
   });
   if (!packagePolicies) return [];
 
-  const installationStats: CloudSecurityInstallationStats[] = await getInstalledPackagePolicies(
+  const installationStats: CloudSecurityInstallationStats[] = getInstalledPackagePolicies(
     packagePolicies.items,
     agentPolicies?.items || []
   );
