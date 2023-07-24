@@ -71,16 +71,17 @@ export const cspmMetringCallback = async ({
         )
       : { benchmarks: [], sumResources: 0, earliestTimestampArray: undefined };
 
-    const minTimestamp: string = earliestTimestampArray
-      ? earliestTimestampArray.reduce((min, current) => {
-          return current.value < min.value ? current : min;
-        }, earliestTimestampArray[0]).value_as_string
-      : new Date().toLocaleString();
+    const minTimestamp: string =
+      earliestTimestampArray && earliestTimestampArray.length > 0
+        ? earliestTimestampArray.reduce((min, current) => {
+            return current.value < min.value ? current : min;
+          }, earliestTimestampArray[0]).value_as_string
+        : new Date().toISOString();
 
     const usageRecords = {
       id: TASK_TYPE_PREFIX + ':' + CSPM_METRING_TASK_NAME,
-      usage_timestamp: minTimestamp,
-      creation_timestamp: new Date().toLocaleString(),
+      usage_timestamp: new Date(minTimestamp).toISOString(),
+      creation_timestamp: new Date().toISOString(),
       usage: {
         type: CSPM_BUCKET_TYPE_NAME,
         quantity: sumResources,
@@ -133,6 +134,7 @@ export const getFindingsByResourceAggQuery = () => ({
         unique_resources: {
           cardinality: {
             field: 'resource.id',
+            precision_threshold: 3000, // default = 3000  note note that even with a threshold as low as 100, the error remains very low 1-6% even when counting millions of items. https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate
           },
         },
         min_timestamp: {

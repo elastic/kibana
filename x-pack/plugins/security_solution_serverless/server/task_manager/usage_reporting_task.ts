@@ -77,7 +77,6 @@ export class SecurityUsageReportingTask {
     }
 
     this.wasStarted = true;
-    taskManager.bulkUpdateSchedules([this.taskId], { interval: '30s' });
 
     try {
       await taskManager.ensureScheduled({
@@ -131,7 +130,16 @@ export class SecurityUsageReportingTask {
 
     try {
       usageReportResponse = await usageReportingService.reportUsage(usageRecords);
-      this.logger.info(`usage records report was sent successfully ${usageReportResponse}`);
+
+      if (!usageReportResponse.ok) {
+        const errorResponse = await usageReportResponse.json(); // Assuming the error details are in JSON format
+        this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
+        return;
+      }
+
+      this.logger.info(
+        `usage records report was sent successfully: ${usageReportResponse.status}, ${usageReportResponse.statusText}`
+      );
     } catch (err) {
       this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
     }
