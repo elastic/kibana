@@ -57,7 +57,11 @@ export function defineLoginRoutes({
   );
 
   router.get(
-    { path: '/internal/security/login_state', validate: false, options: { authRequired: false } },
+    {
+      path: '/internal/security/login_state',
+      validate: false,
+      options: { authRequired: false, access: 'public' },
+    },
     async (context, request, response) => {
       const { allowLogin, layout = 'form' } = license.getFeatures();
       const { sortedProviders, selector } = config.authc;

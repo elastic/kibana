@@ -23,7 +23,7 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
   );
 
   deps.httpResources.register(
-    { path: ENTER_SPACE_PATH, validate: false },
+    { path: ENTER_SPACE_PATH, validate: false, options: { access: 'public' } },
     async (context, request, response) => {
       try {
         const { uiSettings } = await context.core;
