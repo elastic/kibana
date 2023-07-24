@@ -15,13 +15,17 @@ import {
 import { useKibana } from '../../common/lib/kibana';
 import { useFetchSecurityTags } from './use_fetch_security_tags';
 import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
+import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/utils/get_ramdom_color', () => ({
+  getRandomColor: jest.fn().mockReturnValue('#FFFFFF'),
+}));
 
 const mockGet = jest.fn();
-const mockPut = jest.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;
-
+const mockCreateTag = jest.fn();
 const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecurityTags(), {});
 
 const asyncRenderUseCreateSecurityDashboardLink = async () => {
@@ -34,8 +38,10 @@ const asyncRenderUseCreateSecurityDashboardLink = async () => {
 
 describe('useFetchSecurityTags', () => {
   beforeAll(() => {
-    useKibana().services.http = { get: mockGet, put: mockPut } as unknown as HttpStart;
-
+    useKibana().services.http = { get: mockGet } as unknown as HttpStart;
+    useKibana().services.savedObjectsTagging = {
+      client: { create: mockCreateTag } as unknown as ITagsClient,
+    } as unknown as SavedObjectsTaggingApi;
     global.AbortController = jest.fn().mockReturnValue({
       abort: jest.fn(),
       signal: mockAbortSignal,
@@ -60,9 +66,10 @@ describe('useFetchSecurityTags', () => {
     mockGet.mockResolvedValue([]);
     await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockPut).toHaveBeenCalledWith(INTERNAL_TAGS_URL, {
-      body: JSON.stringify({ name: SECURITY_TAG_NAME, description: SECURITY_TAG_DESCRIPTION }),
-      signal: mockAbortSignal,
+    expect(mockCreateTag).toHaveBeenCalledWith({
+      name: SECURITY_TAG_NAME,
+      description: SECURITY_TAG_DESCRIPTION,
+      color: '#FFFFFF',
     });
   });
 
@@ -76,7 +83,7 @@ describe('useFetchSecurityTags', () => {
     }));
     const { result } = await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockPut).not.toHaveBeenCalled();
+    expect(mockCreateTag).not.toHaveBeenCalled();
     expect(result.current.tags).toEqual(expect.objectContaining(expected));
   });
 });

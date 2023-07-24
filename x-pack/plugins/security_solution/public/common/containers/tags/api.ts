@@ -23,6 +23,8 @@ export const getTagsByName = (
   abortSignal?: AbortSignal
 ): Promise<Tag[]> => http.get(INTERNAL_TAGS_URL, { query: { name: tagName }, signal: abortSignal });
 
+// Dashboard listing needs savedObjectsTaggingClient to work correctly with cache.
+// https://github.com/elastic/kibana/issues/160723#issuecomment-1641904984
 export const createTag = ({
   savedObjectsTaggingClient,
   tag,
