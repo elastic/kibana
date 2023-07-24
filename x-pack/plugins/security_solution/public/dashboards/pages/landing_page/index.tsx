@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
@@ -117,7 +125,7 @@ export const DashboardsLandingPage = () => {
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="m" />
 
-      {canReadDashboard && securityTagsExist && initialFilter && (
+      {canReadDashboard && securityTagsExist && initialFilter ? (
         <>
           <DashboardListingTable
             disableCreateDashboardButton={loadingCreateDashboardUrl}
@@ -133,6 +141,8 @@ export const DashboardsLandingPage = () => {
             <EuiSpacer size="m" />
           </DashboardListingTable>
         </>
+      ) : (
+        <EuiEmptyPrompt icon={<EuiLoadingSpinner size="l" />} />
       )}
 
       <SpyRoute pageName={SecurityPageName.dashboards} />
