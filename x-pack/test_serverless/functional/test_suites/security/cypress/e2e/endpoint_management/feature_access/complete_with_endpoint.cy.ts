@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// FIXME:PT Delete when implemented
-export {};
+import { FLEET_BASE_PATH } from '@kbn/fleet-plugin/public/constants';
+import { login } from '../../../tasks/login';
+import { getEndpointManagementPageList } from '../../../lib';
 
 describe(
   'App Features for Complete PLI with Endpoint Complete',
@@ -21,6 +22,22 @@ describe(
     },
   },
   () => {
-    // FIXME:PT implement
+    beforeEach(() => {
+      login();
+    });
+
+    const allPages = getEndpointManagementPageList();
+
+    for (const { url, title, pageTestSubj } of allPages) {
+      it(`should allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj(pageTestSubj).should('exist');
+      });
+    }
+
+    it(`should have access to Fleet`, () => {
+      cy.visit(FLEET_BASE_PATH);
+      cy.getByTestSubj('fleetAgentListTable').should('exist');
+    });
   }
 );

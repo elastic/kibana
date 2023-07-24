@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FLEET_BASE_PATH } from '@kbn/fleet-plugin/public/constants';
 import { login } from '../../../tasks/login';
 import { getEndpointManagementPageMap } from '../../../lib';
 
@@ -32,8 +33,9 @@ describe(
       allPages.trustedApps,
       allPages.blocklist,
       allPages.eventFilters,
+      allPages.hostIsolationExceptions,
     ];
-    const deniedPages = [allPages.hostIsolationExceptions, allPages.responseActionLog];
+    const deniedPages = [allPages.responseActionLog];
 
     for (const { url, title, pageTestSubj } of allowedPages) {
       it(`should allow access to ${title}`, () => {
@@ -48,5 +50,10 @@ describe(
         cy.getByTestSubj('noPrivilegesPage').should('exist');
       });
     }
+
+    it(`should have access to Fleet`, () => {
+      cy.visit(FLEET_BASE_PATH);
+      cy.getByTestSubj('fleetAgentListTable').should('exist');
+    });
   }
 );
