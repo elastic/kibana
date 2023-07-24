@@ -5,7 +5,18 @@
  * 2.0.
  */
 
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { login } from '../../../tasks/login';
+import {
+  EndpointArtifactPageId,
+  getEndpointManagementPageList,
+  getEndpointManagementPageMap,
+} from '../../../lib';
+import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
+import { ensurePermissionDeniedScreen, visitFleetAgentList } from '../../../screens';
+import { visitEndpointList } from '../../../screens/endpoint_management/endpoint_list';
+import { ServerlessRoleName } from '../../../../../../../shared/lib';
+import { getArtifactListEmptyStateAddButton } from '../../../screens/endpoint_management/artifacts';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -20,43 +31,120 @@ describe(
     },
   },
   () => {
-    describe('for role: t1_analyst', () => {
-      before(() => {
-        login('t1_analyst');
-      });
+    const allPages = getEndpointManagementPageList();
+    const pageById = getEndpointManagementPageMap();
 
-      // FIXME:PT implement
-      it('should do something', () => {});
+    let loadedEndpoints: IndexedHostsAndAlertsResponse;
+
+    before(() => {
+      cy.task('indexEndpointHosts', {}, { timeout: 240000 }).then((response) => {
+        loadedEndpoints = response;
+      });
     });
 
-    describe('for role: t2_analyst', () => {
-      before(() => {
-        login('t2_analyst');
-      });
+    after(() => {
+      if (loadedEndpoints) {
+        cy.task('deleteIndexedEndpointHosts', loadedEndpoints);
+      }
+    });
 
-      // FIXME:PT implement
-      it('should do something', () => {});
+    // roles `t1_analyst` and `t2_analyst` are the same as far as endpoint access
+    (['t1_analyst', `t2_analyst`] as ServerlessRoleName[]).forEach((roleName) => {
+      describe(`for role: ${roleName}`, () => {
+        const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
+
+        before(() => {
+          login(roleName);
+        });
+
+        it('should have READ access to Endpoint list page', () => {
+          visitEndpointList();
+          getNoPrivilegesPage().should('not.exist');
+        });
+
+        for (const { url, title } of deniedPages) {
+          it(`should NOT have access to: ${title}`, () => {
+            cy.visit(url);
+            getNoPrivilegesPage().should('exist');
+          });
+        }
+
+        it('should NOT have access to Fleet', () => {
+          visitFleetAgentList();
+          ensurePermissionDeniedScreen();
+        });
+      });
     });
 
     describe('for role: t3_analyst', () => {
+      const artifactPagesFullAccess = [
+        pageById.trustedApps,
+        pageById.eventFilters,
+        pageById.hostIsolationExceptions,
+        pageById.blocklist,
+      ];
+
       before(() => {
         login('t3_analyst');
       });
 
-      // FIXME:PT implement
-      it('should do something', () => {});
+      it('should have access to Endpoint list page', () => {
+        visitEndpointList();
+        getNoPrivilegesPage().should('not.exist');
+      });
+
+      for (const { url, title, id } of artifactPagesFullAccess) {
+        it(`should have CRUD access to: ${title}`, () => {
+          cy.visit(url);
+          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+        });
+      }
+
+      it('should NOT have access to Fleet', () => {
+        visitFleetAgentList();
+        ensurePermissionDeniedScreen();
+      });
     });
 
     describe('for role: threat_intelligence_analyst', () => {
+      const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
+
       before(() => {
         login('threat_intelligence_analyst');
       });
 
-      // FIXME:PT implement
-      it('should do something', () => {});
+      it('should have access to Endpoint list page', () => {
+        visitEndpointList();
+        getNoPrivilegesPage().should('not.exist');
+      });
+
+      it(`should have CRUD access to: Blocklist`, () => {
+        cy.visit(pageById.blocklist.url);
+        getArtifactListEmptyStateAddButton(pageById.blocklist.id as EndpointArtifactPageId).should(
+          'exist'
+        );
+      });
+
+      for (const { url, title } of deniedPages) {
+        it(`should NOT have access to: ${title}`, () => {
+          cy.visit(url);
+          getNoPrivilegesPage().should('exist');
+        });
+      }
+
+      it('should NOT have access to Fleet', () => {
+        visitFleetAgentList();
+        ensurePermissionDeniedScreen();
+      });
     });
 
     describe('for role: rule_author', () => {
+      const artifactPagesFullAccess = [
+        pageById.trustedApps,
+        pageById.eventFilters,
+        pageById.blocklist,
+      ];
+
       before(() => {
         login('rule_author');
       });

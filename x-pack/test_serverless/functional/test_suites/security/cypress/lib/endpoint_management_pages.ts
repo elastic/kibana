@@ -16,7 +16,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { keyBy } from 'lodash';
 
-interface EndpointManagementPageMap {
+export interface EndpointManagementPageMap {
   endpointList: EndpointManagementPage;
   policyList: EndpointManagementPage;
   trustedApps: EndpointManagementPage;
@@ -26,8 +26,14 @@ interface EndpointManagementPageMap {
   responseActionLog: EndpointManagementPage;
 }
 
+export type EndpointManagementPageId = keyof EndpointManagementPageMap;
+export type EndpointArtifactPageId = keyof Pick<
+  EndpointManagementPageMap,
+  'trustedApps' | 'eventFilters' | 'hostIsolationExceptions' | 'blocklist'
+>;
+
 interface EndpointManagementPage {
-  id: keyof EndpointManagementPageMap;
+  id: EndpointManagementPageId;
   title: string;
   url: string;
   pageTestSubj: string;

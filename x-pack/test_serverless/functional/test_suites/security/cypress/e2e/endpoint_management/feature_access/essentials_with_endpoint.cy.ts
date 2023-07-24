@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FLEET_BASE_PATH } from '@kbn/fleet-plugin/public/constants';
 import { login } from '../../../tasks/login';
 import { getEndpointManagementPageMap } from '../../../lib';
+import { getAgentListTable, visitFleetAgentList } from '../../../screens';
 
 describe(
   'App Features for Essentials PLI with Endpoint Essentials',
@@ -52,8 +52,8 @@ describe(
     }
 
     it(`should have access to Fleet`, () => {
-      cy.visit(FLEET_BASE_PATH);
-      cy.getByTestSubj('fleetAgentListTable').should('exist');
+      visitFleetAgentList();
+      getAgentListTable().should('exist');
     });
   }
 );

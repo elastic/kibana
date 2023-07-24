@@ -6,6 +6,7 @@
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { dataLoaders } from '@kbn/security-solution-plugin/public/management/cypress/support/data_loaders';
 import { LoadUserAndRoleCyTaskOptions } from '../cypress';
 import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
 
@@ -13,6 +14,9 @@ export const setupDataLoaderTasks = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) => {
+  // Reuse data loaders from endpoint management cypress setup
+  dataLoaders(on, config);
+
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,

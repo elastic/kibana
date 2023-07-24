@@ -7,6 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { getEndpointManagementPageList } from '../../../lib';
+import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
 
 describe(
   'App Features for Essential PLI',
@@ -27,7 +28,7 @@ describe(
     for (const { url, title } of pages) {
       it(`should not allow access to ${title}`, () => {
         cy.visit(url);
-        cy.getByTestSubj('noPrivilegesPage').should('exist');
+        getNoPrivilegesPage().should('exist');
       });
     }
   }
