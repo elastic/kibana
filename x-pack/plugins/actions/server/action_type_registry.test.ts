@@ -15,6 +15,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { rawConnectorSchema } from './raw_connector_schema';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -82,17 +83,18 @@ describe('actionTypeRegistry', () => {
       });
       expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions:my-action-type": Object {
-            "createTaskRunner": [Function],
-            "maxAttempts": 3,
-            "title": "My action type",
+      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toEqual(
+        expect.objectContaining([
+          {
+            'actions:my-action-type': {
+              createTaskRunner: expect.any(Function),
+              maxAttempts: 3,
+              title: 'My action type',
+              indirectParamsSchema: rawConnectorSchema,
+            },
           },
-        },
-      ]
-    `);
+        ])
+      );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
         'Connector: My action type',
         'gold'
@@ -245,6 +247,29 @@ describe('actionTypeRegistry', () => {
           executor,
         })
       ).not.toThrow();
+    });
+
+    test('throws if the kibana privileges are defined but the action type is not a system action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: jest.fn(),
+          isSystemActionType: false,
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Kibana privilege authorization is only supported for system action types"`
+      );
     });
   });
 
@@ -687,6 +712,94 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isSystemActionType('not-exist');
       expect(result).toBe(false);
+    });
+  });
+
+  describe('getSystemActionKibanaPrivileges()', () => {
+    it('should get the kibana privileges correctly for system actions', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges: () => ['test/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.getSystemActionKibanaPrivileges('.cases');
+      expect(result).toEqual(['test/create']);
+    });
+
+    it('should return an empty array if the system action does not define any kibana privileges', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.getSystemActionKibanaPrivileges('.cases');
+      expect(result).toEqual([]);
+    });
+
+    it('should return an empty array if the action type is not a system action', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      const result = registry.getSystemActionKibanaPrivileges('foo');
+      expect(result).toEqual([]);
+    });
+
+    it('should pass the params correctly', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+
+      registry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges,
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      registry.getSystemActionKibanaPrivileges('.cases', { foo: 'bar' });
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
 });

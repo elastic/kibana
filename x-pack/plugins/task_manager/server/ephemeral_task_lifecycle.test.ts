@@ -79,6 +79,11 @@ describe('EphemeralTaskLifecycle', () => {
           warn_threshold: 5000,
         },
         worker_utilization_running_average_window: 5,
+        requeue_invalid_tasks: {
+          enabled: false,
+          delay: 3000,
+          max_attempts: 20,
+        },
         ...config,
       },
       elasticsearchAndSOAvailability$,

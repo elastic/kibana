@@ -21,14 +21,16 @@ import {
 import {
   confirmRulesDelete,
   deleteFirstRule,
-  deleteSelectedRules,
-  disableSelectedRules,
-  enableSelectedRules,
   selectAllRules,
   selectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
+import {
+  deleteSelectedRules,
+  disableSelectedRules,
+  enableSelectedRules,
+} from '../../tasks/rules_bulk_actions';
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
