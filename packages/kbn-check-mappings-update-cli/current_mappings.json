@@ -2935,6 +2935,13 @@
       }
     }
   },
+  "risk-engine-configuration": {
+    "properties": {
+      "enable": {
+        "type": "boolean"
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
