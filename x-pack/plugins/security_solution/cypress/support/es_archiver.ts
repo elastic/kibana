@@ -17,13 +17,13 @@ export const esArchiver = (
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
   const client = new Client({
-    node: config.env.ELASTICSEARCH_URL_WITH_AUTH,
+    node: config.env.ELASTICSEARCH_URL,
     Connection: HttpConnection,
   });
 
   const kbnClient = new KbnClient({
     log,
-    url: config.env.KIBANA_URL_WITH_AUTH,
+    url: config.env.CYPRESS_BASE_URL as string,
   });
 
   const esArchiverInstance = new EsArchiver({

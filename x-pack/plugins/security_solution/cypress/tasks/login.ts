@@ -45,9 +45,6 @@ const ELASTICSEARCH_USERNAME = 'ELASTICSEARCH_USERNAME';
  */
 const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
 
-const KIBANA_USERNAME = 'KIBANA_USERNAME';
-const KIBANA_PASSWORD = 'KIBANA_PASSWORD';
-
 /**
  * The Kibana server endpoint used for authentication
  */
@@ -206,8 +203,7 @@ export const login = (role?: ROLES) => {
  * via environment variables
  */
 const credentialsProvidedByEnvironment = (): boolean =>
-  (Cypress.env(KIBANA_USERNAME) != null && Cypress.env(KIBANA_PASSWORD) != null) ||
-  (Cypress.env(ELASTICSEARCH_USERNAME) != null && Cypress.env(ELASTICSEARCH_PASSWORD) != null);
+  Cypress.env(ELASTICSEARCH_USERNAME) != null && Cypress.env(ELASTICSEARCH_PASSWORD) != null;
 
 /**
  * Authenticates with Kibana by reading credentials from the
@@ -216,26 +212,12 @@ const credentialsProvidedByEnvironment = (): boolean =>
  * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
 const loginViaEnvironmentCredentials = () => {
-  let username: string;
-  let password: string;
-  let usernameEnvVar: string;
-  let passwordEnvVar: string;
-
-  if (Cypress.env(KIBANA_USERNAME) && Cypress.env(KIBANA_PASSWORD)) {
-    username = Cypress.env(KIBANA_USERNAME);
-    password = Cypress.env(KIBANA_PASSWORD);
-    usernameEnvVar = KIBANA_USERNAME;
-    passwordEnvVar = KIBANA_PASSWORD;
-  } else {
-    username = Cypress.env(ELASTICSEARCH_USERNAME);
-    password = Cypress.env(ELASTICSEARCH_PASSWORD);
-    usernameEnvVar = ELASTICSEARCH_USERNAME;
-    passwordEnvVar = ELASTICSEARCH_PASSWORD;
-  }
-
   cy.log(
-    `Authenticating [${username}] retrieved via environment credentials from the \`CYPRESS_${usernameEnvVar}\` and \`CYPRESS_${passwordEnvVar}\` environment variables`
+    `Authenticating via environment credentials from the \`CYPRESS_${ELASTICSEARCH_USERNAME}\` and \`CYPRESS_${ELASTICSEARCH_PASSWORD}\` environment variables`
   );
+
+  const username = Cypress.env(ELASTICSEARCH_USERNAME);
+  const password = Cypress.env(ELASTICSEARCH_PASSWORD);
 
   cy.session([username, password], () => {
     // programmatically authenticate without interacting with the Kibana login page
@@ -296,17 +278,14 @@ const loginViaConfig = () => {
 export const getEnvAuth = (): User => {
   if (credentialsProvidedByEnvironment()) {
     return {
-      username: Cypress.env(KIBANA_USERNAME) ?? Cypress.env(ELASTICSEARCH_USERNAME),
-      password: Cypress.env(KIBANA_PASSWORD) ?? Cypress.env(ELASTICSEARCH_PASSWORD),
+      username: Cypress.env(ELASTICSEARCH_USERNAME),
+      password: Cypress.env(ELASTICSEARCH_PASSWORD),
     };
   } else {
     let user: User = { username: '', password: '' };
     cy.readFile(KIBANA_DEV_YML_PATH).then((devYml) => {
       const config = yaml.safeLoad(devYml);
-      user = {
-        username: config.kibana.username ?? config.elasticsearch.username,
-        password: config.kibana.password ?? config.elasticsearch.password,
-      };
+      user = { username: config.elasticsearch.username, password: config.elasticsearch.password };
     });
 
     return user;

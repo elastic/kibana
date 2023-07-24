@@ -63,7 +63,7 @@ describe('Rule actions during detection rule creation', () => {
     /* We assert that the new indexed document is the one set on the index action */
     cy.request({
       method: 'GET',
-      url: `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/${index}/_search`,
+      url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
       headers: { 'kbn-xsrf': 'cypress-creds' },
     }).then((response) => {
       expect(response.body.hits.hits[0]._source).to.deep.equal(expectedJson);

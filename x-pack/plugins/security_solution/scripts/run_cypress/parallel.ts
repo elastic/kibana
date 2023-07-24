@@ -358,6 +358,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
               retries: 1,
             });
 
+            // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
               ...ftrEnv,
 
@@ -367,20 +368,6 @@ ${JSON.stringify(config.getAll(), null, 2)}
               ...createCyEnvVar('KIBANA_URL_WITH_AUTH', createUrlFromFtrConfig('kibana', true)),
               ...createCyEnvVar('KIBANA_USERNAME', config.get('servers.kibana.username')),
               ...createCyEnvVar('KIBANA_PASSWORD', config.get('servers.kibana.password')),
-
-              ...createCyEnvVar('ELASTICSEARCH_URL', createUrlFromFtrConfig('elasticsearch')),
-              ...createCyEnvVar(
-                'ELASTICSEARCH_URL_WITH_AUTH',
-                createUrlFromFtrConfig('elasticsearch', true)
-              ),
-              ...createCyEnvVar(
-                'ELASTICSEARCH_USERNAME',
-                config.get('servers.elasticsearch.username')
-              ),
-              ...createCyEnvVar(
-                'ELASTICSEARCH_PASSWORD',
-                config.get('servers.elasticsearch.password')
-              ),
             };
 
             log.info(`

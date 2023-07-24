@@ -40,7 +40,7 @@ export const createSavedQuery = (
   });
 
 export const deleteSavedQueries = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL_WITH_AUTH')}/.kibana_\*`;
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
