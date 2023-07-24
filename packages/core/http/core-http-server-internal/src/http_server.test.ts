@@ -1515,7 +1515,7 @@ describe('setup contract', () => {
       }
     });
 
-    test('registers routes with access set to "public"', async () => {
+    test('registers routes with expected options', async () => {
       const { registerStaticDir } = await server.setup(config);
       expect(createServer).toHaveBeenCalledTimes(1);
       const [{ value: myServer }] = (createServer as jest.Mock).mock.results;
