@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -19,6 +20,8 @@ import {
   CasesBulkGetResponseRt,
   CasesByAlertIDRequestRt,
   CasesFindRequestRt,
+  CasesFindRequestSearchFieldsRt,
+  CasesFindRequestSortFieldsRt,
   CasesFindResponseRt,
   CasesPatchRequestRt,
 } from './v1';
@@ -198,11 +201,10 @@ describe('Status', () => {
       page: '1',
       perPage: '10',
       search: 'search text',
-      searchFields: 'closed_by.username',
-      rootSearchFields: ['_id'],
+      searchFields: ['title', 'description'],
       to: '1w',
       sortOrder: 'desc',
-      sortField: 'created_at',
+      sortField: 'createdAt',
       owner: 'cases',
     };
 
@@ -221,6 +223,58 @@ describe('Status', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest, page: 1, perPage: 10 },
+      });
+    });
+
+    const searchFields = Object.keys(CasesFindRequestSearchFieldsRt.keys);
+
+    it.each(searchFields)('succeeds with %s as searchFields', (field) => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: field });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, searchFields: field, page: 1, perPage: 10 },
+      });
+    });
+
+    const sortFields = Object.keys(CasesFindRequestSortFieldsRt.keys);
+
+    it.each(sortFields)('succeeds with %s as sortField', (sortField) => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField, page: 1, perPage: 10 },
+      });
+    });
+
+    it('removes rootSearchField when passed', () => {
+      expect(
+        PathReporter.report(
+          CasesFindRequestRt.decode({ ...defaultRequest, rootSearchField: ['foobar'] })
+        )
+      ).toContain('No errors!');
+    });
+
+    describe('errors', () => {
+      it('throws error when invalid searchField passed', () => {
+        expect(
+          PathReporter.report(
+            CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'foobar' })
+          )
+        ).not.toContain('No errors!');
+      });
+
+      it('throws error when invalid sortField passed', () => {
+        expect(
+          PathReporter.report(CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'foobar' }))
+        ).not.toContain('No errors!');
+      });
+
+      it('succeeds when valid parameters passed', () => {
+        expect(PathReporter.report(CasesFindRequestRt.decode(defaultRequest))).toContain(
+          'No errors!'
+        );
       });
     });
   });
