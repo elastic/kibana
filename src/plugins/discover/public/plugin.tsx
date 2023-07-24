@@ -415,15 +415,14 @@ export class DiscoverPlugin
 
     const isDev = this.initializerContext.env.mode.dev;
 
-    const getDiscoverServicesInternal = async () => {
+    const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
 
     return {
       locator: this.locator,
       customize: createCustomizeFunction(this.profileRegistry),
-      DiscoverContainer: (props: DiscoverContainerProps) => {
-        const { overrideServices, ...restProps } = props;
+      DiscoverContainer: ({ overrideServices, ...restProps }: DiscoverContainerProps) => {
         return (
           <DiscoverContainerInternal
             overrideServices={overrideServices}
@@ -442,7 +441,7 @@ export class DiscoverPlugin
     }
   }
 
-  getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
+  private getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
     const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
       locator: this.locator!,
       contextLocator: this.contextLocator!,
