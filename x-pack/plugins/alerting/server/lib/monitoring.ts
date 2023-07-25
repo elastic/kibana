@@ -12,6 +12,7 @@ import {
   RuleMonitoringHistory,
   RuleMonitoringLastRunMetrics,
 } from '../types';
+import { RuleDomain } from '../application/rule/types';
 
 const INITIAL_LAST_RUN_METRICS: RuleMonitoringLastRunMetrics = {
   duration: 0,
@@ -23,6 +24,23 @@ const INITIAL_LAST_RUN_METRICS: RuleMonitoringLastRunMetrics = {
 };
 
 export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
+  return {
+    run: {
+      history: [],
+      calculated_metrics: {
+        success_ratio: 0,
+      },
+      last_run: {
+        timestamp,
+        metrics: INITIAL_LAST_RUN_METRICS,
+      },
+    },
+  };
+};
+
+export const getDefaultMonitoringRuleDomainProperties = (
+  timestamp: string
+): RuleDomain['monitoring'] => {
   return {
     run: {
       history: [],
