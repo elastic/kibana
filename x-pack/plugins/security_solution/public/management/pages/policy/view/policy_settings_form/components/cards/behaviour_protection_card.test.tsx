@@ -10,13 +10,16 @@ import type { AppContextTestRender } from '../../../../../../../common/mock/endp
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
-import type { BehaviourProtectionCardProps } from './behaviour_protection_card';
-import { BehaviourProtectionCard, LOCKED_CARD_BEHAVIOR_TITLE } from './behaviour_protection_card';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { set } from 'lodash';
 import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
+import type { BehaviourProtectionCardProps } from './protection_seetings_card/behaviour_protection_card';
+import {
+  BehaviourProtectionCard,
+  LOCKED_CARD_BEHAVIOR_TITLE,
+} from './protection_seetings_card/behaviour_protection_card';
 
 jest.mock('../../../../../../../common/hooks/use_license');
 
