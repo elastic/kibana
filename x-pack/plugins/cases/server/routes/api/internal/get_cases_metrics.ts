@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASE_METRICS_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_METRICS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
 export const getCasesMetricRoute = createCasesRoute({
   method: 'get',
-  path: CASE_METRICS_URL,
+  path: INTERNAL_CASE_METRICS_URL,
   params: {
     query: schema.object({
       features: schema.oneOf([

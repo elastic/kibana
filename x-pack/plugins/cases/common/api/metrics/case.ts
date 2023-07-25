@@ -15,6 +15,16 @@ export type AlertHostsMetrics = rt.TypeOf<typeof AlertHostsMetricsRt>;
 export type AlertUsersMetrics = rt.TypeOf<typeof AlertUsersMetricsRt>;
 export type StatusInfo = rt.TypeOf<typeof StatusInfoRt>;
 
+export const CaseMetricsFeatureFieldRt = rt.keyof({
+  'alerts.count': null,
+  'alerts.users': null,
+  'alerts.hosts': null,
+  'actions.isolateHost': null,
+  connectors: null,
+  lifespan: null,
+  mttr: null,
+});
+
 const StatusInfoRt = rt.strict({
   /**
    * Duration the case was in the open status in milliseconds
@@ -76,7 +86,7 @@ export const SingleCaseMetricsRequestRt = rt.strict({
   /**
    * The metrics to retrieve.
    */
-  features: rt.array(rt.string),
+  features: rt.array(CaseMetricsFeatureFieldRt),
 });
 
 export const CasesMetricsRequestRt = rt.intersection([
@@ -84,7 +94,7 @@ export const CasesMetricsRequestRt = rt.intersection([
     /**
      * The metrics to retrieve.
      */
-    features: rt.array(rt.string),
+    features: rt.array(CaseMetricsFeatureFieldRt),
   }),
   rt.exact(
     rt.partial({
