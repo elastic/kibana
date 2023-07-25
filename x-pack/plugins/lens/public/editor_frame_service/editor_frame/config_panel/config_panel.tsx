@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, memo, useCallback } from 'react';
-import { useStore } from 'react-redux';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -14,7 +13,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { isEqual } from 'lodash';
+
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import {
   changeIndexPattern,
@@ -58,8 +57,7 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const lensStore = useStore();
-  const { activeVisualization, datasourceMap, indexPatternService, onUpdateStateCb } = props;
+  const { activeVisualization, datasourceMap, indexPatternService } = props;
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
@@ -81,31 +79,19 @@ export function LayerPanels(
           newState,
         })
       );
-      if (onUpdateStateCb && activeDatasourceId) {
-        const dsState = datasourceStates[activeDatasourceId].state;
-        onUpdateStateCb?.(dsState, newState);
-      }
     },
-    [activeDatasourceId, activeVisualization.id, datasourceStates, dispatchLens, onUpdateStateCb]
+    [activeVisualization.id, dispatchLens]
   );
   const updateDatasource = useMemo(
     () =>
       (datasourceId: string | undefined, newState: unknown, dontSyncLinkedDimensions?: boolean) => {
         if (datasourceId) {
-          const newDatasourceState =
-            typeof newState === 'function'
-              ? newState(datasourceStates[datasourceId].state)
-              : newState;
-
-          if (isEqual(newDatasourceState, datasourceStates[datasourceId].state)) {
-            return;
-          }
-
-          onUpdateStateCb?.(newDatasourceState, visualization.state);
-
           dispatchLens(
             updateDatasourceState({
-              newDatasourceState,
+              newDatasourceState:
+                typeof newState === 'function'
+                  ? newState(datasourceStates[datasourceId].state)
+                  : newState,
               datasourceId,
               clearStagedPreview: false,
               dontSyncLinkedDimensions,
@@ -113,7 +99,7 @@ export function LayerPanels(
           );
         }
       },
-    [dispatchLens, onUpdateStateCb, visualization.state, datasourceStates]
+    [dispatchLens, datasourceStates]
   );
   const updateDatasourceAsync = useMemo(
     () => (datasourceId: string | undefined, newState: unknown) => {
@@ -148,8 +134,6 @@ export function LayerPanels(
               ? newVisualizationState(visualization.state)
               : newVisualizationState;
 
-          onUpdateStateCb?.(newDsState, newVisState);
-
           dispatchLens(
             updateVisualizationState({
               visualizationId: activeVisualization.id,
@@ -166,7 +150,7 @@ export function LayerPanels(
           );
         }, 0);
       },
-    [dispatchLens, onUpdateStateCb, visualization.state, datasourceStates, activeVisualization.id]
+    [dispatchLens, visualization.state, datasourceStates, activeVisualization.id]
   );
 
   const toggleFullscreen = useCallback(() => {
@@ -207,24 +191,15 @@ export function LayerPanels(
           layerIds,
         })
       );
-      if (activeDatasourceId && onUpdateStateCb) {
-        const newState = lensStore.getState().lens;
-        onUpdateStateCb(
-          newState.datasourceStates[activeDatasourceId].state,
-          newState.visualization.state
-        );
-      }
+
       removeLayerRef(layerToRemoveId);
     },
     [
-      activeDatasourceId,
       activeVisualization.id,
       datasourceMap,
       datasourceStates,
       dispatchLens,
       layerIds,
-      lensStore,
-      onUpdateStateCb,
       props.framePublicAPI.datasourceLayers,
       props.uiActions,
       removeLayerRef,
@@ -267,13 +242,6 @@ export function LayerPanels(
 
     dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
 
-    if (activeDatasourceId && onUpdateStateCb) {
-      const newState = lensStore.getState().lens;
-      onUpdateStateCb(
-        newState.datasourceStates[activeDatasourceId].state,
-        newState.visualization.state
-      );
-    }
     setNextFocusedLayerId(layerId);
   };
 
@@ -355,13 +323,6 @@ export function LayerPanels(
                 const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
                 const datasourceId = datasourcePublicAPI?.datasourceId;
                 dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
-                if (datasourceId && onUpdateStateCb) {
-                  const newState = lensStore.getState().lens;
-                  onUpdateStateCb(
-                    newState.datasourceStates[datasourceId].state,
-                    newState.visualization.state
-                  );
-                }
               }}
               toggleFullscreen={toggleFullscreen}
               indexPatternService={indexPatternService}
