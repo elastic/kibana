@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject } from 'react';
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
+import React, { RefObject, useCallback } from 'react';
+import {
+  UnifiedHistogramContainer,
+  UnifiedHistogramContainerProps,
+} from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
@@ -41,6 +46,23 @@ export const DiscoverHistogramLayout = ({
     hideChart,
     isPlainRecord,
   });
+  const { data: dataService } = useDiscoverServices();
+
+  const onBrushEnd: UnifiedHistogramContainerProps['onBrushEnd'] = useCallback(
+    (
+      data: BrushTriggerEvent['data'] & {
+        preventDefault: () => void;
+      }
+    ) => {
+      dataService.query.timefilter.timefilter.setTime({
+        from: new Date(data.range[0]).toISOString(),
+        to: new Date(data.range[1]).toISOString(),
+        mode: 'absolute',
+      });
+      if (data.preventDefault) data.preventDefault();
+    },
+    [dataService.query.timefilter.timefilter]
+  );
 
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
@@ -60,6 +82,7 @@ export const DiscoverHistogramLayout = ({
         ) : undefined
       }
       css={histogramLayoutCss}
+      onBrushEnd={onBrushEnd}
     >
       <DiscoverMainContent
         {...mainContentProps}
