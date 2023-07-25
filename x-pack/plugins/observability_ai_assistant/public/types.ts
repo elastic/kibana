@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -43,6 +44,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   triggersActions: TriggersAndActionsUIPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
+  security: SecurityPluginStart;
   triggersActions: TriggersAndActionsUIPublicPluginStart;
 }
 

@@ -9,7 +9,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -24,7 +23,7 @@ interface Props {
 
 export function MessagePanel(props: Props) {
   return (
-    <EuiPanel color="subdued" hasShadow={false}>
+    <>
       {props.body}
       {props.error ? (
         <>
@@ -51,6 +50,6 @@ export function MessagePanel(props: Props) {
           {props.controls}
         </>
       ) : null}
-    </EuiPanel>
+    </>
   );
 }
