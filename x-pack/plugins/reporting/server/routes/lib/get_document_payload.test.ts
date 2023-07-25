@@ -6,7 +6,7 @@
  */
 
 import { Readable } from 'stream';
-import { CSV_JOB_TYPE, PDF_JOB_TYPE } from '../../../common/constants';
+import { CSV_JOB_TYPE, PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
 import { ContentStream, getContentStream, statuses } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
@@ -104,7 +104,7 @@ describe('getDocumentPayload', () => {
           id: 'id1',
           index: '.reporting-12345',
           status: statuses.JOB_STATUS_FAILED,
-          jobtype: PDF_JOB_TYPE,
+          jobtype: PDF_JOB_TYPE_V2,
           output: {},
           payload: {},
         } as ReportApiJSON)
@@ -128,7 +128,7 @@ describe('getDocumentPayload', () => {
           id: 'id1',
           index: '.reporting-12345',
           status: statuses.JOB_STATUS_PENDING,
-          jobtype: PDF_JOB_TYPE,
+          jobtype: PDF_JOB_TYPE_V2,
           output: {},
           payload: {},
         } as ReportApiJSON)

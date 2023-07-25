@@ -11,8 +11,7 @@ import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { ExpandableFlyout, ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { expandableFlyoutDocumentsPanels } from '../../../flyout';
+import { SecuritySolutionFlyout, SecuritySolutionFlyoutContextProvider } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -24,7 +23,6 @@ import {
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -69,8 +67,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { colorMode: globalColorMode } = useEuiTheme();
 
-    const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
-
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
      * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
@@ -78,11 +74,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <ExpandableFlyoutProvider
-        onChanges={handleFlyoutChangedOrClosed}
-        onClosePanels={handleFlyoutChangedOrClosed}
-        ref={flyoutRef}
-      >
+      <SecuritySolutionFlyoutContextProvider>
         <StyledKibanaPageTemplate
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
@@ -108,12 +100,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
               </EuiThemeProvider>
             </KibanaPageTemplate.BottomBar>
           )}
-          <ExpandableFlyout
-            registeredPanels={expandableFlyoutDocumentsPanels}
-            handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
-          />
+          <SecuritySolutionFlyout />
         </StyledKibanaPageTemplate>
-      </ExpandableFlyoutProvider>
+      </SecuritySolutionFlyoutContextProvider>
     );
   });
 
