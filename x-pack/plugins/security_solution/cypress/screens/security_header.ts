@@ -34,7 +34,7 @@ export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
 
 export const DETECTION_RESPONSE = '[data-test-subj="solutionSideNavPanelLink-detection_response"]';
 
-export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity-analytics"]';
+export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity_analytics"]';
 
 export const KUBERNETES = '[data-test-subj="solutionSideNavPanelLink-kubernetes"]';
 
