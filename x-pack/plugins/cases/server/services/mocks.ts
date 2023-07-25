@@ -177,6 +177,7 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     countAlertsAttachedToCase: jest.fn(),
     executeCaseActionsAggregations: jest.fn(),
     executeCaseAggregations: jest.fn(),
+    countPersistableStateAndExternalReferenceAttachments: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
