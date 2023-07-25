@@ -1094,8 +1094,6 @@
       "@kbn/reporting-common/*": ["packages/kbn-reporting/common/*"],
       "@kbn/reporting-example-plugin": ["x-pack/examples/reporting_example"],
       "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
-      "@kbn/reporting-export-types-plugin": ["x-pack/plugins/reporting_export_types"],
-      "@kbn/reporting-export-types-plugin/*": ["x-pack/plugins/reporting_export_types/*"],
       "@kbn/reporting-plugin": ["x-pack/plugins/reporting"],
       "@kbn/reporting-plugin/*": ["x-pack/plugins/reporting/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],

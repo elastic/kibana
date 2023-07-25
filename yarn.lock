@@ -4922,10 +4922,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-plugin@link:x-pack/plugins/reporting_export_types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
   version "0.0.0"
   uid ""

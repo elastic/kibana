@@ -6,12 +6,11 @@
  */
 
 import { ReportingServerInfo } from '../../core';
-import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 import { ReportingConfigType } from '../../config';
 
-const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
+const getMockJob = (base: object) => base as TaskPayloadPDF;
 const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
 const mockServerInfo: ReportingServerInfo = {
   hostname: 'localhost',
