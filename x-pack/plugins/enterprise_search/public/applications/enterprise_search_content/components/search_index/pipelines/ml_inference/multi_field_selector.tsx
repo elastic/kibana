@@ -129,7 +129,7 @@ export const MultiFieldMapping: React.FC = () => {
   };
 
   const onAddSelectedFields = () => {
-    addSelectedFieldsToMapping();
+    addSelectedFieldsToMapping(isTextExpansionModelSelected);
     setTargetField('');
     setPlaceholderText(getInitialTargetFieldPlaceholderText(isTextExpansionModelSelected));
   };

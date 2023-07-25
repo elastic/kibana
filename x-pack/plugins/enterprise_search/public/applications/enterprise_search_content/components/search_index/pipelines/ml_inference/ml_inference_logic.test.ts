@@ -567,7 +567,7 @@ describe('MlInferenceLogic', () => {
 
         MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
         MLInferenceLogic.actions.selectFields(['my_source_field1', 'my_source_field2']);
-        MLInferenceLogic.actions.addSelectedFieldsToMapping();
+        MLInferenceLogic.actions.addSelectedFieldsToMapping(true);
         MLInferenceLogic.actions.createPipeline();
 
         expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({

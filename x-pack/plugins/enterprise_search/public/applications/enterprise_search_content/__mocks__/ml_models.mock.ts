@@ -77,7 +77,7 @@ export const textExpansionModel: TrainedModelConfigResponse = {
   input: {
     field_names: ['text_field'],
   },
-  model_id: '.elser_model_mocked',
+  model_id: 'text-expansion-mocked-model',
   model_type: 'pytorch',
   tags: [],
   version: '1',
