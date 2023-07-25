@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { mockStoreDeps } from '../../../mocks';
 import {
   initEmpty,
