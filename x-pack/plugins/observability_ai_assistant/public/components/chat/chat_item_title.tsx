@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { Message, MessageRole } from '../../../common/types';
 
 interface ChatItemTitleProps {
+  actionsTrigger?: ReactNode;
   dateFormat: string;
   index: number;
   message: Message;
 }
 
-export function ChatItemTitle({ dateFormat, index, message }: ChatItemTitleProps) {
+export function ChatItemTitle({ actionsTrigger, dateFormat, index, message }: ChatItemTitleProps) {
+  let content: string = '';
+
   switch (message.message.role) {
     case MessageRole.User:
       if (index === 0) {
-        return i18n.translate(
+        content = i18n.translate(
           'xpack.observabilityAiAssistant.chatTimeline.messages.user.createdNewConversation',
           {
             defaultMessage: 'created a new conversation on {date}',
@@ -29,21 +34,22 @@ export function ChatItemTitle({ dateFormat, index, message }: ChatItemTitleProps
           }
         );
       } else {
-        return i18n.translate(
+        content = i18n.translate(
           'xpack.observabilityAiAssistant.chatTimeline.messages.user.addedPrompt',
           {
-            defaultMessage: 'added a prompt on {date}',
+            defaultMessage: 'added a message on {date}',
             values: {
               date: moment(message['@timestamp']).format(dateFormat),
             },
           }
         );
       }
+      break;
 
     case MessageRole.Assistant:
     case MessageRole.Elastic:
     case MessageRole.Function:
-      return i18n.translate(
+      content = i18n.translate(
         'xpack.observabilityAiAssistant.chatTimeline.messages.elasticAssistant.responded',
         {
           defaultMessage: 'responded on {date}',
@@ -52,17 +58,34 @@ export function ChatItemTitle({ dateFormat, index, message }: ChatItemTitleProps
           },
         }
       );
+      break;
 
     case MessageRole.System:
-      return i18n.translate('xpack.observabilityAiAssistant.chatTimeline.messages.system.added', {
-        defaultMessage: 'added {thing} on {date}',
-        values: {
-          date: moment(message['@timestamp']).format(dateFormat),
-          thing: message.message.content,
-        },
-      });
+      content = i18n.translate(
+        'xpack.observabilityAiAssistant.chatTimeline.messages.system.added',
+        {
+          defaultMessage: 'added {thing} on {date}',
+          values: {
+            date: moment(message['@timestamp']).format(dateFormat),
+            thing: message.message.content,
+          },
+        }
+      );
+      break;
 
     default:
-      return '';
+      content = '';
+      break;
   }
+  return (
+    <>
+      {content}
+
+      {actionsTrigger ? (
+        <div css={{ position: 'absolute', top: 2, right: euiThemeVars.euiSizeS }}>
+          {actionsTrigger}
+        </div>
+      ) : null}
+    </>
+  );
 }

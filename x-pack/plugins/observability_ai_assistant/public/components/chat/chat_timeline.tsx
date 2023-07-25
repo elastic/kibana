@@ -14,13 +14,16 @@ import { ChatItem } from './chat_item';
 
 export interface ChatTimelineProps {
   messages: Message[];
+  onEditMessage?: (id: string) => void;
 }
 
-export function ChatTimeline({ messages = [] }: ChatTimelineProps) {
+export function ChatTimeline({ messages = [], onEditMessage }: ChatTimelineProps) {
   const { uiSettings } = useKibana().services;
   const currentUser = useCurrentUser();
 
   const dateFormat = uiSettings?.get('dateFormat');
+
+  const handleFeedback = () => {};
 
   return (
     <EuiCommentList>
@@ -29,8 +32,10 @@ export function ChatTimeline({ messages = [] }: ChatTimelineProps) {
           currentUser={currentUser}
           dateFormat={dateFormat}
           index={index}
+          isLoading={false}
           message={message}
-          onFeedbackClick={() => {}}
+          onFeedbackClick={handleFeedback}
+          onEditMessage={onEditMessage}
         />
       ))}
     </EuiCommentList>

@@ -33,7 +33,7 @@ export function buildUserInnerMessage(
   params: Partial<Message['message']> = {}
 ): Message['message'] {
   return cloneDeep({
-    ...{ content: "What's this function?", role: MessageRole.User, ...params },
+    ...{ content: "What's a function?", role: MessageRole.User, ...params },
   });
 }
 
