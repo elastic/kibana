@@ -33,6 +33,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+import { AssistantTelemetry } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -47,6 +48,7 @@ type ShowAssistantOverlay = ({
 }: ShowAssistantOverlayProps) => void;
 interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
@@ -77,6 +79,7 @@ interface AssistantProviderProps {
 
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
@@ -123,6 +126,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
+  assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
@@ -240,6 +244,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const value = useMemo(
     () => ({
       actionTypeRegistry,
+      assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
       allSystemPrompts: localStorageSystemPrompts ?? [],
@@ -274,6 +279,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     }),
     [
       actionTypeRegistry,
+      assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
       baseAllowReplacement,

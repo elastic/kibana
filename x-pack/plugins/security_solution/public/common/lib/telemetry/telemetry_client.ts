@@ -17,6 +17,7 @@ import type {
   ReportMLJobUpdateParams,
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
+  ReportAssistantInvokedParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -62,6 +63,16 @@ export class TelemetryClient implements TelemetryClientStart {
       groupNumber,
       status,
       groupByField,
+    });
+  };
+
+  public reportAssistantInvoked = ({ location }: ReportAssistantInvokedParams) => {
+    console.log('reporting assistant invoked', {
+      arg: TelemetryEventTypes.AssistantInvoked,
+      location,
+    });
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
+      location,
     });
   };
 

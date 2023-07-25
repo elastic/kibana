@@ -18,13 +18,13 @@ export enum TelemetryEventTypes {
   AlertsGroupingChanged = 'Alerts Grouping Changed',
   AlertsGroupingToggled = 'Alerts Grouping Toggled',
   AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
+  AssistantInvoked = 'Assistant Invoked',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
   MLJobUpdate = 'ML Job Update',
   CellActionClicked = 'Cell Action Clicked',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
-  AssistantInvoked = 'Assistant Invoked',
 }
 
 export interface ReportAlertsGroupingChangedParams {
@@ -44,6 +44,10 @@ export interface ReportAlertsTakeActionParams {
   groupNumber: number;
   status: 'open' | 'closed' | 'acknowledged';
   groupByField: string;
+}
+
+export interface ReportAssistantInvokedParams {
+  location: string;
 }
 
 interface EntityParam {
@@ -89,6 +93,7 @@ export type TelemetryEventParams =
   | ReportAlertsGroupingChangedParams
   | ReportAlertsGroupingToggledParams
   | ReportAlertsTakeActionParams
+  | ReportAssistantInvokedParams
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
   | ReportEntityRiskFilteredParams
@@ -101,6 +106,8 @@ export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
   reportAlertsGroupingToggled(params: ReportAlertsGroupingToggledParams): void;
   reportAlertsGroupingTakeAction(params: ReportAlertsTakeActionParams): void;
+
+  reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
 
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
@@ -124,6 +131,10 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AlertsGroupingTakeAction;
       schema: RootSchema<ReportAlertsTakeActionParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssistantInvoked;
+      schema: RootSchema<ReportAssistantInvokedParams>;
     }
   | {
       eventType: TelemetryEventTypes.EntityDetailsClicked;

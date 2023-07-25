@@ -56,3 +56,7 @@ export interface Conversation {
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
+
+export interface AssistantTelemetry {
+  reportAssistantInvoked: (params: { location: string }) => void;
+}

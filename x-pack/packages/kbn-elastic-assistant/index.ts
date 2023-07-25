@@ -90,7 +90,7 @@ export type {
 } from './impl/assistant/use_conversation/helpers';
 
 /** serialized conversations */
-export type { Conversation, Message } from './impl/assistant_context/types';
+export type { AssistantTelemetry, Conversation, Message } from './impl/assistant_context/types';
 
 /** Interface for defining system/user prompts */
 export type { Prompt } from './impl/assistant/types';

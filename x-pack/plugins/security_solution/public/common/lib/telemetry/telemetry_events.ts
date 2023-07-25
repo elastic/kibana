@@ -95,6 +95,19 @@ const alertsGroupingTakeActionEvent: TelemetryEvent = {
   },
 };
 
+const assistantInvokedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssistantInvoked,
+  schema: {
+    location: {
+      type: 'keyword',
+      _meta: {
+        description: 'Invokation location',
+        optional: false,
+      },
+    },
+  },
+};
+
 const entityClickedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.EntityDetailsClicked,
   schema: {
@@ -240,6 +253,7 @@ export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
   alertsGroupingTakeActionEvent,
+  assistantInvokedEvent,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
