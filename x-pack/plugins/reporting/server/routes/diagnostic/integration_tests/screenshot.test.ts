@@ -18,6 +18,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
 import { defer } from 'rxjs';
+import { reportingMock } from '../../../mocks';
 
 jest.mock('../../../export_types/common/generate_png');
 
@@ -45,7 +46,7 @@ describe('POST /diagnose/screenshot', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: () => false, registerExportTypes: jest.fn() })
+      () => reportingMock.createStart()
     );
 
     core = await createMockReportingCore(

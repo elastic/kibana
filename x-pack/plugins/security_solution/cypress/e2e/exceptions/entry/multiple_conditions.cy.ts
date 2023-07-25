@@ -9,7 +9,6 @@ import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { esArchiverResetKibana, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
@@ -34,7 +33,7 @@ describe(
   { testIsolation: false },
   () => {
     beforeEach(() => {
-      esArchiverResetKibana();
+      cy.task('esArchiverResetKibana');
       login();
       // At least create Rule with exceptions_list to be able to view created exceptions
       createRule({
@@ -50,7 +49,7 @@ describe(
     });
 
     after(() => {
-      esArchiverUnload('exceptions');
+      cy.task('esArchiverUnload', 'exceptions');
     });
     const exceptionName = 'My item name';
 

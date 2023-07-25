@@ -17,7 +17,7 @@ import React, {
 } from 'react';
 import { ActionType } from './actions';
 import { reducer, State } from './reducer';
-import type { FlyoutPanel } from './types';
+import type { FlyoutPanelProps } from './types';
 import { initialState } from './reducer';
 
 export interface ExpandableFlyoutContext {
@@ -28,19 +28,23 @@ export interface ExpandableFlyoutContext {
   /**
    * Open the flyout with left, right and/or preview panels
    */
-  openFlyout: (panels: { left?: FlyoutPanel; right?: FlyoutPanel; preview?: FlyoutPanel }) => void;
+  openFlyout: (panels: {
+    left?: FlyoutPanelProps;
+    right?: FlyoutPanelProps;
+    preview?: FlyoutPanelProps;
+  }) => void;
   /**
    * Replaces the current right panel with a new one
    */
-  openRightPanel: (panel: FlyoutPanel) => void;
+  openRightPanel: (panel: FlyoutPanelProps) => void;
   /**
    * Replaces the current left panel with a new one
    */
-  openLeftPanel: (panel: FlyoutPanel) => void;
+  openLeftPanel: (panel: FlyoutPanelProps) => void;
   /**
    * Add a new preview panel to the list of current preview panels
    */
-  openPreviewPanel: (panel: FlyoutPanel) => void;
+  openPreviewPanel: (panel: FlyoutPanelProps) => void;
   /**
    * Closes right panel
    */
@@ -111,25 +115,25 @@ export const ExpandableFlyoutProvider = React.forwardRef<
       left,
       preview,
     }: {
-      right?: FlyoutPanel;
-      left?: FlyoutPanel;
-      preview?: FlyoutPanel;
+      right?: FlyoutPanelProps;
+      left?: FlyoutPanelProps;
+      preview?: FlyoutPanelProps;
     }) => dispatch({ type: ActionType.openFlyout, payload: { left, right, preview } }),
     [dispatch]
   );
 
   const openRightPanel = useCallback(
-    (panel: FlyoutPanel) => dispatch({ type: ActionType.openRightPanel, payload: panel }),
+    (panel: FlyoutPanelProps) => dispatch({ type: ActionType.openRightPanel, payload: panel }),
     []
   );
 
   const openLeftPanel = useCallback(
-    (panel: FlyoutPanel) => dispatch({ type: ActionType.openLeftPanel, payload: panel }),
+    (panel: FlyoutPanelProps) => dispatch({ type: ActionType.openLeftPanel, payload: panel }),
     []
   );
 
   const openPreviewPanel = useCallback(
-    (panel: FlyoutPanel) => dispatch({ type: ActionType.openPreviewPanel, payload: panel }),
+    (panel: FlyoutPanelProps) => dispatch({ type: ActionType.openPreviewPanel, payload: panel }),
     []
   );
 
