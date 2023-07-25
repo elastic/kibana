@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { Message, MessageRole } from '../../common/types';
 
 const baseMessage: Message = {
-  '@timestamp': String(new Date().getUTCMilliseconds()),
+  '@timestamp': String(Date.now()),
   message: {
     content: 'foo',
     name: 'bar',
@@ -21,48 +21,54 @@ export function buildMessage(params: Partial<Message> = {}): Message {
   return cloneDeep({ ...baseMessage, ...params });
 }
 
-export function buildUserMessage(params: Partial<Message> = {}): Message {
+export function buildSystemInnerMessage(
+  params: Partial<Message['message']> = {}
+): Message['message'] {
   return cloneDeep({
-    ...baseMessage,
-    ...{ message: { content: "What's this function?", role: MessageRole.User } },
-    ...params,
+    ...{ role: MessageRole.System, ...params },
   });
 }
 
-export function buildAssistantMessage(params: Partial<Message> = {}): Message {
+export function buildUserInnerMessage(
+  params: Partial<Message['message']> = {}
+): Message['message'] {
   return cloneDeep({
-    ...baseMessage,
+    ...{ content: "What's this function?", role: MessageRole.User, ...params },
+  });
+}
+
+export function buildAssistantInnerMessage(
+  params: Partial<Message['message']> = {}
+): Message['message'] {
+  return cloneDeep({
     ...{
-      message: {
-        content: 'This is "leftpad":',
-        role: MessageRole.Assistant,
-        data: { key: 'value', nestedData: { foo: 'bar' } },
-      },
+      content: 'This is "leftpad":',
+      role: MessageRole.Assistant,
+      data: { key: 'value', nestedData: { foo: 'bar' } },
+      ...params,
     },
-    ...params,
   });
 }
 
-export function buildElasticMessage(params: Partial<Message> = {}): Message {
+export function buildElasticInnerMessage(
+  params: Partial<Message['message']> = {}
+): Message['message'] {
   return cloneDeep({
-    ...baseMessage,
+    ...{ role: MessageRole.Elastic, data: { key: 'value', nestedData: { foo: 'bar' } }, ...params },
+  });
+}
+
+export function buildFunctionInnerMessage(
+  params: Partial<Message['message']> = {}
+): Message['message'] {
+  return cloneDeep({
     ...{
-      message: { role: MessageRole.Elastic, data: { key: 'value', nestedData: { foo: 'bar' } } },
+      role: MessageRole.Function,
     },
-    ...params,
-  });
-}
-
-export function buildFunctionMessage(params: Partial<Message> = {}): Message {
-  return cloneDeep({
-    ...baseMessage,
-    ...{
-      message: { role: MessageRole.Function },
-      function_call: {
-        name: 'leftpad',
-        args: '{ foo: "bar" }',
-        trigger: MessageRole.User,
-      },
+    function_call: {
+      name: 'leftpad',
+      args: '{ foo: "bar" }',
+      trigger: MessageRole.User,
     },
     ...params,
   });

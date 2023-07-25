@@ -6,104 +6,32 @@
  */
 
 import React from 'react';
-import { EuiText, EuiCommentList, EuiComment, EuiCode, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Message, MessageRole } from '../../../common/types';
+import { EuiCommentList } from '@elastic/eui';
+import { useKibana } from '../../hooks/use_kibana';
 import { useCurrentUser } from '../../hooks/use_current_user';
-import { ChatAvatar } from './chat_avatar';
+import { Message } from '../../../common/types';
+import { ChatItem } from './chat_item';
 
 export interface ChatTimelineProps {
   messages: Message[];
 }
 
 export function ChatTimeline({ messages = [] }: ChatTimelineProps) {
+  const { uiSettings } = useKibana().services;
   const currentUser = useCurrentUser();
+
+  const dateFormat = uiSettings?.get('dateFormat');
 
   return (
     <EuiCommentList>
       {messages.map((message, index) => (
-        <EuiComment
-          username={i18n.translate(
-            'xpack.observabilityAiAssistant.chatTimeline.messages.userInitiatedTitle.you',
-            { defaultMessage: 'You' }
-          )}
-          event={
-            index === 0 && message.message.role === MessageRole.User
-              ? i18n.translate(
-                  'xpack.observabilityAiAssistant.chatTimeline.messages.userInitiatedTitle.createdNewConversation',
-                  {
-                    defaultMessage: 'created a new conversation',
-                  }
-                )
-              : null
-          }
-          timelineAvatar={<ChatAvatar user={currentUser} role={message.message.role} />}
-        >
-          {message.message.role === MessageRole.User && index === 0 ? (
-            <EuiText size="s">
-              <p>{message.message.content}</p>
-            </EuiText>
-          ) : (
-            <EuiPanel
-              hasBorder
-              css={{
-                backgroundColor: message.message.role !== MessageRole.User ? '#F1F4FA' : '#fff',
-              }}
-              paddingSize="s"
-            >
-              <p>{message.message.content}</p>
-            </EuiPanel>
-          )}
-        </EuiComment>
+        <ChatItem
+          currentUser={currentUser}
+          dateFormat={dateFormat}
+          index={index}
+          message={message}
+        />
       ))}
     </EuiCommentList>
   );
 }
-
-// <EuiTimeline>
-//   {messages.map((message, index) => (
-//     <EuiTimelineItem
-//       key={index}
-//       verticalAlign="top"
-//       icon={<EuiAvatar name="Checked" iconType="check" />}
-//     >
-//       <EuiSplitPanel.Outer color="transparent" hasBorder grow>
-//         {message.message.role === MessageRole.User && index === 0 ? (
-//           <>
-//             <EuiSplitPanel.Inner css={{ backgroundColor: lightGreyBgColor }} paddingSize="s">
-//               <EuiText size="s">
-//                 <p>
-//                   <strong>
-//                     {i18n.translate(
-//                       'xpack.observabilityAiAssistant.chatTimeline.messages.userInitiatedTitle.you',
-//                       { defaultMessage: 'You' }
-//                     )}{' '}
-//                   </strong>
-//                   {i18n.translate(
-//                     'xpack.observabilityAiAssistant.chatTimeline.messages.userInitiatedTitle.createdNewConversation',
-//                     {
-//                       defaultMessage: 'created a new conversation',
-//                     }
-//                   )}
-//                 </p>
-//               </EuiText>
-//             </EuiSplitPanel.Inner>
-//             <EuiHorizontalRule margin="none" />
-//           </>
-//         ) : null}
-
-//         <EuiSplitPanel.Inner
-//           css={{
-//             backgroundColor:
-//               message.message.role === MessageRole.User ? 'white' : lightGreyBgColor,
-//           }}
-//           paddingSize="s"
-//         >
-//           <EuiText grow={false} size="s">
-//             <p>{message.message.content}</p>
-//           </EuiText>
-//         </EuiSplitPanel.Inner>
-//       </EuiSplitPanel.Outer>
-//     </EuiTimelineItem>
-//   ))}
-// </EuiTimeline>

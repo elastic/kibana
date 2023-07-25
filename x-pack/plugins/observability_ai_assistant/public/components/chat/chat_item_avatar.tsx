@@ -13,15 +13,15 @@ import { AssistantAvatar } from '../assistant_avatar';
 import { MessageRole } from '../../../common/types';
 
 interface ChatAvatarProps {
+  currentUser?: AuthenticatedUser | undefined;
   role: MessageRole;
-  user?: AuthenticatedUser | undefined;
 }
 
-export function ChatAvatar({ user, role }: ChatAvatarProps) {
+export function ChatItemAvatar({ currentUser, role }: ChatAvatarProps) {
   switch (role) {
     case MessageRole.User:
-      return user ? (
-        <UserAvatar user={user} size="m" data-test-subj="userMenuAvatar" />
+      return currentUser ? (
+        <UserAvatar user={currentUser} size="m" data-test-subj="userMenuAvatar" />
       ) : (
         <EuiLoadingSpinner size="xl" />
       );
@@ -29,7 +29,10 @@ export function ChatAvatar({ user, role }: ChatAvatarProps) {
     case MessageRole.Assistant:
     case MessageRole.Elastic:
     case MessageRole.Function:
-      return <EuiAvatar name="Elastic Assistant" iconType={AssistantAvatar} color="#fff" />;
+      return <EuiAvatar name="Elastic Assistant" iconType={AssistantAvatar} color="subdued" />;
+
+    case MessageRole.System:
+      return <EuiAvatar name="system" iconType="dot" color="subdued" />;
 
     default:
       return null;

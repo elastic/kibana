@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-export function useCurrentUser() {
+export function useKibana() {
   return {
-    username: 'john_doe',
-    email: 'john.doe@example.com',
-    full_name: 'John Doe',
-    roles: ['user', 'editor'],
-    enabled: true,
+    services: {
+      uiSettings: {
+        get: (setting: string) => {
+          if (setting === 'dateFormat') {
+            return 'MMM D, YYYY HH:mm';
+          }
+        },
+      },
+    },
   };
 }
