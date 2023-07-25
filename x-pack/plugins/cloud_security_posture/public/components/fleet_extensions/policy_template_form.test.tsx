@@ -197,7 +197,7 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option2).toBeInTheDocument();
     expect(option3).toBeInTheDocument();
     expect(option1).toBeEnabled();
-    expect(option2).toBeDisabled();
+    expect(option2).toBeEnabled();
     expect(option3).toBeDisabled();
     expect(option1).toBeChecked();
   });
