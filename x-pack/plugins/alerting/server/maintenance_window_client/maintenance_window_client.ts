@@ -6,7 +6,10 @@
  */
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { create, CreateParams } from './methods/create';
+import {
+  createMaintenanceWindow,
+  CreateMaintenanceWindowParams,
+} from '../application/maintenance_window/methods/create/create_maintenance_window';
 import { get, GetParams } from './methods/get';
 import { update, UpdateParams } from './methods/update';
 import { find, FindResult } from './methods/find';
@@ -21,6 +24,10 @@ import {
   MaintenanceWindowModificationMetadata,
   MaintenanceWindowClientContext,
 } from '../../common';
+
+// TODO (http-versioning): Replace this type as the only MaintenanceWindow type once all
+// methods have been converted
+import { MaintenanceWindow as ApplicationMaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface MaintenanceWindowClientConstructorOptions {
   readonly logger: Logger;
@@ -57,8 +64,8 @@ export class MaintenanceWindowClient {
     };
   }
 
-  public create = (params: CreateParams): Promise<MaintenanceWindow> =>
-    create(this.context, params);
+  public create = (params: CreateMaintenanceWindowParams): Promise<ApplicationMaintenanceWindow> =>
+    createMaintenanceWindow(this.context, params);
   public get = (params: GetParams): Promise<MaintenanceWindow> => get(this.context, params);
   public update = (params: UpdateParams): Promise<MaintenanceWindow> =>
     update(this.context, params);

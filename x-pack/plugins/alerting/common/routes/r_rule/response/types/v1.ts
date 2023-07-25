@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import { rRuleResponseSchemaV1 } from '../..';
 
-export * from './maintenance_window_client';
-export * from '../application/maintenance_window/lib/generate_maintenance_window_events';
+export type RRuleResponse = TypeOf<typeof rRuleResponseSchemaV1>;

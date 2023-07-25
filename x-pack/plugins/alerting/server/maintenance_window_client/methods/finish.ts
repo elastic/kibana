@@ -10,8 +10,8 @@ import Boom from '@hapi/boom';
 import {
   generateMaintenanceWindowEvents,
   mergeEvents,
-} from '../generate_maintenance_window_events';
-import { getMaintenanceWindowDateAndStatus } from '../get_maintenance_window_date_and_status';
+} from '../../application/maintenance_window/lib/generate_maintenance_window_events';
+import { getMaintenanceWindowDateAndStatus } from '../../application/maintenance_window/lib/get_maintenance_window_date_and_status';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
   MaintenanceWindowSOAttributes,

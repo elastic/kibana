@@ -10,7 +10,7 @@ import {
   getMaintenanceWindowDateAndStatus,
   findRecentEventWithStatus,
 } from './get_maintenance_window_date_and_status';
-import { DateRange, MaintenanceWindowStatus } from '../../common';
+import { DateRange, MaintenanceWindowStatus } from '../../../../common';
 
 const events: DateRange[] = [
   {

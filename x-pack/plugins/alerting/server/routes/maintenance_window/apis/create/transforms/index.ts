@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './maintenance_window_client';
-export * from '../application/maintenance_window/lib/generate_maintenance_window_events';
+export { transformCreateBody } from './transform_create_body/latest';
+
+export { transformCreateBody as transformCreateBodyV1 } from './transform_create_body/v1';

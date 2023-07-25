@@ -6,14 +6,17 @@
  */
 
 import moment from 'moment-timezone';
-import { create } from './create';
+import {
+  createMaintenanceWindow,
+  CreateMaintenanceWindowParams,
+} from './create_maintenance_window';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObject } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../../common';
-import { getMockMaintenanceWindow } from './test_helpers';
+} from '../../../../../common';
+import { getMockMaintenanceWindow } from '../../../../maintenance_window_client/methods/test_helpers';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -56,10 +59,12 @@ describe('MaintenanceWindowClient - create', () => {
       id: 'test-id',
     } as unknown as SavedObject);
 
-    const result = await create(mockContext, {
-      title: mockMaintenanceWindow.title,
-      duration: mockMaintenanceWindow.duration,
-      rRule: mockMaintenanceWindow.rRule,
+    const result = await createMaintenanceWindow(mockContext, {
+      data: {
+        title: mockMaintenanceWindow.title,
+        duration: mockMaintenanceWindow.duration,
+        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+      },
     });
 
     expect(savedObjectsClient.create).toHaveBeenLastCalledWith(

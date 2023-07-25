@@ -6,18 +6,22 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../lib/license_state.mock';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from '../_mock_handler_arguments';
-import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
-import { createMaintenanceWindowRoute, rewriteQueryReq } from './create_maintenance_window';
-import { getMockMaintenanceWindow } from '../../maintenance_window_client/methods/test_helpers';
-import { MaintenanceWindowStatus } from '../../../common';
-import { rewritePartialMaintenanceBodyRes } from '../lib';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
+import { createMaintenanceWindowRoute } from './create_maintenance_window_route';
+import { getMockMaintenanceWindow } from '../../../../maintenance_window_client/methods/test_helpers';
+import { MaintenanceWindowStatus } from '../../../../../common';
+
+import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
+import { transformCreateBody } from './transforms';
+import { transformMaintenanceWindowToResponse } from '../../transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -27,13 +31,13 @@ const mockMaintenanceWindow = {
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   id: 'test-id',
-};
+} as MaintenanceWindow;
 
 const createParams = {
   title: 'test-title',
   duration: 1000,
   r_rule: mockMaintenanceWindow.rRule,
-};
+} as CreateMaintenanceWindowRequestBody;
 
 describe('createMaintenanceWindowRoute', () => {
   beforeEach(() => {
@@ -58,9 +62,11 @@ describe('createMaintenanceWindowRoute', () => {
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.create).toHaveBeenLastCalledWith(rewriteQueryReq(createParams));
+    expect(maintenanceWindowClient.create).toHaveBeenLastCalledWith(
+      transformCreateBody(createParams)
+    );
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
+      body: transformMaintenanceWindowToResponse(mockMaintenanceWindow),
     });
   });
 

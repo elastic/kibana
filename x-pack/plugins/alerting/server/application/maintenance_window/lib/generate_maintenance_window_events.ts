@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { RRule, Weekday } from '@kbn/rrule';
-import { RRuleParams, MaintenanceWindowSOAttributes, DateRange } from '../../common';
+import { RRuleParams, MaintenanceWindowSOAttributes, DateRange } from '../../../../common';
 
 export interface GenerateMaintenanceWindowEventsParams {
   rRule: RRuleParams;

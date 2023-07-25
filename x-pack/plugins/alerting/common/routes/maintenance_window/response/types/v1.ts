@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export * from './maintenance_window_client';
-export * from '../application/maintenance_window/lib/generate_maintenance_window_events';
+import type { TypeOf } from '@kbn/config-schema';
+import { maintenanceWindowResponseSchemaV1 } from '..';
+
+export type MaintenanceWindowResponse = TypeOf<typeof maintenanceWindowResponseSchemaV1>;

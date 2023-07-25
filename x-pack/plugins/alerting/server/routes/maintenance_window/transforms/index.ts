@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { rRuleSchemaV1 } from '..';
 
-export type RRule = TypeOf<typeof rRuleSchemaV1>;
+export { transformMaintenanceWindowToResponse } from './transform_maintenance_window_to_response/latest';
+
+export { transformMaintenanceWindowToResponse as transformMaintenanceWindowToResponseV1 } from './transform_maintenance_window_to_response/v1';

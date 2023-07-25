@@ -10,9 +10,9 @@ import {
   validateStartDateV1,
   validateEndDateV1,
   createValidateRecurrenceByV1,
-} from '../validation';
+} from '../../validation';
 
-export const rRuleSchema = schema.object({
+export const rRuleRequestSchema = schema.object({
   dtstart: schema.string({ validate: validateStartDateV1 }),
   tzid: schema.string(),
   freq: schema.maybe(

@@ -12,7 +12,7 @@ import {
   generateMaintenanceWindowEvents,
   shouldRegenerateEvents,
   mergeEvents,
-} from '../generate_maintenance_window_events';
+} from '../../application/maintenance_window/lib/generate_maintenance_window_events';
 import {
   MaintenanceWindow,
   MaintenanceWindowSOAttributes,

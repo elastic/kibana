@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export * from './maintenance_window_client';
-export * from '../application/maintenance_window/lib/generate_maintenance_window_events';
+export type {
+  MaintenanceWindowAttributes,
+  MaintenanceWindowEventAttributes,
+} from './maintenance_window_attributes';

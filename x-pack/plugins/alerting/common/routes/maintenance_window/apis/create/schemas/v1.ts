@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export * from './maintenance_window_client';
-export * from '../application/maintenance_window/lib/generate_maintenance_window_events';
+import { schema } from '@kbn/config-schema';
+import { rRuleRequestSchemaV1 } from '../../../../r_rule';
+
+export const createBodySchema = schema.object({
+  title: schema.string(),
+  duration: schema.number(),
+  r_rule: rRuleRequestSchemaV1,
+});

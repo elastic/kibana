@@ -48,7 +48,7 @@ import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
 
-import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
+import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
 import { updateMaintenanceWindowRoute } from './maintenance_window/update_maintenance_window';
 import { deleteMaintenanceWindowRoute } from './maintenance_window/delete_maintenance_window';

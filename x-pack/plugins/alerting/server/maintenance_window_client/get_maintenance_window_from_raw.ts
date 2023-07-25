@@ -6,7 +6,7 @@
  */
 
 import { MaintenanceWindowSOAttributes } from '../../common';
-import { getMaintenanceWindowDateAndStatus } from './get_maintenance_window_date_and_status';
+import { getMaintenanceWindowDateAndStatus } from '../application/maintenance_window/lib/get_maintenance_window_date_and_status';
 
 export interface GetMaintenanceWindowFromRawParams {
   id: string;

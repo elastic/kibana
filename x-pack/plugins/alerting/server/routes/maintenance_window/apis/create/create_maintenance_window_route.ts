@@ -6,33 +6,21 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../../lib';
-import {
-  verifyAccessAndContext,
-  rRuleSchema,
-  RewriteRequestCase,
-  rewriteMaintenanceWindowRes,
-} from '../lib';
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '../../types';
-import { MaintenanceWindowCreateBody, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
+} from '../../../../types';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
-const bodySchema = schema.object({
-  title: schema.string(),
-  duration: schema.number(),
-  r_rule: rRuleSchema,
-});
-
-export const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowCreateBody> = ({
-  r_rule: rRule,
-  ...rest
-}) => ({
-  ...rest,
-  rRule,
-});
+import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import {
+  createBodySchemaV1,
+  CreateMaintenanceWindowResponseV1,
+} from '../../../../../common/routes/maintenance_window/apis/create';
+import { transformCreateBodyV1 } from './transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const createMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -42,7 +30,7 @@ export const createMaintenanceWindowRoute = (
     {
       path: INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
       validate: {
-        body: bodySchema,
+        body: createBodySchemaV1,
       },
       options: {
         tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
@@ -53,10 +41,14 @@ export const createMaintenanceWindowRoute = (
         licenseState.ensureLicenseForMaintenanceWindow();
 
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
-        const maintenanceWindow = await maintenanceWindowClient.create(rewriteQueryReq(req.body));
-        return res.ok({
-          body: rewriteMaintenanceWindowRes(maintenanceWindow),
+        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.create({
+          data: transformCreateBodyV1(req.body),
         });
+
+        const response: CreateMaintenanceWindowResponseV1 = {
+          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+        };
+        return res.ok(response);
       })
     )
   );
