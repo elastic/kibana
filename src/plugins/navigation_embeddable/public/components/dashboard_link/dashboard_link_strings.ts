@@ -9,6 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const DashboardLinkStrings = {
+  getType: () =>
+    i18n.translate('navigationEmbeddable.dashboardLink.type', {
+      defaultMessage: 'Dashboard link',
+    }),
   getDisplayName: () =>
     i18n.translate('navigationEmbeddable.dashboardLink.displayName', {
       defaultMessage: 'Dashboard',

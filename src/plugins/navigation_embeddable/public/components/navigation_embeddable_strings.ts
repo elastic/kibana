@@ -55,9 +55,9 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
           defaultMessage: 'Save',
         }),
-      getLinkLoadingAriaLabel: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.linkLoadingAriaLabel', {
-          defaultMessage: 'Loading link',
+      getBrokenDashboardLinkAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.brokenDashboardLinkAriaLabel', {
+          defaultMessage: 'Broken dashboard link',
         }),
       getDragHandleAriaLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.dragHandleAriaLabel', {

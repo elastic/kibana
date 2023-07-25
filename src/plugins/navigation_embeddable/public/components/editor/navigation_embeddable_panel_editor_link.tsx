@@ -72,11 +72,16 @@ export const NavigationEmbeddablePanelEditorLink = ({
 
   const LinkLabel = useMemo(() => {
     const labelText = (
-      <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
+      <EuiFlexGroup tabIndex={0} gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={dashboardError ? 'warning' : NavigationLinkInfo[link.type].icon}
             color={dashboardError ? 'warning' : 'text'}
+            aria-label={
+              dashboardError
+                ? NavEmbeddableStrings.editor.panelEditor.getBrokenDashboardLinkAriaLabel()
+                : NavigationLinkInfo[link.type].type
+            }
           />
         </EuiFlexItem>
 
@@ -88,7 +93,8 @@ export const NavigationEmbeddablePanelEditorLink = ({
           <EuiSkeletonTitle
             size="xxxs"
             isLoading={linkLabelLoading}
-            contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
+            announceLoadedStatus={false}
+            announceLoadingStatus={false}
           >
             <EuiText size="s" color={'text'} className="wrapText">
               {linkLabel}

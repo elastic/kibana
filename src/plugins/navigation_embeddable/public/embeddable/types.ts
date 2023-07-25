@@ -73,15 +73,22 @@ export interface NavigationEmbeddableInput extends EmbeddableInput {
 }
 
 export const NavigationLinkInfo: {
-  [id in NavigationLinkType]: { icon: string; displayName: string; description: string };
+  [id in NavigationLinkType]: {
+    icon: string;
+    type: string;
+    displayName: string;
+    description: string;
+  };
 } = {
   [DASHBOARD_LINK_TYPE]: {
     icon: 'dashboardApp',
+    type: DashboardLinkStrings.getType(),
     displayName: DashboardLinkStrings.getDisplayName(),
     description: DashboardLinkStrings.getDescription(),
   },
   [EXTERNAL_LINK_TYPE]: {
     icon: 'link',
+    type: ExternalLinkEmbeddableStrings.getType(),
     displayName: ExternalLinkEmbeddableStrings.getDisplayName(),
     description: ExternalLinkEmbeddableStrings.getDescription(),
   },
