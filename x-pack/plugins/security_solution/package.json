@@ -25,9 +25,10 @@
     "cypress:dw:endpoint:open": "node ./scripts/start_cypress_parallel open --config-file ./public/management/cypress_endpoint.config.ts ts --ftr-config-file ../../../../../../x-pack/test/defend_workflows_cypress/endpoint_config",
     "cypress:investigations:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/investigations/**/*.cy.ts' --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
     "cypress:explore:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/explore/**/*.cy.ts' --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
-    "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
+    "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "test:generate": "node scripts/endpoint/resolver_generator",
     "mappings:generate": "node scripts/mappings/mappings_generator",
-    "mappings:load": "node scripts/mappings/mappings_loader"
+    "mappings:load": "node scripts/mappings/mappings_loader",
+    "junit:transform": "node scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace"
   }
 }

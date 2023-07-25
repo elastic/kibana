@@ -7,11 +7,12 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import { RunContext } from '@kbn/task-manager-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
-import { ReportingCore } from '../..';
-import { ReportingConfigType } from '../../config';
+import type { ReportingCore } from '../..';
+import type { ReportingConfigType } from '../../config';
+import type { ExportType } from '../../export_types/common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
 
@@ -86,12 +87,14 @@ describe('Execute Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'noop',
       name: 'Noop',
-      createJobFnFactory: () => async () => new Promise(() => {}),
-      runTaskFnFactory: () => async () => new Promise(() => {}),
-      jobContentExtension: 'none',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: () => new Promise(() => {}),
+      jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
-    });
+    } as unknown as ExportType);
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
