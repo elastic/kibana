@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlyoutBody,
@@ -31,9 +31,11 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type { DatasourceMap, VisualizationMap, Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
+import { suggestionsApi } from '../../../lens_suggestions_api';
+import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
 
 export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
@@ -59,6 +61,7 @@ export function LensEditConfigurationFlyout({
   datasourceMap,
   datasourceId,
   updateAll,
+  dataView,
   closeFlyout,
   adaptersTables,
   canEditTextBasedQuery,
@@ -69,6 +72,7 @@ export function LensEditConfigurationFlyout({
   const { euiTheme } = useEuiTheme();
   const query = attributes.state.query;
   const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(query);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>();
 
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
@@ -90,6 +94,40 @@ export function LensEditConfigurationFlyout({
     };
     return selectFramePublicAPI(newState, datasourceMap);
   });
+
+  const runQuery = useCallback(
+    async (q: AggregateQuery) => {
+      setQueryTextBased(q);
+      const table = await fetchDataFromAggregateQuery(
+        q,
+        dataView,
+        startDependencies.data,
+        startDependencies.expressions
+      );
+
+      const columns = table?.columns?.map(({ name }) => name);
+
+      const context = {
+        dataViewSpec: dataView?.toSpec(),
+        fieldName: '',
+        contextualFields: columns,
+        query: q,
+      };
+
+      const allSuggestions =
+        suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+
+      setSuggestions(allSuggestions);
+    },
+    [
+      dataView,
+      datasourceMap,
+      startDependencies.data,
+      startDependencies.expressions,
+      visualizationMap,
+    ]
+  );
+
   const { isLoading } = useLensSelector((state) => state.lens);
   if (isLoading) return null;
 
@@ -138,12 +176,13 @@ export function LensEditConfigurationFlyout({
             onTextLangQueryChange={(q) => {}}
             expandCodeEditor={(status: boolean) => {}}
             isCodeEditorExpanded={true}
+            detectTimestamp={Boolean(dataView?.timeFieldName)}
             errors={[]}
             hideExpandButton={true}
             renderRunButton={true}
             onTextLangQuerySubmit={(q) => {
               if (q) {
-                setQueryTextBased(q);
+                runQuery(q);
               }
             }}
             isDisabled={false}

@@ -188,12 +188,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   };
 
-  const onQuerySubmit = useCallback(
-    (value?: string) => {
-      onTextLangQuerySubmit({ [language]: value } as AggregateQuery);
-    },
-    [language, onTextLangQuerySubmit]
-  );
+  const onQuerySubmit = useCallback(() => {
+    const currentValue = editor1.current?.getValue();
+    onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery);
+  }, [language, onTextLangQuerySubmit]);
 
   const restoreInitialMode = () => {
     setIsCodeEditorExpandedFocused(false);
@@ -235,8 +233,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       // eslint-disable-next-line no-bitwise
       editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
         editor1.current?.getValue();
-        const currentValue = editor1.current?.getValue();
-        onQuerySubmit(currentValue);
+        onQuerySubmit();
       });
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);
