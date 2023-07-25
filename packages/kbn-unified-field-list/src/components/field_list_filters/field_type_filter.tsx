@@ -47,7 +47,8 @@ const popoverTitleStyle = css`
   padding: ${EQUAL_HEIGHT_OFFSET}px 0;
 `;
 const filterButtonStyle = css`
-  .euiFilterButton__textShift {
+  &,
+  & .euiFilterButton__textShift {
     min-width: 0;
     line-height: 1;
   }
