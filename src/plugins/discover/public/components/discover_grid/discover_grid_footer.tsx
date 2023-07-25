@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { MAX_LOADED_GRID_ROWS } from '../../../common/constants';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DiscoverGridFooterProps {
   isLoadingMore: boolean;
@@ -32,6 +34,21 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
     totalHits = 0,
     onFetchMoreRecords,
   } = props;
+  const { data } = useDiscoverServices();
+  const timefilter = data.query.timefilter.timefilter;
+  const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
+
+  useEffect(() => {
+    const subscriber = timefilter.getRefreshIntervalUpdate$().subscribe(() => {
+      setRefreshInterval(timefilter.getRefreshInterval());
+    });
+
+    return () => subscriber.unsubscribe();
+  }, [timefilter, setRefreshInterval]);
+
+  const isRefreshIntervalOn =
+    refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0;
+
   const { euiTheme } = useEuiTheme();
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
@@ -44,8 +61,17 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
     if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
       return (
         <DiscoverGridFooterContainer hasButton={true} {...props}>
-          <>
+          <EuiToolTip
+            content={
+              isRefreshIntervalOn
+                ? i18n.translate('discover.gridSampleSize.fetchMoreLinkDisabledTooltip', {
+                    defaultMessage: 'To load more the refresh interval needs to be disabled first',
+                  })
+                : undefined
+            }
+          >
             <EuiButtonEmpty
+              disabled={isRefreshIntervalOn}
               isLoading={isLoadingMore}
               flush="both"
               data-test-subj="dscGridSampleSizeFetchMoreLink"
@@ -59,8 +85,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
                 defaultMessage="Load more"
               />
             </EuiButtonEmpty>
-            {'.'}
-          </>
+          </EuiToolTip>
         </DiscoverGridFooterContainer>
       );
     }
