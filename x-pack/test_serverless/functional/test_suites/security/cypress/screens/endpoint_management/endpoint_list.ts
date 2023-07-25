@@ -26,14 +26,14 @@ export const getTableRow = ({
   row = 0,
 }: ListRowOptions = {}): Cypress.Chainable => {
   if (endpointId) {
-    return cy.get(`[data-endpoint-id="${endpointId}"]`);
+    return cy.get(`[data-endpoint-id="${endpointId}"]`).should('exist');
   }
 
   if (hostName) {
-    return cy.getByTestSubj('hostnameCellLink').contains(hostName).closest('tr');
+    return cy.getByTestSubj('hostnameCellLink').contains(hostName).closest('tr').should('exist');
   }
 
-  return cy.getByTestSubj('endpointListTable').find(`tr:eq(${row})`);
+  return cy.getByTestSubj('endpointListTable').find(`tr:eq(${row})`).should('exist');
 };
 
 export const openRowActionMenu = (options?: ListRowOptions): Cypress.Chainable => {

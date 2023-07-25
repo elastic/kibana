@@ -7,7 +7,6 @@
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { dataLoaders } from '@kbn/security-solution-plugin/public/management/cypress/support/data_loaders';
-import { ToolingLog } from '@kbn/tooling-log';
 import { LoadUserAndRoleCyTaskOptions } from '../cypress';
 import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
 
@@ -15,12 +14,6 @@ export const setupDataLoaderTasks = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) => {
-  const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
-
-  logger.info(`nodeJS env.:\n`, JSON.stringify(process.env, null, 2));
-
-  logger.info(`CY config 'env' data passed on input:\n`, JSON.stringify(config.env, null, 2));
-
   // Reuse data loaders from endpoint management cypress setup
   dataLoaders(on, config);
 

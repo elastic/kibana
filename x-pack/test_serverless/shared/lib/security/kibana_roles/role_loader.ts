@@ -73,7 +73,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .catch(ignoreHttp409Error)
       .catch(this.logPromiseError)
       .then((response) => {
-        this.logger.info(`Role [${role}] created/updated`, response?.data);
+        this.logger.info(`Role [${roleName}] created/updated`, response?.data);
         return response;
       });
   }

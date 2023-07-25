@@ -213,42 +213,46 @@ describe(
       });
     });
 
-    // Endpoint Operations Manager and Platform Engineer currently have the same level of access
-    (['platform_engineer', `endpoint_operations_manager`] as ServerlessRoleName[]).forEach(
-      (roleName) => {
-        describe(`for role: ${roleName}`, () => {
-          const artifactPagesFullAccess = [
-            pageById.trustedApps,
-            pageById.eventFilters,
-            pageById.blocklist,
-            pageById.hostIsolationExceptions,
-          ];
-          const grantedAccessPages = [pageById.endpointList, pageById.policyList];
+    // Endpoint Operations Manager, Endpoint Policy Manager and Platform Engineer currently have the same level of access
+    (
+      [
+        'platform_engineer',
+        `endpoint_operations_manager`,
+        'endpoint_policy_manager',
+      ] as ServerlessRoleName[]
+    ).forEach((roleName) => {
+      describe(`for role: ${roleName}`, () => {
+        const artifactPagesFullAccess = [
+          pageById.trustedApps,
+          pageById.eventFilters,
+          pageById.blocklist,
+          pageById.hostIsolationExceptions,
+        ];
+        const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
-          beforeEach(() => {
-            login('platform_engineer');
-          });
-
-          for (const { id, url, title } of artifactPagesFullAccess) {
-            it(`should have CRUD access to: ${title}`, () => {
-              cy.visit(url);
-              getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
-            });
-          }
-
-          for (const { url, title } of grantedAccessPages) {
-            it(`should have access to: ${title}`, () => {
-              cy.visit(url);
-              getNoPrivilegesPage().should('not.exist');
-            });
-          }
-
-          it('should have access to Fleet', () => {
-            visitFleetAgentList();
-            ensurePermissionDeniedScreen();
-          });
+        beforeEach(() => {
+          login('platform_engineer');
         });
-      }
-    );
+
+        for (const { id, url, title } of artifactPagesFullAccess) {
+          it(`should have CRUD access to: ${title}`, () => {
+            cy.visit(url);
+            getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          });
+        }
+
+        for (const { url, title } of grantedAccessPages) {
+          it(`should have access to: ${title}`, () => {
+            cy.visit(url);
+            getNoPrivilegesPage().should('not.exist');
+          });
+        }
+
+        it('should have access to Fleet', () => {
+          visitFleetAgentList();
+          ensurePermissionDeniedScreen();
+        });
+      });
+    });
   }
 );

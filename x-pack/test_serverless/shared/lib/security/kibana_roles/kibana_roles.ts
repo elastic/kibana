@@ -20,7 +20,8 @@ export type ServerlessRoleName =
   | 'soc_manager'
   | 'detections_admin'
   | 'platform_engineer'
-  | 'endpoint_operations_manager';
+  | 'endpoint_operations_manager'
+  | 'endpoint_policy_manager';
 
 type YamlRoleDefinitions = Record<
   ServerlessRoleName,
