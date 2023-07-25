@@ -114,6 +114,13 @@ export interface AddFinishedStepAction {
   payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
 }
 
+export interface RemoveFinishedStepAction {
+  type: GetStartedPageActions.RemoveFinishedStep;
+  payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
+}
+
+export type ReducerActions = ToggleProductAction | AddFinishedStepAction | RemoveFinishedStepAction;
+
 export interface Switch {
   id: ProductLine;
   label: string;
@@ -121,5 +128,28 @@ export interface Switch {
 
 export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
+  RemoveFinishedStep = 'removeFinishedStep',
   ToggleProduct = 'toggleProduct',
 }
+
+export type OnStepClicked = ({
+  stepId,
+  cardId,
+  sectionId,
+}: {
+  stepId: StepId;
+  cardId: CardId;
+  sectionId: SectionId;
+}) => void;
+
+export type OnStepButtonClicked = ({
+  stepId,
+  cardId,
+  sectionId,
+  undo,
+}: {
+  stepId: StepId;
+  cardId: CardId;
+  sectionId: SectionId;
+  undo?: boolean;
+}) => void;

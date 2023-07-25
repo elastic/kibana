@@ -46,7 +46,7 @@ describe('CardItemComponent', () => {
 
   it('should not render steps left information when all steps done', () => {
     const mockFinishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as Record<CardId, Set<StepId>>;
 
     const { getByText, queryByText } = render(

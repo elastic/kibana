@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from 
 import type { EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import type { CardId, SectionId, StepId } from './types';
+import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
 import { getSections } from './sections';
@@ -19,7 +19,8 @@ const CardItemComponent: React.FC<{
   shadow?: string;
   stepsLeft?: number;
   timeInMins?: number;
-  onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
+  onStepClicked: OnStepClicked;
+  onStepButtonClicked: OnStepButtonClicked;
   finishedSteps: Record<CardId, Set<StepId>>;
   sectionId: SectionId;
   cardId: CardId;
@@ -29,6 +30,7 @@ const CardItemComponent: React.FC<{
   shadow,
   euiTheme,
   onStepClicked,
+  onStepButtonClicked,
   finishedSteps,
   sectionId,
   cardId,
@@ -115,6 +117,7 @@ const CardItemComponent: React.FC<{
                   cardId={cardItem.id}
                   step={step}
                   onStepClicked={onStepClicked}
+                  onStepButtonClicked={onStepButtonClicked}
                   finishedStepsByCard={finishedSteps[cardItem.id]}
                 />
               );

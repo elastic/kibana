@@ -13,23 +13,16 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useSetUpCardSections } from './use_setup_cards';
 
-import type { ActiveCards, CardId, IntroductionSteps, SectionId } from './types';
+import type { ActiveCards, CardId, StepId, OnStepClicked, OnStepButtonClicked } from './types';
 import type { ProductLine } from '../../common/product';
 
 const TogglePanelComponent: React.FC<{
-  finishedSteps: Record<CardId, Set<IntroductionSteps>>;
+  finishedSteps: Record<CardId, Set<StepId>>;
   activeCards: ActiveCards | null;
   activeProducts: Set<ProductLine>;
-  onStepClicked: ({
-    stepId,
-    cardId,
-    sectionId,
-  }: {
-    stepId: IntroductionSteps;
-    cardId: CardId;
-    sectionId: SectionId;
-  }) => void;
-}> = ({ finishedSteps, activeCards, activeProducts, onStepClicked }) => {
+  onStepClicked: OnStepClicked;
+  onStepButtonClicked: OnStepButtonClicked;
+}> = ({ finishedSteps, activeCards, activeProducts, onStepClicked, onStepButtonClicked }) => {
   const { euiTheme } = useEuiTheme();
 
   const shadow = useEuiShadow('s');
@@ -37,6 +30,7 @@ const TogglePanelComponent: React.FC<{
   const { setUpSections } = useSetUpCardSections({ euiTheme, shadow });
   const sectionNodes = setUpSections({
     onStepClicked,
+    onStepButtonClicked,
     finishedSteps,
     activeCards,
   });

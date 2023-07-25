@@ -271,6 +271,20 @@ export const ENDPOINT_SWITCH_LABEL = i18n.translate(
   }
 );
 
+export const MARK_AS_DONE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.markAsDoneTitle',
+  {
+    defaultMessage: 'Mark as done',
+  }
+);
+
+export const UNDO_MARK_AS_DONE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.undoMarkAsDoneTitle',
+  {
+    defaultMessage: `Undo 'mark as done'`,
+  }
+);
+
 export const TOGGLE_PANEL_EMPTY_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.empty.title',
   {

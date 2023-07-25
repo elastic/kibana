@@ -23,7 +23,7 @@ jest.mock('./use_setup_cards', () => ({
 }));
 
 const finishedSteps = {
-  [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+  [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
 } as unknown as Record<CardId, Set<StepId>>;
 const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
@@ -34,18 +34,13 @@ const activeCards = {
       timeInMins: 3,
       stepsLeft: 1,
     },
-    [GetSetUpCardId.bringInYourData]: {
-      id: GetSetUpCardId.bringInYourData,
+    [GetSetUpCardId.configure]: {
+      id: GetSetUpCardId.configure,
       timeInMins: 0,
       stepsLeft: 0,
     },
-    [GetSetUpCardId.activateAndCreateRules]: {
-      id: GetSetUpCardId.activateAndCreateRules,
-      timeInMins: 0,
-      stepsLeft: 0,
-    },
-    [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-      id: GetSetUpCardId.protectYourEnvironmentInRealtime,
+    [GetSetUpCardId.explore]: {
+      id: GetSetUpCardId.explore,
       timeInMins: 0,
       stepsLeft: 0,
     },

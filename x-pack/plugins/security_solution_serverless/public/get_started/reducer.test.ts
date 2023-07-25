@@ -63,7 +63,7 @@ describe('reducer', () => {
       type: GetStartedPageActions.AddFinishedStep,
       payload: {
         cardId: GetSetUpCardId.introduction,
-        stepId: IntroductionSteps.watchOverviewVideo,
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
         sectionId: SectionId.getSetUp,
       },
     };
@@ -71,7 +71,7 @@ describe('reducer', () => {
     const nextState = reducer(initialState, action);
 
     expect(nextState.finishedSteps[GetSetUpCardId.introduction]).toEqual(
-      new Set([IntroductionSteps.watchOverviewVideo])
+      new Set([IntroductionSteps.getToKnowElasticSecurity])
     );
     expect(nextState.activeCards).toEqual({
       getSetUp: {
@@ -88,16 +88,16 @@ describe('reducer', () => {
 describe('getFinishedStepsInitialStates', () => {
   it('should return the initial states of finished steps correctly', () => {
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo],
-      [GetSetUpCardId.bringInYourData]: [],
+      [GetSetUpCardId.introduction]: [IntroductionSteps.getToKnowElasticSecurity],
+      [GetSetUpCardId.configure]: [],
     } as unknown as Record<CardId, StepId[]>;
 
     const initialStates = getFinishedStepsInitialStates({ finishedSteps });
 
     expect(initialStates[GetSetUpCardId.introduction]).toEqual(
-      new Set([IntroductionSteps.watchOverviewVideo])
+      new Set([IntroductionSteps.getToKnowElasticSecurity])
     );
-    expect(initialStates[GetSetUpCardId.bringInYourData]).toEqual(new Set([]));
+    expect(initialStates[GetSetUpCardId.configure]).toEqual(new Set([]));
   });
 });
 
@@ -115,7 +115,7 @@ describe('getActiveCardsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as unknown as Record<CardId, Set<StepId>>;
 
     const initialStates = getActiveCardsInitialStates({ activeProducts, finishedSteps });
@@ -127,13 +127,13 @@ describe('getActiveCardsInitialStates', () => {
           timeInMins: 0,
           stepsLeft: 0,
         },
-        [GetSetUpCardId.bringInYourData]: {
-          id: GetSetUpCardId.bringInYourData,
+        [GetSetUpCardId.configure]: {
+          id: GetSetUpCardId.configure,
           timeInMins: 0,
           stepsLeft: 0,
         },
-        [GetSetUpCardId.activateAndCreateRules]: {
-          id: GetSetUpCardId.activateAndCreateRules,
+        [GetSetUpCardId.explore]: {
+          id: GetSetUpCardId.explore,
           timeInMins: 0,
           stepsLeft: 0,
         },

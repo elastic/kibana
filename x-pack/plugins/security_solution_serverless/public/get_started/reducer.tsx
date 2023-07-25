@@ -7,19 +7,10 @@
 
 import type { ProductLine } from '../../common/product';
 import { setupCards, updateCard } from './helpers';
-import {
-  type CardId,
-  type StepId,
-  type ToggleProductAction,
-  type TogglePanelReducer,
-  type AddFinishedStepAction,
-  GetStartedPageActions,
-} from './types';
+import type { ReducerActions } from './types';
+import { type CardId, type StepId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
-export const reducer = (
-  state: TogglePanelReducer,
-  action: ToggleProductAction | AddFinishedStepAction
-): TogglePanelReducer => {
+export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
   if (action.type === GetStartedPageActions.ToggleProduct) {
     const activeProducts = new Set([...state.activeProducts]);
 
@@ -44,7 +35,34 @@ export const reducer = (
         : new Set(),
     };
 
-    finishedSteps[action.payload.cardId].add(action.payload.stepId);
+    if (action.type === GetStartedPageActions.AddFinishedStep) {
+      finishedSteps[action.payload.cardId].add(action.payload.stepId);
+    }
+
+    return {
+      ...state,
+      finishedSteps,
+      activeCards: updateCard({
+        finishedSteps,
+        activeProducts: state.activeProducts,
+        activeCards: state.activeCards,
+        cardId: action.payload.cardId,
+        sectionId: action.payload.sectionId,
+      }),
+    };
+  }
+
+  if (action.type === GetStartedPageActions.RemoveFinishedStep) {
+    const finishedSteps = {
+      ...state.finishedSteps,
+      [action.payload.cardId]: state.finishedSteps[action.payload.cardId]
+        ? new Set([...state.finishedSteps[action.payload.cardId]])
+        : new Set(),
+    };
+
+    if (action.type === GetStartedPageActions.RemoveFinishedStep) {
+      finishedSteps[action.payload.cardId].delete(action.payload.stepId);
+    }
 
     return {
       ...state,

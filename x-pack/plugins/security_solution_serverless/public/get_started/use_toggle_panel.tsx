@@ -15,7 +15,7 @@ import {
   getFinishedStepsInitialStates,
   reducer,
 } from './reducer';
-import type { CardId, SectionId, StepId, Switch } from './types';
+import type { OnStepButtonClicked, OnStepClicked, Switch } from './types';
 import { GetStartedPageActions } from './types';
 
 export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProductTypes }) => {
@@ -24,6 +24,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     getActiveProductsFromStorage,
     toggleActiveProductsInStorage,
     addFinishedStepToStorage,
+    removeFinishedStepFromStorage,
   } = getStartedStorage;
 
   const finishedStepsInitialStates = useMemo(
@@ -56,8 +57,8 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     activeCards: activeCardsInitialStates,
   });
 
-  const onStepClicked = useCallback(
-    ({ stepId, cardId, sectionId }: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => {
+  const onStepClicked: OnStepClicked = useCallback(
+    ({ stepId, cardId, sectionId }) => {
       dispatch({
         type: GetStartedPageActions.AddFinishedStep,
         payload: { stepId, cardId, sectionId },
@@ -65,6 +66,23 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
       addFinishedStepToStorage(cardId, stepId);
     },
     [addFinishedStepToStorage]
+  );
+
+  const onStepButtonClicked: OnStepButtonClicked = useCallback(
+    ({ stepId, cardId, sectionId, undo }) => {
+      dispatch({
+        type: undo
+          ? GetStartedPageActions.RemoveFinishedStep
+          : GetStartedPageActions.AddFinishedStep,
+        payload: { stepId, cardId, sectionId },
+      });
+      if (undo) {
+        removeFinishedStepFromStorage(cardId, stepId);
+      } else {
+        addFinishedStepToStorage(cardId, stepId);
+      }
+    },
+    [addFinishedStepToStorage, removeFinishedStepFromStorage]
   );
 
   const onProductSwitchChanged = useCallback(
@@ -75,5 +93,5 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [toggleActiveProductsInStorage]
   );
 
-  return { state, onStepClicked, onProductSwitchChanged };
+  return { state, onStepClicked, onStepButtonClicked, onProductSwitchChanged };
 };

@@ -9,7 +9,14 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type { ActiveCards, CardId, SectionId, StepId } from './types';
+import type {
+  ActiveCards,
+  CardId,
+  OnStepButtonClicked,
+  OnStepClicked,
+  SectionId,
+  StepId,
+} from './types';
 
 import { CardItem } from './card_item';
 import { getSections } from './sections';
@@ -24,11 +31,13 @@ export const useSetUpCardSections = ({
   const setUpCards = useCallback(
     ({
       onStepClicked,
+      onStepButtonClicked,
       finishedSteps,
       activeCards,
       sectionId,
     }: {
-      onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
+      onStepClicked: OnStepClicked;
+      onStepButtonClicked: OnStepButtonClicked;
       finishedSteps: Record<CardId, Set<StepId>>;
       activeCards: ActiveCards | null;
       sectionId: SectionId;
@@ -46,6 +55,7 @@ export const useSetUpCardSections = ({
                 shadow={shadow}
                 euiTheme={euiTheme}
                 onStepClicked={onStepClicked}
+                onStepButtonClicked={onStepButtonClicked}
                 finishedSteps={finishedSteps}
               />
             </EuiFlexItem>
@@ -58,10 +68,12 @@ export const useSetUpCardSections = ({
   const setUpSections = useCallback(
     ({
       onStepClicked,
+      onStepButtonClicked,
       finishedSteps,
       activeCards,
     }: {
-      onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
+      onStepClicked: OnStepClicked;
+      onStepButtonClicked: OnStepButtonClicked;
       finishedSteps: Record<CardId, Set<StepId>>;
       activeCards: ActiveCards | null;
     }) =>
@@ -69,6 +81,7 @@ export const useSetUpCardSections = ({
         const cardNodes = setUpCards({
           sectionId: currentSection.id,
           onStepClicked,
+          onStepButtonClicked,
           finishedSteps,
           activeCards,
         });
