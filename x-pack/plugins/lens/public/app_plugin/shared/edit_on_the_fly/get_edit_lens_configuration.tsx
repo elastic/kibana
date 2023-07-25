@@ -15,7 +15,13 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import { makeConfigureStore, LensRootStore, loadInitial } from '../../../state_management';
+import {
+  makeConfigureStore,
+  LensRootStore,
+  loadInitial,
+  initExisting,
+  initEmpty,
+} from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
@@ -38,7 +44,8 @@ function LoadingSpinnerWithOverlay() {
 
 type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => void;
 
-const updatingMiddleware =
+// exported for testing
+export const updatingMiddleware =
   (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
     const {
       datasourceStates: prevDatasourceStates,
@@ -48,10 +55,17 @@ const updatingMiddleware =
     next(action);
     const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
     if (
-      !isEqual(prevDatasourceStates, datasourceStates) ||
-      !isEqual(prevVisualization, visualization) ||
-      prevActiveDatasourceId !== activeDatasourceId
+      prevActiveDatasourceId !== activeDatasourceId ||
+      !isEqual(
+        prevDatasourceStates[prevActiveDatasourceId].state,
+        datasourceStates[activeDatasourceId].state
+      ) ||
+      !isEqual(prevVisualization, visualization)
     ) {
+      // ignore the actions that initialize the store with the state from the attributes
+      if (initExisting.match(action) || initEmpty.match(action)) {
+        return;
+      }
       updater(datasourceStates[activeDatasourceId].state, visualization.state);
     }
   };
