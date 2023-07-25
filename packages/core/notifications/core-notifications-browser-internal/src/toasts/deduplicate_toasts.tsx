@@ -12,9 +12,21 @@ import { EuiNotificationBadge } from '@elastic/eui';
 import { Toast } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 
+/**
+ * We can introduce this type within this domain, to allow for react-managed titles
+ */
+export type ToastWithRichTitle = Omit<Toast, 'title'> & {
+  title?: MountPoint | ReactNode;
+};
+
 export interface DeduplicateResult {
-  toasts: Toast[];
+  toasts: ToastWithRichTitle[];
   idToToasts: Record<string, Toast[]>;
+}
+
+interface TitleWithBadgeProps {
+  title: MountPoint | ReactNode;
+  counter: number;
 }
 
 /**
@@ -26,7 +38,7 @@ export interface DeduplicateResult {
 export function deduplicateToasts(allToasts: Toast[]): DeduplicateResult {
   const toastGroups = groupByKey(allToasts);
 
-  const distinctToasts: Toast[] = [];
+  const distinctToasts: ToastWithRichTitle[] = [];
   const idToToasts: Record<string, Toast[]> = {};
   for (const toastGroup of Object.values(toastGroups)) {
     const firstElement = toastGroup[0];
@@ -81,10 +93,6 @@ function groupByKey(allToasts: Toast[]) {
   return toastGroups;
 }
 
-interface TitleWithBadgeProps {
-  title: MountPoint | ReactNode;
-  counter: number;
-}
 
 export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
   const hostRef = React.useRef<HTMLSpanElement>(null);

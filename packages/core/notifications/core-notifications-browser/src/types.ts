@@ -8,7 +8,6 @@
 import type { Observable } from 'rxjs';
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import { ReactChild, ReactNode } from 'react';
 
 /**
  * Allowed fields for {@link ToastInput}.
@@ -19,8 +18,8 @@ import { ReactChild, ReactNode } from 'react';
  * @public
  */
 export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
-  title?: string | MountPoint | ReactNode;
-  text?: string | MountPoint | ReactChild;
+  title?: string | MountPoint;
+  text?: string | MountPoint;
 };
 
 export type Toast = ToastInputFields & {

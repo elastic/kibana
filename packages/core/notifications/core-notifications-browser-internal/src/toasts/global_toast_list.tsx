@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
-import { deduplicateToasts } from './deduplicate_toasts';
+import { deduplicateToasts, ToastWithRichTitle } from './deduplicate_toasts';
 
 interface Props {
   toasts$: Observable<Toast[]>;
@@ -21,11 +21,11 @@ interface Props {
 }
 
 interface State {
-  toasts: Toast[];
+  toasts: ToastWithRichTitle[];
   idToToasts: Record<string, Toast[]>;
 }
 
-const convertToEui = (toast: Toast): EuiToast => ({
+const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
   ...toast,
   title: toast.title instanceof Function ? <MountWrapper mount={toast.title} /> : toast.title,
   text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
