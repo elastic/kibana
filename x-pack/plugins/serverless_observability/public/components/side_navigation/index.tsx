@@ -102,16 +102,15 @@ const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'apm:services',
                   getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return (
-                      pathNameSerialized.startsWith(prepend('/app/apm/services')) ||
-                      pathNameSerialized.startsWith(prepend('/app/apm/service-map')) ||
-                      pathNameSerialized.startsWith(prepend('/app/apm/service-groups')) ||
-                      pathNameSerialized.startsWith(prepend('/app/apm/mobile-services'))
-                    );
+                    const regex = /app\/apm\/.*service.*/;
+                    return regex.test(pathNameSerialized);
                   },
                 },
                 {
                   link: 'apm:traces',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                  },
                 },
                 {
                   link: 'apm:dependencies',

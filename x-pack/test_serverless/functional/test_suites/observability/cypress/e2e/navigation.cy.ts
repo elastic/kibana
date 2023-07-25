@@ -141,6 +141,23 @@ describe('Serverless', () => {
     );
   });
 
+  it('sets traces nav item as active', () => {
+    cy.loginAsElasticUser('/app/apm/traces/explorer/waterfall');
+
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:traces').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+
+    cy.loginAsElasticUser('/app/apm/traces/explorer/critical_path');
+    cy.getByTestSubj('nav-item-id-apm').should('have.class', 'euiSideNavItemButton-isOpen');
+    cy.getByTestSubj('nav-item-id-apm:traces').should(
+      'have.class',
+      'euiSideNavItemButton-isSelected'
+    );
+  });
+
   it('sets AIOps nav item as active', () => {
     cy.loginAsElasticUser('app/ml/aiops/explain_log_rate_spikes');
 
