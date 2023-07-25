@@ -58,6 +58,7 @@ describe('Timeline Templates', () => {
     populateTimeline();
     addFilter(getTimeline().filter);
     cy.get(PIN_EVENT).should('be.visible');
+    cy.get(PIN_EVENT).should('be.disabled');
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(getTimeline().title);
