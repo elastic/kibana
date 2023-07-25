@@ -14,6 +14,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { IContainer } from '../lib';
 import { core } from '../kibana_services';
+import { tracksOverlays } from '..';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
   const module = await import('./add_panel_flyout');
@@ -29,6 +30,10 @@ export const openAddPanelFlyout = ({
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {
+  // send the overlay ref to the root embeddable if it is capable of tracking overlays
+  const rootEmbeddable = container.getRoot();
+  const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
@@ -39,8 +44,13 @@ export const openAddPanelFlyout = ({
     {
       'data-test-subj': 'dashboardAddPanel',
       ownFocus: true,
-      onClose,
+      onClose: (overlayRef) => {
+        if (overlayTracker) overlayTracker.clearOverlays();
+        overlayRef.close();
+      },
     }
   );
   return flyoutSession;
+
+  overlayTracker?.openOverlay(flyoutSession);
 };

@@ -35,7 +35,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     }
   };
 
-  describe('adding children', () => {
+  describe.only('adding children', () => {
     before(async () => {
       await testSubjects.click('embeddablePanelExample');
     });
