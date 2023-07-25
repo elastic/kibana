@@ -362,7 +362,6 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
     default:
       return prevState;
   }
-  return prevState;
 };
 
 export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = ({

@@ -25,7 +25,6 @@ import {
   createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import {
@@ -46,7 +45,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     login();
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
   });

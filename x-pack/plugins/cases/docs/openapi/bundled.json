@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "cases",
-      "description": "Case APIs enable you to open and track issues."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "cases",
+      "description": "Case APIs enable you to open and track issues."
     }
   ],
   "paths": {
@@ -3977,7 +3985,12 @@
           "type": "string",
           "enum": [
             "createdAt",
-            "updatedAt"
+            "updatedAt",
+            "closedAt",
+            "title",
+            "category",
+            "status",
+            "severity"
           ],
           "default": "createdAt"
         },
@@ -5286,31 +5299,8 @@
         "type": "string",
         "description": "The fields to perform the `simple_query_string` parsed query against.",
         "enum": [
-          "closed_by.username",
-          "closed_by.full_name",
-          "closed_by.email",
-          "closed_by.profile_uid",
-          "created_by.username",
-          "created_by.full_name",
-          "created_by.email",
-          "created_by.profile_uid",
           "description",
-          "connector.name",
-          "connector.type",
-          "external_service.pushed_by.username",
-          "external_service.pushed_by.full_name",
-          "external_service.pushed_by.email",
-          "external_service.pushed_by.profile_uid",
-          "external_service.connector_name",
-          "external_service.external_id",
-          "external_service.external_title",
-          "external_service.external_url",
-          "title",
-          "title.keyword",
-          "updated_by.username",
-          "updated_by.full_name",
-          "updated_by.email",
-          "updated_by.profile_uid"
+          "title"
         ]
       },
       "closure_types": {
@@ -7151,13 +7141,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }

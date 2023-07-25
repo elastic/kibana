@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleResponseV1, RuleParamsV1 } from '../../../../../common/routes/rule/rule_response';
+import { RuleResponseV1, RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule, RuleLastRun, RuleParams } from '../../../../application/rule/types';
 
 const transformRuleLastRun = (lastRun: RuleLastRun): RuleResponseV1['last_run'] => {
