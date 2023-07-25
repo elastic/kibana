@@ -14,7 +14,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
-import { actionsMock } from '../mocks';
+import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
@@ -43,6 +43,9 @@ const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
 const securityMockStart = securityMock.createStart();
 
+const authorizationMock = actionsAuthorizationMock.create();
+const getActionsAuthorizationWithRequest = jest.fn();
+
 actionExecutor.initialize({
   logger: loggerMock,
   spaces: spacesMock,
@@ -51,6 +54,7 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
+  getActionsAuthorizationWithRequest,
   inMemoryConnectors: [
     {
       id: 'preconfigured',
@@ -95,6 +99,8 @@ beforeEach(() => {
     roles: ['superuser'],
     username: 'coolguy',
   }));
+
+  getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
 
 test('successfully executes', async () => {
@@ -681,6 +687,7 @@ test('successfully executes with system connector', async () => {
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
       secrets: { schema: schema.any() },
@@ -800,6 +807,92 @@ test('successfully executes with system connector', async () => {
       ],
     ]
   `);
+});
+
+test('successfully authorize system actions', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    getKibanaPrivileges: () => ['test/create'],
+    isSystemActionType: true,
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
+  actionTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    operation: 'execute',
+    additionalPrivileges: ['test/create'],
+  });
+});
+
+test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    getKibanaPrivileges: () => ['test/create'],
+    isSystemActionType: true,
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
+  actionTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+
+  await actionExecutor.execute({
+    ...executeParams,
+    params: { foo: 'bar' },
+    actionId: 'system-connector-.cases',
+  });
+
+  expect(actionTypeRegistry.getSystemActionKibanaPrivileges).toHaveBeenCalledWith('.cases', {
+    foo: 'bar',
+  });
+
+  expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    operation: 'execute',
+    additionalPrivileges: ['test/create'],
+  });
+});
+
+test('does not authorize non system actions', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.string() }) },
+      secrets: { schema: schema.object({ apiKey: schema.string() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.isSystemActionType.mockReturnValueOnce(false);
+
+  await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+  expect(authorizationMock.ensureAuthorized).not.toBeCalled();
 });
 
 test('successfully executes as a task', async () => {
@@ -1102,6 +1195,7 @@ test('should not throws an error if actionType is system action', async () => {
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
       secrets: { schema: schema.any() },
@@ -1151,6 +1245,7 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     inMemoryConnectors: [],
+    getActionsAuthorizationWithRequest,
   });
   await expect(
     customActionExecutor.execute(executeParams)
@@ -1168,6 +1263,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
+    getActionsAuthorizationWithRequest,
     inMemoryConnectors: [
       {
         id: 'preconfigured',
@@ -1318,6 +1414,7 @@ test('should not throw error if action is system action and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
+    getActionsAuthorizationWithRequest,
     inMemoryConnectors: [
       {
         actionTypeId: '.cases',
@@ -1337,6 +1434,7 @@ test('should not throw error if action is system action and isESOCanEncrypt is f
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
       secrets: { schema: schema.any() },

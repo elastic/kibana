@@ -27,7 +27,10 @@ jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
   return {
     ...originalModule,
-    useDiscoverCustomizationService: () => mockCustomizationService,
+    useDiscoverCustomizationService: () => ({
+      customizationService: mockCustomizationService,
+      isInitialized: Boolean(mockCustomizationService),
+    }),
   };
 });
 

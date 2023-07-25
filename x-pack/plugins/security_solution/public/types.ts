@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -50,6 +50,9 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -72,6 +75,7 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
+import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -122,6 +126,9 @@ export interface StartPlugins {
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
+  discover: DiscoverStart;
+  navigation: NavigationPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -153,6 +160,9 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     telemetry: TelemetryClientStart;
+    discoverFilterManager: FilterManager;
+    customDataService: DataPublicPluginStart;
+    topValuesPopover: TopValuesPopoverService;
   };
 
 export interface PluginSetup {

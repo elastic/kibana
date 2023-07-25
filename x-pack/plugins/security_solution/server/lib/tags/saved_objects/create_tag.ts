@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
+import { getRandomColor } from '../../../../common/utils/get_ramdom_color';
 
 interface CreateTagParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -19,13 +20,6 @@ interface CreateTagParams {
   color?: string;
   references?: SavedObjectReference[];
 }
-
-/**
- * Returns the hex representation of a random color (e.g `#F1B7E2`)
- */
-const getRandomColor = (): string => {
-  return `#${String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0')}`;
-};
 
 export const createTag = async ({
   savedObjectsClient,
