@@ -6,7 +6,12 @@
  */
 
 import type { AgentPolicy } from '../types';
-import { FLEET_SERVER_PACKAGE, FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE } from '../constants';
+import {
+  FLEET_SERVER_PACKAGE,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_ENDPOINT_PACKAGE,
+} from '../constants';
 
 export function policyHasFleetServer(agentPolicy: AgentPolicy) {
   if (!agentPolicy.package_policies) {
@@ -24,6 +29,10 @@ export function policyHasAPMIntegration(agentPolicy: AgentPolicy) {
 
 export function policyHasSyntheticsIntegration(agentPolicy: AgentPolicy) {
   return policyHasIntegration(agentPolicy, FLEET_SYNTHETICS_PACKAGE);
+}
+
+export function policyHasDefendSecurity(agentPolicy: AgentPolicy) {
+  return policyHasIntegration(agentPolicy, FLEET_ENDPOINT_PACKAGE);
 }
 
 function policyHasIntegration(agentPolicy: AgentPolicy, packageName: string) {

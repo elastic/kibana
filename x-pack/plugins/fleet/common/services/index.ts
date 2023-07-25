@@ -66,6 +66,7 @@ export { agentStatusesToSummary } from './agent_statuses_to_summary';
 export {
   policyHasFleetServer,
   policyHasAPMIntegration,
+  policyHasEndpointSecurity,
   policyHasSyntheticsIntegration,
 } from './agent_policies_helpers';
 
