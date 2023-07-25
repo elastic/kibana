@@ -34,7 +34,7 @@ export default defineCypressConfig({
     // Username/password used for both elastic and kibana
     KIBANA_USERNAME: 'elastic',
     KIBANA_PASSWORD: 'changeme',
-    ELASTICSEARCH_USERNAME: 'elastic',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
     ELASTICSEARCH_PASSWORD: 'changeme',
   },
 
