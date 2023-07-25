@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { DiscoverMainRoute } from '../../application/main';
@@ -31,15 +31,15 @@ export interface DiscoverContainerInternalProps {
   isDev: boolean;
 }
 
-const DiscoverContainerWrapper = euiStyled(EuiFlexGroup)`
+const DiscoverContainerWrapper = styled(EuiFlexGroup)`
   width: 100%;
   height: 100%;
 
   // override the embedded discover page height
   // to fit in the container
   .dscPage {
-    height: 100%
-}
+    height: 100%;
+  }
 `;
 
 export const DiscoverContainerInternal = ({
@@ -77,7 +77,7 @@ export const DiscoverContainerInternal = ({
   }
 
   return (
-    <DiscoverContainerWrapper data-test-subj="data-container-internal-wrapper">
+    <DiscoverContainerWrapper data-test-subj="discover-container-internal-wrapper">
       <EuiFlexItem>
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
