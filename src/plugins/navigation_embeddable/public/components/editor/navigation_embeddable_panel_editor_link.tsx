@@ -54,9 +54,12 @@ export const NavigationEmbeddablePanelEditorLink = ({
       if (parentDashboardId === link.destination) {
         return link.label || parentDashboardTitle;
       } else {
-        const dashboard = await fetchDashboard(link.destination).catch((error) =>
-          setDashboardError(error)
-        );
+        const dashboard = await fetchDashboard(link.destination)
+          .then((result) => {
+            setDashboardError(undefined);
+            return result;
+          })
+          .catch((error) => setDashboardError(error));
         return (
           link.label ||
           (dashboard ? dashboard.attributes.title : DashboardLinkStrings.getDashboardErrorLabel())

@@ -33,7 +33,12 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
          * only fetch the dashboard if it's not the current dashboard - if it is the current dashboard,
          * use `dashboardContainer` and its corresponding state (title, description, etc.) instead.
          */
-        const dashboard = await fetchDashboard(link.destination).catch((e) => setError(e));
+        const dashboard = await fetchDashboard(link.destination)
+          .then((result) => {
+            setError(undefined);
+            return result;
+          })
+          .catch((e) => setError(e));
         return dashboard;
       }
     }, [link, parentDashboardId]);
