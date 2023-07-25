@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import type { HTMLAttributes } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -41,6 +39,7 @@ const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.no
   defaultMessage: 'Node details were unable to be retrieved',
 });
 
+// eslint-disable-next-line react/display-name
 export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: string }) {
   const processEvent = useSelector((state: State) =>
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer.analyzerById[id])(nodeID))
@@ -68,6 +67,7 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
+// eslint-disable-next-line react/display-name
 const NodeDetailView = memo(function ({
   id,
   processEvent,

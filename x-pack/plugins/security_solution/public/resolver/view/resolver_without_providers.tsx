@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';

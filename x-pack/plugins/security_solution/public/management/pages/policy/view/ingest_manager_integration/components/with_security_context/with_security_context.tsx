@@ -34,6 +34,7 @@ export const withSecurityContext = <P extends {}>({
 }: WithSecurityContextProps<P>): ComponentType<P> => {
   let store: ReturnType<typeof createFleetContextReduxStore>; // created on first render
 
+  // eslint-disable-next-line react/display-name
   return memo((props) => {
     if (!store) {
       store = createFleetContextReduxStore({ coreStart, depsStart });

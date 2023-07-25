@@ -73,8 +73,6 @@ export const createUserAttachmentUserActionBuilder = ({
   handleManageQuote,
   handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
   build: () => [
     {
       username: <HoverableUsernameResolver user={comment.createdBy} userProfiles={userProfiles} />,

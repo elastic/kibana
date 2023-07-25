@@ -77,7 +77,6 @@ interface EventCollectionCardComponent {
   displayName?: string | undefined;
 }
 
-// eslint-disable-next-line react/display-name
 export const EventCollectionCard = memo(
   <T extends OperatingSystem>({
     policy,

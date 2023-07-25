@@ -20,8 +20,8 @@ interface MarkdownEditorProps {
   editorId: string;
   height?: number;
   onChange: (content: string) => void;
-  parsingPlugins?: PluggableList;
-  processingPlugins?: PluggableList;
+  parsingPlugins?: PluggableList; // eslint-disable-line react/no-unused-prop-types
+  processingPlugins?: PluggableList; // eslint-disable-line react/no-unused-prop-types
   disabledUiPlugins?: string[] | undefined;
   value: string;
 }

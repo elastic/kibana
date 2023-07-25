@@ -7,8 +7,6 @@
 
 /* eslint-disable no-continue */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,6 +99,7 @@ export const EventDetail = memo(function EventDetail({
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
+// eslint-disable-next-line react/display-name
 const EventDetailContents = memo(function ({
   id,
   nodeID,
@@ -358,6 +357,7 @@ const StyledFlexTitle = memo(styled('h3')`
   font-size: 1.2em;
 `);
 
+// eslint-disable-next-line react/display-name
 const TitleHr = memo(() => {
   return <EuiHorizontalRule margin="none" size="half" />;
 });
