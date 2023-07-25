@@ -8,7 +8,6 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
-import { createAppContextStartContractMock } from '../../../mocks';
 import * as Archive from '../archive';
 
 import {
