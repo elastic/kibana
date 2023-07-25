@@ -1009,7 +1009,8 @@
     "xstate": "^4.38.1",
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1"
+    "yazl": "^2.5.1",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
@@ -1424,7 +1425,6 @@
     "eslint-plugin-mocha": "^10.0.5",
     "eslint-plugin-no-unsanitized": "^3.1.5",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
