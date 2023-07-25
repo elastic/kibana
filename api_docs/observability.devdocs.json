@@ -12545,7 +12545,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
