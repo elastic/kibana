@@ -134,7 +134,7 @@ const bulkEnableRulesWithOCC = async (
           try {
             if (rule.attributes.actions.length) {
               try {
-                await context.actionsAuthorization.ensureAuthorized('execute');
+                await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
               } catch (error) {
                 throw Error(`Rule not authorized for bulk enable - ${error.message}`);
               }

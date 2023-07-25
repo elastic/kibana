@@ -150,6 +150,26 @@ export function validateName(value: string) {
   }
 }
 
+export function validateKafkaUsername(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaUsernameIsRequired', {
+        defaultMessage: 'Username is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaPassword(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaPasswordIsRequired', {
+        defaultMessage: 'Password is required',
+      }),
+    ];
+  }
+}
+
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [
@@ -178,5 +198,97 @@ export function validateSSLKey(value: string) {
         defaultMessage: 'SSL key is required',
       }),
     ];
+  }
+}
+
+export function validateKafkaDefaultTopic(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaDefaultTopicRequiredMessage', {
+        defaultMessage: 'Default topic is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaTopics(
+  topics: Array<{
+    topic: string;
+  }>
+) {
+  const errors: Array<{
+    message: string;
+    index: number;
+  }> = [];
+
+  topics.forEach((topic, index) => {
+    if (!topic.topic || topic.topic === '') {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {
+          defaultMessage: 'Topic is required',
+        }),
+        index,
+      });
+    }
+  });
+  if (errors.length) {
+    return errors;
+  }
+}
+
+export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }>) {
+  const errors: Array<{
+    message: string;
+    index: number;
+    hasKeyError: boolean;
+    hasValueError: boolean;
+  }> = [];
+
+  const existingKeys: Set<string> = new Set();
+
+  pairs.forEach((pair, index) => {
+    const { key, value } = pair;
+
+    const hasKey = !!key;
+    const hasValue = !!value;
+
+    if (hasKey && !hasValue) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingKeyError', {
+          defaultMessage: 'Missing value for key "{key}"',
+          values: { key },
+        }),
+        index,
+        hasKeyError: false,
+        hasValueError: true,
+      });
+    } else if (!hasKey && hasValue) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingValueError', {
+          defaultMessage: 'Missing key for value "{value}"',
+          values: { value },
+        }),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    } else if (hasKey && hasValue) {
+      if (existingKeys.has(key)) {
+        errors.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersDuplicateKeyError', {
+            defaultMessage: 'Duplicate key "{key}"',
+            values: { key },
+          }),
+          index,
+          hasKeyError: true,
+          hasValueError: false,
+        });
+      } else {
+        existingKeys.add(key);
+      }
+    }
+  });
+  if (errors.length) {
+    return errors;
   }
 }
