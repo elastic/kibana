@@ -12,10 +12,10 @@ import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
-import type { UnifiedHistogramServices } from '../../types';
-import type { LensAttributesContext } from '../utils/get_lens_attributes';
+import type { UnifiedHistogramServices } from '../types';
+import type { LensAttributesContext } from './utils/get_lens_attributes';
 
-export function useChartConfigPanel({
+export function ChartConfigPanel({
   services,
   lensAttributesContext,
   dataView,
@@ -49,7 +49,9 @@ export function useChartConfigPanel({
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       } as Suggestion;
-      onSuggestionChange?.(updatedSuggestion);
+      if (!isEqual(updatedSuggestion, currentSuggestion)) {
+        onSuggestionChange?.(updatedSuggestion);
+      }
     },
     [currentSuggestion, onSuggestionChange]
   );

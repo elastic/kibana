@@ -8,7 +8,7 @@
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
@@ -27,7 +27,7 @@ import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { LayerType } from '../../common/types';
+import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -113,7 +113,7 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
-  const state = {
+  const state: LensAppState = {
     ...initialState,
     isLoading: true,
     // Do not use app-specific filters from previous app,
@@ -124,7 +124,7 @@ export const getPreloadedState = ({
       : 'searchFilters' in initialContext && initialContext.searchFilters
       ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: data.search.session.getSessionId() || '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
       embeddableEditorIncomingState?.originatingApp ||
@@ -140,7 +140,18 @@ export const getPreloadedState = ({
   return state;
 };
 
+export interface SetExecutionContextPayload {
+  query?: Query;
+  filters?: Filter[];
+  searchSessionId?: string;
+  resolvedDateRange?: DateRange;
+}
+
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
+export const setExecutionContext = createAction<SetExecutionContextPayload>(
+  'lens/setExecutionContext'
+);
+export const initExisting = createAction<Partial<LensAppState>>('lens/initExisting');
 export const onActiveDataChange = createAction<{
   activeData: TableInspectorAdapter;
 }>('lens/onActiveDataChange');
@@ -268,7 +279,9 @@ export const registerLibraryAnnotationGroup = createAction<{
 }>('lens/registerLibraryAnnotationGroup');
 
 export const lensActions = {
+  initExisting,
   setState,
+  setExecutionContext,
   onActiveDataChange,
   setSaveable,
   enableAutoApply,
@@ -307,6 +320,18 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;
   return createReducer<LensAppState>(initialState, {
     [setState.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [setExecutionContext.type]: (state, { payload }: PayloadAction<SetExecutionContextPayload>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [initExisting.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
       return {
         ...state,
         ...payload,

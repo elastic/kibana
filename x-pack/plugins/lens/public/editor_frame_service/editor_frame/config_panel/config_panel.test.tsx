@@ -170,25 +170,18 @@ describe('ConfigPanel', () => {
 
   it('updates datasources and visualizations', async () => {
     const props = getDefaultProps();
-    const onUpdateCbSpy = jest.fn();
-    const newProps = {
-      ...props,
-      onUpdateStateCb: onUpdateCbSpy,
-    };
-    const { instance, lensStore } = await prepareAndMountComponent(newProps);
+    const { instance, lensStore } = await prepareAndMountComponent(props);
     const { updateDatasource, updateAll } = instance.find(LayerPanel).props();
 
     const newDatasourceState = 'updated';
     updateDatasource('testDatasource', newDatasourceState);
     await waitMs(0);
     expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-    expect(onUpdateCbSpy).toHaveBeenCalled();
     expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
       'updated'
     );
 
     updateAll('testDatasource', newDatasourceState, props.visualizationState);
-    expect(onUpdateCbSpy).toHaveBeenCalled();
     // wait for one tick so async updater has a chance to trigger
     await waitMs(0);
     expect(lensStore.dispatch).toHaveBeenCalledTimes(3);

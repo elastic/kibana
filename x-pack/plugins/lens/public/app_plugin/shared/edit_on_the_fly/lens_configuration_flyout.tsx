@@ -93,7 +93,6 @@ export function LensEditConfigurationFlyout({
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
-    onUpdateStateCb: updateAll,
   };
   return (
     <>
@@ -120,7 +119,6 @@ export function LensEditConfigurationFlyout({
             <VisualizationToolbar
               activeVisualization={activeVisualization}
               framePublicAPI={framePublicAPI}
-              onUpdateStateCb={updateAll}
             />
             <EuiSpacer size="m" />
             <ConfigPanelWrapper {...layerPanelsProps} />
