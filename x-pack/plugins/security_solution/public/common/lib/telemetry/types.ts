@@ -24,6 +24,7 @@ export enum TelemetryEventTypes {
   MLJobUpdate = 'ML Job Update',
   CellActionClicked = 'Cell Action Clicked',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
+  AssistantInvoked = 'Assistant Invoked',
 }
 
 export interface ReportAlertsGroupingChangedParams {
