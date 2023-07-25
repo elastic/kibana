@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { z } from '@kbn/zod';
-import type { RouteValidatorFullConfig } from './route_validator';
+import type { RouteValidatorFullConfig, ZodRouteValidatorType } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -96,18 +95,6 @@ export interface RouteConfigOptionsBody {
   parse?: boolean | 'gunzip';
 }
 
-export interface ZodRouteValidatorConfig<P, Q, B> {
-  params?: z.ZodType<P>;
-  query?: z.ZodType<Q>;
-  body?: z.ZodType<B>;
-}
-
-type ZodRouteValidatorType<P, Q, B> = Omit<
-  RouteValidatorFullConfig<P, Q, B>,
-  'params' | 'query' | 'body'
-> &
-  ZodRouteValidatorConfig<P, Q, B>;
-
 /**
  * Additional route options.
  * @public
@@ -169,6 +156,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      */
     idleSocket?: number;
   };
+
+  isZod?: boolean;
 }
 
 /**

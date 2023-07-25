@@ -12,7 +12,6 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 import { generateOpenApiDocument } from './generate_oas';
@@ -48,11 +47,15 @@ run(
       await root.preboot();
       const { http } = await root.setup();
 
+      // http.getRegisteredRouters() -> array of routers than with getRoutes method return array of paths
+      // console.log(http.getRegisteredRouters().map((r) => r.getRoutes().map((r) => r.path)));
+
       log.info('Generating OpenAPI spec...');
-      const spec = generateOpenApiDocument(
-        http.getRegisteredRouters().map((r) => r.versioned as CoreVersionedRouter),
-        { title: 'Kibana OpenAPI spec', baseUrl: '/', version: '0.0.0' }
-      );
+      const spec = generateOpenApiDocument(http.getRegisteredRouters(), {
+        title: 'Kibana OpenAPI spec',
+        baseUrl: '/',
+        version: '0.0.0',
+      });
 
       log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
       await Fsp.writeFile(OUTPUT_FILE, JSON.stringify(spec, null, 2));

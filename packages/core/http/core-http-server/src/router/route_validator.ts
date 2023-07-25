@@ -108,7 +108,6 @@ export interface RouteValidatorConfig<P, Q, B> {
    * @public
    */
   body?: RouteValidationSpec<B>;
-  isZod?: boolean;
 }
 
 /**
@@ -134,3 +133,15 @@ export interface RouteValidatorOptions {
  */
 export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
   RouteValidatorOptions;
+
+export interface ZodRouteValidatorConfig<P, Q, B> {
+  params?: z.ZodType<P>;
+  query?: z.ZodType<Q>;
+  body?: z.ZodType<B>;
+}
+
+export type ZodRouteValidatorType<P, Q, B> = Omit<
+  RouteValidatorFullConfig<P, Q, B>,
+  'params' | 'query' | 'body'
+> &
+  ZodRouteValidatorConfig<P, Q, B>;

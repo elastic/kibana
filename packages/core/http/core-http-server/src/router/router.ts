@@ -13,6 +13,7 @@ import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfigOptions } from './route';
+import type { RouteValidatorFullConfig, ZodRouteValidatorType } from './route_validator';
 
 /**
  * Route handler common definition
@@ -117,4 +118,7 @@ export interface RouterRoute {
     req: Request,
     responseToolkit: ResponseToolkit
   ) => Promise<ResponseObject | Boom.Boom<any>>;
+  validate:
+    | RouteValidatorFullConfig<unknown, unknown, unknown>
+    | ZodRouteValidatorType<unknown, unknown, unknown>;
 }

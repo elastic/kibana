@@ -33,7 +33,7 @@ const paramSchema = z.object({
 });
 
 const bodySchema = z.object({
-  name: z.string(),
+  name: z.string({ description: 'The name of the rule.' }),
   tags: z.array(z.string()),
   schedule: z.object({
     interval: z.string().superRefine(validateDurationSchema),
@@ -172,9 +172,11 @@ export const updateRuleRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       validate: {
-        isZod: true,
         body: bodySchema,
         params: paramSchema,
+      },
+      options: {
+        isZod: true,
       },
     },
     handleDisabledApiKeysError(

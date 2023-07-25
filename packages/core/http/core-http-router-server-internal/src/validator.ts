@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
 import { instanceofZodType, z } from '@kbn/zod';
-import { ZodRouteValidatorConfig } from '@kbn/core-http-server/src/router/route';
+import { ZodRouteValidatorConfig } from '@kbn/core-http-server/src/router/route_validator';
 
 // Ugly as hell but we need this conditional typing to have proper type inference
 type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
@@ -90,6 +90,10 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    */
   public hasBody(): boolean {
     return typeof this.config.body !== 'undefined';
+  }
+
+  public getConfig() {
+    return this.config;
   }
 
   private validate<T>(

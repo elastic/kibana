@@ -66,7 +66,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate !== false) {
-    if (route.validate.isZod) {
+    if (route.options && route.options.isZod) {
       return RouteValidator.from(route.validate);
     }
 
@@ -119,7 +119,7 @@ function validOptions(
         ...options.body,
       };
 
-  return { ...options, body };
+  return { ...options, body, isZod: options.isZod };
 }
 
 /** @internal */
@@ -168,6 +168,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
+          validate: routeSchemas ? routeSchemas.getConfig() : {},
         });
       };
 
