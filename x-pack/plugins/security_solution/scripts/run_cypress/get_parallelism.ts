@@ -15,7 +15,7 @@ import { getRun, getRunsFeed } from './gql';
 
   const projectName = (argv.projectName as string) ?? 'security_solution';
 
-  const endpoint = 'https://cypress-dasbhoard-dashboard-qup6nhupua-uc.a.run.app';
+  const endpoint = 'https://cypress-dasbhoard-api-qup6nhupua-uc.a.run.app';
   const client = new GraphQLClient(endpoint, { method: 'POST' });
   let data;
   try {

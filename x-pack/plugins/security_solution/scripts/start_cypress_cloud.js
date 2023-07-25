@@ -6,4 +6,4 @@
  */
 
 require('../../../../src/setup_node_env');
-require('./run_cypress/cloud').cli();
+require('./run_cypress/cloud');
