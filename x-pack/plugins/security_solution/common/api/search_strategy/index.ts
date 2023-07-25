@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export const FirstLastSeenQuery = 'firstlastseen';
-
-export type {
-  FirstLastSeenRequestOptions,
-  FirstLastSeenStrategyResponse,
-} from '../../../api/search_strategy';
+export * from './first_seen_last_seen/first_seen_last_seen';
