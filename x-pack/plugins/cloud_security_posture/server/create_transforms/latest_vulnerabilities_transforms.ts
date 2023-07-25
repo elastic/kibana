@@ -9,6 +9,7 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
   VULNERABILITIES_INDEX_PATTERN,
 } from '../../common/constants';
 
@@ -32,7 +33,7 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '3d',
+      max_age: LATEST_VULNERABILITIES_RETENTION_POLICY,
     },
   },
   latest: {

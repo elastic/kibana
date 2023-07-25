@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import { CloudSecurityMeteringCallbackInput, UsageRecord } from '../types';
-import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { UsageRecord } from '../types';
+import {
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 
-import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metring';
+import {
+  AGGREGATION_PRECISION_THRESHOLD,
+  CLOUD_SECURITY_TASK_TYPE,
+} from './cloud_security_metring';
 import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
+import type { CloudSecurityMeteringCallbackInput, ResourceCountAggregation } from './types';
 
-const CNVM_RETENTION_POLICY = '72h';
 const CNVM_BUCKET_SUB_TYPE_NAME = 'CNVM';
-
-interface ResourceCountAggregation {
-  min_timestamp: MinTimestamp;
-  unique_resources: {
-    value: number;
-  };
-}
-
-interface MinTimestamp {
-  value: number;
-  value_as_string: string;
-}
 
 export const getCnvmUsageRecord = async ({
   esClient,
@@ -34,12 +28,12 @@ export const getCnvmUsageRecord = async ({
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord | undefined> => {
   try {
     const response = await esClient.search<unknown, ResourceCountAggregation>(
-      getFindingsByResourceAggQuery()
+      getVulnerabilitiesByResourceAggQuery()
     );
 
-    const cnvmResourceCount = response.aggregations
-      ? response.aggregations.unique_resources.value
-      : 0;
+    if (!response.aggregations) return;
+
+    const cnvmResourceCount = response.aggregations.unique_resources.value;
 
     const minTimestamp = response.aggregations
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
@@ -70,15 +64,15 @@ export const getCnvmUsageRecord = async ({
   }
 };
 
-export const getFindingsByResourceAggQuery = () => ({
-  index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+export const getVulnerabilitiesByResourceAggQuery = () => ({
+  index: LATEST_VULNERABILITIES_INDEX_PATTERN,
   query: {
     bool: {
       must: [
         {
           range: {
             '@timestamp': {
-              gte: 'now-' + CNVM_RETENTION_POLICY, // the "look back" period should be the same as the scan interval
+              gte: 'now-' + LATEST_VULNERABILITIES_RETENTION_POLICY, // the "look back" period should be the same as the scan interval
             },
           },
         },
@@ -90,7 +84,7 @@ export const getFindingsByResourceAggQuery = () => ({
     unique_resources: {
       cardinality: {
         field: 'resource.id',
-        precision_threshold: 3000, // default = 3000  note note that even with a threshold as low as 100, the error remains very low 1-6% even when counting millions of items. https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate
+        precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
       },
     },
     min_timestamp: {

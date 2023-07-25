@@ -10,6 +10,7 @@ import { getCnvmUsageRecord } from './cnvm_metring_task';
 import { getCspmUsageRecord } from './cspm_metring_task';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
+export const AGGREGATION_PRECISION_THRESHOLD = 3000;
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
