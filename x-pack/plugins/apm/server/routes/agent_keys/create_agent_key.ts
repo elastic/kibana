@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { ApmPluginRequestHandlerContext } from '../typings';
 
 const resource = '*';
+const CLUSTER_PRIVILEGES = ['manage_api_key', 'manage_own_api_key'];
 
 export interface CreateAgentKeyResponse {
   agentKey: SecurityCreateApiKeyResponse;
@@ -39,10 +40,12 @@ export async function createAgentKey({
     application: userApplicationPrivileges,
     username,
     has_all_requested: hasRequiredPrivileges,
+    cluster: clusterPrivileges,
   } = await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges(
     {
       body: {
         application: [application],
+        cluster: CLUSTER_PRIVILEGES,
       },
     }
   );
@@ -54,9 +57,19 @@ export async function createAgentKey({
       .filter((x) => !x[1])
       .map((x) => x[0]);
 
+    const missingClusterPrivileges = Object.keys(clusterPrivileges).filter(
+      (key) => !clusterPrivileges[key]
+    );
+
     const error = `${username} is missing the following requested privilege(s): ${missingPrivileges.join(
       ', '
-    )}.\
+    )}${
+      missingClusterPrivileges
+        ? ` and following cluster privileges - ${missingClusterPrivileges.join(
+            ', '
+          )} privilege(s)`
+        : ''
+    }.\
     You might try with the superuser, or add the missing APM application privileges to the role of the authenticated user, eg.:
     PUT /_security/role/my_role
     {
@@ -68,7 +81,10 @@ export async function createAgentKey({
       }],
       ...
     }`;
-    throw Boom.internal(error, { missingPrivileges }, 403);
+    throw Boom.forbidden(error, {
+      missingPrivileges,
+      missingClusterPrivileges,
+    });
   }
 
   const body = {
