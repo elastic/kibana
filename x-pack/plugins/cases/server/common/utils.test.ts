@@ -26,6 +26,7 @@ import {
   getCaseViewPath,
   isSOError,
   countUserAttachments,
+  isPersistableStateOrExternalReference,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
@@ -39,6 +40,12 @@ import type {
 } from '../../common/types/domain';
 import { ConnectorTypes, CaseSeverity, AttachmentType } from '../../common/types/domain';
 import type { AttachmentRequest } from '../../common/types/api';
+import {
+  createAlertRequests,
+  createExternalReferenceRequests,
+  createPersistableStateRequests,
+  createUserRequests,
+} from './limiter_checker/test_utils';
 
 interface CommentReference {
   ids: string[];
@@ -1352,6 +1359,27 @@ describe('common utils', () => {
       const attachments = [createAlertAttachment()];
 
       expect(countUserAttachments(attachments)).toBe(0);
+    });
+  });
+
+  describe('isPersistableStateOrExternalReference', () => {
+    it('returns true for persistable state request', () => {
+      expect(isPersistableStateOrExternalReference(createPersistableStateRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns true for external reference request', () => {
+      expect(isPersistableStateOrExternalReference(createExternalReferenceRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns false for other request types', () => {
+      expect(isPersistableStateOrExternalReference(createUserRequests(1)[0])).toBe(false);
+      expect(isPersistableStateOrExternalReference(createAlertRequests(1, 'alert-id')[0])).toBe(
+        false
+      );
     });
   });
 });

@@ -16,6 +16,7 @@ import {
   CaseStatuses,
   ExternalReferenceSOAttachmentPayload,
   AlertAttachmentPayload,
+  ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -42,6 +43,7 @@ import {
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -464,6 +466,76 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCommentAlertReq,
             alertId: alerts.slice(500),
             index: alerts.slice(500),
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add a persistable state to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const attachments = Array(100).fill({
+          type: AttachmentType.externalReference as const,
+          owner: 'securitySolutionFixture',
+          externalReferenceAttachmentTypeId: '.test',
+          externalReferenceId: 'so-id',
+          externalReferenceMetadata: {},
+          externalReferenceStorage: {
+            soType: 'external-ref',
+            type: ExternalReferenceStorageType.savedObject as const,
+          },
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: attachments,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            persistableStateAttachmentTypeId: '.test',
+            persistableStateAttachmentState: {},
+            type: AttachmentType.persistableState as const,
+            owner: 'securitySolutionFixture',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add an external reference to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const attachments = Array(100).fill({
+          persistableStateAttachmentTypeId: '.test',
+          persistableStateAttachmentState: {},
+          type: AttachmentType.persistableState as const,
+          owner: 'securitySolutionFixture',
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: attachments,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: AttachmentType.externalReference as const,
+            owner: 'securitySolutionFixture',
+            externalReferenceAttachmentTypeId: '.test',
+            externalReferenceId: 'so-id',
+            externalReferenceMetadata: {},
+            externalReferenceStorage: {
+              soType: 'external-ref',
+              type: ExternalReferenceStorageType.savedObject as const,
+            },
           },
           expectedHttpCode: 400,
         });

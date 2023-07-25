@@ -11,8 +11,8 @@ import type { Limiter } from './types';
 
 interface LimiterParams {
   limit: number;
-  attachmentType: AttachmentType;
-  field: string;
+  attachmentType: AttachmentType | AttachmentType[];
+  field?: string;
   attachmentNoun: string;
 }
 

@@ -10,6 +10,8 @@ import type {
   UserCommentAttachmentPayload,
   FileAttachmentMetadata,
   AlertAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  ExternalReferenceAttachmentPayload,
 } from '../../../common/types/domain';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type { FileAttachmentRequest } from '../types';
@@ -24,6 +26,37 @@ export const createUserRequests = (num: number): UserCommentAttachmentPayload[] 
   });
 
   return requests;
+};
+
+export const createPersistableStateRequests = (
+  num: number
+): PersistableStateAttachmentPayload[] => {
+  return [...Array(num).keys()].map(() => {
+    return {
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: {},
+      type: AttachmentType.persistableState as const,
+      owner: 'test',
+    };
+  });
+};
+
+export const createExternalReferenceRequests = (
+  num: number
+): ExternalReferenceAttachmentPayload[] => {
+  return [...Array(num).keys()].map((value) => {
+    return {
+      type: AttachmentType.externalReference as const,
+      owner: 'test',
+      externalReferenceAttachmentTypeId: '.test',
+      externalReferenceId: 'so-id',
+      externalReferenceMetadata: {},
+      externalReferenceStorage: {
+        soType: `${value}`,
+        type: ExternalReferenceStorageType.savedObject,
+      },
+    };
+  });
 };
 
 export const createFileRequests = ({
