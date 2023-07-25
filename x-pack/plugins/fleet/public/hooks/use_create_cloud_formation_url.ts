@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { CLOUDBEAT_AWS } from '@kbn/cloud-security-posture-plugin/common/constants';
+
 import type { PackagePolicy, PackagePolicyInput } from '../../common';
 
 import { useKibanaVersion } from './use_kibana_version';
@@ -30,7 +32,7 @@ export const useCreateCloudFormationUrl = ({
 
   const kibanaVersion = useKibanaVersion();
 
-  const awsInput = packagePolicy?.inputs?.find((input) => input.type === 'cloudbeat/cis_aws');
+  const awsInput = packagePolicy?.inputs?.find((input) => input.type === CLOUDBEAT_AWS);
   const awsAccountType = getAwsAccountType(awsInput) || '';
 
   let isError = false;
