@@ -50,6 +50,7 @@ import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
 import { UpsellingService } from '../upsellings';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -118,6 +119,7 @@ export const createStartServicesMock = (
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
+  const cloud = cloudMock.createStart();
 
   return {
     ...core,
@@ -198,6 +200,10 @@ export const createStartServicesMock = (
     triggersActionsUi,
     cloudExperiments,
     guidedOnboarding,
+    cloud: {
+      ...cloud,
+      isCloudEnabled: false,
+    },
     isSidebarEnabled$: of(true),
     upselling: new UpsellingService(),
     customDataService,
