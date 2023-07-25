@@ -104,6 +104,13 @@ export const addDescriptionToTimeline = (
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
+export const addDescriptionToTimelineTemplate = (
+  description: string,
+  modalAlreadyOpen: boolean = false
+) => {
+  addDescriptionToTimeline(description, modalAlreadyOpen);
+};
+
 export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = false) => {
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
@@ -114,6 +121,10 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const addNameToTimelineTemplate = (name: string, modalAlreadyOpen: boolean = false) => {
+  addNameToTimeline(name, modalAlreadyOpen);
 };
 
 export const addNameAndDescriptionToTimeline = (
@@ -302,6 +313,10 @@ export const closeTimeline = () => {
   cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
 };
 
+export const closeTimelineTemplate = () => {
+  closeTimeline();
+};
+
 export const removeDataProvider = () => {
   cy.get(PROVIDER_BADGE).click();
   cy.get(PROVIDER_BADGE_DELETE).click();
@@ -404,6 +419,10 @@ export const persistNoteToFirstEvent = (notes: string) => {
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
+};
+
+export const populateTimelineTemplate = () => {
+  populateTimeline();
 };
 
 const clickTimestampHoverActionOverflowButton = () => {

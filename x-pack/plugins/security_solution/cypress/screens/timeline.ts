@@ -178,6 +178,8 @@ export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
+export const TIMELINE_TEMPLATE_DESCRIPTION = TIMELINE_DESCRIPTION;
+
 export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
@@ -233,6 +235,8 @@ export const TIMELINE_PROGRESS_BAR = '[data-test-subj="progress-bar"]';
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
+export const TIMELINE_TEMPLATE_QUERY = TIMELINE_QUERY;
+
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';
 
 export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
@@ -250,6 +254,8 @@ export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMe
 export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+
+export const TIMELINE_TEMPLATE_TITLE = TIMELINE_TITLE;
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
 
@@ -269,6 +275,8 @@ export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
+
+export const TIMELINE_TEMPLATE_FLYOUT_WRAPPER = TIMELINE_FLYOUT_WRAPPER;
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 

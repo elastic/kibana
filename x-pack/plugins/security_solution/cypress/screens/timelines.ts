@@ -40,7 +40,11 @@ export const TIMELINE_NAME = '[data-test-subj^=title]';
 
 export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFilled-star"]';
 
+export const TIMELINES_TEMPLATE_FAVORITE = TIMELINES_FAVORITE;
+
 export const TIMELINES_DESCRIPTION = '[data-test-subj="description"]';
+
+export const TIMELINES_DESCRIPTION_TEMPLATE = TIMELINES_DESCRIPTION;
 
 export const TIMELINES_NOTES_COUNT = '[data-test-subj="notes-count"]';
 
