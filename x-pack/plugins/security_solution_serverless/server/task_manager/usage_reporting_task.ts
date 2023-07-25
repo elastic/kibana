@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { usageReportingService } from '../common/services';
-
 import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { usageReportingService } from '../common/services';
 import type {
   MeteringCallback,
   SecurityUsageReportingTaskStartContract,
@@ -123,25 +122,29 @@ export class SecurityUsageReportingTask {
       taskId: this.taskId,
       lastSuccessfulReport,
     });
+
     this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
-    try {
-      usageReportResponse = await usageReportingService.reportUsage(usageRecords);
+    if (usageRecords.length !== 0) {
+      try {
+        usageReportResponse = await usageReportingService.reportUsage(usageRecords);
 
-      if (!usageReportResponse.ok) {
-        const errorResponse = await usageReportResponse.json(); // Assuming the error details are in JSON format
-        this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
-        return;
+        if (!usageReportResponse.ok) {
+          const errorResponse = await usageReportResponse.json();
+          this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
+          return;
+        }
+
+        this.logger.info(
+          `usage records report was sent successfully: ${usageReportResponse.status}, ${usageReportResponse.statusText}`
+        );
+      } catch (err) {
+        this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
       }
-
-      this.logger.info(
-        `usage records report was sent successfully: ${usageReportResponse.status}, ${usageReportResponse.statusText}`
-      );
-    } catch (err) {
-      this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
     }
+
     const state = {
       lastSuccessfulReport:
         usageReportResponse?.status === 201 ? new Date() : taskInstance.state.lastSuccessfulReport,
