@@ -138,7 +138,7 @@ describe('Agent policy advanced options content', () => {
               package: { name: 'not-endpoint', title: 'Not Endpoint', version: '0.1.0' },
             },
           ],
-          is_protected: true,
+          isProtected: true,
         });
       });
       it('should disable the switch and uninstall command link', () => {

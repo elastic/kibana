@@ -31,7 +31,7 @@ export function policyHasSyntheticsIntegration(agentPolicy: AgentPolicy) {
   return policyHasIntegration(agentPolicy, FLEET_SYNTHETICS_PACKAGE);
 }
 
-export function policyHasDefendSecurity(agentPolicy: AgentPolicy) {
+export function policyHasEndpointSecurity(agentPolicy: AgentPolicy) {
   return policyHasIntegration(agentPolicy, FLEET_ENDPOINT_PACKAGE);
 }
 
