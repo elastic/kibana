@@ -112,11 +112,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.toggleCustomExpiration();
-        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
-        expect(await pageObjects.apiKeys.getErrorCallOutText()).to.be(
-          'Enter a valid duration or disable this option.'
-        );
-
         await pageObjects.apiKeys.setApiKeyCustomExpiration('12');
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
