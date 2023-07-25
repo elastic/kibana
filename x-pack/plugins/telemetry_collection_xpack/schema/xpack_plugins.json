@@ -4012,7 +4012,7 @@
                 }
               }
             },
-            "spanDestinationServiceResource": {
+            "span_destination_service_resource": {
               "properties": {
                 "1d": {
                   "type": "long",
