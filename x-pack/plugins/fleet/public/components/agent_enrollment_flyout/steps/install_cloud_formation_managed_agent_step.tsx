@@ -16,6 +16,7 @@ import type { AgentPolicy } from '../../../../common';
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
 import { CloudFormationInstructions } from '../cloud_formation_instructions';
+import { FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../../common';
 
 export const InstallCloudFormationManagedAgentStep = ({
   selectedApiKeyId,
@@ -36,7 +37,7 @@ export const InstallCloudFormationManagedAgentStep = ({
   const status = isComplete ? 'complete' : nonCompleteStatus;
 
   const cloudSecurityPackagePolicy = agentPolicy?.package_policies?.find(
-    (p) => p.package?.name === 'cloud_security_posture'
+    (p) => p.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
   );
 
   return {
