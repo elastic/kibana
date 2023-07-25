@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", ".storybook/**/*.tsx"],
+  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*", ".storybook/**/*.tsx"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/discover-plugin",
@@ -13,6 +13,7 @@
     "@kbn/io-ts-utils",
     "@kbn/data-views-plugin",
     "@kbn/rison",
+    "@kbn/config-schema",
   ],
   "exclude": ["target/**/*"]
 }
