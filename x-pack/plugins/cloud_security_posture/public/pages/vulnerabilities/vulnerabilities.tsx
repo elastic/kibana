@@ -100,6 +100,7 @@ export const Vulnerabilities = () => {
   );
 };
 
+// TODO: fix any type for data
 const VulnerabilitiesDataGrid = ({
   dataView,
   data,
@@ -305,7 +306,7 @@ const VulnerabilitiesDataGrid = ({
 
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
-  if (data?.page.length === 0) {
+  if (data.page.length === 0) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 
