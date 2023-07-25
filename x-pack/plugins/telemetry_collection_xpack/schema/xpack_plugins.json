@@ -4001,6 +4001,16 @@
                   "type": "long"
                 }
               }
+            },
+            "environments": {
+              "properties": {
+                "1d": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of unique environments within the last day"
+                  }
+                }
+              }
             }
           }
         },

@@ -60,7 +60,6 @@ import {
 import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('EQL rules', () => {
   before(() => {
@@ -152,10 +151,10 @@ describe('EQL rules', () => {
     const rule = getEqlSequenceRule();
 
     before(() => {
-      esArchiverLoad('auditbeat_big');
+      cy.task('esArchiverLoad', 'auditbeat_big');
     });
     after(() => {
-      esArchiverUnload('auditbeat_big');
+      cy.task('esArchiverUnload', 'auditbeat_big');
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {

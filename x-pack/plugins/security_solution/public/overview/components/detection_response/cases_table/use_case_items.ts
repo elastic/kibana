@@ -57,7 +57,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
           from,
           to,
           owner: APP_ID,
-          sortField: 'create_at',
+          sortField: 'createdAt',
           sortOrder: 'desc',
           page: 1,
           perPage: 4,

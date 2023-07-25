@@ -6,10 +6,10 @@
  */
 
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
-import { UserActionActions } from '../../../common/types/domain';
+import { ConnectorTypes, UserActionActions } from '../../../common/types/domain';
 import type { Comment, CommentResponseAlertsType } from '../../../common/api';
-import { CommentType, ConnectorTypes, ExternalReferenceStorageType } from '../../../common/api';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CommentType, ExternalReferenceStorageType } from '../../../common/api';
+import { FILE_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export const updateUser = {
   updated_at: '2020-03-13T08:34:53.450Z',
@@ -226,6 +226,16 @@ export const commentPersistableState: Comment = {
     username: 'elastic',
   },
   version: 'WzEsMV0=',
+};
+
+export const commentFileExternalReference: Comment = {
+  ...commentExternalReference,
+  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+  externalReferenceMetadata: { files: [{ name: '', extension: '', mimeType: '', created: '' }] },
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject as const,
+    soType: 'file',
+  },
 };
 
 export const basicParams = {

@@ -70,6 +70,7 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
+export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 

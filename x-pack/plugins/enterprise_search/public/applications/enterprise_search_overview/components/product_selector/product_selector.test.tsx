@@ -11,9 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
+import { ErrorStateCallout } from '../../../shared/error_state';
 
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -51,6 +51,40 @@ describe('ProductSelector', () => {
     );
   });
 
+  it('does not render connection error callout without an error', () => {
+    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
+    const wrapper = shallow(<ProductSelector {...props} />);
+
+    expect(wrapper.find(ErrorStateCallout)).toHaveLength(0);
+  });
+
+  it('does render connection error callout with an error', () => {
+    setMockValues({
+      config: { canDeployEntSearch: true, host: 'localhost' },
+      errorConnectingMessage: '502 Bad Gateway',
+    });
+    const wrapper = shallow(<ProductSelector {...props} />);
+
+    expect(wrapper.find(ErrorStateCallout)).toHaveLength(1);
+  });
+
+  it('renders add content', () => {
+    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
+    const wrapper = shallow(<ProductSelector {...props} />);
+
+    expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(1);
+  });
+
+  it('does not render add content when theres a connection error', () => {
+    setMockValues({
+      config: { canDeployEntSearch: true, host: 'localhost' },
+      errorConnectingMessage: '502 Bad Gateway',
+    });
+    const wrapper = shallow(<ProductSelector {...props} />);
+
+    expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(0);
+  });
+
   describe('access checks when host is set', () => {
     beforeEach(() => {
       setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
@@ -82,11 +116,11 @@ describe('ProductSelector', () => {
       expect(wrapper.find('[data-test-subj="productCard-elasticsearch"]')).toHaveLength(1);
     });
 
-    it('renders empty prompt and no cards or license callout if the user does not have access', () => {
+    it('renders elasticsearch card if the user does not have access app search & workplace search', () => {
       const wrapper = shallow(<ProductSelector {...props} />);
 
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-      expect(wrapper.find(ProductCard)).toHaveLength(0);
+      expect(wrapper.find(ProductCard)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="productCard-elasticsearch"]')).toHaveLength(1);
     });
   });
 });

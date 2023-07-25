@@ -27,7 +27,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
-import { NameInput } from '@kbn/visualization-ui-components/public';
+import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
