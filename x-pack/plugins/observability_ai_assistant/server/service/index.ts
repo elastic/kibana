@@ -13,6 +13,7 @@ import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import fnv from 'fnv-plus';
+import { errors } from '@elastic/elasticsearch';
 import type { ObservabilityAIAssistantResourceNames } from './types';
 import { conversationComponentTemplate } from './conversation_component_template';
 import type { IObservabilityAIAssistantClient, IObservabilityAIAssistantService } from './types';
@@ -112,14 +113,24 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
 
       if (!aliasExists) {
         const firstIndexName = `${this.resourceNames.aliases.conversations}-000001`;
-        await esClient.indices.create({
-          index: firstIndexName,
-          aliases: {
-            [aliasName]: {
-              is_write_index: true,
+        try {
+          await esClient.indices.create({
+            index: firstIndexName,
+            aliases: {
+              [aliasName]: {
+                is_write_index: true,
+              },
             },
-          },
-        });
+          });
+        } catch (err) {
+          const indexAlreadyExists =
+            (err as errors.ResponseError)?.body?.error?.type ===
+            'resource_already_exists_exception';
+
+          if (!indexAlreadyExists) {
+            throw err;
+          }
+        }
       }
 
       const indicesForAlias = await esClient.indices.get({
