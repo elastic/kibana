@@ -461,13 +461,13 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       items: [
         {
           value: false,
-          name: i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
+          name: i18n.translate('xpack.security.management.apiKeys.table.activeFilter', {
             defaultMessage: 'Active',
           }),
         },
         {
           value: true,
-          name: i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
+          name: i18n.translate('xpack.security.management.apiKeys.table.expiredFilter', {
             defaultMessage: 'Expired',
           }),
         },
@@ -700,7 +700,9 @@ export const UsernameWithIcon: FunctionComponent<UsernameWithIconProps> = ({ use
       <UserAvatar user={{ username }} size="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText size="s">{username}</EuiText>
+      <EuiText size="s" data-test-subj="apiKeyUsername">
+        {username}
+      </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -722,7 +724,7 @@ export type ApiKeyStatusProps = Pick<CategorizedApiKey, 'expiration'>;
 export const ApiKeyStatus: FunctionComponent<ApiKeyStatusProps> = ({ expiration }) => {
   if (!expiration) {
     return (
-      <EuiHealth color="primary">
+      <EuiHealth color="primary" data-test-subj="apiKeyStatus">
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.statusActive"
           defaultMessage="Active"
@@ -733,7 +735,7 @@ export const ApiKeyStatus: FunctionComponent<ApiKeyStatusProps> = ({ expiration 
 
   if (Date.now() > expiration) {
     return (
-      <EuiHealth color="subdued">
+      <EuiHealth color="subdued" data-test-subj="apiKeyStatus">
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.statusExpired"
           defaultMessage="Expired"
@@ -743,7 +745,7 @@ export const ApiKeyStatus: FunctionComponent<ApiKeyStatusProps> = ({ expiration 
   }
 
   return (
-    <EuiHealth color="warning">
+    <EuiHealth color="warning" data-test-subj="apiKeyStatus">
       <TimeToolTip timestamp={expiration}>
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.statusExpires"

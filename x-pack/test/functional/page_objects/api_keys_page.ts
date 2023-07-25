@@ -135,11 +135,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return header.getVisibleText();
     },
 
-    async getFlyoutUsername() {
-      const usernameField = await testSubjects.find('apiKeyFlyoutUsername');
-      return usernameField.getVisibleText();
-    },
-
     async getFlyoutApiKeyStatus() {
       const apiKeyStatusField = await testSubjects.find('apiKeyStatus');
       return apiKeyStatusField.getVisibleText();
