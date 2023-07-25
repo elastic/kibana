@@ -10,8 +10,7 @@ import * as React from 'react';
 
 import {
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -31,11 +30,7 @@ export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
-          {children}
-        </EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection style={{ maxWidth: 800, margin: '0 auto' }}>{children}</EuiPageSection>
     </EuiPageBody>
   );
 };
