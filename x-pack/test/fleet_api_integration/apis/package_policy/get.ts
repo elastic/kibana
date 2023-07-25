@@ -426,5 +426,94 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body.items[0].id).to.eql(packagePolicyId);
       });
     });
+
+    describe('get by kuery', async function () {
+      let agentPolicyId: string;
+      let endpointPackagePolicyId: string;
+
+      before(async function () {
+        if (!server.enabled) {
+          return;
+        }
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: endpointPackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          });
+        endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
+      });
+
+      after(async function () {
+        if (!server.enabled) {
+          return;
+        }
+
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [endpointPackagePolicyId] })
+          .expect(200);
+
+        // uninstall endpoint package
+        await supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      it('should return 200 if the passed kuery is correct', async () => {
+        const { body: packagePolicyResponse } = await supertest
+          .get(`/api/fleet/package_policies?kuery=ingest-package-policies.package.name:endpoint`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
+      });
+      it('should return 400 if the passed kuery does not have prefix ingest-package-policies', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery=package.name:endpoint`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(
+            `/api/fleet/package_policies?kuery=ingest-package-policies.non_existent_parameter:test`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+    });
   });
 }
