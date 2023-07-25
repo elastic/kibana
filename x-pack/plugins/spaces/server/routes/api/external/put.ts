@@ -8,14 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { ConfigurableRouteDeps } from '.';
+import type { ExternalRouteDeps } from '.';
 import type { Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
-export function initPutSpacesApi(deps: ConfigurableRouteDeps) {
-  const { router, getSpacesService, access } = deps;
+export function initPutSpacesApi(deps: ExternalRouteDeps) {
+  const { router, getSpacesService } = deps;
 
   router.put(
     {
@@ -26,7 +26,6 @@ export function initPutSpacesApi(deps: ConfigurableRouteDeps) {
         }),
         body: spaceSchema,
       },
-      options: { access },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spacesClient = getSpacesService().createSpacesClient(request);

@@ -16,7 +16,6 @@ export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
     {
       path: '/internal/spaces/_active_space',
       validate: false,
-      options: { access: 'internal' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {

@@ -66,7 +66,6 @@ describe('GET space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      access: 'public',
     });
 
     return {

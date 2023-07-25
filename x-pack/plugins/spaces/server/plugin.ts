@@ -28,7 +28,7 @@ import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { initConfigurableSpacesApi, initPublicSpacesApi } from './routes/api/external';
+import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
 import { SpacesSavedObjectsService } from './saved_objects';
@@ -148,26 +148,19 @@ export class SpacesPlugin
       logger: this.log,
     });
 
-    const buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
     const router = core.http.createRouter<SpacesRequestHandlerContext>();
-    if (buildFlavor !== 'serverless') {
-      initPublicSpacesApi({
+
+    initExternalSpacesApi(
+      {
         router,
         log: this.log,
         getStartServices: core.getStartServices,
         getSpacesService,
         usageStatsServicePromise,
-      });
-    }
-    const configuredAccess = buildFlavor === 'serverless' ? 'internal' : 'public';
-    initConfigurableSpacesApi({
-      router,
-      log: this.log,
-      getStartServices: core.getStartServices,
-      getSpacesService,
-      usageStatsServicePromise,
-      access: configuredAccess,
-    });
+      },
+      this.initializerContext.env.packageInfo.buildFlavor
+    );
+
     initInternalSpacesApi({
       router,
       getSpacesService,

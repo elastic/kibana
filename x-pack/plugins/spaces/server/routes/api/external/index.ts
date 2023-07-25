@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '../../../spaces_service';
@@ -28,21 +29,18 @@ export interface ExternalRouteDeps {
   log: Logger;
 }
 
-export interface ConfigurableRouteDeps extends ExternalRouteDeps {
-  access: 'internal' | 'public';
-}
-
-export function initPublicSpacesApi(deps: ExternalRouteDeps) {
-  initDeleteSpacesApi(deps);
-  initPostSpacesApi(deps);
-  initCopyToSpacesApi(deps);
-  initUpdateObjectsSpacesApi(deps);
-  initGetShareableReferencesApi(deps);
-  initDisableLegacyUrlAliasesApi(deps);
-}
-
-export function initConfigurableSpacesApi(deps: ConfigurableRouteDeps) {
+export function initExternalSpacesApi(deps: ExternalRouteDeps, buildFlavor: BuildFlavor) {
+  // These three routes are always registered in serverless, internal by default
   initGetSpaceApi(deps);
   initGetAllSpacesApi(deps);
   initPutSpacesApi(deps);
+
+  if (buildFlavor !== 'serverless') {
+    initDeleteSpacesApi(deps);
+    initPostSpacesApi(deps);
+    initCopyToSpacesApi(deps);
+    initUpdateObjectsSpacesApi(deps);
+    initGetShareableReferencesApi(deps);
+    initDisableLegacyUrlAliasesApi(deps);
+  }
 }

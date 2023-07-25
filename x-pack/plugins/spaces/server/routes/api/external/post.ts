@@ -23,7 +23,6 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
       validate: {
         body: spaceSchema,
       },
-      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);

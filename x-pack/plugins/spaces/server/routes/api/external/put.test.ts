@@ -67,7 +67,6 @@ describe('PUT /api/spaces/space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      access: 'public',
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];
