@@ -105,7 +105,12 @@ describe('updateMlInferenceMappings', () => {
       ],
     });
 
-    await updateMlInferenceMappings(indexName, nonTextExpansionModelId, fieldMappings, mockClient.asCurrentUser);
+    await updateMlInferenceMappings(
+      indexName,
+      nonTextExpansionModelId,
+      fieldMappings,
+      mockClient.asCurrentUser
+    );
     expect(mockClient.asCurrentUser.indices.putMapping).not.toHaveBeenCalled();
   });
 
