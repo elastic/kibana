@@ -16,14 +16,12 @@ import {
   ExternalServiceSimulator,
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
   hasAuth: true,
-  authType: WebhookAuthType.Basic,
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
