@@ -400,13 +400,6 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
-  {
-    defaultMessage: 'Selection contains immutable rules which cannot be deleted',
-  }
-);
-
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
   {
@@ -858,10 +851,17 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const DELETE_CONFIRMATION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
     defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const SINGLE_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.singleDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm deletion',
   }
 );
 
