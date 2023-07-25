@@ -49,7 +49,6 @@ import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_pan
 
 import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
 import noLinksIllustrationLight from '../assets/empty_links_light.svg';
-
 import './navigation_embeddable.scss';
 
 const NavigationEmbeddablePanelEditor = ({
@@ -59,18 +58,19 @@ const NavigationEmbeddablePanelEditor = ({
   savedObjectId,
   parentDashboard,
 }: {
-  onSave: (attributes: NavigationEmbeddableAttributes, useRefType: boolean) => void;
+  onSave: (newAttributes: NavigationEmbeddableAttributes, useRefType: boolean) => void;
   onClose: () => void;
-  parentDashboard?: DashboardContainer;
   attributes?: NavigationEmbeddableAttributes;
   savedObjectId?: string;
+  parentDashboard?: DashboardContainer;
 }) => {
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
-  const [saveToLibrary, setSaveToLibrary] = useState(false);
-  const [libraryTitle, setLibraryTitle] = useState<string | undefined>();
+  const [saveToLibrary, setSaveToLibrary] = useState(Boolean(savedObjectId));
+  const [libraryTitle, setLibraryTitle] = useState<string>(attributes?.title ?? '');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const initialLinks = attributes?.links;
@@ -133,15 +133,23 @@ const NavigationEmbeddablePanelEditor = ({
     const button = (
       <EuiButton
         disabled={!canSave}
-        onClick={() => {
+        isLoading={isSaving}
+        onClick={async () => {
+          setIsSaving(true);
           const newLinks = orderedLinks.reduce((prev, link, i) => {
             return { ...prev, [link.id]: { ...link, order: i } };
           }, {} as NavigationEmbeddableLinkList);
-          const newAttributes = { ...attributes, title: libraryTitle, links: newLinks };
-          onSave(newAttributes, !Boolean(savedObjectId));
+          const newAttributes: NavigationEmbeddableAttributes = {
+            title: libraryTitle,
+            links: newLinks,
+          };
+          await onSave(newAttributes, Boolean(savedObjectId) || saveToLibrary);
+          setIsSaving(false);
         }}
       >
-        {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
+        {savedObjectId
+          ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonLabel()
+          : NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
       </EuiButton>
     );
 
@@ -152,7 +160,7 @@ const NavigationEmbeddablePanelEditor = ({
         {button}
       </EuiToolTip>
     );
-  }, [onSave, orderedLinks, attributes, saveToLibrary, libraryTitle, savedObjectId]);
+  }, [onSave, isSaving, orderedLinks, saveToLibrary, libraryTitle, savedObjectId]);
 
   return (
     <>

@@ -16,11 +16,14 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
 import { coreServices } from '../services/kibana_services';
-import { NavigationEmbeddableInput } from '../embeddable/types';
+import {
+  NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableInput,
+} from '../embeddable/types';
 import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
 
 const LazyNavigationEmbeddablePanelEditor = React.lazy(
   () => import('../components/navigation_embeddable_panel_editor')
@@ -43,15 +46,16 @@ export async function openEditorFlyout(
   const { attributes } = await getNavigationEmbeddableAttributeService().unwrapAttributes(
     initialInput
   );
+
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
     const onSave = async (newAttributes: NavigationEmbeddableAttributes, useRefType: boolean) => {
-      const wrappedAttributes = (await getNavigationEmbeddableAttributeService()).wrapAttributes(
+      const newInput = await getNavigationEmbeddableAttributeService().wrapAttributes(
         newAttributes,
         useRefType
       );
-      resolve(wrappedAttributes);
+      resolve(newInput);
       editorFlyout.close();
     };
 
@@ -76,6 +80,7 @@ export async function openEditorFlyout(
           onClose={onCancel}
           onSave={onSave}
           parentDashboard={parentDashboard}
+          savedObjectId={(initialInput as NavigationEmbeddableByReferenceInput).savedObjectId}
         />,
         { theme$: coreServices.theme.theme$ }
       ),

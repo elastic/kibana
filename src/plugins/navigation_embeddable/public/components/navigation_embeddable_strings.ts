@@ -51,6 +51,14 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
           defaultMessage: 'Save',
         }),
+      getSaveToLibraryButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.saveToLibraryButtonLabel', {
+          defaultMessage: 'Save to library',
+        }),
+      getUpdateLibraryItemButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonLabel', {
+          defaultMessage: 'Update library item',
+        }),
       getTitleInputLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.titleInputLabel', {
           defaultMessage: 'Title',

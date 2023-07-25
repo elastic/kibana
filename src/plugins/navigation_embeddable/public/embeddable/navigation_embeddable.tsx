@@ -16,6 +16,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { Subscription } from 'rxjs';
 import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
 import {
   NavigationEmbeddableByReferenceInput,
@@ -56,6 +57,10 @@ export class NavigationEmbeddable
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
   deferEmbeddableLoad = true;
 
+  private attributes?: NavigationEmbeddableAttributes;
+  private savedObjectId?: string;
+  private subscriptions: Subscription = new Subscription();
+
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
   public getState: NavigationReduxEmbeddableTools['getState'];
@@ -63,7 +68,6 @@ export class NavigationEmbeddable
   public onStateChange: NavigationReduxEmbeddableTools['onStateChange'];
 
   private cleanupStateTools: () => void;
-  private attributes?: NavigationEmbeddableAttributes;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
@@ -96,6 +100,23 @@ export class NavigationEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
+
+    this.subscriptions.add(
+      this.getInput$().subscribe(async () => {
+        const savedObjectId = (this.getInput() as NavigationEmbeddableByReferenceInput)
+          .savedObjectId;
+        const attributes = (this.getInput() as NavigationEmbeddableByValueInput).attributes;
+        if (this.attributes !== attributes || this.savedObjectId !== savedObjectId) {
+          this.savedObjectId = savedObjectId;
+          this.reload();
+        } else {
+          this.updateOutput({
+            attributes: this.attributes,
+            defaultTitle: this.attributes.title,
+          });
+        }
+      })
+    );
     this.setInitializationFinished();
   }
 
@@ -116,10 +137,12 @@ export class NavigationEmbeddable
   }
 
   public async reload() {
+    this.attributes = (await this.attributeService.unwrapAttributes(this.input)).attributes;
+
     this.updateOutput({
-      defaultTitle: this.attributes?.title,
-      defaultDescription: this.attributes?.description,
-      links: this.attributes?.links,
+      attributes: this.attributes,
+      defaultTitle: this.attributes.title,
+      defaultDescription: this.attributes.description,
     });
   }
 

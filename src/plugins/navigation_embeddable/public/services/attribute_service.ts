@@ -19,7 +19,7 @@ import { embeddableService } from './kibana_services';
 import { navigationEmbeddableClient } from '../content_management';
 import { NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
 
-type NavigationEmbeddableDocument = NavigationEmbeddableAttributes & {
+export type NavigationEmbeddableDocument = NavigationEmbeddableAttributes & {
   references?: Reference[];
 };
 

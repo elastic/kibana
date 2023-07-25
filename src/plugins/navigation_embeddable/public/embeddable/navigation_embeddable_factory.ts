@@ -17,7 +17,11 @@ import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public'
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { NavigationEmbeddableByReferenceInput, NavigationEmbeddableInput } from './types';
+import {
+  NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableByValueInput,
+  NavigationEmbeddableInput,
+} from './types';
 import type { NavigationEmbeddable } from './navigation_embeddable';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
@@ -78,10 +82,14 @@ export class NavigationEmbeddableFactoryDefinition
     if (!(input as NavigationEmbeddableByReferenceInput).savedObjectId) {
       (input as NavigationEmbeddableByReferenceInput).savedObjectId = savedObjectId;
     }
-    return this.create(input, parent);
+    return this.create(input, parent, savedObjectId);
   }
 
-  public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
+  public async create(
+    initialInput: NavigationEmbeddableInput,
+    parent: DashboardContainer,
+    savedObjectId?: string
+  ) {
     await untilPluginStartServicesReady();
 
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
@@ -106,7 +114,10 @@ export class NavigationEmbeddableFactoryDefinition
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
     const input = await openEditorFlyout(
-      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
+      {
+        ...getDefaultNavigationEmbeddableInput(),
+        ...initialInput,
+      } as NavigationEmbeddableByValueInput,
       parent
     ).catch(() => {
       // swallow the promise rejection that happens when the flyout is closed

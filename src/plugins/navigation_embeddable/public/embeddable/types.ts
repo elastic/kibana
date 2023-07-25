@@ -20,7 +20,6 @@ import {
   EXTERNAL_LINK_TYPE,
   NavigationLinkType,
   NavigationEmbeddableAttributes,
-  NavigationEmbeddableLinkList,
 } from '../../common/content_management';
 
 export const NavigationLinkInfo: {
@@ -49,7 +48,7 @@ export type NavigationEmbeddableInput =
   | NavigationEmbeddableByReferenceInput;
 
 export type NavigationEmbeddableOutput = EmbeddableOutput & {
-  links?: NavigationEmbeddableLinkList;
+  attributes?: NavigationEmbeddableAttributes;
 };
 
 /**

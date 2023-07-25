@@ -19,9 +19,10 @@ import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_edit
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const links = navEmbeddable.select((state) => state.output.links) ?? {};
+  const links = navEmbeddable.select((state) => state.output.attributes?.links);
 
   const orderedLinks = useMemo(() => {
+    if (!links) return [];
     return memoizedGetOrderedLinkList(links);
   }, [links]);
 
