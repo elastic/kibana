@@ -10,7 +10,7 @@ import type { Indicator } from '@kbn/slo-schema';
 interface SloListFilter {
   kqlQuery: string;
   page: number;
-  sortBy?: string;
+  sortBy: string;
   sortDirection: string;
 }
 

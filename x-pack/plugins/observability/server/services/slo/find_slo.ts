@@ -20,12 +20,10 @@ export class FindSLO {
   ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
-    const pagination: Pagination = toPagination(params);
-
     const sloSummaryList = await this.summarySearchClient.search(
       params.kqlQuery ?? '',
       toSort(params),
-      pagination
+      toPagination(params)
     );
 
     const sloList = await this.repository.findAllByIds(sloSummaryList.results.map((slo) => slo.id));

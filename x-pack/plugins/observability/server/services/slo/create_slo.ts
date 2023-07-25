@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v1 as uuidv1 } from 'uuid';
+import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
+import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 
 export class CreateSLO {
-  constructor(private repository: SLORepository, private transformManager: TransformManager) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private repository: SLORepository,
+    private transformManager: TransformManager
+  ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
@@ -38,6 +45,12 @@ export class CreateSLO {
 
       throw err;
     }
+
+    await this.esClient.index({
+      index: SLO_SUMMARY_TEMP_INDEX_NAME,
+      id: `slo-${slo.id}`,
+      document: createTempSummaryDocument(slo),
+    });
 
     return this.toResponse(slo);
   }

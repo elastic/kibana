@@ -45,7 +45,7 @@ const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 export function useFetchSloList({
   kqlQuery = '',
   page = 1,
-  sortBy,
+  sortBy = 'status',
   sortDirection = 'desc',
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
