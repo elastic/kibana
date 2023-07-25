@@ -78,6 +78,7 @@ export const timeRangeRT = rt.type({
   from: rt.number,
   to: rt.number,
   interval: rt.string,
+  timeFieldName: rt.string,
 });
 
 export const metricsExplorerRequestBodyRequiredFieldsRT = rt.type({

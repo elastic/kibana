@@ -14,6 +14,7 @@ export const MetricsAPITimerangeRT = rt.type({
   from: rt.number,
   to: rt.number,
   interval: rt.string,
+  timeFieldName: rt.string,
 });
 
 const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
