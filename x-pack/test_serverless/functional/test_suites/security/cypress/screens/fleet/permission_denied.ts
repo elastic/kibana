@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * The screen normally returned by the API when a user does not have access to a Plugin.
+ * Note that the requested page will likely also receive an HTTP status code of `403`
+ */
 export const ensurePermissionDeniedScreen = (): Cypress.Chainable => {
   return cy.contains('You do not have permission to access the requested page').should('exist');
 };

@@ -8,7 +8,7 @@
 import { FLEET_BASE_PATH } from '@kbn/fleet-plugin/public/constants';
 
 export const visitFleetAgentList = (): Cypress.Chainable => {
-  return cy.visit(FLEET_BASE_PATH);
+  return cy.visit(FLEET_BASE_PATH, { failOnStatusCode: false });
 };
 
 export const getAgentListTable = (): Cypress.Chainable => {

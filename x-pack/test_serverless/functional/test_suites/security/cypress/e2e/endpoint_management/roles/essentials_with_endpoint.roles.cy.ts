@@ -56,7 +56,7 @@ describe(
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
-        before(() => {
+        beforeEach(() => {
           login(roleName);
         });
 
@@ -87,7 +87,7 @@ describe(
         pageById.blocklist,
       ];
 
-      before(() => {
+      beforeEach(() => {
         login('t3_analyst');
       });
 
@@ -112,7 +112,7 @@ describe(
     describe('for role: threat_intelligence_analyst', () => {
       const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
 
-      before(() => {
+      beforeEach(() => {
         login('threat_intelligence_analyst');
       });
 
@@ -148,7 +148,7 @@ describe(
         pageById.blocklist,
       ];
 
-      before(() => {
+      beforeEach(() => {
         login('rule_author');
       });
 
@@ -191,7 +191,7 @@ describe(
       ];
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
-      before(() => {
+      beforeEach(() => {
         login('soc_manager');
       });
 
@@ -227,7 +227,7 @@ describe(
           ];
           const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
-          before(() => {
+          beforeEach(() => {
             login('platform_engineer');
           });
 
