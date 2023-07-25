@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
-
-export const BULK_ACTIONS_PROGRESS_BTN = '[data-test-subj="bulkActions-progress"]';
-
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
@@ -30,14 +26,6 @@ export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
-export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
-
-export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
-
-export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
-
-export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
-
 export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"] label';
 
 export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
@@ -48,8 +36,6 @@ export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExce
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
-
-export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
 
 export const FIRST_RULE = 0;
 
@@ -106,6 +92,8 @@ export const RULES_MANAGEMENT_TABLE = '[data-test-subj="rules-management-table"]
 export const RULES_MONITORING_TABLE = '[data-test-subj="rules-monitoring-table"]';
 
 export const RULES_UPDATES_TABLE = '[data-test-subj="rules-upgrades-table"]';
+
+export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
@@ -182,3 +170,16 @@ export const RULE_EXECUTION_STATUS_BADGE = '[data-test-subj="ruleExecutionStatus
 export const EXECUTION_STATUS_FILTER_BUTTON = '[data-test-subj="executionStatusFilterButton"]';
 
 export const EXECUTION_STATUS_FILTER_OPTION = '[data-test-subj="executionStatusFilterOption"]';
+
+export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="installSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE =
+  '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE =
+  '[data-test-subj="noPrebuiltRulesAvailableForUpgrade"]';

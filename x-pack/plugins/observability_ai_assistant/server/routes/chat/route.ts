@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import type { IncomingMessage } from 'http';
 import { notImplemented } from '@hapi/boom';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { conversationRt } from '../runtime_types';
+import { messageRt } from '../runtime_types';
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -17,7 +17,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   },
   params: t.type({
     body: t.type({
-      conversation: conversationRt,
+      messages: t.array(messageRt),
       connectorId: t.string,
     }),
   }),
@@ -31,7 +31,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }
 
     return client.chat({
-      messages: params.body.conversation.messages,
+      messages: params.body.messages,
       connectorId: params.body.connectorId,
     });
   },

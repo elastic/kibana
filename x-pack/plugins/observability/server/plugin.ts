@@ -45,7 +45,6 @@ import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common'
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
-import { OpenAIService } from './services/openai';
 import { threshold } from './saved_objects/threshold';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -244,10 +243,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     );
     registerSloUsageCollector(plugins.usageCollection);
 
-    const openAIService = config.aiAssistant?.enabled
-      ? new OpenAIService(config.aiAssistant)
-      : undefined;
-
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
@@ -259,7 +254,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
-          getOpenAIClient: () => openAIService?.client,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
@@ -278,9 +272,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
-      },
-      getOpenAIClient() {
-        return openAIService?.client;
       },
       alertsLocator,
     };

@@ -221,6 +221,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
+        'xpack.cloud.performance_url (string)',
+        'xpack.cloud.users_and_roles_url (string)',
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
@@ -277,8 +279,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.aiAssistant.enabled (boolean)',
-        'xpack.observability.aiAssistant.feedback.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',

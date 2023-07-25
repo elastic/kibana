@@ -9,17 +9,40 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  CreateChatCompletionResponse,
+  CreateChatCompletionResponseChoicesInner,
+} from 'openai';
+import type { Observable } from 'rxjs';
+import type { Message } from '../common/types';
+import type { ObservabilityAIAssistantAPIClient } from './api';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface ObservabilityAIAssistantPluginStart {}
+export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionResponse, 'choices'> & {
+  choices: Array<
+    Omit<CreateChatCompletionResponseChoicesInner, 'message'> & {
+      delta: { content?: string; function_call?: { name?: string; args?: string } };
+    }
+  >;
+};
+
+export interface ObservabilityAIAssistantService {
+  isEnabled: () => boolean;
+  chat: (options: {
+    messages: Message[];
+    connectorId: string;
+    signal: AbortSignal;
+  }) => Promise<Observable<CreateChatCompletionResponseChunk>>;
+  callApi: ObservabilityAIAssistantAPIClient;
+}
+
+export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {}
 
 export interface ObservabilityAIAssistantPluginSetup {}
-
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   triggersActions: TriggersAndActionsUIPublicPluginSetup;
 }
-
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   triggersActions: TriggersAndActionsUIPublicPluginStart;

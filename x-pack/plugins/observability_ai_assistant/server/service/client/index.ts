@@ -13,8 +13,9 @@ import type { Logger } from '@kbn/logging';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { internal, notFound } from '@hapi/boom';
-import { compact, merge, omit } from 'lodash';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { compact, isEmpty, merge, omit } from 'lodash';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import {
   type Conversation,
   type ConversationCreateRequest,
@@ -125,14 +126,20 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         return {
           role,
           content: message.message.content,
-          function_call: omit(message.message.function_call, 'trigger'),
+          function_call: isEmpty(message.message.function_call?.name)
+            ? undefined
+            : omit(message.message.function_call, 'trigger'),
           name: message.message.name,
         };
       })
     );
 
-    const request: CreateChatCompletionRequest = {
-      model: 'gpt-4',
+    const connector = await this.dependencies.actionsClient.get({
+      id: connectorId,
+    });
+
+    const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
+      ...(connector.config?.apiProvider === OpenAiProviderType.OpenAi ? { model: 'gpt-4' } : {}),
       messages: messagesForOpenAI,
       stream: true,
     };
@@ -141,7 +148,10 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       actionId: connectorId,
       params: {
         subAction: 'stream',
-        subActionParams: JSON.stringify(request),
+        subActionParams: {
+          body: JSON.stringify(request),
+          stream: true,
+        },
       },
     });
 

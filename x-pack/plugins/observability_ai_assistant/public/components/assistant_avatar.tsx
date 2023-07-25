@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 export interface AssistantAvatarProps {
-  size?: keyof typeof sizeMap;
-  children?: ReactNode;
+  size: keyof typeof sizeMap;
 }
 
 export const sizeMap = {

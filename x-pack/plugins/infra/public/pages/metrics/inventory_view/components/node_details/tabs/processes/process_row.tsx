@@ -22,34 +22,54 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useCoPilot, CoPilotPrompt } from '@kbn/observability-plugin/public';
-import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import useToggle from 'react-use/lib/useToggle';
+import {
+  useObservabilityAIAssistant,
+  type Message,
+  MessageRole,
+  ContextualInsight,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
 interface Props {
   cells: React.ReactNode[];
   item: Process;
-  supportCopilot?: boolean;
+  supportAIAssistant?: boolean;
 }
-export const CopilotProcessRow = ({ command }: { command: string }) => {
-  const coPilotService = useCoPilot();
-  const explainProcessParams = useMemo(() => {
-    return command ? { command } : undefined;
+export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
+  const aiAssistant = useObservabilityAIAssistant();
+  const explainProcessMessages = useMemo<Message[] | undefined>(() => {
+    if (!command) {
+      return undefined;
+    }
+    const now = new Date().toISOString();
+    return [
+      {
+        '@timestamp': now,
+        message: {
+          role: MessageRole.System,
+          content: '',
+        },
+      },
+      {
+        '@timestamp': now,
+        message: {
+          role: MessageRole.User,
+          content: '',
+        },
+      },
+    ];
   }, [command]);
   return (
     <>
-      {coPilotService?.isEnabled() && explainProcessParams ? (
+      {aiAssistant.isEnabled() && explainProcessMessages ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <CoPilotPrompt
-                coPilot={coPilotService}
+              <ContextualInsight
                 title={explainProcessMessageTitle}
-                params={explainProcessParams}
-                promptId={CoPilotPromptId.InfraExplainProcess}
-                feedbackEnabled={true}
+                messages={explainProcessMessages}
               />
             </EuiFlexItem>
           </EuiFlexItem>
@@ -59,7 +79,7 @@ export const CopilotProcessRow = ({ command }: { command: string }) => {
   );
 };
 
-export const ProcessRow = ({ cells, item, supportCopilot = false }: Props) => {
+export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) => {
   const [isExpanded, toggle] = useToggle(false);
 
   return (
@@ -135,7 +155,7 @@ export const ProcessRow = ({ cells, item, supportCopilot = false }: Props) => {
                 </EuiFlexItem>
                 <ProcessRowCharts command={item.command} />
               </EuiFlexGrid>
-              {supportCopilot && <CopilotProcessRow command={item.command} />}
+              {supportAIAssistant && <ContextualInsightProcessRow command={item.command} />}
             </ExpandedRowDescriptionList>
           </ExpandedRowCell>
         )}

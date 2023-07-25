@@ -150,6 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
@@ -293,6 +294,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.infraHostsView.metadataTableExist();
+          await pageObjects.infraHostsView.clickOverviewFlyoutTab();
+        });
+
+        it('should show alerts', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.overviewAlertsTitleExist();
+        });
+
+        it('should open alerts flyout', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.clickOverviewOpenAlertsFlyout();
+          // There are 2 flyouts open (asset details and alerts)
+          // so we need a stricter selector
+          // to be sure that we are closing the alerts flyout
+          const closeAlertFlyout = await find.byCssSelector(
+            '[aria-labelledby="flyoutRuleAddTitle"] > [data-test-subj="euiFlyoutCloseButton"]'
+          );
+          await closeAlertFlyout.click();
+        });
+
+        it('should navigate to alerts', async () => {
+          await pageObjects.infraHostsView.clickOverviewLinkToAlerts();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const url = parse(await browser.getCurrentUrl());
+
+          const query = decodeURIComponent(url.query ?? '');
+
+          const alertsQuery =
+            "_a=(kuery:'host.name:\"Jennys-MBP.fritz.box\"',rangeFrom:'2023-03-28T18:20:00.000Z',rangeTo:'2023-03-28T18:21:00.000Z',status:all)";
+
+          expect(url.pathname).to.eql('/app/observability/alerts');
+          expect(query).to.contain(alertsQuery);
+
+          await returnTo(HOSTS_VIEW_PATH);
         });
       });
 
@@ -383,22 +418,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to APM services after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        const url = parse(await browser.getCurrentUrl());
+      describe('Flyout links', () => {
+        it('should navigate to APM services after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+          const url = parse(await browser.getCurrentUrl());
+          const query = decodeURIComponent(url.query ?? '');
+          const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
 
-        const query = decodeURIComponent(url.query ?? '');
+          expect(url.pathname).to.eql('/app/apm/services');
+          expect(query).to.contain(kuery);
 
-        const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-        const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
-        const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
-
-        expect(url.pathname).to.eql('/app/apm/services');
-        expect(query).to.contain(kuery);
-        expect(query).to.contain(rangeFrom);
-        expect(query).to.contain(rangeTo);
-
-        await returnTo(HOSTS_VIEW_PATH);
+          await returnTo(HOSTS_VIEW_PATH);
+        });
       });
     });
 
@@ -475,6 +506,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const hostRowsAfterRemovingFilter = await pageObjects.infraHostsView.getHostsTableData();
           expect(hostRowsAfterRemovingFilter.length).to.equal(6);
         });
+      });
+
+      it('should render alerts count for a host inside a flyout', async () => {
+        await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-mysql-01', '-');
+        await pageObjects.infraHostsView.clickSelectedHostsButton();
+        await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+
+        const activeAlertsCount = await pageObjects.infraHostsView.getActiveAlertsCountText();
+        const totalAlertsCount = await pageObjects.infraHostsView.getTotalAlertsCountText();
+
+        expect(activeAlertsCount).to.equal('2 ');
+        expect(totalAlertsCount).to.equal('3');
+
+        const deleteFilterButton = await find.byCssSelector(
+          `[title="Delete host.name: demo-stack-mysql-01"]`
+        );
+        await deleteFilterButton.click();
+
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
       });
 
       it('should render "N/A" when processes summary is not available in flyout', async () => {

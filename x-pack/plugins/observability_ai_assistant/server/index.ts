@@ -9,5 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { ObservabilityAIAssistantPlugin } from './plugin';
 
+export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get_global_observability_ai_assistant_route_repository';
+
 export const plugin = (ctx: PluginInitializerContext<ObservabilityAIAssistantConfig>) =>
   new ObservabilityAIAssistantPlugin(ctx);
