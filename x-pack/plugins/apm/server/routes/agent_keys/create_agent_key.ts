@@ -68,7 +68,7 @@ export async function createAgentKey({
     const error = `${username} is missing the following requested privilege(s): ${missingPrivileges.join(
       ', '
     )}${
-      missingClusterPrivileges
+      missingClusterPrivileges && missingClusterPrivileges.length > 0
         ? ` and following cluster privileges - ${missingClusterPrivileges.join(
             ', '
           )} privilege(s)`
