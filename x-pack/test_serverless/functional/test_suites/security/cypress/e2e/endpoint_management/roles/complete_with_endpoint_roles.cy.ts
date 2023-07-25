@@ -6,6 +6,7 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { pick } from 'lodash';
 import { login } from '../../../tasks/login';
 import {
   EndpointArtifactPageId,
@@ -16,10 +17,16 @@ import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import {
   getArtifactListEmptyStateAddButton,
   getNoPrivilegesPage,
+  openConsoleFromEndpointList,
+  openRowActionMenu,
   visitEndpointList,
   visitPolicyList,
 } from '../../../screens/endpoint_management';
 import { ensurePermissionDeniedScreen, visitFleetAgentList } from '../../../screens';
+import {
+  getConsoleHelpPanelResponseActionTestSubj,
+  openConsoleHelpPanel,
+} from '../../../screens/endpoint_management/response_console';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
@@ -36,6 +43,7 @@ describe(
   () => {
     const allPages = getEndpointManagementPageList();
     const pageById = getEndpointManagementPageMap();
+    const consoleHelpPanelResponseActionsTestSubj = getConsoleHelpPanelResponseActionTestSubj();
 
     let loadedEndpoints: IndexedHostsAndAlertsResponse;
 
@@ -51,7 +59,7 @@ describe(
       }
     });
 
-    // roles `t1_analyst` and `t2_analyst` are the same as far as endpoint access
+    // roles `t1_analyst` and `t2_analyst` are very similar with exception of one page
     (['t1_analyst', `t2_analyst`] as ServerlessRoleName[]).forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
@@ -65,16 +73,29 @@ describe(
           getNoPrivilegesPage().should('not.exist');
         });
 
-        for (const { url, title } of deniedPages) {
-          it(`should NOT have access to: ${title}`, () => {
-            cy.visit(url);
-            getNoPrivilegesPage().should('exist');
-          });
+        for (const { id, url, title } of deniedPages) {
+          // T2 analyst has Read view to Response Actions log
+          if (id === 'responseActionLog' && roleName === 't2_analyst') {
+            it(`should have access to: ${title}`, () => {
+              cy.visit(url);
+              getNoPrivilegesPage().should('not.exist');
+            });
+          } else {
+            it(`should NOT have access to: ${title}`, () => {
+              cy.visit(url);
+              getNoPrivilegesPage().should('exist');
+            });
+          }
         }
 
         it('should NOT have access to Fleet', () => {
           visitFleetAgentList();
           ensurePermissionDeniedScreen();
+        });
+
+        it('should NOT have access to execute response actions', () => {
+          visitEndpointList();
+          openRowActionMenu().findByTestSubj('console').should('not.exist');
         });
       });
     });
@@ -86,6 +107,19 @@ describe(
         pageById.hostIsolationExceptions,
         pageById.blocklist,
       ];
+
+      const grantedResponseActions = pick(
+        consoleHelpPanelResponseActionsTestSubj,
+        'isolate',
+        'release',
+        'processes',
+        'kill-process',
+        'suspend-process',
+        'get-file',
+        'upload'
+      );
+
+      const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
 
       beforeEach(() => {
         login('t3_analyst');
@@ -106,6 +140,26 @@ describe(
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensurePermissionDeniedScreen();
+      });
+
+      describe('Response Actions access', () => {
+        beforeEach(() => {
+          visitEndpointList();
+          openConsoleFromEndpointList();
+          openConsoleHelpPanel();
+        });
+
+        for (const [action, testSubj] of Object.entries(grantedResponseActions)) {
+          it(`should have access to execute action: ${action}`, () => {
+            cy.getByTestSubj(testSubj).should('exist');
+          });
+        }
+
+        for (const [action, testSubj] of Object.entries(deniedResponseActions)) {
+          it(`should NOT have access to execute: ${action}`, () => {
+            cy.getByTestSubj(testSubj).should('not.exist');
+          });
+        }
       });
     });
 
@@ -138,6 +192,16 @@ describe(
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensurePermissionDeniedScreen();
+      });
+
+      it('should have access to Response Actions Log', () => {
+        cy.visit(pageById.responseActionLog);
+        getNoPrivilegesPage().should('not.exist');
+      });
+
+      it('should NOT have access to execute response actions', () => {
+        visitEndpointList();
+        openRowActionMenu().findByTestSubj('console').should('not.exist');
       });
     });
 
@@ -180,6 +244,16 @@ describe(
         visitFleetAgentList();
         ensurePermissionDeniedScreen();
       });
+
+      it('should have access to Response Actions Log', () => {
+        cy.visit(pageById.responseActionLog);
+        getNoPrivilegesPage().should('not.exist');
+      });
+
+      it('should NOT have access to execute response actions', () => {
+        visitEndpointList();
+        openRowActionMenu().findByTestSubj('console').should('not.exist');
+      });
     });
 
     describe('for role: soc_manager', () => {
@@ -213,9 +287,22 @@ describe(
         visitFleetAgentList();
         ensurePermissionDeniedScreen();
       });
+
+      describe('Response Actions access', () => {
+        beforeEach(() => {
+          visitEndpointList();
+          openConsoleFromEndpointList();
+          openConsoleHelpPanel();
+        });
+
+        Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(([action, testSubj]) => {
+          it(`should have access to execute action: ${action}`, () => {
+            cy.getByTestSubj(testSubj).should('exist');
+          });
+        });
+      });
     });
 
-    // Endpoint Operations Manager and Platform Engineer currently have the same level of access
     (['platform_engineer', `endpoint_operations_manager`] as ServerlessRoleName[]).forEach(
       (roleName) => {
         describe(`for role: ${roleName}`, () => {
@@ -248,6 +335,31 @@ describe(
           it('should have access to Fleet', () => {
             visitFleetAgentList();
             ensurePermissionDeniedScreen();
+          });
+
+          it('should have access to Response Actions Log', () => {
+            cy.visit(pageById.responseActionLog);
+            getNoPrivilegesPage().should('not.exist');
+          });
+
+          describe('Response Actions access', () => {
+            if (roleName === 'platform_engineer') {
+              it('should NOT have access to execute response actions', () => {
+                visitEndpointList();
+                openRowActionMenu().findByTestSubj('console').should('not.exist');
+              });
+            } else if (roleName === 'endpoint_operations_manager') {
+              Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(
+                ([action, testSubj]) => {
+                  it(`should have access to execute action: ${action}`, () => {
+                    visitEndpointList();
+                    openConsoleFromEndpointList();
+                    openConsoleHelpPanel();
+                    cy.getByTestSubj(testSubj).should('exist');
+                  });
+                }
+              );
+            }
           });
         });
       }
