@@ -61,9 +61,13 @@ const DOCKER_BASE_CMD = [
 ];
 
 const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
-  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
+  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 
   ['ES_LOG_STYLE', 'file'],
+
+  ['discovery.type', 'single-node'],
+
+  ['xpack.security.enabled', 'false'],
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
