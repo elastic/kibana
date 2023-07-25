@@ -13,6 +13,8 @@
   - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
   - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
   - [Removing an existing field](#removing-an-existing-field)
+- [Particularities of the serverless environment](#particularities-of-the-serverless-environment)
+  - [Using the fields option of the find api](#using-the-fields-option-of-the-find-savedobjects-api)
 
 ## Introduction
 
@@ -867,3 +869,25 @@ const myType: SavedObjectsType = {
   },
 };
 ```
+
+## Particularities of the serverless environment
+
+The serverless environment, and the fact that upgrade in such environments are performed in a way
+where, at some point, the old and new version of the application are living in cohabitation, leads 
+to some particularities regarding the way the SO APIs works, and to some limitations / edge case
+that we need to document
+
+### Using the `fields` option of the `find` savedObjects API
+
+By default, the `find` API (as any other SO API returning documents) will migrate all documents before
+returning them, to ensure that documents can be used by both versions during a cohabitation (e.g an old
+node searching for documents already migrated, or a new node searching for documents not yet migrated).
+
+However, when using the `fields` option of the `find` API, the documents can't be migrated, as some
+model version changes can't be applied against a partial set of attributes. For this reason, when the
+`fields` option is provided, the documents returned from `find` will **not** be migrated.
+
+Which is why, when using this option, the API consumer needs to make sure that *all* the fields passed
+to the `fields` option **were already present in the prior model version**. Otherwise, it may lead to inconsistencies
+during upgrades, where newly introduced or backfilled fields may not necessarily appear in the documents returned
+from the `search` API when the option is used.
