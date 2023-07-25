@@ -53,6 +53,7 @@ describe('TogglePanel', () => {
   };
 
   const onStepClicked = jest.fn();
+  const onStepButtonClicked = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -66,6 +67,7 @@ describe('TogglePanel', () => {
         finishedSteps={finishedSteps}
         activeCards={activeCards}
         onStepClicked={onStepClicked}
+        onStepButtonClicked={onStepButtonClicked}
       />
     );
 
@@ -82,6 +84,7 @@ describe('TogglePanel', () => {
         finishedSteps={finishedSteps}
         activeCards={activeCards}
         onStepClicked={onStepClicked}
+        onStepButtonClicked={onStepButtonClicked}
       />
     );
 

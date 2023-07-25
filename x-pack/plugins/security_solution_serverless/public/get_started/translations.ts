@@ -124,28 +124,28 @@ export const PRODUCT_BADGE_EDR = i18n.translate(
 );
 
 export const WATCH_OVERVIEW_VIDEO_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.watchOverviewVideo.description1',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.description1',
   {
     defaultMessage: `Elastic security keeps your organization’s data safe from attack. `,
   }
 );
 
 export const WATCH_OVERVIEW_VIDEO_DESCRIPTION2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.watchOverviewVideo.description2',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.description2',
   {
     defaultMessage: `Our unified security platform combines Analytics, EDR, and cloud security capabilities into a single SaaS product, providing organizations with a comprehensive solution to protect against a wide range of security threats. With centralized management, real-time threat detection and response, and scalability, our platform can help organizations improve their security posture and reduce the risk of data breaches.`,
   }
 );
 
 export const WATCH_OVERVIEW_VIDEO_DESCRIPTION3 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.watchOverviewVideo.description3',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.description3',
   {
     defaultMessage: `Watch the video to explore the core features that allow you to keep your data safe.`,
   }
 );
 
 export const WATCH_OVERVIEW_VIDEO_HEADER = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.watchOverviewVideo.header',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.header',
   {
     defaultMessage: 'Elastic Security',
   }

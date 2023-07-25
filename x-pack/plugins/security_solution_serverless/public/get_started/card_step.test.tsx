@@ -12,7 +12,7 @@ import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 
 describe('CardStepComponent', () => {
   const step = {
-    id: IntroductionSteps.watchOverviewVideo,
+    id: IntroductionSteps.getToKnowElasticSecurity,
     title: 'Test Step',
     badges: [
       { id: 'badge1', name: 'Badge 1' },
@@ -23,12 +23,13 @@ describe('CardStepComponent', () => {
   };
 
   const onStepClicked = jest.fn();
-
+  const onStepButtonClicked = jest.fn();
   const props = {
     sectionId: SectionId.getSetUp,
     cardId: GetSetUpCardId.introduction,
     step,
     onStepClicked,
+    onStepButtonClicked,
     finishedStepsByCard: new Set() as Set<StepId>,
   };
 
@@ -41,7 +42,7 @@ describe('CardStepComponent', () => {
     expect(onStepClicked).toHaveBeenCalledTimes(1);
     expect(onStepClicked).toHaveBeenCalledWith({
       sectionId: SectionId.getSetUp,
-      stepId: IntroductionSteps.watchOverviewVideo,
+      stepId: IntroductionSteps.getToKnowElasticSecurity,
       cardId: GetSetUpCardId.introduction,
     });
   });
@@ -78,7 +79,7 @@ describe('CardStepComponent', () => {
   });
 
   it('should render check icon when stepId is in finishedStepsByCard', () => {
-    const finishedStepsByCard = new Set([IntroductionSteps.watchOverviewVideo]);
+    const finishedStepsByCard = new Set([IntroductionSteps.getToKnowElasticSecurity]);
 
     const { getByTestId } = render(
       <CardStep {...props} finishedStepsByCard={finishedStepsByCard} />

@@ -23,9 +23,12 @@ const mockEuiTheme: EuiThemeComputed = {
   },
 } as EuiThemeComputed;
 const finishedSteps = {
-  [GetSetUpCardId.introduction]: new Set<StepId>([IntroductionSteps.watchOverviewVideo]),
+  [GetSetUpCardId.introduction]: new Set<StepId>([IntroductionSteps.getToKnowElasticSecurity]),
 } as Record<CardId, Set<StepId>>;
 describe('useSetUpCardSections', () => {
+  const onStepClicked = jest.fn();
+  const onStepButtonClicked = jest.fn();
+
   it('should return the sections', () => {
     const { result } = renderHook(() => useSetUpCardSections({ euiTheme: mockEuiTheme }));
 
@@ -46,7 +49,8 @@ describe('useSetUpCardSections', () => {
 
     const sections = result.current.setUpSections({
       activeCards,
-      onStepClicked: jest.fn(),
+      onStepClicked,
+      onStepButtonClicked,
       finishedSteps,
     });
 
@@ -60,7 +64,8 @@ describe('useSetUpCardSections', () => {
 
     const sections = result.current.setUpSections({
       activeCards,
-      onStepClicked: jest.fn(),
+      onStepClicked,
+      onStepButtonClicked,
       finishedSteps,
     });
 
