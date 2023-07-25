@@ -77,11 +77,10 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           </>
         )}
 
-        <EuiPageTemplate.Section
-          paddingSize="none"
-          color="transparent"
-        >
-          <EuiPageTemplate.Section restrictWidth={restrictWidth}>{children}</EuiPageTemplate.Section>
+        <EuiPageTemplate.Section paddingSize="none" color="transparent">
+          <EuiPageTemplate.Section restrictWidth={restrictWidth}>
+            {children}
+          </EuiPageTemplate.Section>
         </EuiPageTemplate.Section>
       </div>
     );

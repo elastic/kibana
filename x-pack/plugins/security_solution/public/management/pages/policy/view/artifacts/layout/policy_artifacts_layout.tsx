@@ -218,10 +218,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           />
         )}
         <EuiSpacer size="l" />
-        <EuiPageTemplate.Section
-          paddingSize="none"
-          color="transparent"
-        >
+        <EuiPageTemplate.Section paddingSize="none" color="transparent">
           <PolicyArtifactsList
             policy={policyItem}
             apiClient={exceptionsListApiClient}

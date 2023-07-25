@@ -6,10 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiButton,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';

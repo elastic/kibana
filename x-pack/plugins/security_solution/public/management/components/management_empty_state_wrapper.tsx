@@ -23,7 +23,7 @@ export const ManagementEmptyStateWrapper = memo(
   }) => {
     return (
       <StyledEuiFlexGroup direction="column" alignItems="center" data-test-subj={dataTestSubj}>
-        <EuiPageTemplate.EmptyPrompt >{children}</EuiPageTemplate.EmptyPrompt>
+        <EuiPageTemplate.EmptyPrompt>{children}</EuiPageTemplate.EmptyPrompt>
       </StyledEuiFlexGroup>
     );
   }
