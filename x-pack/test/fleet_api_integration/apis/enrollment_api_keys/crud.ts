@@ -58,6 +58,36 @@ export default function (providerContext: FtrProviderContext) {
           .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
           .expect(403);
       });
+
+      it('should return 200 if the passed kuery is correct', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 200 if the passed kuery does not have prefix fleet-enrollment-api-keys', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(
+            `/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.non_existent_parameter:test`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
     });
 
     describe('GET /fleet/enrollment_api_keys/{id}', async () => {
