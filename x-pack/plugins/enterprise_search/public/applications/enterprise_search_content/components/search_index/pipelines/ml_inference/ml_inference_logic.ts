@@ -100,15 +100,12 @@ const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 const DEFAULT_CONNECTOR_FIELDS = ['body', 'title', 'id', 'type', 'url'];
 
 const getFullTargetFieldName = (
-  modelId: string,
   sourceField: string,
-  targetField: string | undefined
+  targetField: string | undefined,
+  isTextExpansionModelSelected: boolean,
 ) => {
   let suffixedTargetField = (targetField ?? '').length > 0 ? targetField! : sourceField;
-
-  // Temporary hardcoding of condition with ELSER model name
-  // This will get removed or modified once the naming pattern for all models has been defined
-  if (modelId.startsWith('.elser_model')) {
+  if (isTextExpansionModelSelected) {
     suffixedTargetField = `${suffixedTargetField}_expanded`;
   }
 
@@ -126,7 +123,9 @@ export interface MLInferencePipelineOption {
 }
 
 interface MLInferenceProcessorsActions {
-  addSelectedFieldsToMapping: () => void;
+  addSelectedFieldsToMapping: (isTextExpansionModelSelected: boolean) => {
+    isTextExpansionModelSelected: boolean;
+  };
   attachApiError: Actions<
     AttachMlInferencePipelineApiLogicArgs,
     AttachMlInferencePipelineResponse
@@ -221,7 +220,7 @@ export const MLInferenceLogic = kea<
   MakeLogicType<MLInferenceProcessorsValues, MLInferenceProcessorsActions>
 >({
   actions: {
-    addSelectedFieldsToMapping: true,
+    addSelectedFieldsToMapping: (isTextExpansionModelSelected: string) => ({ isTextExpansionModelSelected }),
     attachPipeline: true,
     clearFormErrors: true,
     createPipeline: true,
@@ -390,17 +389,17 @@ export const MLInferenceLogic = kea<
         step: AddInferencePipelineSteps.Configuration,
       },
       {
-        addSelectedFieldsToMapping: (modal) => {
+        addSelectedFieldsToMapping: (modal, { isTextExpansionModelSelected }) => {
           const {
-            configuration: { fieldMappings, modelID, targetField },
+            configuration: { fieldMappings, targetField },
             selectedSourceFields,
           } = modal;
 
           const mergedFieldMappings: FieldMapping[] = [
             ...(fieldMappings || []),
-            ...(selectedSourceFields || []).map((fieldName) => ({
+            ...(selectedSourceFields || []).map((fieldName: string) => ({
               sourceField: fieldName,
-              targetField: getFullTargetFieldName(modelID, fieldName, targetField),
+              targetField: getFullTargetFieldName(fieldName, targetField, isTextExpansionModelSelected),
             })),
           ];
 
