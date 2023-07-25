@@ -32,6 +32,7 @@ describe('CreateMlInferencePipelineApiLogic', () => {
           },
         ],
         indexName: 'my-index',
+        modelId: 'my-model-id',
         pipelineName: 'my-pipeline',
         pipelineDefinition: { processors: [], version: 1 },
       };
