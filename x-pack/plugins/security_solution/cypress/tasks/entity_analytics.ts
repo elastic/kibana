@@ -10,21 +10,16 @@ import {
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
 } from '../screens/entity_analytics';
+import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
 
-import { waitForPageToBeLoaded } from './common';
+import { visit } from './login';
 
 export const waitForAnomaliesToBeLoaded = () => {
   cy.waitUntil(() => {
-    cy.reload();
-    waitForPageToBeLoaded();
-    return cy.get(ANOMALIES_TABLE_ROWS).then(
-      (rows) => {
-        if (rows.length > 1) {
-          cy.log('anomalies loaded');
-        }
-      },
-      { timeout: 12000 }
-    );
+    visit(ENTITY_ANALYTICS_URL);
+    cy.get('.euiBasicTable.euiBasicTable-loading').should('exist');
+    cy.get('.euiBasicTable.euiBasicTable-loading').should('not.exist');
+    return cy.get(ANOMALIES_TABLE_ROWS).then((tableRows) => tableRows.length > 1);
   });
 };
 
