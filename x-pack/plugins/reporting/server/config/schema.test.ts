@@ -63,15 +63,26 @@ describe('Reporting Config Schema', () => {
     }
   );
   it('disables image reporting with serverless', () => {
-    expect(() => ConfigSchema.validate({ export_types: { pdf: { enabled: true }}}, { serverless: true })).toThrow()
-    expect(() => ConfigSchema.validate({ export_types: { png: { enabled: true }}}, { serverless: true })).toThrow()
+    expect(() =>
+      ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { serverless: true })
+    ).toThrow();
+    expect(() =>
+      ConfigSchema.validate({ export_types: { png: { enabled: true } } }, { serverless: true })
+    ).toThrow();
     // csv should pass in either dev or serverless
-    expect(() => ConfigSchema.validate({ export_types: { csv: { enabled: true }}}, { serverless: true })).not.toThrow()
+    expect(() =>
+      ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { serverless: true })
+    ).not.toThrow();
   });
   it('allows image reporting in dev', () => {
-    expect(() => ConfigSchema.validate({ export_types: { pdf: { enabled: true }}}, { dev: true })).not.toThrow()
-    expect(() => ConfigSchema.validate({ export_types: { png: { enabled: true }}}, { dev: true })).not.toThrow()
-    expect(() => ConfigSchema.validate({ export_types: { csv: { enabled: true }}}, { dev: true })).not.toThrow()
-
-  } )
+    expect(() =>
+      ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+    expect(() =>
+      ConfigSchema.validate({ export_types: { png: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+    expect(() =>
+      ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+  });
 });
