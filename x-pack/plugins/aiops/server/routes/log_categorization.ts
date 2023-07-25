@@ -19,7 +19,7 @@ export const defineLogCategorizationRoutes = (
 ) => {
   router.versioned
     .post({
-      path: AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
+      path: AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION,
       access: 'internal',
     })
     .addVersion(

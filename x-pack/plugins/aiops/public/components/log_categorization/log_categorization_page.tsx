@@ -49,7 +49,7 @@ import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 
 const BAR_TARGET = 20;
-const MESSAGE_FIELD = 'message';
+const DEFAULT_SELECTED_FIELD = 'message';
 
 export const LogCategorizationPage: FC = () => {
   const {
@@ -257,9 +257,9 @@ export const LogCategorizationPage: FC = () => {
       } else if (fields.length === 1) {
         // otherwise, if there is only one field in the list, select it
         setSelectedField(fields[0].label);
-      } else if (fields.find((f) => f.label === MESSAGE_FIELD)) {
+      } else if (fields.find((f) => f.label === DEFAULT_SELECTED_FIELD)) {
         // otherwise, if there is a field called `message`, select it
-        setSelectedField(MESSAGE_FIELD);
+        setSelectedField(DEFAULT_SELECTED_FIELD);
       }
     },
     [fields, loadCategories, selectedField, stateFromUrl.field]
