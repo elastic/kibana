@@ -339,7 +339,7 @@ const recursiveMerge = (target: Record<string, any>, value: any, keys: string[] 
     for (const [subKey, subVal] of Object.entries(value)) {
       recursiveMerge(target, subVal, [...keys, subKey]);
     }
-  } else if (keys.length !== undefined) {
+  } else if (keys.length > 0) {
     set(target, keys, value);
   }
 
