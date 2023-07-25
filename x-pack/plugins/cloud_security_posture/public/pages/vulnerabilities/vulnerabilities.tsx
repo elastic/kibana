@@ -126,7 +126,6 @@ const VulnerabilitiesDataGrid = ({
   });
   const { euiTheme } = useEuiTheme();
   const styles = useStyles();
-
   const [showHighlight, setHighlight] = useState(false);
 
   const invalidIndex = -1;
@@ -306,88 +305,86 @@ const VulnerabilitiesDataGrid = ({
 
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
+  if (data?.page.length === 0) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
+
   return (
     <>
-      {data?.page.length === 0 ? (
-        <EmptyState onResetFilters={onResetFilters} />
-      ) : (
-        <>
-          <EuiProgress
-            size="xs"
-            color="accent"
-            style={{
-              opacity: isFetching ? 1 : 0,
-            }}
-          />
-          <EuiDataGrid
-            className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
-            aria-label={VULNERABILITIES}
-            columns={columns}
-            columnVisibility={{
-              visibleColumns: columns.map(({ id }) => id),
-              setVisibleColumns: () => {},
-            }}
-            schemaDetectors={[severitySchemaConfig]}
-            rowCount={limitedTotalItemCount}
-            toolbarVisibility={{
-              showColumnSelector: false,
-              showDisplaySelector: false,
-              showKeyboardShortcuts: false,
-              showFullScreenSelector: false,
-              additionalControls: {
-                left: {
-                  prepend: (
-                    <>
-                      <EuiButtonEmpty size="xs" color="text">
-                        {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
-                          defaultMessage:
-                            '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                          values: { total: data?.total },
-                        })}
-                      </EuiButtonEmpty>
-                    </>
-                  ),
-                },
-                right: (
-                  <EuiFlexItem grow={false} className={styles.groupBySelector}>
-                    <FindingsGroupBySelector
-                      type="default"
-                      pathnameHandler={vulnerabilitiesPathnameHandler}
-                    />
-                  </EuiFlexItem>
-                ),
-              },
-            }}
-            gridStyle={{
-              border: 'horizontal',
-              cellPadding: 'l',
-              stripes: false,
-              rowHover: 'none',
-              header: 'underline',
-            }}
-            renderCellValue={renderCellValue}
-            inMemory={{ level: 'enhancements' }}
-            sorting={{ columns: sort, onSort: onSortHandler }}
-            pagination={{
-              pageIndex,
-              pageSize,
-              pageSizeOptions: [10, 25, 100],
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
-          />
-          {isLastLimitedPage && <LimitedResultsBar />}
-          {showVulnerabilityFlyout && selectedVulnerability && (
-            <VulnerabilityFindingFlyout
-              flyoutIndex={selectedVulnerabilityIndex}
-              vulnerabilityRecord={selectedVulnerability}
-              totalVulnerabilitiesCount={limitedTotalItemCount}
-              onPaginate={onPaginateFlyout}
-              closeFlyout={onCloseFlyout}
-              isLoading={isFetching}
-            />
-          )}
-        </>
+      <EuiProgress
+        size="xs"
+        color="accent"
+        style={{
+          opacity: isFetching ? 1 : 0,
+        }}
+      />
+      <EuiDataGrid
+        className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
+        aria-label={VULNERABILITIES}
+        columns={columns}
+        columnVisibility={{
+          visibleColumns: columns.map(({ id }) => id),
+          setVisibleColumns: () => {},
+        }}
+        schemaDetectors={[severitySchemaConfig]}
+        rowCount={limitedTotalItemCount}
+        toolbarVisibility={{
+          showColumnSelector: false,
+          showDisplaySelector: false,
+          showKeyboardShortcuts: false,
+          showFullScreenSelector: false,
+          additionalControls: {
+            left: {
+              prepend: (
+                <>
+                  <EuiButtonEmpty size="xs" color="text">
+                    {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                      defaultMessage:
+                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                      values: { total: data?.total },
+                    })}
+                  </EuiButtonEmpty>
+                </>
+              ),
+            },
+            right: (
+              <EuiFlexItem grow={false} className={styles.groupBySelector}>
+                <FindingsGroupBySelector
+                  type="default"
+                  pathnameHandler={vulnerabilitiesPathnameHandler}
+                />
+              </EuiFlexItem>
+            ),
+          },
+        }}
+        gridStyle={{
+          border: 'horizontal',
+          cellPadding: 'l',
+          stripes: false,
+          rowHover: 'none',
+          header: 'underline',
+        }}
+        renderCellValue={renderCellValue}
+        inMemory={{ level: 'enhancements' }}
+        sorting={{ columns: sort, onSort: onSortHandler }}
+        pagination={{
+          pageIndex,
+          pageSize,
+          pageSizeOptions: [10, 25, 100],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+      />
+      {isLastLimitedPage && <LimitedResultsBar />}
+      {showVulnerabilityFlyout && selectedVulnerability && (
+        <VulnerabilityFindingFlyout
+          flyoutIndex={selectedVulnerabilityIndex}
+          vulnerabilityRecord={selectedVulnerability}
+          totalVulnerabilitiesCount={limitedTotalItemCount}
+          onPaginate={onPaginateFlyout}
+          closeFlyout={onCloseFlyout}
+          isLoading={isFetching}
+        />
       )}
     </>
   );
