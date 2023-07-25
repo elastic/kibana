@@ -46,6 +46,7 @@ export const TopNAction = ({
         repositionOnScroll
         ownFocus
         attachToAnchor={false}
+        zIndex={1000}
       >
         <StatefulTopN
           field={firstItem.field.name}
