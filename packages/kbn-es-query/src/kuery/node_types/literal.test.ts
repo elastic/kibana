@@ -42,6 +42,18 @@ describe('kuery node types', () => {
         const result = toKqlExpression(node);
         expect(result).toBe('"foo"');
       });
+
+      test('reserved chars', () => {
+        const node = buildNode('():<>"*');
+        const result = toKqlExpression(node);
+        expect(result).toBe('\\(\\)\\:\\<\\>\\"\\*');
+      });
+
+      test('reserved keywords', () => {
+        const node = buildNode('foo and bar not baz or qux');
+        const result = toKqlExpression(node);
+        expect(result).toBe('foo \\and bar \\not baz \\or qux');
+      });
     });
   });
 });

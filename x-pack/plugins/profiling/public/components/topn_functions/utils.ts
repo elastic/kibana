@@ -7,11 +7,11 @@
 import { keyBy } from 'lodash';
 import { TopNFunctions } from '../../../common/functions';
 import { StackFrameMetadata } from '../../../common/profiling';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {
   const color = percent < 0 ? 'success' : 'danger';
-  const icon = percent < 0 ? 'sortDown' : 'sortUp';
+  const icon = percent < 0 ? 'sortUp' : 'sortDown';
   const isSmallPercent = Math.abs(percent) <= 0.01;
   const label = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2) + '%';
 
@@ -38,6 +38,7 @@ export interface IFunctionRow {
     totalCPU: number;
     selfCPUPerc: number;
     totalCPUPerc: number;
+    impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   };
 }
 
@@ -46,13 +47,11 @@ export function getFunctionsRows({
   comparisonScaleFactor,
   comparisonTopNFunctions,
   topNFunctions,
-  totalSeconds,
 }: {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   comparisonTopNFunctions?: TopNFunctions;
   topNFunctions?: TopNFunctions;
-  totalSeconds: number;
 }): IFunctionRow[] {
   if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
     return [];
@@ -65,25 +64,10 @@ export function getFunctionsRows({
   return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
-    const totalSamples = topN.CountExclusive;
-
     const topNCountExclusiveScaled = scaleValue({
-      value: totalSamples,
+      value: topN.CountExclusive,
       scaleFactor: baselineScaleFactor,
     });
-
-    const totalCPUPerc = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-    const selfCPUPerc = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
-
-    const impactEstimates =
-      totalSeconds > 0
-        ? calculateImpactEstimates({
-            countExclusive: topN.CountExclusive,
-            countInclusive: topN.CountInclusive,
-            totalSamples,
-            totalSeconds,
-          })
-        : undefined;
 
     function calculateDiff() {
       if (comparisonTopNFunctions && comparisonRow) {
@@ -96,12 +80,10 @@ export function getFunctionsRows({
           rank: topN.Rank - comparisonRow.Rank,
           samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
           selfCPU: comparisonRow.CountExclusive,
-          selfCPUPerc:
-            selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
           totalCPU: comparisonRow.CountInclusive,
-          totalCPUPerc:
-            totalCPUPerc -
-            (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+          selfCPUPerc: topN.selfCPUPerc - comparisonRow.selfCPUPerc,
+          totalCPUPerc: topN.totalCPUPerc - comparisonRow.totalCPUPerc,
+          impactEstimates: comparisonRow.impactEstimates,
         };
       }
     }
@@ -110,12 +92,57 @@ export function getFunctionsRows({
       rank: topN.Rank,
       frame: topN.Frame,
       samples: topNCountExclusiveScaled,
+      selfCPUPerc: topN.selfCPUPerc,
+      totalCPUPerc: topN.totalCPUPerc,
       selfCPU: topN.CountExclusive,
-      selfCPUPerc,
       totalCPU: topN.CountInclusive,
-      totalCPUPerc,
-      impactEstimates,
+      impactEstimates: topN.impactEstimates,
       diff: calculateDiff(),
     };
   });
+}
+
+export function calculateBaseComparisonDiff({
+  baselineValue,
+  baselineScaleFactor,
+  comparisonValue,
+  comparisonScaleFactor,
+  formatValue,
+}: {
+  baselineValue: number;
+  baselineScaleFactor?: number;
+  comparisonValue: number;
+  comparisonScaleFactor?: number;
+  formatValue?: (value: number) => string;
+}) {
+  const scaledBaselineValue = scaleValue({
+    value: baselineValue,
+    scaleFactor: baselineScaleFactor,
+  });
+
+  const baseValue = formatValue
+    ? formatValue(scaledBaselineValue)
+    : scaledBaselineValue.toLocaleString();
+  if (comparisonValue === 0) {
+    return { baseValue };
+  }
+
+  const scaledComparisonValue = scaleValue({
+    value: comparisonValue,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledComparisonValue - scaledBaselineValue;
+  const percentDiffDelta = (diffSamples / (scaledComparisonValue - diffSamples)) * 100;
+  const { color, icon, label } = getColorLabel(percentDiffDelta);
+  return {
+    baseValue,
+    comparisonValue: formatValue
+      ? formatValue(scaledComparisonValue)
+      : scaledComparisonValue.toLocaleString(),
+    percentDiffDelta,
+    color,
+    icon,
+    label,
+  };
 }
