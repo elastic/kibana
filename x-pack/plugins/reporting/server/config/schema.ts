@@ -102,37 +102,42 @@ const PollSchema = schema.object({
 });
 
 const ExportTypeSchema = schema.object({
+  // Csv reports are enabled in all offerings
+  csv: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+  // Png reports are disabled in serverless
   png: schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
       false,
-      schema.boolean({ defaultValue: false }),
       schema.boolean({
         validate: (rawValue) => {
           if (rawValue === true) {
             return 'PNG reports can only be disabled in serverless mode';
           }
         },
-        defaultValue: false,
-      })
+        // when running in dev mode default to true
+        defaultValue: schema.contextRef('dev'),
+      }),
+      schema.boolean({ defaultValue: false })
     ),
   }),
+  // Pdf reports are disabled in serverelastless 
   pdf: schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
       false,
-      schema.boolean({ defaultValue: false }),
       schema.boolean({
         validate: (rawValue) => {
           if (rawValue === true) {
             return 'PDF reports can only be disabled in serverless mode';
           }
         },
-        defaultValue: false,
-      })
+        // when running in dev mode default to true
+        defaultValue: schema.contextRef('dev'),
+      }),
+      schema.boolean({ defaultValue: false })
     ),
   }),
-  csv: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
 });
 
 export const ConfigSchema = schema.object({
