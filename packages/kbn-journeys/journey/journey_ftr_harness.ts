@@ -25,6 +25,7 @@ import { KibanaUrl } from '../services/kibana_url';
 import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
+import { getNewPageObject } from '../services/page';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
@@ -99,7 +100,8 @@ export class JourneyFtrHarness {
 
   private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
-    const browserContextArgs = this.auth.isCloud() ? {} : { bypassCSP: true };
+    const browserContextArgs = {}; // this.auth.isCloud() ? {} : { bypassCSP: true };
+    this.log.info(`browserContextArgs=${JSON.stringify(browserContextArgs)}`);
     this.context = await browser.newContext(browserContextArgs);
 
     if (this.journeyConfig.shouldAutoLogin()) {
@@ -357,7 +359,11 @@ export class JourneyFtrHarness {
       throw new Error('performance service is not properly initialized');
     }
 
+    const isServerlessProject = !!this.config.get('serverless');
+    const kibanaPage = getNewPageObject(isServerlessProject, page, this.log);
+
     this.#_ctx = this.journeyConfig.getExtendedStepCtx({
+      kibanaPage,
       page,
       log: this.log,
       inputDelays: getInputDelays(),
