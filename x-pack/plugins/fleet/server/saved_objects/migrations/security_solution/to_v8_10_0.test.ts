@@ -73,7 +73,7 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
 
     const migratedDoc = policyDoc({
       behaviorProtection: { reputation_service: false },
-      meta: { license_uid: '', cluster_uuid: '', cluster_name: ''  },
+      meta: { license_uid: '', cluster_uuid: '', cluster_name: '' },
     });
 
     expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
@@ -86,7 +86,7 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
   it('removes reputation service from behaviour protection and remove new meta values', () => {
     const initialDoc = policyDoc({
       behaviorProtection: { reputation_service: true },
-      meta: { license_uid: '', cluster_uuid: '', cluster_name: ''  },
+      meta: { license_uid: '', cluster_uuid: '', cluster_name: '' },
     });
 
     const migratedDoc = policyDoc({});
