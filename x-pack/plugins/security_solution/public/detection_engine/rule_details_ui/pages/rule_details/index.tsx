@@ -10,9 +10,10 @@
 
 import {
   EuiButtonIcon,
-  EuiLoadingSpinner,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
@@ -117,6 +118,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
 import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+
 import { RuleDetailsContextProvider } from './rule_details_context';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from './translations';
@@ -135,9 +137,11 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -290,6 +294,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
+
+  const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+    useBoolState();
+
+  const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
+    onInit: showDeleteConfirmation,
+    onFinish: hideDeleteConfirmation,
+  });
 
   const {
     aboutRuleData,
@@ -675,6 +687,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           rulesCount={1}
         />
       )}
+      {isDeleteConfirmationVisible && (
+        <EuiConfirmModal
+          title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
+          onCancel={handleDeletionCancel}
+          onConfirm={handleDeletionConfirm}
+          confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
+          cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          {i18n.DELETE_CONFIRMATION_BODY}
+        </EuiConfirmModal>
+      )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -760,6 +785,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             hasActionsPrivileges
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                          confirmDeletion={confirmDeletion}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

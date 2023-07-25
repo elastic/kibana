@@ -49,6 +49,7 @@ interface RuleActionsOverflowComponentProps {
   userHasPermissions: boolean;
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }
 
 /**
@@ -59,6 +60,7 @@ const RuleActionsOverflowComponent = ({
   userHasPermissions,
   canDuplicateRuleWithActions,
   showBulkDuplicateExceptionsConfirmation,
+  confirmDeletion,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
@@ -143,8 +145,12 @@ const RuleActionsOverflowComponent = ({
               key={i18nActions.DELETE_RULE}
               icon="trash"
               disabled={!userHasPermissions}
-              data-test-subj="rules-details-delete-rule"
               onClick={async () => {
+                if ((await confirmDeletion()) === false) {
+                  // User has canceled deletion
+                  return;
+                }
+
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
                 await executeBulkAction({
@@ -171,6 +177,7 @@ const RuleActionsOverflowComponent = ({
       startTransaction,
       userHasPermissions,
       downloadExportedRules,
+      confirmDeletion,
     ]
   );
 
