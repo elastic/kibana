@@ -33,6 +33,8 @@ import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 
+
+
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -54,6 +56,7 @@ const basicRenderCellValue = ({
   ecsData?: FetchAlertData['ecsAlertsData'][number];
   columnId: string;
 }) => {
+  console.log("BASIC IS CALLED!");
   const value = data.find((d) => d.field === columnId)?.value ?? [];
   if (Array.isArray(value)) {
     return <>{value.length ? value.join() : '--'}</>;
@@ -380,12 +383,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
+      console.log("RENDER CELL VALUE IS CALLED!: ", renderCellValue);
       // https://github.com/elastic/eui/issues/5811
       const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
       const alert = alerts[idx];
       // ecsAlert is needed for security solution
       const ecsAlert = ecsAlertsData[idx];
       if (alert) {
+        // TODO: Can this work be done on the backend rather than taking up cpu cycles here?
+        // Better option though, security should use a single format for alerts and call it a day (Clean up the tech debt)
         const data: Array<{ field: string; value: string[] }> = [];
         Object.entries(alert ?? {}).forEach(([key, value]) => {
           data.push({ field: key, value: value as string[] });
