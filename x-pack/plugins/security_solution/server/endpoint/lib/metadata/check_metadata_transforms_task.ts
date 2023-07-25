@@ -96,7 +96,7 @@ export class CheckMetadataTransformsTask {
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. MetadataTask not started yet');
-      return;
+      return { state: taskInstance.state };
     }
 
     // Check that this task is current
@@ -121,14 +121,14 @@ export class CheckMetadataTransformsTask {
       const errMessage = `failed to get transform stats with error: ${err}`;
       this.logger.error(errMessage);
 
-      return;
+      return { state: taskInstance.state };
     }
 
     const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
     const installation = await packageClient.getInstallation(FLEET_ENDPOINT_PACKAGE);
     if (!installation) {
       this.logger.info('no endpoint installation found');
-      return;
+      return { state: taskInstance.state };
     }
     const expectedTransforms = installation.installed_es.filter(
       (asset) => asset.type === ElasticsearchAssetType.transform
