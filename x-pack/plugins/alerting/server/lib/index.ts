@@ -31,6 +31,7 @@ export { lastRunFromState, lastRunFromError, lastRunToRaw } from './last_run_sta
 export {
   resetMonitoringLastRun,
   getDefaultMonitoring,
+  getDefaultMonitoringRuleDomainProperties,
   convertMonitoringFromRawAndVerify,
 } from './monitoring';
 export { getNextRun } from './next_run';

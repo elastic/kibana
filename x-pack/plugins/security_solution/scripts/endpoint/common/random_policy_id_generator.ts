@@ -36,7 +36,7 @@ export const randomPolicyIdGenerator: (
   log: ToolingLog
 ) => Promise<() => string> = async (kbn, log) => {
   log.info('Setting up fleet');
-  await setupFleetForEndpoint(kbn);
+  await setupFleetForEndpoint(kbn, log);
   const endpointPackage = await getEndpointPackageInfo(kbn);
 
   log.info('Generarting test policies...');
