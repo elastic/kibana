@@ -393,7 +393,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
             {formik.values.type === 'cross_cluster' ? (
               <FormRow
-                data-test-subj="apiKeysRoleDescriptorsCodeEditor"
+                data-test-subj="apiKeysAccessCodeEditor"
                 label={
                   <FormattedMessage
                     id="xpack.security.accountManagement.apiKeyFlyout.accessLabel"
@@ -406,7 +406,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     doc="security-api-create-cross-cluster-api-key.html#security-api-create-cross-cluster-api-key-request-body"
                   >
                     <FormattedMessage
-                      id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
+                      id="xpack.security.accountManagement.apiKeyFlyout.accessHelpText"
                       defaultMessage="Learn how to structure access permissions."
                     />
                   </DocLink>
