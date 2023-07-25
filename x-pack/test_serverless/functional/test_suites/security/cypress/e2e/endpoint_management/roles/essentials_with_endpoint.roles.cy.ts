@@ -8,14 +8,12 @@
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { login } from '../../../tasks/login';
 import {
-  EndpointArtifactPageId,
-  getEndpointManagementPageList,
-  getEndpointManagementPageMap,
-} from '../../../lib';
-import {
   getNoPrivilegesPage,
   visitEndpointList,
   getArtifactListEmptyStateAddButton,
+  getEndpointManagementPageMap,
+  getEndpointManagementPageList,
+  EndpointArtifactPageId,
 } from '../../../screens/endpoint_management';
 import { ensurePermissionDeniedScreen, visitFleetAgentList } from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';

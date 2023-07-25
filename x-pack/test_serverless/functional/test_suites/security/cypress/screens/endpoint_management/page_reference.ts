@@ -85,7 +85,6 @@ export const getEndpointManagementPageList = (): EndpointManagementPage[] => {
     },
   ];
 };
-
 export const getEndpointManagementPageMap = (): EndpointManagementPageMap => {
   return keyBy(getEndpointManagementPageList(), 'id') as unknown as EndpointManagementPageMap;
 };

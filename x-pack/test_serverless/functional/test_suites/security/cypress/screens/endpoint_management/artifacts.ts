@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointArtifactPageId } from '../../lib';
+import { EndpointArtifactPageId } from './page_reference';
 
 const artifactPageTopTestSubjPrefix: Readonly<Record<EndpointArtifactPageId, string>> = {
   trustedApps: 'trustedAppsListPage',

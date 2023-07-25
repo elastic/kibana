@@ -6,7 +6,7 @@
  */
 
 import { DeepReadonly } from 'utility-types';
-import { EndpointManagementPageMap, getEndpointManagementPageMap } from '../../lib';
+import { EndpointManagementPageMap, getEndpointManagementPageMap } from './page_reference';
 
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();
 

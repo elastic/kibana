@@ -8,14 +8,12 @@
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { pick } from 'lodash';
 import { login } from '../../../tasks/login';
-import {
-  EndpointArtifactPageId,
-  getEndpointManagementPageList,
-  getEndpointManagementPageMap,
-} from '../../../lib';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import {
+  EndpointArtifactPageId,
   getArtifactListEmptyStateAddButton,
+  getEndpointManagementPageList,
+  getEndpointManagementPageMap,
   getNoPrivilegesPage,
   openConsoleFromEndpointList,
   openRowActionMenu,

@@ -6,8 +6,8 @@
  */
 
 import { login } from '../../../tasks/login';
-import { getEndpointManagementPageList } from '../../../lib';
 import { getAgentListTable, visitFleetAgentList } from '../../../screens';
+import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
 
 describe(
   'App Features for Complete PLI with Endpoint Complete',

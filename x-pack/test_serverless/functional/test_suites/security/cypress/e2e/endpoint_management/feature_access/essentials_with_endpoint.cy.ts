@@ -6,8 +6,8 @@
  */
 
 import { login } from '../../../tasks/login';
-import { getEndpointManagementPageMap } from '../../../lib';
 import { getAgentListTable, visitFleetAgentList } from '../../../screens';
+import { getEndpointManagementPageMap } from '../../../screens/endpoint_management';
 
 describe(
   'App Features for Essentials PLI with Endpoint Essentials',
