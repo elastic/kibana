@@ -10,6 +10,8 @@
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -102,11 +104,14 @@ export const createStartServicesMock = (
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
+  const customDataService = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const navigation = navigationPluginMock.createStartContract();
+  const discover = discoverPluginMock.createStartContract();
   const cases = mockCasesContract();
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
@@ -119,6 +124,8 @@ export const createStartServicesMock = (
     apm,
     cases,
     unifiedSearch,
+    navigation,
+    discover,
     dataViews: dataViewServiceMock,
     data: {
       ...data,
@@ -193,6 +200,7 @@ export const createStartServicesMock = (
     guidedOnboarding,
     isSidebarEnabled$: of(true),
     upselling: new UpsellingService(),
+    customDataService,
   } as unknown as StartServices;
 };
 
