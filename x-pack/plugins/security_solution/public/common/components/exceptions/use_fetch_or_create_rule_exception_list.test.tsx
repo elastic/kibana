@@ -108,7 +108,6 @@ describe.skip('useFetchOrCreateRuleExceptionList', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('initializes hook', async () => {

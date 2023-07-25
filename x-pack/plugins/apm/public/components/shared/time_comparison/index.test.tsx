@@ -184,9 +184,9 @@ describe('TimeComparison', () => {
   });
 
   describe('TimeComparison component', () => {
-    const spy = jest.spyOn(urlHelpers, 'replace');
+    const spy = jest.spyOn(urlHelpers, 'replace').mockImplementation(() => {});
     beforeEach(() => {
-      jest.resetAllMocks();
+      spy.mockClear();
     });
     describe('Time range is between 0 - 24 hours', () => {
       it('sets default values', () => {

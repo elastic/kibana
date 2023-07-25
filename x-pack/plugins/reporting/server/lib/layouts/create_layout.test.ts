@@ -76,6 +76,7 @@ describe('Create Layout', () => {
           "height": 1200,
           "width": 1950,
         },
+        "width": 1950,
       }
     `);
   });

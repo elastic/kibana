@@ -25,7 +25,6 @@ describe('usePostComment', () => {
   const updateCaseCallback = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('init', async () => {

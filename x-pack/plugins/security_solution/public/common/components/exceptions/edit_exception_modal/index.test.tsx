@@ -104,7 +104,6 @@ describe('When the edit exception modal is opened', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {

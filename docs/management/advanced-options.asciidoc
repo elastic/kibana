@@ -196,7 +196,7 @@ to be displayed).
 
 [[timepicker-refreshintervaldefaults]]`timepicker:refreshIntervalDefaults`::
 The default refresh interval for the time filter. Example:
-`{ "display": "15 seconds", "pause": true, "value": 15000 }`.
+`{ "pause": true, "value": 15000 }`.
 
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
