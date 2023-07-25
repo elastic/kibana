@@ -46,6 +46,8 @@ export function getDocumentCountStatsSplitLabel(
 export interface LogRateAnalysisContentProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or drop */
+  analysisType?: 'above' | 'below';
   setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
   initialAnalysisStart?: number | WindowParameters;
@@ -64,6 +66,7 @@ export interface LogRateAnalysisContentProps {
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   dataView,
+  analysisType = 'above',
   setGlobalState,
   initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
@@ -129,6 +132,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     <EuiPanel hasBorder={false} hasShadow={false}>
       {documentCountStats !== undefined && (
         <DocumentCountContent
+          analysisType={analysisType}
           brushSelectionUpdateHandler={brushSelectionUpdate}
           documentCountStats={documentCountStats}
           documentCountStatsSplit={documentCountStatsCompare}
@@ -148,6 +152,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
         <LogRateAnalysisResults
           dataView={dataView}
+          analysisType={analysisType}
           earliest={earliest}
           isBrushCleared={isBrushCleared}
           latest={latest}

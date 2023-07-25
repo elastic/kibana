@@ -79,6 +79,8 @@ export interface LogRateAnalysisResultsData {
 interface LogRateAnalysisResultsProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or drop */
+  analysisType?: 'above' | 'below';
   /** Start timestamp filter */
   earliest: number;
   /** End timestamp filter */
@@ -104,6 +106,7 @@ interface LogRateAnalysisResultsProps {
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   dataView,
+  analysisType = 'above',
   earliest,
   isBrushCleared,
   latest,
@@ -170,7 +173,14 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       index: dataView.getIndexPattern(),
       grouping: true,
       flushFix: true,
-      ...windowParameters,
+      ...(analysisType === 'above'
+        ? windowParameters
+        : {
+            baselineMin: windowParameters.deviationMin,
+            baselineMax: windowParameters.deviationMax,
+            deviationMin: windowParameters.baselineMin,
+            deviationMax: windowParameters.baselineMax,
+          }),
       overrides,
       sampleProbability,
     },

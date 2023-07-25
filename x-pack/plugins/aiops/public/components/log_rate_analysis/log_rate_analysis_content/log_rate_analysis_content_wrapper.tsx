@@ -34,6 +34,8 @@ const localStorage = new Storage(window.localStorage);
 export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or drop */
+  analysisType?: 'above' | 'below';
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
   /** App dependencies */
@@ -55,6 +57,7 @@ export interface LogRateAnalysisContentWrapperProps {
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
   dataView,
+  analysisType = 'above',
   appDependencies,
   setGlobalState,
   initialAnalysisStart,
@@ -89,6 +92,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisContent
                   dataView={dataView}
+                  analysisType={analysisType}
                   setGlobalState={setGlobalState}
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}

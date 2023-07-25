@@ -52,6 +52,7 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
+  analysisType?: 'above' | 'below';
   brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
@@ -103,6 +104,7 @@ function getBaselineBadgeOverflow(
 }
 
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
+  analysisType = 'above',
   brushSelectionUpdateHandler,
   width,
   chartPoints,
@@ -333,24 +335,27 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const barColor = barColorOverride ? [barColorOverride] : undefined;
   const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
 
+  const baselineBadgeLabel = i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+    defaultMessage: 'Baseline',
+  });
+  const deviationBadgeLabel = i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+    defaultMessage: 'Deviation',
+  });
+
   return (
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
-                defaultMessage: 'Baseline',
-              })}
+              label={analysisType === 'above' ? baselineBadgeLabel : deviationBadgeLabel}
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
               width={BADGE_WIDTH}
             />
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
-                defaultMessage: 'Deviation',
-              })}
+              label={analysisType === 'above' ? deviationBadgeLabel : baselineBadgeLabel}
               marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
               timestampFrom={windowParameters.deviationMin}
               timestampTo={windowParameters.deviationMax}

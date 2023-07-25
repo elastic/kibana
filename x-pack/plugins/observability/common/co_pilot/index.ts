@@ -16,7 +16,7 @@ export enum CoPilotPromptId {
   LogsExplainMessage = 'logsExplainMessage',
   LogsFindSimilar = 'logsFindSimilar',
   InfraExplainProcess = 'infraExplainProcess',
-  ExplainLogSpike = 'explainLogSpike',
+  LogRateAnalysis = 'logRateAnalysis',
 }
 
 export type {

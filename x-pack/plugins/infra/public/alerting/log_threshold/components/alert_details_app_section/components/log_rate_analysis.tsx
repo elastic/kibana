@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
@@ -30,7 +30,7 @@ import {
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { getESQueryForLogSpike } from '../log_rate_spike_query';
+import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -49,14 +49,19 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const { dataViews, logsShared } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
-  const [logSpikeParams, setLogSpikeParams] = useState<
+  const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     { significantFieldValues: SignificantFieldValue[] } | undefined
   >();
+  const [logRateAnalysisType, setLogRateAnalysisType] = useState<'above' | 'below' | undefined>(
+    undefined
+  );
+
+  const validatedParams = useMemo(() => decodeOrThrow(ruleParamsRT)(rule.params), [rule]);
 
   useEffect(() => {
     const getDataView = async () => {
       const { timestampField, dataViewReference } =
-        await logsShared.logViews.client.getResolvedLogView(rule.params.logView);
+        await logsShared.logViews.client.getResolvedLogView(validatedParams.logView);
 
       if (dataViewReference.id) {
         const logDataView = await dataViews.get(dataViewReference.id);
@@ -66,11 +71,11 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     };
 
     const getQuery = (timestampField: string) => {
-      const esSearchRequest = getESQueryForLogSpike(
+      const esSearchRequest = getESQueryForLogRateAnalysis(
         validatedParams as CountRuleParams,
         timestampField,
         alert,
-        rule.params.groupBy
+        validatedParams.groupBy
       ) as QueryDslQueryContainer;
 
       if (esSearchRequest) {
@@ -78,16 +83,23 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       }
     };
 
-    const validatedParams = decodeOrThrow(ruleParamsRT)(rule.params);
-
-    if (
-      !isRatioRuleParams(validatedParams) &&
-      (validatedParams.count.comparator === Comparator.GT ||
-        validatedParams.count.comparator === Comparator.GT_OR_EQ)
-    ) {
+    if (!isRatioRuleParams(validatedParams)) {
       getDataView();
+
+      switch (validatedParams.count.comparator) {
+        case Comparator.GT:
+        case Comparator.GT_OR_EQ:
+          setLogRateAnalysisType('above');
+          break;
+        case Comparator.LT:
+        case Comparator.LT_OR_EQ:
+          setLogRateAnalysisType('below');
+          break;
+        default:
+          setLogRateAnalysisType(undefined);
+      }
     }
-  }, [rule, alert, dataViews, logsShared]);
+  }, [validatedParams, alert, dataViews, logsShared]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
@@ -148,8 +160,8 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     deviationMax: getDeviationMax(),
   };
 
-  const explainLogSpikeTitle = i18n.translate(
-    'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
+  const logRateAnalysisTitle = i18n.translate(
+    'xpack.infra.logs.alertDetails.logRateAnalysisTitle',
     {
       defaultMessage: 'Possible causes and remediations',
     }
@@ -166,11 +178,12 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       ['pValue', 'docCount'],
       ['asc', 'asc']
     ).slice(0, 50);
-    setLogSpikeParams(significantFieldValues ? { significantFieldValues } : undefined);
+    setLogRateAnalysisParams(significantFieldValues ? { significantFieldValues } : undefined);
   };
 
   const coPilotService = useCoPilot();
-  const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
+  const hasLogRateAnalysisParams =
+    logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -190,6 +203,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         <EuiFlexItem>
           <LogRateAnalysisContent
             dataView={dataView}
+            analysisType={logRateAnalysisType}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}
@@ -215,13 +229,13 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {coPilotService?.isEnabled() && hasLogSpikeParams ? (
+        {coPilotService?.isEnabled() && hasLogRateAnalysisParams ? (
           <EuiFlexItem grow={false}>
             <CoPilotPrompt
               coPilot={coPilotService}
-              title={explainLogSpikeTitle}
-              params={logSpikeParams}
-              promptId={CoPilotPromptId.ExplainLogSpike}
+              title={logRateAnalysisTitle}
+              params={logRateAnalysisParams}
+              promptId={CoPilotPromptId.LogRateAnalysis}
               feedbackEnabled={false}
             />
           </EuiFlexItem>

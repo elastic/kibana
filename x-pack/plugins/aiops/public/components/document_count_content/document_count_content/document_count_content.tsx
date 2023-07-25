@@ -17,6 +17,7 @@ import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_c
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
+  analysisType: 'above' | 'below';
   brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
@@ -32,6 +33,7 @@ export interface DocumentCountContentProps {
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
+  analysisType = 'above',
   brushSelectionUpdateHandler,
   documentCountStats,
   documentCountStatsSplit,
@@ -84,6 +86,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
           <DocumentCountChart
+            analysisType={analysisType}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
             chartPointsSplit={chartPointsSplit}
