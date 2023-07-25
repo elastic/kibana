@@ -207,7 +207,34 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.toolbarVisibility,
   ])();
 
+  const controlProps = useRef<unknown>(null);
+
   const leadingControlColumns = useMemo(() => {
+    const currentControlProps = {
+      actionsColumnWidth,
+      alerts,
+      oldAlertsData,
+      ecsAlertsData,
+      getBulkActionsLeadingControlColumn,
+      handleFlyoutAlert,
+      isBulkActionsColumnActive,
+      id: props.id,
+      leadingControlColumns: props.leadingControlColumns,
+      showExpandToDetails: props.showExpandToDetails,
+      renderCustomActionsRow,
+      setFlyoutAlertIndex,
+      getSetIsActionLoadingCallback,
+      refresh,
+      clearSelection,
+    };
+
+    if (controlProps.current !== null) {
+      Object.keys(controlProps.current).forEach((key) => {
+        if (currentControlProps[key] !== controlProps.current[key]) {
+          console.log("IN RESPONSE OPS: ", key, " has changed");
+        }
+      });
+    }
     const isActionButtonsColumnActive =
       props.showExpandToDetails || Boolean(renderCustomActionsRow);
 
@@ -274,7 +301,26 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       controlColumns = [getBulkActionsLeadingControlColumn(), ...controlColumns];
     }
 
+    controlProps.current = {
+      actionsColumnWidth,
+      alerts,
+      oldAlertsData,
+      ecsAlertsData,
+      getBulkActionsLeadingControlColumn,
+      handleFlyoutAlert,
+      isBulkActionsColumnActive,
+      id: props.id,
+      leadingControlColumns: props.leadingControlColumns,
+      showExpandToDetails: props.showExpandToDetails,
+      renderCustomActionsRow,
+      setFlyoutAlertIndex,
+      getSetIsActionLoadingCallback,
+      refresh,
+      clearSelection,
+    };
+
     return controlColumns;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     actionsColumnWidth,
     alerts,
@@ -284,13 +330,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     handleFlyoutAlert,
     isBulkActionsColumnActive,
     props.id,
-    props.leadingControlColumns,
+    // props.leadingControlColumns,
     props.showExpandToDetails,
     renderCustomActionsRow,
     setFlyoutAlertIndex,
-    getSetIsActionLoadingCallback,
-    refresh,
-    clearSelection,
+    // getSetIsActionLoadingCallback,
+    // refresh,
+    // clearSelection,
   ]);
 
   useEffect(() => {

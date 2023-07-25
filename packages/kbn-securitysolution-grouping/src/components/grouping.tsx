@@ -14,7 +14,7 @@ import {
   EuiTablePagination,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
@@ -90,6 +90,8 @@ const GroupingComponent = <T,>({
     [groupCount]
   );
 
+  const defaultChildComponent = useCallback(() => <span />, []);
+
   const groupPanels = useMemo(
     () =>
       data?.groupByFields?.buckets?.map((groupBucket: GroupingBucket<T>, groupNumber) => {
@@ -148,7 +150,7 @@ const GroupingComponent = <T,>({
               renderChildComponent={
                 trigger[groupKey] && trigger[groupKey].state === 'open'
                   ? renderChildComponent
-                  : () => <span />
+                  : defaultChildComponent
               }
               selectedGroup={selectedGroup}
               groupingLevel={groupingLevel}
@@ -159,6 +161,7 @@ const GroupingComponent = <T,>({
       }),
     [
       data?.groupByFields?.buckets,
+      defaultChildComponent,
       groupPanelRenderer,
       groupStatsRenderer,
       groupingId,

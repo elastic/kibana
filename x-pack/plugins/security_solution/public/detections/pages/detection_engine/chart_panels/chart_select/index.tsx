@@ -58,12 +58,16 @@ const ChartSelectComponent: React.FC<Props> = ({
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () =>
       getContextMenuPanels({
-        alertViewSelection,
         closePopover,
         setAlertViewSelection,
         isAlertsPageChartsEnabled,
       }),
-    [alertViewSelection, closePopover, setAlertViewSelection, isAlertsPageChartsEnabled]
+    [closePopover, setAlertViewSelection, isAlertsPageChartsEnabled]
+  );
+
+  const onChange = useCallback(
+    (id) => setAlertViewSelection(id as AlertViewSelection),
+    [setAlertViewSelection]
   );
 
   return (
@@ -74,7 +78,7 @@ const ChartSelectComponent: React.FC<Props> = ({
           legend={i18n.LEGEND_TITLE}
           options={options}
           idSelected={alertViewSelection}
-          onChange={(id) => setAlertViewSelection(id as AlertViewSelection)}
+          onChange={onChange}
           buttonSize="compressed"
           color="primary"
           data-test-subj="chart-select-tabs"

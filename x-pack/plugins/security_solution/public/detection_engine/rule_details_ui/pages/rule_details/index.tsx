@@ -620,19 +620,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     });
   }, [updatedAt, showUpdating, timelinesUi]);
 
+  const allAlertTableFilters = useMemo(() => alertMergedFilters, [alertMergedFilters]);
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
+      allAlertTableFilters.push(...groupingFilters);
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
           flyoutSize="m"
-          inputFilters={[...alertMergedFilters, ...groupingFilters]}
+          inputFilters={allAlertTableFilters}
           tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
         />
       );
     },
-    [alertMergedFilters, refreshRule]
+    [allAlertTableFilters, refreshRule]
   );
 
   const {

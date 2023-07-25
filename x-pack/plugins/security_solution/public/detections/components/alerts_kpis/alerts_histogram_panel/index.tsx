@@ -366,6 +366,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
+    console.log("IS LOADING: ", isLoadingAlerts, isInitialLoading);
     return (
       <InspectButtonContainer show={!isInitialLoading && showHistogram}>
         <KpiPanel

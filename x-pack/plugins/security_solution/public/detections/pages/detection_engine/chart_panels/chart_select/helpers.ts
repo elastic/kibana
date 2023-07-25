@@ -44,12 +44,10 @@ export const getButtonProperties = (alertViewSelection: AlertViewSelection): But
 };
 
 export const getContextMenuPanels = ({
-  alertViewSelection,
   closePopover,
   setAlertViewSelection,
   isAlertsPageChartsEnabled,
 }: {
-  alertViewSelection: AlertViewSelection;
   closePopover: () => void;
   setAlertViewSelection: (alertViewSelection: AlertViewSelection) => void;
   isAlertsPageChartsEnabled: boolean;

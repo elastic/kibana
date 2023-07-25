@@ -101,6 +101,11 @@ const GroupPanelComponent = <T,>({
     [groupFieldValue.asArray, isNullGroup, selectedGroup]
   );
 
+  const childComponent = useMemo(() => {
+    console.log('CHILD COMPONENT IS CHANGING or CHANGED!!');
+    return renderChildComponent(groupFilters);
+  }, [groupFilters, renderChildComponent]);
+
   const onToggle = useCallback(
     (isOpen) => {
       if (onToggleGroup) {
@@ -134,7 +139,7 @@ const GroupPanelComponent = <T,>({
       onToggle={onToggle}
       paddingSize="m"
     >
-      <span data-test-subj="grouping-accordion-content">{renderChildComponent(groupFilters)}</span>
+      <span data-test-subj="grouping-accordion-content">{childComponent}</span>
     </EuiAccordion>
   );
 };

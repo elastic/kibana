@@ -377,19 +377,24 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     ]
   );
 
+  const allAlertTableFilters = useMemo(
+    () => alertsTableDefaultFilters,
+    [alertsTableDefaultFilters]
+  );
   const renderAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
+      allAlertTableFilters.push(...groupingFilters);
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
           flyoutSize="m"
-          inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
+          inputFilters={allAlertTableFilters}
           tableId={TableId.alertsOnAlertsPage}
           isLoading={isAlertTableLoading}
         />
       );
     },
-    [alertsTableDefaultFilters, isAlertTableLoading]
+    [allAlertTableFilters, isAlertTableLoading]
   );
 
   if (loading) {

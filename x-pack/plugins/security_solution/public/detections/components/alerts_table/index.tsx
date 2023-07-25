@@ -55,7 +55,7 @@ const { updateIsLoading, updateTotalCount } = dataTableActions;
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
 
 const storage = new Storage(localStorage);
-
+const featureIds = ['siem'];
 interface GridContainerProps {
   hideLastPage: boolean;
 }
@@ -97,15 +97,30 @@ interface DetectionEngineAlertTableProps {
   onRuleChange?: () => void;
 }
 
-export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
-  configId,
-  flyoutSize,
-  inputFilters,
-  tableId = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
-  isLoading,
-  onRuleChange,
-}) => {
+export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = React.memo((props) => {
+  const {
+    configId,
+    flyoutSize,
+    inputFilters,
+    tableId = TableId.alertsOnAlertsPage,
+    sourcererScope = SourcererScopeName.detections,
+    isLoading,
+    onRuleChange,
+  } = props;
+
+  console.log("I AM RE_RENDERING!!");
+  const oldProps = useRef<DetectionEngineAlertTableProps | null>(null);
+
+  useEffect(() => {
+    Object.keys(props).forEach((key) => {
+      if (oldProps.current != null && oldProps.current[key] !== props[key]) {
+        // eslint-disable-next-line no-console
+        console.warn(`AlertsTableComponent: ${key} changed from ${oldProps.current[key]}`);
+      }
+    });
+    oldProps.current = props;
+  }, [props]);
+
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
   const { from, to, setQuery } = useGlobalTime();
@@ -210,9 +225,18 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return undefined;
   }, [isEventRenderedView]);
 
-  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
-  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
+  const dataTableStorage = useMemo(
+    () => getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]),
+    []
+  );
+  const columnsFormStorage = useMemo(
+    () => dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [],
+    [dataTableStorage]
+  );
+  const alertColumns = useMemo(
+    () => (columnsFormStorage.length ? columnsFormStorage : getColumns(license)),
+    [columnsFormStorage, license]
+  );
 
   const finalBrowserFields = useMemo(
     () => (isEventRenderedView ? {} : browserFields),
@@ -260,7 +284,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       // stores saperate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       flyoutSize,
-      featureIds: ['siem'],
+      featureIds,
       query: finalBoolQuery,
       showExpandToDetails: false,
       gridStyle,
@@ -305,10 +329,9 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     );
   }, [dispatch, tableId, finalColumns, isDataTableInitialized]);
 
-  const AlertTable = useMemo(
-    () => triggersActionsUi.getAlertsStateTable(alertStateProps),
-    [alertStateProps, triggersActionsUi]
-  );
+  const AlertTable = useMemo(() => {
+    return triggersActionsUi.getAlertsStateTable(alertStateProps);
+  }, [alertStateProps, triggersActionsUi]);
 
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableId,
@@ -342,4 +365,4 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       {DetailsPanel}
     </div>
   );
-};
+});

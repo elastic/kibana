@@ -62,7 +62,6 @@ describe('helpers', () => {
     alertViewSelections.forEach((alertViewSelection) => {
       test(`it returns the expected panel id when alertViewSelection is '${alertViewSelection}'`, () => {
         const panels = getContextMenuPanels({
-          alertViewSelection,
           closePopover,
           setAlertViewSelection,
           isAlertsPageChartsEnabled: true, // remove after charts is implemented
@@ -73,7 +72,6 @@ describe('helpers', () => {
 
       test(`onClick invokes setAlertViewSelection with '${alertViewSelection}' item when alertViewSelection is '${alertViewSelection}'`, () => {
         const panels = getContextMenuPanels({
-          alertViewSelection,
           closePopover,
           setAlertViewSelection,
           isAlertsPageChartsEnabled: true, // remove after charts is implemented
@@ -87,7 +85,6 @@ describe('helpers', () => {
 
       test(`onClick invokes closePopover when alertViewSelection is '${alertViewSelection}'`, () => {
         const panels = getContextMenuPanels({
-          alertViewSelection,
           closePopover,
           setAlertViewSelection,
           isAlertsPageChartsEnabled: true, // remove after charts is implemented
