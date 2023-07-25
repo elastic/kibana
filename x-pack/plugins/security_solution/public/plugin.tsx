@@ -54,6 +54,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
+import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -195,6 +196,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         telemetry: this.telemetry.start(),
         discoverFilterManager: filterManager,
         customDataService,
+        topValuesPopover: new TopValuesPopoverService(),
       };
       return services;
     };
