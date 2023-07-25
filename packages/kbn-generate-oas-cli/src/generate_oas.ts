@@ -15,10 +15,7 @@ import z from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
-import { versionHandlerResolvers } from '@kbn/core-http-router-server-internal';
 import { RouterRoute } from '@kbn/core-http-server';
-import type { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   instanceofZodType,
   instanceofZodTypeObject,
