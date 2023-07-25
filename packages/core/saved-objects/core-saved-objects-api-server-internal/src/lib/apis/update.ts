@@ -334,13 +334,13 @@ export const performUpdate = async <T>(
   );
 };
 
-const recursiveMerge = (target: Record<string, any>, value: any, key?: string) => {
+const recursiveMerge = (target: Record<string, any>, value: any, keys: string[] = []) => {
   if (isPlainObject(value) && Object.keys(value).length > 0) {
     for (const [subKey, subVal] of Object.entries(value)) {
-      recursiveMerge(target, subVal, key ? `${key}.${subKey}` : subKey);
+      recursiveMerge(target, subVal, [...keys, subKey]);
     }
-  } else if (key !== undefined) {
-    set(target, key, value);
+  } else if (keys.length !== undefined) {
+    set(target, keys, value);
   }
 
   return target;
