@@ -7,11 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { EuiText, EuiComment } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { MessageRole, Message } from '../../../common/types';
 import { ChatItemAvatar } from './chat_item_avatar';
 import { ChatItemTitle } from './chat_item_title';
+import { MessagePanel } from '../message_panel/message_panel';
+import { FeedbackButtons, Feedback } from '../feedback_buttons';
 
 const roleMap = {
   [MessageRole.User]: i18n.translate(
@@ -45,20 +48,45 @@ export interface ChatItemProps {
   dateFormat: string;
   index: number;
   message: Message;
+  onFeedbackClick: (feedback: Feedback) => void;
 }
 
-export function ChatItem({ currentUser, dateFormat, index, message }: ChatItemProps) {
+export function ChatItem({
+  currentUser,
+  dateFormat,
+  index,
+  message,
+  onFeedbackClick,
+}: ChatItemProps) {
   return (
     <EuiComment
       key={message['@timestamp']}
       event={<ChatItemTitle message={message} index={index} dateFormat={dateFormat} />}
       timelineAvatar={<ChatItemAvatar currentUser={currentUser} role={message.message.role} />}
       username={roleMap[message.message.role]}
+      css={
+        message.message.role !== MessageRole.User
+          ? css`
+              .euiCommentEvent__body {
+                padding: 0;
+              }
+            `
+          : ''
+      }
     >
       {message.message.content ? (
-        <EuiText size="s">
-          <p>{message.message.content}</p>
-        </EuiText>
+        <>
+          {message.message.role === MessageRole.User ? (
+            <EuiText size="s">
+              <p>{message.message.content}</p>
+            </EuiText>
+          ) : (
+            <MessagePanel
+              body={message.message.content}
+              controls={<FeedbackButtons onClickFeedback={onFeedbackClick} />}
+            />
+          )}
+        </>
       ) : null}
     </EuiComment>
   );

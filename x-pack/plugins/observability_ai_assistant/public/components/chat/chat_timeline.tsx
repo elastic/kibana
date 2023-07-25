@@ -30,6 +30,7 @@ export function ChatTimeline({ messages = [] }: ChatTimelineProps) {
           dateFormat={dateFormat}
           index={index}
           message={message}
+          onFeedbackClick={() => {}}
         />
       ))}
     </EuiCommentList>
