@@ -46,8 +46,9 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
     return () => subscriber.unsubscribe();
   }, [timefilter, setRefreshInterval]);
 
-  const isRefreshIntervalOn =
-    refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0;
+  const isRefreshIntervalOn = Boolean(
+    refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0
+  );
 
   const { euiTheme } = useEuiTheme();
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
