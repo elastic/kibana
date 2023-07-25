@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
+
 export const PAGE_TITLE = '[data-test-subj="entityAnalyticsManagmentPageTitle"]';
 
 export const HOST_RISK_PREVIEW_TABLE = '[data-test-subj="host-risk-preview-table"]';
@@ -18,3 +20,5 @@ export const USER_RISK_PREVIEW_TABLE_ROWS = '[data-test-subj="user-risk-preview-
 export const RISK_PREVIEW_ERROR = '[data-test-subj="risk-preview-error"]';
 
 export const RISK_PREVIEW_ERROR_BUTTON = '[data-test-subj="risk-preview-error-button"]';
+
+export const LOCAL_QUERY_BAR_SELECTOR = getDataTestSubjectSelector('risk-score-preview-search-bar');
