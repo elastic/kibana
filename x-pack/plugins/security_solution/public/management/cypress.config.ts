@@ -27,7 +27,7 @@ export default defineCypressConfig({
   },
 
   screenshotsFolder:
-    '../../../target/kibana-security-solution/public/management/cypress/screenshots',
+    '../../../../target/kibana-security-solution/public/management/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   viewportHeight: 900,
