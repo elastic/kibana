@@ -100,12 +100,18 @@ export const Vulnerabilities = () => {
   );
 };
 
-const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
+const VulnerabilitiesDataGrid = ({
+  dataView,
+  data,
+  isFetching,
+}: {
+  dataView: DataView;
+  data: any;
+  isFetching: boolean;
+}) => {
   const {
     pageIndex,
-    query,
     sort,
-    queryError,
     pageSize,
     onChangeItemsPerPage,
     onChangePage,
@@ -123,6 +129,18 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
   const [showHighlight, setHighlight] = useState(false);
 
+  const invalidIndex = -1;
+
+  const selectedVulnerability = useMemo(() => {
+    return data?.page[urlQuery.vulnerabilityIndex];
+  }, [data?.page, urlQuery.vulnerabilityIndex]);
+
+  const onCloseFlyout = () => {
+    setUrlQuery({
+      vulnerabilityIndex: invalidIndex,
+    });
+  };
+
   const onSortHandler = useCallback(
     (newSort: any) => {
       onSort(newSort);
@@ -136,40 +154,11 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     [onSort, sort]
   );
 
-  const multiFieldsSort = useMemo(() => {
-    return sort.map(({ id, direction }: { id: string; direction: string }) => {
-      if (id === vulnerabilitiesColumns.severity) {
-        return severitySortScript(direction);
-      }
-      if (id === vulnerabilitiesColumns.package) {
-        return getCaseInsensitiveSortScript(id, direction);
-      }
-
-      return {
-        [id]: direction,
-      };
-    });
-  }, [sort]);
-
-  const { data, isLoading, isFetching } = useLatestVulnerabilities({
-    query,
-    sort: multiFieldsSort,
-    enabled: !queryError,
+  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
+    total: data?.total,
     pageIndex,
     pageSize,
   });
-
-  const invalidIndex = -1;
-
-  const selectedVulnerability = useMemo(() => {
-    return data?.page[urlQuery.vulnerabilityIndex];
-  }, [data?.page, urlQuery.vulnerabilityIndex]);
-
-  const onCloseFlyout = () => {
-    setUrlQuery({
-      vulnerabilityIndex: invalidIndex,
-    });
-  };
 
   const onOpenFlyout = useCallback(
     (vulnerabilityRow: VulnerabilityRecord) => {
@@ -188,12 +177,6 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     },
     [setUrlQuery, data?.page]
   );
-
-  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
-    total: data?.total,
-    pageIndex,
-    pageSize,
-  });
 
   const columns = useMemo(() => {
     if (!data?.page) {
@@ -321,33 +304,11 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     [pageSize, setUrlQuery]
   );
 
-  const error = queryError || null;
-
-  if (error) {
-    return <ErrorCallout error={error as Error} />;
-  }
-  if (isLoading) {
-    return defaultLoadingRenderer();
-  }
-
-  if (!data?.page) {
-    return defaultNoDataRenderer();
-  }
-
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
   return (
     <>
-      <FindingsSearchBar
-        dataView={dataView}
-        setQuery={(newQuery) => {
-          setUrlQuery({ ...newQuery, pageIndex: 0 });
-        }}
-        loading={isFetching}
-        placeholder={SEARCH_BAR_PLACEHOLDER}
-      />
-      <EuiSpacer size="m" />
-      {data.page.length === 0 ? (
+      {data?.page.length === 0 ? (
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <>
@@ -427,6 +388,64 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             />
           )}
         </>
+      )}
+    </>
+  );
+};
+const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
+  const { pageIndex, query, sort, queryError, pageSize, setUrlQuery } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
+
+  const multiFieldsSort = useMemo(() => {
+    return sort.map(({ id, direction }: { id: string; direction: string }) => {
+      if (id === vulnerabilitiesColumns.severity) {
+        return severitySortScript(direction);
+      }
+      if (id === vulnerabilitiesColumns.package) {
+        return getCaseInsensitiveSortScript(id, direction);
+      }
+
+      return {
+        [id]: direction,
+      };
+    });
+  }, [sort]);
+
+  const { data, isLoading, isFetching } = useLatestVulnerabilities({
+    query,
+    sort: multiFieldsSort,
+    enabled: !queryError,
+    pageIndex,
+    pageSize,
+  });
+
+  const error = queryError || null;
+
+  if (isLoading && !error) {
+    return defaultLoadingRenderer();
+  }
+
+  if (!data?.page && !error) {
+    return defaultNoDataRenderer();
+  }
+
+  return (
+    <>
+      <FindingsSearchBar
+        dataView={dataView}
+        setQuery={(newQuery) => {
+          setUrlQuery({ ...newQuery, pageIndex: 0 });
+        }}
+        loading={isFetching}
+        placeholder={SEARCH_BAR_PLACEHOLDER}
+      />
+      <EuiSpacer size="m" />
+      {error && <ErrorCallout error={error as Error} />}
+      {!error && (
+        <VulnerabilitiesDataGrid dataView={dataView} data={data} isFetching={isFetching} />
       )}
     </>
   );
