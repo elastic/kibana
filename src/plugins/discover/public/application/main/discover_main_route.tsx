@@ -34,6 +34,7 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import type { DiscoverDisplayMode } from '../types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -44,9 +45,14 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  mode?: DiscoverDisplayMode;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
+export function DiscoverMainRoute({
+  customizationCallbacks,
+  isDev,
+  mode = 'standalone',
+}: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -146,21 +152,21 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
         });
+        if (mode === 'standalone') {
+          if (currentSavedSearch?.id) {
+            chrome.recentlyAccessed.add(
+              getSavedSearchFullPathUrl(currentSavedSearch.id),
+              currentSavedSearch.title ?? '',
+              currentSavedSearch.id
+            );
+          }
 
-        if (currentSavedSearch?.id) {
-          chrome.recentlyAccessed.add(
-            getSavedSearchFullPathUrl(currentSavedSearch.id),
-            currentSavedSearch.title ?? '',
-            currentSavedSearch.id
+          chrome.setBreadcrumbs(
+            currentSavedSearch && currentSavedSearch.title
+              ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
+              : getRootBreadcrumbs({ services })
           );
         }
-
-        chrome.setBreadcrumbs(
-          currentSavedSearch && currentSavedSearch.title
-            ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
-            : getRootBreadcrumbs({ services })
-        );
-
         setLoading(false);
         if (services.analytics) {
           const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
@@ -205,6 +211,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       core.theme,
       basePath,
       toastNotifications,
+      mode,
     ]
   );
 
@@ -278,8 +285,10 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        <DiscoverMainAppMemoized stateContainer={stateContainer} mode={mode} />
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
 }
+// eslint-disable-next-line import/no-default-export
+export default DiscoverMainRoute;

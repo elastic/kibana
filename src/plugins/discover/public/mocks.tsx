@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { DiscoverSetup, DiscoverStart } from '.';
 
@@ -25,6 +26,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     locator: sharePluginMock.createLocator(),
+    DiscoverContainer: jest.fn().mockImplementation(() => <></>),
     registerCustomizationProfile: jest.fn(),
   };
   return startContract;
