@@ -1,18 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parseEsDockerLog parses json with nested brackets 1`] = `"[ES_ECS] Node [{c468318b091c}{26kYJn8jQt2MDYMEj_6Duw}] is selected as the current health node."`;
+exports[`parses data containing exception 1`] = `"[o.e.n.Node] [qEfPPg8] starting ..."`;
 
-exports[`parseEsDockerLog parses multiple line 1`] = `"[ES_ECS] The current build is a snapshot, feature flag [query_rules] is enabled"`;
-
-exports[`parseEsDockerLog parses multiple line 2`] = `"[ES_ECS] JVM arguments [-Des.networkaddress.cache.ttl=60, -Des.networkaddress.cache.negative.ttl=10, -Djava.security.manager=allow, -XX:+AlwaysPreTouch, -Xss1m, -Djava.awt.headless=true, -Dfile.encoding=UTF-8, -Djna.nosys=true, -XX:-OmitStackTraceInFastThrow, -Dio.netty.noUnsafe=true, -Dio.netty.noKeySetOptimization=true, -Dio.netty.recycler.maxCapacityPerThread=0, -Dlog4j.shutdownHookEnabled=false, -Dlog4j2.disable.jmx=true, -Dlog4j2.formatMsgNoLookups=true, -Djava.locale.providers=SPI,COMPAT, --add-opens=java.base/java.io=org.elasticsearch.preallocate, -Des.cgroups.hierarchy.override=/, -XX:+UseG1GC, -Djava.io.tmpdir=/tmp/elasticsearch-6398256883002408259, --add-modules=jdk.incubator.vector, -XX:+HeapDumpOnOutOfMemoryError, -XX:+ExitOnOutOfMemoryError, -XX:HeapDumpPath=data, -XX:ErrorFile=logs/hs_err_pid%p.log, -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,level,pid,tags:filecount=32,filesize=64m, -Des.serverless_transport=true, -Xms7928m, -Xmx7928m, -XX:MaxDirectMemorySize=4156555264, -XX:G1HeapRegionSize=4m, -XX:InitiatingHeapOccupancyPercent=30, -XX:G1ReservePercent=15, -Des.distribution.type=docker, --module-path=/usr/share/elasticsearch/lib, --add-modules=jdk.net, --add-modules=org.elasticsearch.preallocate, -Djdk.module.main=org.elasticsearch.server]"`;
-
-exports[`parseEsDockerLog parses non json log 1`] = `"Node [{c468318b091c}{26kYJn8jQt2MDYMEj_6Duw}]"`;
-
-exports[`parseEsDockerLog parses single line 1`] = `"[ES_ECS] The current build is a snapshot, feature flag [query_rules] is enabled"`;
-
-exports[`parseEsLog parses data containing exception 1`] = `"[o.e.n.Node] [qEfPPg8] starting ..."`;
-
-exports[`parseEsLog parses data containing exception 2`] = `
+exports[`parses data containing exception 2`] = `
 "[o.e.b.ElasticsearchUncaughtExceptionHandler] [] uncaught exception in thread [main]
 org.elasticsearch.bootstrap.StartupException: BindHttpException; nested: BindException[Address already in use];
   at org.elasticsearch.bootstrap.Elasticsearch.init(Elasticsearch.java:125) ~[elasticsearch-7.0.0.jar:7.0.0-alpha1-SNAPSHOT]
@@ -25,10 +15,10 @@ Caused by: java.net.BindException: Address already in use
   at java.lang.Thread.run(Thread.java:844) [?:?]"
 `;
 
-exports[`parseEsLog parses data containing exception 3`] = `"[o.e.g.GatewayService] [qEfPPg8] recovered [0] indices into cluster_state"`;
+exports[`parses data containing exception 3`] = `"[o.e.g.GatewayService] [qEfPPg8] recovered [0] indices into cluster_state"`;
 
-exports[`parseEsLog parses multiple lines 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-security]"`;
+exports[`parses multiple lines 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-security]"`;
 
-exports[`parseEsLog parses multiple lines 2`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-watcher]"`;
+exports[`parses multiple lines 2`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded plugin [x-pack-watcher]"`;
 
-exports[`parseEsLog parses single line 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded module [lang-expression]"`;
+exports[`parses single line 1`] = `"[o.e.p.PluginsService] [qEfPPg8] loaded module [lang-expression]"`;

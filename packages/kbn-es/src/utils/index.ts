@@ -8,7 +8,7 @@
 
 export { cache } from './cache';
 export { log } from './log';
-export { parseEsLog, parseEsDockerLog } from './parse_es_log';
+export { parseEsLog } from './parse_es_log';
 export { findMostRecentlyChanged } from './find_most_recently_changed';
 export { extractConfigFiles } from './extract_config_files';
 // @ts-expect-error not typed yet
