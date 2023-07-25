@@ -21,7 +21,7 @@ export const useLangchain = ({ data, dataViews, apiConfig, appendMessage }) => {
   const model = useMemo(() => {
     // Azure support
     return new ChatOpenAI({
-      openAIApiKey: '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',
+      openAIApiKey: 'xxx,
       temperature: 0.9,
       modelName: 'gpt-4-0613',
     });
