@@ -1,11 +1,5 @@
 # -----
 # Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
-#
-# Changes that needed to be done locally here:
-#
-# 1. indentation of 'privileges' for role endpoint_operations_manager was not correct
-# 2. instances of 'application.spaces.privileges[0]' of '*' were changed to 'all'
-#
 # -----
 t1_analyst:
   cluster:
@@ -508,7 +502,7 @@ platform_engineer:
         - all
       resources: "*"
 
-endpoint_operations_manager:
+endpoint_operations_analyst:
   cluster:
   indices:
     - names:
@@ -530,7 +524,6 @@ endpoint_operations_manager:
         - .items*
       privileges:
         - read
-        - write
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -539,7 +532,6 @@ endpoint_operations_manager:
       privileges:
         - read
         - write
-        - manage
   applications:
     - application: ml
       privileges:
@@ -549,7 +541,6 @@ endpoint_operations_manager:
       privileges:
         - all
         - read_alerts
-        - crud_alerts
         - policy_management_all
         - endpoint_list_all
         - trusted_applications_all
@@ -575,6 +566,82 @@ endpoint_operations_manager:
         - all
       resources: "*"
     - application: osquery
+      privileges:
+        - all
+      resources: "*"
+    - application: fleet
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+
+endpoint_policy_manager:
+  cluster:
+  indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - .lists*
+        - .items*
+      privileges:
+        - read
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - read
+        - write
+        - manage
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+        - policy_management_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_all
+        - blocklist_all
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - all
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+    - application: fleet
       privileges:
         - all
       resources: "*"
