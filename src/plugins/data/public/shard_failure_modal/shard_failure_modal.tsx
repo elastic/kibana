@@ -94,7 +94,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
   return (
     <React.Fragment>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="shardFailureModalTitle" size="s">
+        <EuiModalHeaderTitle data-test-subj="shardFailureModalTitle" size="xs">
           {title}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
