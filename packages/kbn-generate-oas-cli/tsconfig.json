@@ -19,5 +19,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-plugins-server-internal",
+    "@kbn/core-http-server",
   ]
 }
