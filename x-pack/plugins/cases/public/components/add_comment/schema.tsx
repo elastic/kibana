@@ -9,10 +9,11 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { CommentRequestUserType } from '../../../common/api';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 import * as i18n from './translations';
 
-const { emptyField } = fieldValidators;
+const { emptyField, maxLengthField } = fieldValidators;
 
 export interface AddCommentFormSchema {
   comment: CommentRequestUserType['comment'];
@@ -24,6 +25,12 @@ export const schema: FormSchema<AddCommentFormSchema> = {
     validations: [
       {
         validator: emptyField(i18n.EMPTY_COMMENTS_NOT_ALLOWED),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_COMMENT_LENGTH,
+          message: i18n.MAX_LENGTH_ERROR('comment', MAX_COMMENT_LENGTH),
+        }),
       },
     ],
   },

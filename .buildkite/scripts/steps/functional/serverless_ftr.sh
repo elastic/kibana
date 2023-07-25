@@ -6,12 +6,7 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB="kibana-serverless-$SERVERLESS_ENVIRONMENT"
 
-if [[ "$SERVERLESS_ENVIRONMENT" == "common" ]]; then
-  SERVERLESS_CONFIGS=(
-    "x-pack/test_serverless/api_integration/test_suites/common/config.ts"
-    "x-pack/test_serverless/functional/test_suites/common/config.ts"
-  )
-elif [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
+if [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/search/config.ts"
     "x-pack/test_serverless/functional/test_suites/search/config.ts"
@@ -20,6 +15,7 @@ elif [[ "$SERVERLESS_ENVIRONMENT" == "observability" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/observability/config.ts"
     "x-pack/test_serverless/functional/test_suites/observability/config.ts"
+    "x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts"
   )
 elif [[ "$SERVERLESS_ENVIRONMENT" == "security" ]]; then
   SERVERLESS_CONFIGS=(

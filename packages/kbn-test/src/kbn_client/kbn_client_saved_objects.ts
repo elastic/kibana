@@ -90,7 +90,10 @@ const STANDARD_LIST_TYPES = [
   'lens',
   'map',
   'cases',
+  // synthetics based objects
+  'synthetics-monitor',
   'uptime-dynamic-settings',
+
   'osquery-saved-query',
   'osquery-pack',
   'infrastructure-ui-source',
@@ -107,6 +110,7 @@ const STANDARD_LIST_TYPES = [
   'epm-packages-assets',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
+  'fleet-uninstall-tokens',
 ];
 
 /**

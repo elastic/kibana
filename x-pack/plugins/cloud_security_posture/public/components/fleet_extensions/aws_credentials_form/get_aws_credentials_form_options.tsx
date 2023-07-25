@@ -103,10 +103,12 @@ export const getAwsCredentialsFormManualOptions = (): Array<{
   value: AwsCredentialsType;
   text: string;
 }> => {
-  return Object.entries(getAwsCredentialsFormOptions()).map(([key, value]) => ({
-    value: key as AwsCredentialsType,
-    text: value.label,
-  }));
+  return Object.entries(getAwsCredentialsFormOptions())
+    .map(([key, value]) => ({
+      value: key as AwsCredentialsType,
+      text: value.label,
+    }))
+    .filter(({ value }) => value !== 'cloud_formation');
 };
 
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';

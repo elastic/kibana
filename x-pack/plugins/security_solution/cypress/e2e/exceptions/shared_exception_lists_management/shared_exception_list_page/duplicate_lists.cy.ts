@@ -20,7 +20,6 @@ import {
   createExceptionList,
   createExceptionListItem,
 } from '../../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import { getNewRule } from '../../../../objects/rule';
 
 const expiredDate = new Date(Date.now() - 1000000).toISOString();
@@ -43,7 +42,7 @@ const getExceptionList2 = () => ({
 
 describe('Duplicate List', () => {
   beforeEach(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     login();
 
     createRule(getNewRule({ name: 'Another rule' }));

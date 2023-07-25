@@ -6,13 +6,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { TOOLTIP } from '../../translations';
+import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
-import { TooltipContent } from '../metric_explanation/tooltip_content';
+import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   id: `metric-hostCount`,
@@ -23,7 +24,7 @@ const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   ['data-test-subj']: 'hostsViewKPI-hostsCount',
 };
 
-export const HostsTile = () => {
+export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
@@ -41,11 +42,12 @@ export const HostsTile = () => {
   return (
     <MetricChartWrapper
       {...HOSTS_CHART}
+      style={style}
       value={hostCountData?.count.value ?? 0}
       subtitle={getSubtitle()}
       toolTip={
         <TooltipContent
-          formula={hostLensFormulas.hostCount.formula.formula}
+          formula={hostLensFormulas.hostCount.value}
           description={TOOLTIP.hostCount}
         />
       }

@@ -38,7 +38,6 @@ describe('Alert by grouping', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders correctly', async () => {

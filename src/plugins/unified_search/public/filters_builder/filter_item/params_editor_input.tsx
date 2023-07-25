@@ -18,6 +18,7 @@ import {
   isRangeParams,
 } from '../../filter_bar/filter_editor';
 import type { Operator } from '../../filter_bar/filter_editor';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export const strings = {
   getSelectFieldPlaceholderLabel: () =>
@@ -41,6 +42,7 @@ interface ParamsEditorInputProps {
   operator?: Operator;
   invalid: boolean;
   disabled: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const getPlaceholderText = (isFieldSelected: boolean, isOperatorSelected: boolean) => {
@@ -66,6 +68,7 @@ export function ParamsEditorInput({
   onParamsUpdate,
   timeRangeForSuggestionsOverride,
   filtersForSuggestions,
+  suggestionsAbstraction,
 }: ParamsEditorInputProps) {
   switch (operator?.type) {
     case 'exists':
@@ -83,6 +86,7 @@ export function ParamsEditorInput({
           fullWidth
           invalid={invalid}
           disabled={disabled}
+          suggestionsAbstraction={suggestionsAbstraction}
         />
       );
     case 'phrases':
@@ -98,6 +102,7 @@ export function ParamsEditorInput({
           filtersForSuggestions={filtersForSuggestions}
           fullWidth
           disabled={disabled}
+          suggestionsAbstraction={suggestionsAbstraction}
         />
       );
     case 'range':
@@ -111,7 +116,6 @@ export function ParamsEditorInput({
           disabled={disabled}
         />
       );
-      break;
     default:
       const placeholderText = getPlaceholderText(Boolean(field), Boolean(operator?.type));
       return (

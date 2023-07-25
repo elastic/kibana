@@ -15,6 +15,8 @@ import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/chart
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
@@ -28,6 +30,7 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 };
 
 const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>
@@ -80,6 +83,7 @@ export const TagCloudChart = ({
   fireEvent,
   renderComplete,
   syncColors,
+  overrides,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
@@ -203,12 +207,13 @@ export const TagCloudChart = ({
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
-          <Chart size="100%">
+          <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
               onElementClick={handleWordClick}
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}
               ariaUseDefaultSummary={!visParams.ariaLabel}
+              {...getOverridesFor(overrides, 'settings')}
             />
             <Wordcloud
               id="tagCloud"

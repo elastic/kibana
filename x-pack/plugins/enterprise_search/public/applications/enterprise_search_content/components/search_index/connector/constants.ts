@@ -43,6 +43,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: 'https://cloud.google.com/storage/docs',
     icon: CONNECTOR_ICONS.google_cloud_storage,
   },
+  google_drive: {
+    docsUrl: docLinks.connectorsGoogleDrive,
+    externalAuthDocsUrl: 'https://cloud.google.com/iam/docs/service-account-overview',
+    externalDocsUrl: 'https://developers.google.com/drive',
+    icon: CONNECTOR_ICONS.google_drive,
+  },
   jira: {
     docsUrl: docLinks.connectorsJira,
     externalAuthDocsUrl: '',

@@ -9,7 +9,7 @@ import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,
@@ -24,13 +24,12 @@ interface StatusPopoverButtonProps {
   eventId: string;
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfoWithValues;
-  indexName: string;
   scopeId: string;
   handleOnEventClosed: () => void;
 }
 
 export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
-  ({ eventId, contextId, enrichedFieldInfo, indexName, scopeId, handleOnEventClosed }) => {
+  ({ eventId, contextId, enrichedFieldInfo, scopeId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -51,7 +50,6 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       closePopover: closeAfterAction,
       eventId,
       scopeId,
-      indexName,
       alertStatus: enrichedFieldInfo.values[0] as Status,
       refetch: refetchGlobalQuery,
     });

@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import {
   PatchRuleRequestBody,
   validatePatchRuleRequestBody,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';

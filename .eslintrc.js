@@ -639,7 +639,7 @@ module.exports = {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -672,7 +672,7 @@ module.exports = {
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -708,7 +708,7 @@ module.exports = {
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
@@ -986,7 +986,11 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
@@ -1014,6 +1018,8 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
@@ -1022,6 +1028,8 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
@@ -1036,6 +1044,8 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
@@ -1069,6 +1079,8 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1163,6 +1175,8 @@ module.exports = {
         {
           files: [
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {

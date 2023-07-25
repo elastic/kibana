@@ -12,6 +12,8 @@ import type { Section } from '../../sections';
 import { useLink, useConfig } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { ExperimentalFeaturesService } from '../../services';
+
 import { DefaultPageTitle } from './default_page_title';
 
 interface Props {
@@ -27,70 +29,79 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
+  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+
+  const tabs = [
+    {
+      name: (
+        <FormattedMessage id="xpack.fleet.appNavigation.agentsLinkText" defaultMessage="Agents" />
+      ),
+      isSelected: section === 'agents',
+      href: getHref('agent_list'),
+      disabled: !agents?.enabled,
+      'data-test-subj': 'fleet-agents-tab',
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.appNavigation.policiesLinkText"
+          defaultMessage="Agent policies"
+        />
+      ),
+      isSelected: section === 'agent_policies',
+      href: getHref('policies_list'),
+      'data-test-subj': 'fleet-agent-policies-tab',
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.appNavigation.enrollmentTokensText"
+          defaultMessage="Enrollment tokens"
+        />
+      ),
+      isSelected: section === 'enrollment_tokens',
+      href: getHref('enrollment_tokens'),
+      'data-test-subj': 'fleet-enrollment-tokens-tab',
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.appNavigation.uninstallTokensText"
+          defaultMessage="Uninstall tokens"
+        />
+      ),
+      isSelected: section === 'uninstall_tokens',
+      href: getHref('uninstall_tokens'),
+      'data-test-subj': 'fleet-uninstall-tokens-tab',
+      isHidden: !agentTamperProtectionEnabled, // needed only for agentTamperProtectionEnabled feature flag
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.appNavigation.dataStreamsLinkText"
+          defaultMessage="Data streams"
+        />
+      ),
+      isSelected: section === 'data_streams',
+      href: getHref('data_streams'),
+      'data-test-subj': 'fleet-datastreams-tab',
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.appNavigation.settingsLinkText"
+          defaultMessage="Settings"
+        />
+      ),
+      isSelected: section === 'settings',
+      href: getHref('settings'),
+      'data-test-subj': 'fleet-settings-tab',
+    },
+    // the filtering below is needed only for agentTamperProtectionEnabled feature flag
+  ].filter(({ isHidden }) => !isHidden);
 
   return (
-    <WithHeaderLayout
-      leftColumn={<DefaultPageTitle />}
-      rightColumn={rightColumn}
-      tabs={[
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.appNavigation.agentsLinkText"
-              defaultMessage="Agents"
-            />
-          ),
-          isSelected: section === 'agents',
-          href: getHref('agent_list'),
-          disabled: !agents?.enabled,
-          'data-test-subj': 'fleet-agents-tab',
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.appNavigation.policiesLinkText"
-              defaultMessage="Agent policies"
-            />
-          ),
-          isSelected: section === 'agent_policies',
-          href: getHref('policies_list'),
-          'data-test-subj': 'fleet-agent-policies-tab',
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.appNavigation.enrollmentTokensText"
-              defaultMessage="Enrollment tokens"
-            />
-          ),
-          isSelected: section === 'enrollment_tokens',
-          href: getHref('enrollment_tokens'),
-          'data-test-subj': 'fleet-enrollment-tokens-tab',
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.appNavigation.dataStreamsLinkText"
-              defaultMessage="Data streams"
-            />
-          ),
-          isSelected: section === 'data_streams',
-          href: getHref('data_streams'),
-          'data-test-subj': 'fleet-datastreams-tab',
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.appNavigation.settingsLinkText"
-              defaultMessage="Settings"
-            />
-          ),
-          isSelected: section === 'settings',
-          href: getHref('settings'),
-          'data-test-subj': 'fleet-settings-tab',
-        },
-      ]}
-    >
+    <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
       {children}
     </WithHeaderLayout>
   );

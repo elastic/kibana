@@ -60,7 +60,6 @@ export function AlertDetails() {
   const userCasesPermissions = canUseCases();
   const { rule } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID],
-    http,
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
 

@@ -28,6 +28,7 @@ describe('Utils', () => {
     config: { usesTableApi: false },
     secrets: {},
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   };
 

@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
@@ -94,6 +101,145 @@ describe('create', () => {
         `"Failed to create case: Error: invalid keys \\"foo\\""`
       );
     });
+  });
+
+  describe('title', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it(`should not throw an error if the title is non empty and less than ${MAX_TITLE_LENGTH} characters`, async () => {
+      await expect(
+        create({ ...theCase, title: 'This is a test case!!' }, clientArgs)
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw an error if the title length is too long', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            title:
+              'This is a very long title with more than one hundred and sixty characters!! To confirm the maximum limit error thrown for more than one hundred and sixty characters!!',
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to create case: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+      );
+    });
+
+    it('should throw an error if the title is an empty string', async () => {
+      await expect(create({ ...theCase, title: '' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The title field cannot be an empty string.'
+      );
+    });
+
+    it('should throw an error if the title is a string with empty characters', async () => {
+      await expect(create({ ...theCase, title: '   ' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The title field cannot be an empty string.'
+      );
+    });
+  });
+
+  describe('description', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it(`should not throw an error if the description is non empty and less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
+      await expect(
+        create({ ...theCase, description: 'This is a test description!!' }, clientArgs)
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw an error if the description length is too long', async () => {
+      const description = Array(MAX_DESCRIPTION_LENGTH + 1)
+        .fill('x')
+        .toString();
+
+      await expect(create({ ...theCase, description }, clientArgs)).rejects.toThrow(
+        `Failed to create case: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+      );
+    });
+
+    it('should throw an error if the description is an empty string', async () => {
+      await expect(create({ ...theCase, description: '' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The description field cannot be an empty string.'
+      );
+    });
+
+    it('should throw an error if the description is a string with empty characters', async () => {
+      await expect(create({ ...theCase, description: '   ' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The description field cannot be an empty string.'
+      );
+    });
+  });
+
+  describe('tags', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should not throw an error if the tags array is empty', async () => {
+      await expect(create({ ...theCase, tags: [] }, clientArgs)).resolves.not.toThrow();
+    });
+
+    it('should not throw an error if the tags array has non empty string within limit', async () => {
+      await expect(create({ ...theCase, tags: ['abc'] }, clientArgs)).resolves.not.toThrow();
+    });
+
+    it('should throw an error if the tags array length is too long', async () => {
+      const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foo');
+
+      await expect(create({ ...theCase, tags }, clientArgs)).rejects.toThrow(
+        `Failed to create case: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+      );
+    });
+
+    it('should throw an error if the tags array has empty string', async () => {
+      await expect(create({ ...theCase, tags: [''] }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The tag field cannot be an empty string.'
+      );
+    });
+
+    it('should throw an error if the tags array has string with empty characters', async () => {
+      await expect(create({ ...theCase, tags: ['  '] }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The tag field cannot be an empty string.'
+      );
+    });
+
+    it('should throw an error if the tag length is too long', async () => {
+      const tag = Array(MAX_LENGTH_PER_TAG + 1)
+        .fill('f')
+        .toString();
+
+      await expect(create({ ...theCase, tags: [tag] }, clientArgs)).rejects.toThrow(
+        `Failed to create case: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+      );
+    });
+  });
+
+  describe('Category', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should not throw an error if the category is null', async () => {
+      await expect(create({ ...theCase, category: null }, clientArgs)).resolves.not.toThrow();
+    });
 
     it('should throw an error if the category length is too long', async () => {
       await expect(
@@ -106,13 +252,13 @@ describe('create', () => {
 
     it('should throw an error if the category is an empty string', async () => {
       await expect(create({ ...theCase, category: '' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The category cannot be an empty string.'
+        'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "" supplied to "category"'
       );
     });
 
     it('should throw an error if the category is a string with empty characters', async () => {
       await expect(create({ ...theCase, category: '   ' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The category cannot be an empty string.'
+        'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "category"'
       );
     });
   });

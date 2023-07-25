@@ -26,7 +26,7 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -48,7 +48,6 @@ export interface TakeActionDropdownProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   ecsData?: Ecs;
   handleOnEventClosed: () => void;
-  indexName: string;
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddEventFilterClick: () => void;
@@ -65,7 +64,6 @@ export const TakeActionDropdown = React.memo(
     detailsData,
     ecsData,
     handleOnEventClosed,
-    indexName,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     onAddEventFilterClick,
@@ -180,7 +178,6 @@ export const TakeActionDropdown = React.memo(
       alertStatus: actionsData.alertStatus,
       closePopover: closePopoverAndFlyout,
       eventId: actionsData.eventId,
-      indexName,
       refetch,
       scopeId,
     });
@@ -188,7 +185,6 @@ export const TakeActionDropdown = React.memo(
     const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
       closePopover: closePopoverHandler,
       ecsRowData: ecsData ?? { _id: actionsData.eventId },
-      scopeId,
       refetch,
     });
 

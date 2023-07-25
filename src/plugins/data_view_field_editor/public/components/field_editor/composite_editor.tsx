@@ -71,7 +71,7 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
         </EuiFlexGroup>
         {Object.entries(subfields).map(([key, itemValue], idx) => {
           return (
-            <div>
+            <div key={key}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
                   <EuiFieldText value={key} disabled={true} />

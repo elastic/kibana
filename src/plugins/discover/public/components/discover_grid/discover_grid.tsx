@@ -29,14 +29,14 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
-  type CellActionFieldValue,
 } from '@kbn/cell-actions';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
-import { isTypeSupportedByCellActions } from '@kbn/cell-actions/src/utils';
+import { Serializable } from '@kbn/utility-types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -56,8 +56,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
-import type { DataTableRecord, ValueToStringConverter } from '../../types';
+import type { ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
@@ -451,31 +450,22 @@ export const DiscoverGrid = ({
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
     (fieldName, rowIndex) =>
-      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as CellActionFieldValue,
+      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
     [displayedRows]
   );
 
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
       cellActionsTriggerId && !isPlainRecord
-        ? visibleColumns.map((columnName) => {
-            const field = dataView.getFieldByName(columnName);
-            if (!field || !isTypeSupportedByCellActions(field.type as KBN_FIELD_TYPES)) {
-              // disable custom actions on object columns
-              return {
+        ? visibleColumns.map(
+            (columnName) =>
+              dataView.getFieldByName(columnName)?.toSpec() ?? {
                 name: '',
                 type: '',
                 aggregatable: false,
                 searchable: false,
-              };
-            }
-            return {
-              name: columnName,
-              type: field.type,
-              aggregatable: field.aggregatable,
-              searchable: field.searchable,
-            };
-          })
+              }
+          )
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );

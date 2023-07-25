@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
@@ -71,10 +72,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.kspm.status).to.be('indexed');
+        expect(res.kspm.status).to.eql(
+          'indexed',
+          `expected kspm status to be indexed but got ${res.kspm.status} instead`
+        );
       });
 
       it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
@@ -89,10 +94,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.cspm.status).to.be('indexed');
+        expect(res.cspm.status).to.eql(
+          'indexed',
+          `expected cspm status to be indexed but got ${res.cspm.status} instead`
+        );
       });
 
       it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`, async () => {
@@ -107,10 +116,14 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.vuln_mgmt.status).to.be('indexed');
+        expect(res.vuln_mgmt.status).to.eql(
+          'indexed',
+          `expected vuln_mgmt status to be indexed but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
   });

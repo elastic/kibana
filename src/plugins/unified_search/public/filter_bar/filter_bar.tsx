@@ -14,6 +14,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import FilterItems, { type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export interface Props {
   filters: Filter[];
@@ -28,11 +29,12 @@ export interface Props {
    * Applies extra styles necessary when coupled with the query bar
    */
   afterQueryBar?: boolean;
-
   /**
    * Disable all interactive actions
    */
   isDisabled?: boolean;
+  /** Array of suggestion abstraction that controls the render of the field */
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -58,6 +60,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         filtersForSuggestions={props.filtersForSuggestions}
         hiddenPanelOptions={props.hiddenPanelOptions}
         readOnly={props.isDisabled}
+        suggestionsAbstraction={props.suggestionsAbstraction}
       />
     </EuiFlexGroup>
   );

@@ -330,7 +330,7 @@ export function ServicesTable() {
         tableCaption={i18n.translate(
           'xpack.apm.storageExplorer.table.caption',
           {
-            defaultMessage: 'Storage explorer',
+            defaultMessage: 'Storage Explorer',
           }
         )}
         items={items ?? []}

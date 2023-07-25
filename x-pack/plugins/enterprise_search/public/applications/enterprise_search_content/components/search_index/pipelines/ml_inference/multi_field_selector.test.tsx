@@ -95,28 +95,29 @@ describe('MultiFieldMapping', () => {
 });
 
 describe('SelectedFieldMappings', () => {
+  const mockValues = {
+    ...DEFAULT_VALUES,
+    addInferencePipelineModal: {
+      configuration: {
+        fieldMappings: [
+          {
+            sourceField: 'my-source-field1',
+            targetField: 'my-target-field1',
+          },
+          {
+            sourceField: 'my-source-field2',
+            targetField: 'my-target-field2',
+          },
+        ],
+      },
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({});
   });
   it('renders field mapping list', () => {
-    const mockValues = {
-      ...DEFAULT_VALUES,
-      addInferencePipelineModal: {
-        configuration: {
-          fieldMappings: [
-            {
-              sourceField: 'my-source-field1',
-              targetField: 'my-target-field1',
-            },
-            {
-              sourceField: 'my-source-field2',
-              targetField: 'my-target-field2',
-            },
-          ],
-        },
-      },
-    };
     setMockValues(mockValues);
     const wrapper = shallow(<SelectedFieldMappings />);
 
@@ -125,5 +126,13 @@ describe('SelectedFieldMappings', () => {
     expect(table.prop('items')).toEqual(
       mockValues.addInferencePipelineModal.configuration.fieldMappings
     );
+  });
+  it('does not render action column in read-only mode', () => {
+    setMockValues(mockValues);
+    const wrapper = shallow(<SelectedFieldMappings isReadOnly />);
+
+    expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
+    const table = wrapper.find(EuiBasicTable);
+    expect(table.prop('columns').map((c) => c.name)).toEqual(['Source field', '', 'Target field']);
   });
 });

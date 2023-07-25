@@ -1190,6 +1190,7 @@ describe('Alerts Service', () => {
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
+        kibanaVersion: '8.8.0',
       });
     });
 
@@ -1291,6 +1292,7 @@ describe('Alerts Service', () => {
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
+        kibanaVersion: '8.8.0',
       });
 
       expect(result).not.toBe(null);
@@ -1394,6 +1396,7 @@ describe('Alerts Service', () => {
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
+        kibanaVersion: '8.8.0',
       });
 
       expect(result[0]).not.toBe(null);
@@ -1467,6 +1470,7 @@ describe('Alerts Service', () => {
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
+        kibanaVersion: '8.8.0',
       });
 
       expect(result).not.toBe(null);
@@ -1555,6 +1559,7 @@ describe('Alerts Service', () => {
           spaceId: 'default',
           tags: ['rule-', '-tags'],
         },
+        kibanaVersion: '8.8.0',
       });
 
       expect(result[0]).not.toBe(null);

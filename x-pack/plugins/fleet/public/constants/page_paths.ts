@@ -14,6 +14,7 @@ export type StaticPage =
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
+  | 'uninstall_tokens'
   | 'data_streams'
   | 'settings'
   | 'settings_create_outputs'
@@ -72,6 +73,7 @@ export const FLEET_ROUTING_PATHS = {
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
+  uninstall_tokens: '/uninstall-tokens',
   data_streams: '/data-streams',
   settings: '/settings',
   settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
@@ -220,6 +222,7 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
+  uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
   settings_edit_fleet_server_hosts: ({ itemId }) => [

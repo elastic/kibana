@@ -19,13 +19,20 @@ import type {
   NotificationsCountResponse,
   NotificationsSearchResponse,
 } from '../../../common/types/notifications';
+import type { MlFeatures } from '../../types';
 
 const MAX_NOTIFICATIONS_SIZE = 10000;
+
+interface EntityIdsPerType {
+  type: 'anomaly_detector' | 'data_frame_analytics' | 'inference' | 'system';
+  ids?: Array<string | null>;
+}
 
 export class NotificationsService {
   constructor(
     private readonly scopedClusterClient: IScopedClusterClient,
-    private readonly mlSavedObjectService: MLSavedObjectService
+    private readonly mlSavedObjectService: MLSavedObjectService,
+    private readonly enabledFeatures: MlFeatures
   ) {}
 
   private getDefaultCountResponse() {
@@ -42,17 +49,23 @@ export class NotificationsService {
    */
   private async _getEntityIdsPerType() {
     const [adJobIds, dfaJobIds, modelIds] = await Promise.all([
-      this.mlSavedObjectService.getAnomalyDetectionJobIds(),
-      this.mlSavedObjectService.getDataFrameAnalyticsJobIds(),
-      this.mlSavedObjectService.getTrainedModelsIds(),
+      this.enabledFeatures.ad ? this.mlSavedObjectService.getAnomalyDetectionJobIds() : [],
+      this.enabledFeatures.dfa ? this.mlSavedObjectService.getDataFrameAnalyticsJobIds() : [],
+      this.enabledFeatures.nlp ? this.mlSavedObjectService.getTrainedModelsIds() : [],
     ]);
+    const idsPerType: EntityIdsPerType[] = [{ type: 'system' }];
 
-    return [
-      { type: 'anomaly_detector', ids: adJobIds },
-      { type: 'data_frame_analytics', ids: dfaJobIds },
-      { type: 'inference', ids: modelIds },
-      { type: 'system' },
-    ].filter((v) => v.ids === undefined || v.ids.length > 0);
+    if (this.enabledFeatures.ad) {
+      idsPerType.push({ type: 'anomaly_detector', ids: adJobIds });
+    }
+    if (this.enabledFeatures.dfa) {
+      idsPerType.push({ type: 'data_frame_analytics', ids: dfaJobIds });
+    }
+    if (this.enabledFeatures.nlp) {
+      idsPerType.push({ type: 'inference', ids: modelIds as string[] });
+    }
+
+    return idsPerType.filter((v) => v.ids === undefined || v.ids.length > 0);
   }
 
   /**

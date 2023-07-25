@@ -43,6 +43,14 @@ interface StepAboutRuleProps extends RuleStepProps {
   dataViewId: string | undefined;
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
+
+  // TODO: https://github.com/elastic/kibana/issues/161456
+  // The About step page contains EuiRange component which does not work properly within memoized parents.
+  // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
+  // Workaround: We introduced this additional property to be able to do extra re-render on switching to/from the About step page.
+  // NOTE: We should remove this workaround once EUI team fixed EuiRange.
+  // Related ticket: https://github.com/elastic/kibana/issues/160561
+  isActive: boolean;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -69,6 +77,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   index,
   dataViewId,
   timestampOverride,
+  isActive = false,
   isUpdateView = false,
   isLoading,
   form,

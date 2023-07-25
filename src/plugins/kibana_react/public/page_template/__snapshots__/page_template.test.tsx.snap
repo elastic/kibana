@@ -370,7 +370,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
     </nav>
     <button
       aria-label="Collapse side navigation"
-      class="euiButtonIcon euiButtonIcon--small kbnPageTemplateSolutionNavCollapseButton emotion-euiButtonIcon-empty-text-hoverStyles"
+      class="euiButtonIcon kbnPageTemplateSolutionNavCollapseButton emotion-euiButtonIcon-s-empty-text"
       title="Collapse side navigation"
       type="button"
     >

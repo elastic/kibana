@@ -86,7 +86,6 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   detailsEcsData: Ecs | null;
   id: string;
-  indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
   rawEventData: object | undefined;
@@ -154,7 +153,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   data,
   detailsEcsData,
   id,
-  indexName,
   isAlert,
   isDraggable,
   rawEventData,
@@ -235,7 +233,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                   contextId={scopeId}
                   data={data}
                   eventId={id}
-                  indexName={indexName}
                   scopeId={scopeId}
                   handleOnEventClosed={handleOnEventClosed}
                   isReadOnly={isReadOnly}
@@ -328,7 +325,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       scopeId,
       data,
       id,
-      indexName,
       handleOnEventClosed,
       isReadOnly,
       renderer,

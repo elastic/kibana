@@ -12,6 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type {
   Case,
   CommentAttributes,
@@ -20,7 +21,7 @@ import type {
   CommentRequestUserType,
   CommentRequestAlertType,
 } from '../../../common/api';
-import { CaseRt, CaseStatuses, CommentType, ActionTypes, Actions } from '../../../common/api';
+import { CaseRt, CaseStatuses, CommentType } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
@@ -187,8 +188,8 @@ export class CaseCommentModel {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
     await this.params.services.userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.update,
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: { attachment: queryRestAttributes },
@@ -397,8 +398,8 @@ export class CaseCommentModel {
     req: CommentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.create,
+      type: UserActionTypes.comment,
+      action: UserActionActions.create,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
       payload: {

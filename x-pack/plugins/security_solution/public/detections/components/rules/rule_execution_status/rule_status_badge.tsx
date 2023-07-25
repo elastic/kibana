@@ -11,7 +11,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 import { getCapitalizedStatusText, getStatusColor } from './utils';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 interface RuleStatusBadgeProps {
   status: RuleExecutionStatus | null | undefined;

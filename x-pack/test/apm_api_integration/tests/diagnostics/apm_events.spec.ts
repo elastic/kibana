@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -26,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns zero data streams`', async () => {
-        const { status, body } = await apmApiClient.adminUser({
+        const { status, body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
@@ -57,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => synthtraceEsClient.clean());
 
       it('returns zero doc_counts when no time range is specified', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
         });
 
@@ -65,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns non-zero doc_counts when time range is specified', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
           params: {
             query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
@@ -88,17 +90,85 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               'processor.event: "metric" AND metricset.name: "transaction" AND transaction.duration.summary :* ',
             docCount: 21,
           },
-          { kuery: 'processor.event: "metric" AND metricset.name: "span_breakdown"', docCount: 15 },
           {
             kuery: 'processor.event: "metric" AND metricset.name: "service_summary"',
             docCount: 21,
           },
+          { kuery: 'processor.event: "metric" AND metricset.name: "span_breakdown"', docCount: 15 },
           { kuery: 'processor.event: "transaction"', docCount: 450 },
         ]);
       });
 
+      describe('transactions', async () => {
+        let body: APIReturnType<'GET /internal/apm/diagnostics'>;
+
+        const expectedDocCount = 450;
+
+        beforeEach(async () => {
+          const res = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/diagnostics',
+            params: {
+              query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
+            },
+          });
+
+          body = res.body;
+        });
+
+        it('raw transaction events', () => {
+          const rawTransactions = body.apmEvents.find(({ kuery }) =>
+            kuery.includes('processor.event: "transaction"')
+          );
+
+          expect(rawTransactions?.docCount).to.be(expectedDocCount);
+        });
+
+        it('transaction metrics', () => {
+          const transactionMetrics = body.apmEvents.find(({ kuery }) =>
+            kuery.includes('metricset.name: "transaction"')
+          );
+
+          const intervalDocCount = sumBy(
+            Object.values(transactionMetrics?.intervals ?? {}),
+            ({ metricDocCount }) => metricDocCount
+          );
+          expect(transactionMetrics?.docCount).to.be(intervalDocCount);
+          expect(transactionMetrics?.docCount).to.be(21);
+
+          expect(transactionMetrics?.intervals).to.eql({
+            '1m': { metricDocCount: 15, eventDocCount: expectedDocCount },
+            '10m': { metricDocCount: 4, eventDocCount: expectedDocCount },
+            '60m': { metricDocCount: 2, eventDocCount: expectedDocCount },
+          });
+        });
+
+        it('service transactions', () => {
+          const serviceTransactionMetrics = body.apmEvents.find(({ kuery }) =>
+            kuery.includes('metricset.name: "service_transaction"')
+          );
+
+          const intervalDocCount = sumBy(
+            Object.values(serviceTransactionMetrics?.intervals ?? {}),
+            ({ metricDocCount }) => metricDocCount
+          );
+
+          expect(serviceTransactionMetrics?.docCount).to.be(intervalDocCount);
+          expect(serviceTransactionMetrics?.docCount).to.be(21);
+
+          expect(serviceTransactionMetrics?.kuery).to.be(
+            'processor.event: "metric" AND metricset.name: "service_transaction" AND transaction.duration.summary :* '
+          );
+
+          expect(serviceTransactionMetrics?.intervals).to.eql({
+            '1m': { metricDocCount: 15, eventDocCount: expectedDocCount },
+            '10m': { metricDocCount: 4, eventDocCount: expectedDocCount },
+            '60m': { metricDocCount: 2, eventDocCount: expectedDocCount },
+          });
+        });
+      });
+
       it('returns zero doc_counts when filtering by a non-existing service', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
           params: {
             query: {
@@ -113,7 +183,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns non-zero doc_counts when filtering by an existing service', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
           params: {
             query: {

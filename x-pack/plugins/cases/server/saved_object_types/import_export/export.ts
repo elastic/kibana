@@ -12,10 +12,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
-import type {
-  CaseUserActionWithoutReferenceIds,
-  CommentAttributesWithoutRefs,
-} from '../../../common/api';
+import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
+import type { CommentAttributesWithoutRefs } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,

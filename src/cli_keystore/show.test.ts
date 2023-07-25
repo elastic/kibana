@@ -96,6 +96,6 @@ describe('Kibana keystore: show', () => {
   afterEach(() => {
     mockLogFn.mockReset();
     mockErrFn.mockReset();
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
 
 /**
@@ -147,6 +148,7 @@ export enum SecurityPageName {
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
   entityAnalytics = 'entity-analytics',
+  entityAnalyticsManagement = 'entity-analytics-management',
   coverageOverview = 'coverage-overview',
 }
 
@@ -165,6 +167,7 @@ export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
+export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
@@ -184,6 +187,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
+export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
@@ -501,24 +505,30 @@ export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
+export const DETECTION_ENTITY_DASHBOARD =
+  'https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
 
-export const DEFAULT_DETECTION_PAGE_FILTERS = [
+export const DEFAULT_DETECTION_PAGE_FILTERS: Array<
+  Omit<AddOptionsListControlProps, 'dataViewId'> & { persist?: boolean }
+> = [
   {
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
     hideActionBar: true,
     persist: true,
+    hideExists: true,
   },
   {
     title: 'Severity',
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
     hideActionBar: true,
+    hideExists: true,
   },
   {
     title: 'User',

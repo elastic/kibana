@@ -15,7 +15,7 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
   EventAnnotationGroupSavedObjectAttributes,
@@ -268,9 +268,11 @@ export class EventAnnotationGroupStorage
       EventAnnotationGroupSearchQuery,
       EventAnnotationGroupSearchQuery
     >(options);
+
     if (optionsError) {
       throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
     }
+
     const { searchFields = ['title^3', 'description'], types = [SO_TYPE] } = optionsToLatest;
 
     const { included, excluded } = query.tags ?? {};

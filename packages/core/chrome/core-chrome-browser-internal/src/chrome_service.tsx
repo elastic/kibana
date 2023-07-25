@@ -15,7 +15,7 @@ import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { type DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -33,8 +33,11 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { SideNavComponent as ISideNavComponent } from '@kbn/core-chrome-browser';
-import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+import type {
+  SideNavComponent as ISideNavComponent,
+  ChromeHelpMenuLink,
+} from '@kbn/core-chrome-browser';
+
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
@@ -135,7 +138,7 @@ export class ChromeService {
     >(undefined);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
-    const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
+    const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
 
@@ -168,6 +171,7 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
+    const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -263,9 +267,6 @@ export class ChromeService {
     const getHeaderComponent = () => {
       if (chromeStyle$.getValue() === 'project') {
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-        const projectNavigation$ = projectNavigation
-          .getProjectNavigation$()
-          .pipe(takeUntil(this.stop$));
         const projectBreadcrumbs$ = projectNavigation
           .getProjectBreadcrumbs$()
           .pipe(takeUntil(this.stop$));
@@ -275,11 +276,7 @@ export class ChromeService {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
           const activeNodes = useObservable(activeNodes$, []);
 
-          const currentProjectNavigation = useObservable(projectNavigation$, undefined);
-          // TODO: remove this switch once security sets project navigation tree
-          const currentProjectBreadcrumbs$ = currentProjectNavigation
-            ? projectBreadcrumbs$
-            : breadcrumbs$;
+          const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
 
           let SideNavComponent: ISideNavComponent = () => null;
 
@@ -301,12 +298,14 @@ export class ChromeService {
               breadcrumbs$={currentProjectBreadcrumbs$}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+              helpMenuLinks$={helpMenuLinks$}
               navControlsLeft$={navControls.getLeft$()}
               navControlsCenter$={navControls.getCenter$()}
               navControlsRight$={navControls.getRight$()}
               loadingCount$={http.getLoadingCount$()}
+              headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
               homeHref$={projectNavigation.getProjectHome$()}
-              kibanaDocLink={docLinks.links.kibana.guide}
+              docLinks={docLinks}
               kibanaVersion={injectedMetadata.getKibanaVersion()}
               prependBasePath={http.basePath.prepend}
             >
@@ -329,10 +328,12 @@ export class ChromeService {
           breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana.guide}
+          docLinks={docLinks}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+          helpMenuLinks$={helpMenuLinks$}
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
@@ -399,12 +400,18 @@ export class ChromeService {
 
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
+      getHelpSupportUrl$: () => helpSupportUrl$.pipe(takeUntil(this.stop$)),
+
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
+      },
+
+      setHelpMenuLinks: (helpMenuLinks: ChromeHelpMenuLink[]) => {
+        navControls.setHelpMenuLinks(helpMenuLinks);
       },
 
       setHeaderBanner: (headerBanner?: ChromeUserBanner) => {

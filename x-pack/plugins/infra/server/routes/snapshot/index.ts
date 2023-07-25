@@ -40,8 +40,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, snapshotRequest.sourceId);
       const compositeSize = libs.configuration.inventory.compositeSize;
-      const [, , { logViews }] = await libs.getStartServices();
-      const logQueryFields: LogQueryFields | undefined = await logViews
+      const [, { logsShared }] = await libs.getStartServices();
+      const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
         .getScopedClient(request)
         .getResolvedLogView({
           type: 'log-view-reference',

@@ -8,9 +8,8 @@
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
+import type { MlPluginSetup, MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -168,7 +167,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -195,7 +194,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -984,7 +983,7 @@ describe('Enterprise Search Managed Indices', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });
@@ -1069,7 +1068,7 @@ describe('Enterprise Search Managed Indices', () => {
 
   describe('GET /internal/enterprise_search/pipelines/ml_inference', () => {
     let mockTrainedModelsProvider: MlTrainedModels;
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
 
     beforeEach(() => {
       const context = {
@@ -1095,7 +1094,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1134,7 +1133,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('POST /internal/enterprise_search/ml/models/{modelName}', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1156,7 +1155,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1198,7 +1197,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('POST /internal/enterprise_search/ml/models/{modelName}/deploy', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1220,7 +1219,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1262,7 +1261,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/ml/models/{modelName}', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1283,7 +1282,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,

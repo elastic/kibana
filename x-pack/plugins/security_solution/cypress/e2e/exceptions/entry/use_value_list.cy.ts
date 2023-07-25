@@ -33,7 +33,6 @@ import {
   closeValueListsModal,
 } from '../../../tasks/lists';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import {
   CLOSE_ALERTS_CHECKBOX,
   EXCEPTIONS_TABLE_MODAL,
@@ -54,7 +53,7 @@ describe('Use Value list in exception entry', () => {
   before(() => {
     cleanKibana();
     login();
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverLoad', 'exceptions');
     createRule({
       ...getNewRule(),
       query: 'user.name:*',
@@ -69,7 +68,7 @@ describe('Use Value list in exception entry', () => {
   });
 
   afterEach(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   it('Should use value list in exception entry, and validate deleting value list prompt', () => {

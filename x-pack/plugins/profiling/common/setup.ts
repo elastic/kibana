@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { RecursivePartial } from '@elastic/eui';
 
 export interface SetupState {
   cloud: {

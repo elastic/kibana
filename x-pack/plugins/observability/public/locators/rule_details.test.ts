@@ -6,7 +6,10 @@
  */
 
 import { ACTIVE_ALERTS } from '../components/alert_search_bar/constants';
-import { EXECUTION_TAB, ALERTS_TAB } from '../pages/rule_details/constants';
+import {
+  RULE_DETAILS_EXECUTION_TAB,
+  RULE_DETAILS_ALERTS_TAB,
+} from '../pages/rule_details/constants';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
 import { RULES_PATH } from '../routes/paths';
 
@@ -21,12 +24,18 @@ describe('RuleDetailsLocator', () => {
   });
 
   it('should return correct url when tabId is execution', async () => {
-    const location = await locator.getLocation({ ruleId: mockedRuleId, tabId: EXECUTION_TAB });
+    const location = await locator.getLocation({
+      ruleId: mockedRuleId,
+      tabId: RULE_DETAILS_EXECUTION_TAB,
+    });
     expect(location.path).toEqual(`${RULES_PATH}/${mockedRuleId}?tabId=execution`);
   });
 
   it('should return correct url when tabId is alerts without extra search params', async () => {
-    const location = await locator.getLocation({ ruleId: mockedRuleId, tabId: ALERTS_TAB });
+    const location = await locator.getLocation({
+      ruleId: mockedRuleId,
+      tabId: RULE_DETAILS_ALERTS_TAB,
+    });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(kuery:'',rangeFrom:now-15m,rangeTo:now,status:all)`
     );
@@ -35,7 +44,7 @@ describe('RuleDetailsLocator', () => {
   it('should return correct url when tabId is alerts with search params', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: ALERTS_TAB,
+      tabId: RULE_DETAILS_ALERTS_TAB,
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',

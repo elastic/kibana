@@ -477,7 +477,9 @@ export class DiscoverPageObject extends FtrService {
   public async isAdHocDataViewSelected() {
     const dataView = await this.getCurrentlySelectedDataView();
     await this.testSubjects.click('discover-dataView-switch-link');
-    return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return hasBadge;
   }
 
   public async selectIndexPattern(indexPattern: string) {

@@ -32,7 +32,7 @@ import type { InventoryItemType } from '../../../../../common/inventory_models/t
 export interface ProcessesProps {
   nodeName: string;
   nodeType: InventoryItemType;
-  currentTime: number;
+  currentTimestamp: number;
   search?: string;
   onSearchFilterChange?: (searchFilter: string) => void;
 }
@@ -43,7 +43,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 }));
 
 export const Processes = ({
-  currentTime,
+  currentTimestamp,
   nodeName,
   nodeType,
   search,
@@ -69,7 +69,7 @@ export const Processes = ({
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchText));
+  } = useProcessList(hostTerm, currentTimestamp, sortBy, parseSearchString(searchText));
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
@@ -97,7 +97,7 @@ export const Processes = ({
   }, [onSearchFilterChange]);
 
   return (
-    <ProcessListContextProvider hostTerm={hostTerm} to={currentTime}>
+    <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
       <SummaryTable
         isLoading={loading}
         processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
@@ -148,7 +148,7 @@ export const Processes = ({
       <EuiSpacer size="m" />
       {!error ? (
         <ProcessesTable
-          currentTime={currentTime}
+          currentTime={currentTimestamp}
           isLoading={loading || !response}
           processList={response?.processList ?? []}
           sortBy={sortBy}
