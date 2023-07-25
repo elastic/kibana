@@ -61,8 +61,33 @@ import type { AutocompleteBodyParams, GlobalDefinition, SpecificationTypes as S 
  */
 
 export class BodyParamsConverter {
+  /**
+   * The array of typenames that are being used to describe the current field.
+   * For example, a request body has a field
+   * `policy` which is a typename {name: "policy", namespace: "ilm"}.
+   * A policy has a field `phase` which is a typename {name: "phase", namespace: "ilm"}.
+   * Now while converting fields in a phase the array `currentTypes` holds 2 items
+   * [{name: "policy", namespace: "ilm"}, {name: "phase", namespace: "ilm"}].
+   * We track the typenames to avoid an endless loop when a field subsequently contains its parents' fields.
+   * For example, if a phase has a field `policy` which is also {name: "policy", namespace: "ilm"}.
+   * It's now impossible to describe the field without extracting the typename {name: "policy", namespace: "ilm"}
+   * to a separate definition.
+   * @private
+   */
   private currentTypes: S.TypeName[];
-  private globalTypes: S.TypeName[];
+
+  /**
+   * The array of typenames that need to be extracted to a separate definition. For example,
+   * a request body has a `policy` field which is {name: "policy", namespace: "ilm"},
+   * a policy has a `phase` field which is {name: "phase", namespace: "ilm"}
+   * and a phase has a `policy` field which is also {name: "policy", namespace: "ilm"}.
+   * Thus it's impossible to describe the field without getting in an endless loop.
+   * Instead, we use a global scope link like `__scope_link: "GLOBAL.ilm.policy"
+   * and add {name: "policy", namespace: "ilm"} to the global types array.
+   * After all endpoints are converted, global types are also converted to definitions and saved in the `globals` folder.
+   * @private
+   */
+  private readonly globalTypes: S.TypeName[];
   private processedGlobals: S.TypeName[];
   private readonly schema: S.Model;
 
@@ -245,7 +270,7 @@ export class BodyParamsConverter {
     }
   }
 
-  public getPublicTypes(): S.TypeName[] {
+  public getGlobalTypes(): S.TypeName[] {
     return Array.from(this.globalTypes);
   }
 
@@ -255,9 +280,9 @@ export class BodyParamsConverter {
       const globalType = this.globalTypes.shift();
       if (globalType) {
         this.currentTypes = [];
+        this.processedGlobals.push(globalType);
         const params = this.convertTypeName(globalType, undefined);
         const name = getCombinedGlobalName(globalType);
-        this.processedGlobals.push(globalType);
         globalDefinitions.push({ name, params });
       }
     }

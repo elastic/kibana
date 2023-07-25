@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SpecificationTypes } from './types';
-import { generateAvailability } from './generate_availability';
+import { SpecificationTypes } from '../src/types';
+import { generateAvailability } from '../src/generate_availability';
 
 describe('generateAvailability', () => {
   const mockEndpoint: SpecificationTypes.Endpoint = {

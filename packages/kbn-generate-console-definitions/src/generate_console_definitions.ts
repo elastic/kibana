@@ -145,12 +145,13 @@ export function generateConsoleDefinitions({
   const globalsFolder = Path.resolve(generatedFilesFolder, GLOBALS_SUBFOLDER);
   createFolderIfDoesntExist(globalsFolder, log);
   emptyFolder(globalsFolder, log);
-  const globalTypes = bodyParamsConverter.getPublicTypes();
-  console.log({ globalTypes });
+  const globalTypes = bodyParamsConverter.getGlobalTypes();
+  log.info(`generating definitions for global types`);
+  log.info({ globalTypes });
   const globalDefinitions = bodyParamsConverter.convertGlobals();
-  console.log({ globalDefinitions });
   globalDefinitions.forEach((globalDefinition) => {
     const { name, params } = globalDefinition;
+    log.info(name);
     if (params && Object.keys(params).length > 0) {
       const fileContent = { [name]: params };
       saveJsonToFile({ folder: globalsFolder, name, fileContent });

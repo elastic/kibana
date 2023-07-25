@@ -6,54 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { SpecificationTypes } from './types';
-import { generateQueryParams } from './generate_query_params';
-import { UrlParamValue } from './types/autocomplete_definition_types';
+import { SpecificationTypes } from '../src/types';
+import { generateQueryParams } from '../src/generate_query_params';
+import { UrlParamValue } from '../src/types/autocomplete_definition_types';
+import {
+  getMockProperty,
+  mockBooleanProperty,
+  mockNumberProperty,
+  mockRequestType,
+  mockSchema,
+  mockStringProperty
+} from '.';
 
 describe('generateQueryParams', () => {
-  const mockRequestType: SpecificationTypes.Request = {
-    body: { kind: 'no_body' },
-    kind: 'request',
-    name: {
-      name: 'TestRequest',
-      namespace: 'test.namespace',
-    },
-    path: [],
-    query: [],
-    specLocation: '',
-  };
-
-  const getMockProperty = ({
-    propertyName,
-    typeName,
-    serverDefault,
-    type,
-  }: {
-    propertyName: string;
-    typeName?: SpecificationTypes.TypeName;
-    serverDefault?: SpecificationTypes.Property['serverDefault'];
-    type?: SpecificationTypes.ValueOf;
-  }): SpecificationTypes.Property => {
-    return {
-      description: 'Description',
-      name: propertyName,
-      required: false,
-      serverDefault: serverDefault ?? undefined,
-      type: type ?? {
-        kind: 'instance_of',
-        type: typeName ?? {
-          name: 'string',
-          namespace: '_builtins',
-        },
-      },
-    };
-  };
-
-  const mockSchema: SpecificationTypes.Model = {
-    endpoints: [],
-    types: [],
-  };
-
   it('iterates over attachedBehaviours', () => {
     const behaviour1: SpecificationTypes.Interface = {
       kind: 'interface',
@@ -108,21 +73,9 @@ describe('generateQueryParams', () => {
   });
 
   it('converts builtin types', () => {
-    const stringProperty = getMockProperty({
-      propertyName: 'stringProperty',
-      typeName: { name: 'string', namespace: '_builtins' },
-    });
-    const numberProperty = getMockProperty({
-      propertyName: 'numberProperty',
-      typeName: { name: 'number', namespace: '_builtins' },
-    });
-    const booleanProperty = getMockProperty({
-      propertyName: 'booleanProperty',
-      typeName: { name: 'boolean', namespace: '_builtins' },
-    });
     const requestType = {
       ...mockRequestType,
-      query: [stringProperty, numberProperty, booleanProperty],
+      query: [mockStringProperty, mockNumberProperty, mockBooleanProperty],
     };
     const urlParams = generateQueryParams(requestType, mockSchema);
     expect(urlParams).toEqual({
