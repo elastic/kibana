@@ -437,14 +437,14 @@ export function registerIndexRoutes({
       } = request.body;
 
       // additional validations
-      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField || modelId)) {
+      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField)) {
         return createError({
           errorCode: ErrorCode.PARAMETER_CONFLICT,
           message: i18n.translate(
             'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
             {
               defaultMessage:
-                'pipeline_definition and field_mappings should only be provided if source_field and destination_field and model_id are not provided',
+                'pipeline_definition and field_mappings should only be provided if source_field and destination_field are not provided',
             }
           ),
           response,

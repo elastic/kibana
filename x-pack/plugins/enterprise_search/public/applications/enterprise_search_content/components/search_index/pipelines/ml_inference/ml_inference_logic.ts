@@ -316,6 +316,7 @@ export const MLInferenceLogic = kea<
             targetField: getMlInferencePrefixedFieldName(configuration.destinationField),
           },
         ],
+        modelId: configuration.modelID,
         pipelineDefinition: mlInferencePipeline!,
         pipelineName: configuration.pipelineName,
       });
