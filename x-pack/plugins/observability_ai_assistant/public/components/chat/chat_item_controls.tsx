@@ -28,6 +28,7 @@ export function ChatItemControls({ role, onFeedbackClick, onRegenerateClick }: C
       <EuiSpacer size="m" />
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
           {canReceiveFeedback ? <FeedbackButtons onClickFeedback={onFeedbackClick} /> : null}
