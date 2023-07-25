@@ -345,29 +345,38 @@ ${JSON.stringify(config.getAll(), null, 2)}
               return url.toString().replace(/\/$/, '');
             };
 
-            const createCyEnvVar = (varName: string, varValue: string): Record<string, string> => {
-              return {
-                [varName]: varValue,
-                [`CYPRESS_${varName}`]: varValue,
-              };
-            };
-
             const baseUrl = createUrlFromFtrConfig('kibana');
 
             const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
               retries: 1,
             });
 
+            log.debug(
+              `Env. variables returned by [functionalTestRunner.run()]:\n`,
+              JSON.stringify(ftrEnv, null, 2)
+            );
+
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
               ...ftrEnv,
 
-              ...createCyEnvVar('FLEET_SERVER_URL', createUrlFromFtrConfig('fleetserver')),
+              // NOTE:
+              // ELASTICSEARCH_URL needs to be crated here with auth because SIEM cypress setup depends on it. At some
+              // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
+              ELASTICSEARCH_URL:
+                ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
+              ELASTICSEARCH_URL_WITH_AUTH: createUrlFromFtrConfig('elasticsearch', true),
+              ELASTICSEARCH_USERNAME:
+                ftrEnv.ELASTICSEARCH_USERNAME ?? config.get('servers.elasticsearch.username'),
+              ELASTICSEARCH_PASSWORD:
+                ftrEnv.ELASTICSEARCH_PASSWORD ?? config.get('servers.elasticsearch.password'),
 
-              ...createCyEnvVar('KIBANA_URL', baseUrl),
-              ...createCyEnvVar('KIBANA_URL_WITH_AUTH', createUrlFromFtrConfig('kibana', true)),
-              ...createCyEnvVar('KIBANA_USERNAME', config.get('servers.kibana.username')),
-              ...createCyEnvVar('KIBANA_PASSWORD', config.get('servers.kibana.password')),
+              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+
+              KIBANA_URL: baseUrl,
+              KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
+              KIBANA_USERNAME: config.get('servers.kibana.username'),
+              KIBANA_PASSWORD: config.get('servers.kibana.password'),
             };
 
             log.info(`
