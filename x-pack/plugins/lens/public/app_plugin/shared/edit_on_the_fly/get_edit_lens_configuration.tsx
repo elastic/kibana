@@ -15,13 +15,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import {
-  makeConfigureStore,
-  LensRootStore,
-  loadInitial,
-  setState,
-} from '../../../state_management';
-import { getPreloadedState } from '../../../state_management/lens_slice';
+import { makeConfigureStore, LensRootStore, loadInitial } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
