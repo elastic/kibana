@@ -48,5 +48,6 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
       </p>
     }
     actions={readOnly ? null : <CreateRoleMappingButton history={history} />}
+    data-test-subj="roleMappingsEmptyPrompt"
   />
 );
