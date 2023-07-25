@@ -15,6 +15,12 @@ export function useKibana() {
           }
         },
       },
+      notifications: {
+        toasts: {
+          addSuccess: () => {},
+          addError: () => {},
+        },
+      },
     },
   };
 }
