@@ -98,9 +98,9 @@ describe('useStorage', () => {
       [GetSetUpCardId.introduction]: [IntroductionSteps.getToKnowElasticSecurity, 'step2'],
       [GetSetUpCardId.configure]: ['step3'],
     });
-    expect(
-      getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.configure)
-    ).toEqual(['step3']);
+    expect(getStartedStorage.getFinishedStepsFromStorageByCardId(GetSetUpCardId.configure)).toEqual(
+      ['step3']
+    );
   });
 
   it('should get all finished steps from storage', () => {
