@@ -11,18 +11,18 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   FactoryQueryTypes,
   FirstLastSeenStrategyResponse,
-  FirstLastSeenRequestOptions,
 } from '../../../../../common/search_strategy/security_solution';
 import { FirstLastSeenQuery } from '../../../../../common/search_strategy/security_solution';
 
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../types';
 import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen.dsl';
+import { parseOptions } from './parse_options';
 
 export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery> = {
-  buildDsl: (options: FirstLastSeenRequestOptions) => buildFirstOrLastSeenQuery(options),
+  buildDsl: (options: unknown) => buildFirstOrLastSeenQuery(options),
   parse: async (
-    options: FirstLastSeenRequestOptions,
+    options: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<FirstLastSeenStrategyResponse> => {
     // First try to get the formatted field if it exists or not.
@@ -36,7 +36,9 @@ export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery>
       dsl: [inspectStringifyObject(buildFirstOrLastSeenQuery(options))],
     };
 
-    if (options.order === 'asc') {
+    const { order } = parseOptions(options);
+
+    if (order === 'asc') {
       return {
         ...response,
         inspect,
