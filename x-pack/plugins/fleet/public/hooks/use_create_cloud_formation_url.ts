@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CLOUDBEAT_AWS } from '@kbn/cloud-security-posture-plugin/common/constants';
-
 import type { PackagePolicy, PackagePolicyInput } from '../../common';
 
 import { useKibanaVersion } from './use_kibana_version';
 import { useGetSettings } from './use_request';
 
 type AwsAccountType = 'single_account' | 'organization_account';
+
+const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 
 const getAwsAccountType = (input?: PackagePolicyInput): AwsAccountType | undefined =>
   input?.streams[0].vars?.['aws.account_type'].value;
