@@ -7,6 +7,7 @@
  */
 
 import React, { ReactNode } from 'react';
+import { css } from '@emotion/css';
 
 import { EuiNotificationBadge } from '@elastic/eui';
 import { Toast } from '@kbn/core-notifications-browser';
@@ -93,6 +94,12 @@ function groupByKey(allToasts: Toast[]) {
   return toastGroups;
 }
 
+const floatTopRight = css`
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  scale: 1.2;
+`;
 
 export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
   const hostRef = React.useRef<HTMLSpanElement>(null);
@@ -108,7 +115,7 @@ export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
   return (
     <React.Fragment>
       {renderedTitle}{' '}
-      <EuiNotificationBadge color="subdued" className="eui-alignTop">
+      <EuiNotificationBadge color="subdued" className={floatTopRight}>
         {counter}
       </EuiNotificationBadge>
     </React.Fragment>
