@@ -12,6 +12,11 @@ export enum PrivilegeType {
   AGENT_CONFIG = 'config_agent:read',
 }
 
+export enum ClusterPrivilegeType {
+  MANAGE_API_KEY = 'manage_api_key',
+  MANAGE_OWN_API_KEY = 'manage_own_api_key',
+}
+
 export const privilegesTypeRt = t.array(
   t.union([
     t.literal(PrivilegeType.EVENT),
