@@ -17,7 +17,7 @@ import {
   ServerlessSecurityRoles,
 } from './kibana_roles';
 
-const igonoreHttp409Error = (error: AxiosError) => {
+const ignoreHttp409Error = (error: AxiosError) => {
   if (error?.response?.status === 409) {
     return;
   }
@@ -67,11 +67,15 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     await this.kbnClient
       .request({
         method: 'PUT',
-        path: `/api/security/role/${roleName}?createOnly=true`,
+        path: `/api/security/role/${roleName}`,
         body: roleDefinition,
       })
-      .catch(igonoreHttp409Error)
-      .catch(this.logPromiseError);
+      .catch(ignoreHttp409Error)
+      .catch(this.logPromiseError)
+      .then((response) => {
+        this.logger.info(`Role [${role}] created/updated`, response?.data);
+        return response;
+      });
   }
 
   private async createUser(
@@ -95,8 +99,12 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         path: `/internal/security/users/${username}`,
         body: user,
       })
-      .catch(igonoreHttp409Error)
-      .catch(this.logPromiseError);
+      .catch(ignoreHttp409Error)
+      .catch(this.logPromiseError)
+      .then((response) => {
+        this.logger.info(`User [${username}] created/updated`, response?.data);
+        return response;
+      });
   }
 }
 

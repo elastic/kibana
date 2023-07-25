@@ -1,4 +1,12 @@
+# -----
 # Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+#
+# Changes that needed to be done locally here:
+#
+# 1. indentation of 'privileges' for role endpoint_operations_manager was not correct
+# 2. instances of 'application.spaces.privileges[0]' of '*' were changed to 'all'
+#
+# -----
 t1_analyst:
   cluster:
   indices:
@@ -48,7 +56,7 @@ t1_analyst:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 t2_analyst:
@@ -102,7 +110,7 @@ t2_analyst:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 t3_analyst:
@@ -177,7 +185,7 @@ t3_analyst:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 threat_intelligence_analyst:
@@ -234,7 +242,7 @@ threat_intelligence_analyst:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 rule_author:
@@ -306,7 +314,7 @@ rule_author:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 soc_manager:
@@ -381,7 +389,7 @@ soc_manager:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 detections_admin:
@@ -441,7 +449,7 @@ detections_admin:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 platform_engineer:
@@ -497,7 +505,7 @@ platform_engineer:
       resources: "*"
     - application: spaces
       privileges:
-        - "*"
+        - all
       resources: "*"
 
 endpoint_operations_manager:
