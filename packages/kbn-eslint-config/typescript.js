@@ -23,7 +23,6 @@ module.exports = {
         '@typescript-eslint',
         'ban',
         'import',
-        'prefer-object-spread',
         'eslint-comments'
       ],
 
