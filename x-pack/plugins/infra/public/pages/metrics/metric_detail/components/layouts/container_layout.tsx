@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withTheme } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
 import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { GaugesSectionVis } from '../gauges_section_vis';
-import { LayoutContent } from '../layout_content';
 import { MetadataDetails } from '../metadata_details';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
@@ -20,7 +20,7 @@ export const ContainerLayout = withTheme(
   ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <React.Fragment>
       <MetadataDetails />
-      <LayoutContent>
+      <EuiPanel>
         <Section
           navLabel={i18n.translate(
             'xpack.infra.metricDetailPage.containerMetricsLayout.layoutLabel',
@@ -294,7 +294,7 @@ export const ContainerLayout = withTheme(
             />
           </SubSection>
         </Section>
-      </LayoutContent>
+      </EuiPanel>
     </React.Fragment>
   )
 );

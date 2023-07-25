@@ -5536,6 +5536,36 @@
       },
       {
         "parentPluginId": "fieldFormats",
+        "id": "def-common.DURATION_INPUT_FORMATS",
+        "type": "Array",
+        "tags": [],
+        "label": "DURATION_INPUT_FORMATS",
+        "description": [],
+        "signature": [
+          "{ text: any; kind: string; }[]"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.DURATION_OUTPUT_FORMATS",
+        "type": "Array",
+        "tags": [],
+        "label": "DURATION_OUTPUT_FORMATS",
+        "description": [],
+        "signature": [
+          "({ text: any; method: string; shortText?: undefined; } | { text: any; shortText: any; method: string; })[]"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatConfig",
         "type": "Type",
         "tags": [],
@@ -6612,6 +6642,36 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.DEFAULT_DURATION_INPUT_FORMAT",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DURATION_INPUT_FORMAT",
+        "description": [],
+        "signature": [
+          "{ text: any; kind: string; }"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.DEFAULT_DURATION_OUTPUT_FORMAT",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DURATION_OUTPUT_FORMAT",
+        "description": [],
+        "signature": [
+          "{ text: any; method: string; }"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

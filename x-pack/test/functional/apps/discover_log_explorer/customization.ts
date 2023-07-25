@@ -4,26 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'navigationalSearch']);
   const testSubjects = getService('testSubjects');
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
-    'doc_table:legacy': false,
-  };
 
   describe('Customizations', () => {
     before('initialize tests', async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.uiSettings.update(defaultSettings);
     });
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 
     describe('when Discover is loaded with the log-explorer profile', () => {
@@ -33,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('dataset-selector-popover');
 
         // Assert it renders on log-explorer profile
-        await PageObjects.common.navigateToActualUrl('discover', 'p/log-explorer');
+        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         await testSubjects.existOrFail('dataset-selector-popover');
       });
 
@@ -48,13 +43,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverSaveButton');
 
         // Assert it renders on log-explorer profile
-        await PageObjects.common.navigateToActualUrl('discover', 'p/log-explorer');
+        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         await testSubjects.missingOrFail('discoverNewButton');
         await testSubjects.missingOrFail('discoverOpenButton');
         await testSubjects.existOrFail('shareTopNavButton');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.existOrFail('openInspectorButton');
         await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it('should add a searchable deep link to the profile page', async () => {
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.navigationalSearch.searchFor('discover log explorer');
+
+        const results = await PageObjects.navigationalSearch.getDisplayedResults();
+        expect(results[0].label).to.eql('Discover / Logs Explorer');
       });
     });
   });
