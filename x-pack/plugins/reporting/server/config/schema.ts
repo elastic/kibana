@@ -121,7 +121,7 @@ const ExportTypeSchema = schema.object({
       schema.boolean({ defaultValue: false })
     ),
   }),
-  // Pdf reports are disabled in serverelastless 
+  // Pdf reports are disabled in serverelastless
   pdf: schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
