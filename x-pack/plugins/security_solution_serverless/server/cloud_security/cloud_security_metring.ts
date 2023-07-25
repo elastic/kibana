@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MeteringCallbackInput, UsageRecord } from '../types';
 import { getCspmUsageRecord } from './cspm_metring_task';
+import type { MeteringCallbackInput, UsageRecord } from '../types';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
 
@@ -34,7 +34,9 @@ export const cloudSecurityMetringCallback = async ({
       lastSuccessfulReport,
     });
 
-    cspmUsageRecord ? cloudSecurityUsageRecords.push(cspmUsageRecord) : cloudSecurityUsageRecords;
+    if (cspmUsageRecord) {
+      cloudSecurityUsageRecords.push(cspmUsageRecord);
+    }
 
     return cloudSecurityUsageRecords;
   } catch (err) {

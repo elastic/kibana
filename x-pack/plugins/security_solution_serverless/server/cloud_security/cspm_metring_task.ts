@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CloudSecurityMeteringCallbackInput, UsageRecord } from '../types';
 import {
   CSPM_POLICY_TEMPLATE,
   CSP_LATEST_FINDINGS_DATA_VIEW,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-
 import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metring';
 import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
+
+import type { CloudSecurityMeteringCallbackInput, UsageRecord } from '../types';
 
 const CSPM_CYCLE_SCAN_FREQUENT = '24h';
 const CSPM_BUCKET_SUB_TYPE_NAME = 'CSPM';
@@ -40,7 +40,7 @@ export const getCspmUsageRecord = async ({
       getFindingsByResourceAggQuery()
     );
 
-    if (!!response.aggregations) {
+    if (!response.aggregations) {
       return;
     }
     const cspmResourceCount = response.aggregations.unique_resources.value;
@@ -70,7 +70,6 @@ export const getCspmUsageRecord = async ({
     return usageRecords;
   } catch (err) {
     logger.error(`Failed to fetch CSPM metering data ${err}`);
-    return;
   }
 };
 
