@@ -63,15 +63,19 @@ const getDefaultQuery = ({ query, filters }: any) => ({
   pageIndex: 0,
 });
 
-export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) => {
-  const params = useParams<{ resourceId: string }>();
-  const resourceId = decodeURIComponent(params.resourceId);
-
+// TODO: fix any type for data
+const ResourceVulnerabilitiesDataGrid = ({
+  dataView,
+  data,
+  isFetching,
+}: {
+  dataView: DataView;
+  data: any;
+  isFetching: boolean;
+}) => {
   const {
     pageIndex,
-    query,
     sort,
-    queryError,
     pageSize,
     onChangeItemsPerPage,
     onChangePage,
@@ -101,35 +105,6 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
     },
     [onSort, sort]
   );
-
-  const multiFieldsSort = useMemo(() => {
-    return sort.map(({ id, direction }: { id: string; direction: string }) => {
-      if (id === vulnerabilitiesColumns.severity) {
-        return severitySortScript(direction);
-      }
-      if (id === vulnerabilitiesColumns.package) {
-        return getCaseInsensitiveSortScript(id, direction);
-      }
-
-      return {
-        [id]: direction,
-      };
-    });
-  }, [sort]);
-
-  const { data, isLoading, isFetching } = useLatestVulnerabilities({
-    query: {
-      ...query,
-      bool: {
-        ...query!.bool,
-        filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
-      },
-    },
-    sort: multiFieldsSort,
-    enabled: !queryError,
-    pageIndex,
-    pageSize,
-  });
 
   const invalidIndex = -1;
 
@@ -293,11 +268,130 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
     [pageSize, setUrlQuery]
   );
 
+  const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
+
+  if (data.page.length === 0) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
+
+  return (
+    <>
+      <EuiProgress
+        size="xs"
+        color="accent"
+        style={{
+          opacity: isFetching ? 1 : 0,
+        }}
+      />
+      <EuiDataGrid
+        className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
+        aria-label={VULNERABILITIES}
+        columns={columns}
+        columnVisibility={{
+          visibleColumns: columns.map(({ id }) => id),
+          setVisibleColumns: () => {},
+        }}
+        height={undefined}
+        width={undefined}
+        schemaDetectors={[severitySchemaConfig]}
+        rowCount={limitedTotalItemCount}
+        rowHeightsOptions={{
+          defaultHeight: 40,
+        }}
+        toolbarVisibility={{
+          showColumnSelector: false,
+          showDisplaySelector: false,
+          showKeyboardShortcuts: false,
+          showFullScreenSelector: false,
+          additionalControls: {
+            left: {
+              prepend: (
+                <>
+                  <EuiButtonEmpty size="xs" color="text">
+                    {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                      defaultMessage:
+                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                      values: { total: data?.total },
+                    })}
+                  </EuiButtonEmpty>
+                </>
+              ),
+            },
+          },
+        }}
+        gridStyle={{
+          border: 'horizontal',
+          cellPadding: 'l',
+          stripes: false,
+          rowHover: 'none',
+          header: 'underline',
+        }}
+        renderCellValue={renderCellValue}
+        inMemory={{ level: 'enhancements' }}
+        sorting={{ columns: sort, onSort: onSortHandler }}
+        pagination={{
+          pageIndex,
+          pageSize,
+          pageSizeOptions: [10, 25, 100],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+      />
+      {isLastLimitedPage && <LimitedResultsBar />}
+      {showVulnerabilityFlyout && selectedVulnerability && (
+        <VulnerabilityFindingFlyout
+          flyoutIndex={selectedVulnerabilityIndex}
+          vulnerabilityRecord={selectedVulnerability}
+          totalVulnerabilitiesCount={limitedTotalItemCount}
+          onPaginate={onPaginateFlyout}
+          closeFlyout={onCloseFlyout}
+          isLoading={isFetching}
+        />
+      )}
+    </>
+  );
+};
+export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) => {
+  const params = useParams<{ resourceId: string }>();
+  const resourceId = decodeURIComponent(params.resourceId);
+
+  const { pageIndex, query, sort, queryError, pageSize, setUrlQuery } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
+
+  const multiFieldsSort = useMemo(() => {
+    return sort.map(({ id, direction }: { id: string; direction: string }) => {
+      if (id === vulnerabilitiesColumns.severity) {
+        return severitySortScript(direction);
+      }
+      if (id === vulnerabilitiesColumns.package) {
+        return getCaseInsensitiveSortScript(id, direction);
+      }
+
+      return {
+        [id]: direction,
+      };
+    });
+  }, [sort]);
+
+  const { data, isLoading, isFetching } = useLatestVulnerabilities({
+    query: {
+      ...query,
+      bool: {
+        ...query!.bool,
+        filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
+      },
+    },
+    sort: multiFieldsSort,
+    enabled: !queryError,
+    pageIndex,
+    pageSize,
+  });
+
   const error = queryError || null;
 
-  if (error) {
-    return <ErrorCallout error={error as Error} />;
-  }
   if (isLoading) {
     return defaultLoadingRenderer();
   }
@@ -305,8 +399,6 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
   if (!data?.page) {
     return defaultNoDataRenderer();
   }
-
-  const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
   return (
     <>
@@ -363,83 +455,9 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
       />
       <EuiSpacer />
       <EuiSpacer size="m" />
-      {data.page.length === 0 ? (
-        <EmptyState onResetFilters={onResetFilters} />
-      ) : (
-        <>
-          <EuiProgress
-            size="xs"
-            color="accent"
-            style={{
-              opacity: isFetching ? 1 : 0,
-            }}
-          />
-          <EuiDataGrid
-            className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
-            aria-label={VULNERABILITIES}
-            columns={columns}
-            columnVisibility={{
-              visibleColumns: columns.map(({ id }) => id),
-              setVisibleColumns: () => {},
-            }}
-            height={undefined}
-            width={undefined}
-            schemaDetectors={[severitySchemaConfig]}
-            rowCount={limitedTotalItemCount}
-            rowHeightsOptions={{
-              defaultHeight: 40,
-            }}
-            toolbarVisibility={{
-              showColumnSelector: false,
-              showDisplaySelector: false,
-              showKeyboardShortcuts: false,
-              showFullScreenSelector: false,
-              additionalControls: {
-                left: {
-                  prepend: (
-                    <>
-                      <EuiButtonEmpty size="xs" color="text">
-                        {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
-                          defaultMessage:
-                            '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                          values: { total: data?.total },
-                        })}
-                      </EuiButtonEmpty>
-                    </>
-                  ),
-                },
-              },
-            }}
-            gridStyle={{
-              border: 'horizontal',
-              cellPadding: 'l',
-              stripes: false,
-              rowHover: 'none',
-              header: 'underline',
-            }}
-            renderCellValue={renderCellValue}
-            inMemory={{ level: 'enhancements' }}
-            sorting={{ columns: sort, onSort: onSortHandler }}
-            pagination={{
-              pageIndex,
-              pageSize,
-              pageSizeOptions: [10, 25, 100],
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
-          />
-          {isLastLimitedPage && <LimitedResultsBar />}
-          {showVulnerabilityFlyout && selectedVulnerability && (
-            <VulnerabilityFindingFlyout
-              flyoutIndex={selectedVulnerabilityIndex}
-              vulnerabilityRecord={selectedVulnerability}
-              totalVulnerabilitiesCount={limitedTotalItemCount}
-              onPaginate={onPaginateFlyout}
-              closeFlyout={onCloseFlyout}
-              isLoading={isFetching}
-            />
-          )}
-        </>
+      {error && <ErrorCallout error={error as Error} />}
+      {!error && (
+        <ResourceVulnerabilitiesDataGrid dataView={dataView} data={data} isFetching={isFetching} />
       )}
     </>
   );
