@@ -923,7 +923,7 @@ describe('get()', () => {
         getEventLogClient,
       });
 
-      await actionsClient.get({ id: 'system-connector-.cases' });
+      await expect(actionsClient.get({ id: 'system-connector-.cases' })).rejects.toThrow();
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
@@ -1164,7 +1164,7 @@ describe('get()', () => {
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
-  it('return system action with id', async () => {
+  it('throws when getting a system action by default', async () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -1194,18 +1194,51 @@ describe('get()', () => {
       getEventLogClient,
     });
 
-    const result = await actionsClient.get({ id: 'system-connector-.cases' });
+    await expect(
+      actionsClient.get({ id: 'system-connector-.cases' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+  });
 
-    expect(result).toEqual({
-      id: 'system-connector-.cases',
+  it('does not throw when getting a system action if throwIfSystemAction=false', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    expect(
+      await actionsClient.get({ id: 'system-connector-.cases', throwIfSystemAction: false })
+    ).toEqual({
       actionTypeId: '.cases',
-      isPreconfigured: false,
+      id: 'system-connector-.cases',
       isDeprecated: false,
+      isPreconfigured: false,
       isSystemAction: true,
       name: 'System action: .cases',
     });
-
-    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 });
 
@@ -1412,6 +1445,11 @@ describe('getAll()', () => {
             foo: 'bar',
           },
         },
+        /**
+         * System actions will not
+         * be returned from getAll
+         * if no options are provided
+         */
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
@@ -1432,12 +1470,111 @@ describe('getAll()', () => {
 
     expect(result).toEqual([
       {
-        id: 'system-connector-.cases',
+        id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+    ]);
+  });
+
+  test('get system actions correctly', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    const result = await actionsClient.getAll({ includeSystemActions: true });
+
+    expect(result).toEqual([
+      {
         actionTypeId: '.cases',
-        name: 'System action: .cases',
+        id: 'system-connector-.cases',
+        isDeprecated: false,
         isPreconfigured: false,
         isSystemAction: true,
-        isDeprecated: false,
+        name: 'System action: .cases',
         referencedByCount: 2,
       },
       {
@@ -1673,11 +1810,7 @@ describe('getBulk()', () => {
       getEventLogClient,
     });
 
-    const result = await actionsClient.getBulk([
-      '1',
-      'testPreconfigured',
-      'system-connector-.cases',
-    ]);
+    const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
 
     expect(result).toEqual([
       {
@@ -1691,17 +1824,6 @@ describe('getBulk()', () => {
         config: { foo: 'bar' },
       },
       {
-        id: 'system-connector-.cases',
-        actionTypeId: '.cases',
-        name: 'System action: .cases',
-        config: {},
-        secrets: {},
-        isDeprecated: false,
-        isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: true,
-      },
-      {
         id: '1',
         actionTypeId: 'test',
         name: 'test',
@@ -1710,6 +1832,188 @@ describe('getBulk()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
+      },
+    ]);
+  });
+
+  test('should throw an error if a system action is requested by default', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+            isMissingSecrets: false,
+          },
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'])
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+  });
+
+  test('should throw an error if a system action is requested', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+            isMissingSecrets: false,
+          },
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    expect(
+      await actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'], false)
+    ).toEqual([
+      {
+        actionTypeId: '.slack',
+        config: { foo: 'bar' },
+        id: 'testPreconfigured',
+        isDeprecated: false,
+        isPreconfigured: true,
+        isSystemAction: false,
+        name: 'test',
+        secrets: {},
+      },
+      {
+        actionTypeId: '.cases',
+        config: {},
+        id: 'system-connector-.cases',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: true,
+        name: 'System action: .cases',
+        secrets: {},
+      },
+      {
+        actionTypeId: 'test',
+        config: { foo: 'bar' },
+        id: '1',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: false,
+        name: 'test',
       },
     ]);
   });
@@ -3281,6 +3585,172 @@ describe('bulkEnqueueExecution()', () => {
     );
 
     expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
+  });
+});
+
+describe('listType()', () => {
+  it('filters action types by feature ID', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+    ]);
+  });
+
+  it('filters out system action types when not defining options', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
+
+    expect(await actionsClient.listTypes()).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+      {
+        id: 'my-action-type-2',
+        name: 'My action type 2',
+        isSystemActionType: false,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['cases'],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+      },
+    ]);
+  });
+
+  it('return system action types when defining options', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
+
+    expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+      {
+        id: '.cases',
+        name: 'Cases',
+        isSystemActionType: true,
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+      },
+    ]);
   });
 });
 

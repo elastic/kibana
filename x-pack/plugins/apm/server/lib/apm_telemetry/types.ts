@@ -108,6 +108,7 @@ export interface APMUsage {
     max_error_groups_per_service: TimeframeMap;
     traces: TimeframeMap;
     services: TimeframeMap;
+    environments: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };

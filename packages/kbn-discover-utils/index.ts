@@ -6,4 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { getDocId, buildDataTableRecord, buildDataTableRecordList } from './src';
+export {
+  IgnoredReason,
+  buildDataTableRecord,
+  buildDataTableRecordList,
+  formatFieldValue,
+  formatHit,
+  getDocId,
+  getIgnoredReason,
+  getShouldShowFieldHandler,
+  isNestedFieldParent,
+  usePager,
+} from './src';

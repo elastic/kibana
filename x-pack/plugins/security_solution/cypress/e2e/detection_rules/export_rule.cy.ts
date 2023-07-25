@@ -17,13 +17,13 @@ import {
 import {
   filterByElasticRules,
   selectNumberOfRules,
-  bulkExportRules,
   selectAllRules,
   waitForRuleExecution,
   exportRule,
   importRules,
   expectManagementTableRules,
 } from '../../tasks/alerts_detection_rules';
+import { bulkExportRules } from '../../tasks/rules_bulk_actions';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
 import { createRule } from '../../tasks/api_calls/rules';
