@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { isEqual } from 'lodash';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
   ThreatMatchRuleCreateProps,
@@ -442,6 +441,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      /**
+       * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+       */
       it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         const { id } = await createRule(supertest, log, rule);
@@ -469,10 +471,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           };
-          if (!isEqual(expected, stats)) {
-            expect(JSON.stringify(expected)).to.eql(JSON.stringify(stats));
-          }
-          expect(stats).to.eql(expected);
+          expect(stats).to.eql(
+            expected,
+            `expected: ${JSON.stringify(expected)}, actual: ${JSON.stringify(stats)}`
+          );
         });
       });
 
