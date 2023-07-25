@@ -94,7 +94,7 @@ async function throwIfMaxUserActionsReached({
   });
 
   Object.keys(currentTotals).forEach((caseId) => {
-    const totalToAdd = userActionsDict?.[caseId].length ?? 0;
+    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
 
     if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
       throw Boom.badRequest(
