@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export const FirstLastSeenQuery = 'firstlastseen';
+import { Direction } from '@kbn/timelines-plugin/common';
 
-export type {
-  FirstLastSeenRequestOptions,
-  FirstLastSeenStrategyResponse,
-} from '../../../api/search_strategy';
+import { z } from 'zod';
+
+export const order = z.enum([Direction.asc, Direction.desc]);
