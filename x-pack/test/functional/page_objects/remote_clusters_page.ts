@@ -37,7 +37,6 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('setupTrustDoneButton');
       await testSubjects.setCheckbox('remoteClusterTrustCheckbox', 'check');
       await testSubjects.click('remoteClusterTrustSubmitButton');
-
     },
     async getRemoteClustersList() {
       const table = await testSubjects.find('remoteClusterListTable');
