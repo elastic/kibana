@@ -165,5 +165,6 @@
     "@kbn/security-solution-navigation",
     "@kbn/discover-plugin",
     "@kbn/data-view-editor-plugin",
+    "@kbn/navigation-plugin",
   ]
 }
