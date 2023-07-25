@@ -185,7 +185,7 @@ export const MultiFieldMapping: React.FC = () => {
           >
             <EuiFieldText
               prepend={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.documentId',
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetFieldPrefix',
                 { defaultMessage: 'ml.inference.' }
               )}
               onChange={(e) => setTargetField(e.target.value)}
