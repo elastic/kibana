@@ -61,6 +61,7 @@ const AssistantComponent: React.FC<Props> = ({
 }) => {
   const {
     actionTypeRegistry,
+    assistantTelemetry,
     augmentMessageCodeBlocks,
     conversations,
     defaultAllow,
@@ -74,6 +75,13 @@ const AssistantComponent: React.FC<Props> = ({
     title,
     allSystemPrompts,
   } = useAssistantContext();
+
+  useEffect(() => {
+    if (shouldRefocusPrompt && conversationId) {
+      // this indicates consumer (timeline) has invoked the chat
+      assistantTelemetry?.reportAssistantInvoked({ location: conversationId });
+    }
+  }, [assistantTelemetry, conversationId, shouldRefocusPrompt]);
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
