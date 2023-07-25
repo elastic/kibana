@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import { ROLES } from '../../../../../common/test';
-import { getNewRule } from '../../../../objects/rule';
+import { ROLES } from '../../../common/test';
+import { getNewRule } from '../../objects/rule';
 import {
   COLLAPSED_ACTION_BTN,
   RULE_CHECKBOX,
   RULE_NAME,
-} from '../../../../screens/alerts_detection_rules';
-import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
-import { waitForRulesTableToBeLoaded } from '../../../../tasks/alerts_detection_rules';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
-import {
-  dismissCallOut,
-  getCallOut,
-  waitForCallOutToBeShown,
-} from '../../../../tasks/common/callouts';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
+} from '../../screens/alerts_detection_rules';
+import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
+import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
+import { createRule } from '../../tasks/api_calls/rules';
+import { cleanKibana } from '../../tasks/common';
+import { dismissCallOut, getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 

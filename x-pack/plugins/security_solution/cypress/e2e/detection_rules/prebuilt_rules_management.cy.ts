@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -17,7 +17,7 @@ import {
   RULE_SWITCH,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   INSTALL_ALL_RULES_BUTTON,
-} from '../../../screens/alerts_detection_rules';
+} from '../../screens/alerts_detection_rules';
 import {
   confirmRulesDelete,
   deleteFirstRule,
@@ -25,12 +25,7 @@ import {
   selectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
-} from '../../../tasks/alerts_detection_rules';
-import {
-  deleteSelectedRules,
-  disableSelectedRules,
-  enableSelectedRules,
-} from '../../../tasks/rules_bulk_actions';
+} from '../../tasks/alerts_detection_rules';
 import {
   deleteSelectedRules,
   disableSelectedRules,
@@ -39,14 +34,10 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
-} from '../../../tasks/api_calls/prebuilt_rules';
-import {
-  cleanKibana,
-  deleteAlertsAndRules,
-  deletePrebuiltRulesAssets,
-} from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+} from '../../tasks/api_calls/prebuilt_rules';
+import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 const rules = Array.from(Array(5)).map((_, i) => {
   return createRuleAssetSavedObject({

@@ -10,7 +10,7 @@ import {
   REFRESH_RULES_STATUS,
   REFRESH_SETTINGS_SWITCH,
   REFRESH_SETTINGS_SELECTION_NOTE,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../screens/alerts_detection_rules';
 import {
   checkAutoRefresh,
   waitForRulesTableToBeLoaded,
@@ -22,14 +22,14 @@ import {
   disableAutoRefresh,
   checkAutoRefreshIsDisabled,
   checkAutoRefreshIsEnabled,
-} from '../../../../tasks/alerts_detection_rules';
-import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
+} from '../../tasks/alerts_detection_rules';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
-import { getNewRule } from '../../../../objects/rule';
-import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { createRule } from '../../tasks/api_calls/rules';
+import { cleanKibana } from '../../tasks/common';
+import { getNewRule } from '../../objects/rule';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 

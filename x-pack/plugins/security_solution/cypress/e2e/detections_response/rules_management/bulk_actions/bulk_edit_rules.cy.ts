@@ -87,6 +87,7 @@ import {
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../../../objects/rule';
+
 import {
   getAvailablePrebuiltRulesCount,
   excessivelyInstallAllPrebuiltRules,

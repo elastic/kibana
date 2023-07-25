@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-import { FIELD } from '../../../screens/alerts_details';
-import { INTEGRATIONS, INTEGRATIONS_STATUS } from '../../../screens/rule_details';
+import { FIELD } from '../../screens/alerts_details';
+import { INTEGRATIONS, INTEGRATIONS_STATUS } from '../../screens/rule_details';
 import {
   INTEGRATIONS_POPOVER,
   INTEGRATIONS_POPOVER_TITLE,
   RULE_NAME,
-} from '../../../screens/alerts_detection_rules';
+} from '../../screens/alerts_detection_rules';
 
-import { cleanFleet } from '../../../tasks/api_calls/fleet';
-import { importRule } from '../../../tasks/api_calls/rules';
+import { cleanFleet } from '../../tasks/api_calls/fleet';
+import { importRule } from '../../tasks/api_calls/rules';
 import {
   disableRelatedIntegrations,
   enableRelatedIntegrations,
-} from '../../../tasks/api_calls/kibana_advanced_settings';
+} from '../../tasks/api_calls/kibana_advanced_settings';
 
-import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
-import { expandFirstAlert } from '../../../tasks/alerts';
-import { filterBy, openTable } from '../../../tasks/alerts_details';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { installAwsCloudFrontWithPolicy } from '../../../tasks/integrations';
+import { cleanKibana } from '../../tasks/common';
+import { login, visit } from '../../tasks/login';
+import { expandFirstAlert } from '../../tasks/alerts';
+import { filterBy, openTable } from '../../tasks/alerts_details';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { installAwsCloudFrontWithPolicy } from '../../tasks/integrations';
 import {
   enableRule,
   goToTheRuleDetailsOf,
   openIntegrationsPopover,
   waitForRulesTableToShow,
   waitForRuleToUpdate,
-} from '../../../tasks/alerts_detection_rules';
+} from '../../tasks/alerts_detection_rules';
 
 /*
 Note that the rule we are using for testing purposes has the following characteristics, changing that may affect the coverage.

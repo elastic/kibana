@@ -6,16 +6,16 @@
  */
 
 import { encode } from '@kbn/rison';
-import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { cleanKibana, resetRulesTableState } from '../../tasks/common';
+import { login, visit } from '../../tasks/login';
 import {
   DASHBOARDS_URL,
   KIBANA_HOME,
   SECURITY_DETECTIONS_RULES_MANAGEMENT_URL,
   SECURITY_DETECTIONS_RULES_MONITORING_URL,
   SECURITY_DETECTIONS_RULES_URL,
-} from '../../../../urls/navigation';
-import { getNewRule } from '../../../../objects/rule';
+} from '../../urls/navigation';
+import { getNewRule } from '../../objects/rule';
 import {
   filterByCustomRules,
   filterBySearchTerm,
@@ -34,8 +34,8 @@ import {
   expectFilterByPrebuiltRules,
   expectFilterByEnabledRules,
   expectManagementTableRules,
-} from '../../../../tasks/alerts_detection_rules';
-import { createRule } from '../../../../tasks/api_calls/rules';
+} from '../../tasks/alerts_detection_rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
   expectTablePage,
@@ -43,7 +43,7 @@ import {
   goToTablePage,
   setRowsPerPageTo,
   sortByTableColumn,
-} from '../../../../tasks/table_pagination';
+} from '../../tasks/table_pagination';
 
 function createTestRules(): void {
   createRule(getNewRule({ rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false }));

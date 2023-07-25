@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
   expectNumberOfRulesShownOnPage,
-} from '../../../../tasks/rule_filters';
+} from '../../tasks/rule_filters';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
+import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
-import { waitForRulesTableToBeLoaded } from '../../../../tasks/alerts_detection_rules';
+import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 
-import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
-import {
-  deleteIndex,
-  createIndex,
-  createDocument,
-} from '../../../../tasks/api_calls/elasticsearch';
+import { createRule, waitForRulesToFinishExecution } from '../../tasks/api_calls/rules';
+import { deleteIndex, createIndex, createDocument } from '../../tasks/api_calls/elasticsearch';
 
-import { getNewRule } from '../../../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 
 describe('Rule management filters', () => {
   before(() => {

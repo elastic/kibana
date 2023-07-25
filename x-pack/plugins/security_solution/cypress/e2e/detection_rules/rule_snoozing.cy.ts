@@ -6,18 +6,14 @@
  */
 
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
-import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { getNewRule } from '../../../objects/rule';
-import {
-  ruleDetailsUrl,
-  ruleEditUrl,
-  SECURITY_DETECTIONS_RULES_URL,
-} from '../../../urls/navigation';
-import { internalAlertingSnoozeRule } from '../../../urls/routes';
-import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../../screens/alerts_detection_rules';
+import type { RuleResponse } from '../../../common/api/detection_engine';
+import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../tasks/api_calls/rules';
+import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+import { getNewRule } from '../../objects/rule';
+import { ruleDetailsUrl, ruleEditUrl, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { internalAlertingSnoozeRule } from '../../urls/routes';
+import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
 import {
   expectRuleSnoozed,
   expectRuleSnoozedInTable,
@@ -29,17 +25,17 @@ import {
   snoozeRule,
   snoozeRuleInTable,
   unsnoozeRuleInTable,
-} from '../../../tasks/rule_snoozing';
-import { createSlackConnector } from '../../../tasks/api_calls/connectors';
-import { duplicateFirstRule, importRules } from '../../../tasks/alerts_detection_rules';
-import { goToActionsStepTab } from '../../../tasks/create_new_rule';
-import { goToRuleEditSettings } from '../../../tasks/rule_details';
-import { actionFormSelector } from '../../../screens/common/rule_actions';
-import { RULE_INDICES } from '../../../screens/create_new_rule';
-import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
-import { saveEditedRule } from '../../../tasks/edit_rule';
-import { DISABLED_SNOOZE_BADGE } from '../../../screens/rule_snoozing';
-import { TOOLTIP } from '../../../screens/common';
+} from '../../tasks/rule_snoozing';
+import { createSlackConnector } from '../../tasks/api_calls/connectors';
+import { duplicateFirstRule, importRules } from '../../tasks/alerts_detection_rules';
+import { goToActionsStepTab } from '../../tasks/create_new_rule';
+import { goToRuleEditSettings } from '../../tasks/rule_details';
+import { actionFormSelector } from '../../screens/common/rule_actions';
+import { RULE_INDICES } from '../../screens/create_new_rule';
+import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
+import { saveEditedRule } from '../../tasks/edit_rule';
+import { DISABLED_SNOOZE_BADGE } from '../../screens/rule_snoozing';
+import { TOOLTIP } from '../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 

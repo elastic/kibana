@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { getIndexConnector } from '../../../objects/connector';
-import { getSimpleCustomQueryRule } from '../../../objects/rule';
+import { getIndexConnector } from '../../objects/connector';
+import { getSimpleCustomQueryRule } from '../../objects/rule';
 
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { deleteIndex, waitForNewDocumentToBeIndexed } from '../../../tasks/api_calls/elasticsearch';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { deleteIndex, waitForNewDocumentToBeIndexed } from '../../tasks/api_calls/elasticsearch';
 import {
   cleanKibana,
   deleteAlertsAndRules,
   deleteConnectors,
   deleteDataView,
-} from '../../../tasks/common';
+} from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
   fillRuleAction,
   fillScheduleRuleAndContinue,
-} from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+} from '../../tasks/create_new_rule';
+import { login, visit } from '../../tasks/login';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Rule actions during detection rule creation', () => {
   const indexConnector = getIndexConnector();

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../../screens/alerts_detection_rules';
-import {
-  deleteFirstRule,
-  waitForRulesTableToBeLoaded,
-} from '../../../tasks/alerts_detection_rules';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
+import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../screens/alerts_detection_rules';
+import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
   createAndInstallMockedPrebuiltRules,

@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
   SELECT_ALL_RULES_BTN,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../screens/alerts_detection_rules';
 import {
   selectNumberOfRules,
   unselectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
-} from '../../../../tasks/alerts_detection_rules';
+} from '../../tasks/alerts_detection_rules';
 import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+} from '../../tasks/api_calls/prebuilt_rules';
+import { cleanKibana } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',

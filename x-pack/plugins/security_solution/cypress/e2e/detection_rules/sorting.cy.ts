@@ -13,29 +13,25 @@ import {
   FOURTH_RULE,
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../screens/alerts_detection_rules';
 import {
   enableRule,
   waitForRulesTableToBeLoaded,
   waitForRuleToUpdate,
-} from '../../../../tasks/alerts_detection_rules';
-import { login, visit } from '../../../../tasks/login';
+} from '../../tasks/alerts_detection_rules';
+import { login, visit } from '../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { createRule } from '../../tasks/api_calls/rules';
+import { cleanKibana } from '../../tasks/common';
 import {
   getExistingRule,
   getNewOverrideRule,
   getNewRule,
   getNewThresholdRule,
-} from '../../../../objects/rule';
-import {
-  goToTablePage,
-  setRowsPerPageTo,
-  sortByTableColumn,
-} from '../../../../tasks/table_pagination';
-import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
+} from '../../objects/rule';
+import { goToTablePage, setRowsPerPageTo, sortByTableColumn } from '../../tasks/table_pagination';
+import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../screens/table_pagination';
 
 describe('Alerts detection rules', () => {
   before(() => {

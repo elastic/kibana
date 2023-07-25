@@ -6,8 +6,8 @@
  */
 
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
-import type { Rule } from '../../../../public/detection_engine/rule_management/logic/types';
-import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import type { Rule } from '../../../public/detection_engine/rule_management/logic/types';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   GO_BACK_TO_RULES_TABLE_BUTTON,
   INSTALL_ALL_RULES_BUTTON,
@@ -18,23 +18,15 @@ import {
   RULE_CHECKBOX,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
-} from '../../../screens/alerts_detection_rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
+} from '../../screens/alerts_detection_rules';
+import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
   getRuleAssets,
   createAndInstallMockedPrebuiltRules,
-<<<<<<< HEAD:x-pack/plugins/security_solution/cypress/e2e/detections_response/prebuilt_rules/prebuilt_rules_install_update_workflows.cy.ts
-} from '../../../tasks/api_calls/prebuilt_rules';
-import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
-=======
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
->>>>>>> e3cc4a9a2211ac982c57255f3ad26a5110df05d6:x-pack/plugins/security_solution/cypress/e2e/detection_rules/prebuilt_rules_install_update_workflows.cy.ts
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -46,7 +38,7 @@ import {
   assertRuleUpgradeAvailableAndUpgradeAllInPage,
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
-} from '../../../tasks/prebuilt_rules';
+} from '../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   beforeEach(() => {
