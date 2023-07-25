@@ -246,7 +246,7 @@ renameCommand
     ;
 
 renameClause
-    : renameVariable ASSIGN qualifiedName
+    : qualifiedName AS renameVariable
     ;
 
 dissectCommand

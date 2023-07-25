@@ -19,6 +19,16 @@ export const byOperatorDefinition: AutocompleteCommandDefinition = {
   sortText: 'D',
 };
 
+export const asOperatorDefinition: AutocompleteCommandDefinition = {
+  label: 'as',
+  insertText: 'as',
+  kind: 11,
+  detail: i18n.translate('monaco.esql.autocomplete.asDoc', {
+    defaultMessage: 'As',
+  }),
+  sortText: 'D',
+};
+
 export const assignOperatorDefinition: AutocompleteCommandDefinition = {
   label: '=',
   insertText: '=',
