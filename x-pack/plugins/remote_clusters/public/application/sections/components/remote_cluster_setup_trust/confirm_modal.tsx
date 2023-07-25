@@ -46,7 +46,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.remoteClusters.clusterWizard.trustStep.modal.title"
-            defaultMessage="Confirm your configuration"
+            defaultMessage="Have you finished setting up trust?"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -56,7 +56,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
           <p>
             <FormattedMessage
               id="xpack.remoteClusters.clusterWizard.trustStep.body"
-              defaultMessage="Have you setup trust to connect to your remote cluster?"
+              defaultMessage="Have you set up trust to connect to your remote cluster?"
             />
           </p>
         </EuiText>
@@ -95,7 +95,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
         >
           <FormattedMessage
             id="xpack.remoteClusters.clusterWizard.trustStep.modal.createCluster"
-            defaultMessage="Create remote cluster"
+            defaultMessage="Add remote cluster"
           />
         </EuiButton>
       </EuiModalFooter>

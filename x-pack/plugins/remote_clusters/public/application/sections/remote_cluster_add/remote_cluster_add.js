@@ -70,7 +70,7 @@ export class RemoteClusterAdd extends PureComponent {
             description={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClustersDescription"
-                defaultMessage="Add a remote cluster that connects to seed nodes or to a single proxy address."
+                defaultMessage="Create a connection from this cluster to other Elasticsearch clusters."
               />
             }
           />

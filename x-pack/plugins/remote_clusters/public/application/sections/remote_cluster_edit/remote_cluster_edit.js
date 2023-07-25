@@ -112,6 +112,7 @@ export class RemoteClusterEdit extends Component {
         <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
           <EuiPageTemplate.EmptyPrompt
             iconType="warning"
+            color="danger"
             title={
               <h2>
                 <FormattedMessage

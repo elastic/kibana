@@ -30,12 +30,14 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.setValue('remoteClusterFormNameInput', name);
       await comboBox.setCustom('comboBoxInput', seedNode);
 
+      // Submit config form
+      await testSubjects.click('remoteClusterFormSaveButton');
+
       // Complete trust setup
       await testSubjects.click('setupTrustDoneButton');
       await testSubjects.setCheckbox('remoteClusterTrustCheckbox', 'check');
       await testSubjects.click('remoteClusterTrustSubmitButton');
 
-      await testSubjects.click('remoteClusterFormSaveButton');
     },
     async getRemoteClustersList() {
       const table = await testSubjects.find('remoteClusterListTable');

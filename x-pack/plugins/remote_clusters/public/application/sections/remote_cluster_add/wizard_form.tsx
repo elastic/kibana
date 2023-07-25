@@ -47,7 +47,7 @@ export const RemoteClusterWizard = ({
           defaultMessage: 'Add connection information',
         }),
         status: (currentStep === CONFIGURE_CONNECTION ? 'current' : 'complete') as EuiStepStatus,
-        onClick: () => {},
+        onClick: () => setCurrentStep(CONFIGURE_CONNECTION),
       },
       {
         step: SETUP_TRUST,
@@ -55,10 +55,11 @@ export const RemoteClusterWizard = ({
           defaultMessage: 'Establish trust',
         }),
         status: (currentStep === SETUP_TRUST ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => {},
+        disabled: !formState,
+        onClick: () => setCurrentStep(SETUP_TRUST),
       },
     ],
-    [currentStep]
+    [currentStep, formState, setCurrentStep]
   );
 
   // Upon finalizing configuring the connection, we need to temporarily store the

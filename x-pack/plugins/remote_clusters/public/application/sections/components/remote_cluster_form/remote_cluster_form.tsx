@@ -506,7 +506,7 @@ export class RemoteClusterForm extends Component<Props, State> {
             <span id={this.generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-                defaultMessage="Fix errors before continuing."
+                defaultMessage="Some fields require your attention."
               />
             </span>
           }
