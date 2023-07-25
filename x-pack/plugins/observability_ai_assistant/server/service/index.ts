@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
-import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import { once } from 'lodash';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
+import { createConcreteWriteIndex } from '@kbn/alerting-plugin/server';
+import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
-import fnv from 'fnv-plus';
-import { errors } from '@elastic/elasticsearch';
-import type { ObservabilityAIAssistantResourceNames } from './types';
-import { conversationComponentTemplate } from './conversation_component_template';
-import type { IObservabilityAIAssistantClient, IObservabilityAIAssistantService } from './types';
+import { once } from 'lodash';
 import { ObservabilityAIAssistantClient } from './client';
+import { conversationComponentTemplate } from './conversation_component_template';
+import type {
+  IObservabilityAIAssistantClient,
+  IObservabilityAIAssistantService,
+  ObservabilityAIAssistantResourceNames,
+} from './types';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -58,20 +59,10 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-      const versionHash = fnv.fast1a64(stringify(conversationComponentTemplate));
-
       await esClient.cluster.putComponentTemplate({
         create: false,
         name: this.resourceNames.componentTemplate.conversations,
-        template: {
-          ...conversationComponentTemplate,
-          mappings: {
-            _meta: {
-              version: versionHash,
-            },
-            ...conversationComponentTemplate.mappings,
-          },
-        },
+        template: conversationComponentTemplate,
       });
 
       await esClient.ilm.putLifecycle({
@@ -107,57 +98,18 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
 
       const aliasName = this.resourceNames.aliases.conversations;
 
-      const aliasExists = await esClient.indices.existsAlias({
-        name: aliasName,
-      });
-
-      if (!aliasExists) {
-        const firstIndexName = `${this.resourceNames.aliases.conversations}-000001`;
-        try {
-          await esClient.indices.create({
-            index: firstIndexName,
-            aliases: {
-              [aliasName]: {
-                is_write_index: true,
-              },
-            },
-          });
-        } catch (err) {
-          const indexAlreadyExists =
-            (err as errors.ResponseError)?.body?.error?.type ===
-            'resource_already_exists_exception';
-
-          if (!indexAlreadyExists) {
-            throw err;
-          }
-        }
-      }
-
-      const indicesForAlias = await esClient.indices.get({
-        index: aliasName,
-      });
-
-      const writeIndexName = Object.keys(indicesForAlias).find((indexName) => {
-        if (indicesForAlias[indexName]!.aliases?.[aliasName].is_write_index) {
-          return true;
-        }
-        return false;
-      });
-
-      if (!writeIndexName) {
-        throw new Error(`Expected write index for ${aliasName}, but none was found`);
-      }
-
-      const writeIndex = indicesForAlias[writeIndexName];
-
-      if (writeIndex.mappings?._meta?.version !== versionHash) {
-        await esClient.indices.rollover({
+      await createConcreteWriteIndex({
+        esClient,
+        logger: this.logger,
+        totalFieldsLimit: 10000,
+        indexPatterns: {
           alias: aliasName,
-          conditions: {
-            min_docs: 0,
-          },
-        });
-      }
+          pattern: `${aliasName}*`,
+          basePattern: `${aliasName}*`,
+          name: `${aliasName}-000001`,
+          template: this.resourceNames.indexTemplate.conversations,
+        },
+      });
     } catch (error) {
       this.logger.error(`Failed to initialize service: ${error.message}`);
       this.logger.debug(error);
