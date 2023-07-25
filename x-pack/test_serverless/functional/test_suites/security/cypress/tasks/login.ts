@@ -8,41 +8,47 @@
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 import { ServerlessRoleName } from '../../../../../shared/lib';
 
-export const login = (user: ServerlessRoleName | 'elastic' = 'elastic') => {
+/**
+ * Login to Kibana using API (not login page). By default, user will be logged in using
+ * the username and password defined via `KIBANA_USERNAME` and `KIBANA_PASSWORD` cypress env
+ * variables.
+ * @param user
+ */
+export const login = (user: ServerlessRoleName) => {
   const url = new URL(Cypress.config().baseUrl ?? '');
   url.pathname = '/internal/security/login';
 
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
 
-  if (user && user === 'elastic' && user !== username) {
-    throw Error(
-      `Unable to login with user [${user}]. Username defined via [Cypress.env('KIBANA_USERNAME')] is set to [${username}]`
-    );
-  }
+  const sendApiLoginRequest = () => {
+    cy.log(`Authenticating ${username}`);
 
-  if (user && user !== 'elastic') {
-    cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
+    // programmatically authenticate without interacting with the Kibana login page
+    return request({
+      headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
+      method: 'POST',
+      url: url.toString(),
+      body: {
+        providerType: 'basic',
+        providerName: !url.toString().includes('localhost') ? 'cloud-basic' : 'basic',
+        currentURL: '/',
+        params: {
+          username,
+          password,
+        },
+      },
+    });
+  };
+
+  if (user) {
+    return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
       username = loadedUser.username;
       password = loadedUser.password;
+
+      return sendApiLoginRequest();
     });
+  } else {
+    return sendApiLoginRequest();
   }
-
-  cy.log(`Authenticating ${username}`);
-
-  // programmatically authenticate without interacting with the Kibana login page
-  request({
-    headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
-    method: 'POST',
-    url: url.toString(),
-    body: {
-      providerType: 'basic',
-      providerName: !url.toString().includes('localhost') ? 'cloud-basic' : 'basic',
-      currentURL: '/',
-      params: {
-        username,
-        password,
-      },
-    },
-  });
 };
