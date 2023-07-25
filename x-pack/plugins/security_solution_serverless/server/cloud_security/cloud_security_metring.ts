@@ -6,6 +6,7 @@
  */
 
 import { MeteringCallbackInput, UsageRecord } from '../types';
+import { getCnvmUsageRecord } from './cnvm_metring_task';
 import { getCspmUsageRecord } from './cspm_metring_task';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
@@ -35,6 +36,16 @@ export const cloudSecurityMetringCallback = async ({
     });
 
     cspmUsageRecord ? cloudSecurityUsageRecords.push(cspmUsageRecord) : cloudSecurityUsageRecords;
+
+    const cnvmUsageRecord = await getCnvmUsageRecord({
+      esClient,
+      projectId,
+      logger,
+      taskId,
+      lastSuccessfulReport,
+    });
+
+    cnvmUsageRecord ? cloudSecurityUsageRecords.push(cnvmUsageRecord) : cloudSecurityUsageRecords;
 
     return cloudSecurityUsageRecords;
   } catch (err) {
