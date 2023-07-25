@@ -179,7 +179,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                   euiFieldProps: {
                     'data-test-subj': 'webhookSSLCRTInput',
                     display: 'default',
-                    accept: '.crt,.cert,.pem',
+                    accept: '.crt,.cert,.cer,.pem',
                   },
                 }}
               />
