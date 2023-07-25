@@ -879,14 +879,6 @@ export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
   }
 );
 
-export const DELETE_CONFIRMATION_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
-  {
-    defaultMessage:
-      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
-  }
-);
-
 export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
