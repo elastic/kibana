@@ -315,7 +315,7 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
         setQuery={(newQuery) => {
           setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
-        loading={isLoading}
+        loading={isFetching}
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <Link to={generatePath(findingsNavigation.vulnerabilities_by_resource.path)}>

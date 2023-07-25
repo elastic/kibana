@@ -343,7 +343,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         setQuery={(newQuery) => {
           setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
-        loading={isLoading}
+        loading={isFetching}
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <EuiSpacer size="m" />
