@@ -19064,7 +19064,7 @@
     "xpack.infra.logs.alertDetails.chartHistory.avgTimeToRecover": "恢复的平均时间",
     "xpack.infra.logs.alertDetails.chartHistory.chartTitle": "日志阈值告警历史记录",
     "xpack.infra.logs.alertDetails.chartHistory.last30days": "过去 30 天",
-    "xpack.infra.logs.alertDetails.explainLogSpikeTitle": "可能的原因和补救措施",
+    "xpack.infra.logs.alertDetails.logRateAnalysisTitle": "可能的原因和补救措施",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent": "不支持通过内联日志视图创建告警",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle": "内联日志视图",
     "xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent": "要创建告警，在此应用程序中需要更多权限。",
