@@ -5066,6 +5066,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-navigation@link:x-pack/packages/security-solution/navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
   version "0.0.0"
   uid ""
