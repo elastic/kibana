@@ -8,9 +8,13 @@
 import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
 import { ApmPluginRequestHandlerContext } from '../typings';
+import { ClusterPrivilegeType } from '../../../common/privilege_type';
 
 const resource = '*';
-const CLUSTER_PRIVILEGES = ['manage_api_key', 'manage_own_api_key'];
+const CLUSTER_PRIVILEGES = [
+  ClusterPrivilegeType.MANAGE_API_KEY,
+  ClusterPrivilegeType.MANAGE_OWN_API_KEY,
+];
 
 export interface CreateAgentKeyResponse {
   agentKey: SecurityCreateApiKeyResponse;
