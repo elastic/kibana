@@ -39,10 +39,12 @@ export class FindSLO {
 }
 
 function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
-  return sloSummaryList.map((sloSummary) => ({
-    ...sloList.find((s) => s.id === sloSummary.id)!,
-    summary: sloSummary.summary,
-  }));
+  return sloSummaryList
+    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+    .map((sloSummary) => ({
+      ...sloList.find((s) => s.id === sloSummary.id)!,
+      summary: sloSummary.summary,
+    }));
 }
 
 function toPagination(params: FindSLOParams): Pagination {

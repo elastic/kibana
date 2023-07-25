@@ -10,6 +10,7 @@ import { assertNever } from '@kbn/std';
 import _ from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
+import { toHighPrecision } from '../../utils/number';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
 
 interface EsSummaryDocument {
@@ -123,12 +124,12 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           id: doc._source!.slo.id,
           summary: {
             errorBudget: {
-              initial: doc._source!.errorBudgetInitial,
-              consumed: doc._source!.errorBudgetConsumed,
-              remaining: doc._source!.errorBudgetRemaining,
+              initial: toHighPrecision(doc._source!.errorBudgetInitial),
+              consumed: toHighPrecision(doc._source!.errorBudgetConsumed),
+              remaining: toHighPrecision(doc._source!.errorBudgetRemaining),
               isEstimated: doc._source!.errorBudgetEstimated,
             },
-            sliValue: doc._source!.sliValue,
+            sliValue: toHighPrecision(doc._source!.sliValue),
             status: doc._source!.status,
           },
         })),
