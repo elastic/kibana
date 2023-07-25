@@ -98,10 +98,37 @@ const alertsGroupingTakeActionEvent: TelemetryEvent = {
 const assistantInvokedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.AssistantInvoked,
   schema: {
-    location: {
+    conversationId: {
       type: 'keyword',
       _meta: {
-        description: 'Invokation location',
+        description: 'Active conversation ID',
+        optional: false,
+      },
+    },
+    invokedBy: {
+      type: 'keyword',
+      _meta: {
+        description: 'Invocation method',
+        optional: false,
+      },
+    },
+  },
+};
+
+const assistantMessageSentEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssistantMessageSent,
+  schema: {
+    conversationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Active conversation ID',
+        optional: false,
+      },
+    },
+    role: {
+      type: 'keyword',
+      _meta: {
+        description: 'Conversation role',
         optional: false,
       },
     },
@@ -254,6 +281,7 @@ export const telemetryEvents = [
   alertsGroupingChangedEvent,
   alertsGroupingTakeActionEvent,
   assistantInvokedEvent,
+  assistantMessageSentEvent,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,

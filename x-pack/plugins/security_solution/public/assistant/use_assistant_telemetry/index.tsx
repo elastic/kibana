@@ -6,7 +6,6 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useCallback } from 'react';
 import type { AssistantTelemetry } from '@kbn/elastic-assistant';
 import type { StartServices } from '../../types';
 
@@ -15,14 +14,8 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     services: { telemetry },
   } = useKibana<StartServices>();
 
-  const reportAssistantInvoked = useCallback(
-    (params: { location: string }) => {
-      telemetry.reportAssistantInvoked(params);
-    },
-    [telemetry]
-  );
-
   return {
-    reportAssistantInvoked,
+    reportAssistantInvoked: telemetry.reportAssistantInvoked,
+    reportAssistantMessageSent: telemetry.reportAssistantMessageSent,
   };
 };

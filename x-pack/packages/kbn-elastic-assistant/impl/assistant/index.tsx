@@ -79,7 +79,7 @@ const AssistantComponent: React.FC<Props> = ({
   useEffect(() => {
     if (shouldRefocusPrompt && conversationId) {
       // this indicates consumer (timeline) has invoked the chat
-      assistantTelemetry?.reportAssistantInvoked({ location: conversationId });
+      assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: conversationId });
     }
   }, [assistantTelemetry, conversationId, shouldRefocusPrompt]);
 

@@ -18,6 +18,7 @@ import type {
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
   ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -66,13 +67,30 @@ export class TelemetryClient implements TelemetryClientStart {
     });
   };
 
-  public reportAssistantInvoked = ({ location }: ReportAssistantInvokedParams) => {
+  public reportAssistantMessageSent = ({
+    conversationId,
+    role,
+  }: ReportAssistantMessageSentParams) => {
+    console.log('reporting assistant message sent', {
+      arg: TelemetryEventTypes.AssistantMessageSent,
+      conversationId,
+      role,
+    });
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
+      conversationId,
+      role,
+    });
+  };
+
+  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
     console.log('reporting assistant invoked', {
       arg: TelemetryEventTypes.AssistantInvoked,
-      location,
+      conversationId,
+      invokedBy,
     });
     this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
-      location,
+      conversationId,
+      invokedBy,
     });
   };
 

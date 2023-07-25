@@ -47,7 +47,11 @@ export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
         promptContextId: pid,
         conversationId: cid,
       }: ShowAssistantOverlayProps) => {
-        if (so) assistantTelemetry?.reportAssistantInvoked({ location: cid ?? 'unknown' });
+        if (so)
+          assistantTelemetry?.reportAssistantInvoked({
+            conversationId: cid ?? 'unknown',
+            invokedBy: 'click',
+          });
         setIsModalVisible(so);
         setPromptContextId(pid);
         setConversationId(cid);
@@ -63,7 +67,10 @@ export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
       setConversationId(localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE);
-      assistantTelemetry?.reportAssistantInvoked({ location: 'shortcut' });
+      assistantTelemetry?.reportAssistantInvoked({
+        invokedBy: 'shortcut',
+        conversationId: localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+      });
     }
 
     setIsModalVisible(!isModalVisible);

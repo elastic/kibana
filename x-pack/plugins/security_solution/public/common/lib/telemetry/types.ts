@@ -19,6 +19,7 @@ export enum TelemetryEventTypes {
   AlertsGroupingToggled = 'Alerts Grouping Toggled',
   AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
   AssistantInvoked = 'Assistant Invoked',
+  AssistantMessageSent = 'Assistant Message Sent',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
@@ -46,8 +47,14 @@ export interface ReportAlertsTakeActionParams {
   groupByField: string;
 }
 
+export interface ReportAssistantMessageSentParams {
+  conversationId: string;
+  role: string;
+}
+
 export interface ReportAssistantInvokedParams {
-  location: string;
+  conversationId: string;
+  invokedBy: string;
 }
 
 interface EntityParam {
@@ -108,6 +115,7 @@ export interface TelemetryClientStart {
   reportAlertsGroupingTakeAction(params: ReportAlertsTakeActionParams): void;
 
   reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
+  reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
 
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
@@ -135,6 +143,10 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AssistantInvoked;
       schema: RootSchema<ReportAssistantInvokedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssistantMessageSent;
+      schema: RootSchema<ReportAssistantMessageSentParams>;
     }
   | {
       eventType: TelemetryEventTypes.EntityDetailsClicked;

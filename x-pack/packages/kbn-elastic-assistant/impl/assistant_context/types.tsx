@@ -58,5 +58,6 @@ export interface Conversation {
 }
 
 export interface AssistantTelemetry {
-  reportAssistantInvoked: (params: { location: string }) => void;
+  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantMessageSent: (params: { conversationId: string; role: string }) => void;
 }
