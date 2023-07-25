@@ -14,6 +14,8 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 
+import { getMSearch, type GetMSearchType } from '@kbn/content-management-utils';
+
 import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
@@ -103,7 +105,23 @@ const SO_TYPE: VisualizationContentType = 'visualization';
 export class VisualizationsStorage
   implements ContentStorage<VisualizationSavedObject, PartialVisualizationSavedObject>
 {
-  constructor() {}
+  mSearch: GetMSearchType<VisualizationSavedObject>;
+
+  constructor() {
+    this.mSearch = getMSearch<VisualizationSavedObject, VisualizationSearchOut>({
+      savedObjectType: SO_TYPE,
+      cmServicesDefinition,
+      allowedSavedObjectAttributes: [
+        'title',
+        'description',
+        'version',
+        'kibanaSavedObjectMeta',
+        'uiStateJSON',
+        'visState',
+        'savedSearchRefName',
+      ],
+    });
+  }
 
   async get(ctx: StorageContext, id: string): Promise<VisualizationGetOut> {
     const {
