@@ -82,9 +82,7 @@ export const ConfigureFields: React.FC = () => {
           </>
         ) : (
           <>
-            {/* <SingleFieldMapping /> */}
-            {areInputsDisabled || <MultiFieldMapping />}
-            <SelectedFieldMappings isReadOnly={areInputsDisabled} />
+            <SingleFieldMapping />
             <InferenceConfiguration />
           </>
         )}

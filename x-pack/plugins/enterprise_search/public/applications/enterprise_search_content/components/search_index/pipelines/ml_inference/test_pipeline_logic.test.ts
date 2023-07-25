@@ -71,6 +71,7 @@ describe('TestPipelineLogic', () => {
         modelID: '',
         pipelineName: '',
         sourceField: '',
+        targetField: '',
       },
       indexName: '',
       step: AddInferencePipelineSteps.Configuration,

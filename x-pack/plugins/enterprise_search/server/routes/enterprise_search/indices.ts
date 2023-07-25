@@ -409,7 +409,7 @@ export function registerIndexRoutes({
               ),
             })
           ),
-          model_id: schema.maybe(schema.string()),
+          model_id: schema.string(),
           pipeline_definition: schema.maybe(
             schema.object({
               description: schema.maybe(schema.string()),

@@ -172,6 +172,7 @@ describe('MlInferenceLogic', () => {
             },
           ],
           indexName: 'test',
+          modelId: 'test-model',
           pipelineDefinition: {},
           pipelineName: 'unit-test',
         });
@@ -573,6 +574,7 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
           indexName: mockModelConfiguration.indexName,
           inferenceConfig: undefined,
+          modelId: textExpansionModel.model_id,
           fieldMappings: [
             {
               sourceField: 'my_source_field1',
@@ -613,6 +615,7 @@ describe('MlInferenceLogic', () => {
               targetField: `ml.inference.${mockModelConfiguration.configuration.destinationField}`,
             },
           ],
+          modelId: nerModel.model_id,
           pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
           pipelineName: mockModelConfiguration.configuration.pipelineName,
         });
