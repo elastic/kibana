@@ -26,10 +26,10 @@ export const updateMlInferenceMappings = async (
   esClient: ElasticsearchClient
 ) => {
   // Check if the model is of text_expansion type, if not, skip the mapping update
-  if (!await isTextExpansionModel(modelId, esClient)) {
+  if (!(await isTextExpansionModel(modelId, esClient))) {
     return {
       acknowledged: false,
-    }
+    };
   }
 
   const sourceFields = fieldMappings.map(({ sourceField }) => sourceField);
