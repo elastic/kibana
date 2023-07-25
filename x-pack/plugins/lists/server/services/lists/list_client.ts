@@ -8,11 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createBootstrapIndex,
+  createDataStream,
   deleteAllIndex,
   deleteIndexTemplate,
   deletePolicy,
   deleteTemplate,
   getBootstrapIndexExists,
+  getDataStreamExists,
   getIndexTemplateExists,
   getPolicyExists,
   getTemplateExists,
@@ -245,6 +247,7 @@ export class ListClient {
   /**
    * True if the list index exists, otherwise false
    * @returns True if the list index exists, otherwise false
+   * @deprecated
    */
   public getListIndexExists = async (): Promise<boolean> => {
     const { esClient } = this;
@@ -253,8 +256,19 @@ export class ListClient {
   };
 
   /**
+   * True if the list data stream exists, otherwise false
+   * @returns True if the list data stream exists, otherwise false
+   */
+  public getListDataStreamExists = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    return getDataStreamExists(esClient, listIndex);
+  };
+
+  /**
    * True if the list index item exists, otherwise false
    * @returns True if the list item index exists, otherwise false
+   * @deprecated
    */
   public getListItemIndexExists = async (): Promise<boolean> => {
     const { esClient } = this;
@@ -263,8 +277,19 @@ export class ListClient {
   };
 
   /**
+   * True if the list item data stream exists, otherwise false
+   * @returns True if the list item data stream exists, otherwise false
+   */
+  public getListItemDataStreamExists = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    return getDataStreamExists(esClient, listItemIndex);
+  };
+
+  /**
    * Creates the list boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
+   * @deprecated
    */
   public createListBootStrapIndex = async (): Promise<unknown> => {
     const { esClient } = this;
@@ -273,13 +298,34 @@ export class ListClient {
   };
 
   /**
+   * Creates list data stream
+   * @returns The contents of the create data stream from Elasticsearch
+   */
+  public createListDataStream = async (): Promise<unknown> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    return createDataStream(esClient, listIndex);
+  };
+
+  /**
    * Creates the list item boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
+   * @deprecated
    */
   public createListItemBootStrapIndex = async (): Promise<unknown> => {
     const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return createBootstrapIndex(esClient, listItemIndex);
+  };
+
+  /**
+   * Creates list item data stream
+   * @returns The contents of the create data stream from Elasticsearch
+   */
+  public createListItemDataStream = async (): Promise<unknown> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    return createDataStream(esClient, listItemIndex);
   };
 
   /**

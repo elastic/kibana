@@ -8,7 +8,8 @@
 import listMappings from './list_mappings.json';
 
 export const getListTemplate = (index: string): Record<string, unknown> => ({
-  index_patterns: [`${index}-*`],
+  data_stream: {},
+  index_patterns: [index],
   template: {
     mappings: listMappings,
     settings: {

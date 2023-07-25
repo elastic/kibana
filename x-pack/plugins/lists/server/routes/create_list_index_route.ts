@@ -30,9 +30,9 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
       try {
         const lists = await getListClient(context);
-        const listIndexExists = await lists.getListIndexExists();
-        const listItemIndexExists = await lists.getListItemIndexExists();
 
+        const listDataStreamExists = await lists.getListDataStreamExists();
+        const listItemDataStreamExists = await lists.getListItemDataStreamExists();
         const policyExists = await lists.getListPolicyExists();
         const policyListItemExists = await lists.getListItemPolicyExists();
 
@@ -43,16 +43,16 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
           await lists.setListItemPolicy();
         }
 
-        const templateExists = await lists.getListTemplateExists();
+        const templateListExists = await lists.getListTemplateExists();
         const templateListItemsExists = await lists.getListItemTemplateExists();
         const legacyTemplateExists = await lists.getLegacyListTemplateExists();
         const legacyTemplateListItemsExists = await lists.getLegacyListItemTemplateExists();
 
-        if (!templateExists) {
+        if (!templateListExists || !listDataStreamExists) {
           await lists.setListTemplate();
         }
 
-        if (!templateListItemsExists) {
+        if (!templateListItemsExists || !listItemDataStreamExists) {
           await lists.setListItemTemplate();
         }
 
@@ -70,17 +70,17 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
           }
         }
 
-        if (listIndexExists && listItemIndexExists) {
+        if (listDataStreamExists && listItemDataStreamExists) {
           return siemResponse.error({
-            body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
+            body: `data stream: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
             statusCode: 409,
           });
         } else {
-          if (!listIndexExists) {
-            await lists.createListBootStrapIndex();
+          if (!listDataStreamExists) {
+            await lists.createListDataStream();
           }
-          if (!listItemIndexExists) {
-            await lists.createListItemBootStrapIndex();
+          if (!listItemDataStreamExists) {
+            await lists.createListItemDataStream();
           }
 
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
