@@ -38,7 +38,6 @@ export default defineCypressConfig({
     baseUrl: 'http://google.com',
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
-    // specPattern: './cypress/e2e/urls/*.cy.ts',
     specPattern: ['./cypress/e2e', '!./cypress/e2e/investigations', '!./cypress/e2e/explore'],
     supportFile: './cypress/support/e2e_cloud.js',
     env: {
@@ -74,7 +73,7 @@ export default defineCypressConfig({
 
             const program = path.resolve('../scripts/start_cypress_setup_env.js');
             const parameters = [
-              `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
+              `run --ftr-config-file '../../../test/security_solution_cypress/cli_config.ts'`,
             ];
             const options = {
               env: {

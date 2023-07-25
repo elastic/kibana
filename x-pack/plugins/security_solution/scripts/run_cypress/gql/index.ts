@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getRun } from './getRun';
+export { getRun } from './get_run';
 export { getRunsFeed } from './get_runs_feed';

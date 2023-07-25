@@ -1396,7 +1396,7 @@
     "cssnano": "^5.1.12",
     "cssnano-preset-default": "^5.2.12",
     "csstype": "^3.0.2",
-    "cypress": "^12.17.2",
+    "cypress": "^12.13.0",
     "cypress-axe": "^1.4.0",
     "cypress-data-session": "^2.7.0",
     "cypress-file-upload": "^5.0.8",

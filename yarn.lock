@@ -13562,7 +13562,7 @@ cypress-recurse@^1.35.2:
   dependencies:
     humanize-duration "^3.27.3"
 
-cypress@^12.17.2:
+cypress@^12.13.0:
   version "12.17.2"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.17.2.tgz#040ac55de1e811f6e037d231a2869d5ab8c29c85"
   integrity sha512-hxWAaWbqQBzzMuadSGSuQg5PDvIGOovm6xm0hIfpCVcORsCAj/gF2p0EvfnJ4f+jK2PCiDgP6D2eeE9/FK4Mjg==

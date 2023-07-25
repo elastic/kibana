@@ -344,7 +344,7 @@ export const cli = () => {
           concurrency: (argv.concurrency as number | undefined)
             ? (argv.concurrency as number)
             : !isOpen
-            ? 2
+            ? 3
             : 1,
         }
       ).then((results) => {

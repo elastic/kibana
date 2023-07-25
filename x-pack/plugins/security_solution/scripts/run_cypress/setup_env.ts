@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import path from 'path';
 import _ from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
+import yargs from 'yargs';
 
 import {
   EsVersion,
@@ -25,60 +27,15 @@ import {
 
 import pRetry from 'p-retry';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-// import { parseTestFileConfig } from './utils';
+import { parseTestFileConfig } from './utils';
 
 (async () => {
-  const argv = {
-    ftrConfigFile: '../../../../../../x-pack/test/security_solution_cypress/cli_config',
-    _: [],
-  };
-
-  const esPorts: number[] = [9200, 9220];
-  const kibanaPorts: number[] = [5601, 5620];
-  const fleetServerPorts: number[] = [8220];
-
-  const getEsPort = <T>(): T | number => {
-    return 9222;
-    // const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
-    // if (esPorts.includes(esPort)) {
-    //   return getEsPort();
-    // }
-    // esPorts.push(esPort);
-    // return esPort;
-  };
-
-  const getKibanaPort = <T>(): T | number => {
-    return 5622;
-    // const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
-    // if (kibanaPorts.includes(kibanaPort)) {
-    //   return getKibanaPort();
-    // }
-    // kibanaPorts.push(kibanaPort);
-    // return kibanaPort;
-  };
-
-  const getFleetServerPort = <T>(): T | number => {
-    const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
-    if (fleetServerPorts.includes(fleetServerPort)) {
-      return getFleetServerPort();
-    }
-    fleetServerPorts.push(fleetServerPort);
-    return fleetServerPort;
-  };
-
-  const cleanupServerPorts = ({
-    esPort,
-    kibanaPort,
-    fleetServerPort,
-  }: {
-    esPort: number;
-    kibanaPort: number;
-    fleetServerPort: number;
-  }) => {
-    _.pull(esPorts, esPort);
-    _.pull(kibanaPorts, kibanaPort);
-    _.pull(fleetServerPorts, fleetServerPort);
-  };
+  const { argv } = yargs(process.argv.slice(2)[0].split(' '))
+    .coerce('ftrConfigFile', (ftrConfigFile) => path.resolve(ftrConfigFile))
+    .default('esPort', 9222)
+    .default('kibanaPort', 5622)
+    .default('fleetServerPort', 8220)
+    .default('isOpen', false);
 
   const log = new ToolingLog({
     level: 'info',
@@ -86,8 +43,6 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
   });
 
   const hostRealIp = getLocalhostRealIp();
-
-  const isOpen = argv._[0] === 'open';
 
   await withProcRunner(log, async (procs) => {
     const abortCtrl = new AbortController();
@@ -97,10 +52,7 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
       abortCtrl.abort();
     };
 
-    const esPort: number = getEsPort();
-    const kibanaPort: number = getKibanaPort();
-    const fleetServerPort: number = getFleetServerPort();
-    const configFromTestFile = {}; // parseTestFileConfig(filePath);
+    const configFromTestFile = parseTestFileConfig(argv.ftrConfigFile as string);
 
     const config = await readConfigFile(
       log,
@@ -109,19 +61,19 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
       {
         servers: {
           elasticsearch: {
-            port: esPort,
+            port: argv.esPort,
           },
           kibana: {
-            port: kibanaPort,
+            port: argv.kibanaPort,
           },
           fleetserver: {
-            port: fleetServerPort,
+            port: argv.fleetServerPort,
           },
         },
         kbnTestServer: {
           serverArgs: [
-            `--server.port=${kibanaPort}`,
-            `--elasticsearch.hosts=http://localhost:${esPort}`,
+            `--server.port=${argv.kibanaPort}`,
+            `--elasticsearch.hosts=http://localhost:${argv.esPort}`,
           ],
         },
       },
@@ -163,8 +115,8 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
         if (hasFleetServerArgs) {
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`,
-            `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
+            `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${argv.fleetServerPort}"]`,
+            `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${argv.esPort}`
           );
         }
 
@@ -193,8 +145,7 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
         runElasticsearch({
           config,
           log,
-          name: `ftr-${esPort}`,
-          // name: `ftr-${esPort}-${Math.random().toString(36).substring(2)}`,
+          name: `ftr-${argv.esPort}`,
           esFrom: 'snapshot',
           onEarlyExit,
         }),
@@ -206,7 +157,7 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
       config,
       installDir: options?.installDir,
       extraKbnOpts:
-        options?.installDir || options?.ci || !isOpen
+        options?.installDir || options?.ci
           ? []
           : ['--dev', '--no-dev-config', '--no-dev-credentials'],
       onEarlyExit,
@@ -222,8 +173,8 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
     if (process.send) {
       process.send({
-        esPort,
-        kibanaPort,
+        esPort: argv.esPort,
+        kibanaPort: argv.kibanaPort,
         customEnv,
       });
     }
