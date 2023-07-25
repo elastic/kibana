@@ -10,7 +10,7 @@ import React from 'react';
 import { mount, render, shallow } from 'enzyme';
 import { ReactElement, ReactNode } from 'react';
 
-import { deduplicateToasts, TitleWithBadge } from './deduplicate_toasts';
+import { deduplicateToasts, TitleWithBadge, ToastWithRichTitle } from './deduplicate_toasts';
 import { Toast } from '@kbn/core-notifications-browser';
 
 function toast(title: string, text: string, id = Math.random()): Toast {
@@ -104,7 +104,11 @@ describe('TitleWithBadge component', () => {
   });
 });
 
-function verifyTextAndTitle({ text, title }: Toast, expectedTitle: string, expectedText: string) {
+function verifyTextAndTitle(
+  { text, title }: ToastWithRichTitle,
+  expectedTitle: string,
+  expectedText: string
+) {
   expect(getNodeText(title)).toBe(expectedTitle);
   expect(text).toBe(expectedText);
 }

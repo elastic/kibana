@@ -88,7 +88,7 @@ describe('global_toast_list with duplicate elements', () => {
 
   it(`calls all toast's dismiss when closed`, () => {
     const firstRenderedToast = toastsProp![0];
-    const dismissToast: (toast: Toast) => void = globalToastList.prop('dismissToast');
+    const dismissToast = globalToastList.prop('dismissToast');
     dismissToast(firstRenderedToast);
 
     expect(mockDismissToast).toHaveBeenCalledTimes(4);
