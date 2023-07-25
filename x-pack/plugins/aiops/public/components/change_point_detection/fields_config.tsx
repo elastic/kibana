@@ -10,16 +10,24 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiPopover,
   EuiProgress,
   EuiSpacer,
+  type EuiContextMenuPanelProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -37,6 +45,8 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 const selectControlCss = { width: '350px' };
+
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 /**
  * Contains panels with controls and change point results.
@@ -151,11 +161,28 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [dashboardAttachment, setDashboardAttachment] = useState<any>();
+
   const {
     results: annotations,
     isLoading: annotationsLoading,
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
+
+  const panels: EuiContextMenuPanelProps['items'] = [
+    <EuiContextMenuItem
+      key="dashboard"
+      icon="dashboardApp"
+      onClick={() => {
+        setDashboardAttachment({});
+      }}
+    >
+      {i18n.translate('xpack.aiops.changePointDetection.addToDashboardLabel', {
+        defaultMessage: 'Add to dashboard',
+      })}
+    </EuiContextMenuItem>,
+  ];
 
   return (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
@@ -197,15 +224,43 @@ const FieldPanel: FC<FieldPanelProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            disabled={removeDisabled}
-            aria-label={i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
-              defaultMessage: 'Remove configuration',
-            })}
-            iconType="trash"
-            color="danger"
-            onClick={onRemove}
-          />
+          <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                disabled={removeDisabled}
+                aria-label={i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
+                  defaultMessage: 'Remove configuration',
+                })}
+                iconType="trash"
+                color="danger"
+                onClick={onRemove}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id={''}
+                button={
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.aiops.changePointDetection.configActionsLabel',
+                      {
+                        defaultMessage: 'Context menu',
+                      }
+                    )}
+                    iconType="boxesVertical"
+                    color="text"
+                    onClick={setIsActionMenuOpen.bind(null, true)}
+                  />
+                }
+                isOpen={isActionMenuOpen}
+                closePopover={setIsActionMenuOpen.bind(null, false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenuPanel size={'s'} items={panels} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -216,6 +271,21 @@ const FieldPanel: FC<FieldPanelProps> = ({
           annotations={annotations}
           splitFieldCardinality={splitFieldCardinality}
           onSelectionChange={onSelectionChange}
+        />
+      ) : null}
+
+      {dashboardAttachment ? (
+        <SavedObjectSaveModalDashboard
+          canSaveByReference={false}
+          objectType={i18n.translate('xpack.aiops.changePointDetection.objectTypeLabel', {
+            defaultMessage: 'Change point chart',
+          })}
+          documentInfo={{
+            title: 'Title',
+            description: 'Desc',
+          }}
+          onClose={() => {}}
+          onSave={() => {}}
         />
       ) : null}
     </EuiPanel>

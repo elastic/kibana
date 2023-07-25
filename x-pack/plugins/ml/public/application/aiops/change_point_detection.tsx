@@ -60,6 +60,7 @@ export const ChangePointDetectionPage: FC = () => {
               'unifiedSearch',
               'theme',
               'lens',
+              'presentationUtil',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

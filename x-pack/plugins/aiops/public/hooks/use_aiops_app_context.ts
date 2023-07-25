@@ -29,6 +29,7 @@ import type {
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -57,6 +58,7 @@ export interface AiopsAppDependencies {
       dslQuery?: FieldStatsProps['dslQuery'];
     }>;
   };
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);

@@ -30,7 +30,8 @@
       "uiActions",
       "unifiedSearch",
       "savedObjectsManagement",
-      "savedSearch"
+      "savedSearch",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "alerting",

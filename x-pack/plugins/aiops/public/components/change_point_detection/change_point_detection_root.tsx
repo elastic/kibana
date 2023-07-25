@@ -55,21 +55,25 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     return <>{warning}</>;
   }
 
+  const PresentationContextProvider = appDependencies.presentationUtil.ContextProvider;
+
   return (
-    <AiopsAppContext.Provider value={appDependencies}>
-      <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <PageHeader />
-              <EuiSpacer />
-              <ChangePointDetectionContextProvider>
-                <ChangePointDetectionPage />
-              </ChangePointDetectionContextProvider>
-            </DatePickerContextProvider>
-          </StorageContextProvider>
-        </DataSourceContext.Provider>
-      </UrlStateProvider>
-    </AiopsAppContext.Provider>
+    <PresentationContextProvider>
+      <AiopsAppContext.Provider value={appDependencies}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <PageHeader />
+                <EuiSpacer />
+                <ChangePointDetectionContextProvider>
+                  <ChangePointDetectionPage />
+                </ChangePointDetectionContextProvider>
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    </PresentationContextProvider>
   );
 };

@@ -27,6 +27,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -51,6 +52,8 @@ interface StartPlugins {
   lens: LensPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+
+  presentationUtil: PresentationUtilPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

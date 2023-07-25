@@ -14,12 +14,14 @@
       "licensing",
       "uiActions",
       "embeddable",
+      "presentationUtil",
+      "dashboard"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
+      "embeddable"
     ],
     "extraPublicDirs": [
       "common"
