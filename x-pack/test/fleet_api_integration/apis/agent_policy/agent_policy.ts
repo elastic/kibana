@@ -21,6 +21,64 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
+
+    describe('GET /api/fleet/agent_policies', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+      setupFleetAndAgents(providerContext);
+
+      it('should get list agent policies', async () => {
+        await supertest.get(`/api/fleet/agent_policies`).expect(200);
+      });
+
+      it('should get a list of agent policies by kuery', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+          })
+          .expect(200);
+        const { body: responseBody } = await supertest
+          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(responseBody.items.length).to.eql(1);
+      });
+
+      it('should return 200 even if the passed kuery does not have prefix ingest-agent-policies', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST-1',
+            namespace: 'default',
+          })
+          .expect(200);
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=name:TEST-1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 if passed kuery is not correct', async () => {
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+    });
+
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
