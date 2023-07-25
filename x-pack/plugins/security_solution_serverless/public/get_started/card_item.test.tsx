@@ -16,6 +16,7 @@ describe('CardItemComponent', () => {
   const finishedSteps = {} as Record<CardId, Set<StepId>>;
 
   const onStepClicked = jest.fn();
+  const onStepButtonClicked = jest.fn();
   const mockEuiTheme = { size: { xxs: '4px' }, base: 16 } as EuiThemeComputed;
   it('should render card', () => {
     const { getByText, queryByText } = render(
@@ -27,11 +28,12 @@ describe('CardItemComponent', () => {
         stepsLeft={1}
         timeInMins={30}
         onStepClicked={onStepClicked}
+        onStepButtonClicked={onStepButtonClicked}
         finishedSteps={finishedSteps}
       />
     );
 
-    const cardTitle = getByText('introduction');
+    const cardTitle = getByText('Introduction');
     expect(cardTitle).toBeInTheDocument();
 
     const step = getByText('1 step left');
@@ -58,11 +60,12 @@ describe('CardItemComponent', () => {
         stepsLeft={0}
         timeInMins={0}
         onStepClicked={onStepClicked}
+        onStepButtonClicked={onStepButtonClicked}
         finishedSteps={mockFinishedSteps}
       />
     );
 
-    const cardTitle = getByText('introduction');
+    const cardTitle = getByText('Introduction');
     expect(cardTitle).toBeInTheDocument();
 
     const step = queryByText('1 step left');

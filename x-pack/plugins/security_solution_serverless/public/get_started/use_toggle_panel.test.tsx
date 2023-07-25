@@ -28,7 +28,7 @@ describe('useTogglePanel', () => {
     jest.clearAllMocks();
 
     (getStartedStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
@@ -56,20 +56,15 @@ describe('useTogglePanel', () => {
             timeInMins: 3,
             stepsLeft: 1,
           },
-          [GetSetUpCardId.activateAndCreateRules]: {
-            id: GetSetUpCardId.activateAndCreateRules,
+          [GetSetUpCardId.configure]: {
+            id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 4,
           },
-          [GetSetUpCardId.bringInYourData]: {
-            id: GetSetUpCardId.bringInYourData,
+          [GetSetUpCardId.explore]: {
+            id: GetSetUpCardId.explore,
             timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-            id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-            timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
           },
         },
         [SectionId.getMoreFromElasticSecurity]: {
@@ -102,7 +97,7 @@ describe('useTogglePanel', () => {
       new Set([ProductLine.security, ProductLine.cloud, ProductLine.endpoint])
     );
     expect(state.finishedSteps).toEqual({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
 
     expect(state.activeCards).toEqual(
@@ -113,20 +108,15 @@ describe('useTogglePanel', () => {
             timeInMins: 0,
             stepsLeft: 0,
           },
-          [GetSetUpCardId.activateAndCreateRules]: {
-            id: GetSetUpCardId.activateAndCreateRules,
+          [GetSetUpCardId.configure]: {
+            id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 4,
           },
-          [GetSetUpCardId.bringInYourData]: {
-            id: GetSetUpCardId.bringInYourData,
+          [GetSetUpCardId.explore]: {
+            id: GetSetUpCardId.explore,
             timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-            id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-            timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
           },
         },
         [SectionId.getMoreFromElasticSecurity]: {
@@ -150,7 +140,7 @@ describe('useTogglePanel', () => {
     );
   });
 
-  test('should initialize state with correct initial values - when only security product active', () => {
+  test('should initialize state with correct initial values - when security product active', () => {
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
     ]);
@@ -160,7 +150,7 @@ describe('useTogglePanel', () => {
 
     expect(state.activeProducts).toEqual(new Set([ProductLine.security]));
     expect(state.finishedSteps).toEqual({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
 
     expect(state.activeCards).toEqual(
@@ -171,15 +161,15 @@ describe('useTogglePanel', () => {
             timeInMins: 0,
             stepsLeft: 0,
           },
-          [GetSetUpCardId.activateAndCreateRules]: {
-            id: GetSetUpCardId.activateAndCreateRules,
+          [GetSetUpCardId.configure]: {
+            id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 4,
           },
-          [GetSetUpCardId.bringInYourData]: {
-            id: GetSetUpCardId.bringInYourData,
+          [GetSetUpCardId.explore]: {
+            id: GetSetUpCardId.explore,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
           },
         },
         [SectionId.getMoreFromElasticSecurity]: {
@@ -203,14 +193,14 @@ describe('useTogglePanel', () => {
     );
   });
 
-  test('should call addFinishedStepToStorage', () => {
+  test('should call addFinishedStepToStorage when onStepClicked is executed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { onStepClicked } = result.current;
 
     act(() => {
       onStepClicked({
-        stepId: IntroductionSteps.watchOverviewVideo,
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
         cardId: GetSetUpCardId.introduction,
         sectionId: SectionId.getSetUp,
       });
@@ -219,11 +209,52 @@ describe('useTogglePanel', () => {
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
       GetSetUpCardId.introduction,
-      IntroductionSteps.watchOverviewVideo
+      IntroductionSteps.getToKnowElasticSecurity
     );
   });
 
-  test('should call toggleActiveProductsInStorage', () => {
+  test('should call addFinishedStepToStorage when onStepButtonClicked is executed', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepButtonClicked } = result.current;
+
+    act(() => {
+      onStepButtonClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+      });
+    });
+
+    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
+      GetSetUpCardId.introduction,
+      IntroductionSteps.getToKnowElasticSecurity
+    );
+  });
+
+  test('should call removeFinishedStepToStorage when onStepButtonClicked is executed with undo equals to true', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepButtonClicked } = result.current;
+
+    act(() => {
+      onStepButtonClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+        undo: true,
+      });
+    });
+
+    expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
+      GetSetUpCardId.introduction,
+      IntroductionSteps.getToKnowElasticSecurity
+    );
+  });
+
+  test('should call toggleActiveProductsInStorage when onProductSwitchChanged is executed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { onProductSwitchChanged } = result.current;

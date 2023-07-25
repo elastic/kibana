@@ -105,15 +105,15 @@ describe('setupCards', () => {
         timeInMins: 3,
         stepsLeft: 1,
       },
-      [GetSetUpCardId.bringInYourData]: {
-        id: GetSetUpCardId.bringInYourData,
+      [GetSetUpCardId.configure]: {
+        id: GetSetUpCardId.configure,
         timeInMins: 0,
-        stepsLeft: 0,
+        stepsLeft: 4,
       },
-      [GetSetUpCardId.activateAndCreateRules]: {
-        id: GetSetUpCardId.activateAndCreateRules,
+      [GetSetUpCardId.explore]: {
+        id: GetSetUpCardId.explore,
         timeInMins: 0,
-        stepsLeft: 0,
+        stepsLeft: 2,
       },
     },
     [SectionId.getMoreFromElasticSecurity]: {
@@ -140,12 +140,23 @@ describe('setupCards', () => {
 
     const activeCards = setupCards(finishedSteps, activeProducts);
 
+    expect(activeCards).toEqual(analyticProductActiveCards);
+  });
+
+  it('should set up active cards based on finished steps', () => {
+    const finishedSteps = {
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+    } as unknown as Record<CardId, Set<StepId>>;
+    const activeProducts = new Set([ProductLine.security]);
+
+    const activeCards = setupCards(finishedSteps, activeProducts);
+
     expect(activeCards).toEqual({
       ...analyticProductActiveCards,
       [SectionId.getSetUp]: {
         ...analyticProductActiveCards[SectionId.getSetUp],
-        [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-          id: GetSetUpCardId.protectYourEnvironmentInRealtime,
+        [GetSetUpCardId.introduction]: {
+          id: GetSetUpCardId.introduction,
           timeInMins: 0,
           stepsLeft: 0,
         },
@@ -153,19 +164,8 @@ describe('setupCards', () => {
     });
   });
 
-  it('should skip inactive cards based on finished steps and active products', () => {
-    const finishedSteps = {} as Record<CardId, Set<StepId>>;
-    const activeProducts = new Set([ProductLine.security]);
-
-    const activeCards = setupCards(finishedSteps, activeProducts);
-
-    expect(activeCards).toEqual(analyticProductActiveCards);
-  });
-
   it('should return null if there are no active products', () => {
-    const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
-    } as unknown as Record<CardId, Set<StepId>>;
+    const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
 
     const activeProducts: Set<ProductLine> = new Set();
 
@@ -182,7 +182,7 @@ describe('setupCards', () => {
     ]);
 
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
@@ -196,7 +196,7 @@ describe('setupCards', () => {
 
 describe('updateCard', () => {
   const finishedSteps = {
-    [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+    [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
   } as unknown as Record<CardId, Set<StepId>>;
   const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
@@ -207,20 +207,15 @@ describe('updateCard', () => {
         timeInMins: 3,
         stepsLeft: 1,
       },
-      [GetSetUpCardId.bringInYourData]: {
-        id: GetSetUpCardId.bringInYourData,
+      [GetSetUpCardId.configure]: {
+        id: GetSetUpCardId.configure,
         timeInMins: 0,
-        stepsLeft: 0,
+        stepsLeft: 4,
       },
-      [GetSetUpCardId.activateAndCreateRules]: {
-        id: GetSetUpCardId.activateAndCreateRules,
+      [GetSetUpCardId.explore]: {
+        id: GetSetUpCardId.explore,
         timeInMins: 0,
-        stepsLeft: 0,
-      },
-      [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-        timeInMins: 0,
-        stepsLeft: 0,
+        stepsLeft: 2,
       },
     },
     [SectionId.getMoreFromElasticSecurity]: {
@@ -269,7 +264,7 @@ describe('updateCard', () => {
 
   it('should return null if the card is inactive based on active products', () => {
     const sectionId = SectionId.getSetUp;
-    const cardId = GetSetUpCardId.protectYourEnvironmentInRealtime;
+    const cardId = GetSetUpCardId.introduction;
 
     const updatedCards = updateCard({
       finishedSteps,

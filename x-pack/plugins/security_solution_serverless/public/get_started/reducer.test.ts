@@ -130,12 +130,12 @@ describe('getActiveCardsInitialStates', () => {
         [GetSetUpCardId.configure]: {
           id: GetSetUpCardId.configure,
           timeInMins: 0,
-          stepsLeft: 0,
+          stepsLeft: 4,
         },
         [GetSetUpCardId.explore]: {
           id: GetSetUpCardId.explore,
           timeInMins: 0,
-          stepsLeft: 0,
+          stepsLeft: 2,
         },
       },
       [SectionId.getMoreFromElasticSecurity]: {
