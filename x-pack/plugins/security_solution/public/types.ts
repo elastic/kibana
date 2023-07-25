@@ -75,6 +75,7 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
+import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -161,6 +162,7 @@ export type StartServices = CoreStart &
     telemetry: TelemetryClientStart;
     discoverFilterManager: FilterManager;
     customDataService: DataPublicPluginStart;
+    topValuesPopover: TopValuesPopoverService;
   };
 
 export interface PluginSetup {
