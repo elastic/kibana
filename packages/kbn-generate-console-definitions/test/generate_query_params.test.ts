@@ -15,7 +15,7 @@ import {
   mockNumberProperty,
   mockRequestType,
   mockSchema,
-  mockStringProperty
+  mockStringProperty,
 } from '.';
 
 describe('generateQueryParams', () => {
