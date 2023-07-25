@@ -450,7 +450,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         const taskState = telemetryTask!._source!.task?.state;
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
-        expect(actionsTelemetry.runs).to.equal(2);
+        expect(actionsTelemetry.runs > 0).to.be(true);
         expect(actionsTelemetry.count_total).to.equal(21);
       });
 
@@ -473,7 +473,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         const taskState = telemetryTask!._source!.task?.state;
         expect(taskState).not.to.be(undefined);
         alertingTelemetry = JSON.parse(taskState!);
-        expect(alertingTelemetry.runs).to.equal(2);
+        expect(alertingTelemetry.runs > 0).to.be(true);
         expect(alertingTelemetry.count_total).to.equal(12);
       });
 

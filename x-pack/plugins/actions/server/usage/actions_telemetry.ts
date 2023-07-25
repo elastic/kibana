@@ -420,7 +420,7 @@ export async function getExecutionsPerDayCount(
   countFailedByType: Record<string, number>;
   avgExecutionTime: number;
   avgExecutionTimeByType: Record<string, number>;
-  countRunOutcomeByConnectorType: Record<string, number>;
+  countRunOutcomeByConnectorType: Record<string, Record<string, number>>;
 }> {
   const scriptedMetric = {
     scripted_metric: {
