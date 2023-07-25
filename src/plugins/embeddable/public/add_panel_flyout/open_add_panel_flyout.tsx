@@ -24,7 +24,6 @@ const LazyAddPanelFlyout = React.lazy(async () => {
 export const openAddPanelFlyout = ({
   container,
   onAddPanel,
-  onClose = () => {},
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
