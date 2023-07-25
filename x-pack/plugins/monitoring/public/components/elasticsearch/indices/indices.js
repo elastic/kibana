@@ -16,7 +16,6 @@ import { EuiMonitoringTable } from '../../table';
 import {
   EuiLink,
   EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiSwitch,
@@ -171,7 +170,7 @@ export const ElasticsearchIndices = ({
           <ClusterStatus stats={clusterStatus} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiSwitch
             label={
               <FormattedMessage
@@ -206,7 +205,7 @@ export const ElasticsearchIndices = ({
               defaultFields: ['name'],
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

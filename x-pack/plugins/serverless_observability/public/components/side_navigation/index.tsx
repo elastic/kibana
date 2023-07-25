@@ -31,7 +31,10 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'discover-dashboard-alerts-slos',
           children: [
             {
-              link: 'discover',
+              title: i18n.translate('xpack.serverlessObservability.nav.discover', {
+                defaultMessage: 'Discover',
+              }),
+              link: 'discover:log-explorer',
             },
             {
               title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -173,10 +176,6 @@ const navigationTree: NavigationTreeDefinition = {
             {
               id: 'cloudLinkUserAndRoles',
               cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkPerformance',
-              cloudLink: 'performance',
             },
             {
               id: 'cloudLinkBilling',
