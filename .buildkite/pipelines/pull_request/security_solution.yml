@@ -5,7 +5,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 7
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '-1'
@@ -24,11 +24,12 @@ steps:
     command: |
       source .buildkite/scripts/steps/functional/common.sh
       export PARALLELISM=$(node x-pack/plugins/security_solution/scripts/start_cypress_cloud_pipeline.js)
+      buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'false'
       buildkite-agent pipeline upload <<YAML
       steps:
       - command: .buildkite/scripts/steps/functional/security_solution_cloud.sh
         label: Security Solution SorryCypress Tests
-        parallelism: $${PARALLELISM:-10}
+        parallelism: $${PARALLELISM:-15}
         agents:
           queue: n2-4-spot
         depends_on: build

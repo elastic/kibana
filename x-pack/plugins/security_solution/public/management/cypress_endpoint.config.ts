@@ -15,7 +15,7 @@ import { responseActionTasks } from './cypress/support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../../../node_modules/cypress-multi-reporters',
+  reporter: '../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: path.resolve(__dirname, '../../cypress/reporter_config.json'),
   },
