@@ -7,7 +7,6 @@
 
 export {
   ruleParamsSchema,
-  rRuleSchema,
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
