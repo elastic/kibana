@@ -678,7 +678,7 @@ module.exports = {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -711,7 +711,7 @@ module.exports = {
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -748,7 +748,7 @@ module.exports = {
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
