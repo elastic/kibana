@@ -331,7 +331,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 headers: null,
                 method: 'post',
                 url: 'http://localhost',
-                authType: WebhookAuthType.Basic,
               },
               isMissingSecrets: true,
               name: 'Some connector',
