@@ -86,7 +86,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
           },
         },
         from: (pagination.page - 1) * pagination.perPage,
-        size: pagination.perPage * 2, // get twice as much as we show in a given page, in case they are all duplicate temp/non-temp summary
+        size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
       });
 
       const [tempSummaryDocuments, summaryDocuments] = _.partition(
