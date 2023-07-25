@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Eslint from 'eslint';
+import type { Rule } from 'eslint';
 import { SomeNode } from './visit_all_import_statements';
 
 interface ReportOptions {
@@ -18,7 +18,7 @@ interface ReportOptions {
 /**
  * Simple wrapper around context.report so that the types work better with typescript-estree
  */
-export function report(context: Eslint.Rule.RuleContext, options: ReportOptions) {
+export function report(context: Rule.RuleContext, options: ReportOptions) {
   context.report({
     node: options.node as any,
     message: options.message,

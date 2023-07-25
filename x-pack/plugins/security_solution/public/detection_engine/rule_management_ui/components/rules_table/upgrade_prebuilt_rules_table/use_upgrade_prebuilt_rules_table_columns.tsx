@@ -98,6 +98,7 @@ const createUpgradeButtonColumn = (
         size="s"
         disabled={isUpgradeButtonDisabled}
         onClick={() => upgradeOneRule(ruleId)}
+        data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
       >
         {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>

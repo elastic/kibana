@@ -12,7 +12,7 @@ import { EuiText, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } 
 import { isEmpty } from 'lodash/fp';
 
 import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
-import type { ActionConnector, CaseConnector } from '../../../common/api';
+import type { ActionConnector, CaseConnector } from '../../../common/types/domain';
 import * as i18n from './translations';
 import { getConnectorById } from '../utils';
 import { usePushToService } from '../use_push_to_service';

@@ -26,6 +26,8 @@ import {
 } from '../types';
 
 export const useEmbeddablePanelBadges = (
+  showNotifications: boolean,
+  showBadges: boolean,
   embeddable: IEmbeddable,
   getActions: EmbeddablePanelProps['getActions']
 ) => {
@@ -35,6 +37,7 @@ export const useEmbeddablePanelBadges = (
   const [notifications, setNotifications] = useState<EmbeddableNotificationAction[]>();
 
   const getAllBadgesFromEmbeddable = useCallback(async () => {
+    if (!showBadges) return;
     let currentBadges: EmbeddableBadgeAction[] =
       ((await getActionsForTrigger(PANEL_BADGE_TRIGGER, {
         embeddable,
@@ -45,9 +48,10 @@ export const useEmbeddablePanelBadges = (
       currentBadges = currentBadges.filter((badge) => disabledActions.indexOf(badge.id) === -1);
     }
     return currentBadges;
-  }, [embeddable, getActionsForTrigger]);
+  }, [embeddable, getActionsForTrigger, showBadges]);
 
   const getAllNotificationsFromEmbeddable = useCallback(async () => {
+    if (!showNotifications) return;
     let currentNotifications: EmbeddableNotificationAction[] =
       ((await getActionsForTrigger(PANEL_NOTIFICATION_TRIGGER, {
         embeddable,
@@ -60,7 +64,7 @@ export const useEmbeddablePanelBadges = (
       );
     }
     return currentNotifications;
-  }, [embeddable, getActionsForTrigger]);
+  }, [embeddable, getActionsForTrigger, showNotifications]);
 
   /**
    * On embeddable creation get initial badges & notifications then subscribe to all

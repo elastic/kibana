@@ -42,7 +42,7 @@ export const getCspmUsageRecord = async ({
       : new Date().toISOString();
 
     const usageRecords = {
-      id: CLOUD_SECURITY_TASK_TYPE + ':' + CLOUD_SECURITY_TASK_TYPE,
+      id: `${CLOUD_SECURITY_TASK_TYPE}:${CLOUD_SECURITY_TASK_TYPE}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
       usage: {

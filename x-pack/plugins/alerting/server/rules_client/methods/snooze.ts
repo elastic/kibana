@@ -14,7 +14,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { validateSnoozeStartDate } from '../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../lib/errors/rule_muted';
 import { RulesClientContext } from '../types';
-import { getSnoozeAttributes, verifySnoozeScheduleLimit } from '../common';
+import { getSnoozeAttributes, verifySnoozeAttributeScheduleLimit } from '../common';
 import { updateMeta } from '../lib';
 
 export interface SnoozeParams {
@@ -62,7 +62,7 @@ async function snoozeWithOCC(
     });
 
     if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized('execute');
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
     }
   } catch (error) {
     context.auditLogger?.log(
@@ -88,7 +88,7 @@ async function snoozeWithOCC(
   const newAttrs = getSnoozeAttributes(attributes, snoozeSchedule);
 
   try {
-    verifySnoozeScheduleLimit(newAttrs);
+    verifySnoozeAttributeScheduleLimit(newAttrs);
   } catch (error) {
     throw Boom.badRequest(error.message);
   }

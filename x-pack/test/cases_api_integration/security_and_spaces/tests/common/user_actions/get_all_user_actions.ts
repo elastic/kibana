@@ -13,10 +13,9 @@ import {
   CaseStatuses,
   CommentRequestUserType,
   CommentType,
-  ConnectorTypes,
   getCaseUserActionUrl,
 } from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/types/domain';
+import { CreateCaseUserAction, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {

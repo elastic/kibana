@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { getCnvmUsageRecord } from './cnvm_metring_task';
+=======
+>>>>>>> upstream/main
 import { getCspmUsageRecord } from './cspm_metring_task';
 import type { MeteringCallbackInput, UsageRecord } from '../types';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
+<<<<<<< HEAD
 export const AGGREGATION_PRECISION_THRESHOLD = 3000;
+=======
+>>>>>>> upstream/main
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
@@ -48,7 +54,10 @@ export const cloudSecurityMetringCallback = async ({
       lastSuccessfulReport,
     });
 
-    cnvmUsageRecord ? cloudSecurityUsageRecords.push(cnvmUsageRecord) : cloudSecurityUsageRecords;
+    if (cnvmUsageRecord) {
+      cloudSecurityUsageRecords.push(cnvmUsageRecord);
+    }
+
 
     return cloudSecurityUsageRecords;
   } catch (err) {
