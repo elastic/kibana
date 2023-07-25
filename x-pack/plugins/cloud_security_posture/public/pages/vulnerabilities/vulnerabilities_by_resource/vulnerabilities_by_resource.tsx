@@ -175,7 +175,7 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <EuiSpacer size="m" />
-      {!isLoading && data.page.length === 0 ? (
+      {data.page.length === 0 ? (
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <>

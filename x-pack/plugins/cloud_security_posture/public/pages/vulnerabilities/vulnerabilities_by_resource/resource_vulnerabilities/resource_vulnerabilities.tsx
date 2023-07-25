@@ -363,7 +363,7 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
       />
       <EuiSpacer />
       <EuiSpacer size="m" />
-      {!isLoading && data?.page.length === 0 ? (
+      {data.page.length === 0 ? (
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <>
