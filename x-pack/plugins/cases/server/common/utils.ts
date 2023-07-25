@@ -260,9 +260,10 @@ export const isCommentRequestTypeAlert = (
  * Returns true if a Comment Request is trying to create either a persistableState or an
  * externalReference attachment.
  */
-export const isPersistableStateOrExternalReference = (context: CommentRequest): boolean => {
+export const isPersistableStateOrExternalReference = (context: AttachmentRequest): boolean => {
   return (
-    context.type === CommentType.persistableState || context.type === CommentType.externalReference
+    context.type === AttachmentType.persistableState ||
+    context.type === AttachmentType.externalReference
   );
 };
 
