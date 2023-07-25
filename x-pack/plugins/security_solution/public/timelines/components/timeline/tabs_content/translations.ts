@@ -46,6 +46,13 @@ export const SECURITY_ASSISTANT = i18n.translate(
   }
 );
 
+export const DISCOVER_IN_TIMELINE_TAB = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.discoverInTimeline',
+  {
+    defaultMessage: 'Discover',
+  }
+);
+
 export const SESSION_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.sessionTabTimelineTitle',
   {
