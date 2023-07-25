@@ -16,7 +16,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const observabilityOnboardingApiClient = getService('observabilityOnboardingApiClient');
 
-  async function callApi({ id, name, status }: { id: string; name: string; status: string }) {
+  async function callApi({
+    id,
+    name,
+    status,
+    message,
+  }: {
+    id: string;
+    name: string;
+    status: string;
+    message?: string;
+  }) {
     return await observabilityOnboardingApiClient.logMonitoringUser({
       endpoint: 'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
       params: {
@@ -26,28 +36,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
         body: {
           status,
+          message,
         },
       },
     });
   }
 
   registry.when('Update step progress', { config: 'basic' }, () => {
-    let onboardingId: string;
-
-    before(async () => {
-      const req = await observabilityOnboardingApiClient.logMonitoringUser({
-        endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
-        params: {
-          body: {
-            name: 'name',
-            state: {},
-          },
-        },
-      });
-
-      onboardingId = req.body.onboardingId;
-    });
-
     describe("when onboardingId doesn't exists", () => {
       it('fails with a 404 error', async () => {
         const err = await expectToReject<ObservabilityOnboardingApiError>(
@@ -65,21 +60,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when onboardingId exists', () => {
-      const step = {
-        name: 'ea-download',
-        status: 'complete',
-      };
+      let onboardingId: string;
 
-      before(async () => {
+      beforeEach(async () => {
+        const req = await observabilityOnboardingApiClient.logMonitoringUser({
+          endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
+          params: {
+            body: {
+              name: 'name',
+              state: {},
+            },
+          },
+        });
+
+        onboardingId = req.body.onboardingId;
         const savedState = await kibanaServer.savedObjects.get({
           type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
           id: onboardingId,
         });
 
-        expect(savedState.attributes.progress?.[step.name]).not.ok();
+        expect(savedState.attributes.progress).eql({});
       });
 
       it('updates step status', async () => {
+        const step = {
+          name: 'ea-download',
+          status: 'complete',
+        };
+
         const request = await callApi({
           id: onboardingId,
           ...step,
@@ -92,7 +100,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           id: onboardingId,
         });
 
-        expect(savedState.attributes.progress?.[step.name]).to.be(step.status);
+        const stepProgress = savedState.attributes.progress?.[step.name];
+        expect(stepProgress).to.have.property('status', step.status);
+      });
+
+      it('updates step status with message', async () => {
+        const step = {
+          name: 'ea-download',
+          status: 'danger',
+          message: 'Download failed',
+        };
+        const request = await callApi({
+          id: onboardingId,
+          ...step,
+        });
+
+        expect(request.status).to.be(200);
+
+        const savedState = await kibanaServer.savedObjects.get({
+          type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+          id: onboardingId,
+        });
+
+        const stepProgress = savedState.attributes.progress?.[step.name];
+        expect(stepProgress).to.have.property('status', step.status);
+        expect(stepProgress).to.have.property('message', step.message);
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.delete({
+          type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+          id: onboardingId,
+        });
       });
     });
   });

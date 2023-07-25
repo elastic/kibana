@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiForm, EuiSpacer, EuiTitle, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
@@ -19,16 +19,28 @@ import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector
 import { SingleFieldMapping } from './single_field_selector';
 
 export const ConfigureFields: React.FC = () => {
-  const { isTextExpansionModelSelected } = useValues(MLInferenceLogic);
+  const {
+    isTextExpansionModelSelected,
+    addInferencePipelineModal: { configuration },
+  } = useValues(MLInferenceLogic);
+  const areInputsDisabled = configuration.existingPipeline !== false;
+
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={3}>
           <EuiTitle size="s">
             <h4>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title',
-                { defaultMessage: 'Select field mappings' }
+              {areInputsDisabled ? (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.titleReview"
+                  defaultMessage="Review field mappings"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title"
+                  defaultMessage="Select field mappings"
+                />
               )}
             </h4>
           </EuiTitle>
@@ -36,12 +48,26 @@ export const ConfigureFields: React.FC = () => {
         <EuiFlexItem grow={7}>
           <EuiText color="subdued" size="s">
             <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
-                {
-                  defaultMessage:
-                    'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
-                }
+              {areInputsDisabled ? (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.descriptionReview"
+                  defaultMessage="Examine the field mappings of your chosen pipeline to ensure that the source and target fields align with your specific use case. {notEditable}"
+                  values={{
+                    notEditable: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.descriptionReviewNotEditable"
+                          defaultMessage="The fields from existing pipelines are not editable."
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description"
+                  defaultMessage="Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using."
+                />
               )}
             </p>
           </EuiText>
@@ -51,8 +77,8 @@ export const ConfigureFields: React.FC = () => {
       <EuiForm component="form">
         {isTextExpansionModelSelected ? (
           <>
-            <MultiFieldMapping />
-            <SelectedFieldMappings />
+            {areInputsDisabled || <MultiFieldMapping />}
+            <SelectedFieldMappings isReadOnly={areInputsDisabled} />
           </>
         ) : (
           <>

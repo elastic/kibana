@@ -229,7 +229,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Web crawler',
       }),
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
-        defaultMessage: 'Add search to your website with the Enterprise Search web crawler.',
+        defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
       uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/crawler',
@@ -273,8 +273,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.content.integrations.dropboxDescription',
         {
-          defaultMessage:
-            'Search over your files and folders stored on Dropbox with Enterprise Search.',
+          defaultMessage: 'Search over your files and folders stored on Dropbox.',
         }
       ),
       categories: [
@@ -304,7 +303,7 @@ export const registerEnterpriseSearchIntegrations = (
     //     defaultMessage: 'GitHub',
     //   }),
     //   description: i18n.translate('xpack.enterpriseSearch.content.integrations.githubDescription', {
-    //     defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
+    //     defaultMessage: 'Search over your projects and repos on GitHub.',
     //   }),
     //   categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
     //   uiInternalPath:
@@ -327,7 +326,7 @@ export const registerEnterpriseSearchIntegrations = (
     //   description: i18n.translate(
     //     'xpack.enterpriseSearch.content.integrations.githubServerDescription',
     //     {
-    //       defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
+    //       defaultMessage: 'Search over your projects and repos on GitHub.',
     //     }
     //   ),
     //   categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
@@ -353,7 +352,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBDescription',
         {
-          defaultMessage: 'Search over your MongoDB content with Enterprise Search.',
+          defaultMessage: 'Search over your MongoDB content.',
         }
       ),
       categories: [
@@ -384,7 +383,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.mysqlDescription',
         {
-          defaultMessage: 'Search over your MySQL content with Enterprise Search.',
+          defaultMessage: 'Search over your MySQL content.',
         }
       ),
       categories: [
@@ -414,7 +413,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.buildAConnectorDescription',
         {
-          defaultMessage: 'Search over data stored on custom data sources with Enterprise Search.',
+          defaultMessage: 'Search over data stored on custom data sources.',
         }
       ),
       categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector_client'],
@@ -438,7 +437,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.postgreSQLDescription',
         {
-          defaultMessage: 'Search over your content on PostgreSQL with Enterprise Search.',
+          defaultMessage: 'Search over your content on PostgreSQL.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
@@ -464,7 +463,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.serviceNowDescription',
         {
-          defaultMessage: 'Search over your content on ServiceNow with Enterprise Search.',
+          defaultMessage: 'Search over your content on ServiceNow.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
@@ -493,7 +492,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointOnlineDescription',
         {
-          defaultMessage: 'Search over your content on SharePoint Online with Enterprise Search.',
+          defaultMessage: 'Search over your content on SharePoint Online.',
         }
       ),
       categories: [
@@ -528,7 +527,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointServerDescription',
         {
-          defaultMessage: 'Search over your content on SharePoint Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on SharePoint Server.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
@@ -554,7 +553,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.oracleDescription',
         {
-          defaultMessage: 'Search over your content on Oracle with Enterprise Search.',
+          defaultMessage: 'Search over your content on Oracle.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
@@ -578,8 +577,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.msSqlDescription',
         {
-          defaultMessage:
-            'Search over your content on Microsoft SQL Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on Microsoft SQL Server.',
         }
       ),
       categories: ['enterprise_search', 'custom', 'elastic_stack', 'datastore'],
@@ -606,7 +604,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.netowkrDriveDescription',
         {
-          defaultMessage: 'Search over your Network Drive content with Enterprise Search.',
+          defaultMessage: 'Search over your Network Drive content.',
         }
       ),
       categories: [
@@ -638,7 +636,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.s3Description',
         {
-          defaultMessage: 'Search over your content on Amazon S3 with Enterprise Search.',
+          defaultMessage: 'Search over your content on Amazon S3.',
         }
       ),
       categories: ['enterprise_search', 'datastore', 'elastic_stack'],
@@ -662,8 +660,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.googleCloudDescription',
         {
-          defaultMessage:
-            'Search over your content on Google Cloud Storage with Enterprise Search.',
+          defaultMessage: 'Search over your content on Google Cloud Storage.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom'],
@@ -689,7 +686,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.azureBlobDescription',
         {
-          defaultMessage: 'Search over your content on Azure Blob Storage with Enterprise Search.',
+          defaultMessage: 'Search over your content on Azure Blob Storage.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom'],
@@ -714,7 +711,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.confluenceDescription',
         {
-          defaultMessage: 'Search over your content on Confluence Cloud with Enterprise Search.',
+          defaultMessage: 'Search over your content on Confluence Cloud.',
         }
       ),
       categories: [
@@ -749,7 +746,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.confluenceServerDescription',
         {
-          defaultMessage: 'Search over your content on Confluence Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on Confluence Server.',
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
@@ -774,7 +771,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.jiraDescription',
         {
-          defaultMessage: 'Search over your content on Jira Cloud with Enterprise Search.',
+          defaultMessage: 'Search over your content on Jira Cloud.',
         }
       ),
       categories: [
@@ -807,7 +804,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate(
         'xpack.enterpriseSearch.integrations.connectors.jiraServerDescription',
         {
-          defaultMessage: 'Search over your content on Jira Server with Enterprise Search.',
+          defaultMessage: 'Search over your content on Jira Server.',
         }
       ),
       categories: [

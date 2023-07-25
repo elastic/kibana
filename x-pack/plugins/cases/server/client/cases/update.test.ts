@@ -11,6 +11,7 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
+  MAX_CASES_TO_UPDATE,
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -698,6 +699,42 @@ describe('update', () => {
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+      );
+    });
+  });
+
+  describe('Validation', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it(`throws an error when trying to update more than ${MAX_CASES_TO_UPDATE} cases`, async () => {
+      await expect(
+        update(
+          {
+            cases: Array(MAX_CASES_TO_UPDATE + 1).fill({
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              title: 'This is a test case!!',
+            }),
+          },
+          createCasesClientMockArgs()
+        )
+      ).rejects.toThrow(
+        'Error: The length of the field cases is too long. Array must be of length <= 100.'
+      );
+    });
+
+    it('throws an error when trying to update zero cases', async () => {
+      await expect(
+        update(
+          {
+            cases: [],
+          },
+          createCasesClientMockArgs()
+        )
+      ).rejects.toThrow(
+        'Error: The length of the field cases is too short. Array must be of length >= 1.'
       );
     });
   });

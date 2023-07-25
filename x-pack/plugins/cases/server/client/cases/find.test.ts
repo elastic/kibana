@@ -10,7 +10,9 @@ import type { Case } from '../../../common/api';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CASES_PER_PAGE,
   MAX_CATEGORY_FILTER_LENGTH,
+  MAX_DOCS_PER_PAGE,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '../../../common/constants';
@@ -53,8 +55,7 @@ describe('find', () => {
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
       expect(call.caseOptions.search).toBe(`"${search}" "cases:${search}"`);
-      expect(call.caseOptions).toHaveProperty('rootSearchFields');
-      expect(call.caseOptions.rootSearchFields).toStrictEqual(['_id']);
+      expect(call.caseOptions).toHaveProperty('rootSearchFields', ['_id']);
     });
 
     it('regular search term does not cause rootSearchFields to be appended', async () => {
@@ -68,8 +69,16 @@ describe('find', () => {
       expect(call.caseOptions.search).toBe(search);
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
+  });
 
-    it('should not have foo:bar attribute in request payload', async () => {
+  describe('errors', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('when foo:bar attribute in request payload', async () => {
       const search = 'sample_text';
       const findRequest = createCasesClientMockFindRequest({ search });
       await expect(
@@ -78,14 +87,6 @@ describe('find', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
       );
-    });
-  });
-
-  describe('searchFields errors', () => {
-    const clientArgs = createCasesClientMockArgs();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
     });
 
     it('invalid searchFields with array', async () => {
@@ -107,6 +108,17 @@ describe('find', () => {
 
       await expect(find(findRequest, clientArgs)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+
+    it('invalid sortField', async () => {
+      const sortField = 'foobar';
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ sortField });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "sortField"'
       );
     });
 
@@ -147,6 +159,25 @@ describe('find', () => {
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
         `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
+      );
+    });
+
+    it('Invalid total items results in error', async () => {
+      const findRequest = createCasesClientMockFindRequest({ page: 209, perPage: 100 });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
+      );
+    });
+
+    it('Invalid perPage items results in error', async () => {
+      const findRequest = createCasesClientMockFindRequest({
+        page: 1,
+        perPage: MAX_CASES_PER_PAGE + 1,
+      });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
   });

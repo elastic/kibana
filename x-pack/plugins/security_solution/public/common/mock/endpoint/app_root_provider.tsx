@@ -16,6 +16,7 @@ import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { MockAssistantProvider } from '../mock_assistant_provider';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins } from '../../../types';
 
@@ -46,9 +47,11 @@ export const AppRootProvider = memo<{
         <I18nProvider>
           <KibanaContextProvider services={services}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <Router history={history}>
-                <RouteCapture>{children}</RouteCapture>
-              </Router>
+              <MockAssistantProvider>
+                <Router history={history}>
+                  <RouteCapture>{children}</RouteCapture>
+                </Router>
+              </MockAssistantProvider>
             </EuiThemeProvider>
           </KibanaContextProvider>
         </I18nProvider>

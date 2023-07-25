@@ -36,6 +36,7 @@ import type { AddCommentFormSchema } from './schema';
 import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -174,6 +175,9 @@ export const AddComment = React.memo(
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [focusOnContext]);
 
+      const isDisabled =
+        isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
+
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
@@ -200,7 +204,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={!comment || isLoading}
+                          isDisabled={isDisabled}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

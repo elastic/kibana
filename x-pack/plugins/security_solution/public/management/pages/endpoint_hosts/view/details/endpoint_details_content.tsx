@@ -24,7 +24,6 @@ import { useEndpointSelector } from '../hooks';
 import {
   getEndpointPendingActionsCallback,
   nonExistingPolicies,
-  policyResponseStatus,
   uiQueryParams,
 } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
@@ -64,9 +63,10 @@ interface EndpointDetailsContentProps {
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
     const queryParams = useEndpointSelector(uiQueryParams);
-    const policyStatus = useEndpointSelector(
-      policyResponseStatus
-    ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
+    const policyStatus = useMemo(
+      () => hostInfo.metadata.Endpoint.policy.applied.status,
+      [hostInfo]
+    );
     const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 

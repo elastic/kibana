@@ -9,23 +9,17 @@ import type { SavedObject } from '@kbn/core/server';
 import type {
   CasePostRequest,
   CommentAttributes,
+  CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestUserType,
-  ConnectorMappings,
-  UserActionAttributes,
 } from '../common/api';
-import {
-  Actions,
-  ActionTypes,
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-} from '../common/api';
+import { CaseSeverity, CaseStatuses, CommentType } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
+import type { ConnectorMappings, UserActionAttributes } from '../common/types/domain';
+import { UserActionActions, UserActionTypes, ConnectorTypes } from '../common/types/domain';
 
 const lensPersistableState = {
   attributes: {
@@ -552,8 +546,8 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-1',
     attributes: {
-      type: ActionTypes.description,
-      action: Actions.update,
+      type: UserActionTypes.description,
+      action: UserActionActions.update,
       payload: { description: 'test' },
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
@@ -578,8 +572,8 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-2',
     attributes: {
-      type: ActionTypes.comment,
-      action: Actions.update,
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
       payload: {
         comment: {
           type: CommentType.persistableState,
@@ -611,8 +605,8 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-3',
     attributes: {
-      type: ActionTypes.comment,
-      action: Actions.update,
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
       payload: {
         comment: {
           type: CommentType.persistableState,
@@ -662,6 +656,21 @@ export const comment: CommentRequestUserType = {
   comment: 'a comment',
   type: CommentType.user as const,
   owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const actionComment: CommentRequestActionsType = {
+  type: CommentType.actions,
+  comment: 'I just isolated the host!',
+  actions: {
+    targets: [
+      {
+        hostname: 'host1',
+        endpointId: '001',
+      },
+    ],
+    type: 'isolate',
+  },
+  owner: 'cases',
 };
 
 export const alertComment: CommentRequestAlertType = {

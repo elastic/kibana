@@ -14,6 +14,7 @@ export const EXPAND_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderExpandDetailButton';
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton';
+export const FLYOUT_HEADER_STATUS_BUTTON_TEST_ID = 'rule-status-badge';
 export const FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderSeverityTitle';
 export const FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID = 'severity';
@@ -25,12 +26,11 @@ export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderShareButton';
 export const FLYOUT_HEADER_CHAT_BUTTON_TEST_ID = 'newChatById';
 
-/* Description section */
+/* About section */
 
-export const DESCRIPTION_SECTION_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionSection';
-export const DESCRIPTION_SECTION_HEADER_TEST_ID = DESCRIPTION_SECTION_TEST_ID + HEADER_TEST_ID;
-export const DESCRIPTION_SECTION_CONTENT_TEST_ID = DESCRIPTION_SECTION_TEST_ID + CONTENT_TEST_ID;
+export const ABOUT_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAboutSection';
+export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
+export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
 export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
 export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';

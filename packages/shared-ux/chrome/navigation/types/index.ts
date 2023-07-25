@@ -7,6 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import type {
   ChromeNavLink,
@@ -14,6 +15,7 @@ import type {
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
+import type { CloudLinks } from '../src/cloud_links';
 
 /**
  * A list of services that are consumed by this component.
@@ -27,6 +29,7 @@ export interface NavigationServices {
   navigateToUrl: NavigateToUrlFn;
   onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
+  cloudLinks: CloudLinks;
 }
 
 /**
@@ -55,4 +58,5 @@ export interface NavigationKibanaDependencies {
     ) => void;
     getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
   };
+  cloud: CloudStart;
 }

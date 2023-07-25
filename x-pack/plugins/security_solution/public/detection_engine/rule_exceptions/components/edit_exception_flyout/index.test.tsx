@@ -25,7 +25,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -160,7 +160,6 @@ describe('When the edit exception modal is opened', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {

@@ -859,7 +859,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">sortOrder (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. Limited to 100 items. default: 20 </div><div class="param">sortOrder (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
 
@@ -951,7 +951,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">sortOrder (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. Limited to 100 items. default: 20 </div><div class="param">sortOrder (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
 
@@ -1278,7 +1278,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">reporters (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. Limited to 100 items. default: 20 </div><div class="param">reporters (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by the user name of the reporter. default: null </div><div class="param">search (optional)</div>
 
@@ -1471,7 +1471,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">reporters (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. Limited to 100 items. default: 20 </div><div class="param">reporters (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by the user name of the reporter. default: null </div><div class="param">search (optional)</div>
 
@@ -4156,7 +4156,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#findCaseConnectorsDefaultSpace_200_response_inner_config"><code>findCaseConnectorsDefaultSpace_200_response_inner_config</code> - </a></li>
     <li><a href="#findCasesDefaultSpace_200_response"><code>findCasesDefaultSpace_200_response</code> - </a></li>
     <li><a href="#findCasesDefaultSpace_assignees_parameter"><code>findCasesDefaultSpace_assignees_parameter</code> - </a></li>
-    <li><a href="#findCasesDefaultSpace_category_parameter"><code>findCasesDefaultSpace_category_parameter</code> - </a></li>
     <li><a href="#findCasesDefaultSpace_owner_parameter"><code>findCasesDefaultSpace_owner_parameter</code> - </a></li>
     <li><a href="#findCasesDefaultSpace_searchFields_parameter"><code>findCasesDefaultSpace_searchFields_parameter</code> - </a></li>
     <li><a href="#getCaseCommentDefaultSpace_200_response"><code>getCaseCommentDefaultSpace_200_response</code> - </a></li>
@@ -4580,6 +4579,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
 <div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
 <div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">category (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Category for the case. It could be a word or a phrase to categorize the case. </div>
 <div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
     </div>  <!-- field-items -->
   </div>
@@ -4655,12 +4655,6 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="findCasesDefaultSpace_assignees_parameter"><code>findCasesDefaultSpace_assignees_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-          </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="findCasesDefaultSpace_category_parameter"><code>findCasesDefaultSpace_category_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
@@ -5056,6 +5050,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
 <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">category (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Category for the case. It could be a word or a phrase to categorize the case. </div>
 <div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
     </div>  <!-- field-items -->

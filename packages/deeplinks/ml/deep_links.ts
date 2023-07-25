@@ -19,7 +19,7 @@ export type LinkId =
   | 'resultExplorer'
   | 'analyticsMap'
   | 'aiOps'
-  | 'explainLogRateSpikes'
+  | 'logRateAnalysis'
   | 'logPatternAnalysis'
   | 'changePointDetections'
   | 'modelManagement'

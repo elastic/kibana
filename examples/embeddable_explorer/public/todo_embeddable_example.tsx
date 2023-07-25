@@ -8,22 +8,17 @@
 
 import React from 'react';
 import {
-  EuiButton,
+  EuiCodeBlock,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiForm,
   EuiFormRow,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiPanel,
   EuiText,
   EuiTextArea,
-  EuiTitle,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiSelect,
 } from '@elastic/eui';
-import { TodoInput } from '@kbn/embeddable-examples-plugin/public/todo';
 import { TodoEmbeddableFactory } from '@kbn/embeddable-examples-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
@@ -32,96 +27,94 @@ interface Props {
 }
 
 interface State {
-  task?: string;
-  title?: string;
-  icon?: string;
-  loading: boolean;
-  input: TodoInput;
+  task: string;
+  title: string;
+  icon: string;
 }
+
+const ICON_OPTIONS = [
+  { value: 'beaker', text: 'beaker' },
+  { value: 'bell', text: 'bell' },
+  { value: 'bolt', text: 'bolt' },
+  { value: 'broom', text: 'broom' },
+  { value: 'bug', text: 'bug' },
+  { value: 'bullseye', text: 'bullseye' },
+];
 
 export class TodoEmbeddableExample extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      loading: true,
-      input: {
-        id: '1',
-        task: 'Take out the trash',
-        icon: 'broom',
-        title: 'Trash',
-      },
+      icon: 'broom',
+      task: 'Take out the trash',
+      title: 'Trash',
     };
   }
 
-  private onUpdateEmbeddableInput = () => {
-    const { task, title, icon, input } = this.state;
-    this.setState({ input: { ...input, task: task ?? '', title, icon } });
-  };
-
   public render() {
     return (
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Todo example</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
+      <>
+        <EuiPageTemplate.Header pageTitle="Update embeddable state" />
+        <EuiPageTemplate.Section grow={false}>
+          <>
             <EuiText>
-              This embeddable takes input parameters, task, title and icon. You can update them
-              using this form. Input changes will be passed inside `EmbeddableRenderer` as a prop
+              Use <strong>input</strong> prop to update embeddable state.
             </EuiText>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={true}>
-                <EuiFormRow label="Title">
-                  <EuiFieldText
-                    data-test-subj="titleTodo"
-                    onChange={(ev) => this.setState({ title: ev.target.value })}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiFormRow label="Icon">
-                  <EuiFieldText
-                    data-test-subj="iconTodo"
-                    onChange={(ev) => this.setState({ icon: ev.target.value })}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow label="Task">
-                  <EuiTextArea
-                    fullWidth
-                    resize="horizontal"
-                    data-test-subj="taskTodo"
-                    onChange={(ev) => this.setState({ task: ev.target.value })}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiButton
-                    data-test-subj="updateTodoButton"
-                    onClick={this.onUpdateEmbeddableInput}
-                  >
-                    Update
-                  </EuiButton>
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiPanel data-test-subj="todoEmbeddable" paddingSize="none" role="figure">
+            <EuiSpacer />
+            <EuiForm>
+              <EuiFormRow label="Title">
+                <EuiFieldText
+                  data-test-subj="titleTodo"
+                  value={this.state.title}
+                  onChange={(ev) => this.setState({ title: ev.target.value })}
+                />
+              </EuiFormRow>
+              <EuiFormRow label="Icon">
+                <EuiSelect
+                  data-test-subj="iconTodo"
+                  value={this.state.icon}
+                  options={ICON_OPTIONS}
+                  onChange={(ev) => this.setState({ icon: ev.target.value })}
+                />
+              </EuiFormRow>
+              <EuiFormRow label="Task">
+                <EuiTextArea
+                  fullWidth
+                  resize="horizontal"
+                  data-test-subj="taskTodo"
+                  value={this.state.task}
+                  onChange={(ev) => this.setState({ task: ev.target.value })}
+                />
+              </EuiFormRow>
+            </EuiForm>
+            <EuiSpacer />
+            <EuiPanel data-test-subj="todoEmbeddable" role="figure">
               <EmbeddableRenderer
                 factory={this.props.todoEmbeddableFactory}
-                input={this.state.input}
+                input={{
+                  id: '1',
+                  task: this.state.task,
+                  title: this.state.title,
+                  icon: this.state.icon,
+                }}
               />
             </EuiPanel>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
+            <EuiSpacer />
+            <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
+              {`<EmbeddableRenderer
+  factory={this.props.todoEmbeddableFactory}
+  input={{
+    id: '1',
+    task: this.state.task,
+    title: this.state.title,
+    icon: this.state.icon,
+  }}
+/>`}
+            </EuiCodeBlock>
+          </>
+        </EuiPageTemplate.Section>
+      </>
     );
   }
 }

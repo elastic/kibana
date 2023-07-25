@@ -24,23 +24,29 @@ describe('Policy Config helpers', () => {
         supported: false,
       };
 
+      const notSupportedBehaviorProtection: PolicyConfig['windows']['behavior_protection'] = {
+        mode: ProtectionModes.off,
+        supported: false,
+        reputation_service: false,
+      };
+
       const inputPolicyWithoutSupportedProtections: PolicyConfig = {
         ...defaultPolicy,
         windows: {
           ...defaultPolicy.windows,
           memory_protection: notSupported,
-          behavior_protection: notSupported,
+          behavior_protection: notSupportedBehaviorProtection,
           ransomware: notSupported,
         },
         mac: {
           ...defaultPolicy.mac,
           memory_protection: notSupported,
-          behavior_protection: notSupported,
+          behavior_protection: notSupportedBehaviorProtection,
         },
         linux: {
           ...defaultPolicy.linux,
           memory_protection: notSupported,
-          behavior_protection: notSupported,
+          behavior_protection: notSupportedBehaviorProtection,
         },
       };
 
@@ -49,18 +55,18 @@ describe('Policy Config helpers', () => {
         windows: {
           ...eventsOnlyPolicy.windows,
           memory_protection: notSupported,
-          behavior_protection: notSupported,
+          behavior_protection: notSupportedBehaviorProtection,
           ransomware: notSupported,
         },
         mac: {
           ...eventsOnlyPolicy.mac,
           memory_protection: notSupported,
-          behavior_protection: notSupported,
+          behavior_protection: notSupportedBehaviorProtection,
         },
         linux: {
           ...eventsOnlyPolicy.linux,
           memory_protection: notSupported,
-          behavior_protection: notSupported,
+          behavior_protection: notSupportedBehaviorProtection,
         },
       };
 
@@ -134,7 +140,7 @@ export const eventsOnlyPolicy: PolicyConfig = {
     malware: { mode: ProtectionModes.off, blocklist: false },
     ransomware: { mode: ProtectionModes.off, supported: true },
     memory_protection: { mode: ProtectionModes.off, supported: true },
-    behavior_protection: { mode: ProtectionModes.off, supported: true },
+    behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     popup: {
       malware: { message: '', enabled: false },
       ransomware: { message: '', enabled: false },
@@ -148,7 +154,7 @@ export const eventsOnlyPolicy: PolicyConfig = {
   mac: {
     events: { process: true, file: true, network: true },
     malware: { mode: ProtectionModes.off, blocklist: false },
-    behavior_protection: { mode: ProtectionModes.off, supported: true },
+    behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {
       malware: { message: '', enabled: false },
@@ -169,7 +175,7 @@ export const eventsOnlyPolicy: PolicyConfig = {
       tty_io: false,
     },
     malware: { mode: ProtectionModes.off, blocklist: false },
-    behavior_protection: { mode: ProtectionModes.off, supported: true },
+    behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {
       malware: { message: '', enabled: false },

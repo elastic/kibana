@@ -7,13 +7,16 @@
 
 import * as rt from 'io-ts';
 
-import { NumberFromString } from '../saved_object';
 import { UserRt } from '../user';
 import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
-import { limitedArraySchema, limitedStringSchema, NonEmptyString } from '../../schema';
+import {
+  limitedArraySchema,
+  limitedStringSchema,
+  NonEmptyString,
+  paginationSchema,
+} from '../../schema';
 import {
   MAX_DELETE_IDS_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -24,8 +27,11 @@ import {
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
+  MAX_CASES_TO_UPDATE,
   MAX_BULK_GET_CASES,
+  MAX_CASES_PER_PAGE,
 } from '../../constants';
+import { CaseConnectorRt } from '../../types/domain/connector/v1';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
@@ -199,138 +205,124 @@ export const CasePostRequestRt = rt.intersection([
   ),
 ]);
 
-const CasesFindRequestSearchFieldsRt = rt.keyof({
-  'closed_by.username': null,
-  'closed_by.full_name': null,
-  'closed_by.email': null,
-  'closed_by.profile_uid': null,
-  'created_by.username': null,
-  'created_by.full_name': null,
-  'created_by.email': null,
-  'created_by.profile_uid': null,
+export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
-  'connector.name': null,
-  'connector.type': null,
-  'external_service.pushed_by.username': null,
-  'external_service.pushed_by.full_name': null,
-  'external_service.pushed_by.email': null,
-  'external_service.pushed_by.profile_uid': null,
-  'external_service.connector_name': null,
-  'external_service.external_id': null,
-  'external_service.external_title': null,
-  'external_service.external_url': null,
   title: null,
-  'title.keyword': null,
-  'updated_by.username': null,
-  'updated_by.full_name': null,
-  'updated_by.email': null,
-  'updated_by.profile_uid': null,
 });
 
-export const CasesFindRequestRt = rt.exact(
-  rt.partial({
-    /**
-     * Tags to filter by
-     */
-    tags: rt.union([
-      limitedArraySchema({
-        codec: rt.string,
-        fieldName: 'tags',
-        min: 0,
-        max: MAX_TAGS_FILTER_LENGTH,
-      }),
-      rt.string,
-    ]),
-    /**
-     * The status of the case (open, closed, in-progress)
-     */
-    status: CaseStatusRt,
-    /**
-     * The severity of the case
-     */
-    severity: CaseSeverityRt,
-    /**
-     * The uids of the user profiles to filter by
-     */
-    assignees: rt.union([
-      limitedArraySchema({
-        codec: rt.string,
-        fieldName: 'assignees',
-        min: 0,
-        max: MAX_ASSIGNEES_FILTER_LENGTH,
-      }),
-      rt.string,
-    ]),
-    /**
-     * The reporters to filter by
-     */
-    reporters: rt.union([
-      limitedArraySchema({
-        codec: rt.string,
-        fieldName: 'reporters',
-        min: 0,
-        max: MAX_REPORTERS_FILTER_LENGTH,
-      }),
-      rt.string,
-    ]),
-    /**
-     * Operator to use for the `search` field
-     */
-    defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
-    /**
-     * A KQL date. If used all cases created after (gte) the from date will be returned
-     */
-    from: rt.string,
-    /**
-     * The page of objects to return
-     */
-    page: NumberFromString,
-    /**
-     * The number of objects to include in each page
-     */
-    perPage: NumberFromString,
-    /**
-     * An Elasticsearch simple_query_string
-     */
-    search: rt.string,
-    /**
-     * The fields to perform the simple_query_string parsed query against
-     */
-    searchFields: rt.union([
-      rt.array(CasesFindRequestSearchFieldsRt),
-      CasesFindRequestSearchFieldsRt,
-    ]),
-    /**
-     * The root fields to perform the simple_query_string parsed query against
-     */
-    rootSearchFields: rt.array(rt.string),
-    /**
-     * The field to use for sorting the found objects.
-     *
-     */
-    sortField: rt.string,
-    /**
-     * The order to sort by
-     */
-    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+export const CasesFindRequestSortFieldsRt = rt.keyof({
+  title: null,
+  category: null,
+  createdAt: null,
+  updatedAt: null,
+  closedAt: null,
+  status: null,
+  severity: null,
+});
 
-    /**
-     * A KQL date. If used all cases created before (lte) the to date will be returned.
-     */
-    to: rt.string,
-    /**
-     * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
-     * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
-     * that the user has access to.
-     */
+export const CasesFindRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * Tags to filter by
+       */
+      tags: rt.union([
+        limitedArraySchema({
+          codec: rt.string,
+          fieldName: 'tags',
+          min: 0,
+          max: MAX_TAGS_FILTER_LENGTH,
+        }),
+        rt.string,
+      ]),
+      /**
+       * The status of the case (open, closed, in-progress)
+       */
+      status: CaseStatusRt,
+      /**
+       * The severity of the case
+       */
+      severity: CaseSeverityRt,
+      /**
+       * The uids of the user profiles to filter by
+       */
+      assignees: rt.union([
+        limitedArraySchema({
+          codec: rt.string,
+          fieldName: 'assignees',
+          min: 0,
+          max: MAX_ASSIGNEES_FILTER_LENGTH,
+        }),
+        rt.string,
+      ]),
+      /**
+       * The reporters to filter by
+       */
+      reporters: rt.union([
+        limitedArraySchema({
+          codec: rt.string,
+          fieldName: 'reporters',
+          min: 0,
+          max: MAX_REPORTERS_FILTER_LENGTH,
+        }),
+        rt.string,
+      ]),
+      /**
+       * Operator to use for the `search` field
+       */
+      defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+      /**
+       * A KQL date. If used all cases created after (gte) the from date will be returned
+       */
+      from: rt.string,
+      /**
+       * The page of objects to return
+       */
+      // page: rt.union([rt.number, NumberFromString]),
+      /**
+       * The number of objects to include in each page
+       */
+      // perPage: rt.union([rt.number, NumberFromString]),
+      /**
+       * An Elasticsearch simple_query_string
+       */
+      search: rt.string,
+      /**
+       * The fields to perform the simple_query_string parsed query against
+       */
+      searchFields: rt.union([
+        rt.array(CasesFindRequestSearchFieldsRt),
+        CasesFindRequestSearchFieldsRt,
+      ]),
+      /**
+       * The field to use for sorting the found objects.
+       *
+       */
+      sortField: CasesFindRequestSortFieldsRt,
+      /**
+       * The order to sort by
+       */
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 
-    owner: rt.union([rt.array(rt.string), rt.string]),
-    /**
-     * The category of the case.
-     */
-    category: rt.union([rt.array(rt.string), rt.string]),
-  })
-);
+      /**
+       * A KQL date. If used all cases created before (lte) the to date will be returned.
+       */
+      to: rt.string,
+      /**
+       * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+       * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+       * that the user has access to.
+       */
+
+      owner: rt.union([rt.array(rt.string), rt.string]),
+      /**
+       * The category of the case.
+       */
+      category: rt.union([rt.array(rt.string), rt.string]),
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
+]);
 
 export const CasesDeleteRequestRt = limitedArraySchema({
   codec: NonEmptyString,
@@ -453,7 +445,15 @@ export const CasePatchRequestRt = rt.intersection([
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-export const CasesPatchRequestRt = rt.strict({ cases: rt.array(CasePatchRequestRt) });
+export const CasesPatchRequestRt = rt.strict({
+  cases: limitedArraySchema({
+    codec: CasePatchRequestRt,
+    min: 1,
+    max: MAX_CASES_TO_UPDATE,
+    fieldName: 'cases',
+  }),
+});
+
 export const CasesRt = rt.array(CaseRt);
 
 export const CasePushRequestParamsRt = rt.strict({
@@ -532,8 +532,9 @@ export type Case = rt.TypeOf<typeof CaseRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
-export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
+export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;

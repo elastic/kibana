@@ -65,6 +65,11 @@ export const SPECIFIC_SCRIPTED_FIELD_PATH = `${SCRIPTED_FIELD_PATH}/{name}`;
 export const SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY = `${SCRIPTED_FIELD_PATH_LEGACY}/{name}`;
 
 /**
+ * Path to swap references
+ */
+export const DATA_VIEW_SWAP_REFERENCES_PATH = `${SERVICE_PATH}/swap_references`;
+
+/**
  * name of service in path form
  */
 export const SERVICE_KEY = 'data_view';

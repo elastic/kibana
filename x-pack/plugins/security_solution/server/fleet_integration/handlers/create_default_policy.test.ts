@@ -57,9 +57,14 @@ describe('Create Default Policy tests ', () => {
 
       // check some of the protections to be disabled
       const disabledButSupported = { mode: ProtectionModes.off, supported: true };
-      expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
+      const disabledButSupportedBehaviorProtection = {
+        mode: ProtectionModes.off,
+        supported: true,
+        reputation_service: false,
+      };
+      expect(policy.windows.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
       expect(policy.mac.memory_protection).toEqual(disabledButSupported);
-      expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
 
       // malware popups should be disabled
       expect(policy.windows.popup.malware.enabled).toBeFalsy();
@@ -80,9 +85,14 @@ describe('Create Default Policy tests ', () => {
 
       // check some of the protections to be disabled and unsupported
       const disabledAndUnsupported = { mode: ProtectionModes.off, supported: false };
-      expect(policy.windows.behavior_protection).toEqual(disabledAndUnsupported);
+      const disabledAndUnsupportedBehaviorProtection = {
+        mode: ProtectionModes.off,
+        supported: false,
+        reputation_service: false,
+      };
+      expect(policy.windows.behavior_protection).toEqual(disabledAndUnsupportedBehaviorProtection);
       expect(policy.mac.memory_protection).toEqual(disabledAndUnsupported);
-      expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupportedBehaviorProtection);
 
       // malware popups are enabled on unpaid license
       expect(policy.windows.popup.malware.enabled).toBeTruthy();
@@ -138,9 +148,14 @@ describe('Create Default Policy tests ', () => {
 
       // check some of the protections to be disabled
       const disabledButSupported = { mode: ProtectionModes.off, supported: true };
-      expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
+      const disabledButSupportedBehaviorProtection = {
+        mode: ProtectionModes.off,
+        supported: true,
+        reputation_service: false,
+      };
+      expect(policy.windows.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
       expect(policy.mac.memory_protection).toEqual(disabledButSupported);
-      expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
 
       // malware popups should be disabled
       expect(policy.windows.popup.malware.enabled).toBeFalsy();

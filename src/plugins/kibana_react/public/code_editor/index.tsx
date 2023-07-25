@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 
-import { useUiSetting } from '../ui_settings';
+import { useKibanaTheme } from '../theme';
 import type { Props } from './code_editor';
 
 export * from './languages/constants';
@@ -40,11 +40,11 @@ export type CodeEditorProps = Props;
  * @see CodeEditorField to render a code editor in the same style as other EUI form fields.
  */
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const coreTheme = useKibanaTheme();
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyBaseEditor {...props} useDarkTheme={darkMode} />
+        <LazyBaseEditor {...props} useDarkTheme={coreTheme.darkMode} />
       </React.Suspense>
     </EuiErrorBoundary>
   );
@@ -54,11 +54,11 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const coreTheme = useKibanaTheme();
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyCodeEditorField {...props} useDarkTheme={darkMode} />
+        <LazyCodeEditorField {...props} useDarkTheme={coreTheme.darkMode} />
       </React.Suspense>
     </EuiErrorBoundary>
   );

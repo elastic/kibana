@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
 import { get, identity } from 'lodash';
 import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
+import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -31,9 +32,8 @@ import {
 } from '../../../../../common/alerting/logs/log_threshold';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
-import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
+import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
-import { useLogView } from '../../../../hooks/use_log_view';
 import { useLicense } from '../../../../hooks/use_license';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
@@ -44,7 +44,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, logViews } = useKibanaContextForPlugin().services;
+  const { observability, logsShared } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -66,7 +66,7 @@ const AlertDetailsAppSection = ({
 
   const { derivedDataView } = useLogView({
     initialLogViewReference: rule.params.logView,
-    logViews: logViews.client,
+    logViews: logsShared.logViews.client,
   });
 
   const { hasAtLeast } = useLicense();
@@ -237,8 +237,8 @@ const AlertDetailsAppSection = ({
     );
   };
 
-  const getExplainLogRateSpikesSection = () => {
-    return hasLicenseForExplainLogSpike ? <ExplainLogRateSpikes rule={rule} alert={alert} /> : null;
+  const getLogRateAnalysisSection = () => {
+    return hasLicenseForExplainLogSpike ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (
@@ -246,7 +246,7 @@ const AlertDetailsAppSection = ({
       <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
         {getLogRatioChart()}
         {getLogCountChart()}
-        {getExplainLogRateSpikesSection()}
+        {getLogRateAnalysisSection()}
         {getLogsHistoryChart()}
       </EuiFlexGroup>
     </CoPilotContextProvider>

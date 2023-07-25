@@ -836,12 +836,12 @@ test('allows declaring route access to flag a route as public or internal', asyn
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener).get('/with-access').expect(200, { access });
+  await supertest(innerServer.listener).get('/with-access').expect(200, { access: 'internal' });
 
-  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'public' });
+  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'internal' });
 });
 
-test('infers access flag from path if not defined', async () => {
+test(`sets access flag to 'internal' if not defined`, async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
@@ -863,13 +863,13 @@ test('infers access flag from path if not defined', async () => {
   await server.start();
   await supertest(innerServer.listener).get('/internal/foo').expect(200, { access: 'internal' });
 
-  await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'public' });
+  await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'internal' });
   await supertest(innerServer.listener)
     .get('/random/internal/foo')
-    .expect(200, { access: 'public' });
+    .expect(200, { access: 'internal' });
   await supertest(innerServer.listener)
     .get('/api/foo/internal/my-foo')
-    .expect(200, { access: 'public' });
+    .expect(200, { access: 'internal' });
 });
 
 test('exposes route details of incoming request to a route handler', async () => {
@@ -888,7 +888,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       options: {
         authRequired: true,
         xsrfRequired: false,
-        access: 'public',
+        access: 'internal',
         tags: [],
         timeout: {},
       },
@@ -1066,7 +1066,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       options: {
         authRequired: true,
         xsrfRequired: true,
-        access: 'public',
+        access: 'internal',
         tags: [],
         timeout: {
           payload: 10000,

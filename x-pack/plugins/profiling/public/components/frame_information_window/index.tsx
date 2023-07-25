@@ -108,21 +108,12 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
             <EuiFlexItem>
               <CoPilotPrompt
                 coPilot={coPilotService}
-                promptId={CoPilotPromptId.ProfilingExplainFunction}
-                params={promptParams}
-                title={i18n.translate('xpack.profiling.frameInformationWindow.explainFunction', {
-                  defaultMessage: 'Explain function',
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CoPilotPrompt
-                coPilot={coPilotService}
                 promptId={CoPilotPromptId.ProfilingOptimizeFunction}
                 params={promptParams}
                 title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
                   defaultMessage: 'Optimize function',
                 })}
+                feedbackEnabled={true}
               />
             </EuiFlexItem>
           </>

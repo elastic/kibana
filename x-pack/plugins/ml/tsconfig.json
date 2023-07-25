@@ -95,6 +95,7 @@
     "@kbn/ml-kibana-theme",
     "@kbn/ml-runtime-field-utils",
     "@kbn/ml-date-utils",
+    "@kbn/ml-category-validator",
     "@kbn/deeplinks-ml",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/unified-field-list",

@@ -101,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -1789,7 +1789,7 @@
         "label": "PageUpsellings",
         "description": [],
         "signature": [
-          "{ administration?: React.ComponentType<{}> | undefined; alerts?: React.ComponentType<{}> | undefined; blocklist?: React.ComponentType<{}> | undefined; cases?: React.ComponentType<{}> | undefined; cases_configure?: React.ComponentType<{}> | undefined; cases_create?: React.ComponentType<{}> | undefined; \"cloud_security_posture-benchmarks\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-dashboard\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-findings\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-rules\"?: React.ComponentType<{}> | undefined; \"cloud_defend-policies\"?: React.ComponentType<{}> | undefined; dashboards?: React.ComponentType<{}> | undefined; data_quality?: React.ComponentType<{}> | undefined; detections?: React.ComponentType<{}> | undefined; detection_response?: React.ComponentType<{}> | undefined; endpoints?: React.ComponentType<{}> | undefined; event_filters?: React.ComponentType<{}> | undefined; exceptions?: React.ComponentType<{}> | undefined; explore?: React.ComponentType<{}> | undefined; host_isolation_exceptions?: React.ComponentType<{}> | undefined; hosts?: React.ComponentType<{}> | undefined; \"hosts-anomalies\"?: React.ComponentType<{}> | undefined; \"hosts-risk\"?: React.ComponentType<{}> | undefined; \"hosts-events\"?: React.ComponentType<{}> | undefined; investigate?: React.ComponentType<{}> | undefined; kubernetes?: React.ComponentType<{}> | undefined; get_started?: React.ComponentType<{}> | undefined; network?: React.ComponentType<{}> | undefined; \"network-anomalies\"?: React.ComponentType<{}> | undefined; \"network-dns\"?: React.ComponentType<{}> | undefined; \"network-events\"?: React.ComponentType<{}> | undefined; \"network-http\"?: React.ComponentType<{}> | undefined; \"network-tls\"?: React.ComponentType<{}> | undefined; \"\"?: React.ComponentType<{}> | undefined; overview?: React.ComponentType<{}> | undefined; policy?: React.ComponentType<{}> | undefined; response_actions_history?: React.ComponentType<{}> | undefined; rules?: React.ComponentType<{}> | undefined; \"rules-add\"?: React.ComponentType<{}> | undefined; \"rules-create\"?: React.ComponentType<{}> | undefined; \"rules-landing\"?: React.ComponentType<{}> | undefined; sessions?: React.ComponentType<{}> | undefined; \"threat_intelligence-indicators\"?: React.ComponentType<{}> | undefined; timelines?: React.ComponentType<{}> | undefined; \"timelines-templates\"?: React.ComponentType<{}> | undefined; trusted_apps?: React.ComponentType<{}> | undefined; uncommon_processes?: React.ComponentType<{}> | undefined; users?: React.ComponentType<{}> | undefined; \"users-anomalies\"?: React.ComponentType<{}> | undefined; \"users-authentications\"?: React.ComponentType<{}> | undefined; \"users-events\"?: React.ComponentType<{}> | undefined; \"users-risk\"?: React.ComponentType<{}> | undefined; \"entity-analytics\"?: React.ComponentType<{}> | undefined; \"coverage-overview\"?: React.ComponentType<{}> | undefined; }"
+          "{ administration?: React.ComponentType<{}> | undefined; alerts?: React.ComponentType<{}> | undefined; blocklist?: React.ComponentType<{}> | undefined; cases?: React.ComponentType<{}> | undefined; cases_configure?: React.ComponentType<{}> | undefined; cases_create?: React.ComponentType<{}> | undefined; \"cloud_security_posture-benchmarks\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-dashboard\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-findings\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-rules\"?: React.ComponentType<{}> | undefined; \"cloud_defend-policies\"?: React.ComponentType<{}> | undefined; dashboards?: React.ComponentType<{}> | undefined; data_quality?: React.ComponentType<{}> | undefined; detections?: React.ComponentType<{}> | undefined; detection_response?: React.ComponentType<{}> | undefined; endpoints?: React.ComponentType<{}> | undefined; event_filters?: React.ComponentType<{}> | undefined; exceptions?: React.ComponentType<{}> | undefined; explore?: React.ComponentType<{}> | undefined; host_isolation_exceptions?: React.ComponentType<{}> | undefined; hosts?: React.ComponentType<{}> | undefined; \"hosts-anomalies\"?: React.ComponentType<{}> | undefined; \"hosts-risk\"?: React.ComponentType<{}> | undefined; \"hosts-events\"?: React.ComponentType<{}> | undefined; investigate?: React.ComponentType<{}> | undefined; kubernetes?: React.ComponentType<{}> | undefined; get_started?: React.ComponentType<{}> | undefined; network?: React.ComponentType<{}> | undefined; \"network-anomalies\"?: React.ComponentType<{}> | undefined; \"network-dns\"?: React.ComponentType<{}> | undefined; \"network-events\"?: React.ComponentType<{}> | undefined; \"network-http\"?: React.ComponentType<{}> | undefined; \"network-tls\"?: React.ComponentType<{}> | undefined; \"\"?: React.ComponentType<{}> | undefined; overview?: React.ComponentType<{}> | undefined; policy?: React.ComponentType<{}> | undefined; response_actions_history?: React.ComponentType<{}> | undefined; rules?: React.ComponentType<{}> | undefined; \"rules-add\"?: React.ComponentType<{}> | undefined; \"rules-create\"?: React.ComponentType<{}> | undefined; \"rules-landing\"?: React.ComponentType<{}> | undefined; sessions?: React.ComponentType<{}> | undefined; \"threat_intelligence-indicators\"?: React.ComponentType<{}> | undefined; timelines?: React.ComponentType<{}> | undefined; \"timelines-templates\"?: React.ComponentType<{}> | undefined; trusted_apps?: React.ComponentType<{}> | undefined; uncommon_processes?: React.ComponentType<{}> | undefined; users?: React.ComponentType<{}> | undefined; \"users-anomalies\"?: React.ComponentType<{}> | undefined; \"users-authentications\"?: React.ComponentType<{}> | undefined; \"users-events\"?: React.ComponentType<{}> | undefined; \"users-risk\"?: React.ComponentType<{}> | undefined; \"entity-analytics\"?: React.ComponentType<{}> | undefined; \"entity-analytics-management\"?: React.ComponentType<{}> | undefined; \"coverage-overview\"?: React.ComponentType<{}> | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -2934,6 +2934,21 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.APP_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "APP_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/security\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.APP_UI_ID",
         "type": "string",
         "tags": [],
@@ -3026,9 +3041,24 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.MANAGE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGE_PATH",
+        "description": [],
+        "signature": [
+          "\"/manage\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3079,7 +3109,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,

@@ -30,7 +30,10 @@ export async function saveObservabilityOnboardingState({
     savedObject = await savedObjectsClient.update<ObservabilityOnboardingState>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
       savedObjectId,
-      observabilityOnboardingState
+      {
+        state: observabilityOnboardingState.state,
+        progress: { ...observabilityOnboardingState.progress },
+      }
     );
   } else {
     savedObject = await savedObjectsClient.create<ObservabilityOnboardingState>(

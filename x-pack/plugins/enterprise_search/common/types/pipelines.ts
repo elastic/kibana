@@ -80,10 +80,12 @@ export interface CreateMlInferencePipelineParameters {
   model_id: string;
   pipeline_name: string;
   source_field: string;
+  field_mappings: FieldMapping[];
 }
 
 export interface CreateMLInferencePipelineDefinition {
   field_mappings: FieldMapping[];
+  inference_config?: InferencePipelineInferenceConfig;
   pipeline_definition: MlInferencePipeline;
   pipeline_name: string;
 }

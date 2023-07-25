@@ -173,6 +173,73 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('unhappy path - 400s when comment is too long', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      const longComment = Array(30001).fill('a').toString();
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.user,
+          comment: longComment,
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when comment is empty', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.user,
+          comment: '',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when comment is a string of empty characters', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.user,
+          comment: '   ',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
     it('unhappy path - 400s when trying to change comment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({

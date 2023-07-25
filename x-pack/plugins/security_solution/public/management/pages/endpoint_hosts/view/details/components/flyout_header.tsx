@@ -7,29 +7,23 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutHeader, EuiSkeletonText, EuiTitle, EuiToolTip } from '@elastic/eui';
-import { useEndpointSelector } from '../../hooks';
-import { isHostInfoLoading } from '../../../store/selectors';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
 
-export const EndpointDetailsFlyoutHeader = memo(
-  ({
-    endpointId,
-    hasBorder = false,
-    hostname,
-    children,
-  }: {
-    endpointId?: string;
-    hasBorder?: boolean;
-    hostname?: string;
-    children?: React.ReactNode | React.ReactNode[];
-  }) => {
-    const hostDetailsLoading = useEndpointSelector(isHostInfoLoading);
+interface EndpointDetailsFlyoutHeaderProps {
+  children?: React.ReactNode | React.ReactNode[];
+  endpointId?: string;
+  hasBorder?: boolean;
+  hostname?: string;
+  isHostInfoLoading: boolean;
+}
 
+export const EndpointDetailsFlyoutHeader = memo<EndpointDetailsFlyoutHeaderProps>(
+  ({ children, endpointId, hasBorder = false, hostname, isHostInfoLoading }) => {
     return (
       <EuiFlyoutHeader hasBorder={hasBorder}>
         {endpointId && <BackToEndpointDetailsFlyoutSubHeader endpointId={endpointId} />}
 
-        {hostDetailsLoading ? (
+        {isHostInfoLoading ? (
           <EuiSkeletonText lines={1} />
         ) : (
           <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">

@@ -16,6 +16,8 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
@@ -52,6 +54,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
+import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -79,6 +82,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  private queryService: QueryService = new QueryService();
+  private nowProvider: NowProvider = new NowProvider();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -90,6 +95,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.contract = new PluginContract();
     this.telemetry = new TelemetryService();
+    this.storage = new Storage(window.localStorage);
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -124,6 +130,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
     this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
 
+    this.queryService?.setup({
+      uiSettings: core.uiSettings,
+      storage: this.storage,
+      nowProvider: this.nowProvider,
+    });
+
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
@@ -150,6 +162,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
+      const query = this.queryService.start({
+        uiSettings: core.uiSettings,
+        storage: this.storage,
+        http: core.http,
+      });
+
+      const filterManager = new FilterManager(core.uiSettings);
+
+      // used for creating a custom stateful KQL Query Bar
+      const customDataService: DataPublicPluginStart = {
+        ...startPlugins.data,
+        query: {
+          ...query,
+          filterManager,
+        },
+      };
+
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
@@ -165,6 +194,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         telemetry: this.telemetry.start(),
+        discoverFilterManager: filterManager,
+        customDataService,
+        topValuesPopover: new TopValuesPopoverService(),
       };
       return services;
     };
@@ -295,6 +327,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    this.queryService.stop();
     licenseService.stop();
     return this.contract.getStopContract();
   }
@@ -393,6 +426,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
+        entityAnalytics: new subPluginClasses.EntityAnalytics(),
       };
     }
     return this._subPlugins;
@@ -421,6 +455,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
       timelines: subPlugins.timelines.start(),
+      entityAnalytics: subPlugins.entityAnalytics.start(
+        this.experimentalFeatures.riskScoringRoutesEnabled
+      ),
     };
   }
   /**

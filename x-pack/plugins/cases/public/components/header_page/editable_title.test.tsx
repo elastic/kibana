@@ -209,8 +209,32 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 160.'
+      'The length of the title is too long. The maximum length is 160 characters.'
     );
+
+    expect(submitTitle).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
+      false
+    );
+  });
+
+  it('does not submit the title is empty', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: '' } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('.euiFormErrorText').text()).toBe('A name is required.');
 
     expect(submitTitle).not.toHaveBeenCalled();
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
@@ -239,7 +263,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 160.'
+      'The length of the title is too long. The maximum length is 160 characters.'
     );
 
     // write a shorter one

@@ -27,10 +27,16 @@ export class SavedSearchesService {
 
   get = (savedSearchId: string) => {
     const { search, contentManagement, spaces, savedObjectsTaggingOss } = this.deps;
+    const getViaCm = (id: string) =>
+      contentManagement.get<SavedSearchCrudTypes['GetIn'], SavedSearchCrudTypes['GetOut']>({
+        contentTypeId: SavedSearchType,
+        id,
+      });
+
     return getSavedSearch(savedSearchId, {
-      search,
-      contentManagement,
+      getSavedSrch: getViaCm,
       spaces,
+      searchSourceCreate: search.searchSource.create,
       savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     });
   };
@@ -45,7 +51,7 @@ export class SavedSearchesService {
     });
     return result.hits;
   };
-  getNew = () => getNewSavedSearch({ search: this.deps.search });
+  getNew = () => getNewSavedSearch({ searchSource: this.deps.search.searchSource });
 
   find = async (search: string) => {
     const { contentManagement } = this.deps;

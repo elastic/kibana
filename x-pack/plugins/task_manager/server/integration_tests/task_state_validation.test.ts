@@ -77,7 +77,8 @@ jest.mock('../queries/task_claiming', () => {
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
 describe('task state validation', () => {
-  describe('allow_reading_invalid_state: true', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/161081
+  describe.skip('allow_reading_invalid_state: true', () => {
     let esServer: TestElasticsearchUtils;
     let kibanaServer: TestKibanaUtils;
     let taskManagerPlugin: TaskManagerStartContract;

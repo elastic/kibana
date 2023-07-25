@@ -63,6 +63,10 @@ import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import {
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+} from '@kbn/profiling-plugin/public';
+import {
   DiscoverStart,
   DiscoverSetup,
 } from '@kbn/discover-plugin/public/plugin';
@@ -98,6 +102,7 @@ export interface ApmPluginSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
+  profiling?: ProfilingPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -124,6 +129,7 @@ export interface ApmPluginStartDeps {
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
+  profiling?: ProfilingPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -165,15 +171,25 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
+const apmTutorialTitle = i18n.translate(
+  'xpack.apm.navigation.apmTutorialTitle',
+  {
+    defaultMessage: 'Tutorial',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
   }
+
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
+
+    const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
       pluginSetupDeps.home.environment.update({ apmUi: true });
@@ -359,7 +375,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
+          searchable: featureFlags.storageExplorerAvailable,
         },
+        { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -390,6 +408,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       locator,
     };
   }
+
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
     if (fleet) {

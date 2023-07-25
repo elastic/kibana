@@ -16,6 +16,7 @@ import {
   CaseStatuses,
   CommentRequestExternalReferenceSOType,
   CommentRequestAlertType,
+  ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -42,6 +43,7 @@ import {
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -274,6 +276,49 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('400s when adding too long comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const longComment = Array(30001).fill('a').toString();
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: longComment,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding empty comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: '',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding a comment with only empty characters', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: '    ',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
       it('400s when adding excess attributes for type user', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
@@ -421,6 +466,76 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCommentAlertReq,
             alertId: alerts.slice(500),
             index: alerts.slice(500),
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add a persistable state to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const attachments = Array(100).fill({
+          type: CommentType.externalReference as const,
+          owner: 'securitySolutionFixture',
+          externalReferenceAttachmentTypeId: '.test',
+          externalReferenceId: 'so-id',
+          externalReferenceMetadata: {},
+          externalReferenceStorage: {
+            soType: 'external-ref',
+            type: ExternalReferenceStorageType.savedObject as const,
+          },
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: attachments,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            persistableStateAttachmentTypeId: '.test',
+            persistableStateAttachmentState: {},
+            type: CommentType.persistableState as const,
+            owner: 'securitySolutionFixture',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add an external reference to a case that already has 100', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const attachments = Array(100).fill({
+          persistableStateAttachmentTypeId: '.test',
+          persistableStateAttachmentState: {},
+          type: CommentType.persistableState as const,
+          owner: 'securitySolutionFixture',
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: attachments,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: CommentType.externalReference as const,
+            owner: 'securitySolutionFixture',
+            externalReferenceAttachmentTypeId: '.test',
+            externalReferenceId: 'so-id',
+            externalReferenceMetadata: {},
+            externalReferenceStorage: {
+              soType: 'external-ref',
+              type: ExternalReferenceStorageType.savedObject as const,
+            },
           },
           expectedHttpCode: 400,
         });

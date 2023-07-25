@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
-import { RuleCreateProps } from '../../../../../../../common/detection_engine/rule_schema';
+import { validateCreateRuleProps } from '../../../../../../../common/api/detection_engine/rule_management';
+import { RuleCreateProps } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SetupPlugins } from '../../../../../../plugin';

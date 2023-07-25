@@ -39,7 +39,6 @@ import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { validateFindCommentsPagination } from './validators';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
@@ -123,8 +122,6 @@ export async function find(
 
   try {
     const queryParams = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(findQueryParams);
-
-    validateFindCommentsPagination(queryParams);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);

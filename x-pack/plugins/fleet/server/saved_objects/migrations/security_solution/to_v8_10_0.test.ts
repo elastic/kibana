@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+
+import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 
 import type { PackagePolicy } from '../../../../common';
 
 import { migratePackagePolicyToV8100 as migration } from './to_v8_10_0';
+import { migratePackagePolicyEvictionsFromV8100 as eviction } from './to_v8_10_0';
 
 describe('8.10.0 Endpoint Package Policy migration', () => {
-  const policyDoc = ({ meta = {} }) => {
+  const policyDoc = ({ behaviorProtection = {}, meta = {} }) => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -40,9 +43,21 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   meta: { license: '', cloud: false, ...meta },
-                  windows: {},
-                  mac: {},
-                  linux: {},
+                  windows: {
+                    behavior_protection: {
+                      ...behaviorProtection,
+                    },
+                  },
+                  mac: {
+                    behavior_protection: {
+                      ...behaviorProtection,
+                    },
+                  },
+                  linux: {
+                    behavior_protection: {
+                      ...behaviorProtection,
+                    },
+                  },
                 },
               },
             },
@@ -53,14 +68,30 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds license_uid and cluster info, defaulted to empty string without overwiting existing meta values', () => {
+  it('adds reputation service field to behaviour protection, set to false and adds license_uid and cluster info, defaulted to empty string without overwiting existing meta values', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
-      meta: { license_uid: '', cluster_uuid: '', cluster_name: '' },
+      behaviorProtection: { reputation_service: false },
+      meta: { license_uid: '', cluster_uuid: '', cluster_name: ''  },
     });
 
-    expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
+    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
+      attributes: {
+        inputs: migratedDoc.attributes.inputs,
+      },
+    });
+  });
+
+  it('removes reputation service from behaviour protection and remove new meta values', () => {
+    const initialDoc = policyDoc({
+      behaviorProtection: { reputation_service: true },
+      meta: { license_uid: '', cluster_uuid: '', cluster_name: ''  },
+    });
+
+    const migratedDoc = policyDoc({});
+
+    expect(eviction(initialDoc.attributes)).toEqual(migratedDoc.attributes);
   });
 
   it('does not modify non-endpoint package policies', () => {
@@ -95,7 +126,10 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
     };
 
     expect(
-      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PackagePolicy>
+      migration(
+        doc,
+        {} as SavedObjectModelTransformationContext
+      ) as SavedObjectUnsanitizedDoc<PackagePolicy>
     ).toEqual({
       attributes: {
         name: 'Some Policy Name',
@@ -122,8 +156,6 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
           },
         ],
       },
-      type: ' nested',
-      id: 'mock-saved-object-id',
     });
   });
 });

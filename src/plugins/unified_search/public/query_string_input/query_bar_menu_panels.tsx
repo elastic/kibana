@@ -28,7 +28,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  KIBANA_USER_QUERY_LANGUAGE_KEY,
+  KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+  UI_SETTINGS,
+} from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
@@ -297,7 +301,8 @@ export function QueryBarMenuPanels({
   };
 
   const onSelectLanguage = (lang: string) => {
-    http.post('/api/kibana/kql_opt_in_stats', {
+    http.post('/internal/kql_opt_in_stats', {
+      version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
       body: JSON.stringify({ opt_in: lang === 'kuery' }),
     });
 

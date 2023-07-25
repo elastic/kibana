@@ -51,6 +51,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: false,
         supported: true,
       },
       popup: {
@@ -95,6 +96,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: false,
         supported: true,
       },
       memory_protection: {
@@ -136,6 +138,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: false,
         supported: true,
       },
       memory_protection: {
@@ -209,6 +212,7 @@ export const policyFactoryWithoutPaidFeatures = (
       },
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       attack_surface_reduction: {
@@ -240,6 +244,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.mac,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {
@@ -266,6 +271,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.linux,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {
