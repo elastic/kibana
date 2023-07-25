@@ -8,7 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { get, pick } from 'lodash';
 import type { GetLicense } from '.';
-import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
+import { REPORTING_DATA_STREAM_WILDCARD } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import {
   FIELD_EXECUTION_TIME_MS,
@@ -222,9 +222,8 @@ export async function getReportingUsage(
   esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
-  const reportingIndex = REPORTING_SYSTEM_INDEX;
   const params = {
-    index: `${reportingIndex}-*`,
+    index: REPORTING_DATA_STREAM_WILDCARD,
     filter_path: 'aggregations.*.buckets,aggregations.metrics_*',
     body: {
       size: 0,

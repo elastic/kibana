@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { estypes, errors, TransportResult } from '@elastic/elasticsearch';
+import { errors, estypes, TransportResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ReportingCore } from '../..';
-import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
+import { REPORTING_DATA_STREAM, REPORTING_DATA_STREAM_WILDCARD } from '../../../common/constants';
 import type { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
@@ -54,10 +54,6 @@ export interface JobsQueryFactory {
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
-  function getIndex() {
-    return `${REPORTING_SYSTEM_INDEX}-*`;
-  }
-
   async function execQuery<
     T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
@@ -96,7 +92,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = (await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search({ body, index: REPORTING_DATA_STREAM_WILDCARD })
       )) as estypes.SearchResponse<ReportSource>;
 
       return (
@@ -127,7 +123,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.count({ body, index: getIndex() })
+        elasticsearchClient.count({ body, index: REPORTING_DATA_STREAM_WILDCARD })
       );
 
       return response?.count ?? 0;
@@ -156,7 +152,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: REPORTING_DATA_STREAM })
       );
 
       const result = response?.hits?.hits?.[0];
@@ -187,7 +183,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: REPORTING_DATA_STREAM })
       );
       const hits = response?.hits?.hits?.[0];
       const status = hits?._source?.status;

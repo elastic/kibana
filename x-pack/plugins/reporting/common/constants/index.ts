@@ -13,10 +13,16 @@ const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobType
 
 export const PLUGIN_ID = 'reporting';
 
+/**
+ * @internal
+ * Used for APM
+ */
 export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
 
-export const REPORTING_SYSTEM_INDEX = '.reporting';
-
+/**
+ * @internal
+ * Used for messaging the user about completed report jobs in the UI
+ */
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -28,9 +34,9 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'text/plain',
 ];
 
-// Re-export type definitions here for convenience.
-export * from './report_types';
 export * from './job_types';
+export * from './report_types';
+export * from './storage';
 
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];

@@ -65,6 +65,7 @@ export interface ReportSource {
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
   created_at: string; // timestamp in UTC
+  '@timestamp'?: string; // required at creation time for data streams compatibility
   status: JobStatus;
 
   /*

@@ -10,6 +10,7 @@ import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
+  REPORTING_DATA_STREAM_WILDCARD,
 } from '../../../common/constants';
 import type { IlmPolicyStatusResponse } from '../../../common/types';
 import type { ReportingCore } from '../../core';
@@ -29,15 +30,13 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
       const { elasticsearch } = await ctx.core;
 
-      const store = await reporting.getStore();
-
       try {
         const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
           body: {
             index: [
               {
                 privileges: ['manage'], // required to do anything with the reporting indices
-                names: [store.getReportingIndexPattern()],
+                names: [REPORTING_DATA_STREAM_WILDCARD],
                 allow_restricted_indices: true,
               },
             ],
@@ -70,7 +69,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       } = await core;
       const checkIlmMigrationStatus = () => {
         return deprecations.checkIlmMigrationStatus({
-          reportingCore: reporting,
           // We want to make the current status visible to all reporting users
           elasticsearchClient: scopedClient.asInternalUser,
         });
@@ -105,7 +103,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         reporting.getUsageCounter()
       );
 
-      const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },
       } = (await core).elasticsearch;
@@ -124,12 +121,10 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });
       }
 
-      const indexPattern = store.getReportingIndexPattern();
-
       // Second we migrate all of the existing indices to be managed by the reporting ILM policy
       try {
         await client.indices.putSettings({
-          index: indexPattern,
+          index: REPORTING_DATA_STREAM_WILDCARD,
           body: {
             index: {
               lifecycle: {

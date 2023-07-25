@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import moment from 'moment';
 import Puid from 'puid';
-import { JOB_STATUSES } from '../../../common/constants';
+import { JOB_STATUSES, REPORTING_DATA_STREAM } from '../../../common/constants';
 import {
   ReportApiJSON,
   ReportDocument,
@@ -28,7 +28,7 @@ export const MIGRATION_VERSION = '7.14.0';
  * Class for an ephemeral report document: possibly is not saved in Elasticsearch
  */
 export class Report implements Partial<ReportSource & ReportDocumentHead> {
-  public _index?: string;
+  public _index: string;
   public _id: string;
   public _primary_term?: number; // set by ES
   public _seq_no?: number; // set by ES
@@ -65,7 +65,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
    */
   constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>, fields?: ReportFields) {
     this._id = opts._id != null ? opts._id : puid.generate();
-    this._index = opts._index;
+    this._index = opts._index ?? REPORTING_DATA_STREAM; // Sets the value to the data stream, unless it's a stored report and we know the name of the backing index
     this._primary_term = opts._primary_term;
     this._seq_no = opts._seq_no;
 
@@ -168,7 +168,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   toApiJSON(): ReportApiJSON {
     return {
       id: this._id,
-      index: this._index!,
+      index: this._index ?? REPORTING_DATA_STREAM,
       kibana_name: this.kibana_name,
       kibana_id: this.kibana_id,
       jobtype: this.jobtype,

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ILM_POLICY_NAME } from '../../../common/constants';
+import { ILM_POLICY_NAME, REPORTING_DATA_STREAM_WILDCARD } from '../../../common/constants';
 import { IlmPolicyMigrationStatus } from '../../../common/types';
 import { IlmPolicyManager } from '../store/ilm_policy_manager';
 import type { DeprecationsDependencies } from './types';
 
 export const checkIlmMigrationStatus = async ({
-  reportingCore,
   elasticsearchClient,
 }: DeprecationsDependencies): Promise<IlmPolicyMigrationStatus> => {
   const ilmPolicyManager = IlmPolicyManager.create({ client: elasticsearchClient });
@@ -19,11 +18,8 @@ export const checkIlmMigrationStatus = async ({
     return 'policy-not-found';
   }
 
-  const store = await reportingCore.getStore();
-  const indexPattern = store.getReportingIndexPattern();
-
   const reportingIndicesSettings = await elasticsearchClient.indices.getSettings({
-    index: indexPattern,
+    index: REPORTING_DATA_STREAM_WILDCARD,
   });
 
   const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some((settings) => {

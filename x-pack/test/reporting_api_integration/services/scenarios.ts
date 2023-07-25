@@ -9,6 +9,7 @@ import rison from '@kbn/rison';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
+  REPORTING_DATA_STREAM_WILDCARD,
 } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
@@ -214,7 +215,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     // ignores 409 errs and keeps retrying
     await retry.tryForTime(5000, async () => {
       await esSupertest
-        .post('/.reporting*/_delete_by_query')
+        .post(`/${REPORTING_DATA_STREAM_WILDCARD}/_delete_by_query`)
         .send({ query: { match_all: {} } })
         .expect(200);
     });
