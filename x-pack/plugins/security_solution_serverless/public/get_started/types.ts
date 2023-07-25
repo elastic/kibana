@@ -28,7 +28,13 @@ export interface Badge {
   id: string;
 }
 
-export type StepId = IntroductionSteps | ConfigureSteps | ExploreSteps;
+export type StepId =
+  | IntroductionSteps
+  | ConfigureSteps
+  | ExploreSteps
+  | MasterTheInvestigationsWorkflowSteps
+  | RespondToThreatsSteps
+  | OptimizeYourWorkSpaceSteps;
 
 export interface Step {
   badges: Badge[];
@@ -85,6 +91,27 @@ export enum ConfigureSteps {
 export enum ExploreSteps {
   viewAlerts = 'viewAlerts',
   analyzeData = 'analyzeData',
+}
+
+export enum MasterTheInvestigationsWorkflowSteps {
+  introductionToInvestigations = 'introductionToInvestigations',
+  exploreProcess = 'exploreProcess',
+  exploreUser = 'exploreUser',
+  exploreThreatHunting = 'exploreThreatHunting',
+  introductionToCases = 'introductionToCases',
+}
+
+export enum RespondToThreatsSteps {
+  automated = 'automated',
+  takeControlOfEndpoint = 'takeControlOfEndpoint',
+}
+
+export enum OptimizeYourWorkSpaceSteps {
+  enableThreatIntelligence = 'enableThreatIntelligence',
+  enableEntityAnalytics = 'enableEntityAnalytics',
+  createCustomRules = 'createCustomRules',
+  introductionToExceptions = 'introductionToExceptions',
+  connectNotification = 'connectNotification',
 }
 
 export enum GetMoreFromElasticSecurityCardId {

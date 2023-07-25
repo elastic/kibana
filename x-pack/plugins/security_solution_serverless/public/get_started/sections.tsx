@@ -14,6 +14,9 @@ import {
   ConfigureSteps,
   BadgeId,
   ExploreSteps,
+  MasterTheInvestigationsWorkflowSteps,
+  RespondToThreatsSteps,
+  OptimizeYourWorkSpaceSteps,
 } from './types';
 import * as i18n from './translations';
 import respond from './images/respond.svg';
@@ -98,6 +101,75 @@ const exploreSteps = [
   },
 ];
 
+const masterTheInvestigationsWorkflowSteps = [
+  {
+    id: MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
+    title: i18n.MASTER_THE_INVESTIGATION_STEP1,
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: MasterTheInvestigationsWorkflowSteps.exploreProcess,
+    title: i18n.MASTER_THE_INVESTIGATION_STEP2,
+    badges: [cloudBadge, edrBadge],
+  },
+  {
+    id: MasterTheInvestigationsWorkflowSteps.exploreUser,
+    title: i18n.MASTER_THE_INVESTIGATION_STEP3,
+    badges: [cloudBadge, edrBadge],
+  },
+  {
+    id: MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: MasterTheInvestigationsWorkflowSteps.introductionToCases,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+];
+
+const respondToThreatsSteps = [
+  {
+    id: RespondToThreatsSteps.automated,
+    title: '',
+    badges: [edrBadge],
+  },
+  {
+    id: RespondToThreatsSteps.takeControlOfEndpoint,
+    title: '',
+    badges: [edrBadge],
+  },
+];
+
+const optimizeYourWorkSpaceSteps = [
+  {
+    id: OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: OptimizeYourWorkSpaceSteps.createCustomRules,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: OptimizeYourWorkSpaceSteps.introductionToExceptions,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+  {
+    id: OptimizeYourWorkSpaceSteps.connectNotification,
+    title: '',
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+  },
+];
+
 export const sections: Section[] = [
   {
     id: SectionId.getSetUp,
@@ -136,16 +208,19 @@ export const sections: Section[] = [
         icon: { type: 'advancedSettingsApp', size: 'xl' },
         title: i18n.MASTER_THE_INVESTIGATION_TITLE,
         id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
+        steps: masterTheInvestigationsWorkflowSteps,
       },
       {
         icon: { type: respond, size: 'xl' },
         title: i18n.RESPOND_TO_THREATS_TITLE,
         id: GetMoreFromElasticSecurityCardId.respondToThreats,
+        steps: respondToThreatsSteps,
       },
       {
         icon: { type: 'spacesApp', size: 'xl' },
         title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
         id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
+        steps: optimizeYourWorkSpaceSteps,
       },
     ],
   },

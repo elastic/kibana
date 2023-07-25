@@ -228,6 +228,27 @@ export const MASTER_THE_INVESTIGATION_TITLE = i18n.translate(
   }
 );
 
+export const MASTER_THE_INVESTIGATION_STEP1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.step1',
+  {
+    defaultMessage: 'Introduction to investigations',
+  }
+);
+
+export const MASTER_THE_INVESTIGATION_STEP2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.step2',
+  {
+    defaultMessage: 'Explore process lineage with Analyzer',
+  }
+);
+
+export const MASTER_THE_INVESTIGATION_STEP3 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.step3',
+  {
+    defaultMessage: 'Explore user and process activity with Session View',
+  }
+);
+
 export const RESPOND_TO_THREATS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.title',
   {
