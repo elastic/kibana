@@ -40,9 +40,10 @@ export const getCspmUsageRecord = async ({
       getFindingsByResourceAggQuery()
     );
 
-    const cspmResourceCount = response.aggregations
-      ? response.aggregations.unique_resources.value
-      : 0;
+    if (!!response.aggregations) {
+      return;
+    }
+    const cspmResourceCount = response.aggregations.unique_resources.value;
 
     const minTimestamp = response.aggregations
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
