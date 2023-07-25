@@ -12,7 +12,7 @@ import { partiallyUpdateAlert } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMeta } from '../lib';
-import { clearUnscheduledSnooze } from '../common';
+import { clearUnscheduledSnoozeAttributes } from '../common';
 
 export async function muteAll(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -63,7 +63,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
   const updateAttributes = updateMeta(context, {
     muteAll: true,
     mutedInstanceIds: [],
-    snoozeSchedule: clearUnscheduledSnooze(attributes),
+    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
