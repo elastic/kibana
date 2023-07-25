@@ -16,7 +16,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
-import { SingleFieldMapping } from './single_field_selector';
 
 export const ConfigureFields: React.FC = () => {
   const {

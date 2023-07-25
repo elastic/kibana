@@ -102,7 +102,7 @@ const DEFAULT_CONNECTOR_FIELDS = ['body', 'title', 'id', 'type', 'url'];
 const getFullTargetFieldName = (
   sourceField: string,
   targetField: string | undefined,
-  isTextExpansionModelSelected: boolean,
+  isTextExpansionModelSelected: boolean
 ) => {
   let suffixedTargetField = (targetField ?? '').length > 0 ? targetField! : sourceField;
   if (isTextExpansionModelSelected) {
@@ -220,7 +220,9 @@ export const MLInferenceLogic = kea<
   MakeLogicType<MLInferenceProcessorsValues, MLInferenceProcessorsActions>
 >({
   actions: {
-    addSelectedFieldsToMapping: (isTextExpansionModelSelected: string) => ({ isTextExpansionModelSelected }),
+    addSelectedFieldsToMapping: (isTextExpansionModelSelected: string) => ({
+      isTextExpansionModelSelected,
+    }),
     attachPipeline: true,
     clearFormErrors: true,
     createPipeline: true,
@@ -399,7 +401,11 @@ export const MLInferenceLogic = kea<
             ...(fieldMappings || []),
             ...(selectedSourceFields || []).map((fieldName: string) => ({
               sourceField: fieldName,
-              targetField: getFullTargetFieldName(fieldName, targetField, isTextExpansionModelSelected),
+              targetField: getFullTargetFieldName(
+                fieldName,
+                targetField,
+                isTextExpansionModelSelected
+              ),
             })),
           ];
 
