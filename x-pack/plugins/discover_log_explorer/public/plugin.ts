@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
+import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
+import { getLogExplorerDeepLink } from './deep_links';
 import {
   DiscoverLogExplorerPluginSetup,
   DiscoverLogExplorerPluginStart,
@@ -17,14 +19,20 @@ import {
 export class DiscoverLogExplorerPlugin
   implements Plugin<DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart>
 {
+  private config: DiscoverLogExplorerConfig;
+
+  constructor(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
+    this.config = context.config.get();
+  }
+
   public setup() {}
 
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover, data } = plugins;
 
-    discover.customize(
-      LOG_EXPLORER_PROFILE_ID,
-      createLogExplorerProfileCustomizations({ core, data })
-    );
+    discover.registerCustomizationProfile(LOG_EXPLORER_PROFILE_ID, {
+      customize: createLogExplorerProfileCustomizations({ core, data }),
+      deepLinks: [getLogExplorerDeepLink({ isVisible: this.config.featureFlags.deepLinkVisible })],
+    });
   }
 }

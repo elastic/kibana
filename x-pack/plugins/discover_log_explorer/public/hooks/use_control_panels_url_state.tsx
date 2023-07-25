@@ -14,7 +14,7 @@ import { useCallback, useMemo, useState } from 'react';
 export const CONTROL_PANELS_URL_KEY = 'controlPanels';
 
 const availableControlsPanels = {
-  NAMESPACE: 'data_stream.namespace.keyword',
+  NAMESPACE: 'data_stream.namespace',
 };
 
 const controlPanelConfigs: ControlPanels = {
