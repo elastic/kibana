@@ -16,7 +16,8 @@
       "security"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "kibanaUtils"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

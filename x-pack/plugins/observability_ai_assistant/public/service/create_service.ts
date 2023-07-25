@@ -52,6 +52,10 @@ export function createService(coreStart: CoreStart): ObservabilityAIAssistantSer
         throw new Error('Could not get reader from response');
       }
 
+      signal.addEventListener('abort', () => {
+        reader.cancel();
+      });
+
       return readableStreamReaderIntoObservable(reader).pipe(
         map((line) => line.substring(6)),
         filter((line) => !!line && line !== '[DONE]'),
