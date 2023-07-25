@@ -16,13 +16,14 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { useKibana } from '../../hooks/use_kibana';
 import { MessageRole, Message } from '../../../common/types';
 import { ChatItemAvatar } from './chat_item_avatar';
 import { ChatItemTitle } from './chat_item_title';
+import { ChatItemControls } from './chat_item_controls';
 import { MessagePanel } from '../message_panel/message_panel';
-import { FeedbackButtons, Feedback } from '../feedback_buttons';
 import { MessageText } from '../message_panel/message_text';
-import { useKibana } from '../../hooks/use_kibana';
+import { Feedback } from '../feedback_buttons';
 
 export interface ChatItemAction {
   id: string;
@@ -184,9 +185,11 @@ export function ChatItem({
         <MessagePanel
           body={<MessageText content={message.message.content} loading={isLoading} />}
           controls={
-            message.message.role !== MessageRole.User ? (
-              <FeedbackButtons onClickFeedback={onFeedbackClick} />
-            ) : null
+            <ChatItemControls
+              role={message.message.role}
+              onFeedbackClick={onFeedbackClick}
+              onRegenerateClick={() => onRegenerateMessage?.(message['@timestamp'])}
+            />
           }
         />
       ) : null}
