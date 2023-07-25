@@ -712,6 +712,51 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('AWS Credentials input fields', () => {
+    // ###################################################
+    // ###################################################
+    // ###################################################
+    // ###################################################
+
+    it(`renders ${CLOUDBEAT_AWS} Account Type field`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.account_type': { value: 'single_account' },
+        'aws.credentials.type': { value: 'assume_role' },
+        'aws.setup.format': { value: 'manual' },
+      });
+
+      const { getByLabelText, getByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.5.0' } as PackageInfo} />
+      );
+
+      expect(getByRole('option', { name: 'Assume role', selected: true })).toBeInTheDocument();
+
+      expect(getByLabelText('Role ARN')).toBeInTheDocument();
+    });
+
+    it(`updates ${CLOUDBEAT_AWS} Account Type field`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'assume_role' },
+        'aws.setup.format': { value: 'manual' },
+      });
+      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+
+      userEvent.type(getByLabelText('Role ARN'), 'a');
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { role_arn: { value: 'a' } });
+
+      // Ignore 1st call triggered on mount to ensure initial state is valid
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+    });
+
+    // ###################################################
+    // ###################################################
+    // ###################################################
+    // ###################################################
+
     it(`renders ${CLOUDBEAT_AWS} Assume Role fields`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
