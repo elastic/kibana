@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor);
 
       expect(apiResponse.status).eql(200);
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...DEFAULT_FIELDS[DataStream.HTTP],
@@ -375,7 +375,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
-        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
@@ -423,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
-        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql('default');
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql('default');
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
@@ -467,7 +467,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
-        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);

@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { SimpleSavedObject } from '@kbn/core/public';
 import {
   ConfigKey,
-  SyntheticsMonitor,
   MonitorFields,
   MonitorOverviewItem,
+  EncryptedSyntheticsSavedMonitor,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -52,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(monitor);
 
-      return res.body as SimpleSavedObject<MonitorFields>;
+      return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {
@@ -81,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
       await Promise.all([
-        (body.monitors as Array<SimpleSavedObject<MonitorFields>>).map((monitor) => {
+        (body.monitors as EncryptedSyntheticsSavedMonitor[]).map((monitor) => {
           return deleteMonitor(monitor.id);
         }),
       ]);
@@ -106,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns the correct response', async () => {
-      let savedMonitors: SimpleSavedObject[] = [];
+      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
       try {
         const savedResponse = await Promise.all(monitors.map(saveMonitor));
         savedMonitors = savedResponse;
@@ -130,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('accepts search queries', async () => {
-      let savedMonitors: Array<SimpleSavedObject<SyntheticsMonitor>> = [];
+      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
       try {
         const savedResponse = await Promise.all(monitors.map(saveMonitor));
         savedMonitors = savedResponse;
@@ -144,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.total).eql(2);
         expect(apiResponse.body.allMonitorIds.sort()).eql(
           savedMonitors
-            .filter((monitor) => monitor.attributes.name.includes('19'))
+            .filter((monitor) => monitor.name.includes('19'))
             .map((monitor) => monitor.id)
         );
         expect(apiResponse.body.monitors.length).eql(2);
@@ -158,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns the correct response', async () => {
-      let savedMonitors: Array<SimpleSavedObject<SyntheticsMonitor>> = [];
+      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
       const customHeartbeatId = 'example_custom_heartbeat_id';
       try {
         const savedResponse = await Promise.all(
@@ -179,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const expected: MonitorOverviewItem[] = [
           {
-            id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
+            id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[0].id,
             name: 'test monitor a',
             location: {
@@ -199,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
             schedule: '5',
           },
           {
-            id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
+            id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[0].id,
             name: 'test monitor a',
             location: {
@@ -219,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
             schedule: '5',
           },
           {
-            id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
+            id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[1].id,
             name: 'test monitor b',
             location: {
@@ -239,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
             schedule: '5',
           },
           {
-            id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
+            id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[1].id,
             name: 'test monitor b',
             location: {
@@ -261,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
         ];
 
         expect(apiResponse.body.monitors).eql(expected);
-        expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
+        expect(savedMonitors[1][ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
       } finally {
         await Promise.all(
           savedMonitors.map((monitor) => {

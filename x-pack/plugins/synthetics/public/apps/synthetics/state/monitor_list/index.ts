@@ -81,7 +81,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     .addCase(fetchUpsertSuccessAction, (state, action) => {
       state.monitorUpsertStatuses[action.payload.id] = {
         status: FETCH_STATUS.SUCCESS,
-        enabled: action.payload.attributes.enabled,
+        enabled: action.payload.enabled,
       };
     })
     .addCase(fetchUpsertFailureAction, (state, action) => {
@@ -102,7 +102,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
         state.data.monitors = state.data.monitors.map<EncryptedSyntheticsSavedMonitor>(
           (monitor: any) => {
             if (monitor.config_id === action.payload.id) {
-              return action.payload.attributes;
+              return action.payload;
             }
             return monitor;
           }

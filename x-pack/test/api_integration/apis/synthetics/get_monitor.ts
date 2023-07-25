@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body as MonitorFields;
+      return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {

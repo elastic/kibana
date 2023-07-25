@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor)
         .expect(200);
 
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
@@ -185,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson);
 
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...httpMonitorJson,
@@ -341,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
 
-        expect(apiResponse.body.attributes).eql(
+        expect(apiResponse.body).eql(
           omit(
             {
               ...monitor,
