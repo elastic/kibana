@@ -9,8 +9,6 @@ import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import { run as cypressRun } from 'cypress-cloud';
-// import { fork } from 'child_process';
-// import type { IOType } from 'child_process';
 
 export const cli = () => {
   run(

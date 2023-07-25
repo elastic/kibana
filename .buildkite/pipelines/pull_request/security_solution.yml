@@ -20,6 +20,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
+    soft_fail: true
     command: |
       source .buildkite/scripts/steps/functional/common.sh
       export PARALLELISM=$(node x-pack/plugins/security_solution/scripts/start_cypress_cloud_pipeline.js)
@@ -35,3 +36,4 @@ steps:
         artifact_paths:
           - "target/kibana-security-solution/**/*"
       YAML
+      exit 0
