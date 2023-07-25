@@ -31,6 +31,7 @@
     "@kbn/ml-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/cloud-security-posture-plugin"
   ]
 }
