@@ -200,7 +200,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                   euiFieldProps: {
                     'data-test-subj': 'webhookSSLKEYInput',
                     display: 'default',
-                    accept: '.key',
+                    accept: '.key,.pem',
                   },
                 }}
               />
