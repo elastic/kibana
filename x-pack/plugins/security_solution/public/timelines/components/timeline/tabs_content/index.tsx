@@ -14,6 +14,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -304,6 +305,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
+  const { reportAssistantInvoked } = useAssistantTelemetry();
+
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
       (acc, v) => [...acc, ...v],
@@ -352,7 +355,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const setSecurityAssistantAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.securityAssistant);
-  }, [setActiveTab]);
+    if (activeTab !== TimelineTabs.securityAssistant) {
+      reportAssistantInvoked({
+        conversationId: TIMELINE_CONVERSATION_TITLE,
+        invokedBy: TIMELINE_CONVERSATION_TITLE,
+      });
+    }
+  }, [activeTab, reportAssistantInvoked, setActiveTab]);
 
   const setDiscoverAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.discover);

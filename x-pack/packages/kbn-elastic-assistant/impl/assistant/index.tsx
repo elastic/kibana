@@ -76,13 +76,6 @@ const AssistantComponent: React.FC<Props> = ({
     allSystemPrompts,
   } = useAssistantContext();
 
-  useEffect(() => {
-    if (shouldRefocusPrompt && conversationId) {
-      // this indicates consumer (timeline) has invoked the chat
-      assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: conversationId });
-    }
-  }, [assistantTelemetry, conversationId, shouldRefocusPrompt]);
-
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
@@ -404,6 +397,16 @@ const AssistantComponent: React.FC<Props> = ({
     return chatbotComments;
   }, [connectorComments, isDisabled, chatbotComments]);
 
+  const trackPrompt = useCallback(
+    (promptTitle: string) => {
+      assistantTelemetry?.reportAssistantQuickPrompt({
+        conversationId: selectedConversationId,
+        promptTitle,
+      });
+    },
+    [assistantTelemetry, selectedConversationId]
+  );
+
   return (
     <>
       <EuiModalHeader
@@ -493,6 +496,7 @@ const AssistantComponent: React.FC<Props> = ({
           <QuickPrompts
             setInput={setUserPrompt}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            trackPrompt={trackPrompt}
           />
         )}
       </EuiModalFooter>

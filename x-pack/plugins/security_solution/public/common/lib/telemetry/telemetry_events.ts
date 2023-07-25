@@ -135,6 +135,26 @@ const assistantMessageSentEvent: TelemetryEvent = {
   },
 };
 
+const assistantQuickPrompt: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssistantQuickPrompt,
+  schema: {
+    conversationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Active conversation ID',
+        optional: false,
+      },
+    },
+    promptTitle: {
+      type: 'keyword',
+      _meta: {
+        description: 'Title of the quick prompt',
+        optional: false,
+      },
+    },
+  },
+};
+
 const entityClickedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.EntityDetailsClicked,
   schema: {
@@ -282,6 +302,7 @@ export const telemetryEvents = [
   alertsGroupingTakeActionEvent,
   assistantInvokedEvent,
   assistantMessageSentEvent,
+  assistantQuickPrompt,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,

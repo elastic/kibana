@@ -20,6 +20,7 @@ export enum TelemetryEventTypes {
   AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
   AssistantInvoked = 'Assistant Invoked',
   AssistantMessageSent = 'Assistant Message Sent',
+  AssistantQuickPrompt = 'Assistant Quick Prompt',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
@@ -47,14 +48,19 @@ export interface ReportAlertsTakeActionParams {
   groupByField: string;
 }
 
+export interface ReportAssistantInvokedParams {
+  conversationId: string;
+  invokedBy: string;
+}
+
 export interface ReportAssistantMessageSentParams {
   conversationId: string;
   role: string;
 }
 
-export interface ReportAssistantInvokedParams {
+export interface ReportAssistantQuickPromptParams {
   conversationId: string;
-  invokedBy: string;
+  promptTitle: string;
 }
 
 interface EntityParam {
@@ -116,6 +122,7 @@ export interface TelemetryClientStart {
 
   reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
   reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
+  reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
 
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
@@ -147,6 +154,10 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AssistantMessageSent;
       schema: RootSchema<ReportAssistantMessageSentParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssistantQuickPrompt;
+      schema: RootSchema<ReportAssistantQuickPromptParams>;
     }
   | {
       eventType: TelemetryEventTypes.EntityDetailsClicked;

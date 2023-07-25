@@ -17,5 +17,6 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
   return {
     reportAssistantInvoked: telemetry.reportAssistantInvoked,
     reportAssistantMessageSent: telemetry.reportAssistantMessageSent,
+    reportAssistantQuickPrompt: telemetry.reportAssistantQuickPrompt,
   };
 };

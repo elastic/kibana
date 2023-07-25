@@ -19,6 +19,7 @@ import type {
   ReportAnomaliesCountClickedParams,
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -67,6 +68,18 @@ export class TelemetryClient implements TelemetryClientStart {
     });
   };
 
+  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
+    console.log('reporting assistant invoked', {
+      arg: TelemetryEventTypes.AssistantInvoked,
+      conversationId,
+      invokedBy,
+    });
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
+      conversationId,
+      invokedBy,
+    });
+  };
+
   public reportAssistantMessageSent = ({
     conversationId,
     role,
@@ -82,15 +95,18 @@ export class TelemetryClient implements TelemetryClientStart {
     });
   };
 
-  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
-    console.log('reporting assistant invoked', {
-      arg: TelemetryEventTypes.AssistantInvoked,
+  public reportAssistantQuickPrompt = ({
+    conversationId,
+    promptTitle,
+  }: ReportAssistantQuickPromptParams) => {
+    console.log('reporting assistant quick propmpt', {
+      arg: TelemetryEventTypes.AssistantMessageSent,
       conversationId,
-      invokedBy,
+      promptTitle,
     });
-    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, {
       conversationId,
-      invokedBy,
+      promptTitle,
     });
   };
 
