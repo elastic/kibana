@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
 import type {
@@ -12,9 +12,10 @@ import type {
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';
 import type {
-  TaskManagerSetupContract as TaskManagerPluginSetup,
-  TaskManagerStartContract as TaskManagerPluginStart,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -30,14 +31,15 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   securitySolutionEss: SecuritySolutionEssPluginSetup;
   features: PluginSetupContract;
   ml: MlPluginSetup;
-  taskManager: TaskManagerPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  cloudSetup: CloudSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   features: PluginStartContract;
-  taskManager: TaskManagerPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface UsageRecord {
@@ -60,5 +62,47 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  instance_group_type: string;
+  instance_group_type?: string; // not seems part of step 1 fields https://github.com/elastic/mx-team/blob/main/teams/billing/services/usage_record_schema_v2.md
+}
+
+export interface SecurityUsageReportingTaskSetupContract {
+  core: CoreSetup;
+  logFactory: LoggerFactory;
+  taskManager: TaskManagerSetupContract;
+  cloudSetup: CloudSetup;
+  taskType: string;
+  taskTitle: string;
+  version: string;
+  meteringCallback: MeteringCallback;
+}
+
+export interface SecurityUsageReportingTaskStartContract {
+  taskManager: TaskManagerStartContract;
+  interval: string;
+}
+
+export type MeteringCallback = (
+  metringCallbackInput: MeteringCallbackInput
+) => Promise<UsageRecord[]>;
+
+export interface MeteringCallbackInput {
+  esClient: ElasticsearchClient;
+  cloudSetup: CloudSetup;
+  logger: Logger;
+  taskId: string;
+  lastSuccessfulReport: Date;
+}
+
+export interface CloudSecurityMeteringCallbackInput
+  extends Omit<MeteringCallbackInput, 'cloudSetup'> {
+  projectId: string;
+}
+
+export interface MetringTaskProperties {
+  taskType: string;
+  taskTitle: string;
+  meteringCallback: MeteringCallback;
+  interval: string;
+  periodSeconds: number;
+  version: string;
 }
