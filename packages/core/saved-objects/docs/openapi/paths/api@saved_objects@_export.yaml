@@ -3,6 +3,7 @@ post:
   operationId: exportSavedObjects
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+    NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
   tags:
     - cases
   parameters:
@@ -13,15 +14,83 @@ post:
       application/json:
         schema:
           type: object
-          additionalProperties: true
+          anyOf:
+            - required: [type]
+            - required: [objects]
+          properties:
+            excludeExportDetails:
+              description: Do not add export details entry at the end of the stream.
+              type: boolean
+              default: false
+            includeReferencesDeep:
+              description: Includes all of the referenced objects in the exported objects.
+              type: boolean
+            objects:
+              description: A list of objects to export.
+              type: array
+              items:
+                type: object
+            type:
+              description: The saved object types to include in the export.
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+        examples:
+          exportSavedObjectsRequest:
+            $ref: '../components/examples/export_objects_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
       content:
          application/json:
           schema:
-            type: object
-            additionalProperties: true
+            allOf:
+             - type: object
+               properties:
+                attributes:
+                  type: object
+                coreMigrationVersion:
+                  type: string
+                created_at:
+                  type: string
+                  format: date
+                id:
+                  type: string
+                managed:
+                  type: boolean
+                references:
+                  type: array
+                sort:
+                  type: array
+                type:
+                  type: string
+                typeMigrationVersion:
+                  type: string
+                updated_at:
+                  type: string
+                  format: date
+                version:
+                  type: string
+             - type: object
+               properties:
+                 exportedCount:
+                   type: integer
+                 missingRefCount:
+                   type: integer
+                 missingReferences:
+                   type: array
+                   items:
+                     type: object
+                     properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+          examples:
+            exportObjectsRequest:
+              $ref: '../components/examples/export_objects_request.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
