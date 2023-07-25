@@ -55,12 +55,12 @@ export const USES_HEADLESS_JOB_TYPES = [
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
 // Licenses
-export const LICENSE_TYPE_TRIAL = 'trial';
-export const LICENSE_TYPE_BASIC = 'basic';
-export const LICENSE_TYPE_CLOUD_STANDARD = 'standard';
-export const LICENSE_TYPE_GOLD = 'gold';
-export const LICENSE_TYPE_PLATINUM = 'platinum';
-export const LICENSE_TYPE_ENTERPRISE = 'enterprise';
+export const LICENSE_TYPE_TRIAL = 'trial' as const;
+export const LICENSE_TYPE_BASIC = 'basic' as const;
+export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
+export const LICENSE_TYPE_GOLD = 'gold' as const;
+export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
+export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 
 // Routes
 export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu

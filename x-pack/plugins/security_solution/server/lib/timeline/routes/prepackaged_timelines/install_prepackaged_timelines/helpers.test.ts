@@ -22,7 +22,7 @@ import {
 import * as helpers from './helpers';
 import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline/api';
+import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
 
 jest.mock('../../timelines/import_timelines/helpers');
 

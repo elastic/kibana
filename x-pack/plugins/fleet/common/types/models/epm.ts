@@ -336,6 +336,7 @@ export enum RegistryDataStreamKeys {
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
   routing_rules = 'routing_rules',
+  lifecycle = 'lifecycle',
 }
 
 export interface RegistryDataStream {
@@ -353,6 +354,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
+  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
 }
 
 export interface RegistryElasticsearch {
@@ -383,6 +385,10 @@ export interface RegistryDataStreamRoutingRules {
     if: string;
     namespace: string;
   }>;
+}
+
+export interface RegistryDataStreamLifecycle {
+  data_retention: string;
 }
 
 export type RegistryVarType =
@@ -605,6 +611,7 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
+    lifecycle?: any;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
@@ -626,6 +633,9 @@ export interface TemplateMapEntry {
       }
     | {
         settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
+      }
+    | {
+        lifecycle?: any;
       };
 }
 
