@@ -74,7 +74,9 @@ export const cli = () => {
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+      const files = retrieveIntegrations(
+        spec ? spec.split(',') : cypressConfigFile?.e2e?.specPattern
+      );
 
       if (!files?.length) {
         throw new Error('No files found');
