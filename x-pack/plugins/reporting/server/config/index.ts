@@ -18,6 +18,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('capture.browser.type', { level: 'warning' }),
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
     unused('poll.jobsRefresh.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
+    unused('queue.indexInterval', { level: 'warning' }), // unused since 8.10
     unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
