@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { i18n } from '@kbn/i18n';
+import { DashboardContainerInput } from '../../../common';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { pluginServices } from '../../services/plugin_services';
 import {
@@ -118,8 +119,8 @@ export const useDashboardListingTable = ({
   }, [dashboardSessionStorage, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
-    async ({ id, title, description, tags }) => {
-      await updateDashboardMeta({ id, title, description, tags });
+    async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
+      await updateDashboardMeta(props);
 
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
     },
