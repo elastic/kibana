@@ -200,6 +200,31 @@ describe('CasesTableFilters ', () => {
     expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
   });
 
+  it('should not show warning message when one of the tags deselected after reaching the limit', async () => {
+    const newTags = Array(MAX_TAGS_FILTER_LENGTH).fill('coke');
+    (useGetTags as jest.Mock).mockReturnValue({ data: newTags, isLoading: false });
+
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        tags: newTags,
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...ourProps} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
+
+    userEvent.click(screen.getAllByTestId(`options-filter-popover-item-${newTags[0]}`)[0]);
+
+    expect(screen.queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
+  });
+
   it('should show warning message when maximum categories selected', async () => {
     const newCategories = Array(MAX_CATEGORY_FILTER_LENGTH).fill('snickers');
     (useGetCategories as jest.Mock).mockReturnValue({ data: newCategories, isLoading: false });

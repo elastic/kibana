@@ -228,8 +228,8 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedTags}
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
-            optionsMaxLEngth={MAX_TAGS_FILTER_LENGTH}
-            optionsMaxLengthLabel={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
+            limit={MAX_TAGS_FILTER_LENGTH}
+            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
           />
           <FilterPopover
             buttonLabel={i18n.CATEGORIES}
@@ -237,11 +237,8 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedCategories}
             options={categories}
             optionsEmptyLabel={i18n.NO_CATEGORIES_AVAILABLE}
-            optionsMaxLEngth={MAX_CATEGORY_FILTER_LENGTH}
-            optionsMaxLengthLabel={i18n.MAX_SELECTED_FILTER(
-              MAX_CATEGORY_FILTER_LENGTH,
-              'categories'
-            )}
+            limit={MAX_CATEGORY_FILTER_LENGTH}
+            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
           />
           {availableSolutions.length > 1 && (
             <SolutionFilter

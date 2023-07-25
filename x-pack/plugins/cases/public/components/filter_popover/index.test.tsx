@@ -123,8 +123,8 @@ describe('FilterPopover ', () => {
           onSelectedOptionsChanged={onSelectedOptionsChanged}
           selectedOptions={[...newTags.slice(0, 3)]}
           options={newTags}
-          optionsMaxLEngth={maxLength}
-          optionsMaxLengthLabel={maxLengthLabel}
+          limit={maxLength}
+          limitReachedMessage={maxLengthLabel}
         />
       );
 
@@ -134,6 +134,7 @@ describe('FilterPopover ', () => {
 
       expect(getByTestId('maximum-length-warning')).toHaveTextContent(maxLengthLabel);
 
+      expect(getByTestId(`options-filter-popover-item-${newTags[3]}`)).toHaveProperty('disabled');
       expect(getByTestId(`options-filter-popover-item-${newTags[4]}`)).toHaveProperty('disabled');
     });
 
@@ -144,7 +145,7 @@ describe('FilterPopover ', () => {
           onSelectedOptionsChanged={onSelectedOptionsChanged}
           selectedOptions={[newTags[0], newTags[2]]}
           options={newTags}
-          optionsMaxLEngth={maxLength}
+          limit={maxLength}
         />
       );
 
@@ -153,6 +154,7 @@ describe('FilterPopover ', () => {
       await waitForEuiPopoverOpen();
 
       expect(queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
+      expect(getByTestId(`options-filter-popover-item-${newTags[3]}`)).toHaveProperty('disabled');
       expect(getByTestId(`options-filter-popover-item-${newTags[4]}`)).toHaveProperty('disabled');
     });
 
@@ -163,6 +165,7 @@ describe('FilterPopover ', () => {
           onSelectedOptionsChanged={onSelectedOptionsChanged}
           selectedOptions={[newTags[0], newTags[2]]}
           options={newTags}
+          limitReachedMessage={maxLengthLabel}
         />
       );
 

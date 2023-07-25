@@ -331,8 +331,11 @@ describe('AssigneesFilterPopover', () => {
 
     expect(
       screen.getByText(
-        `You've selected the maximum number of ${MAX_ASSIGNEES_FILTER_LENGTH} to filter assignees`
+        `You've selected the maximum number of ${MAX_ASSIGNEES_FILTER_LENGTH} assignees`
       )
     ).toBeInTheDocument();
+
+    expect(screen.getByTitle('No assignees')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTitle('No assignees')).toHaveAttribute('aria-disabled', 'true');
   });
 });

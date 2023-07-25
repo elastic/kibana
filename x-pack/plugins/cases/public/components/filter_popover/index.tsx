@@ -7,10 +7,12 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiCallOut,
   EuiFilterButton,
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -22,20 +24,14 @@ interface FilterPopoverProps {
   onSelectedOptionsChanged: (value: string[]) => void;
   options: string[];
   optionsEmptyLabel?: string;
-  optionsMaxLEngth?: number;
-  optionsMaxLengthLabel?: string;
+  limit?: number;
+  limitReachedMessage?: string;
   selectedOptions: string[];
 }
 
 const ScrollableDiv = styled.div`
   max-height: 250px;
   overflow: auto;
-`;
-
-const WarningPanel = styled(EuiPanel)`
-  ${({ theme }) => `
-    border: 1px solid ${theme.eui.euiColorLightShade};
-  `}
 `;
 
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
@@ -64,8 +60,8 @@ export const FilterPopoverComponent = ({
   options,
   optionsEmptyLabel,
   selectedOptions,
-  optionsMaxLEngth,
-  optionsMaxLengthLabel,
+  limit,
+  limitReachedMessage,
 }: FilterPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -97,25 +93,24 @@ export const FilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      {optionsMaxLEngth && optionsMaxLengthLabel && selectedOptions.length >= optionsMaxLEngth && (
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={true}>
-            <WarningPanel color="warning" paddingSize="s">
-              <EuiText size="s" color="warning" data-test-subj="maximum-length-warning">
-                {optionsMaxLengthLabel}
-              </EuiText>
-            </WarningPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      {limit && limitReachedMessage && selectedOptions.length >= limit ? (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiCallOut
+            title={limitReachedMessage}
+            color="warning"
+            size="s"
+            data-test-subj="maximum-length-warning"
+          />
+          <EuiHorizontalRule margin="none" />
+        </>
+      ) : null}
       <ScrollableDiv>
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
             disabled={Boolean(
-              optionsMaxLEngth &&
-                selectedOptions.length >= optionsMaxLEngth &&
-                !selectedOptions.includes(option)
+              limit && selectedOptions.length >= limit && !selectedOptions.includes(option)
             )}
             data-test-subj={`options-filter-popover-item-${option}`}
             key={`${index}-${option}`}
