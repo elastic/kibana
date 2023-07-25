@@ -7,7 +7,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -67,6 +67,42 @@ export const NavigationEmbeddablePanelEditorLink = ({
     }
   }, [link]);
 
+  const LinkLabel = useMemo(() => {
+    const labelText = (
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            type={dashboardError ? 'warning' : NavigationLinkInfo[link.type].icon}
+            color={dashboardError ? 'warning' : 'text'}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem
+          className={classNames('navEmbeddableLinkText', {
+            'navEmbeddableLinkText--noLabel': !link.label,
+          })}
+        >
+          <EuiSkeletonTitle
+            size="xxxs"
+            isLoading={linkLabelLoading}
+            contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
+          >
+            <EuiText size="s" color={'text'} className="wrapText">
+              {linkLabel}
+            </EuiText>
+          </EuiSkeletonTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
+    return () =>
+      dashboardError ? (
+        <EuiToolTip content={dashboardError.message}>{labelText}</EuiToolTip>
+      ) : (
+        labelText
+      );
+  }, [linkLabel, linkLabelLoading, dashboardError, link.label, link.type]);
+
   return (
     <EuiPanel
       hasBorder
@@ -85,32 +121,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem className="navEmbeddableLinkText">
-          <EuiToolTip content={dashboardError ? dashboardError.message : ''} display="block">
-            <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={dashboardError ? 'warning' : NavigationLinkInfo[link.type].icon}
-                  color={dashboardError ? 'warning' : 'text'}
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem
-                className={classNames('navEmbeddableLinkText', {
-                  'navEmbeddableLinkText--noLabel': !link.label,
-                })}
-              >
-                <EuiSkeletonTitle
-                  size="xxxs"
-                  isLoading={linkLabelLoading}
-                  contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
-                >
-                  <EuiText size="s" color={'text'} className="wrapText">
-                    {linkLabel}
-                  </EuiText>
-                </EuiSkeletonTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiToolTip>
+          <LinkLabel />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
