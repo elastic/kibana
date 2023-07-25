@@ -2,8 +2,7 @@
 
 ## Introduction
 
-Welcome to the documentation for the serverless project navigation. We've exposed the tools to assist teams in building the navigation for their serverless projects.
-Project navigation is an alternative to the default Kibana navigation. It is designed to be more flexible and customizable to the needs of each project. Project navigation replaces default Kibana navigation in serverless mode.
+Welcome to the serverless project navigation documentation. Our tools help teams build customizable and flexible navigation for their serverless projects. Project navigation replaces the default Kibana navigation in serverless mode, providing a more tailored experience for each project.
 
 - [Serverless project navigation](#serverless-project-navigation)
   - [Left Side Navigation](#left-side-navigation)
@@ -15,16 +14,19 @@ Project navigation is an alternative to the default Kibana navigation. It is des
         - [`RecentlyAccessedDefinition`](#recentlyaccesseddefinition)
     - [React components](#react-components)
       - [`unstyled`](#unstyled)
-    - [Deep links](#deep-links)
-    - [Cloud link](#cloud-links)
-    - [Preconfigured navigation sections](#preconfigured-navigation-sections)
+    - [Important concepts](#important-concepts)
+      - [Deep links](#deep-links)
+      - [Cloud link](#cloud-links)
+      - [Preconfigured navigation sections](#preconfigured-navigation-sections)
+      - [Active navigation path](#active-navigation-path)
   - [Breadcrumbs](#breadcrumbs)
   - [Toolbar](#toolbar)
   - [Global Search](#global-search)
+- [Testing](#testing)
 
 ### Building Blocks
 
-The serverless navigation is composed of several key building blocks that work together to form a comprehensive navigation system. These building blocks include:
+The project navigation is composed of several key building blocks that work together to form a comprehensive navigation system. These building blocks include:
 
 1. **Left Side Navigation**: Allow users to navigate through different sections of the project.
 2. **Breadcrumbs**: A visual representation of the user's current location within the navigation hierarchy.
@@ -289,7 +291,9 @@ If you want to completely customize your UI and just need to declare you navigat
 </Navigation>
 ```
 
-### Deep links
+### Important Concepts
+
+#### Deep links
 
 [Deep links](https://github.com/elastic/kibana/blob/f5034e60a501e7b61a3e1bff34e64c9b94c71344/packages/core/application/core-application-browser/src/application.ts#L281-L314) are a Kibana core's mechanism for registering sub-pages within an app. In "classic" Kibana they are used for the default side navigation, navigation APIs and the global search. Teams can register the deep links when they register their app. They can also update or remove deep links dynamically.
 
@@ -303,7 +307,7 @@ There are multiple benefits of using deep links instead of the hardcoded URLs wh
 
 Internal navigation should be configured using deep links. The `href` property should be used only for external links. There is also a special type of external links for links pointing to the cloud console - `cloudLink`.
 
-### Cloud links
+#### Cloud links
 
 The `cloudLink` property of the `NodeDefinition` interface refers to the predefined list of cloud links that are configured in `kibana.yml`.
 Currently available pages are `'userAndRoles' | 'performance' | 'billingAndSub'`
@@ -331,7 +335,7 @@ const navigationTree: NavigationTreeDefinition = {
 };
 ```
 
-### Preconfigured navigation sections
+#### Preconfigured navigation sections
 
 When configuring the navigation tree you can use the preconfigured sections like `devtools`, `management`, `ml`, `analytics`
 
@@ -374,14 +378,120 @@ const navigationTree: NavigationTreeDefinition = {
 };
 ```
 
+#### Active Navigation Path
+
+Active navigation path is automatically tracked by the side navigation component. The active path is determined by the current URL and the deep links registered by apps. The active path is used to highlight the active navigation items and to determine the breadcrumbs.
+
+By default, the path matching logic uses `startsWith` against the path from the deep link and then picks the longest match. This can be overridden using `getIsActive` predicate.
+
+```ts
+import { type NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
+
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    {
+      title: `Dashboards`,
+      link: 'dashboards',
+      getIsActive: ({ pathNameSerialized, prepend }) => {
+        return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+      },
+    },
+  ],
+};
+```
+
+Technically, multiple paths can be active simultaneously and multiple nodes can be highlighted in the side navigation. However, this is not recommended as it can be confusing for the user.
+
+You can programmatically access the active paths using the `getActiveNavigationNodes$` method:
+
+```ts
+const activesNodes$ = pluginsStart.serverless.getActiveNavigationNodes$();
+```
+
 ## Breadcrumbs
 
-TODO
+Breadcrumbs is a list of links that represent the current navigation path. Project navigation breadcrumbs are automatically generated based on the navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
+
+Project breadcrumbs are built from 3 sections:
+
+🏠 > Navigation > Deeper Context
+
+- 🏠 > Navigation - is platform controlled automatically
+- Deeper Context - is manually controlled by projects
+
+### Project breadcrumbs sections
+
+#### 🏠 Home breadcrumb
+
+Home breadcrumb is always displayed as the first breadcrumb and leads to what project specifies as home page in `kibana.yml`.
+
+#### Navigation breadcrumbs
+
+Navigation breadcrumbs are automatically generated based on the navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
+
+#### Deeper context breadcrumbs
+
+Deeper context breadcrumbs are manually controlled by projects. They are added to the breadcrumbs using the `pluginsStart.serverless.setBreadcrumbs` method.
+
+```ts
+pluginsStart.serverless.setBreadcrumbs([
+  {
+    text: 'Deeper Context',
+    href: '/some/deeper/context',
+  },
+]);
+```
+
+These breadcrumbs are removed when the active navigation path changes.
+
+### Overriding breadcrumbs
+
+Projects can override navigation breadcrumbs. This will override navigation breadcrumbs, but will keep the Home breadcrumb:
+
+```ts
+pluginsStart.serverless.setBreadcrumbs([b1, b2, b3], { absolute: true });
+```
+
+The override is automatically reset when the active navigation path changes.
 
 ## Toolbar
 
-TODO
+The application toolbar is a horizontal bar that is displayed at the top of the page below the header where apps can put their custom actions.
+There is no serverless specific API or behavior changes for this: to set custom actions use the same API as in the default Kibana `setHeaderActionMenu` [source](https://github.com/elastic/kibana/blob/188009f9376d5976b5db37e04c52a2b5bdaf9771/packages/core/application/core-application-browser/src/app_mount.ts#L176-L205).
+There might be styling and positioning changes comparing to the toolbar in the default Kibana navigation.
 
 ## Global Search
 
-TODO
+The global search (navigational search) is a search bar that can be opened from the header. It allows users to search for apps, pages, and other resources.
+There is no serverless specific API or behavior changes for this: refer to [the global search plugin](https://github.com/elastic/kibana/blob/bd778221dcf8b934f2947d6be3173f8a2796ef74/x-pack/plugins/global_search/README.md) to learn about the API.
+There might be styling and positioning changes comparing to the search in the default Kibana navigation.
+
+# Testing
+
+> **Note**
+> For the general guidance on functional testing serverless projects refer to [the doc](https://docs.google.com/document/d/1tiax7xoDYwFXYZjRTgVKkVMjN-SQzBWk4yn1JY6Z5UY/edit#heading=h.t3qzojfbvfj4)
+
+To test project navigation in functional tests use `svlCommonNavigation` page object:
+
+```ts
+const svlCommonNavigation = getPageObject('svlCommonNavigation');
+```
+
+The page object exposes helpers for using links in the sidenav and breadcrumbs, as well as using page-level components such as global search, recent items, the Elastic logo icon. There are also utilities to check that no page reload happened during the navigation.
+
+Find the full list of helpers in [the source](https://github.com/elastic/kibana/blob/621401ed6a435d4c9beaa03ac1f61ace9716217a/x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts#L44-L206). The most notable are:
+
+- `svlCommonNavigation.expectExists()` checks that serverless project navigation is displayed and not the statefull one
+- `svlCommonNavigation.sideNav.expectLinkExists({ deepLinkId: 'discover'})` checks that the link is visible. Can check by deepLinkId, text or navId
+- `svlCommonNavigation.sideNav.clickLink({ deepLinkId: 'discover'})` clicks the link. Use to navigate using the sidenav as the users would. Can be used with deepLinkId, text or navId
+- `svlCommonNavigation.sideNav.openSection(sectionId)` opens navigation section.
+- `svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({deepLinkId: 'discover'})` check that breadcrumbs is in the list using deepLinkId or text
+
+For each project there is a navigation test suite that does a shared navigation smoke check and can be used as an example of using the shared navigation page object.
+
+- x-pack/test_serverless/functional/test_suites/
+  - search/navigation
+  - observability/navigation
+  - security/navigation
+
+We recommend solution teams to improve these basic navigation smoke tests to cover more project specific functionality.
