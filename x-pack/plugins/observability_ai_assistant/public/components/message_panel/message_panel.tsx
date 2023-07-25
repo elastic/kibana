@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -42,14 +35,7 @@ export function MessagePanel(props: Props) {
           </EuiFlexGroup>
         </>
       ) : null}
-      {props.controls ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="s" />
-          {props.controls}
-        </>
-      ) : null}
+      {props.controls ? props.controls : null}
     </>
   );
 }
