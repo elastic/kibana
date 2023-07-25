@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { PeerCertificate } from 'tls';
 import { Logger } from '@kbn/core/server';
 import { SSLSettings } from '../types';
@@ -54,7 +53,13 @@ export function getNodeSSLOptions(
     // This is where the global rejectUnauthorized is overridden by a custom host
   }
   if (sslOverrides) {
-    Object.assign(agentOptions, omit(sslOverrides, 'verificationMode'));
+    Object.assign(agentOptions, {
+      cert: sslOverrides.cert,
+      key: sslOverrides.key,
+      pfx: sslOverrides.pfx,
+      passphrase: sslOverrides.passphrase,
+      ca: sslOverrides.ca,
+    });
   }
   return agentOptions;
 }

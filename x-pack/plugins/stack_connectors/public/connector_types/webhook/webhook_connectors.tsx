@@ -42,7 +42,7 @@ import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
-const VERIFICATION_MODE_DEFAULT = 'certificate';
+const VERIFICATION_MODE_DEFAULT = 'full';
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -179,6 +179,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                   euiFieldProps: {
                     'data-test-subj': 'webhookSSLCRTInput',
                     display: 'default',
+                    accept: '.crt,.cert,.pem',
                   },
                 }}
               />
@@ -199,6 +200,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                   euiFieldProps: {
                     'data-test-subj': 'webhookSSLKEYInput',
                     display: 'default',
+                    accept: '.key',
                   },
                 }}
               />
@@ -221,6 +223,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               euiFieldProps: {
                 'data-test-subj': 'webhookSSLPFXInput',
                 display: 'default',
+                accept: '.pfx',
               },
             }}
           />
@@ -326,7 +329,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       />
       {hasHeaders ? (
         <>
-          {' '}
           <EuiSpacer size="m" />
           <UseArray path="config.headers" initialNumberOfItems={1}>
             {({ items, addItem, removeItem }) => {
@@ -403,19 +405,26 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 path="config.ca"
                 config={{
                   label: 'CA file',
+                  validations: [
+                    {
+                      validator:
+                        config?.verificationMode !== 'none'
+                          ? emptyField(i18n.CRT_REQUIRED)
+                          : () => {},
+                    },
+                  ],
                 }}
                 component={FilePickerField}
                 componentProps={{
                   euiFieldProps: {
                     display: 'default',
                     'data-test-subj': 'webhookCAInput',
-                    readOnly,
+                    accept: '.ca,.pem',
                   },
                 }}
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              {' '}
               <UseField
                 path="config.verificationMode"
                 component={SelectField}

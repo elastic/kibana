@@ -174,6 +174,13 @@ export const PFX_REQUIRED = i18n.translate(
   }
 );
 
+export const CA_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookCAText',
+  {
+    defaultMessage: 'CA file is required.',
+  }
+);
+
 export const ADD_CA_LABEL = i18n.translate(
   'xpack.stackConnectors.components.webhook.viewCertificateAuthoritySwitch',
   {

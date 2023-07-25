@@ -24,7 +24,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { WebhookAuthType } from '../../../common/webhook/constants';
+import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';
@@ -55,8 +55,21 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
-  authType: schema.string({ defaultValue: WebhookAuthType.Basic }),
-  certType: schema.maybe(schema.string()),
+  authType: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal(WebhookAuthType.Basic),
+        schema.literal(WebhookAuthType.None),
+        schema.literal(WebhookAuthType.SSL),
+      ],
+      {
+        defaultValue: WebhookAuthType.Basic,
+      }
+    )
+  ),
+  certType: schema.maybe(
+    schema.oneOf([schema.literal(SSLCertType.CRT), schema.literal(SSLCertType.PFX)])
+  ),
   ca: schema.maybe(schema.string()),
   verificationMode: schema.maybe(
     schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])

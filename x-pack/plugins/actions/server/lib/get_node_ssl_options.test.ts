@@ -46,12 +46,31 @@ describe('getNodeSSLOptions', () => {
   });
 
   test('appends SSL overrides', () => {
-    const nodeOption = getNodeSSLOptions(logger, 'none', {
+    const nodeOptionPFX = getNodeSSLOptions(logger, 'none', {
       pfx: Buffer.from("Hi i'm a pfx"),
+      ca: Buffer.from("Hi i'm a ca"),
       passphrase: 'aaaaaaa',
     });
-    expect(nodeOption).toMatchInlineSnapshot(`
+    expect(nodeOptionPFX).toMatchInlineSnapshot(`
       Object {
+        "ca": Object {
+          "data": Array [
+            72,
+            105,
+            32,
+            105,
+            39,
+            109,
+            32,
+            97,
+            32,
+            99,
+            97,
+          ],
+          "type": "Buffer",
+        },
+        "cert": undefined,
+        "key": undefined,
         "passphrase": "aaaaaaa",
         "pfx": Object {
           "data": Array [
@@ -70,6 +89,71 @@ describe('getNodeSSLOptions', () => {
           ],
           "type": "Buffer",
         },
+        "rejectUnauthorized": false,
+      }
+    `);
+
+    const nodeOptionCert = getNodeSSLOptions(logger, 'none', {
+      cert: Buffer.from("Hi i'm a cert"),
+      key: Buffer.from("Hi i'm a key"),
+      ca: Buffer.from("Hi i'm a ca"),
+      passphrase: 'aaaaaaa',
+    });
+    expect(nodeOptionCert).toMatchInlineSnapshot(`
+      Object {
+        "ca": Object {
+          "data": Array [
+            72,
+            105,
+            32,
+            105,
+            39,
+            109,
+            32,
+            97,
+            32,
+            99,
+            97,
+          ],
+          "type": "Buffer",
+        },
+        "cert": Object {
+          "data": Array [
+            72,
+            105,
+            32,
+            105,
+            39,
+            109,
+            32,
+            97,
+            32,
+            99,
+            101,
+            114,
+            116,
+          ],
+          "type": "Buffer",
+        },
+        "key": Object {
+          "data": Array [
+            72,
+            105,
+            32,
+            105,
+            39,
+            109,
+            32,
+            97,
+            32,
+            107,
+            101,
+            121,
+          ],
+          "type": "Buffer",
+        },
+        "passphrase": "aaaaaaa",
+        "pfx": undefined,
         "rejectUnauthorized": false,
       }
     `);

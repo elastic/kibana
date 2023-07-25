@@ -214,6 +214,7 @@ export interface SSLSettings {
   cert?: Buffer;
   key?: Buffer;
   passphrase?: string;
+  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
