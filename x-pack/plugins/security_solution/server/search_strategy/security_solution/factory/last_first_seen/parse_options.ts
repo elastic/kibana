@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const FirstLastSeenQuery = 'firstlastseen';
+import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy/first_seen_last_seen/first_seen_last_seen';
 
-export type {
-  FirstLastSeenRequestOptions,
-  FirstLastSeenStrategyResponse,
-} from '../../../api/search_strategy';
+export const parseOptions = (options: unknown) => firstLastSeenRequestOptionsSchema.parse(options);
