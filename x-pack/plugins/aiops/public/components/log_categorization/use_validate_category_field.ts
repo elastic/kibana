@@ -28,7 +28,7 @@ export function useValidateFieldRequest() {
     ) => {
       const query = processQuery(queryIn, timeField, start, end);
       const resp = await http.post<FieldValidationResults>(
-        AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_EXAMPLES,
+        AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION,
         {
           body: JSON.stringify({
             indexPatternTitle: index,
