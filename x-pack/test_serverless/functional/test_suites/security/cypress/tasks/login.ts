@@ -9,46 +9,69 @@ import { request } from '@kbn/security-solution-plugin/public/management/cypress
 import { ServerlessRoleName } from '../../../../../shared/lib';
 
 /**
+ * Send login via API
+ * @param username
+ * @param password
+ *
+ * @private
+ */
+const sendApiLoginRequest = (username: string, password: string) => {
+  const url = new URL(Cypress.config().baseUrl ?? '');
+  url.pathname = '/internal/security/login';
+
+  cy.log(`Authenticating [${username}] via ${url.toString()}`);
+
+  return request({
+    headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
+    method: 'POST',
+    url: url.toString(),
+    body: {
+      providerType: 'basic',
+      providerName: !url.toString().includes('localhost') ? 'cloud-basic' : 'basic',
+      currentURL: '/',
+      params: {
+        username,
+        password,
+      },
+    },
+  });
+};
+
+interface CyLoginTask {
+  (user?: ServerlessRoleName): Cypress.Chainable<Cypress.Response<unknown>>;
+
+  /**
+   * Login using any username/password
+   * @param username
+   * @param password
+   */
+  with(username: string, password: string): Cypress.Chainable<Cypress.Response<unknown>>;
+}
+
+/**
  * Login to Kibana using API (not login page). By default, user will be logged in using
  * the username and password defined via `KIBANA_USERNAME` and `KIBANA_PASSWORD` cypress env
  * variables.
  * @param user
  */
-export const login = (user: ServerlessRoleName) => {
-  const url = new URL(Cypress.config().baseUrl ?? '');
-  url.pathname = '/internal/security/login';
-
+export const login: CyLoginTask = (
+  user?: ServerlessRoleName
+): Cypress.Chainable<Cypress.Response<unknown>> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
-
-  const sendApiLoginRequest = () => {
-    cy.log(`Authenticating ${username}`);
-
-    // programmatically authenticate without interacting with the Kibana login page
-    return request({
-      headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
-      method: 'POST',
-      url: url.toString(),
-      body: {
-        providerType: 'basic',
-        providerName: !url.toString().includes('localhost') ? 'cloud-basic' : 'basic',
-        currentURL: '/',
-        params: {
-          username,
-          password,
-        },
-      },
-    });
-  };
 
   if (user) {
     return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
       username = loadedUser.username;
       password = loadedUser.password;
 
-      return sendApiLoginRequest();
+      return sendApiLoginRequest(username, password);
     });
   } else {
-    return sendApiLoginRequest();
+    return sendApiLoginRequest(username, password);
   }
+};
+
+login.with = (username: string, password: string): Cypress.Chainable<Cypress.Response<unknown>> => {
+  return sendApiLoginRequest(username, password);
 };
