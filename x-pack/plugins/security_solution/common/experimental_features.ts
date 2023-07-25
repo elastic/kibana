@@ -111,6 +111,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: false,
+  /*
+   *
+   * Enables Discover embedded within timeline
+   *
+   * */
+  discoverInTimeline: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
