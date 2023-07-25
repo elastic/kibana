@@ -26,8 +26,8 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     locator: sharePluginMock.createLocator(),
-    customize: jest.fn(),
     DiscoverContainer: jest.fn().mockImplementation(() => <></>),
+    registerCustomizationProfile: jest.fn(),
   };
   return startContract;
 };
