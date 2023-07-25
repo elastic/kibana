@@ -11,6 +11,7 @@ node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 !/packages/kbn-import-resolver/src/__fixtures__/node_modules
+!/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
 trash
 /optimize
 /built_assets
