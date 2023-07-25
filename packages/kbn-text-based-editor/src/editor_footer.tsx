@@ -216,7 +216,16 @@ export const EditorFooter = memo(function EditorFooter({
       {Boolean(renderRunButton) && (
         <EuiFlexItem grow={false}>
           <EuiButton color="text" size="s" fill onClick={refreshErrors}>
-            Run query
+            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                  defaultMessage: 'Run query',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{COMMAND_KEY} ⏎</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiButton>
         </EuiFlexItem>
       )}
