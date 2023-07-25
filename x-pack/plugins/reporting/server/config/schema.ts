@@ -108,7 +108,7 @@ const ExportTypeSchema = schema.object({
   png: schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
-      false,
+      true,
       schema.boolean({
         validate: (rawValue) => {
           if (rawValue === true) {
@@ -125,7 +125,7 @@ const ExportTypeSchema = schema.object({
   pdf: schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
-      false,
+      true,
       schema.boolean({
         validate: (rawValue) => {
           if (rawValue === true) {

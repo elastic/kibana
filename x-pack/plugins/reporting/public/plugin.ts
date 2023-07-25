@@ -247,7 +247,7 @@ export class ReportingPublicPlugin
             application,
             usesUiCapabilities,
             theme: core.theme,
-            enable: this.config.export_types.pdf.enabled || this.config.export_types.png.enabled,
+            enable: !this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled,
           })
         );
       });
