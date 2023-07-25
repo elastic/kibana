@@ -8,7 +8,7 @@
 import z from 'zod';
 import { from, firstValueFrom } from 'rxjs';
 import { concatMap, toArray } from 'rxjs/operators';
-import { replace, mapValues, keyBy, reduce } from 'lodash';
+import { mapValues, keyBy, reduce } from 'lodash';
 import { useCallback, useMemo } from 'react';
 
 import { DynamicTool, DynamicStructuredTool } from 'langchain/tools';
