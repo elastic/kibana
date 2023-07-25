@@ -13,15 +13,15 @@ import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { isEqual } from 'lodash';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
   LensRootStore,
   loadInitial,
-  setExecutionContext,
-  initExisting,
-  initEmpty,
+  setState,
 } from '../../../state_management';
+import { getPreloadedState } from '../../../state_management/lens_slice';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
@@ -46,15 +46,18 @@ type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => vo
 
 const updatingMiddleware =
   (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+    const {
+      datasourceStates: prevDatasourceStates,
+      visualization: prevVisualization,
+      activeDatasourceId: prevActiveDatasourceId,
+    } = store.getState().lens;
     next(action);
-    // do not update on initializing actions to not trigger loop updates
+    const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
     if (
-      !initExisting.match(action) &&
-      !initEmpty.match(action) &&
-      !loadInitial.match(action) &&
-      !setExecutionContext.match(action)
+      !isEqual(prevDatasourceStates, datasourceStates) ||
+      !isEqual(prevVisualization, visualization) ||
+      prevActiveDatasourceId !== activeDatasourceId
     ) {
-      const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
       updater(datasourceStates[activeDatasourceId].state, visualization.state);
     }
   };

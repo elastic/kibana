@@ -82,9 +82,9 @@ export const makeConfigureStore = (
       },
     }),
     initMiddleware(storeDeps),
-    optimizingMiddleware(),
     contextMiddleware(storeDeps),
     fullscreenMiddleware(storeDeps),
+    optimizingMiddleware(),
   ];
   if (customMiddleware) {
     middleware.push(customMiddleware);

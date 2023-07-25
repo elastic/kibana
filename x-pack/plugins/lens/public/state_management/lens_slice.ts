@@ -8,7 +8,7 @@
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
@@ -27,7 +27,7 @@ import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { LayerType } from '../../common/types';
+import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -140,8 +140,17 @@ export const getPreloadedState = ({
   return state;
 };
 
+export interface SetExecutionContextPayload {
+  query?: Query;
+  filters?: Filter[];
+  searchSessionId?: string;
+  resolvedDateRange?: DateRange;
+}
+
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
-export const setExecutionContext = createAction<Partial<LensAppState>>('lens/setExecutionContext');
+export const setExecutionContext = createAction<SetExecutionContextPayload>(
+  'lens/setExecutionContext'
+);
 export const initExisting = createAction<Partial<LensAppState>>('lens/initExisting');
 export const onActiveDataChange = createAction<{
   activeData: TableInspectorAdapter;
@@ -316,7 +325,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...payload,
       };
     },
-    [setExecutionContext.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+    [setExecutionContext.type]: (state, { payload }: PayloadAction<SetExecutionContextPayload>) => {
       return {
         ...state,
         ...payload,
