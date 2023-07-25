@@ -52,34 +52,46 @@ interface TimeFilterRange {
   to: number;
 }
 
+/* Datum for the bar chart */
 export interface DocumentCountChartPoint {
   time: number | string;
   value: number;
 }
 
+/* Optional brush settings to override the default */
 export interface BrushSettings {
   label?: string;
   annotationStyle?: RectAnnotationSpec['style'];
   badgeWidth?: number;
 }
 export interface DocumentCountChartProps {
+  /* List of Kibana services that are required as dependencies */
   dependencies: {
     data: DataPublicPluginStart;
     charts: ChartsPluginStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
   };
+  /* Optional callback function which gets called the brush selection has changed */
   brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
+  /* Optional width */
   width?: number;
+  /* Data chart points */
   chartPoints: DocumentCountChartPoint[];
+  /* Data chart points */
   chartPointsSplit?: DocumentCountChartPoint[];
+  /* Start time range for the chart */
   timeRangeEarliest: number;
+  /* Ending time range for the chart */
   timeRangeLatest: number;
   interval: number;
+  /* Label to name the adjustedChartPointsSplit histogram */
   chartPointsSplitLabel: string;
+  /* Whether or not brush has been reseted */
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
+  /** Optional style to be overrided  */
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
@@ -124,6 +136,27 @@ function getBaselineBadgeOverflow(
     : 0;
 }
 
+/**
+ * Document count chart with draggable brushes to select time ranges
+ * by default use `Baseline` and `Deviatation` for the badge naems
+ * @param dependencies
+ * @param brushSelectionUpdateHandler
+ * @param width
+ * @param chartPoints
+ * @param chartPointsSplit
+ * @param timeRangeEarliest
+ * @param timeRangeLatest
+ * @param interval
+ * @param chartPointsSplitLabel
+ * @param isBrushCleared
+ * @param autoAnalysisStart
+ * @param barColorOverride
+ * @param barStyleAccessor
+ * @param barHighlightColorOverride
+ * @param deviationBrush
+ * @param baselineBrush
+ * @constructor
+ */
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   dependencies,
   brushSelectionUpdateHandler,

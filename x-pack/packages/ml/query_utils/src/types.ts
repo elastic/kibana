@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+/**
+ * Constant for kuery and lucene string
+ */
 export const SEARCH_QUERY_LANGUAGE = {
   KUERY: 'kuery',
   LUCENE: 'lucene',
 } as const;
 
+/**
+ * Type for SearchQueryLanguage
+ */
 export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];

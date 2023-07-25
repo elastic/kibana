@@ -18,6 +18,9 @@ const DEFAULT_QUERY = {
   },
 };
 
+/**
+ * Default DSL query which matches all the results
+ */
 export function getDefaultDSLQuery(): QueryDslQueryContainer {
   return cloneDeep(DEFAULT_QUERY);
 }

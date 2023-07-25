@@ -22,6 +22,15 @@ interface BrushBadgeProps {
   width: number;
 }
 
+/**
+ * Badge component
+ * @param label
+ * @param marginLeft
+ * @param timestampFrom
+ * @param timestampTo
+ * @param width
+ * @constructor
+ */
 export const BrushBadge: FC<BrushBadgeProps> = ({
   label,
   marginLeft,

@@ -8,13 +8,34 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
 
+/**
+ * Returned type for useTableState hook
+ */
 export interface UseTableState<T> {
+  /*
+   * Callback function which gets called whenever the pagination or sorting state of the table changed
+   */
   onTableChange: EuiInMemoryTable<T>['onTableChange'];
+  /*
+   * Pagination object which contains pageIndex, pageSize
+   */
   pagination: Pagination;
+  /*
+   * Sort field and sort direction
+   */
   sorting: { sort: { field: string; direction: Direction } };
+  /*
+   * setPageIndex setter function which updates page index
+   */
   setPageIndex: Dispatch<SetStateAction<number>>;
 }
 
+/**
+ * Hook to help with managing the pagination and sorting for EuiInMemoryTable
+ * @param {TableItem} items - data to show in the table
+ * @param {string} initialSortField - field name to sort by default
+ * @param {string} initialSortDirection - default to 'asc'
+ */
 export function useTableState<T>(
   items: T[],
   initialSortField: string,
@@ -53,5 +74,10 @@ export function useTableState<T>(
     },
   };
 
-  return { onTableChange, pagination, sorting, setPageIndex };
+  return {
+    onTableChange,
+    pagination,
+    sorting,
+    setPageIndex,
+  };
 }
