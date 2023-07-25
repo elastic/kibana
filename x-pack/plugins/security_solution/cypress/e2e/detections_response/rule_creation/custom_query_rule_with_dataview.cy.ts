@@ -23,7 +23,6 @@ import {
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
 } from '../../../tasks/create_new_rule';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visit } from '../../../tasks/login';
 import { RULE_CREATION } from '../../../urls/navigation';
 
@@ -36,7 +35,8 @@ describe('Custom query rule using data view', () => {
       are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
       We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
       cleaning in all the other tests. */
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
+
     if (rule.data_view_id != null) {
       postDataView(rule.data_view_id);
     }

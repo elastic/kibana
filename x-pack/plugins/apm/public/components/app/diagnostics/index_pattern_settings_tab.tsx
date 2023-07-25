@@ -102,9 +102,7 @@ export function DiagnosticsIndexPatternSettings() {
   );
 }
 
-export function getIndexPatternTabStatus(
-  diagnosticsBundle?: DiagnosticsBundle
-) {
+export function getIsIndexPatternTabOk(diagnosticsBundle?: DiagnosticsBundle) {
   if (!diagnosticsBundle) {
     return true;
   }

@@ -64,10 +64,11 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       services,
     })
   );
-  const customizationService = useDiscoverCustomizationService({
-    customizationCallbacks,
-    stateContainer,
-  });
+  const { customizationService, isInitialized: isCustomizationServiceInitialized } =
+    useDiscoverCustomizationService({
+      customizationCallbacks,
+      stateContainer,
+    });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -219,8 +220,9 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     [loadSavedSearch]
   );
 
-  // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
+    if (!isCustomizationServiceInitialized) return;
+
     setLoading(true);
     setHasESData(false);
     setHasUserDataView(false);
@@ -228,16 +230,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     setError(undefined);
     // restore the previously selected data view for a new state
     loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [
-    loadSavedSearch,
-    savedSearchId,
-    stateContainer,
-    setLoading,
-    setHasESData,
-    setHasUserDataView,
-    setShowNoDataPage,
-    setError,
-  ]);
+  }, [isCustomizationServiceInitialized, loadSavedSearch, savedSearchId, stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({

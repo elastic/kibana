@@ -14,6 +14,7 @@ export const EXPAND_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderExpandDetailButton';
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton';
+export const FLYOUT_HEADER_STATUS_BUTTON_TEST_ID = 'rule-status-badge';
 export const FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderSeverityTitle';
 export const FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID = 'severity';

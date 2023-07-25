@@ -1390,7 +1390,7 @@
         "tags": [],
         "label": "ConnectorTypes",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/connectors/connector.ts",
+        "path": "x-pack/plugins/cases/common/types/domain/connector/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

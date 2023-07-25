@@ -87,14 +87,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query1,
       query2,
       setQuery,
-      skipSavedSearchTests,
     }: {
       type: 'ese' | 'sql';
       savedSearch: string;
       query1: string;
       query2: string;
       setQuery: (query: string) => Promise<void>;
-      skipSavedSearchTests?: boolean;
     }) => {
       it('should send 2 search requests (documents + chart) on page load', async () => {
         await browser.refresh();
@@ -137,37 +135,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      if (!skipSavedSearchTests) {
-        it('should send 2 requests for saved search changes', async () => {
-          await setQuery(query1);
-          await queryBar.clickQuerySubmitButton();
-          await PageObjects.timePicker.setAbsoluteRange(
-            'Sep 21, 2015 @ 06:31:44.000',
-            'Sep 23, 2015 @ 00:00:00.000'
-          );
-          await waitForLoadingToFinish();
-          // creating the saved search
-          await expectSearches(type, 2, async () => {
-            await PageObjects.discover.saveSearch(savedSearch);
-          });
-          // resetting the saved search
-          await setQuery(query2);
-          await queryBar.clickQuerySubmitButton();
-          await waitForLoadingToFinish();
-          await expectSearches(type, 2, async () => {
-            await PageObjects.discover.clickResetSavedSearchButton();
-          });
-          // clearing the saved search
-          await expectSearches(type, 2, async () => {
-            await testSubjects.click('discoverNewButton');
-            await waitForLoadingToFinish();
-          });
-          // loading the saved search
-          await expectSearches(type, 2, async () => {
-            await PageObjects.discover.loadSavedSearch(savedSearch);
-          });
+      it('should send 2 requests for saved search changes', async () => {
+        await setQuery(query1);
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 23, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        // creating the saved search
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.saveSearch(savedSearch);
         });
-      }
+        // resetting the saved search
+        await setQuery(query2);
+        await queryBar.clickQuerySubmitButton();
+        await waitForLoadingToFinish();
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.clickResetSavedSearchButton();
+        });
+        // clearing the saved search
+        await expectSearches('ese', 2, async () => {
+          await testSubjects.click('discoverNewButton');
+          await waitForLoadingToFinish();
+        });
+        // loading the saved search
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.loadSavedSearch(savedSearch);
+        });
+      });
     };
 
     describe('data view mode', () => {
@@ -238,9 +234,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         query1: 'SELECT type, count(*) FROM "logstash-*" WHERE bytes > 1000 GROUP BY type',
         query2: 'SELECT type, count(*) FROM "logstash-*" WHERE bytes < 2000 GROUP BY type',
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
-        // TODO: We get 4 requests instead of 2 for the saved search test in SQL mode,
-        // so we're skipping them for now until we fix the issue.
-        skipSavedSearchTests: true,
       });
     });
   });

@@ -7,7 +7,6 @@
 
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
@@ -37,7 +36,7 @@ describe('Rule management filters', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
   });
 
   describe('Last response filter', () => {

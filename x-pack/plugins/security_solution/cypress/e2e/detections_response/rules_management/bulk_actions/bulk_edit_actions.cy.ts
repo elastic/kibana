@@ -42,7 +42,6 @@ import {
   openBulkActionsMenu,
 } from '../../../../tasks/rules_bulk_actions';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 
@@ -78,7 +77,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     deleteConnectors();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
 
     createSlackConnector().then(({ body }) => {
       const actions: RuleActionArray = [

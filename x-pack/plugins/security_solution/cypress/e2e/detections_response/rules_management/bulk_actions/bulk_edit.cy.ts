@@ -87,8 +87,6 @@ import {
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../../../objects/rule';
-
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import {
   getAvailablePrebuiltRulesCount,
   excessivelyInstallAllPrebuiltRules,
@@ -127,7 +125,7 @@ describe('Detection rules, bulk edit', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' }));
     createRule(getEqlRule({ ...defaultRuleData, rule_id: '2' }));
     createRule(getMachineLearningRule({ tags: ['test-default-tag-1', 'test-default-tag-2'] }));

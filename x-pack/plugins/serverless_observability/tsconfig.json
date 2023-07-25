@@ -25,5 +25,6 @@
     "@kbn/ml-plugin",
     "@kbn/i18n",
     "@kbn/management-cards-navigation",
+    "@kbn/cloud-plugin",
   ]
 }

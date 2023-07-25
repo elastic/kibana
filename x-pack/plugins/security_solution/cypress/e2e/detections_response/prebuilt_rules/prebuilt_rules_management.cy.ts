@@ -32,6 +32,11 @@ import {
   enableSelectedRules,
 } from '../../../tasks/rules_bulk_actions';
 import {
+  deleteSelectedRules,
+  disableSelectedRules,
+  enableSelectedRules,
+} from '../../tasks/rules_bulk_actions';
+import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
 } from '../../../tasks/api_calls/prebuilt_rules';

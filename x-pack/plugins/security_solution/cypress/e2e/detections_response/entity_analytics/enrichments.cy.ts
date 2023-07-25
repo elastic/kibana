@@ -15,7 +15,6 @@ import {
   ALERTS_COUNT,
 } from '../../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../../screens/alerts_details';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
@@ -33,16 +32,16 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe('Enrichment', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risk_users');
+    cy.task('esArchiverLoad', 'risk_users');
   });
 
   after(() => {
-    esArchiverUnload('risk_users');
+    cy.task('esArchiverUnload', 'risk_users');
   });
 
   describe('Custom query rule', () => {
     beforeEach(() => {
-      esArchiverLoad('risk_hosts');
+      cy.task('esArchiverLoad', 'risk_hosts');
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));
       login();
@@ -51,8 +50,8 @@ describe('Enrichment', () => {
     });
 
     afterEach(() => {
-      esArchiverUnload('risk_hosts');
-      esArchiverUnload('risk_hosts_updated');
+      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', 'risk_hosts_updated');
     });
 
     it('Should has enrichment fields', function () {
@@ -73,8 +72,8 @@ describe('Enrichment', () => {
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification').should('not.exist');
 
       closeAlertFlyout();
-      esArchiverUnload('risk_hosts');
-      esArchiverLoad('risk_hosts_updated');
+      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverLoad', 'risk_hosts_updated');
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification');

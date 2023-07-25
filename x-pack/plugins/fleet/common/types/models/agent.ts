@@ -415,3 +415,9 @@ export interface FleetServerAgentAction {
 
   [k: string]: unknown;
 }
+
+export interface ActionStatusOptions {
+  errorSize: number;
+  page?: number;
+  perPage?: number;
+}

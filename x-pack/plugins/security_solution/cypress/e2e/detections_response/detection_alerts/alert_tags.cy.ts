@@ -23,29 +23,24 @@ import {
   SELECTED_ALERT_TAG,
   UNSELECTED_ALERT_TAG,
 } from '../../../screens/alerts';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
 
 describe('Alert tagging', () => {
   before(() => {
     cleanKibana();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
   });
 
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    esArchiverLoad('endpoint');
+    cy.task('esArchiverLoad', 'endpoint');
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 
   afterEach(() => {
-    esArchiverUnload('endpoint');
+    cy.task('esArchiverUnload', 'endpoint');
   });
 
   it('Add and remove a tag using the alert bulk action menu', () => {

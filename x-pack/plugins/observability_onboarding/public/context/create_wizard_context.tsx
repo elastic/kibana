@@ -38,6 +38,11 @@ export interface WizardContext<T, StepKey extends string> {
   };
 }
 
+export interface Step {
+  component: ComponentType;
+  title?: string;
+}
+
 export function createWizardContext<
   T,
   StepKey extends string,
@@ -50,7 +55,7 @@ export function createWizardContext<
 }: {
   initialState: T;
   initialStep: InitialStepKey;
-  steps: Record<StepKey, ComponentType>;
+  steps: Record<StepKey, Step>;
   basePath: string;
 }) {
   const context = createContext<WizardContext<T, StepKey>>({
@@ -70,7 +75,7 @@ export function createWizardContext<
     stepKey === initialStep ? basePath : `${basePath}/${stepKey}`;
 
   const routes = Object.entries(steps).reduce((acc, pair) => {
-    const [key, value] = pair as Entry<Record<StepKey, ComponentType>>;
+    const [key, value] = pair as Entry<Record<StepKey, Step>>;
     return {
       ...acc,
       [stepRoute(key)]: {
@@ -78,7 +83,7 @@ export function createWizardContext<
         handler: () =>
           Page({
             step: key,
-            Component: value,
+            Component: value.component,
           }),
       },
     };
@@ -109,6 +114,7 @@ export function createWizardContext<
     onChangeStep?: (stepChangeEvent: {
       direction: 'back' | 'next';
       stepKey: StepKey;
+      stepTitle?: string;
       StepComponent: ComponentType;
     }) => void;
     transitionDuration?: number;
@@ -148,7 +154,8 @@ export function createWizardContext<
               onChangeStep({
                 direction: stepVisited ? 'back' : 'next',
                 stepKey,
-                StepComponent: steps[stepKey],
+                stepTitle: steps[stepKey].title,
+                StepComponent: steps[stepKey].component,
               });
             }
           },

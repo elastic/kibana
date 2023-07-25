@@ -14,7 +14,7 @@
  */
 
 import { omit, unset } from 'lodash';
-import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
+import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -50,6 +50,7 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import type { CaseConnector } from '../../../common/types/domain';
 
 const createUpdateSOResponse = ({
   connector,

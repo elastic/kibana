@@ -8,8 +8,7 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { SettingCard } from '../setting_card';
 import { NotifyUserOption } from '../notify_user_option';
@@ -18,13 +17,12 @@ import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
 import type { Immutable } from '../../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../../../../../../../common/endpoint/types';
 import type { BehaviorProtectionOSes } from '../../../../types';
-import { LinkToApp } from '../../../../../../../common/components/endpoint/link_to_app';
-import { APP_UI_ID, SecurityPageName } from '../../../../../../../../common';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
+import { RelatedDetectionRulesCallout } from '../related_detection_rules_callout';
 
-const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
+export const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
   {
     defaultMessage: 'Malicious Behavior',
@@ -37,7 +35,7 @@ const BEHAVIOUR_OS_VALUES: Immutable<BehaviorProtectionOSes[]> = [
   PolicyOperatingSystem.linux,
 ];
 
-type BehaviourProtectionCardProps = PolicyFormComponentCommonProps;
+export type BehaviourProtectionCardProps = PolicyFormComponentCommonProps;
 
 export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
@@ -52,7 +50,12 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
     );
 
     if (!isPlatinumPlus) {
-      return <SettingLockedCard title={LOCKED_CARD_BEHAVIOR_TITLE} />;
+      return (
+        <SettingLockedCard
+          title={LOCKED_CARD_BEHAVIOR_TITLE}
+          data-test-subj={getTestId('locked')}
+        />
+      );
     }
 
     return (
@@ -70,7 +73,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
             protection={protection}
             protectionLabel={protectionLabel}
             osList={BEHAVIOUR_OS_VALUES}
-            data-test-subj={getTestId()}
+            data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
       >
@@ -80,6 +83,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           mode={mode}
           protection={protection}
           osList={BEHAVIOUR_OS_VALUES}
+          data-test-subj={getTestId('protectionLevel')}
         />
 
         <NotifyUserOption
@@ -88,25 +92,11 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           mode={mode}
           protection={protection}
           osList={BEHAVIOUR_OS_VALUES}
+          data-test-subj={getTestId('notifyUser')}
         />
 
         <EuiSpacer size="m" />
-        <EuiCallOut iconType="iInCircle">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessage"
-            defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
-            values={{
-              detectionRulesLink: (
-                <LinkToApp appId={APP_UI_ID} deepLinkId={SecurityPageName.rules}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
-                    defaultMessage="related detection rules"
-                  />
-                </LinkToApp>
-              ),
-            }}
-          />
-        </EuiCallOut>
+        <RelatedDetectionRulesCallout data-test-subj={getTestId('rulesCallout')} />
       </SettingCard>
     );
   }
