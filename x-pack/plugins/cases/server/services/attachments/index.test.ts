@@ -548,12 +548,84 @@ describe('AttachmentService', () => {
         service.countPersistableStateAndExternalReferenceAttachments({ caseId: 'test-id' })
       ).resolves.not.toThrow();
 
-      await expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          hasReference: { id: 'test-id', type: 'cases' },
-          type: 'cases-comments',
-        })
-      );
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases-comments.attributes.type",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "persistableState",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases-comments.attributes.type",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "externalReference",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "or",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": ".files",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "not",
+                "type": "function",
+              },
+            ],
+            "function": "and",
+            "type": "function",
+          },
+          "hasReference": Object {
+            "id": "test-id",
+            "type": "cases",
+          },
+          "page": 1,
+          "perPage": 1,
+          "sortField": "created_at",
+          "type": "cases-comments",
+        }
+      `);
     });
 
     it('returns the expected total', async () => {
