@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { isPlainObject } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
@@ -240,10 +242,14 @@ export const performUpdate = async <T>(
     // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
 
     // const updatedAttributes = merge(migrated!.attributes, attributes); // PGA: commented for shallow merge for now.
-    const updatedAttributes = {
-      ...migrated!.attributes,
-      ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)),
-    };
+    // const updatedAttributes = {
+    //   ...migrated!.attributes,
+    //   ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)),
+    // };
+    const updatedAttributes = recursiveMerge(
+      { ...migrated!.attributes },
+      await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)
+    );
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
       id,
@@ -326,4 +332,16 @@ export const performUpdate = async <T>(
     authorizationResult?.typeMap,
     shouldPerformUpsert ? upsert : attributes
   );
+};
+
+const recursiveMerge = (target: Record<string, any>, value: any, key?: string) => {
+  if (isPlainObject(value) && Object.keys(value).length > 0) {
+    for (const [subKey, subVal] of Object.entries(value)) {
+      recursiveMerge(target, subVal, key ? `${key}.${subKey}` : subKey);
+    }
+  } else if (key !== undefined) {
+    set(target, key, value);
+  }
+
+  return target;
 };
