@@ -10,8 +10,8 @@ import type { Limiter } from './types';
 
 interface LimiterParams {
   limit: number;
-  attachmentType: CommentType;
-  field: string;
+  attachmentType: CommentType | CommentType[];
+  field?: string;
   attachmentNoun: string;
 }
 

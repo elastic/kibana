@@ -647,7 +647,6 @@ For the second scenario, refreshing the case fixes the issue.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.8.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 [discrete]
 [[breaking-155470]]
 .Removes legacy project monitor API
@@ -671,7 +670,6 @@ The privileges for attaching alerts to cases has changed. For more information, 
 *Impact* +
 To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases].
 ====
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 
