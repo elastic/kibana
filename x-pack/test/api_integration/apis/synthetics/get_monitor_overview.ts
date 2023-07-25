@@ -107,8 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns the correct response', async () => {
       let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
       try {
-        const savedResponse = await Promise.all(monitors.map(saveMonitor));
-        savedMonitors = savedResponse;
+        savedMonitors = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest.get(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
@@ -131,8 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('accepts search queries', async () => {
       let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
       try {
-        const savedResponse = await Promise.all(monitors.map(saveMonitor));
-        savedMonitors = savedResponse;
+        savedMonitors = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
@@ -156,11 +154,11 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('returns the correct response', async () => {
+    it('returns the correct response for customHeartbeatId', async () => {
       let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
       const customHeartbeatId = 'example_custom_heartbeat_id';
       try {
-        const savedResponse = await Promise.all(
+        savedMonitors = await Promise.all(
           [
             { ...monitors[0], name: 'test monitor a' },
             {
@@ -170,7 +168,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ].map(saveMonitor)
         );
-        savedMonitors = savedResponse;
 
         const apiResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)

@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at'))).eql(
-          expected.map(({ attributes }: any) => attributes)
+          expected.map((expectedMon) => omit(expectedMon, 'updated_at', 'created_at'))
         );
       });
 

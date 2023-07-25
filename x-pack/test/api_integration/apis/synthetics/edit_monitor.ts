@@ -72,9 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('edits the monitor', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
-        newMonitor as MonitorFields
-      );
+      const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
+      const monitorId = savedMonitor.id;
 
       expect(savedMonitor).eql(
         omit(
@@ -395,7 +394,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
-      let monitorId = '';
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
@@ -405,8 +403,8 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor)
         .expect(200);
 
-      const { id, attributes: savedMonitor } = response.body;
-      monitorId = id;
+      const savedMonitor = response.body;
+      const monitorId = savedMonitor.id;
       const toUpdate = {
         ...savedMonitor,
         urls: 'https://google.com',

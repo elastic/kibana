@@ -78,6 +78,8 @@ export default function ({ getService }: FtrProviderContext) {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: apiResponse.body.created_at,
+            updated_at: apiResponse.body.updated_at,
           },
           secretKeys
         )
