@@ -29,6 +29,7 @@ export const isSkipped = (filePath: string): boolean => {
 
   const callExpression = expressionStatement?.expression;
 
+  // @ts-expect-error
   return callExpression?.callee?.property?.name === 'skip';
 };
 

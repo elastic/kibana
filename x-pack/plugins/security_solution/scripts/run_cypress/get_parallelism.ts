@@ -8,8 +8,7 @@
 import yargs from 'yargs';
 import { GraphQLClient } from 'graphql-request';
 import { first, filter, reduce } from 'lodash';
-import { getRunsFeed } from './gql/getRunsFeed';
-import { getRun } from './gql/getRun';
+import { getRun, getRunsFeed } from './gql';
 
 (async () => {
   const { argv } = yargs(process.argv.slice(2));
@@ -34,32 +33,34 @@ import { getRun } from './gql/getRun';
       },
       { 'Content-Type': 'application/json' }
     );
-  } catch (e) {
-    console.error('e', e);
-  }
 
-  const lastSuccessfulRunId = first(
-    filter(
-      data.runFeed.runs,
-      (item) =>
-        item.completion.completed &&
-        item.progress.groups[0].instances.overall === item.progress.groups[0].instances.complete &&
-        item.progress.groups[0].tests.passes
-      // item.progress.groups[0].tests.passes === item.progress.groups[0].tests.overall
-    )
-  )?.runId;
+    const lastSuccessfulRunId = first(
+      filter(
+        // @ts-expect-error
+        data.runFeed.runs,
+        (item) =>
+          item.completion.completed &&
+          item.progress.groups[0].instances.overall ===
+            item.progress.groups[0].instances.complete &&
+          item.progress.groups[0].tests.passes
+        // item.progress.groups[0].tests.passes === item.progress.groups[0].tests.overall
+      )
+    )?.runId;
 
-  const runData = await client.request(getRun, { runId: lastSuccessfulRunId });
+    const runData = await client.request(getRun, { runId: lastSuccessfulRunId });
 
-  const totalRunTime = reduce(
-    runData.run.specs,
-    (acc, item) => (acc += item.results.stats.wallClockDuration),
-    0
-  );
+    const totalRunTime = reduce(
+      // @ts-expect-error
+      runData.run.specs,
+      (acc, item) => acc + item.results.stats.wallClockDuration,
+      0
+    );
 
-  // try to fit into 25min per agent
-  const parallelism = Math.ceil(totalRunTime / 1500000);
+    // try to fit into 25min per agent
+    const parallelism = Math.ceil(totalRunTime / 1500000);
 
-  console.log(parallelism);
-  return parallelism;
+    // eslint-disable-next-line no-console
+    console.log(parallelism);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 })();
