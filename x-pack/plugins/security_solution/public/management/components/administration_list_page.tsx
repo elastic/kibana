@@ -10,8 +10,7 @@ import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import {
   EuiPageHeader,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -78,15 +77,12 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           </>
         )}
 
-        <EuiPageContent
-          hasBorder={false}
-          hasShadow={false}
+        <EuiPageTemplate.Section
           paddingSize="none"
           color="transparent"
-          borderRadius="none"
         >
-          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
-        </EuiPageContent>
+          <EuiPageTemplate.Section restrictWidth={restrictWidth}>{children}</EuiPageTemplate.Section>
+        </EuiPageTemplate.Section>
       </div>
     );
   }

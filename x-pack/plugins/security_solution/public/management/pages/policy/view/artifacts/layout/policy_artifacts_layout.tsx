@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButton,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -181,7 +181,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     }
 
     return (
-      <div>
+      <EuiPageTemplate>
         <EuiPageHeader alignItems="center">
           <EuiPageHeaderSection data-test-subj="policy-artifacts-header-section">
             <EuiTitle size="m">
@@ -218,12 +218,9 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           />
         )}
         <EuiSpacer size="l" />
-        <EuiPageContent
-          hasBorder={false}
-          hasShadow={false}
+        <EuiPageTemplate.Section
           paddingSize="none"
           color="transparent"
-          borderRadius="none"
         >
           <PolicyArtifactsList
             policy={policyItem}
@@ -235,8 +232,8 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
           />
-        </EuiPageContent>
-      </div>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
     );
   }
 );

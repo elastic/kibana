@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
@@ -78,23 +78,23 @@ export const PolicyDetails = React.memo(() => {
   const pageBody: React.ReactNode = useMemo(() => {
     if (policyApiError) {
       return (
-        <EuiPageTemplate template="centeredContent">
+        <EuiPageTemplate.EmptyPrompt>
           <EuiCallOut color="danger" title={policyApiError?.error}>
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
-        </EuiPageTemplate>
+        </EuiPageTemplate.EmptyPrompt>
       );
     }
 
     if (!policyItem) {
       return (
-        <EuiPageTemplate template="centeredContent">
+        <EuiPageTemplate.EmptyPrompt>
           <EuiLoadingSpinner
             className="essentialAnimation"
             size="xl"
             data-test-subj="policyDetailsLoading"
           />
-        </EuiPageTemplate>
+        </EuiPageTemplate.EmptyPrompt>
       );
     }
 

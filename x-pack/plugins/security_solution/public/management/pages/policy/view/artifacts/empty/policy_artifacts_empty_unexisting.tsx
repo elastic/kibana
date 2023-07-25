@@ -7,9 +7,8 @@
 
 import React, { memo } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiButton,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
@@ -43,8 +42,8 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
       }
     );
     return (
-      <EuiPageTemplate template="centeredContent">
-        <EuiEmptyPrompt
+      <EuiPageTemplate>
+        <EuiPageTemplate.EmptyPrompt
           iconType="plusInCircle"
           data-test-subj="policy-artifacts-empty-unexisting"
           title={<h2>{labels.emptyUnexistingTitle}</h2>}

@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -23,7 +23,7 @@ export const ManagementEmptyStateWrapper = memo(
   }) => {
     return (
       <StyledEuiFlexGroup direction="column" alignItems="center" data-test-subj={dataTestSubj}>
-        <EuiPageTemplate template="centeredContent">{children}</EuiPageTemplate>
+        <EuiPageTemplate.EmptyPrompt >{children}</EuiPageTemplate.EmptyPrompt>
       </StyledEuiFlexGroup>
     );
   }

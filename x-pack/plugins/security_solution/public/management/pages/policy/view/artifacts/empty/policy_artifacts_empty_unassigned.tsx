@@ -8,8 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
-  EuiEmptyPrompt,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPageTemplate,
   EuiLink,
 } from '@elastic/eui';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
@@ -54,8 +53,8 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
       [navigateCallback]
     );
     return (
-      <EuiPageTemplate template="centeredContent">
-        <EuiEmptyPrompt
+      <EuiPageTemplate>
+        <EuiPageTemplate.EmptyPrompt
           iconType="plusInCircle"
           data-test-subj="policy-artifacts-empty-unassigned"
           title={<h2>{labels.emptyUnassignedTitle}</h2>}
