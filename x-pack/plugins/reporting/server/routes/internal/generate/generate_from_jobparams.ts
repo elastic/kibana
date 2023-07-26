@@ -34,10 +34,8 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
       try {
         const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
         const jobParams = requestHandler.getJobParams();
-        console.log({ jobParams });
         return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
       } catch (err) {
-        console.log(err);
         if (err instanceof KibanaResponse) {
           return err;
         }
