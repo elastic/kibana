@@ -2,6 +2,16 @@
 .shardFailureModal {
   min-height: 75vh;
   width: 768px;
+
+  // show buttons at the bottom of the modal
+  .kbnOverlayMountWrapper {
+    flex-grow: 1;
+  }
+
+  // smaller gap between the modal title and body
+  .euiModalHeader {
+    padding-bottom: 0;
+  }
 }
 
 .shardFailureModal__desc {
