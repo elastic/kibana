@@ -214,11 +214,7 @@ export function SelectServices({
         >
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-              {!data && isServiceListPreviewLoading && (
-                <CentralizedContainer>
-                  <EuiLoadingSpinner />
-                </CentralizedContainer>
-              )}
+              {!data && isServiceListPreviewLoading && <EuiLoadingSpinner />}
               {kueryValidationMessage?.length ? (
                 <CentralizedContainer>
                   <EuiCallOut
