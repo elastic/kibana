@@ -21949,7 +21949,7 @@
     "xpack.logstash.pipelineList.noPermissionToManageDescription": "请联系您的管理员。",
     "xpack.logstash.pipelineList.noPermissionToManageTitle": "您无权管理 Logstash 管道。",
     "xpack.logstash.pipelineList.noPipelinesDescription": "未定义任何管道。",
-    "xpack.logstash.pipelineList.noPipelinesTitle": "没有管道",
+    "xpack.logstash.pipelineList.noPipelinesTitle": "没有管道成立",
     "xpack.logstash.pipelineList.pipelinesLoadingErrorDescription": "加载管道时出错。",
     "xpack.logstash.pipelineList.pipelinesLoadingErrorTitle": "错误",
     "xpack.logstash.pipelineList.pipelinesLoadingMessage": "正在加载管道……",

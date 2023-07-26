@@ -99,6 +99,7 @@ function PipelinesTableUi({
   selection,
   pageIndex,
   intl,
+  onSearchChange,
 }) {
   const pagination = {
     pageIndex,
@@ -128,6 +129,12 @@ function PipelinesTableUi({
       }
     : null;
 
+  const onSearchQueryChange = ({ queryText }) => {
+    if (typeof queryText === 'string') {
+      onSearchChange(queryText);
+    }
+  };
+
   // display when > 0 selected and user has write permission
   const deleteButton =
     selection.length && !isReadOnly ? (
@@ -145,6 +152,7 @@ function PipelinesTableUi({
     ) : null;
 
   const search = {
+    onChange: onSearchQueryChange,
     box: { incremental: true, 'data-test-subj': 'filter' },
     filters: [
       {
@@ -154,6 +162,7 @@ function PipelinesTableUi({
           defaultMessage: 'Filter by ID',
         }),
         multiSelect: false,
+        filterWith: 'includes',
         options: pipelines.map(({ id }) => {
           return {
             value: id,
