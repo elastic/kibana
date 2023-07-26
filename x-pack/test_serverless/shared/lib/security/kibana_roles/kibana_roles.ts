@@ -11,17 +11,21 @@ import * as path from 'path';
 import { cloneDeep } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 
-export type ServerlessRoleName =
-  | 't1_analyst'
-  | 't2_analyst'
-  | 't3_analyst'
-  | 'threat_intelligence_analyst'
-  | 'rule_author'
-  | 'soc_manager'
-  | 'detections_admin'
-  | 'platform_engineer'
-  | 'endpoint_operations_analyst'
-  | 'endpoint_policy_manager';
+const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
+
+const ROLE_NAMES = [
+  't1_analyst',
+  't2_analyst',
+  't3_analyst',
+  'threat_intelligence_analyst',
+  'rule_author',
+  'soc_manager',
+  'detections_admin',
+  'platform_engineer',
+  'endpoint_operations_analyst',
+] as const;
+
+export type ServerlessRoleName = typeof ROLE_NAMES[number];
 
 type YamlRoleDefinitions = Record<
   ServerlessRoleName,
@@ -36,9 +40,7 @@ type YamlRoleDefinitions = Record<
   }
 >;
 
-const roleDefinitions = loadYaml(
-  readFileSync(path.join(__dirname, 'project_controller_security_roles.yml'), 'utf8')
-) as YamlRoleDefinitions;
+const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
 
 export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
@@ -46,6 +48,12 @@ export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurity
   const definitions = cloneDeep(roleDefinitions);
 
   return Object.entries(definitions).reduce((roles, [roleName, definition]) => {
+    if (!ROLE_NAMES.includes(roleName as ServerlessRoleName)) {
+      throw new Error(
+        `Un-expected role [${roleName}] found in YAML file [${ROLES_YAML_FILE_PATH}]`
+      );
+    }
+
     const kibanaRole: Role = {
       name: roleName,
       elasticsearch: {
