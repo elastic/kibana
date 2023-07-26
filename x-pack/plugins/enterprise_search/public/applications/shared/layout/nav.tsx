@@ -20,7 +20,6 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ESRE_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -56,16 +55,6 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
         {
-          id: 'esre',
-          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
-            defaultMessage: 'ESRE',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ESRE_PLUGIN.URL,
-          }),
-        },
-        {
           id: 'vectorSearch',
           name: VECTOR_SEARCH_PLUGIN.NAME,
           ...generateNavLink({
@@ -74,13 +63,13 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
         {
-          id: 'searchExperiences',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-            defaultMessage: 'Search Experiences',
+          id: 'esre',
+          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
+            defaultMessage: 'ESRE',
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: SEARCH_EXPERIENCES_PLUGIN.URL,
+            to: ESRE_PLUGIN.URL,
           }),
         },
       ],
