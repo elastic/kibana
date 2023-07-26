@@ -7,12 +7,12 @@
 
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-import { ExplainLogRateSpikesDataGeneratorProvider } from '../../functional/services/aiops/explain_log_rate_spikes_data_generator';
+import { LogRateAnalysisDataGeneratorProvider } from '../../functional/services/aiops/log_rate_analysis_data_generator';
 
 export function AiopsProvider(context: FtrProviderContext) {
-  const explainLogRateSpikesDataGenerator = ExplainLogRateSpikesDataGeneratorProvider(context);
+  const logRateAnalysisDataGenerator = LogRateAnalysisDataGeneratorProvider(context);
 
   return {
-    explainLogRateSpikesDataGenerator,
+    logRateAnalysisDataGenerator,
   };
 }

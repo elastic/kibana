@@ -8,10 +8,10 @@
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;

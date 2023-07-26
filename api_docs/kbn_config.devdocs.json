@@ -39,7 +39,9 @@
               "\nInformation about Kibana package (version, build number etc.)."
             ],
             "signature": [
-              "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildDate: Date; readonly dist: boolean; }"
+              "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildDate: Date; readonly buildFlavor: ",
+              "BuildFlavor",
+              "; readonly dist: boolean; }"
             ],
             "path": "packages/kbn-config/src/env.ts",
             "deprecated": false,
@@ -965,6 +967,20 @@
             "description": [],
             "signature": [
               "Date"
+            ],
+            "path": "packages/kbn-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-common.PackageInfo.buildFlavor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buildFlavor",
+            "description": [],
+            "signature": [
+              "\"serverless\" | \"traditional\""
             ],
             "path": "packages/kbn-config/src/types.ts",
             "deprecated": false,

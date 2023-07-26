@@ -11,12 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../../types';
 
 export interface DocProps {
   /**

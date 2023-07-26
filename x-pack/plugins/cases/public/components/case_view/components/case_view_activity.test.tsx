@@ -19,7 +19,6 @@ import {
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
-import { ConnectorTypes } from '../../../../common/api/connectors';
 import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
@@ -37,7 +36,7 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { UserActionTypes } from '../../../../common/types/domain';
+import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -314,7 +313,8 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
-  describe('filter activity', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152202
+  describe.skip('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -496,7 +496,8 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    describe('Reporter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152206
+    describe.skip('Reporter', () => {
       it('should render the reporter correctly', async () => {
         appMockRender = createAppMockRenderer();
         appMockRender.render(<CaseViewActivity {...caseProps} />);

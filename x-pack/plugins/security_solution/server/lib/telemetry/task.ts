@@ -15,6 +15,7 @@ import type {
 import type { ITelemetryReceiver } from './receiver';
 import type { ITelemetryEventsSender } from './sender';
 import { tlog } from './helpers';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;
@@ -83,8 +84,9 @@ export class SecurityTelemetryTask {
       [this.config.type]: {
         title: this.config.title,
         timeout: this.config.timeout,
+        stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const { state } = taskInstance;
+          const state = taskInstance.state as LatestTaskStateSchema;
 
           return {
             run: async () => {
@@ -96,12 +98,14 @@ export class SecurityTelemetryTask {
 
               const hits = await this.runTask(taskInstance.id, executionPeriod);
 
+              const updatedState: LatestTaskStateSchema = {
+                lastExecutionTimestamp: taskExecutionTime,
+                runs: state.runs + 1,
+                hits,
+              };
+
               return {
-                state: {
-                  lastExecutionTimestamp: taskExecutionTime,
-                  runs: (state.runs || 0) + 1,
-                  hits,
-                },
+                state: updatedState,
               };
             },
             cancel: async () => {},
@@ -122,7 +126,7 @@ export class SecurityTelemetryTask {
         schedule: {
           interval: this.config.interval,
         },
-        state: { runs: 0 },
+        state: emptyState,
         params: { version: this.config.version },
       });
     } catch (e) {

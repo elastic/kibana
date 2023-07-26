@@ -10,6 +10,7 @@ import {
   validateLogstashHosts,
   validateYamlConfig,
   validateCATrustedFingerPrint,
+  validateKafkaHeaders,
 } from './output_form_validators';
 
 describe('Output form validation', () => {
@@ -120,6 +121,84 @@ describe('Output form validation', () => {
 
       expect(res).toEqual([
         'CA trusted fingerprint should be valid HEX encoded SHA-256 of a CA certificate',
+      ]);
+    });
+  });
+
+  describe('kafka fields', () => {
+    it('should work with a valid headers', () => {
+      const validHeaders = [
+        { key: 'key', value: 'same_value' },
+        { key: 'different_key', value: 'same_value' },
+        { key: '1', value: '2' },
+        { key: '_', value: '!' },
+      ];
+      validHeaders.forEach((header) => {
+        expect(validateKafkaHeaders([header])).toBeUndefined();
+      });
+
+      expect(validateKafkaHeaders(validHeaders)).toBeUndefined();
+    });
+
+    it('should return an error with invalid headers', () => {
+      const emptyValue = validateKafkaHeaders([{ key: 'test', value: '' }]);
+      expect(emptyValue?.length).toEqual(1);
+      expect(emptyValue).toEqual([
+        {
+          hasKeyError: false,
+          hasValueError: true,
+          index: 0,
+          message: 'Missing value for key "test"',
+        },
+      ]);
+
+      const emptyKey = validateKafkaHeaders([{ key: '', value: 'test' }]);
+      expect(emptyKey?.length).toEqual(1);
+      expect(emptyKey).toEqual([
+        {
+          hasKeyError: true,
+          hasValueError: false,
+          index: 0,
+          message: 'Missing key for value "test"',
+        },
+      ]);
+
+      const duplicatedKey = validateKafkaHeaders([
+        { key: 'test', value: 'test2' },
+        { key: 'test', value: 'test2' },
+      ]);
+
+      expect(duplicatedKey?.length).toEqual(1);
+      expect(duplicatedKey).toEqual([
+        {
+          hasKeyError: true,
+          hasValueError: false,
+          index: 1,
+          message: 'Duplicate key "test"',
+        },
+      ]);
+
+      const lastInvalid = validateKafkaHeaders([
+        { key: 'test', value: 'test2' },
+        { key: 'test2', value: 'test' },
+        { key: 'test', value: 'one' },
+        { key: 'test3', value: '' },
+      ]);
+
+      expect(lastInvalid?.length).toEqual(2);
+      expect(lastInvalid).toEqual([
+        {
+          hasKeyError: true,
+          hasValueError: false,
+          index: 2,
+          message: 'Duplicate key "test"',
+        },
+        {
+          hasKeyError: false,
+          hasValueError: true,
+          index: 3,
+          message: 'Missing value for key "test3"',
+        },
       ]);
     });
   });

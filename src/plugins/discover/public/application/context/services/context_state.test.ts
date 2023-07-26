@@ -14,7 +14,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
 discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);

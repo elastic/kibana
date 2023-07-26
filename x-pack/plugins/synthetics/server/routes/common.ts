@@ -10,7 +10,8 @@ import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
+import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
@@ -63,7 +64,7 @@ export const SEARCH_FIELDS = [
 export const getMonitors = async (
   context: RouteContext<MonitorsQuery>,
   { fields }: { fields?: string[] } = {}
-): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
+): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitorAttributes>> => {
   const {
     perPage = 50,
     page,
@@ -185,7 +186,10 @@ const parseLocationFilter = async (context: RouteContext, locations?: string | s
   return findLocationItem(locations, allLocations)?.id ?? '';
 };
 
-export const findLocationItem = (query: string, locations: ServiceLocations) => {
+export const findLocationItem = (
+  query: string,
+  locations: Array<ServiceLocation | PrivateLocation>
+) => {
   return locations.find(({ id, label }) => query === id || label === query);
 };
 
