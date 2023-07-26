@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingConfig } from '.';
-import { PROFILING_FEATURE } from './feature';
+import { PROFILING_FEATURE, PROFILING_SERVER_FEATURE_ID } from './feature';
 import { registerRoutes } from './routes';
 import {
   ProfilingPluginSetup,
@@ -41,6 +41,10 @@ export class ProfilingPlugin
 
     const config = this.initializerContext.config.get();
 
+    const telemetryUsageCounter = deps.usageCollection?.createUsageCounter(
+      PROFILING_SERVER_FEATURE_ID
+    );
+
     core.getStartServices().then(([coreStart, depsStart]) => {
       const profilingSpecificEsClient = config.elasticsearch
         ? coreStart.elasticsearch.createClient('profiling', {
@@ -57,6 +61,7 @@ export class ProfilingPlugin
           start: depsStart,
           setup: deps,
           config,
+          telemetryUsageCounter,
         },
         services: {
           createProfilingEsClient: ({

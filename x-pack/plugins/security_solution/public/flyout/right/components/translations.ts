@@ -31,6 +31,13 @@ export const SEVERITY_TITLE = i18n.translate(
   }
 );
 
+export const STATUS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
   {

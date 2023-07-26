@@ -15,23 +15,23 @@ import type {
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type {
+  UserActionAction,
+  CaseUserActionWithoutReferenceIds,
+  CommentUserAction,
+  ConnectorUserAction,
+  PushedUserAction,
+  UserActionType,
+} from '../../../common/types/domain';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
-  ActionTypeValues,
   CaseAttributes,
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionWithoutReferenceIds,
   CommentRequest,
-  CommentUserAction,
-  ConnectorUserAction,
-  PushedUserAction,
   User,
-  ActionCategory,
-  UserActionFindRequest,
-  UserActionTypes,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
@@ -40,6 +40,7 @@ import type {
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { UserActionFindRequest } from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {
@@ -109,15 +110,15 @@ export interface CommonArguments {
   owner: string;
   attachmentId?: string;
   connectorId?: string;
-  action?: ActionCategory;
+  action?: UserActionAction;
 }
 
 export interface Attributes {
-  action: ActionCategory;
+  action: UserActionAction;
   created_at: string;
   created_by: User;
   owner: string;
-  type: UserActionTypes;
+  type: UserActionType;
   payload: Record<string, unknown>;
 }
 
@@ -128,7 +129,7 @@ export interface SavedObjectParameters {
 
 export interface EventDetails {
   getMessage: (storedUserActionId?: string) => string;
-  action: ActionCategory;
+  action: UserActionAction;
   descriptiveAction: string;
   savedObjectId: string;
   savedObjectType: string;
@@ -140,8 +141,8 @@ export interface UserActionEvent {
 }
 
 export type CommonBuilderArguments = CommonArguments & {
-  action: ActionCategory;
-  type: UserActionTypes;
+  action: UserActionAction;
+  type: UserActionType;
   value: unknown;
   valueKey: string;
 };
@@ -277,7 +278,7 @@ export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDiffer
   newValue: T[];
 }
 
-export type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
+export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 

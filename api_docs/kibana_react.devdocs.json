@@ -1887,6 +1887,30 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.useKibanaTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "useKibanaTheme",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          }
+        ],
+        "path": "src/plugins/kibana_react/public/theme/use_theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.useUiSetting",
         "type": "Function",
         "tags": [],

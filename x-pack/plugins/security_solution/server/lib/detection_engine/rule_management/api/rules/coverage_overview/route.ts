@@ -6,9 +6,11 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import {
+  CoverageOverviewRequestBody,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+} from '../../../../../../../common/api/detection_engine';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';

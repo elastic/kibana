@@ -23,7 +23,7 @@ import {
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
-  RawAlertsFilter,
+  RawRuleAlertsFilter,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -31,10 +31,7 @@ import { AlertingRulesConfig } from '../config';
 export type {
   BulkEditOperation,
   BulkEditFields,
-  BulkEditOptions,
-  BulkEditOptionsFilter,
-  BulkEditOptionsIds,
-} from './methods/bulk_edit';
+} from '../application/rule/methods/bulk_edit/types';
 export type { FindOptions, FindResult } from './methods/find';
 export type { UpdateOptions } from './methods/update';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
@@ -79,7 +76,7 @@ export type NormalizedAlertActionWithGeneratedValues = Omit<
   'uuid' | 'alertsFilter'
 > & {
   uuid: string;
-  alertsFilter?: RawAlertsFilter;
+  alertsFilter?: RawRuleAlertsFilter;
 };
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {

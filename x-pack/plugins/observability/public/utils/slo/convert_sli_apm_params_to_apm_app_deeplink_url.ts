@@ -6,7 +6,7 @@
  */
 
 interface Props {
-  duration: string;
+  duration?: string;
   environment: string;
   filter: string | undefined;
   service: string;

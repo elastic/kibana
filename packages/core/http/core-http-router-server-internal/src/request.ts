@@ -223,11 +223,10 @@ export class CoreKibanaRequest<
       options,
     };
   }
-  /** infer route access from path if not declared */
+  /** set route access to internal if not declared */
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
-      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ??
-      (request.path.startsWith('/internal') ? 'internal' : 'public')
+      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ?? 'internal'
     );
   }
 

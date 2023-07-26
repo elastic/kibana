@@ -8,8 +8,6 @@
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
-  GetAgentPoliciesRequest,
-  GetAgentPoliciesResponse,
   GetPackagePoliciesResponse,
   GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
@@ -55,38 +53,6 @@ export const sendBulkGetPackagePolicies = (
     body: JSON.stringify({
       ids: packagePolicyIds,
       ignoreMissing: true,
-    }),
-  });
-};
-
-/**
- * Retrieve a list of Agent Policies
- * @param http
- * @param options
- */
-export const sendGetAgentPolicyList = (
-  http: HttpStart,
-  options: HttpFetchOptions & GetAgentPoliciesRequest
-) => {
-  return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
-};
-
-/**
- * Retrieve a list of Agent Policies
- * @param http
- * @param options
- */
-export const sendBulkGetAgentPolicyList = (
-  http: HttpStart,
-  ids: string[],
-  options: HttpFetchOptions = {}
-) => {
-  return http.post<GetAgentPoliciesResponse>(`${INGEST_API_AGENT_POLICIES}/_bulk_get`, {
-    ...options,
-    body: JSON.stringify({
-      ids,
-      ignoreMissing: true,
-      full: true,
     }),
   });
 };

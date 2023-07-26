@@ -37,7 +37,6 @@ export const cspDashboardLink: LinkItem = {
 };
 
 export const vulnerabilityDashboardLink: LinkItem = {
-  isBeta: true,
   ...getSecuritySolutionLink<SecurityPageName>('vulnerability_dashboard'),
   description: i18n.translate('xpack.securitySolution.appLinks.vulnerabilityDashboardDescription', {
     defaultMessage:

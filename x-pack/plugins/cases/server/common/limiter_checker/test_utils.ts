@@ -11,6 +11,8 @@ import type {
   CommentRequestUserType,
   CommentRequestAlertType,
   FileAttachmentMetadata,
+  CommentRequestPersistableStateType,
+  CommentRequestExternalReferenceType,
 } from '../../../common/api';
 import type { FileAttachmentRequest } from '../types';
 
@@ -24,6 +26,37 @@ export const createUserRequests = (num: number): CommentRequestUserType[] => {
   });
 
   return requests;
+};
+
+export const createPersistableStateRequests = (
+  num: number
+): CommentRequestPersistableStateType[] => {
+  return [...Array(num).keys()].map(() => {
+    return {
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: {},
+      type: CommentType.persistableState as const,
+      owner: 'test',
+    };
+  });
+};
+
+export const createExternalReferenceRequests = (
+  num: number
+): CommentRequestExternalReferenceType[] => {
+  return [...Array(num).keys()].map((value) => {
+    return {
+      type: CommentType.externalReference as const,
+      owner: 'test',
+      externalReferenceAttachmentTypeId: '.test',
+      externalReferenceId: 'so-id',
+      externalReferenceMetadata: {},
+      externalReferenceStorage: {
+        soType: `${value}`,
+        type: ExternalReferenceStorageType.savedObject,
+      },
+    };
+  });
 };
 
 export const createFileRequests = ({

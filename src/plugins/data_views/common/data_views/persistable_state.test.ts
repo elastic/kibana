@@ -7,7 +7,7 @@
  */
 
 import { DataViewPersistableStateService } from './persistable_state';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { DataViewSpec } from '../types';
 const { inject, extract } = DataViewPersistableStateService;
 

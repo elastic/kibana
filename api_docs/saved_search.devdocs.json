@@ -215,9 +215,9 @@
             "(savedSearchId: string) => Promise<",
             {
               "pluginId": "savedSearch",
-              "scope": "public",
+              "scope": "common",
               "docId": "kibSavedSearchPluginApi",
-              "section": "def-public.SavedSearch",
+              "section": "def-common.SavedSearch",
               "text": "SavedSearch"
             },
             ">"
@@ -255,9 +255,9 @@
             "() => ",
             {
               "pluginId": "savedSearch",
-              "scope": "public",
+              "scope": "common",
               "docId": "kibSavedSearchPluginApi",
-              "section": "def-public.SavedSearch",
+              "section": "def-common.SavedSearch",
               "text": "SavedSearch"
             }
           ],
@@ -535,6 +535,66 @@
               }
             ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.getKibanaContextFn",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaContextFn",
+        "description": [],
+        "signature": [
+          "(getStartDependencies: (getKibanaRequest: (() => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>) | undefined) => Promise<",
+          "KibanaContextStartDependencies",
+          ">) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ExpressionFunctionKibanaContext",
+            "text": "ExpressionFunctionKibanaContext"
+          }
+        ],
+        "path": "src/plugins/saved_search/common/expressions/kibana_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.getKibanaContextFn.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "getStartDependencies",
+            "description": [],
+            "signature": [
+              "(getKibanaRequest: (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) | undefined) => Promise<",
+              "KibanaContextStartDependencies",
+              ">"
+            ],
+            "path": "src/plugins/saved_search/common/expressions/kibana_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1226,6 +1286,20 @@
                 "text": "SavedObjectReference"
               },
               "[] | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.sharingSavedObjectProps",
+            "type": "Object",
+            "tags": [],
+            "label": "sharingSavedObjectProps",
+            "description": [],
+            "signature": [
+              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,

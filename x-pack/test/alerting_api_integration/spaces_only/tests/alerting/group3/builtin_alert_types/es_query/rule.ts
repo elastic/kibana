@@ -40,7 +40,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     createGroupedEsDocumentsInGroups,
   } = getRuleServices(getService);
 
-  describe('rule', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/154073
+  describe.skip('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);

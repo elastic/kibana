@@ -31,11 +31,12 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
+import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
+
 import {
   AccessControlIndexSelector,
   AccessControlSelectorOption,
 } from './components/access_control_index_selector/access_control_index_selector';
-import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
@@ -43,8 +44,6 @@ import './index_mappings.scss';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { makeMappingRequest } = useActions(DocumentsLogic);
-  const { mappingData } = useValues(DocumentsLogic);
   const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { productFeatures } = useValues(KibanaLogic);
 
@@ -54,7 +53,8 @@ export const SearchIndexIndexMappings: React.FC = () => {
     selectedIndexType === 'content-index'
       ? indexName
       : indexName.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
-
+  const { makeRequest: makeMappingRequest } = useActions(mappingsWithPropsApiLogic(indexToShow));
+  const { data: mappingData } = useValues(mappingsWithPropsApiLogic(indexToShow));
   const shouldShowAccessControlSwitch =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
   useEffect(() => {

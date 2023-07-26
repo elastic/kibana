@@ -8,22 +8,25 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
+import type { ChatCompletionRequestMessage } from 'openai';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, Observable, of } from 'rxjs';
 import { CoPilotPromptId } from '../../../common';
 import type { PromptParamsOf } from '../../../common/co_pilot';
 import type { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
+import { CoPilotPromptFeedback } from './co_pilot_prompt_feedback';
 
 const cursorCss = css`
   @keyframes blink {
@@ -51,6 +54,7 @@ export interface CoPilotPromptProps<TPromptId extends CoPilotPromptId> {
   promptId: TPromptId;
   coPilot: CoPilotService;
   params: PromptParamsOf<TPromptId>;
+  feedbackEnabled: boolean;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -59,26 +63,47 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
   coPilot,
   promptId,
   params,
+  feedbackEnabled,
 }: CoPilotPromptProps<TPromptId>) {
   const [hasOpened, setHasOpened] = useState(false);
 
   const theme = useEuiTheme();
 
+  const [responseTime, setResponseTime] = useState<number | undefined>(undefined);
+
   const conversation$ = useMemo(() => {
-    return hasOpened
-      ? coPilot
-          .prompt(promptId, params)
-          .pipe(
-            catchError((err) => of({ loading: false, error: err, message: String(err.message) }))
-          )
-      : new Observable<PromptObservableState>(() => {});
-  }, [params, promptId, coPilot, hasOpened]);
+    if (hasOpened) {
+      setResponseTime(undefined);
+
+      const now = Date.now();
+
+      const observable = coPilot.prompt(promptId, params).pipe(
+        catchError((err) =>
+          of({
+            messages: [] as ChatCompletionRequestMessage[],
+            loading: false,
+            error: err,
+            message: String(err.message),
+          })
+        )
+      );
+
+      observable.subscribe({
+        complete: () => {
+          setResponseTime(Date.now() - now);
+        },
+      });
+
+      return observable;
+    }
+
+    return new Observable<PromptObservableState & { error?: any }>(() => {});
+  }, [params, promptId, coPilot, hasOpened, setResponseTime]);
 
   const conversation = useObservable(conversation$);
 
-  useEffect(() => {}, [conversation$]);
-
   const content = conversation?.message ?? '';
+  const messages = conversation?.messages;
 
   let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
 
@@ -94,10 +119,26 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
 
   if (state === 'complete' || state === 'streaming') {
     inner = (
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-        {content}
-        {state === 'streaming' ? <span className={cursorCss} /> : <></>}
-      </p>
+      <>
+        <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+          {content}
+          {state === 'streaming' ? <span className={cursorCss} /> : undefined}
+        </p>
+        {state === 'complete' ? (
+          <>
+            <EuiSpacer size="m" />
+            {coPilot.isTrackingEnabled() && feedbackEnabled ? (
+              <CoPilotPromptFeedback
+                messages={messages}
+                response={content}
+                responseTime={responseTime!}
+                promptId={promptId}
+                coPilot={coPilot}
+              />
+            ) : undefined}
+          </>
+        ) : undefined}
+      </>
     );
   } else if (state === 'init' || state === 'loading') {
     inner = (
@@ -128,10 +169,6 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
     );
   }
 
-  const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
-    defaultMessage: 'Ask Observability AI Assistent for help',
-  });
-
   return (
     <EuiPanel color="primary">
       <EuiAccordion
@@ -148,14 +185,23 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
         buttonContent={
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow>
-              <EuiText size="m" color={theme.euiTheme.colors.primaryText}>
-                <strong>{title}</strong>
-              </EuiText>
+              <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="m" color={theme.euiTheme.colors.primaryText}>
+                    <strong>{title}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color={theme.euiTheme.colors.primaryText}>
+                    {i18n.translate('xpack.observability.coPilotChatPrompt.subtitle', {
+                      defaultMessage: 'Get helpful insights from our Elastic AI Assistant',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={tooltipContent}>
-                <EuiIcon color={theme.euiTheme.colors.primaryText} type="questionInCircle" />
-              </EuiToolTip>
+              <TechnicalPreviewBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -164,7 +210,9 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
           setHasOpened(true);
         }}
       >
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="m" />
         {inner}
       </EuiAccordion>
     </EuiPanel>

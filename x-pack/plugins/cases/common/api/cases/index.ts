@@ -8,7 +8,6 @@
 export * from './case';
 export * from './comment';
 export * from './status';
-export * from './user_actions';
 export * from './constants';
 export * from './alerts';
 export * from './user_profiles';

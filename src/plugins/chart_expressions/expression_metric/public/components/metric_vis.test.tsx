@@ -1417,6 +1417,18 @@ describe('MetricVisComponent', function () {
       });
     });
 
+    it('does not override duration configuration at visualization level when set', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'duration',
+        params: { formatOverride: true, outputFormat: 'asSeconds' },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: { formatOverride: true, outputFormat: 'asSeconds' },
+      });
+    });
+
     it('does not tweak bytes format when passed', () => {
       getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',

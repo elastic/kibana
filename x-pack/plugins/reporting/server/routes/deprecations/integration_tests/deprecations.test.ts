@@ -47,7 +47,6 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   });
 
   afterEach(async () => {
-    jest.restoreAllMocks();
     await server.stop();
   });
 

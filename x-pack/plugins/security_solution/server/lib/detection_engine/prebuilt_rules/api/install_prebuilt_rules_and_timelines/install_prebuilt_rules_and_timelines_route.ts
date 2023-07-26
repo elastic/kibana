@@ -13,7 +13,7 @@ import moment from 'moment';
 import {
   InstallPrebuiltRulesAndTimelinesResponse,
   PREBUILT_RULES_URL,
-} from '../../../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,

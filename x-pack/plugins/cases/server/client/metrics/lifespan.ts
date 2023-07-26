@@ -6,14 +6,11 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type {
-  UserActionAttributes,
-  SingleCaseMetricsResponse,
-  StatusInfo,
-  StatusUserAction,
-  UserActionWithResponse,
-} from '../../../common/api';
-import { CaseStatuses, StatusUserActionRt } from '../../../common/api';
+import type { StatusUserAction, UserActionAttributes } from '../../../common/types/domain';
+import type { UserActionWithResponse } from '../../../common/types/api';
+import { StatusUserActionRt } from '../../../common/types/domain';
+import type { SingleCaseMetricsResponse, StatusInfo } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';

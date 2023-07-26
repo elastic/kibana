@@ -9,13 +9,12 @@ import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type {
-  CaseConnector,
   Case,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
 } from '../../common/api';
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
+import { CaseSeverity, CommentType } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -34,11 +33,20 @@ import {
   getCaseViewPath,
   isSOError,
   countUserAttachments,
+  isPersistableStateOrExternalReference,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import { mockCases, mockCaseComments } from '../mocks';
 import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
+import type { CaseConnector } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
+import {
+  createAlertRequests,
+  createExternalReferenceRequests,
+  createPersistableStateRequests,
+  createUserRequests,
+} from './limiter_checker/test_utils';
 
 interface CommentReference {
   ids: string[];
@@ -1350,6 +1358,27 @@ describe('common utils', () => {
       const attachments = [createAlertAttachment()];
 
       expect(countUserAttachments(attachments)).toBe(0);
+    });
+  });
+
+  describe('isPersistableStateOrExternalReference', () => {
+    it('returns true for persistable state request', () => {
+      expect(isPersistableStateOrExternalReference(createPersistableStateRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns true for external reference request', () => {
+      expect(isPersistableStateOrExternalReference(createExternalReferenceRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns false for other request types', () => {
+      expect(isPersistableStateOrExternalReference(createUserRequests(1)[0])).toBe(false);
+      expect(isPersistableStateOrExternalReference(createAlertRequests(1, 'alert-id')[0])).toBe(
+        false
+      );
     });
   });
 });

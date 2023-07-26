@@ -32,6 +32,7 @@ import {
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
+  HistogramTransformGenerator,
   KQLCustomTransformGenerator,
   MetricCustomTransformGenerator,
   TransformGenerator,
@@ -51,6 +52,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
   'sli.kql.custom': new KQLCustomTransformGenerator(),
   'sli.metric.custom': new MetricCustomTransformGenerator(),
+  'sli.histogram.custom': new HistogramTransformGenerator(),
 };
 
 const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {

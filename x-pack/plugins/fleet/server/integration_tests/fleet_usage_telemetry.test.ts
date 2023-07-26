@@ -351,8 +351,26 @@ describe('fleet usage telemetry', () => {
         },
         packages: [],
         agents_per_version: [
-          { version: '8.5.1', count: 1 },
-          { version: '8.6.0', count: 1 },
+          {
+            version: '8.5.1',
+            count: 1,
+            healthy: 0,
+            inactive: 0,
+            offline: 1,
+            unenrolled: 1,
+            unhealthy: 0,
+            updating: 0,
+          },
+          {
+            version: '8.6.0',
+            count: 1,
+            healthy: 0,
+            inactive: 0,
+            offline: 1,
+            unenrolled: 0,
+            unhealthy: 0,
+            updating: 0,
+          },
         ],
         agent_checkin_status: { error: 1, degraded: 1 },
         agents_per_policy: [2],
@@ -382,8 +400,12 @@ describe('fleet usage telemetry', () => {
             message: 'stderr panic some other panic',
           },
         ],
-        // agent_logs_top_errors: ['stderr panic close of closed channel'],
-        // fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        agent_logs_top_errors: [
+          'stderr panic some other panic',
+          'stderr panic close of closed channel',
+          'this should not be included in metrics',
+        ],
+        fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
   });

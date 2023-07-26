@@ -21,7 +21,7 @@ export function FieldMappingStatus() {
   const { query } = useApmParams('/diagnostics/*');
   const { diagnosticsBundle, status } = useDiagnosticsContext();
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isOk = getIndicesTabStatus(diagnosticsBundle);
+  const isOk = getIsIndicesTabOk(diagnosticsBundle);
 
   return (
     <TabStatus
@@ -40,6 +40,10 @@ export function FieldMappingStatus() {
   );
 }
 
-export function getIndicesTabStatus(diagnosticsBundle?: DiagnosticsBundle) {
-  return diagnosticsBundle?.invalidIndices.length === 0;
+export function getIsIndicesTabOk(diagnosticsBundle?: DiagnosticsBundle) {
+  if (!diagnosticsBundle) {
+    return true;
+  }
+
+  return diagnosticsBundle.invalidIndices.length === 0;
 }

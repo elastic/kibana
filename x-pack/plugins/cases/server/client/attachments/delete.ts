@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
-import { Actions, ActionTypes, CommentRequestRt, decodeOrThrow } from '../../../common/api';
+import { CommentRequestRt, decodeOrThrow } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
@@ -121,8 +122,8 @@ export async function deleteComment(
     const attachmentRequestAttributes = decodeOrThrow(CommentRequestRt)(attachment.attributes);
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.delete,
+      type: UserActionTypes.comment,
+      action: UserActionActions.delete,
       caseId: id,
       attachmentId: attachmentID,
       payload: { attachment: attachmentRequestAttributes },

@@ -100,7 +100,7 @@ describe(
           .within(() => {
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_NAVIGATE_TO_RULE_DETAILS_BUTTON)
               .should('be.visible')
-              .and('have.text', 'View rule');
+              .and('contain.text', 'View rule');
           });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')

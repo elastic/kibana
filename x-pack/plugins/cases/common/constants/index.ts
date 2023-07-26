@@ -127,6 +127,7 @@ export const MAX_DELETE_IDS_LENGTH = 100 as const;
 export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
+export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
 
 /**
  * Cases features
@@ -192,3 +193,9 @@ export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
 };
+
+/**
+ * Connectors
+ */
+
+export const NONE_CONNECTOR_ID: string = 'none';

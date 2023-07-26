@@ -39,11 +39,8 @@ export function SloDetailsPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
-
   const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
-
   const isCloningOrDeleting = Boolean(useIsMutating());
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));

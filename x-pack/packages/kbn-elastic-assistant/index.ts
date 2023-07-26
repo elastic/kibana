@@ -71,9 +71,10 @@ export { useAssistantOverlay } from './impl/assistant/use_assistant_overlay';
 /** a helper that enriches content returned from a query with action buttons */
 export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 
-// Sample content is exported with the following:
-/** sample content */
-export { BASE_CONVERSATIONS } from './impl/assistant/use_conversation/sample_conversations';
+export {
+  ELASTIC_AI_ASSISTANT_TITLE,
+  WELCOME_CONVERSATION_TITLE,
+} from './impl/assistant/use_conversation/translations';
 
 /** i18n translations of system prompts */
 export * as SYSTEM_PROMPTS from './impl/content/prompts/system/translations';

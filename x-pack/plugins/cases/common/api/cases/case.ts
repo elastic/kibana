@@ -10,7 +10,6 @@ import * as rt from 'io-ts';
 import { UserRt } from '../user';
 import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
 import {
   limitedArraySchema,
@@ -32,6 +31,7 @@ import {
   MAX_BULK_GET_CASES,
   MAX_CASES_PER_PAGE,
 } from '../../constants';
+import { CaseConnectorRt } from '../../types/domain/connector/v1';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
@@ -205,32 +205,19 @@ export const CasePostRequestRt = rt.intersection([
   ),
 ]);
 
-const CasesFindRequestSearchFieldsRt = rt.keyof({
-  'closed_by.username': null,
-  'closed_by.full_name': null,
-  'closed_by.email': null,
-  'closed_by.profile_uid': null,
-  'created_by.username': null,
-  'created_by.full_name': null,
-  'created_by.email': null,
-  'created_by.profile_uid': null,
+export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
-  'connector.name': null,
-  'connector.type': null,
-  'external_service.pushed_by.username': null,
-  'external_service.pushed_by.full_name': null,
-  'external_service.pushed_by.email': null,
-  'external_service.pushed_by.profile_uid': null,
-  'external_service.connector_name': null,
-  'external_service.external_id': null,
-  'external_service.external_title': null,
-  'external_service.external_url': null,
   title: null,
-  'title.keyword': null,
-  'updated_by.username': null,
-  'updated_by.full_name': null,
-  'updated_by.email': null,
-  'updated_by.profile_uid': null,
+});
+
+export const CasesFindRequestSortFieldsRt = rt.keyof({
+  title: null,
+  category: null,
+  createdAt: null,
+  updatedAt: null,
+  closedAt: null,
+  status: null,
+  severity: null,
 });
 
 export const CasesFindRequestRt = rt.intersection([
@@ -308,14 +295,10 @@ export const CasesFindRequestRt = rt.intersection([
         CasesFindRequestSearchFieldsRt,
       ]),
       /**
-       * The root fields to perform the simple_query_string parsed query against
-       */
-      rootSearchFields: rt.array(rt.string),
-      /**
        * The field to use for sorting the found objects.
        *
        */
-      sortField: rt.string,
+      sortField: CasesFindRequestSortFieldsRt,
       /**
        * The order to sort by
        */
@@ -551,6 +534,7 @@ export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;

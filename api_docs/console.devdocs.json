@@ -265,22 +265,6 @@
     "enums": [],
     "misc": [],
     "objects": [],
-    "setup": {
-      "parentPluginId": "console",
-      "id": "def-server.ConsoleSetup",
-      "type": "Type",
-      "tags": [],
-      "label": "ConsoleSetup",
-      "description": [],
-      "signature": [
-        "{ addExtensionSpecFilePath: (path: string) => void; }"
-      ],
-      "path": "src/plugins/console/server/types.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    },
     "start": {
       "parentPluginId": "console",
       "id": "def-server.ConsoleStart",

@@ -9,8 +9,7 @@
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   AvailableFields$,
@@ -23,7 +22,7 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
@@ -88,7 +87,7 @@ const mountComponent = async ({
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -98,7 +97,7 @@ const mountComponent = async ({
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$;
 
   const savedSearchData$ = {

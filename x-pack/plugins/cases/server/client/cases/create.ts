@@ -9,10 +9,10 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { UserActionTypes } from '../../../common/types/domain';
 import type { Case, CasePostRequest } from '../../../common/api';
 import {
   CaseRt,
-  ActionTypes,
   CasePostRequestRt,
   CaseSeverity,
   decodeWithExcessOrThrow,
@@ -82,7 +82,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     });
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.create_case,
+      type: UserActionTypes.create_case,
       caseId: newCase.id,
       user,
       payload: {

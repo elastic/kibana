@@ -15,6 +15,7 @@ import {
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  histogramIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
   previewDataSchema,
@@ -200,6 +201,7 @@ type Indicator = t.OutputOf<typeof indicatorSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
+type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
 export {
@@ -247,6 +249,7 @@ export type {
   IndicatorType,
   Indicator,
   MetricCustomIndicator,
+  HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
 };

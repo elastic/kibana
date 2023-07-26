@@ -22,13 +22,9 @@ import { first, range, xor } from 'lodash';
 import React, { ReactNode } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
-
-interface Option {
-  label: string;
-  value: string;
-}
 
 interface MetricIndicatorProps {
   type: 'good' | 'total';
@@ -52,15 +48,11 @@ const validateEquation = (value: string) => {
   return result === null;
 };
 
-function createOptions(fields: Field[]): Option[] {
-  return fields
-    .map((field) => ({ label: field.name, value: field.name }))
-    .sort((a, b) => String(a.label).localeCompare(b.label));
-}
-
 function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
+
+const SUPPORTED_FIELD_TYPES = ['number', 'histogram'];
 
 export function MetricIndicator({
   type,
@@ -73,7 +65,9 @@ export function MetricIndicator({
   equationTooltip,
 }: MetricIndicatorProps) {
   const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
-  const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
+  const metricFields = (indexFields ?? []).filter((field) =>
+    SUPPORTED_FIELD_TYPES.includes(field.type)
+  );
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -166,7 +160,7 @@ export function MetricIndicator({
                             ]
                           : []
                       }
-                      options={createOptions(metricFields)}
+                      options={createOptionsFromFields(metricFields)}
                     />
                   )}
                 />
