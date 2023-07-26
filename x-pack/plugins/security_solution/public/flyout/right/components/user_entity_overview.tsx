@@ -73,7 +73,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     startDate: from,
   });
 
-  const { data: userRisk, isLicenseValid } = useRiskScore({
+  const { data: userRisk, isAuthorized } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.user,
     timerange,
@@ -138,7 +138,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {isLicenseValid && (
+        {isAuthorized && (
           <DescriptionListStyled
             data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
             listItems={[userRiskLevel]}
