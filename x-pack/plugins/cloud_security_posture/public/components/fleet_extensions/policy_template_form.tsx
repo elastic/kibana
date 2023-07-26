@@ -81,31 +81,26 @@ interface IntegrationInfoFieldsProps {
 
 type AwsAccountType = 'single_account' | 'organization_account';
 
-const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean) => {
-  const awsAccountTypeOptions: CspRadioGroupProps['options'] = [
-    {
-      id: 'single_account',
-      label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
-        defaultMessage: 'Single Account',
-      }),
-    },
-    {
-      id: 'organization_account',
-      label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
-        defaultMessage: 'AWS Organization',
-      }),
-      disabled: isAwsOrgDisabled,
-      tooltip: isAwsOrgDisabled
-        ? i18n.translate(
-            'xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip',
-            { defaultMessage: 'Supported from integration version 1.5.0 and above' }
-          )
-        : undefined,
-    },
-  ];
-
-  return awsAccountTypeOptions;
-};
+const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
+  {
+    id: 'single_account',
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
+  },
+  {
+    id: 'organization_account',
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
+      defaultMessage: 'AWS Organization',
+    }),
+    disabled: isAwsOrgDisabled,
+    tooltip: isAwsOrgDisabled
+      ? i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip', {
+          defaultMessage: 'Supported from integration version 1.5.0 and above',
+        })
+      : undefined,
+  },
+];
 
 const getAwsAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
@@ -143,9 +138,9 @@ const AwsAccountTypeSelect = ({
         })
       );
     }
-    // we only wish to call this one time, once the options are ready
+    // we only wish to call this once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [awsAccountTypeOptions]);
+  }, []);
 
   return (
     <>
