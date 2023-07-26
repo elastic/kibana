@@ -11,7 +11,8 @@ import { EndpointManagementPageMap, getEndpointManagementPageMap } from './page_
 interface ListRowOptions {
   endpointId?: string;
   hostName?: string;
-  row?: number;
+  /** Zero-based row index */
+  rowIndex?: number;
 }
 
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();
@@ -23,7 +24,7 @@ export const visitEndpointList = (): Cypress.Chainable => {
 export const getTableRow = ({
   endpointId,
   hostName,
-  row = 0,
+  rowIndex = 0,
 }: ListRowOptions = {}): Cypress.Chainable => {
   if (endpointId) {
     return cy.get(`[data-endpoint-id="${endpointId}"]`).should('exist');
@@ -33,7 +34,7 @@ export const getTableRow = ({
     return cy.getByTestSubj('hostnameCellLink').contains(hostName).closest('tr').should('exist');
   }
 
-  return cy.getByTestSubj('endpointListTable').find(`tr:eq(${row})`).should('exist');
+  return cy.getByTestSubj('endpointListTable').find(`tr`).eq(rowIndex).should('exist');
 };
 
 export const openRowActionMenu = (options?: ListRowOptions): Cypress.Chainable => {
@@ -42,5 +43,5 @@ export const openRowActionMenu = (options?: ListRowOptions): Cypress.Chainable =
 };
 
 export const openConsoleFromEndpointList = (options?: ListRowOptions): Cypress.Chainable => {
-  openRowActionMenu(options).findByTestSubj('console').click();
+  return openRowActionMenu(options).findByTestSubj('console').click();
 };
