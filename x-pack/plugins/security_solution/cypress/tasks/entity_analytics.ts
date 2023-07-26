@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
@@ -17,8 +18,8 @@ import { visit } from './login';
 export const waitForAnomaliesToBeLoaded = () => {
   cy.waitUntil(() => {
     visit(ENTITY_ANALYTICS_URL);
-    cy.get('.euiBasicTable.euiBasicTable-loading').should('exist');
-    cy.get('.euiBasicTable.euiBasicTable-loading').should('not.exist');
+    cy.get(BASIC_TABLE_LOADING).should('exist');
+    cy.get(BASIC_TABLE_LOADING).should('not.exist');
     return cy.get(ANOMALIES_TABLE_ROWS).then((tableRows) => tableRows.length > 1);
   });
 };
