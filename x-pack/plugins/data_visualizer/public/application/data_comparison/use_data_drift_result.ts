@@ -136,6 +136,7 @@ const processDataComparisonResult = (
 
       return {
         featureName,
+        secondaryType: data.secondaryType,
         fieldType: DATA_COMPARISON_TYPE.NUMERIC,
         driftDetected: data.pValue < DRIFT_P_VALUE_THRESHOLD,
         similarityTestPValue: data.pValue,
@@ -204,6 +205,7 @@ const processDataComparisonResult = (
     const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
     return {
       featureName,
+      secondaryType: data.secondaryType,
       fieldType: DATA_COMPARISON_TYPE.CATEGORICAL,
       driftDetected: pValue < DRIFT_P_VALUE_THRESHOLD,
       similarityTestPValue: pValue,
@@ -811,7 +813,7 @@ export const useFetchDataComparisonResult = (
           }
 
           const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
-          for (const { field, type } of fields) {
+          for (const { field, type, secondaryType } of fields) {
             if (
               type === DATA_COMPARISON_TYPE.NUMERIC &&
               driftedRespAggs[`${field}_ks_test`] &&
@@ -819,6 +821,7 @@ export const useFetchDataComparisonResult = (
               productionHistogramRespAggs[`${field}_histogram`]
             ) {
               data[field] = {
+                secondaryType,
                 type: DATA_COMPARISON_TYPE.NUMERIC,
                 pValue: driftedRespAggs[`${field}_ks_test`].two_sided,
                 referenceHistogram: referenceHistogramRespAggs[`${field}_histogram`].buckets,
@@ -831,6 +834,7 @@ export const useFetchDataComparisonResult = (
               baselineResponseAggs[`${field}_terms`]
             ) {
               data[field] = {
+                secondaryType,
                 type: DATA_COMPARISON_TYPE.CATEGORICAL,
                 driftedTerms: driftedRespAggs[`${field}_terms`].buckets ?? [],
                 driftedSumOtherDocCount: driftedRespAggs[`${field}_terms`].sum_other_doc_count,

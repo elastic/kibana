@@ -18,6 +18,7 @@ import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
 import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
 import type { DataComparisonField, Feature, TimeRange } from './types';
 import { DataComparisonOverviewTable } from './data_comparison_overview_table';
@@ -85,6 +86,7 @@ export const DataComparisonView = ({
           .map((f) => ({
             field: f.name,
             type: getDataComparisonType(f.type),
+            secondaryType: kbnTypeToSupportedType(f),
             displayName: f.displayName,
           }))
       );

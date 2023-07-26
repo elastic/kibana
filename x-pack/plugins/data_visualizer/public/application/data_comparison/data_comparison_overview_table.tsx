@@ -17,8 +17,9 @@ import {
   EuiTableFieldDataColumnType,
   EuiToolTip,
 } from '@elastic/eui';
+import { FieldTypeIcon } from '../common/components/field_type_icon';
 import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
-import { COMPARISON_LABEL, DATA_COMPARISON_TYPE_LABEL, REFERENCE_LABEL } from './constants';
+import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonField, Feature, FETCH_STATUS } from './types';
 import { formatSignificanceLevel } from './data_comparison_utils';
@@ -106,15 +107,15 @@ export const DataComparisonOverviewTable = ({
       textOnly: true,
     },
     {
-      field: 'fieldType',
+      field: 'secondaryType',
       name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldTypeLabel', {
         defaultMessage: 'Type',
       }),
       'data-test-subj': 'mlDataComparisonOverviewTableFeatureType',
       sortable: true,
       textOnly: true,
-      render: (fieldType: DataComparisonField['type'], feature) => {
-        return <span>{DATA_COMPARISON_TYPE_LABEL[fieldType]}</span>;
+      render: (secondaryType: DataComparisonField['secondaryType']) => {
+        return <FieldTypeIcon type={secondaryType} tooltipEnabled={true} />;
       },
     },
     {

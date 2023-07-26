@@ -59,6 +59,7 @@ export interface Feature {
 export interface DataComparisonField {
   field: string;
   type: DataComparisonType;
+  secondaryType: string;
   displayName: string;
 }
 export enum FETCH_STATUS {
@@ -92,6 +93,7 @@ export interface NumericDriftData {
   range?: Range;
   referenceHistogram: Histogram[];
   productionHistogram: Histogram[];
+  secondaryType: string;
 }
 export interface CategoricalDriftData {
   type: 'categorical';
@@ -99,6 +101,7 @@ export interface CategoricalDriftData {
   driftedSumOtherDocCount: number;
   baselineTerms: Histogram[];
   baselineSumOtherDocCount: number;
+  secondaryType: string;
 }
 
 export const isNumericDriftData = (arg: any): arg is NumericDriftData => {
