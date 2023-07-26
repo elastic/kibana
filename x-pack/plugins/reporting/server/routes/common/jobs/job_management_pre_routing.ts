@@ -8,11 +8,11 @@
 import Boom from '@hapi/boom';
 import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { jobsQueryFactory } from '.';
-import { ReportingCore } from '../..';
-import { ReportApiJSON } from '../../lib/store/report';
-import { ReportingUser } from '../../types';
-import type { Counters } from './get_counter';
+import { Counters } from '..';
+import { ReportingCore } from '../../..';
+import { ReportApiJSON } from '../../../lib/store/report';
+import { ReportingUser } from '../../../types';
+import { jobsQueryFactory } from './jobs_query';
 
 /**
  * The body of a route handler to call via callback

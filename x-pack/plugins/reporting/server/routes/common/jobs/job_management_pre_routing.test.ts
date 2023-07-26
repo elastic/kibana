@@ -6,18 +6,18 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../core';
+import { ReportingCore } from '../../..';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../test_helpers';
+} from '../../../test_helpers';
 import { jobsQueryFactory } from './jobs_query';
 import { jobManagementPreRouting } from './job_management_pre_routing';
 
-jest.mock('../../lib/content_stream');
+jest.mock('../../../lib/content_stream');
 jest.mock('./jobs_query');
 
 const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });

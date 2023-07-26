@@ -11,12 +11,12 @@ import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/ser
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import moment from 'moment';
-import type { ReportingCore } from '../..';
-import { PUBLIC_ROUTES } from '../../../common/constants';
-import { checkParamsVersion, cryptoFactory } from '../../lib';
-import { Report } from '../../lib/store';
-import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
-import { Counters, getCounters } from './get_counter';
+import { Counters, getCounters } from '..';
+import type { ReportingCore } from '../../..';
+import { PUBLIC_ROUTES } from '../../../../common/constants';
+import { checkParamsVersion, cryptoFactory } from '../../../lib';
+import { Report } from '../../../lib/store';
+import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../../types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -36,6 +36,7 @@ export class RequestHandler {
     private reporting: ReportingCore,
     private user: ReportingUser,
     private context: ReportingRequestHandlerContext,
+    private path: string,
     private req: KibanaRequest<
       TypeOf<typeof validation['params']>,
       TypeOf<typeof validation['query']>,
@@ -113,7 +114,7 @@ export class RequestHandler {
     return report;
   }
 
-  private getJobParams(): BaseParams {
+  public getJobParams(): BaseParams {
     let jobParamsRison: null | string = null;
     const req = this.req;
     const res = this.res;
@@ -161,13 +162,13 @@ export class RequestHandler {
     return validation;
   }
 
-  public async handleGenerateRequest(path: string, exportTypeId: string) {
+  public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
     const req = this.req;
     const reporting = this.reporting;
 
     const counters = getCounters(
       req.route.method,
-      path.replace(/{exportType}/, req.params.exportType),
+      this.path.replace(/{exportType}/, exportTypeId),
       reporting.getUsageCounter()
     );
 
@@ -187,7 +188,6 @@ export class RequestHandler {
       return this.res.forbidden({ body: licenseResults.message });
     }
 
-    const jobParams = this.getJobParams();
     if (jobParams.browserTimezone && !moment.tz.zone(jobParams.browserTimezone)) {
       return this.res.badRequest({
         body: `Invalid timezone "${jobParams.browserTimezone ?? ''}".`,

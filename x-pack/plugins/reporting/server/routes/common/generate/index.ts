@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export { authorizedUserPreRouting } from './authorized_user_pre_routing';
-export { jobManagementPreRouting } from './job_management_pre_routing';
-
-export { getCounters } from './get_counter';
-export type { Counters } from './get_counter';
-
 export { handleUnavailable, RequestHandler } from './request_handler';
-export { jobsQueryFactory } from './jobs_query';

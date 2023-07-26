@@ -11,15 +11,11 @@ import { promisify } from 'util';
 import { ReportingCore } from '../..';
 import { ALLOWED_JOB_CONTENT_TYPES, PUBLIC_ROUTES } from '../../../common/constants';
 import { getContentStream } from '../../lib';
-import {
-  authorizedUserPreRouting,
-  getCounters,
-  handleUnavailable,
-  jobManagementPreRouting,
-  jobsQueryFactory,
-} from '../lib';
+import { authorizedUserPreRouting, getCounters } from '../common';
+import { handleUnavailable } from '../common/generate';
+import { jobManagementPreRouting, jobsQueryFactory } from '../common/jobs';
 
-export function registerJobRoutes(reporting: ReportingCore) {
+export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
   const jobsQuery = jobsQueryFactory(reporting);

@@ -17,14 +17,16 @@ import { Readable } from 'stream';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
+import { ExportType } from '../../../export_types/common';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
+import { reportingMock } from '../../../mocks';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
+import { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
@@ -55,7 +57,7 @@ describe('GET /api/reporting/jobs/download', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: jest.fn(), registerExportTypes: jest.fn() })
+      () => reportingMock.createStart()
     );
 
     mockSetupDeps = createMockPluginSetup({
@@ -88,14 +90,14 @@ describe('GET /api/reporting/jobs/download', () => {
       jobType: 'unencodedJobType',
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition);
+    } as ExportType);
     exportTypesRegistry.register({
       id: 'base64Encoded',
       jobType: 'base64EncodedJobType',
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition);
+    } as ExportType);
     core.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;

@@ -13,7 +13,7 @@ import type { ReportingCore } from '../../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE, INTERNAL_ROUTES } from '../../../../common/constants';
 import type { JobParamsDownloadCSV } from '../../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../../lib';
-import { authorizedUserPreRouting, getCounters } from '../../lib';
+import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const path = INTERNAL_ROUTES.GENERATE.CSV_IMMEDIATE;
 

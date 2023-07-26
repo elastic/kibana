@@ -13,7 +13,7 @@ import type { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { generatePngObservable } from '../../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../../export_types/common/get_absolute_url';
-import { authorizedUserPreRouting, getCounters } from '../../lib';
+import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const path = INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/server/export_types/png/types';

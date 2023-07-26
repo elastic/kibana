@@ -28,11 +28,6 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'text/plain',
 ];
 
-// Re-export type definitions here for convenience.
-export * from './job_types';
-export * from './report_types';
-export * from './routes';
-
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
 
@@ -101,3 +96,7 @@ export const REPORT_TABLE_ROW_ID = 'reportJobRow';
 // automation that have no version value in the job params, we assume the
 // intended version is 7.14.0
 export const UNVERSIONED_VERSION = '7.14.0';
+
+export * from './job_types';
+export * from './report_types';
+export * from './routes';

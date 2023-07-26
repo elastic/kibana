@@ -24,13 +24,10 @@ import {
   createMockReportingCore,
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
-import { registerGenerationRoutes } from '../generate_from_jobparams';
+import { registerGenerationRoutesPublic as registerJobGenerationRoutes } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-/**
- * Tests the public API endpoints of Reporting
- */
 describe('POST /api/reporting/generate', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
@@ -105,7 +102,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -120,7 +117,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -131,7 +128,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -143,7 +140,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -157,7 +154,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 on invalid browser timezone', async () => {
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -173,7 +170,7 @@ describe('POST /api/reporting/generate', () => {
   it('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 
@@ -184,7 +181,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    registerGenerationRoutes(mockReportingCore, mockLogger);
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
 

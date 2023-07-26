@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
 import type { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
-import { authorizedUserPreRouting, getCounters } from '../../lib';
+import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(

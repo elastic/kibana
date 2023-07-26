@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { createPdfV2Params, createPngV2Params } from '..';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UsageStatsPayloadTestFriendly } from '../../../api_integration/services/usage_api';

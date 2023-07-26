@@ -12,6 +12,7 @@ import * as Rx from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
+import { reportingMock } from '../../../../mocks';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
@@ -19,7 +20,6 @@ import {
 } from '../../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerDiagnoseBrowser } from '../browser';
-import { reportingMock } from '../../../mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

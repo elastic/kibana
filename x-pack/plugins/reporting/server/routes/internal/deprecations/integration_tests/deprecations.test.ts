@@ -17,7 +17,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { registerDeprecationRoutes } from '../deprecations';
+import { registerDeprecationsRoutes } from '../deprecations';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -53,7 +53,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   it('correctly handles authz when security is unavailable', async () => {
     const core = await createReportingCore({});
 
-    registerDeprecationRoutes(core, loggingSystemMock.createLogger());
+    registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)
@@ -67,7 +67,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     security.license.isEnabled.mockReturnValue(false);
     const core = await createReportingCore({ security });
 
-    registerDeprecationRoutes(core, loggingSystemMock.createLogger());
+    registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)

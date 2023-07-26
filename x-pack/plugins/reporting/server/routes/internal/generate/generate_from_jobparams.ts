@@ -8,9 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
-import { authorizedUserPreRouting, RequestHandler } from '../../lib';
+import { authorizedUserPreRouting } from '../../common';
+import { RequestHandler } from '../../common/generate';
 
-export function registerGeneration(reporting: ReportingCore, logger: Logger) {
+export function registerGenerationRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
@@ -29,8 +30,11 @@ export function registerGeneration(reporting: ReportingCore, logger: Logger) {
       options: { tags: kibanaAccessControlTags },
     },
     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
-      return await requestHandler.handleGenerateRequest(path, req.params.exportType);
+      const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
+      return await requestHandler.handleGenerateRequest(
+        req.params.exportType,
+        requestHandler.getJobParams()
+      );
     })
   );
 }

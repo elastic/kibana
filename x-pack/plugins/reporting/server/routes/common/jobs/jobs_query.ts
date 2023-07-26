@@ -8,13 +8,13 @@
 import { estypes, errors, TransportResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { ReportingCore } from '../..';
-import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import type { ReportApiJSON, ReportSource } from '../../../common/types';
-import { statuses } from '../../lib/statuses';
-import { Report } from '../../lib/store';
-import { runtimeFieldKeys, runtimeFields } from '../../lib/store/runtime_fields';
-import type { ReportingUser } from '../../types';
+import type { ReportingCore } from '../../..';
+import { REPORTING_SYSTEM_INDEX } from '../../../../common/constants';
+import type { ReportApiJSON, ReportSource } from '../../../../common/types';
+import { statuses } from '../../../lib/statuses';
+import { Report } from '../../../lib/store';
+import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
+import type { ReportingUser } from '../../../types';
 import type { Payload } from './get_document_payload';
 import { getDocumentPayloadFactory } from './get_document_payload';
 

@@ -7,16 +7,16 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import { ReportingCore } from '../..';
-import { JobParamsPDFDeprecated } from '../../export_types/printable_pdf/types';
-import { Report, ReportingStore } from '../../lib/store';
-import { ReportApiJSON } from '../../lib/store/report';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
+import { ReportingCore } from '../../..';
+import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printable_pdf_v2';
+import { JobParamsPDFDeprecated } from '../../../export_types/printable_pdf/types';
+import { Report, ReportingStore } from '../../../lib/store';
+import { ReportApiJSON } from '../../../lib/store/report';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
 import { RequestHandler } from './request_handler';
 
-jest.mock('../../lib/crypto', () => ({
+jest.mock('../../../lib/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),
@@ -27,15 +27,15 @@ const getMockContext = () =>
     core: coreMock.createRequestHandlerContext(),
   } as unknown as ReportingRequestHandlerContext);
 
-const getMockRequest = (): KibanaRequest<
-  Readonly<{} & { exportType: string }>,
-  Readonly<{} & { jobParams: string }> | null,
-  Readonly<{ jobParams?: string | undefined } & {}> | null,
-  any
-> => ({
-  url: { port: '5601', search: '', pathname: '/foo' },
-  route: { path: '/foo', options: {} },
-});
+const getMockRequest = () =>
+  ({
+    url: { port: '5601', search: '', pathname: '/foo' },
+    route: { path: '/foo', options: {} },
+  } as KibanaRequest<
+    { exportType: string },
+    { jobParams: string } | null,
+    { jobParams: string } | null
+  >);
 
 const getMockResponseFactory = () =>
   ({
@@ -86,6 +86,7 @@ describe('Handle request to generate', () => {
       reportingCore,
       { username: 'testymcgee' },
       mockContext,
+      '/api/reporting/test/generate/pdf',
       mockRequest,
       mockResponseFactory,
       mockLogger
@@ -155,7 +156,7 @@ describe('Handle request to generate', () => {
   });
 
   test('disallows invalid export type', async () => {
-    expect(await requestHandler.handleGenerateRequest('/api/reporting/generate', 'neanderthals'))
+    expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
       .toMatchInlineSnapshot(`
       Object {
         "body": "Invalid export-type of neanderthals",
@@ -171,9 +172,8 @@ describe('Handle request to generate', () => {
       },
     }));
 
-    expect(
-      await requestHandler.handleGenerateRequest('/api/reporting/generate', 'csv_searchsource')
-    ).toMatchInlineSnapshot(`
+    expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
+      .toMatchInlineSnapshot(`
       Object {
         "body": "seeing this means the license isn't supported",
       }
@@ -189,7 +189,10 @@ describe('Handle request to generate', () => {
     }));
 
     expect(
-      await requestHandler.handleGenerateRequest('/api/reporting/generate', 'csv_searchsource')
+      await requestHandler.handleGenerateRequest('csv_searchsource', {
+        ...mockJobParams,
+        browserTimezone: 'America/Amsterdam',
+      })
     ).toMatchInlineSnapshot(`
         Object {
           "body": "seeing this means the license isn't supported",
@@ -199,8 +202,8 @@ describe('Handle request to generate', () => {
 
   test('generates the download path', async () => {
     const response = (await requestHandler.handleGenerateRequest(
-      '/api/reporting/generate',
-      'csv_searchsource'
+      'csv_searchsource',
+      mockJobParams
     )) as unknown as { body: { job: ReportApiJSON } };
     const { id, created_at: _created_at, ...snapObj } = response.body.job;
     expect(snapObj).toMatchInlineSnapshot(`

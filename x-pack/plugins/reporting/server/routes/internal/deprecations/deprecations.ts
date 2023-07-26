@@ -6,12 +6,12 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { INTERNAL_ROUTES, ILM_POLICY_NAME } from '../../../../common/constants';
+import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '../../../../common/constants';
 import type { IlmPolicyStatusResponse } from '../../../../common/types';
 import type { ReportingCore } from '../../../core';
 import { IlmPolicyManager } from '../../../lib';
 import { deprecations } from '../../../lib/deprecations';
-import { getCounters } from '../../lib';
+import { getCounters } from '../../common';
 
 const getAuthzWrapper =
   (reporting: ReportingCore, logger: Logger) =>
@@ -51,7 +51,7 @@ const getAuthzWrapper =
     };
   };
 
-export const registerDeprecationRoutes = (reporting: ReportingCore, logger: Logger) => {
+export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
   const authzWrapper = getAuthzWrapper(reporting, logger);
 
