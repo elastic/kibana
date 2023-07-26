@@ -97,18 +97,16 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
                 <p>{i18nTexts.apiKeyDescription}</p>
               </EuiText>
               <EuiSpacer size="xl" />
-              <EuiButtonEmpty
+              <EuiButton
                 href={isCloudEnabled ? docLinks.apiKeyCloud : docLinks.apiKey}
-                iconSide="right"
-                iconType="popout"
                 target="_blank"
                 data-test-subj="setupTrustApiKeyCardDocs"
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-                  defaultMessage="Read more"
+                  defaultMessage="View instructions"
                 />
-              </EuiButtonEmpty>
+              </EuiButton>
             </EuiCard>
           </EuiFlexItem>
         )}
@@ -119,18 +117,16 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
               <p>{i18nTexts.certDescription}</p>
             </EuiText>
             <EuiSpacer size="xl" />
-            <EuiButtonEmpty
+            <EuiButton
               href={isCloudEnabled ? docLinks.certCloud : docLinks.cert}
-              iconSide="right"
-              iconType="popout"
               target="_blank"
               data-test-subj="setupTrustCertCardDocs"
             >
               <FormattedMessage
                 id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-                defaultMessage="Read more"
+                defaultMessage="View instructions"
               />
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiCard>
         </EuiFlexItem>
       </EuiFlexGroup>
