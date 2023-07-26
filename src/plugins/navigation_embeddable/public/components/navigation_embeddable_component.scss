@@ -3,7 +3,7 @@
 
   .navigationLink {
     max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
-    
+
     &.dashboardLinkError {
       &.dashboardLinkError--noLabel .euiListGroupItem__button {
         font-style: italic;
