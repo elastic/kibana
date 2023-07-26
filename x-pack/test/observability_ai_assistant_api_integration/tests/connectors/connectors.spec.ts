@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { EXPECTED_COLOR } from 'jest-matcher-utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -14,16 +15,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   describe('List connectors', () => {
     it('Returns a 2xx for enterprise license', async () => {
-      let res: any;
-      try {
-        res = await observabilityAIAssistantAPIClient.readUser({
-          endpoint: 'GET /internal/observability_ai_assistant/connectors',
-        });
-      } catch {
-        //
-      }
+      const res = await observabilityAIAssistantAPIClient.readUser({
+        endpoint: 'GET /internal/observability_ai_assistant/connectors',
+      });
 
-      expect(!!res).to.be(true);
+      expect(res.status).to.be(200);
     });
 
     it('returns an empty list of connectors', async () => {
