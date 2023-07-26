@@ -13388,6 +13388,11 @@ cypress-multi-reporters@^1.6.3:
     debug "^4.3.4"
     lodash "^4.17.21"
 
+cypress-network-idle@^1.14.2:
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/cypress-network-idle/-/cypress-network-idle-1.14.2.tgz#0837100861feeb5a18f4c2d9815be079f8590f4d"
+  integrity sha512-xAdR8dH58KFPv8eCDWjviScITrJOcUpuMXYfYTc175nk2/NvnJ+I6ylSn1CM7yZmoV/gLbFa36QLiH5NfNEaLQ==
+
 cypress-react-selector@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/cypress-react-selector/-/cypress-react-selector-3.0.0.tgz#e86018fffea07ba40c7a1f467a89b475a83cbcae"
