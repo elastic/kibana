@@ -19,7 +19,7 @@ import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 
 export interface LogsProps {
-  currentTime: number;
+  currentTimestamp: number;
   logViewReference?: LogViewReference | null;
   logViewLoading?: boolean;
   nodeName: string;
@@ -32,7 +32,7 @@ const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = ({
   nodeName,
-  currentTime,
+  currentTimestamp,
   nodeType,
   logViewReference,
   search,
@@ -43,7 +43,7 @@ export const Logs = ({
   const { locators } = services;
   const [textQuery, setTextQuery] = useState(search ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(search ?? '');
-  const startTimestamp = currentTime - 60 * 60 * 1000; // 60 minutes
+  const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
 
   useDebounce(
     () => {
@@ -137,7 +137,7 @@ export const Logs = ({
           <LogStream
             logView={logView}
             startTimestamp={startTimestamp}
-            endTimestamp={currentTime}
+            endTimestamp={currentTimestamp}
             query={filter}
             height="60vh"
             showFlyoutAction

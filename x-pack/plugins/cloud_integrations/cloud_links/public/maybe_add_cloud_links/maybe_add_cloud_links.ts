@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ChromeStart } from '@kbn/core/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { createUserMenuLinks } from './user_menu_links';
 import { createHelpMenuLinks } from './help_menu_links';
@@ -21,6 +21,7 @@ export interface MaybeAddCloudLinksDeps {
   chrome: ChromeStart;
   cloud: CloudStart;
   docLinks: DocLinksStart;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export function maybeAddCloudLinks({
@@ -28,6 +29,7 @@ export function maybeAddCloudLinks({
   chrome,
   cloud,
   docLinks,
+  uiSettingsClient,
 }: MaybeAddCloudLinksDeps): void {
   const userObservable = defer(() => security.authc.getCurrentUser()).pipe(
     // Check if user is a cloud user.
@@ -45,7 +47,7 @@ export function maybeAddCloudLinks({
           href: cloud.deploymentUrl,
         });
       }
-      const userMenuLinks = createUserMenuLinks(cloud);
+      const userMenuLinks = createUserMenuLinks({ cloud, security, uiSettingsClient });
       security.navControlService.addUserMenuLinks(userMenuLinks);
     })
   );

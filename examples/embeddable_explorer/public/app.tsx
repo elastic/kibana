@@ -112,7 +112,6 @@ const EmbeddableExplorerApp = ({
       id: 'embeddablePanelExample',
       component: (
         <EmbeddablePanelExample
-          embeddableServices={embeddableApi}
           searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),

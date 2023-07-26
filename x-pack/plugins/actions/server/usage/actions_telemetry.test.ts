@@ -286,6 +286,7 @@ Object {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
@@ -425,6 +426,7 @@ Object {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
       {
         id: 'anotherServerLog',
@@ -434,6 +436,7 @@ Object {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
@@ -541,6 +544,7 @@ Object {
         isDeprecated: false,
         isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 

@@ -3,13 +3,7 @@ type: object
 description: The SLO computed data
 properties:
   status:
-    type: string
-    enum: 
-      - NO_DATA
-      - HEALTHY
-      - DEGRADING
-      - VIOLATED
-    example: "HEALTHY"
+    $ref: './summary_status.yaml'
   sliValue:
     type: number
     example: 0.9836

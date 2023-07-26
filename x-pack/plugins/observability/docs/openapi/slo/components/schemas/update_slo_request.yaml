@@ -16,6 +16,7 @@ properties:
       - $ref: "indicator_properties_apm_availability.yaml"
       - $ref: "indicator_properties_apm_latency.yaml"
       - $ref: "indicator_properties_custom_metric.yaml"
+      - $ref: "indicator_properties_histogram.yaml"
   timeWindow:
     $ref: "time_window.yaml"
   budgetingMethod:

@@ -31,6 +31,7 @@ describe('ActionsPopover', () => {
       configId: '1lkjelre',
       type: 'browser',
       tags: [],
+      schedule: '120',
     };
   });
 

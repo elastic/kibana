@@ -15,12 +15,12 @@ import { shallow } from 'enzyme';
 
 jest.mock('./generate_breadcrumbs', () => ({
   useGenerateBreadcrumbs: jest.requireActual('./generate_breadcrumbs').useGenerateBreadcrumbs,
-  useEnterpriseSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
+  useSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useAppSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
   useWorkplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
 }));
 import {
-  useEnterpriseSearchBreadcrumbs,
+  useSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';
@@ -53,7 +53,7 @@ describe('Set Kibana Chrome helpers', () => {
       shallow(<SetSearchChrome trail={['Hello World']} />);
 
       expect(searchTitle).toHaveBeenCalledWith(['Hello World']);
-      expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([
+      expect(useSearchBreadcrumbs).toHaveBeenCalledWith([
         {
           text: 'Hello World',
           path: '/current-path',
@@ -65,7 +65,7 @@ describe('Set Kibana Chrome helpers', () => {
       shallow(<SetSearchChrome />);
 
       expect(searchTitle).toHaveBeenCalledWith([]);
-      expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([]);
+      expect(useSearchBreadcrumbs).toHaveBeenCalledWith([]);
     });
   });
 

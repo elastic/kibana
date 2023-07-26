@@ -142,7 +142,9 @@ describe('connectorTypesRoute', () => {
     expect(actionsClient.listTypes).toHaveBeenCalledTimes(1);
     expect(actionsClient.listTypes.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "alerting",
+        Object {
+          "featureId": "alerting",
+        },
       ]
     `);
 

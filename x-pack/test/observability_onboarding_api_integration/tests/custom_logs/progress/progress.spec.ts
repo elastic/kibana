@@ -95,7 +95,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(request.status).to.be(200);
 
-            expect(request.body.progress['logs-ingest']).to.be('incomplete');
+            const logsIngestProgress = request.body.progress['logs-ingest'];
+            expect(logsIngestProgress).to.have.property('status', 'incomplete');
           });
         });
 
@@ -124,7 +125,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
                 expect(request.status).to.be(200);
 
-                expect(request.body.progress['logs-ingest']).to.be('loading');
+                const logsIngestProgress = request.body.progress['logs-ingest'];
+                expect(logsIngestProgress).to.have.property('status', 'loading');
               });
             });
 
@@ -156,7 +158,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
                 expect(request.status).to.be(200);
 
-                expect(request.body.progress['logs-ingest']).to.be('complete');
+                const logsIngestProgress = request.body.progress['logs-ingest'];
+                expect(logsIngestProgress).to.have.property('status', 'complete');
               });
 
               after(async () => {

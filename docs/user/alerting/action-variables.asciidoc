@@ -1,5 +1,9 @@
 [[rule-action-variables]]
 == Rule action variables
+:frontmatter-description: A summary of common variables for use in {kib} alerting rule actions.
+:frontmatter-tags-products: [alerting] 
+:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-user-goals: [configure]
 
 Alerting rules can use the https://mustache.github.io/mustache.5.html[Mustache] template syntax
 (`{{variable name}}`) to pass values when the actions run.
@@ -30,9 +34,10 @@ All rule types pass the following variables:
 
 `date`:: The date the rule scheduled the action, in ISO format.
 `kibanaBaseUrl`:: The configured <<server-publicBaseUrl,`server.publicBaseUrl`>>. If not configured, this will be empty.
-`rule.id`:: The ID of the rule.
-`rule.name`:: The name of the rule.
-`rule.spaceId`:: The ID of the space for the rule.
+`rule.id`:: The rule identifier.
+`rule.name`:: The rule name.
+`rule.params`:: The rule parameters, which vary by rule type.
+`rule.spaceId`:: The space identifier for the rule.
 `rule.tags`:: The list of tags applied to the rule.
 
 [float]

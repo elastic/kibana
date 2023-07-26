@@ -7,6 +7,7 @@
 
 declare namespace Cypress {
   interface Chainable {
+    loginAsSuperUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsViewerUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsMonitorUser(): Cypress.Chainable<Cypress.Response<any>>;

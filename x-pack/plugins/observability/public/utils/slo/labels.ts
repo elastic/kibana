@@ -21,6 +21,10 @@ export const INDICATOR_CUSTOM_METRIC = i18n.translate(
   }
 );
 
+export const INDICATOR_HISTOGRAM = i18n.translate('xpack.observability.slo.indicators.histogram', {
+  defaultMessage: 'Histogram Metric',
+});
+
 export const INDICATOR_APM_LATENCY = i18n.translate(
   'xpack.observability.slo.indicators.apmLatency',
   { defaultMessage: 'APM latency' }
@@ -47,8 +51,11 @@ export function toIndicatorTypeLabel(
     case 'sli.metric.custom':
       return INDICATOR_CUSTOM_METRIC;
 
+    case 'sli.histogram.custom':
+      return INDICATOR_HISTOGRAM;
+
     default:
-      assertNever(indicatorType);
+      assertNever(indicatorType as never);
   }
 }
 

@@ -6,7 +6,7 @@
  */
 
 import type { LogMeta } from '@kbn/core/server';
-import type { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Extended metadata that rule execution logger can attach to every console log record.

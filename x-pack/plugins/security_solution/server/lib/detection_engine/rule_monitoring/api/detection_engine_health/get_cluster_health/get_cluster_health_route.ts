@@ -14,11 +14,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type {
   GetClusterHealthRequest,
   GetClusterHealthResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GET_CLUSTER_HEALTH_URL,
   GetClusterHealthRequestBody,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { IDetectionEngineHealthClient } from '../../../logic/detection_engine_health';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetClusterHealthRequest } from './get_cluster_health_request';
@@ -38,6 +38,7 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
       validate: {},
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
     async (context, request, response) => {
@@ -61,6 +62,7 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
       },
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
     async (context, request, response) => {

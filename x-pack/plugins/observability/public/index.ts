@@ -46,8 +46,11 @@ export {
   ruleDetailsLocatorID,
   rulesLocatorID,
   sloDetailsLocatorID,
+  sloEditLocatorID,
   uptimeOverviewLocatorID,
 } from '../common';
+
+export type { SloEditLocatorParams } from './locators/slo_edit';
 
 export type { UXMetrics } from './pages/overview/components/sections/ux/core_web_vitals/core_vitals';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
@@ -67,6 +70,7 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
+export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 

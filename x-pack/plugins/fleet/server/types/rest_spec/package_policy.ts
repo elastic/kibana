@@ -15,13 +15,34 @@ import {
 
 import { inputsFormat } from '../../../common/constants';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICIES_MAPPINGS } from '../../constants';
+
+import { validateKuery } from '../../routes/utils/filter_utils';
+
 import { BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: schema.object({
-    page: schema.number({ defaultValue: 1 }),
-    perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
+    page: schema.maybe(schema.number({ defaultValue: 1 })),
+    perPage: schema.maybe(schema.number({ defaultValue: 20 })),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+    showUpgradeable: schema.maybe(schema.boolean()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(
+            value,
+            [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+            PACKAGE_POLICIES_MAPPINGS,
+            true
+          );
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
     format: schema.maybe(
       schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
     ),

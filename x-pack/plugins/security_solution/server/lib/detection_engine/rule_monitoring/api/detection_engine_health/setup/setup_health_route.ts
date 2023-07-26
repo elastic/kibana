@@ -9,7 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import { SETUP_HEALTH_URL } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { SETUP_HEALTH_URL } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Similar to the "setup" command of beats, this endpoint installs resources
@@ -23,6 +23,7 @@ export const setupHealthRoute = (router: SecuritySolutionPluginRouter) => {
       validate: {},
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
     async (context, request, response) => {

@@ -80,6 +80,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
+          "data-test-subj": "breadcrumb-home",
           "href": "/",
           "text": <EuiIcon
             type="home"
@@ -87,6 +88,7 @@ describe('breadcrumbs', () => {
           "title": "Home",
         },
         Object {
+          "data-test-subj": "breadcrumb-deepLinkId-navItem1",
           "href": "/foo/item1",
           "text": "Nav Item 1",
         },
@@ -117,6 +119,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
+          "data-test-subj": "breadcrumb-home",
           "href": "/",
           "text": <EuiIcon
             type="home"
