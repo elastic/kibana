@@ -11,13 +11,15 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
 
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
+
 import { DocumentCountStats } from '../../../get_document_stats';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
-  analysisType: 'above' | 'below';
+  analysisType: LogRateAnalysisType;
   brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
@@ -33,7 +35,7 @@ export interface DocumentCountContentProps {
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  analysisType = 'above',
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   brushSelectionUpdateHandler,
   documentCountStats,
   documentCountStatsSplit,

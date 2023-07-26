@@ -18,6 +18,8 @@ import type { Dictionary } from '@kbn/ml-url-state';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
+
 import { useData } from '../../../hooks/use_data';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
@@ -47,7 +49,7 @@ export interface LogRateAnalysisContentProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The type of analysis, whether it's a spike or drop */
-  analysisType?: 'above' | 'below';
+  analysisType?: LogRateAnalysisType;
   setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
   initialAnalysisStart?: number | WindowParameters;
@@ -66,7 +68,7 @@ export interface LogRateAnalysisContentProps {
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   dataView,
-  analysisType = 'above',
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   setGlobalState,
   initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,

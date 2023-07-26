@@ -28,6 +28,7 @@ import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-util
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { BrushBadge } from './brush_badge';
@@ -52,7 +53,7 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
-  analysisType?: 'above' | 'below';
+  analysisType?: LogRateAnalysisType;
   brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
@@ -104,7 +105,7 @@ function getBaselineBadgeOverflow(
 }
 
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
-  analysisType = 'above',
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   brushSelectionUpdateHandler,
   width,
   chartPoints,
@@ -348,14 +349,22 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
-              label={analysisType === 'above' ? baselineBadgeLabel : deviationBadgeLabel}
+              label={
+                analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                  ? baselineBadgeLabel
+                  : deviationBadgeLabel
+              }
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
               width={BADGE_WIDTH}
             />
             <BrushBadge
-              label={analysisType === 'above' ? deviationBadgeLabel : baselineBadgeLabel}
+              label={
+                analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                  ? deviationBadgeLabel
+                  : baselineBadgeLabel
+              }
               marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
               timestampFrom={windowParameters.deviationMin}
               timestampTo={windowParameters.deviationMax}

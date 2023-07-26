@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../common/constants';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { AiopsApiLogRateAnalysis } from '../../../common/api';
 import {
@@ -80,7 +81,7 @@ interface LogRateAnalysisResultsProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The type of analysis, whether it's a spike or drop */
-  analysisType?: 'above' | 'below';
+  analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
   earliest: number;
   /** End timestamp filter */
@@ -106,7 +107,7 @@ interface LogRateAnalysisResultsProps {
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   dataView,
-  analysisType = 'above',
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
   isBrushCleared,
   latest,
@@ -173,7 +174,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       index: dataView.getIndexPattern(),
       grouping: true,
       flushFix: true,
-      ...(analysisType === 'above'
+      // If analysis type is `spike`, pass on window parameters as is,
+      // if it's `drop`, swap baseline and deviation.
+      ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
         ? windowParameters
         : {
             baselineMin: windowParameters.deviationMin,

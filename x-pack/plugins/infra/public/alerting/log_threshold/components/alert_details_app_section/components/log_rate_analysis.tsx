@@ -13,7 +13,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
+import {
+  LogRateAnalysisContent,
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisResultsData,
+  type LogRateAnalysisType,
+} from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -52,7 +57,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     { significantFieldValues: SignificantFieldValue[] } | undefined
   >();
-  const [logRateAnalysisType, setLogRateAnalysisType] = useState<'above' | 'below' | undefined>(
+  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType | undefined>(
     undefined
   );
 
@@ -89,11 +94,11 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       switch (validatedParams.count.comparator) {
         case Comparator.GT:
         case Comparator.GT_OR_EQ:
-          setLogRateAnalysisType('above');
+          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.SPIKE);
           break;
         case Comparator.LT:
         case Comparator.LT_OR_EQ:
-          setLogRateAnalysisType('below');
+          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.DROP);
           break;
         default:
           setLogRateAnalysisType(undefined);
