@@ -1649,14 +1649,14 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-crypto@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.1.tgz#88dc41e4bbba6764c323e1a820757607e2f4f720"
-  integrity sha512-ZFZ+CF1hb22+BLAe93D4Kc1EMPfVDKckd8SY6IHk/N4H1WUthQ9xXfPVx06r+pTkz62HliyQfXgLKFTQa+aSmw==
+"@elastic/request-crypto@2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.2.tgz#4e5216783be82371012857a76da75195828d3f45"
+  integrity sha512-DdTMs4ZZKo9Hl6XNHmR8eOuooImpvQp/+4Wzkzw1VdSR+bBsDa8TT6UrIuCgl5n6WI/WujjTneLTKmtSYm+HpA==
   dependencies:
     "@elastic/node-crypto" "1.1.1"
     "@types/node-jose" "1.1.10"
-    node-jose "2.1.0"
+    node-jose "2.2.0"
 
 "@elastic/search-ui-app-search-connector@^1.20.2":
   version "1.20.2"
@@ -21947,10 +21947,10 @@ node-int64@^0.4.0:
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
-node-jose@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/node-jose/-/node-jose-2.1.0.tgz#a2d12a7ff2d386f23979c1bf77f939449ce073d8"
-  integrity sha512-Zmm8vFPJabphGBc5Wz1/LUMPS+1cynqw16RIhgVNQMEI2yEQrvl7Gx2EwN9GhP8tkm8f7SH53K2nIx8TeNTIdg==
+node-jose@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/node-jose/-/node-jose-2.2.0.tgz#b64f3225ad6bec328509a420800de597ba2bf3ed"
+  integrity sha512-XPCvJRr94SjLrSIm4pbYHKLEaOsDvJCpyFw/6V/KK/IXmyZ6SFBzAUDO9HQf4DB/nTEFcRGH87mNciOP23kFjw==
   dependencies:
     base64url "^3.0.1"
     buffer "^6.0.3"
@@ -21960,7 +21960,7 @@ node-jose@2.1.0:
     node-forge "^1.2.1"
     pako "^2.0.4"
     process "^0.11.10"
-    uuid "^8.3.2"
+    uuid "^9.0.0"
 
 node-libs-browser@^2.2.1:
   version "2.2.1"
@@ -28596,7 +28596,7 @@ uuid-browser@^3.1.0:
   resolved "https://registry.yarnpkg.com/uuid-browser/-/uuid-browser-3.1.0.tgz#0f05a40aef74f9e5951e20efbf44b11871e56410"
   integrity sha1-DwWkCu90+eWVHiDvv0SxGHHlZBA=
 
-uuid@9.0.0, uuid@^9:
+uuid@9.0.0, uuid@^9, uuid@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
   integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
