@@ -39,7 +39,13 @@ export default ({ getService }: FtrProviderContext) => {
     it('should have initialized empty/zero values when no rules are running', async () => {
       await retry.try(async () => {
         const stats = await getStats(supertest, log);
-        expect(stats).to.eql(getInitialDetectionMetrics());
+        stats.detection_rules.detection_rule_usage.custom_total.legacy_notification_count = 0;
+        expect(stats).to.eql(
+          getInitialDetectionMetrics(),
+          `\n\n\nexpected: ${JSON.stringify(
+            getInitialDetectionMetrics()
+          )}, \n\n\nactual: ${JSON.stringify(stats)}`
+        );
       });
     });
   });

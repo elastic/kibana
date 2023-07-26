@@ -96,6 +96,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_notifications_disabled: 0,
     notifications_enabled: 0,
     notifications_disabled: 0,
+    legacy_notification_count: 0,
   },
 });
 
