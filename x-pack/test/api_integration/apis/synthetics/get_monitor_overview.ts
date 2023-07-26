@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expected: MonitorOverviewItem[] = [
           {
             id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
-            configId: savedMonitors[0].id,
+            configId: savedMonitors[0].config_id,
             name: 'test monitor a',
             location: {
               id: 'eu-west-01',
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
-            configId: savedMonitors[0].id,
+            configId: savedMonitors[0].config_id,
             name: 'test monitor a',
             location: {
               id: 'eu-west-02',
@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
-            configId: savedMonitors[1].id,
+            configId: savedMonitors[1].config_id,
             name: 'test monitor b',
             location: {
               id: 'eu-west-01',
@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
-            configId: savedMonitors[1].id,
+            configId: savedMonitors[1].config_id,
             name: 'test monitor b',
             location: {
               id: 'eu-west-02',
@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all(
           savedMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id);
+            return deleteMonitor(monitor.config_id);
           })
         );
       }
