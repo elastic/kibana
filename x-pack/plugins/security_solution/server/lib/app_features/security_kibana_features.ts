@@ -143,7 +143,6 @@ export const getSecurityAppFeaturesConfig = (
     SecuritySubFeatureId.endpointList,
     SecuritySubFeatureId.policyManagement,
     SecuritySubFeatureId.trustedApplications,
-    SecuritySubFeatureId.hostIsolationExceptions,
     SecuritySubFeatureId.blocklist,
     SecuritySubFeatureId.eventFilters,
   ];
@@ -176,6 +175,8 @@ export const getSecurityAppFeaturesConfig = (
     [AppFeatureSecurityKey.endpointComplete]: {
       subFeatureIds: [
         ...endpointBaseFeatureIds,
+
+        SecuritySubFeatureId.hostIsolationExceptions,
 
         SecuritySubFeatureId.responseActionsHistory,
         SecuritySubFeatureId.hostIsolation,
