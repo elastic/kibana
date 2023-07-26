@@ -28,4 +28,4 @@ telemetry.labels.serverless: search
 xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
 
 # Fleet specific configuration
-xpack.fleet.internal.capabilities: ['enterprise_search', 'serverless_search']
+xpack.fleet.internal.capabilities: ['serverless_search']
