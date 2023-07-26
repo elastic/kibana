@@ -44,7 +44,12 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
   );
 
   return (
-    <TacticPanel hasShadow={false} hasBorder={true} paddingSize="s">
+    <TacticPanel
+      data-test-subj="coverageOverviewTacticPanel"
+      hasShadow={false}
+      hasBorder={true}
+      paddingSize="s"
+    >
       <EuiToolTip content={tactic.name}>
         <TacticTitle aria-label={tactic.name} title={tactic.name} grow={false} size="xs">
           <h4>{tactic.name}</h4>

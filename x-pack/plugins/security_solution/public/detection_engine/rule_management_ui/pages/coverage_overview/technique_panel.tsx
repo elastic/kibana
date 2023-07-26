@@ -59,6 +59,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
 
   return (
     <TechniquePanel
+      data-test-subj="coverageOverviewTechniquePanel"
       hasShadow={false}
       hasBorder={!techniqueBackgroundColor}
       paddingSize="s"

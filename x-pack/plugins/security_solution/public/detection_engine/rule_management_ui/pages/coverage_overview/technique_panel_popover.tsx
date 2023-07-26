@@ -96,6 +96,36 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     [technique.availableRules]
   );
 
+  const EnabledRulesAccordionButton = useMemo(
+    () => (
+      <CoverageOverviewRuleListHeader
+        listTitle={i18n.ENABLED_RULES_LIST_LABEL}
+        listLength={technique.enabledRules.length}
+      />
+    ),
+    [technique.enabledRules.length]
+  );
+
+  const DisabledRulesAccordionButton = useMemo(
+    () => (
+      <CoverageOverviewRuleListHeader
+        listTitle={i18n.DISABLED_RULES_LIST_LABEL}
+        listLength={technique.disabledRules.length}
+      />
+    ),
+    [technique.disabledRules.length]
+  );
+
+  const AvailableRulesAccordionButton = useMemo(
+    () => (
+      <CoverageOverviewRuleListHeader
+        listTitle={i18n.AVAILABLE_RULES_LIST_LABEL}
+        listLength={technique.availableRules.length}
+      />
+    ),
+    [technique.availableRules.length]
+  );
+
   return (
     <EuiPopover
       button={TechniquePanel}
@@ -125,42 +155,24 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       <div className="eui-yScrollWithShadows" style={{ maxHeight: '700px', padding: '5px 0px' }}>
         <EuiAccordion
           id="enabledRulesListAccordion"
-          arrowDisplay="none"
-          initialIsOpen
-          buttonContent={
-            <CoverageOverviewRuleListHeader
-              listTitle={i18n.ENABLED_RULES_LIST_LABEL}
-              listLength={technique.enabledRules.length}
-            />
-          }
+          initialIsOpen={technique.enabledRules.length > 0}
+          buttonContent={EnabledRulesAccordionButton}
         >
           <EuiListGroup flush listItems={enabledRuleListItems} size="s" />
         </EuiAccordion>
         <EuiSpacer size="s" />
         <EuiAccordion
           id="disabledRulesListAccordion"
-          arrowDisplay="none"
-          initialIsOpen
-          buttonContent={
-            <CoverageOverviewRuleListHeader
-              listTitle={i18n.DISABLED_RULES_LIST_LABEL}
-              listLength={technique.disabledRules.length}
-            />
-          }
+          initialIsOpen={technique.disabledRules.length > 0}
+          buttonContent={DisabledRulesAccordionButton}
         >
           <EuiListGroup flush listItems={disabledRuleListItems} size="s" />
         </EuiAccordion>
         <EuiSpacer size="s" />
         <EuiAccordion
           id="availableRulesListAccordion"
-          arrowDisplay="none"
-          initialIsOpen
-          buttonContent={
-            <CoverageOverviewRuleListHeader
-              listTitle={i18n.AVAILABLE_RULES_LIST_LABEL}
-              listLength={technique.availableRules.length}
-            />
-          }
+          initialIsOpen={technique.availableRules.length > 0}
+          buttonContent={AvailableRulesAccordionButton}
         >
           <EuiListGroup flush listItems={availableRuleListItems} size="s" />
         </EuiAccordion>
