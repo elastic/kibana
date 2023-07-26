@@ -221,6 +221,7 @@ threat_intelligence_analyst:
         - read
         - read_alerts
         - endpoint_list_read
+        - blocklist_all
       resources: "*"
     - application: securitySolutionCases
       privileges:
@@ -288,8 +289,8 @@ rule_author:
         - crud_alerts
         - policy_management_all
         - endpoint_list_all
-        - trusted_applications_read
-        - event_filters_read
+        - trusted_applications_all
+        - event_filters_all
         - host_isolation_exceptions_read
         - blocklist_all
         - actions_log_management_read
