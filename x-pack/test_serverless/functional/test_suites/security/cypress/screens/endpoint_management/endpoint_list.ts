@@ -27,21 +27,25 @@ export const getTableRow = ({
   rowIndex = 0,
 }: ListRowOptions = {}): Cypress.Chainable => {
   if (endpointId) {
-    return cy.get(`[data-endpoint-id="${endpointId}"]`).should('exist');
+    return cy.get(`tr[data-endpoint-id="${endpointId}"]`).should('exist');
   }
 
   if (hostName) {
     return cy.getByTestSubj('hostnameCellLink').contains(hostName).closest('tr').should('exist');
   }
 
-  return cy.getByTestSubj('endpointListTable').find(`tr`).eq(rowIndex).should('exist');
+  return cy
+    .getByTestSubj('endpointListTable')
+    .find(`tbody tr[data-endpoint-id]`)
+    .eq(rowIndex)
+    .should('exist');
 };
 
 export const openRowActionMenu = (options?: ListRowOptions): Cypress.Chainable => {
-  getTableRow(options).getByTestSubj('endpointTableRowActions').click();
+  getTableRow(options).findByTestSubj('endpointTableRowActions', { log: true }).click();
   return cy.getByTestSubj('tableRowActionsMenuPanel');
 };
 
 export const openConsoleFromEndpointList = (options?: ListRowOptions): Cypress.Chainable => {
-  return openRowActionMenu(options).getByTestSubj('console').click();
+  return openRowActionMenu(options).findByTestSubj('console').click();
 };
