@@ -1,0 +1,52 @@
+post:
+  summary: Rotate the encryption key for encrypted saved objects.
+  operationId: rotateEncryptionKey
+  description: >
+    Superuser role required. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+    NOTE: In most cases, total will be greater than successful even if failed is zero. The reason is that Kibana may not need or may not be able to rotate encryption keys for all encrypted saved objects. 
+  tags:
+    - saved objects 
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            batch_size:
+              description: Specifies a maximum number of saved objects that Kibana can process in a single batch. Bulk key rotation is an iterative process since Kibana may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.
+              type: number
+              default: 10000
+            type:
+              description: Limits encryption key rotation only to the saved objects with the specified type. By default, Kibana tries to rotate the encryption key for all saved object types that may contain encrypted attributes.
+              type: string
+           
+        examples:
+          rotateEncryptionKeyRequest:
+            $ref: '../components/examples/key_rotation_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+    '429':
+      description: Already in progress.
+      content:
+         application/json:
+          schema:
+            type: object
+  servers:
+     - url: https://localhost:5601
+servers:
+      - url: https://localhost:5601

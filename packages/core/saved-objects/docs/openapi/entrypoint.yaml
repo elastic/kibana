@@ -42,6 +42,33 @@ paths:
 #    $ref: 'paths/api@saved_objects@{type}@{id}.yaml
 #  'api/saved_objects/resolve/{type}/{id}':
 #    $ref: 'paths/api@saved_objects@resolve@{type}@{id}.yaml'
+  '/api/encrypted_saved_objects/_rotate_key':
+    $ref: 'paths/api@encrypted_saved_objects@_rotate_key.yaml'
+# '/api/saved_objects/_export':
+# $ref: 'paths/api@saved_objects@_export.yaml'
+# '/api/saved_objects/_import':
+# $ref: 'paths/api@saved_objects@_import.yaml'
+# '/api/saved_objects/_resolve_import_errors':
+# $ref: 'paths/api@saved_objects@_resolve_import_errors.yaml'
+# Deprecated APIs
+# '/api/saved_objects/_bulk_resolve':
+# $ref: 'paths/api@saved_objects@_bulk_resolve.yaml'
+# 'api/saved_objects/resolve/{type}/{id}':
+# $ref: 'paths/api@saved_objects@resolve@{type}@{id}.yaml'
+# '/api/saved_objects/_bulk_delete':
+# $ref: 'paths/api@saved_objects@_bulk_delete.yaml'
+# '/api/saved_objects/{type}/{id}':
+# $ref: 'paths/api@saved_objects@{type}@{id}.yaml
+# '/api/saved_objects/_bulk_update':
+# $ref: 'paths/api@saved_objects@_bulk_update.yaml'
+# '/api/saved_objects/_bulk_create':
+# $ref: 'paths/api@saved_objects@_bulk_create.yaml'
+# '/api/saved_objects/{type}':
+# $ref: 'paths/api@saved_objects@{type}.yaml'
+# '/api/saved_objects/_find':
+# $ref: 'paths/api@saved_objects@_find.yaml'
+# '/api/saved_objects/_bulk_get':
+# $ref: 'paths/api@saved_objects@_bulk_get.yaml'
 components:
   securitySchemes:
     basicAuth:
