@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import {
@@ -79,19 +79,13 @@ interface IntegrationInfoFieldsProps {
   onChange(field: string, value: string): void;
 }
 
-const SINGLE_ACCOUNT = 'single-account';
-const ORGANIZATION_ACCOUNT = 'organization-account';
-type AwsAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;
+export const AWS_SINGLE_ACCOUNT = 'single-account';
+export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
+type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
-    id: SINGLE_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
-      defaultMessage: 'Single Account',
-    }),
-  },
-  {
-    id: ORGANIZATION_ACCOUNT,
+    id: AWS_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
       defaultMessage: 'AWS Organization',
     }),
@@ -101,6 +95,12 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
           defaultMessage: 'Supported from integration version 1.5.0 and above',
         })
       : undefined,
+  },
+  {
+    id: AWS_SINGLE_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
   },
 ];
 
@@ -127,22 +127,24 @@ const AwsAccountTypeSelect = ({
     ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
     : true;
 
-  const awsAccountTypeOptions = getAwsAccountTypeOptions(isAwsOrgDisabled);
+  const awsAccountTypeOptions = useMemo(
+    () => getAwsAccountTypeOptions(isAwsOrgDisabled),
+    [isAwsOrgDisabled]
+  );
 
   useEffect(() => {
     if (!getAwsAccountType(input)) {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'aws.account_type': {
-            value: awsAccountTypeOptions[0].id,
+            value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
         })
       );
     }
-    // we only wish to call this once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [awsAccountTypeOptions]);
+  }, [input]);
 
   return (
     <>
@@ -179,7 +181,7 @@ const AwsAccountTypeSelect = ({
         }}
         size="m"
       />
-      {getAwsAccountType(input) === ORGANIZATION_ACCOUNT && (
+      {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
@@ -190,7 +192,7 @@ const AwsAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      {getAwsAccountType(input) === SINGLE_ACCOUNT && (
+      {getAwsAccountType(input) === AWS_SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
