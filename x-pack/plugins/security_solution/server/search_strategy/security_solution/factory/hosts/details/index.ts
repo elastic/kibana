@@ -17,7 +17,6 @@ import type {
   HostAggEsData,
   HostDetailsStrategyResponse,
   HostsQueries,
-  HostDetailsRequestOptions,
   EndpointFields,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
@@ -26,11 +25,15 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem, getHostEndpoint } from './helpers';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
+import { parseOptions } from './parse_options';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
-  buildDsl: (options: HostDetailsRequestOptions) => buildHostDetailsQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildHostDetailsQuery(options);
+  },
   parse: async (
-    options: HostDetailsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<HostAggEsData>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -39,6 +42,8 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
       request: KibanaRequest;
     }
   ): Promise<HostDetailsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const aggregations = get('aggregations', response.rawResponse);
 
     const inspect = {

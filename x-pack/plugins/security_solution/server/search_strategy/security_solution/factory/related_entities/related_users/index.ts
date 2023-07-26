@@ -12,7 +12,6 @@ import type { RiskSeverity } from '../../../../../../common/search_strategy/secu
 import type { SecuritySolutionFactory } from '../../types';
 import type { RelatedEntitiesQueries } from '../../../../../../common/search_strategy/security_solution/related_entities';
 import type {
-  HostsRelatedUsersRequestOptions,
   HostsRelatedUsersStrategyResponse,
   RelatedUserBucket,
   RelatedUser,
@@ -20,17 +19,24 @@ import type {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRelatedUsersQuery } from './query.related_users.dsl';
 import { getUserRiskData } from '../../users/all';
+import { parseOptions } from './parse_options';
 
 export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.relatedUsers> = {
-  buildDsl: (options: HostsRelatedUsersRequestOptions) => buildRelatedUsersQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
+    return buildRelatedUsersQuery(options);
+  },
   parse: async (
-    options: HostsRelatedUsersRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
     }
   ): Promise<HostsRelatedUsersStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {

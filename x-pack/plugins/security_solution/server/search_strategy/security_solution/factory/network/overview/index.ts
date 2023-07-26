@@ -11,19 +11,24 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   NetworkQueries,
   NetworkOverviewStrategyResponse,
-  NetworkOverviewRequestOptions,
   OverviewNetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewNetworkQuery } from './query.overview_network.dsl';
+import { parseOptions } from './parse_options';
 
 export const networkOverview: SecuritySolutionFactory<NetworkQueries.overview> = {
-  buildDsl: (options: NetworkOverviewRequestOptions) => buildOverviewNetworkQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildOverviewNetworkQuery(options);
+  },
   parse: async (
-    options: NetworkOverviewRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<OverviewNetworkHit>
   ): Promise<NetworkOverviewStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     // @ts-expect-error specify aggregations type explicitly
     const aggregations: OverviewNetworkHit = get('aggregations', response.rawResponse) || {};
     const inspect = {

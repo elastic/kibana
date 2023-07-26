@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  NetworkKpiUniquePrivateIpsRequestOptions,
-  UniquePrivateAttributeQuery,
-} from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiUniquePrivateIpsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { UniquePrivateAttributeQuery } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 const getUniquePrivateIpsFilter = (attrQuery: UniquePrivateAttributeQuery) => ({

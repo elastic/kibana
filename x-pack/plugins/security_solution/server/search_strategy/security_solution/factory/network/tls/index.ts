@@ -13,7 +13,6 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import type {
   NetworkTlsStrategyResponse,
   NetworkQueries,
-  NetworkTlsRequestOptions,
   NetworkTlsEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
@@ -22,18 +21,23 @@ import type { SecuritySolutionFactory } from '../../types';
 
 import { getNetworkTlsEdges } from './helpers';
 import { buildNetworkTlsQuery } from './query.tls_network.dsl';
+import { parseOptions } from './parse_options';
 
 export const networkTls: SecuritySolutionFactory<NetworkQueries.tls> = {
-  buildDsl: (options: NetworkTlsRequestOptions) => {
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildNetworkTlsQuery(options);
   },
   parse: async (
-    options: NetworkTlsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTlsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.count.value', response.rawResponse);
     const networkTlsEdges: NetworkTlsEdges[] = getNetworkTlsEdges(response);

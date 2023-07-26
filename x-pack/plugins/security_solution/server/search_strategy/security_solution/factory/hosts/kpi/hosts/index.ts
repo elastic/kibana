@@ -11,19 +11,24 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   HostsKpiQueries,
   HostsKpiHostsStrategyResponse,
-  HostsKpiHostsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiHostsQuery } from './query.hosts_kpi_hosts.dsl';
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
+import { parseOptions } from './parse_options';
 
 export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
-  buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildHostsKpiHostsQuery(options);
+  },
   parse: async (
-    options: HostsKpiHostsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsKpiHostsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildHostsKpiHostsQuery(options))],
     };

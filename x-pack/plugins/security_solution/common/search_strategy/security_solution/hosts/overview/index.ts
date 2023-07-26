@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { RequestBasicOptions } from '../../../../api/search_strategy/model/request_basic_options';
 import type { Inspect, Maybe, SearchHit } from '../../../common';
-import type { RequestBasicOptions } from '../..';
 
 export type HostOverviewRequestOptions = RequestBasicOptions;
 

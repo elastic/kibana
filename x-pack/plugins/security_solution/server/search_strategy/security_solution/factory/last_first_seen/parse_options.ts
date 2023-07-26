@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy/first_seen_last_seen/first_seen_last_seen';
+import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy';
 
 export const parseOptions = (options: unknown) => firstLastSeenRequestOptionsSchema.parse(options);

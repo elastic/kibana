@@ -8,7 +8,6 @@ import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../typed_json';
 import type {
   HostDetailsStrategyResponse,
-  HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
   HostOverviewRequestOptions,
   HostsQueries,
@@ -52,11 +51,7 @@ import type {
   NetworkKpiUniquePrivateIpsStrategyResponse,
   NetworkKpiUniquePrivateIpsRequestOptions,
 } from './network';
-import type {
-  MatrixHistogramQuery,
-  MatrixHistogramRequestOptions,
-  MatrixHistogramStrategyResponse,
-} from './matrix_histogram';
+import type { MatrixHistogramQuery, MatrixHistogramStrategyResponse } from './matrix_histogram';
 import type { TimerangeInput, SortField, PaginationInputPaginated } from '../common';
 import type {
   CtiEventEnrichmentRequestOptions,
@@ -112,6 +107,10 @@ import type {
   HostsRelatedUsersRequestOptions,
   HostsRelatedUsersStrategyResponse,
 } from './related_entities/related_users';
+import type {
+  HostDetailsRequestOptions,
+  MatrixHistogramRequestOptions,
+} from '../../api/search_strategy';
 
 export * from './cti';
 export * from './hosts';

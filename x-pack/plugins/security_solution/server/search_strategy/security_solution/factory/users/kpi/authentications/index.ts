@@ -12,19 +12,23 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildUsersKpiAuthenticationsQuery } from './query.users_kpi_authentications.dsl';
 import type {
-  UsersKpiAuthenticationsRequestOptions,
   UsersKpiAuthenticationsStrategyResponse,
   UsersQueries,
 } from '../../../../../../../common/search_strategy';
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
+import { parseOptions } from './parse_options';
 
 export const usersKpiAuthentications: SecuritySolutionFactory<UsersQueries.kpiAuthentications> = {
-  buildDsl: (options: UsersKpiAuthenticationsRequestOptions) =>
-    buildUsersKpiAuthenticationsQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildUsersKpiAuthenticationsQuery(options);
+  },
   parse: async (
-    options: UsersKpiAuthenticationsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<UsersKpiAuthenticationsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildUsersKpiAuthenticationsQuery(options))],
     };

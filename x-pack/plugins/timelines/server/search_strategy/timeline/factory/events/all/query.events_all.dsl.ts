@@ -7,11 +7,11 @@
 
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
+import { TimelineEventsAllOptions } from '../../../../../../common/api/search_strategy/timeline/events_all';
 
 import {
   TimerangeFilter,
   TimerangeInput,
-  TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -26,7 +26,7 @@ export const buildTimelineEventsAllQuery = ({
   runtimeMappings,
   sort,
   timerange,
-}: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
+}: Omit<TimelineEventsAllOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {

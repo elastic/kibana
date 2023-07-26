@@ -9,18 +9,23 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   NetworkKpiQueries,
   NetworkKpiDnsStrategyResponse,
-  NetworkKpiDnsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
+import { parseOptions } from './parse_options';
 import { buildDnsQuery } from './query.network_kpi_dns.dsl';
 
 export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
-  buildDsl: (options: NetworkKpiDnsRequestOptions) => buildDnsQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildDnsQuery(options);
+  },
   parse: async (
-    options: NetworkKpiDnsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkKpiDnsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildDnsQuery(options))],
     };

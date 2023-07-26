@@ -13,7 +13,6 @@ import type { SecuritySolutionFactory } from '../../types';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import type { RelatedEntitiesQueries } from '../../../../../../common/search_strategy/security_solution/related_entities';
 import type {
-  UsersRelatedHostsRequestOptions,
   UsersRelatedHostsStrategyResponse,
   RelatedHostBucket,
   RelatedHost,
@@ -21,11 +20,16 @@ import type {
 import { buildRelatedHostsQuery } from './query.related_hosts.dsl';
 import { getHostRiskData } from '../../hosts/all';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { parseOptions } from './parse_options';
 
 export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.relatedHosts> = {
-  buildDsl: (options: UsersRelatedHostsRequestOptions) => buildRelatedHostsQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
+    return buildRelatedHostsQuery(options);
+  },
   parse: async (
-    options: UsersRelatedHostsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -33,6 +37,8 @@ export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.r
       endpointContext: EndpointAppContext;
     }
   ): Promise<UsersRelatedHostsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {

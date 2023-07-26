@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
 import type {
   SortField,
   FlowTargetSourceDest,
   NetworkTopTablesFields,
-  NetworkTopNFlowRequestOptions,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';

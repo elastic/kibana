@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { NetworkDnsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type { SortField, NetworkDnsRequestOptions } from '../../../../../../common/search_strategy';
+import type { SortField } from '../../../../../../common/search_strategy';
 import { Direction, NetworkDnsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

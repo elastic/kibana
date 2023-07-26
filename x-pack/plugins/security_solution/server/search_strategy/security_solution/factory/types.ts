@@ -14,15 +14,14 @@ import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/c
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   FactoryQueryTypes,
-  StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
-  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
+  buildDsl: (options: unknown) => ISearchRequestParams;
   parse: (
-    options: StrategyRequestType<T>,
+    options: unknown,
     response: IEsSearchResponse,
     deps?: {
       esClient: IScopedClusterClient;

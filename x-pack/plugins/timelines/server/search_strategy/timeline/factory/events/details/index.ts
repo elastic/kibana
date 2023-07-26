@@ -12,7 +12,6 @@ import {
   EventHit,
   TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -23,9 +22,12 @@ import {
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';
+import { parseOptions } from './parse_options';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
-  buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
+  buildDsl: (request: unknown) => {
+    const parsedRequest = parseOptions(request);
+    const { authFilter, ...options } = parsedRequest;
     const { indexName, eventId, runtimeMappings = {} } = options;
     return buildTimelineDetailsQuery({
       indexName,
@@ -35,9 +37,11 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     });
   },
   parse: async (
-    options: TimelineEventsDetailsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const { indexName, eventId, runtimeMappings = {} } = options;
     const { fields, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 

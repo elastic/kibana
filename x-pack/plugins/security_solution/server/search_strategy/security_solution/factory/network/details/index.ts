@@ -12,7 +12,6 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   NetworkDetailsStrategyResponse,
   NetworkQueries,
-  NetworkDetailsRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -21,13 +20,19 @@ import type { SecuritySolutionFactory } from '../../types';
 import { getNetworkDetailsAgg } from './helpers';
 import { buildNetworkDetailsQuery } from './query.details_network.dsl';
 import { unflattenObject } from '../../../../helpers/format_response_object_values';
+import { parseOptions } from './parse_options';
 
 export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
-  buildDsl: (options: NetworkDetailsRequestOptions) => buildNetworkDetailsQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildNetworkDetailsQuery(options);
+  },
   parse: async (
-    options: NetworkDetailsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkDetailsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildNetworkDetailsQuery(options))],
     };

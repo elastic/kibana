@@ -8,16 +8,14 @@
 import { map, mergeMap } from 'rxjs/operators';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type {
   FactoryQueryTypes,
-  StrategyResponseType,
   StrategyRequestType,
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
-import type { SecuritySolutionFactory } from './factory/types';
 import type { EndpointAppContext } from '../../endpoint/types';
 
 function isObj(req: unknown): req is Record<string, unknown> {
@@ -31,20 +29,21 @@ function assertValidRequestType<T extends FactoryQueryTypes>(
   }
 }
 
-export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
+export const securitySolutionSearchStrategyProvider = (
   data: PluginStart,
   endpointContext: EndpointAppContext,
   getSpaceId?: (request: KibanaRequest) => string,
   ruleDataClient?: IRuleDataClient | null
-): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
+  // TODO: add type for this
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ISearchStrategy<any, any> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {
-      assertValidRequestType<T>(request);
+      assertValidRequestType(request);
 
-      const queryFactory: SecuritySolutionFactory<T> =
-        securitySolutionFactory[request.factoryQueryType];
+      const queryFactory = securitySolutionFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {

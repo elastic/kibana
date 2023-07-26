@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type {
-  Direction,
-  SortField,
-  NetworkUsersRequestOptions,
-} from '../../../../../../common/search_strategy';
+import type { Direction, SortField } from '../../../../../../common/search_strategy';
 import { NetworkUsersFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

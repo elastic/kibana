@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
-import type { SecuritySolutionFactory } from './types';
+// TODO: re-enable this
+// import type { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
+// import type { SecuritySolutionFactory } from './types';
 
 import { hostsFactory } from './hosts';
 import { matrixHistogramFactory } from './matrix_histogram';
@@ -17,10 +18,8 @@ import { usersFactory } from './users';
 import { firstLastSeenFactory } from './last_first_seen';
 import { relatedEntitiesFactory } from './related_entities';
 
-export const securitySolutionFactory: Record<
-  FactoryQueryTypes,
-  SecuritySolutionFactory<FactoryQueryTypes>
-> = {
+// TODO: Once all the strategies are using the new types, we can add stricter types here
+export const securitySolutionFactory = {
   ...hostsFactory,
   ...usersFactory,
   ...matrixHistogramFactory,

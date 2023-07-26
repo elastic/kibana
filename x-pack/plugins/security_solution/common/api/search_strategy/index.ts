@@ -6,3 +6,17 @@
  */
 
 export * from './first_seen_last_seen/first_seen_last_seen';
+
+export * from './hosts/hosts';
+
+export * from './users/users';
+
+export * from './matrix_histogram/matrix_histogram';
+
+export * from './network/network';
+
+export * from './related_entities/related_entities';
+
+export * from './risk_score/risk_score';
+
+export * from './cti/cti';

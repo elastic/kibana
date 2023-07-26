@@ -10,17 +10,23 @@ import type { SecuritySolutionFactory } from '../../types';
 import type {
   CtiDataSourceStrategyResponse,
   CtiQueries,
-  CtiDataSourceRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/cti';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
+import { parseOptions } from './parse_options';
 
 export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
-  buildDsl: (options: CtiDataSourceRequestOptions) => buildTiDataSourceQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
+    return buildTiDataSourceQuery(options);
+  },
   parse: async (
-    options: CtiDataSourceRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<CtiDataSourceStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildTiDataSourceQuery(options))],
     };

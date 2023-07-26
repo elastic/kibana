@@ -13,7 +13,6 @@ import {
   EventHit,
   TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsAllRequestOptions,
   TimelineEdges,
 } from '../../../../../../common/search_strategy';
 import { TimelineFactory } from '../../types';
@@ -21,9 +20,12 @@ import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { formatTimelineData } from '../../helpers/format_timeline_data';
 import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
+import { parseOptions } from './parse_options';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
-  buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {
+  buildDsl: (maybeOptions: unknown) => {
+    const { authFilter, ...options } = parseOptions(maybeOptions);
+
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -32,9 +34,11 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (
-    options: TimelineEventsAllRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsAllStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     // eslint-disable-next-line prefer-const
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);

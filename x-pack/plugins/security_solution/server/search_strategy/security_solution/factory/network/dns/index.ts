@@ -12,29 +12,30 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   NetworkDnsStrategyResponse,
-  NetworkQueries,
-  NetworkDnsRequestOptions,
   NetworkDnsEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { SecuritySolutionFactory } from '../../types';
 
 import { getDnsEdges } from './helpers';
 import { buildDnsQuery } from './query.dns_network.dsl';
+import { parseOptions } from './parse_options';
 
-export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
-  // @ts-expect-error dns_name_query_count is incompatbile. Maybe<string>' is not assignable to type 'string | undefined
-  buildDsl: (options: NetworkDnsRequestOptions) => {
+export const networkDns = {
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildDnsQuery(options);
   },
   parse: async (
-    options: NetworkDnsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkDnsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const { activePage, fakePossibleCount } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response.rawResponse);
     const edges: NetworkDnsEdges[] = getDnsEdges(response);

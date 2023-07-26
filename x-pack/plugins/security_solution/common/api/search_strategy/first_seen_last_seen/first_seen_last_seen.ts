@@ -11,6 +11,7 @@ import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 
 import { order } from '../model/order';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
+import { inspect } from '../model/inspect';
 
 export const firstLastSeenRequestOptionsSchema = z
   .object({
@@ -22,15 +23,11 @@ export const firstLastSeenRequestOptionsSchema = z
 
 export type FirstLastSeenRequestOptions = z.infer<typeof firstLastSeenRequestOptionsSchema>;
 
-const inspectSchema = z.object({
-  dsl: z.array(z.string()),
-});
-
 export const firstLastSeenResponseSchema = z
   .object({
     firstSeen: z.string().nullable(),
     lastSeen: z.string().nullable(),
-    inspect: inspectSchema,
+    inspect,
   })
   .partial();
 

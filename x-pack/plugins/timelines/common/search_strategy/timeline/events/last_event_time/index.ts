@@ -6,17 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { LastEventIndexKey } from '../../../../api/search_strategy/timeline/events_last_event_time';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestBasicOptions } from '../..';
-
-export enum LastEventIndexKey {
-  hostDetails = 'hostDetails',
-  hosts = 'hosts',
-  users = 'users',
-  userDetails = 'userDetails',
-  ipDetails = 'ipDetails',
-  network = 'network',
-}
 
 export interface LastTimeDetails {
   hostName?: Maybe<string>;

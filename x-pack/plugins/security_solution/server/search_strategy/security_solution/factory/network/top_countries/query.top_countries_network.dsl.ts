@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type {
-  Direction,
-  NetworkTopCountriesRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
+import type { Direction, SortField } from '../../../../../../common/search_strategy';
 import {
   FlowTargetSourceDest,
   NetworkTopTablesFields,

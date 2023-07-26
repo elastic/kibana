@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
+import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
   Criteria,
@@ -25,7 +26,6 @@ import type {
   HostItem,
   HostsSortField,
 } from '../../../../../common/search_strategy/security_solution/hosts';
-import { HostsFields } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../../common/constants';
 import { HostsTableType } from '../../store/model';
@@ -210,6 +210,8 @@ const getNodeField = (field: HostsFields): string => {
     case HostsFields.lastSeen:
       return 'node.lastSeen';
   }
+
+  return '';
 };
 
 export const HostsTable = React.memo(HostsTableComponent);

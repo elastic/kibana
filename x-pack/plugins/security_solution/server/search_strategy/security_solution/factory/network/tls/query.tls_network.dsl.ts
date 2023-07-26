@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import type { NetworkTlsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import type {
-  Direction,
-  NetworkTlsRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
+import type { Direction, SortField } from '../../../../../../common/search_strategy';
 import { NetworkTlsFields } from '../../../../../../common/search_strategy';
 
 const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({

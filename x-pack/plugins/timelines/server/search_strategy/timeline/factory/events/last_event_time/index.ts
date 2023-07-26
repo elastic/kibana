@@ -11,19 +11,23 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   TimelineEventsQueries,
   TimelineEventsLastEventTimeStrategyResponse,
-  TimelineEventsLastEventTimeRequestOptions,
 } from '../../../../../../common/search_strategy/timeline';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
+import { parseOptions } from './parse_options';
 
 export const timelineEventsLastEventTime: TimelineFactory<TimelineEventsQueries.lastEventTime> = {
-  buildDsl: (options: TimelineEventsLastEventTimeRequestOptions) =>
-    buildLastEventTimeQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildLastEventTimeQuery(options);
+  },
   parse: async (
-    options: TimelineEventsLastEventTimeRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsLastEventTimeStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildLastEventTimeQuery(options))],
     };

@@ -7,12 +7,9 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
-import type {
-  Direction,
-  HostsRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
-import { HostsFields } from '../../../../../../common/search_strategy';
+import { HostsFields } from '../../../../../../common/api/search_strategy/hosts/model/sort';
+import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { Direction, SortField } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { HOSTS_FIELDS } from './helpers';
@@ -95,6 +92,6 @@ const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
     case HostsFields.hostName:
       return { _key: sort.direction };
     default:
-      return assertUnreachable(sort.field);
+      return assertUnreachable(sort.field as never);
   }
 };

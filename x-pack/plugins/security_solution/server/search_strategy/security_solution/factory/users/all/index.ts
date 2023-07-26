@@ -17,7 +17,6 @@ import { buildUsersQuery } from './query.all_users.dsl';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
   User,
-  UsersRequestOptions,
   UsersStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/all';
 import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
@@ -28,22 +27,26 @@ import {
   buildUserNamesFilter,
   getUserRiskIndex,
 } from '../../../../../../common/search_strategy';
+import { parseOptions } from './parse_options';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
-  buildDsl: (options: UsersRequestOptions) => {
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildUsersQuery(options);
   },
   parse: async (
-    options: UsersRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
     }
   ): Promise<UsersStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const inspect = {
       dsl: [inspectStringifyObject(buildUsersQuery(options))],

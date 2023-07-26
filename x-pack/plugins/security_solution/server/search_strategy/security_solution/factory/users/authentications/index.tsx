@@ -13,7 +13,6 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import type {
   AuthenticationHit,
   AuthenticationsEdges,
-  UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from '../../../../../../common/search_strategy';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
@@ -23,9 +22,12 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 
 import { formatAuthenticationData, getHits } from './helpers';
+import { parseOptions } from './parse_options';
 
 export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
-  buildDsl: (options: UserAuthenticationsRequestOptions) => {
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -33,9 +35,11 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
     return buildAuthenticationQuery(options);
   },
   parse: async (
-    options: UserAuthenticationsRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<UserAuthenticationsStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.stack_by_count.value', response.rawResponse);
 

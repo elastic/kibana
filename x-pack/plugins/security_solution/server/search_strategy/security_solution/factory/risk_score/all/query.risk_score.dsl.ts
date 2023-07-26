@@ -6,14 +6,12 @@
  */
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  RiskScoreRequestOptions,
-  RiskScoreSortField,
-} from '../../../../../../common/search_strategy';
+import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import {
   Direction,
   RiskScoreFields,
   RiskScoreEntity,
+  type RiskScoreSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

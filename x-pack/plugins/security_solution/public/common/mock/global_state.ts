@@ -7,11 +7,11 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
-  HostsFields,
   NetworkDnsFields,
   NetworkTopTablesFields,
   NetworkTlsFields,

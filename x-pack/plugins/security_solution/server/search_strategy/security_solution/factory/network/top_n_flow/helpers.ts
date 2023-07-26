@@ -8,6 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import type {
   Direction,
@@ -15,7 +16,6 @@ import type {
   SortField,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowRequestOptions,
   AutonomousSystemItem,
   FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy';

@@ -8,14 +8,13 @@
 import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
 import {
   TimelineFactoryQueryTypes,
-  TimelineStrategyRequestType,
   TimelineStrategyResponseType,
 } from '../../../../common/search_strategy/timeline';
 
 export interface TimelineFactory<T extends TimelineFactoryQueryTypes> {
-  buildDsl: (options: TimelineStrategyRequestType<T>) => ISearchRequestParams;
+  buildDsl: (options: unknown) => ISearchRequestParams;
   parse: (
-    options: TimelineStrategyRequestType<T>,
+    options: unknown,
     response: IEsSearchResponse
   ) => Promise<TimelineStrategyResponseType<T>>;
 }

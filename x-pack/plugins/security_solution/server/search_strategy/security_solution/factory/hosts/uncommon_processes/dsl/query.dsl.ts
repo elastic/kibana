@@ -6,9 +6,9 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '@kbn/securitysolution-ecs';
+import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
-import type { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
 import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
 
 export const buildQuery = ({
@@ -16,7 +16,7 @@ export const buildQuery = ({
   filterQuery,
   pagination: { querySize },
   timerange: { from, to },
-}: RequestOptionsPaginated) => {
+}: HostUncommonProcessesRequestOptions) => {
   const processUserFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, {
     ...processFieldsMap,
     ...userFieldsMap,

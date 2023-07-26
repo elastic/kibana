@@ -13,7 +13,6 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import type {
   NetworkTopNFlowStrategyResponse,
   NetworkQueries,
-  NetworkTopNFlowRequestOptions,
   NetworkTopNFlowEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
@@ -22,18 +21,23 @@ import type { SecuritySolutionFactory } from '../../types';
 
 import { getTopNFlowEdges } from './helpers';
 import { buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
+import { parseOptions } from './parse_options';
 
 export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
-  buildDsl: (options: NetworkTopNFlowRequestOptions) => {
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildTopNFlowQuery(options);
   },
   parse: async (
-    options: NetworkTopNFlowRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTopNFlowStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response.rawResponse);
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);

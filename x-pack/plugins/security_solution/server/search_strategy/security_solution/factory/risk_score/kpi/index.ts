@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
-  KpiRiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
   RiskQueries,
   RiskSeverity,
@@ -18,6 +17,7 @@ import type {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildKpiRiskScoreQuery } from './query.kpi_risk_score.dsl';
+import { parseOptions } from './parse_options';
 
 interface AggBucket {
   key: RiskSeverity;
@@ -25,11 +25,17 @@ interface AggBucket {
 }
 
 export const kpiRiskScore: SecuritySolutionFactory<RiskQueries.kpiRiskScore> = {
-  buildDsl: (options: KpiRiskScoreRequestOptions) => buildKpiRiskScoreQuery(options),
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+
+    return buildKpiRiskScoreQuery(options);
+  },
   parse: async (
-    options: KpiRiskScoreRequestOptions,
+    maybeOptions: unknown,
     response: IEsSearchResponse<unknown>
   ): Promise<KpiRiskScoreStrategyResponse> => {
+    const options = parseOptions(maybeOptions);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildKpiRiskScoreQuery(options))],
     };

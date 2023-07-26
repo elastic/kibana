@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LastEventIndexKey } from './api/search_strategy';
+
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
 // If you're using functions/types/etc... internally or within integration tests it's best to import directly from their paths
 // than expose the functions/types/etc... here. You should _only_ expose functions/types/etc... that need to be shared with other plugins here.
@@ -62,10 +64,6 @@ export type {
   PaginationInputPaginated,
 } from './search_strategy';
 
-export {
-  Direction,
-  EntityType,
-  LastEventIndexKey,
-  EMPTY_BROWSER_FIELDS,
-  EMPTY_INDEX_FIELDS,
-} from './search_strategy';
+export { LastEventIndexKey };
+
+export { Direction, EntityType, EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from './search_strategy';

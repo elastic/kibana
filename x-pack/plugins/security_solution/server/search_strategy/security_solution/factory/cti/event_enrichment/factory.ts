@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
-import type { SecuritySolutionFactory } from '../../types';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { parseOptions } from './parse_options';
 import { buildEventEnrichmentQuery } from './query';
 import { parseEventEnrichmentResponse } from './response';
 
-export const eventEnrichment: SecuritySolutionFactory<CtiQueries.eventEnrichment> = {
-  buildDsl: buildEventEnrichmentQuery,
-  parse: parseEventEnrichmentResponse,
+export const eventEnrichment = {
+  buildDsl: (maybeOptions: unknown) => {
+    const options = parseOptions(maybeOptions);
+    return buildEventEnrichmentQuery(options);
+  },
+  parse: (maybeOptions: unknown, response: IEsSearchResponse, deps: unknown) => {
+    const options = parseOptions(maybeOptions);
+
+    return parseEventEnrichmentResponse(options, response);
+  },
 };
