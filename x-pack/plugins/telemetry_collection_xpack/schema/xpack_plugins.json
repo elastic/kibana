@@ -4011,6 +4011,16 @@
                   }
                 }
               }
+            },
+            "span_destination_service_resource": {
+              "properties": {
+                "1d": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of unique values of span.destination.service.resource within the last day"
+                  }
+                }
+              }
             }
           }
         },

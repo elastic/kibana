@@ -829,7 +829,49 @@
               "section": "def-common.AggregateQuery",
               "text": "AggregateQuery"
             },
-            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; createTopNavWithCustomContext: (customUnifiedSearch?: ",
+            {
+              "pluginId": "unifiedSearch",
+              "scope": "public",
+              "docId": "kibUnifiedSearchPluginApi",
+              "section": "def-public.UnifiedSearchPublicPluginStart",
+              "text": "UnifiedSearchPublicPluginStart"
+            },
+            " | undefined, customExtensions?: ",
+            "RegisteredTopNavMenuData",
+            "[] | undefined) => <QT extends ",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
+            " | ",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.AggregateQuery",
+              "text": "AggregateQuery"
+            },
+            " = ",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
+            ">(props: ",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.TopNavMenuProps",
+              "text": "TopNavMenuProps"
+            },
+            "<QT>) => JSX.Element; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
