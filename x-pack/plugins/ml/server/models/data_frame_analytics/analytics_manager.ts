@@ -45,7 +45,7 @@ export class AnalyticsManager {
 
   constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
 
-  public async initData() {
+  private async initData() {
     const [models, jobs] = await Promise.all([
       this._mlClient.getTrainedModels(),
       this._mlClient.getDataFrameAnalytics({ size: 1000 }),
@@ -54,7 +54,7 @@ export class AnalyticsManager {
     this._jobs = jobs.data_frame_analytics;
   }
 
-  public async initTransformData() {
+  private async initTransformData() {
     if (!this._transforms) {
       const body = await this._client.asCurrentUser.transform.getTransform({
         size: 1000,
@@ -221,7 +221,7 @@ export class AnalyticsManager {
    * Prepares the initial elements for incoming modelId
    * @param modelId
    */
-  public async getInitialElementsModelRoot(modelId: string): Promise<InitialElementsReturnType> {
+  private async getInitialElementsModelRoot(modelId: string): Promise<InitialElementsReturnType> {
     const resultElements = [];
     const modelElements = [];
     const details: any = {};
@@ -334,7 +334,7 @@ export class AnalyticsManager {
    * @param jobId (optional)
    * @param modelId (optional)
    */
-  public async getAnalyticsMap({
+  private async getAnalyticsMap({
     analyticsId,
     modelId,
   }: GetAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
@@ -608,7 +608,7 @@ export class AnalyticsManager {
 
         if (pipelines) {
           const pipelineIds = new Set(Object.keys(pipelines));
-          pipelineIds.forEach((pipelineId) => {
+          for (const pipelineId of pipelineIds) {
             const pipelineNodeId = `${pipelineId}-${JOB_MAP_NODE_TYPES.INGEST_PIPELINE}`;
             result.details[pipelineNodeId] = pipelines[pipelineId];
 
@@ -627,11 +627,11 @@ export class AnalyticsManager {
                 target: pipelineNodeId,
               },
             });
-          });
+          }
           const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
-          // // const pipelinesToIndices = new Map();
-          const indicesSettings = await this._client.asCurrentUser.indices.getSettings();
-          Object.entries(indicesSettings).forEach(([indexName, { settings }]) => {
+          const indicesSettings = await this._client.asInternalUser.indices.getSettings();
+
+          for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
             if (
               settings?.index?.default_pipeline &&
               pipelineIds.has(settings.index.default_pipeline)
@@ -642,7 +642,7 @@ export class AnalyticsManager {
                 pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
               }
             }
-          });
+          }
 
           for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
             const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);

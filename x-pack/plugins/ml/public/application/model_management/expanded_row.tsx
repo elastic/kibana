@@ -433,15 +433,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           <div data-test-subj={'mlTrainedModelDetailsContent'}>
             <EuiSpacer size={'s'} />
             <EuiFlexItem css={{ height: 300 }}>
-              <EuiTitle size={'xs'}>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.expandedRow.mapViewTitle"
-                    defaultMessage="Map"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSpacer size={'m'} />
               <JobMap
                 analyticsId={undefined}
                 modelId={item.model_id}

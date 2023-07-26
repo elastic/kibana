@@ -773,6 +773,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/map/{analyticsId}`,
       access: 'internal',
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     })
     .addVersion(
       {
