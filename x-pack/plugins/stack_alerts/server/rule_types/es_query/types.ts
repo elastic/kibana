@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertData } from './rule_type';
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
@@ -24,5 +25,6 @@ export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   EsQueryRuleState,
   {},
   ActionContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  AlertData
 >;

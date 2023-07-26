@@ -9,7 +9,21 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_CONTEXT } from '@kbn/rule-data-utils';
+import {
+  ALERT_CONDITIONS,
+  ALERT_CONDITIONS_MET_VALUE,
+  ALERT_DATE,
+  ALERT_HITS_COUNT,
+  ALERT_HITS_HITS,
+  ALERT_MESSAGE,
+  ALERT_RULE_LINK,
+  ALERT_RULE_NAME,
+  ALERT_STATE_DATE_END,
+  ALERT_STATE_DATE_START,
+  ALERT_STATE_LAST_TIMESTAMP,
+  ALERT_TITLE,
+} from '@kbn/rule-data-utils';
+import { RuleAlertData } from '@kbn/alerting-plugin/common';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -24,6 +38,21 @@ import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
 import { isEsQueryRule } from './util';
 
+export interface AlertData extends RuleAlertData {
+  [ALERT_RULE_NAME]: string;
+  [ALERT_RULE_LINK]: string;
+  [ALERT_HITS_COUNT]: number;
+  [ALERT_HITS_HITS]: object[];
+  [ALERT_MESSAGE]: string;
+  [ALERT_TITLE]: string;
+  [ALERT_CONDITIONS]: string;
+  [ALERT_CONDITIONS_MET_VALUE]: number | string;
+  [ALERT_DATE]: string;
+  [ALERT_STATE_LAST_TIMESTAMP]: string;
+  [ALERT_STATE_DATE_START]: string;
+  [ALERT_STATE_DATE_END]: string;
+}
+
 export function getRuleType(
   core: CoreSetup
 ): RuleType<
@@ -32,7 +61,9 @@ export function getRuleType(
   EsQueryRuleState,
   {},
   ActionContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  never,
+  AlertData
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
@@ -137,10 +168,23 @@ export function getRuleType(
   );
 
   const alerts: IRuleTypeAlerts = {
-    context: 'observability.esquery',
-    mappings: { fieldMap: { [ALERT_CONTEXT]: { type: 'object', array: false, required: false } } },
-    useEcs: false,
-    useLegacyAlerts: false,
+    context: 'stack.esquery',
+    mappings: {
+      fieldMap: {
+        [ALERT_RULE_NAME]: { type: 'keyword', array: false, required: false },
+        [ALERT_RULE_LINK]: { type: 'text', array: false, required: false },
+        [ALERT_HITS_COUNT]: { type: 'long', array: false, required: false },
+        [ALERT_HITS_HITS]: { type: 'object', array: true, required: false },
+        [ALERT_MESSAGE]: { type: 'text', array: false, required: false },
+        [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
+        [ALERT_CONDITIONS]: { type: 'keyword', array: false, required: false },
+        [ALERT_CONDITIONS_MET_VALUE]: { type: 'keyword', array: false, required: false },
+        [ALERT_DATE]: { type: 'keyword', array: false, required: false },
+        [ALERT_STATE_LAST_TIMESTAMP]: { type: 'keyword', array: false, required: false },
+        [ALERT_STATE_DATE_START]: { type: 'keyword', array: false, required: false },
+        [ALERT_STATE_DATE_END]: { type: 'keyword', array: false, required: false },
+      },
+    },
     shouldWrite: true,
   };
 

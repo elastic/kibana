@@ -89,9 +89,21 @@ const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_CONTEXT = `${ALERT_NAMESPACE}.context` as const;
 const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
 
+const ALERT_HITS_COUNT = `${ALERT_NAMESPACE}.hits.count` as const;
+const ALERT_HITS_HITS = `${ALERT_NAMESPACE}.hits.hits` as const;
+const ALERT_MESSAGE = `${ALERT_NAMESPACE}.message` as const;
+const ALERT_TITLE = `${ALERT_NAMESPACE}.title` as const;
+const ALERT_CONDITIONS = `${ALERT_NAMESPACE}.conditions` as const;
+const ALERT_CONDITIONS_MET_VALUE = `${ALERT_NAMESPACE}.conditions_met_value` as const;
+const ALERT_DATE = `${ALERT_NAMESPACE}.date` as const;
+const ALERT_STATE_LAST_TIMESTAMP = `${ALERT_NAMESPACE}.state.latest_timestamp` as const;
+const ALERT_STATE_DATE_START = `${ALERT_NAMESPACE}.state.date_start` as const;
+const ALERT_STATE_DATE_END = `${ALERT_NAMESPACE}.state.date_end` as const;
+
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 const ALERT_RULE_NAMESPACE_FIELD = `${ALERT_RULE_NAMESPACE}.namespace` as const;
+const ALERT_RULE_LINK = `${ALERT_RULE_NAMESPACE}.link` as const;
 
 // Fields pertaining to the threat tactic associated with the rule
 const ALERT_THREAT_FRAMEWORK = `${ALERT_RULE_THREAT_NAMESPACE}.framework` as const;
@@ -213,6 +225,17 @@ export {
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME,
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE,
   EVENT_MODULE,
+  ALERT_HITS_COUNT,
+  ALERT_HITS_HITS,
+  ALERT_MESSAGE,
+  ALERT_TITLE,
+  ALERT_CONDITIONS,
+  ALERT_CONDITIONS_MET_VALUE,
+  ALERT_DATE,
+  ALERT_RULE_LINK,
+  ALERT_STATE_LAST_TIMESTAMP,
+  ALERT_STATE_DATE_START,
+  ALERT_STATE_DATE_END,
 };
 
 export type TechnicalRuleDataFieldName = ValuesType<typeof fields & typeof namespaces>;
