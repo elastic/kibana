@@ -93,7 +93,7 @@ describe(
 
         it('should NOT have access to execute response actions', () => {
           visitEndpointList();
-          openRowActionMenu().findByTestSubj('console').should('not.exist');
+          openRowActionMenu().getByTestSubj('console').should('not.exist');
         });
       });
     });
@@ -199,7 +199,7 @@ describe(
 
       it('should NOT have access to execute response actions', () => {
         visitEndpointList();
-        openRowActionMenu().findByTestSubj('console').should('not.exist');
+        openRowActionMenu().getByTestSubj('console').should('not.exist');
       });
     });
 
@@ -250,7 +250,7 @@ describe(
 
       it('should NOT have access to execute response actions', () => {
         visitEndpointList();
-        openRowActionMenu().findByTestSubj('console').should('not.exist');
+        openRowActionMenu().getByTestSubj('console').should('not.exist');
       });
     });
 
@@ -354,7 +354,7 @@ describe(
           if (roleName === 'platform_engineer') {
             it('should NOT have access to execute response actions', () => {
               visitEndpointList();
-              openRowActionMenu().findByTestSubj('console').should('not.exist');
+              openRowActionMenu().getByTestSubj('console').should('not.exist');
             });
           } else if (roleName === 'endpoint_operations_analyst') {
             Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(

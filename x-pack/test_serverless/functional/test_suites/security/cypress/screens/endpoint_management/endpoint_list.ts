@@ -38,10 +38,10 @@ export const getTableRow = ({
 };
 
 export const openRowActionMenu = (options?: ListRowOptions): Cypress.Chainable => {
-  getTableRow(options).findByTestSubj('endpointTableRowActions').click();
+  getTableRow(options).getByTestSubj('endpointTableRowActions').click();
   return cy.getByTestSubj('tableRowActionsMenuPanel');
 };
 
 export const openConsoleFromEndpointList = (options?: ListRowOptions): Cypress.Chainable => {
-  return openRowActionMenu(options).findByTestSubj('console').click();
+  return openRowActionMenu(options).getByTestSubj('console').click();
 };
