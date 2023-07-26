@@ -34,6 +34,7 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  SERVER_APP_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -50,6 +51,7 @@ import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
 import { UpsellingService } from '../upsellings';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 
 const mockUiSettings: Record<string, unknown> = {
@@ -119,6 +121,7 @@ export const createStartServicesMock = (
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
+  const cloud = cloudMock.createStart();
 
   return {
     ...core,
@@ -176,6 +179,16 @@ export const createStartServicesMock = (
         })),
       },
     },
+    application: {
+      ...core.application,
+      capabilities: {
+        ...core.application.capabilities,
+        [SERVER_APP_ID]: {
+          crud: true,
+          read: true,
+        },
+      },
+    },
     security,
     storage,
     fleet,
@@ -199,6 +212,10 @@ export const createStartServicesMock = (
     triggersActionsUi,
     cloudExperiments,
     guidedOnboarding,
+    cloud: {
+      ...cloud,
+      isCloudEnabled: false,
+    },
     isSidebarEnabled$: of(true),
     upselling: new UpsellingService(),
     customDataService,
