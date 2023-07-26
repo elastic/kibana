@@ -28,6 +28,7 @@
     "@kbn/embeddable-plugin",
     "@kbn/saved-objects-plugin",
     "@kbn/es-query",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
