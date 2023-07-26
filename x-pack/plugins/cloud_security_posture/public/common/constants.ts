@@ -90,11 +90,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
         }),
-        disabled: true,
         icon: 'logoGCP',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.gcpOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -215,3 +211,4 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
   },
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
+export const MIN_VERSION_GCP_CIS = '1.5.0';

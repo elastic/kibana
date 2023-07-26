@@ -30,10 +30,14 @@ export class Integration {
   }
 
   public static create(integration: IntegrationType) {
-    return new Integration({
+    const integrationProps = {
       ...integration,
       id: `integration-${integration.name}-${integration.version}` as IntegrationId,
-      datasets: integration.dataStreams.map((dataset) => Dataset.create(dataset, integration)),
+      title: integration.title ?? integration.name,
+    };
+    return new Integration({
+      ...integrationProps,
+      datasets: integration.dataStreams.map((dataset) => Dataset.create(dataset, integrationProps)),
     });
   }
 }

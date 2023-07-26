@@ -19,12 +19,11 @@ import {
 } from '../../../../tasks/exceptions_table';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 
 describe('Import Lists', () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
   });
   beforeEach(() => {
     login();
@@ -32,6 +31,7 @@ describe('Import Lists', () => {
     waitForExceptionsTableToBeLoaded();
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });
+
   it('Should import exception list successfully if the list does not exist', () => {
     importExceptionLists(LIST_TO_IMPORT_FILENAME);
 

@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../common';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
