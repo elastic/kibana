@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
+import semverValid from 'semver/functions/valid';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -121,13 +122,13 @@ const credentialOptionsList = [
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
       defaultMessage: 'Credentials File',
     }),
-    value: 'Credentials File',
+    value: 'credentials-file',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
-    value: 'Credentials JSON',
+    value: 'credentials-json',
   },
 ];
 
@@ -189,7 +190,8 @@ export const GcpCredentialsForm = ({
   onChange,
 }: GcpFormProps) => {
   const fields = getInputVarsFields(input, gcpField.fields);
-  const integrationVersionNumberOnly = semverCoerce(packageInfo.version) || '';
+  const validSemantic = semverValid(packageInfo.version);
+  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   useEffect(() => {
     setIsValid(!isInvalid);
@@ -254,18 +256,16 @@ const GcpInputVarFields = ({
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
-  const [credentialOption, setCredentialOption] = useState(credentialOptionsList[0].value);
-  const credentialsTypeField = {
-    id: 'credentials_type',
-    label: 'Credentials Type',
-    type: 'text',
-    value: credentialOption,
-  };
   const projectIdFields = getFieldById('project_id');
   const credentialsTypeFields = getFieldById('credentials_type');
   const credentialFilesFields = getFieldById('credentials_file');
   const credentialJSONFields = getFieldById('credentials_json');
-
+  const credentialsTypeField = {
+    id: 'credentials_type',
+    label: 'Credentials Type',
+    type: 'text',
+    value: credentialsTypeFields || credentialOptionsList[0].value,
+  };
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
 
@@ -287,16 +287,15 @@ const GcpInputVarFields = ({
             <EuiSelect
               fullWidth
               options={credentialOptionsList}
-              value={credentialsTypeFields?.value || credentialOption}
+              value={credentialsTypeFields?.value}
               onChange={(optionElem) => {
-                setCredentialOption(optionElem.target.value);
-                onChange(credentialsTypeField!.id, optionElem.target.value);
+                onChange(credentialsTypeField.id, optionElem.target.value);
               }}
             />
           </EuiFormRow>
         )}
 
-        {(credentialsTypeFields?.value || credentialOption) === credentialFieldValue &&
+        {(credentialsTypeFields?.value || credentialsTypeField.value) === credentialFieldValue &&
           credentialFilesFields && (
             <EuiFormRow fullWidth label={CredentialFileText}>
               <EuiFieldText
