@@ -8,9 +8,7 @@
 
 import { basename, extname } from 'path';
 
-export function isGzip(path: string) {
-  return extname(path) === '.gz';
-}
+export const isGzip = (path: string): boolean => extname(path) === '.gz';
 
 /**
  *  Check if a path is for a, potentially gzipped, mapping file
