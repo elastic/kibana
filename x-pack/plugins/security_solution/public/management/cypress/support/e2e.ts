@@ -40,7 +40,7 @@ Cypress.Commands.addQuery<'getByTestSubj'>(
       if (subject) {
         const errMessage =
           '`cy.getByTestSubj()` is a parent query and can not be chained off a existing subject. Did you mean to use `.findByTestSubj()`?';
-        cy.log(errMessage, [selector, subject]);
+        cy.now('log', errMessage, [selector, subject]);
         throw new TypeError(errMessage);
       }
 

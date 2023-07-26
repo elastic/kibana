@@ -27,7 +27,7 @@ export const openResponderActionLogFlyout = (): void => {
   ensureOnResponder();
   cy.getByTestSubj('responderShowActionLogButton')
     .click()
-    .getByTestSubj(TEST_SUBJ.actionLogFlyout)
+    .findByTestSubj(TEST_SUBJ.actionLogFlyout)
     .should('exist');
 };
 
