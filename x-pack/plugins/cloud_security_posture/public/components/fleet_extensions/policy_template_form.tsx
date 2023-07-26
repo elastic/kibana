@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import {
@@ -79,17 +79,13 @@ interface IntegrationInfoFieldsProps {
   onChange(field: string, value: string): void;
 }
 
-type AwsAccountType = 'single_account' | 'organization_account';
+export const AWS_SINGLE_ACCOUNT = 'single-account';
+export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
+type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
-    id: 'single_account',
-    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
-      defaultMessage: 'Single Account',
-    }),
-  },
-  {
-    id: 'organization_account',
+    id: AWS_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
       defaultMessage: 'AWS Organization',
     }),
@@ -100,13 +96,19 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
         })
       : undefined,
   },
+  {
+    id: AWS_SINGLE_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
+  },
 ];
 
 const getAwsAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
 ): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
 
-const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0';
+const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
 
 const AwsAccountTypeSelect = ({
   input,
@@ -119,28 +121,30 @@ const AwsAccountTypeSelect = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;
 }) => {
-  // This will disable the aws org option for any version LOWER than 1.5.0
+  // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const isValidSemantic = semverValid(packageInfo.version);
   const isAwsOrgDisabled = isValidSemantic
     ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
     : true;
 
-  const awsAccountTypeOptions = getAwsAccountTypeOptions(isAwsOrgDisabled);
+  const awsAccountTypeOptions = useMemo(
+    () => getAwsAccountTypeOptions(isAwsOrgDisabled),
+    [isAwsOrgDisabled]
+  );
 
   useEffect(() => {
     if (!getAwsAccountType(input)) {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'aws.account_type': {
-            value: awsAccountTypeOptions[0].id,
+            value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
         })
       );
     }
-    // we only wish to call this once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [input]);
 
   return (
     <>
@@ -177,6 +181,28 @@ const AwsAccountTypeSelect = ({
         }}
         size="m"
       />
+      {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              defaultMessage="Connect Elastic to every AWS Account (current and future) in your environment by providing Elastic with read-only (configuration) access to your AWS organization."
+            />
+          </EuiText>
+        </>
+      )}
+      {getAwsAccountType(input) === AWS_SINGLE_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.singleAccountDescription"
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+            />
+          </EuiText>
+        </>
+      )}
       <EuiSpacer size="l" />
     </>
   );
