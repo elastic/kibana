@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { esArchiver } from './support/es_archiver';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -21,6 +22,9 @@ export default defineCypressConfig({
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
+    setupNodeEvents(on, config) {
+      esArchiver(on, config);
+    },
     supportFile: './support/e2e.js',
     specPattern: [
       './e2e/**/*.cy.ts',
