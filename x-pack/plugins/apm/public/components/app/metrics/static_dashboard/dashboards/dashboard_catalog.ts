@@ -24,7 +24,7 @@ export async function loadDashboardFile(filename: string): Promise<any> {
     }
     case 'java': {
       return import(
-        /* webpackChunkName: "lazyNodeJsDashboard" */
+        /* webpackChunkName: "lazyJavaDashboard" */
         './java.json'
       );
     }
