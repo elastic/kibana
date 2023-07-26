@@ -381,7 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(nonAjaxResponse.headers['www-authenticate']).to.be(undefined);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/162581
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162581
       describe.skip('post-authentication stage', () => {
         for (const client of ['start-contract', 'request-context', 'custom']) {
           it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
