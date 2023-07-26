@@ -105,9 +105,14 @@ const buildIdentityRiskFields = (identifierType: IdentifierType): FieldMap =>
     return fieldMap;
   }, {} as FieldMap);
 
-export const riskFieldMap: FieldMap = {
+export const riskScoreFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'host.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -117,6 +122,11 @@ export const riskFieldMap: FieldMap = {
     required: false,
   },
   ...buildIdentityRiskFields(RiskScoreEntity.host),
+  'user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'user.risk': {
     type: 'object',
     array: false,

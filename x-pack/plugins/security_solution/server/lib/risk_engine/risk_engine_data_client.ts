@@ -16,7 +16,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
-  riskFieldMap,
+  riskScoreFieldMap,
   getIndexPattern,
   totalFieldsLimit,
   mappingComponentName,
@@ -94,7 +94,7 @@ export class RiskEngineDataClient {
             },
             template: {
               settings: {},
-              mappings: mappingFromFieldMap(riskFieldMap, 'strict'),
+              mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
             },
           } as ClusterPutComponentTemplateRequest,
           totalFieldsLimit,
