@@ -14,15 +14,19 @@ import {
   createReplaceStream,
   createMapStream,
 } from '@kbn/utils';
+import { flow } from 'fp-ts/function';
 
 import { RECORD_SEPARATOR } from './constants';
+
+const anyCharButNotWhiteSpaces = (): RegExp => /[^\s]/;
+const bool = (x: RegExpMatchArray | null) => Boolean(x);
 
 export function createParseArchiveStreams({ gzip = false } = {}) {
   return [
     gzip ? createGunzip() : new PassThrough(),
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
-    createFilterStream<string>((l) => !!l.match(/[^\s]/)),
-    createMapStream<string>((json) => JSON.parse(json.trim())),
+    createFilterStream<string>(flow((x) => x.match(anyCharButNotWhiteSpaces()), bool)),
+    createMapStream<string>((json: string) => JSON.parse(json.trim())),
   ];
 }

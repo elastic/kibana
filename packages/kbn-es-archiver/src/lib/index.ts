@@ -20,7 +20,7 @@ export {
 
 export { createFilterRecordsStream } from './records';
 
-export type { Stats } from './stats';
+export type { Stats, IndexStats } from './stats';
 export { createStats } from './stats';
 
 export {

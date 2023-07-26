@@ -39,11 +39,11 @@ Metrics are needed for local, ess and serverless.
 
 ### x-pack/test/functional/es_archives/logstash_functional
 
-|                            | Current es-archiver | highwater mark 5000 |
-|----------------------------|---------------------|---------------------|
-| LOCAL avg / min / max      | 4.7 / 4.5 / 5.0     | Cell                |
-| ESS avg / min / max        | 29.4 / 24.1 / 71.9  | Cell                |
-| SERVERLESS avg / min / max | 29.1 / 27.1 / 32.8  | 10.6 / 9.9 / 12.1   |
+|                            | Current es-archiver | highwater mark 5000 | highwater mark 5000 + less logging |
+|----------------------------|---------------------|---------------------|------------------------------------|
+| LOCAL avg / min / max      | 4.7 / 4.5 / 5.0     | Cell                | Cell                               |
+| ESS avg / min / max        | 29.4 / 24.1 / 71.9  | Cell                | Cell                               |
+| SERVERLESS avg / min / max | 29.1 / 27.1 / 32.8  | 10.6 / 9.9 / 12.1   | 9.8 / 9.0 / 10.7                   |
 
 #### `logstash_functional` Meta
 
@@ -58,11 +58,11 @@ Doc Count: 4634 + 4757 + 4614 (3 indices) = 14_005
 
 ### test/functional/fixtures/es_archiver/many_fields
 
-|                            | Current es-archiver | highwater mark 5000 |
-|----------------------------|---------------------|---------------------|
-| LOCAL avg / min / max      | 0.9 / 0.8 / 1.0     | Cell                |
-| ESS avg / min / max        | 4.0 / 3.3 / 12.6    | Cell                |
-| SERVERLESS avg / min / max | 2.8 / 2.5 / 3.2     | 3.0 / 2.8 / 3.4     |
+|                            | Current es-archiver | highwater mark 5000 | highwater mark 5000 + less logging |
+|----------------------------|---------------------|---------------------|------------------------------------|
+| LOCAL avg / min / max      | 0.9 / 0.8 / 1.0     | Cell                | Cell                               |
+| ESS avg / min / max        | 4.0 / 3.3 / 12.6    | Cell                | Cell                               |
+| SERVERLESS avg / min / max | 2.8 / 2.5 / 3.2     | 3.0 / 2.8 / 3.4     | 2.3 / 2.1 / 2.5                    |
 
 #### `many_fields` Meta
 
@@ -77,11 +77,11 @@ Doc Count: 5_350
 
 ### x-pack/test/functional/es_archives/ml/farequote
 
-|                            | Current es-archiver   | highwater mark 5000 |
-|----------------------------|-----------------------|---------------------|
-| LOCAL avg / min / max      | 9.5 / 8.5 / 13.2      | Cell                |
-| ESS avg / min / max        | 76.1 / 47.6 / 612.8   | Cell                |
-| SERVERLESS avg / min / max | 117.1 / 116.4 / 117.8 | 11.5 / 10.6 / 13.2  |
+|                            | Current es-archiver   | highwater mark 5000 | highwater mark 5000 + less logging |
+|----------------------------|-----------------------|---------------------|------------------------------------|
+| LOCAL avg / min / max      | 9.5 / 8.5 / 13.2      | Cell                | Cell                               |
+| ESS avg / min / max        | 76.1 / 47.6 / 612.8   | Cell                | Cell                               |
+| SERVERLESS avg / min / max | 117.1 / 116.4 / 117.8 | 11.5 / 10.6 / 13.2  | 14.9 / 14.5 / 15.3                 |
 
 #### `farequote` Meta
 
