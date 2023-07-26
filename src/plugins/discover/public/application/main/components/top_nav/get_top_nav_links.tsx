@@ -146,7 +146,7 @@ export const getTopNavLinks = ({
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
-          : { dataViewSpec: dataView?.toSpec() }),
+          : { dataViewSpec: dataView?.toMinimalSpec() }),
         filters,
         timeRange,
         refreshInterval,
