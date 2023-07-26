@@ -138,7 +138,7 @@ export const SUMMARY_OCCURRENCES_7D_ROLLING: TransformPutTransformRequest = {
   sync: {
     time: {
       field: '@timestamp',
-      delay: '60s',
+      delay: '125s',
     },
   },
   settings: {

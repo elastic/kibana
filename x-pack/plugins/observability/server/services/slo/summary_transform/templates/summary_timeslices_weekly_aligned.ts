@@ -151,7 +151,7 @@ export const SUMMARY_TIMESLICES_WEEKLY_ALIGNED: TransformPutTransformRequest = {
   sync: {
     time: {
       field: '@timestamp',
-      delay: '60s',
+      delay: '125s',
     },
   },
   settings: {

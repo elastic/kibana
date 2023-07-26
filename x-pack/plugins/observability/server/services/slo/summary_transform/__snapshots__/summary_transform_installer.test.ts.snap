@@ -213,7 +213,7 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -436,7 +436,7 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -659,7 +659,7 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -895,7 +895,7 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -1146,7 +1146,7 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
