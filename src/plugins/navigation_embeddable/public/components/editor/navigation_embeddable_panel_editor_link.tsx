@@ -96,7 +96,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
             announceLoadedStatus={false}
             announceLoadingStatus={false}
           >
-            <EuiText size="s" color={'text'} className="wrapText">
+            <EuiText size="s" color={'text'} className="eui-textTruncate">
               {linkLabel}
             </EuiText>
           </EuiSkeletonTitle>

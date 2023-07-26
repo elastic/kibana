@@ -2,9 +2,9 @@
   font-weight: $euiFontWeightRegular;
 
   .navigationLink {
+    max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
+    
     &.dashboardLinkError {
-      max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
-
       &.dashboardLinkError--noLabel .euiListGroupItem__button {
         font-style: italic;
       }

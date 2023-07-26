@@ -36,14 +36,14 @@ export const NavigationEmbeddableComponent = () => {
           id: currentLink.id,
           content:
             currentLink.type === DASHBOARD_LINK_TYPE ? (
-              <DashboardLinkComponent key={currentLink.id} link={currentLink} />
+              <DashboardLinkComponent key={currentLink.id} link={currentLink} layout={layout} />
             ) : (
               <ExternalLinkComponent key={currentLink.id} link={currentLink} />
             ),
         },
       };
     }, {});
-  }, [links]);
+  }, [links, layout]);
 
   return (
     <EuiPanel

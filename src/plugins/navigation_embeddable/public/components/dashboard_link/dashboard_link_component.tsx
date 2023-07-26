@@ -10,20 +10,34 @@ import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useMemo, useState } from 'react';
 
-import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { fetchDashboard } from './dashboard_link_tools';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { NavigationEmbeddableLink } from '../../embeddable/types';
+import {
+  NAV_VERTICAL_LAYOUT,
+  NavigationLayoutType,
+  NavigationEmbeddableLink,
+} from '../../embeddable/types';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
-export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+}: {
+  link: NavigationEmbeddableLink;
+  layout: NavigationLayoutType;
+}) => {
   const navEmbeddable = useNavigationEmbeddable();
   const [error, setError] = useState<Error | undefined>();
 
   const dashboardContainer = navEmbeddable.parent as DashboardContainer;
   const parentDashboardTitle = dashboardContainer.select((state) => state.explicitInput.title);
+  const parentDashboardDescription = dashboardContainer.select(
+    (state) => state.explicitInput.description
+  );
+
   const parentDashboardId = dashboardContainer.select((state) => state.componentState.lastSavedId);
 
   const { loading: loadingDestinationDashboard, value: destinationDashboard } =
@@ -43,14 +57,21 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
       }
     }, [link, parentDashboardId]);
 
+  const [dashboardTitle, dashboardDescription] = useMemo(() => {
+    return link.destination === parentDashboardId
+      ? [parentDashboardTitle, parentDashboardDescription]
+      : [destinationDashboard?.attributes.title, destinationDashboard?.attributes.description];
+  }, [
+    link.destination,
+    parentDashboardId,
+    parentDashboardTitle,
+    destinationDashboard,
+    parentDashboardDescription,
+  ]);
+
   const linkLabel = useMemo(() => {
-    return (
-      link.label ||
-      (link.destination === parentDashboardId
-        ? parentDashboardTitle
-        : destinationDashboard?.attributes.title ?? DashboardLinkStrings.getDashboardErrorLabel())
-    );
-  }, [link, destinationDashboard, parentDashboardId, parentDashboardTitle]);
+    return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
+  }, [link, dashboardTitle]);
 
   return loadingDestinationDashboard ? (
     <li id={`dashboardLink--${link.id}--loading`}>
@@ -62,7 +83,6 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
     <EuiListGroupItem
       size="s"
       color="text"
-      showToolTip={Boolean(error)}
       isDisabled={Boolean(error)}
       id={`dashboardLink--${link.id}`}
       iconType={error ? 'warning' : undefined}
@@ -79,8 +99,27 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
               // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
             }
       }
-      label={linkLabel}
-      toolTipText={error ? error.message : undefined}
+      label={
+        <EuiToolTip
+          delay="long"
+          display="block"
+          repositionOnScroll
+          position={layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom'}
+          title={
+            error
+              ? DashboardLinkStrings.getDashboardErrorLabel()
+              : dashboardDescription
+              ? dashboardTitle
+              : undefined
+          }
+          content={error ? error.message : dashboardDescription || dashboardTitle}
+        >
+          {/* Setting `title=""` so that the native browser tooltip is disabled */}
+          <div className="eui-textTruncate" title="">
+            {linkLabel}
+          </div>
+        </EuiToolTip>
+      }
     />
   );
 };

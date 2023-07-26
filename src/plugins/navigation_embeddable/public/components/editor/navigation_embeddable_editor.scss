@@ -39,20 +39,14 @@
   }
 }
 
-.navEmbeddableLinkText {
-  flex: 1;
-  min-width: 0;
-
-  .wrapText {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
 .navEmbeddableLinkPanel {
   padding: $euiSizeXS $euiSizeS;
   color: $euiTextColor;
+
+  .navEmbeddableLinkText {
+    flex: 1;
+    min-width: 0;
+  }
 
   &.linkError {
     background-color: tint($euiColorWarning, 95%);
