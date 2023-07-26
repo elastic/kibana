@@ -5865,7 +5865,7 @@ The default values for the session timeout `xpack.security.session.{lifespan|idl
 *Impact* +
 Use the following default values:
 
-* `xpack.security.session.idleTimeout: 8h`
+* `xpack.security.session.idleTimeout: 3d`
 * `xpack.security.session.lifespan: 30d`
 ====
 
