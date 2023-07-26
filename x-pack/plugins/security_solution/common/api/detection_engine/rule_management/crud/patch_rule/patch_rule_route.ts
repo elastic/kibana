@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RulePatchProps, ThresholdRulePatchProps } from '../../../model';
+import type * as t from 'io-ts';
+import { RulePatchProps, RuleResponse, ThresholdRulePatchProps } from '../../../model';
 
 /**
  * Request body parameters of the API route.
@@ -16,3 +17,6 @@ export const PatchRuleRequestBody = RulePatchProps;
 
 export type ThresholdPatchRuleRequestBody = ThresholdRulePatchProps;
 export const ThresholdPatchRuleRequestBody = ThresholdRulePatchProps;
+
+export const PatchRuleResponse = RuleResponse;
+export type PatchRuleResponse = t.TypeOf<typeof PatchRuleResponse>;
