@@ -30,7 +30,7 @@ const EmbeddedDiscoverContainer = styled.div`
 export const DiscoverTabContent = () => {
   const history = useHistory();
   const {
-    services: { customDataService: discoverDataService, discover, discoverFilterManager },
+    services: { customDataService: discoverDataService, discover },
   } = useKibana();
 
   const { CustomStatefulTopNavKqlQueryBar } = useGetStatefulQueryBar();
@@ -47,10 +47,9 @@ export const DiscoverTabContent = () => {
 
   const services = useMemo(
     () => ({
-      filterManager: discoverFilterManager,
       data: discoverDataService,
     }),
-    [discoverDataService, discoverFilterManager]
+    [discoverDataService]
   );
 
   const DiscoverContainer = discover.DiscoverContainer;
