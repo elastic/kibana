@@ -45,7 +45,8 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = await getListClient(context);
-        const listExists = await lists.getListIndexExists();
+        // TODO: migrate??
+        const listExists = await lists.getListDataStreamExists();
         if (!listExists) {
           return siemResponse.error({
             body: `To import a list item, the index must exist first. Index "${lists.getListIndex()}" does not exist`,

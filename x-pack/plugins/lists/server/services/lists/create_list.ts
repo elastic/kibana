@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
   DeserializerOrUndefined,
-  IdOrUndefined,
+  Id,
   Immutable,
   ListSchema,
   MetaOrUndefined,
@@ -24,7 +24,7 @@ import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
-  id: IdOrUndefined;
+  id: Id;
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
   type: Type;
@@ -58,6 +58,7 @@ export const createList = async ({
 }: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const body: IndexEsListSchema = {
+    '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user,
     description,
@@ -72,12 +73,14 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const response = await esClient.index({
-    body,
+
+  const response = await esClient.create({
+    document: body,
     id,
     index: listIndex,
     refresh: 'wait_for',
   });
+
   return {
     _version: encodeHitVersion(response),
     id: response._id,
