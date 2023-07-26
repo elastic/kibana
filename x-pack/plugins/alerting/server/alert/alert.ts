@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { isEmpty } from 'lodash';
-import { AlertHit, CombinedPersistentAlerts } from '../types';
+import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -279,8 +279,8 @@ export class Alert<
   /**
    * Checks whether this alert exists in the given alert summary
    */
-  isFilteredOut(persistentAlerts: CombinedPersistentAlerts | null) {
-    if (persistentAlerts === null) {
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
       return false;
     }
 
@@ -296,7 +296,7 @@ export class Alert<
     //
     // Related issue: https://github.com/elastic/kibana/issues/144862
 
-    return !persistentAlerts.all.data.some(
+    return !summarizedAlerts.all.data.some(
       (alert: AlertHit) =>
         alert?.kibana?.alert?.uuid === this.getId() || alert?.kibana?.alert?.uuid === this.getUuid()
     );

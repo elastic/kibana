@@ -16,7 +16,7 @@ import {
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
 import { AlertsClient, AlertsClientParams } from './alerts_client';
-import { GetPersistentAlertsParams, ProcessAndLogAlertsOpts } from './types';
+import { GetSummarizedAlertsParams, ProcessAndLogAlertsOpts } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
 import { keys, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -1103,7 +1103,7 @@ describe('Alerts Client', () => {
     });
   });
 
-  describe('getPersistentAlerts', () => {
+  describe('getSummarizedAlerts', () => {
     let alertsClient: AlertsClient<{}, {}, {}, 'default', 'recovered'>;
 
     beforeEach(() => {
@@ -1143,7 +1143,7 @@ describe('Alerts Client', () => {
           hits: { total: { value: 0 }, hits: [] },
         });
 
-      const result = await alertsClient.getPersistentAlerts(getParamsByExecutionUuid);
+      const result = await alertsClient.getSummarizedAlerts(getParamsByExecutionUuid);
 
       expect(clusterClient.search).toHaveBeenCalledTimes(3);
 
@@ -1183,7 +1183,7 @@ describe('Alerts Client', () => {
         hits: { total: { value: 1 }, hits: [mockAAD] },
       });
 
-      const result = await alertsClient.getPersistentAlerts({
+      const result = await alertsClient.getSummarizedAlerts({
         ...getParamsByExecutionUuid,
         isLifecycleAlert: false,
       });
@@ -1227,7 +1227,7 @@ describe('Alerts Client', () => {
         },
       });
 
-      const result = await newAlertsClient.getPersistentAlerts({
+      const result = await newAlertsClient.getSummarizedAlerts({
         ...getParamsByExecutionUuid,
         isLifecycleAlert: false,
         formatAlert: (alert) => {
@@ -1357,7 +1357,7 @@ describe('Alerts Client', () => {
             }),
           },
         ])('$text', async ({ params, call1, call2, call3 }) => {
-          await alertsClient.getPersistentAlerts({ ...params, isLifecycleAlert });
+          await alertsClient.getSummarizedAlerts({ ...params, isLifecycleAlert });
           expect(clusterClient.search).toHaveBeenCalledTimes(isLifecycleAlert ? 3 : 1);
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, call1);
           if (isLifecycleAlert) {
@@ -1373,7 +1373,7 @@ describe('Alerts Client', () => {
         const { ruleId, ...paramsWithoutRuleId } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutRuleId as GetPersistentAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutRuleId as GetSummarizedAlertsParams<{}>)
         ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
       });
 
@@ -1381,7 +1381,7 @@ describe('Alerts Client', () => {
         const { spaceId, ...paramsWithoutSpaceId } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutSpaceId as GetPersistentAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutSpaceId as GetSummarizedAlertsParams<{}>)
         ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
       });
 
@@ -1389,8 +1389,8 @@ describe('Alerts Client', () => {
         const { executionUuid, ...paramsWithoutExecutionUuid } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getPersistentAlerts(
-            paramsWithoutExecutionUuid as GetPersistentAlertsParams<{}>
+          alertsClient.getSummarizedAlerts(
+            paramsWithoutExecutionUuid as GetSummarizedAlertsParams<{}>
           )
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
@@ -1401,7 +1401,7 @@ describe('Alerts Client', () => {
         const { start, ...paramsWithoutStart } = getParamsByTimeQuery;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutStart as GetPersistentAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutStart as GetSummarizedAlertsParams<{}>)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );
@@ -1411,7 +1411,7 @@ describe('Alerts Client', () => {
         const { end, ...paramsWithoutEnd } = getParamsByTimeQuery;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutEnd as GetPersistentAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutEnd as GetSummarizedAlertsParams<{}>)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );

@@ -31,7 +31,7 @@ import {
   GetQueryByTimeRangeParams,
   SearchResult,
 } from '../types';
-import { PersistentAlertsChunk } from '../..';
+import { SummarizedAlertsChunk } from '../..';
 import { FormatAlert } from '../../types';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
@@ -350,7 +350,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
 const getHitsWithCount = <AlertData extends RuleAlertData>(
   response: SearchResult<AlertData>,
   formatAlert?: FormatAlert<AlertData>
-): PersistentAlertsChunk => {
+): SummarizedAlertsChunk => {
   return {
     count: (response.total as SearchTotalHits).value,
     data: response.hits.map((hit) => {

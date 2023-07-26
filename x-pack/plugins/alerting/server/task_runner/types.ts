@@ -25,7 +25,7 @@ import {
   RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { RawRule, RulesClientApi, CombinedPersistentAlerts } from '../types';
+import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
@@ -101,10 +101,10 @@ export type Executable<
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
-      persistentAlerts?: never;
+      summarizedAlerts?: never;
     }
   | {
       alert?: never;
-      persistentAlerts: CombinedPersistentAlerts;
+      summarizedAlerts: CombinedSummarizedAlerts;
     }
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetPersistentAlertsParams } from './types';
+import { GetSummarizedAlertsParams } from './types';
 import { AlertRuleData } from '.';
 import { AlertsFilter } from '../types';
 
@@ -62,14 +62,14 @@ const alertTypes = {
   recovered: 'close',
 };
 
-export const getParamsByExecutionUuid: GetPersistentAlertsParams<{}> = {
+export const getParamsByExecutionUuid: GetSummarizedAlertsParams<{}> = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],
   isLifecycleAlert: true,
   executionUuid: '111',
 };
-export const getParamsByTimeQuery: GetPersistentAlertsParams<{}> = {
+export const getParamsByTimeQuery: GetSummarizedAlertsParams<{}> = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],

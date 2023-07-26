@@ -14,7 +14,7 @@ import {
   AlertInstanceState,
   AlertsFilter,
   FormatAlert,
-  PersistentAlerts,
+  SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
   RuleNotifyWhenType,
@@ -60,7 +60,7 @@ export interface IAlertsClient<
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   persistAlerts(): Promise<void>;
-  getPersistentAlerts?(params: GetPersistentAlertsParams<AlertData>): Promise<PersistentAlerts>;
+  getSummarizedAlerts?(params: GetSummarizedAlertsParams<AlertData>): Promise<SummarizedAlerts>;
   getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
@@ -156,7 +156,7 @@ export type SearchResult<AlertData> = Pick<
   'hits' | 'total'
 >;
 
-export type GetPersistentAlertsParams<AlertData extends RuleAlertData> = {
+export type GetSummarizedAlertsParams<AlertData extends RuleAlertData> = {
   ruleId: string;
   spaceId: string;
   excludedAlertInstanceIds: string[];
@@ -169,7 +169,7 @@ export type GetPersistentAlertsParams<AlertData extends RuleAlertData> = {
 );
 
 export type GetAlertsQueryParams = Omit<
-  GetPersistentAlertsParams<never>,
+  GetSummarizedAlertsParams<never>,
   'formatAlert' | 'isLifecycleAlert' | 'spaceId'
 >;
 

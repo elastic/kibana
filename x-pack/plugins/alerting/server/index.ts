@@ -28,7 +28,7 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  PersistentAlertsChunk,
+  SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
 } from './types';

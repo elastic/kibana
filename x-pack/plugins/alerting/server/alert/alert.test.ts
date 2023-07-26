@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
-import { CombinedPersistentAlerts } from '../types';
+import { CombinedSummarizedAlerts } from '../types';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -687,7 +687,7 @@ describe('resetPendingRecoveredCount', () => {
 });
 
 describe('isFilteredOut', () => {
-  const persistentAlerts: CombinedPersistentAlerts = {
+  const summarizedAlerts: CombinedSummarizedAlerts = {
     all: {
       count: 1,
       data: [
@@ -720,28 +720,28 @@ describe('isFilteredOut', () => {
     recovered: { count: 0, data: [] },
   };
 
-  test('returns false if persistentAlerts is null', () => {
+  test('returns false if summarizedAlerts is null', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: { pendingRecoveredCount: 3, uuid: '1' },
     });
     expect(alert.isFilteredOut(null)).toBe(false);
   });
-  test('returns false if the alert with same ID is in persistentAlerts', () => {
+  test('returns false if the alert with same ID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: { pendingRecoveredCount: 3, uuid: 'no' },
     });
-    expect(alert.isFilteredOut(persistentAlerts)).toBe(false);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
   });
-  test('returns false if the alert with same UUID is in persistentAlerts', () => {
+  test('returns false if the alert with same UUID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
       meta: { pendingRecoveredCount: 3, uuid: '1' },
     });
-    expect(alert.isFilteredOut(persistentAlerts)).toBe(false);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
   });
-  test('returns true if the alert with same UUID or ID is not in persistentAlerts', () => {
+  test('returns true if the alert with same UUID or ID is not in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
       meta: { pendingRecoveredCount: 3, uuid: '3' },
     });
-    expect(alert.isFilteredOut(persistentAlerts)).toBe(true);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
   });
 });

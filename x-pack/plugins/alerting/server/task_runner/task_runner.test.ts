@@ -1454,7 +1454,7 @@ describe('Task Runner', () => {
           hasReachedAlertLimit: jest.fn(),
           checkLimitUsage: jest.fn(),
           persistAlerts: jest.fn(),
-          getPersistentAlerts: jest.fn().mockResolvedValue({
+          getSummarizedAlerts: jest.fn().mockResolvedValue({
             new: {
               count: 1,
               data: [mockAAD],
@@ -1558,7 +1558,7 @@ describe('Task Runner', () => {
           hasReachedAlertLimit: jest.fn(),
           checkLimitUsage: jest.fn(),
           persistAlerts: jest.fn(),
-          getPersistentAlerts: jest.fn().mockResolvedValue({
+          getSummarizedAlerts: jest.fn().mockResolvedValue({
             new: {
               count: 1,
               data: [mockAAD],

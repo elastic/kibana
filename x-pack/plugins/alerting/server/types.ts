@@ -169,18 +169,18 @@ export type AlertHit = Alert & {
   _id: string;
   _index: string;
 };
-export interface PersistentAlertsChunk {
+export interface SummarizedAlertsChunk {
   count: number;
   data: AlertHit[];
 }
 
-export interface PersistentAlerts {
-  new: PersistentAlertsChunk;
-  ongoing: PersistentAlertsChunk;
-  recovered: PersistentAlertsChunk;
+export interface SummarizedAlerts {
+  new: SummarizedAlertsChunk;
+  ongoing: SummarizedAlertsChunk;
+  recovered: SummarizedAlertsChunk;
 }
-export interface CombinedPersistentAlerts extends PersistentAlerts {
-  all: PersistentAlertsChunk;
+export interface CombinedSummarizedAlerts extends SummarizedAlerts {
+  all: SummarizedAlertsChunk;
 }
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Pick<SanitizedRule<Params>, 'id'> &

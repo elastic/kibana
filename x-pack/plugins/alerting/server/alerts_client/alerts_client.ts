@@ -14,7 +14,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
-  PersistentAlerts,
+  SummarizedAlerts,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
@@ -35,7 +35,7 @@ import {
   ReportedAlert,
   ReportedAlertData,
   UpdateableAlert,
-  GetPersistentAlertsParams,
+  GetSummarizedAlertsParams,
 } from './types';
 import {
   buildNewAlert,
@@ -416,7 +416,7 @@ export class AlertsClient<
     return this.legacyAlertsClient.factory();
   }
 
-  public async getPersistentAlerts({
+  public async getSummarizedAlerts({
     ruleId,
     spaceId,
     excludedAlertInstanceIds,
@@ -426,7 +426,7 @@ export class AlertsClient<
     executionUuid,
     formatAlert,
     isLifecycleAlert = false,
-  }: GetPersistentAlertsParams<AlertData>): Promise<PersistentAlerts> {
+  }: GetSummarizedAlertsParams<AlertData>): Promise<SummarizedAlerts> {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
     }
