@@ -13,7 +13,6 @@ import { TableListViewTableProps } from '@kbn/content-management-table-list-view
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { i18n } from '@kbn/i18n';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { pluginServices } from '../../services/plugin_services';
