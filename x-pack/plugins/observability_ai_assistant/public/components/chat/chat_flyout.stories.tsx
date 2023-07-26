@@ -8,10 +8,11 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { ChatFlyout as Component, ChatFlyoutProps } from './chat_flyout';
+import { buildConversation } from '../../utils/builders';
 
 export default {
   component: Component,
-  title: 'app/Molecules/ChatFlyout',
+  title: 'app/Organisms/ChatFlyout',
   argTypes: {},
 };
 
@@ -19,7 +20,26 @@ const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
   return <Component {...props} />;
 };
 
-const defaultProps = {};
+const defaultProps = {
+  conversation: buildConversation(),
+  connectors: {
+    connectors: [
+      {
+        id: 'foo',
+        referencedByCount: 1,
+        actionTypeId: 'foo',
+        name: 'GPT-v8-ultra',
+        isPreconfigured: true,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+    ],
+    loading: false,
+    error: undefined,
+    selectedConnector: 'foo',
+    selectConnector: () => {},
+  },
+};
 
 export const ChatFlyout = Template.bind({});
 ChatFlyout.args = defaultProps;
