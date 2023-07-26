@@ -425,7 +425,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         'data-test-subj': 'mlTrainedModelsMap',
         name: (
           <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
+            id="xpack.ml.trainedModels.modelsList.expandedRow.modelsMapLabel"
             defaultMessage="Models map"
           />
         ),
