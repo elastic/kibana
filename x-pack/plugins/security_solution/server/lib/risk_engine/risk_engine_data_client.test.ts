@@ -117,6 +117,9 @@ describe('RiskEngineDataClient', () => {
               },
               "host": Object {
                 "properties": Object {
+                  "name": Object {
+                    "type": "keyword",
+                  },
                   "risk": Object {
                     "properties": Object {
                       "calculated_level": Object {
@@ -170,6 +173,9 @@ describe('RiskEngineDataClient', () => {
               },
               "user": Object {
                 "properties": Object {
+                  "name": Object {
+                    "type": "keyword",
+                  },
                   "risk": Object {
                     "properties": Object {
                       "calculated_level": Object {

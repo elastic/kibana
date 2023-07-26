@@ -44,6 +44,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "host": Object {
+              "name": "hostname",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,
@@ -65,6 +66,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "host": Object {
+              "name": "hostname",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,
@@ -108,6 +110,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "user": Object {
+              "name": "username_1",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,
@@ -129,6 +132,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "user": Object {
+              "name": "username_2",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,
@@ -178,6 +182,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "host": Object {
+              "name": "hostname_1",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,
@@ -199,6 +204,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "user": Object {
+              "name": "username_1",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,
@@ -220,6 +226,7 @@ describe('RiskEngineDataWriter', () => {
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
             "user": Object {
+              "name": "username_2",
               "risk": Object {
                 "calculated_level": "High",
                 "calculated_score": 149,

@@ -56,6 +56,9 @@ export default ({ getService }: FtrProviderContext) => {
           },
           host: {
             properties: {
+              name: {
+                type: 'keyword',
+              },
               risk: {
                 properties: {
                   calculated_level: {
@@ -109,6 +112,9 @@ export default ({ getService }: FtrProviderContext) => {
           },
           user: {
             properties: {
+              name: {
+                type: 'keyword',
+              },
               risk: {
                 properties: {
                   calculated_level: {
