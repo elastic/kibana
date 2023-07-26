@@ -22,8 +22,9 @@ import partition from 'lodash/fp/partition';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { LinkCategories, SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
-import { LinkCategories, SeparatorLinkCategory, SolutionSideNavItemPosition } from './types';
+import { SolutionSideNavItemPosition } from './types';
 import type { SolutionSideNavItem, Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
@@ -199,7 +200,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
           }
 
           return (
-            <>
+            <React.Fragment key={categoryIndex}>
               {categoryIndex !== 0 && <EuiSpacer size="s" />}
               {categoryItems.map((item) => (
                 <SolutionSideNavItem
@@ -212,7 +213,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
                 />
               ))}
               <EuiSpacer size="s" />
-            </>
+            </React.Fragment>
           );
         })}
       </>
