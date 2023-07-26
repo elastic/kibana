@@ -51,6 +51,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
 import { UpsellingService } from '../upsellings';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -222,7 +223,11 @@ export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(KibanaContextProvider, { services }, children);
+    React.createElement(
+      KibanaContextProvider,
+      { services },
+      React.createElement(NavigationProvider, { core: services }, children)
+    );
 };
 
 export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
