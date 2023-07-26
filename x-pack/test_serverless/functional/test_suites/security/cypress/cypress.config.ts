@@ -28,7 +28,7 @@ export default defineCypressConfig({
     supportFile: './support/e2e.js',
     specPattern: [
       './e2e/**/*.cy.ts',
-      '../../../../../plugins/security_solution/cypress/e2e/**/*.cy.ts',
+      '../../../../../plugins/security_solution/cypress/e2e/investigations/**/*.cy.ts',
     ],
   },
 });
