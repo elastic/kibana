@@ -5,13 +5,17 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -22,6 +26,8 @@ import type {
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import {
@@ -73,6 +79,109 @@ interface IntegrationInfoFieldsProps {
   onChange(field: string, value: string): void;
 }
 
+type AwsAccountType = 'single_account' | 'organization_account';
+
+const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
+  {
+    id: 'single_account',
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
+  },
+  {
+    id: 'organization_account',
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
+      defaultMessage: 'AWS Organization',
+    }),
+    disabled: isAwsOrgDisabled,
+    tooltip: isAwsOrgDisabled
+      ? i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip', {
+          defaultMessage: 'Supported from integration version 1.5.0 and above',
+        })
+      : undefined,
+  },
+];
+
+const getAwsAccountType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
+): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
+
+const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0';
+
+const AwsAccountTypeSelect = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+}: {
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  packageInfo: PackageInfo;
+}) => {
+  // This will disable the aws org option for any version LOWER than 1.5.0
+  const isValidSemantic = semverValid(packageInfo.version);
+  const isAwsOrgDisabled = isValidSemantic
+    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
+    : true;
+
+  const awsAccountTypeOptions = getAwsAccountTypeOptions(isAwsOrgDisabled);
+
+  useEffect(() => {
+    if (!getAwsAccountType(input)) {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'aws.account_type': {
+            value: awsAccountTypeOptions[0].id,
+            type: 'text',
+          },
+        })
+      );
+    }
+    // we only wish to call this once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      {isAwsOrgDisabled && (
+        <>
+          <EuiCallOut color="warning">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationNotSupportedMessage"
+              defaultMessage="AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
+      <RadioGroup
+        idSelected={getAwsAccountType(input) || ''}
+        options={awsAccountTypeOptions}
+        onChange={(accountType) => {
+          updatePolicy(
+            getPosturePolicy(newPolicy, input.type, {
+              'aws.account_type': {
+                value: accountType,
+                type: 'text',
+              },
+            })
+          );
+        }}
+        size="m"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
 const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
   <div>
     {fields.map(({ value, id, label, error }) => (
@@ -96,7 +205,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
@@ -230,6 +338,17 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
+
+        {/* AWS account type selection box */}
+        {input.type === 'cloudbeat/cis_aws' && (
+          <AwsAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+          />
+        )}
+
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}
