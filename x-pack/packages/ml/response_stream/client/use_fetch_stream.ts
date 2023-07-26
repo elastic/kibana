@@ -26,7 +26,8 @@ import { stringReducer, type StringReducer } from './string_reducer';
 // and if a custom reducer is supplied fall back to that one instead.
 // The complexity in here allows us to create a simpler API surface where
 // these generics can be infered from the arguments and don't have to be
-// supplied additionally.
+// supplied additionally. Note on the use of `any`: `Reducer<any, any>`
+// is used to match the type definition in React itself.
 type CustomReducer<T> = T extends StringReducer
   ? StringReducer
   : T extends Reducer<any, any>
@@ -46,6 +47,10 @@ function isReducerOptions<T>(arg: unknown): arg is CustomReducer<T> {
 
 /**
  * Custom hook to receive streaming data.
+ *
+ * Note on the use of `any`:
+ * The generic `R` extends from `Reducer<any, any>`
+ * to match the definition in React itself.
  *
  * @param http Kibana HTTP client.
  * @param endpoint API endpoint including Kibana base path.

@@ -23,6 +23,10 @@ type GeneratorError = string | null;
  * }
  * ```
  *
+ * Note on the use of `any`:
+ * The generic `R` extends from `Reducer<any, any>`
+ * to match the definition in React itself.
+ *
  * @param endpoint     — The API endpoint including the Kibana basepath.
  * @param apiVersion   - Optional API version to be used.
  * @param abortCtrl    — Abort controller for cancelling the request.
