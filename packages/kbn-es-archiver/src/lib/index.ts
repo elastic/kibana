@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { createIndexDocRecordsStream, createGenerateDocRecordsStream } from './docs';
+export {
+  createIndexDocRecordsStream,
+  indexDocRecordsWritable$,
+  createGenerateDocRecordsStream,
+} from './docs';
 
 export {
   createCreateIndexStream,
@@ -20,7 +24,7 @@ export {
 
 export { createFilterRecordsStream } from './records';
 
-export type { Stats } from './stats';
+export type { Stats, IndexStats } from './stats';
 export { createStats } from './stats';
 
 export {
