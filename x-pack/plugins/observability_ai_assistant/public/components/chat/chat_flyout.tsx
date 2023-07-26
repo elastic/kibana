@@ -19,7 +19,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useChatConversation } from '../../hooks/use_chat_conversation';
 import { ChatTimeline } from './chat_timeline';
 import { ChatPromptEditor } from './chat_prompt_editor';
-import { AssistantAvatar } from '../assistant_avatar';
+import { ChatHeader } from './chat_header';
 
 export interface ChatFlyoutProps {
   conversationId?: string;
@@ -35,16 +35,7 @@ export function ChatFlyout({ conversationId }: ChatFlyoutProps) {
   return isOpen ? (
     <EuiFlyout onClose={() => setIsOpen(false)} size="m">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AssistantAvatar size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2>{title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ChatHeader title={title} />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

@@ -9,9 +9,9 @@ import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
-export type StartServices<AdditionalServices extends object = {}> = CoreStart &
-  ObservabilityAIAssistantPluginStartDependencies &
-  AdditionalServices & {};
+export type StartServices<AdditionalServices extends object = {}> = CoreStart & {
+  plugins: { start: ObservabilityAIAssistantPluginStartDependencies };
+} & AdditionalServices & {};
 const useTypedKibana = <AdditionalServices extends object = {}>() =>
   useKibana<StartServices<AdditionalServices>>();
 
