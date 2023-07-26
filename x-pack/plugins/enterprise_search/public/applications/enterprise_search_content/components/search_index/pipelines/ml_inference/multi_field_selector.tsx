@@ -184,7 +184,7 @@ export const MultiFieldMapping: React.FC = () => {
             fullWidth
           >
             <EuiFieldText
-              prepend='ml.inference.'
+              prepend="ml.inference."
               onChange={(e) => setTargetField(e.target.value)}
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
               disabled={isTextExpansionModelSelected || !isExactlyOneSourceFieldSelected}
