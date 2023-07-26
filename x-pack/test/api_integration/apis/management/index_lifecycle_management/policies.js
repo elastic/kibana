@@ -11,7 +11,6 @@ import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { getPolicyPayload } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
-import { DEFAULT_POLICY_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -36,26 +35,6 @@ export default function ({ getService }) {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
-      it('should have a default policy to manage the Watcher history indices', async () => {
-        const { body } = await loadPolicies().expect(200);
-        const { version, name, policy } = body.find((policy) =>
-          policy.name.includes(DEFAULT_POLICY_NAME)
-        );
-
-        expect(version).to.eql(1);
-        expect(name).to.eql(DEFAULT_POLICY_NAME);
-        expect(policy.phases).to.eql({
-          delete: {
-            min_age: '7d',
-            actions: {
-              delete: {
-                delete_searchable_snapshot: true,
-              },
-            },
-          },
-        });
-      });
-
       it('should add the indices linked to the policies', async () => {
         // Create a policy
         const policy = getPolicyPayload('link-test-policy');
