@@ -6,15 +6,17 @@
  */
 
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
+import { PdfExportType } from '../../../export_types/printable_pdf_v2';
 import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';
 import { Report } from '../../../lib/store';
+import { reportingMock } from '../../../mocks';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
@@ -42,13 +44,21 @@ describe('POST /api/reporting/generate', () => {
   });
 
   const mockLogger = loggingSystemMock.createLogger();
+  const mockCoreSetup = coreMock.createSetup();
+
+  const mockPdfExportType = new PdfExportType(
+    mockCoreSetup,
+    mockConfigSchema,
+    mockLogger,
+    coreMock.createPluginInitializerContext(mockConfigSchema)
+  );
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: jest.fn(), registerExportTypes: jest.fn() })
+      () => reportingMock.createStart()
     );
 
     const mockSetupDeps = createMockPluginSetup({
@@ -78,17 +88,7 @@ describe('POST /api/reporting/generate', () => {
     );
 
     mockExportTypesRegistry = new ExportTypesRegistry();
-    mockExportTypesRegistry.register({
-      id: 'printablePdf',
-      name: 'not sure why this field exists',
-      jobType: 'printable_pdf',
-      jobContentEncoding: 'base64',
-      jobContentExtension: 'pdf',
-      validLicenses: ['basic', 'gold'],
-      createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } } as any),
-      runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
-    });
-    mockReportingCore.getExportTypesRegistry = () => mockExportTypesRegistry;
+    mockExportTypesRegistry.register(mockPdfExportType);
 
     store = await mockReportingCore.getStore();
     store.addReport = jest.fn().mockImplementation(async (opts) => {
@@ -190,7 +190,14 @@ describe('POST /api/reporting/generate', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/generate/printablePdf')
-      .send({ jobParams: rison.encode({ title: `abc` }) })
+      .send({
+        jobParams: rison.encode({
+          title: `abc`,
+          relativeUrls: ['test'],
+          layout: { id: 'test' },
+          objectType: 'canvas workpad',
+        }),
+      })
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchObject({
@@ -201,9 +208,19 @@ describe('POST /api/reporting/generate', () => {
             index: 'foo-index',
             jobtype: 'printable_pdf',
             payload: {
-              createJobTest: {
-                test1: 'yes',
+              forceNow: expect.any(String),
+              isDeprecated: true,
+              layout: {
+                id: 'test',
               },
+              objectType: 'canvas workpad',
+              objects: [
+                {
+                  relativeUrl: 'test',
+                },
+              ],
+              title: 'abc',
+              version: '7.14.0',
             },
             status: 'pending',
           },

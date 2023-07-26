@@ -52,7 +52,7 @@ export class RequestHandler {
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
-    const { reporting, logger, context, req: request, user } = this;
+    const { reporting, logger, context, req, user } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -60,33 +60,29 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    if (!exportType.createJobFnFactory) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
+    const store = await reporting.getStore();
+
+    if (!exportType.createJob) {
+      throw new Error(`Export type ${exportTypeId} is not a valid instance!`);
     }
 
-    const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
-      reporting.getStore(),
-    ]);
-
-    if (!createJob) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
-    }
-
-    // 1. ensure the incoming params have a version field (should be set by the UI)
+    // 1. Ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
 
-    // 2. encrypt request headers for the running report job to authenticate itself with Kibana
-    // 3. call the export type's createJobFn to create the job payload
-    const [headers, job] = await Promise.all([
-      this.encryptHeaders(),
-      createJob(jobParams, context, this.req),
-    ]);
+    // 2. Encrypt request headers to store for the running report job to authenticate itself with Kibana
+    const headers = await this.encryptHeaders();
+
+    // 3. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
+    const job = await exportType.createJob(jobParams, context, req);
 
     const payload = {
       ...job,
       headers,
-      spaceId: reporting.getSpaceId(request, logger),
+      title: job.title,
+      objectType: jobParams.objectType,
+      browserTimezone: jobParams.browserTimezone,
+      version: jobParams.version,
+      spaceId: reporting.getSpaceId(req, logger),
     };
 
     // 4. Add the report to ReportingStore to show as pending
@@ -95,6 +91,7 @@ export class RequestHandler {
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
         payload,
+        migration_version: jobParams.version,
         meta: {
           // telemetry fields
           objectType: jobParams.objectType,
@@ -113,7 +110,6 @@ export class RequestHandler {
 
     // 6. Log the action with event log
     reporting.getEventLogger(report, task).logScheduleTask();
-
     return report;
   }
 

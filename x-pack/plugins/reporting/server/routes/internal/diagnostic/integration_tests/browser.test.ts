@@ -19,6 +19,7 @@ import {
 } from '../../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerDiagnoseBrowser } from '../browser';
+import { reportingMock } from '../../../mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -45,7 +46,7 @@ describe('POST /diagnose/browser', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: () => false, registerExportTypes: jest.fn() })
+      () => reportingMock.createStart()
     );
 
     const docLinksSetupMock = docLinksServiceMock.createSetupContract();

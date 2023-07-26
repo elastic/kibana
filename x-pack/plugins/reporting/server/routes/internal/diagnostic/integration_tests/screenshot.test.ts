@@ -12,6 +12,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { generatePngObservable } from '../../../../export_types/common';
+import { reportingMock } from '../../../../mocks';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
@@ -49,7 +50,7 @@ describe('POST /diagnose/screenshot', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: () => false, registerExportTypes: jest.fn() })
+      () => reportingMock.createStart()
     );
 
     core = await createMockReportingCore(
