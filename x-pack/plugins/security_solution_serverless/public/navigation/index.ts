@@ -9,15 +9,13 @@ import { APP_PATH, MANAGE_PATH } from '@kbn/security-solution-plugin/common';
 import type { ServerlessSecurityPublicConfig } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
+import { setAppLinks } from './links/app_links';
 import { subscribeNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 
 const SECURITY_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}`;
 
-/**
- * Configures the serverless project navigation
- */
-export const setServerlessNavigation = (
+export const configureNavigation = (
   services: Services,
   serverConfig: ServerlessSecurityPublicConfig
 ) => {
@@ -31,6 +29,7 @@ export const setServerlessNavigation = (
   serverless.setProjectHome(APP_PATH);
   serverless.setSideNavComponent(getSecuritySideNavComponent(services));
 
+  setAppLinks(services);
   subscribeNavigationTree(services);
   subscribeBreadcrumbs(services);
 };

@@ -16,8 +16,9 @@ import type {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
-import { createServices } from './common/services';
-import { setServerlessNavigation } from './navigation';
+import { createServices } from './common/services/create_services';
+import { configureNavigation } from './navigation';
+import { setRoutes } from './pages/routes';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -53,7 +54,8 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
-    setServerlessNavigation(services, this.config);
+    configureNavigation(services, this.config);
+    setRoutes(services);
 
     return {};
   }
