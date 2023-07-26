@@ -712,6 +712,58 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('AWS Credentials input fields', () => {
+    it(`renders ${CLOUDBEAT_AWS} Account Type field`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.account_type': { value: 'single_account' },
+      });
+
+      const { getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.5.0' } as PackageInfo} />
+      );
+
+      expect(getByLabelText('Single Account')).toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeInTheDocument();
+    });
+
+    it(`${CLOUDBEAT_AWS} form displays upgrade message for unsupported versions and aws organization option is disabled`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'cloud_formation' },
+        'aws.account_type': { value: 'single_account' },
+      });
+
+      const { getByText, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.4.0' } as PackageInfo} />
+      );
+
+      expect(
+        getByText(
+          'AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration.'
+        )
+      ).toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeDisabled();
+    });
+
+    it(`${CLOUDBEAT_AWS} form do not displays upgrade message for supported versions and aws organization option is enabled`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'cloud_formation' },
+        'aws.account_type': { value: 'single_account' },
+      });
+
+      const { queryByText, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.5.0' } as PackageInfo} />
+      );
+
+      expect(
+        queryByText(
+          'AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration.'
+        )
+      ).not.toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeEnabled();
+    });
+
     it(`renders ${CLOUDBEAT_AWS} Assume Role fields`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
