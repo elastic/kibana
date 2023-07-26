@@ -672,7 +672,7 @@ describe('ruleType', () => {
 
       await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
+      const instance = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.scheduleActions).toHaveBeenCalled();
     });
   });
