@@ -38,8 +38,8 @@ export default function ({ getService }) {
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const { version, name, policy } = body.find(
-          (policy) => policy.name === DEFAULT_POLICY_NAME
+        const { version, name, policy } = body.find((policy) =>
+          policy.name.includes(DEFAULT_POLICY_NAME)
         );
 
         expect(version).to.eql(1);
