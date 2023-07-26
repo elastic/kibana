@@ -16,9 +16,9 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseSeverity } from '../../../../common/api';
+import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUsers, UseFetchAlertData } from '../../../../common/ui/types';
-import type { CaseUI, CaseStatuses } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';

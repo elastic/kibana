@@ -7,8 +7,10 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CommentRequest } from '../../../common/api';
-import { BulkCreateCommentRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
+import type { AttachmentRequest } from '../../../common/types/api';
+import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
+import type { Case } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -34,7 +36,7 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    decodeWithExcessOrThrow(BulkCreateCommentRequestRt)(attachments);
+    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRt)(attachments);
 
     attachments.forEach((attachment) => {
       decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
@@ -45,17 +47,19 @@ export const bulkCreate = async (
       });
     });
 
-    const [attachmentsWithIds, entities]: [Array<{ id: string } & CommentRequest>, OwnerEntity[]] =
-      attachments.reduce<[Array<{ id: string } & CommentRequest>, OwnerEntity[]]>(
-        ([a, e], attachment) => {
-          const savedObjectID = SavedObjectsUtils.generateId();
-          return [
-            [...a, { id: savedObjectID, ...attachment }],
-            [...e, { owner: attachment.owner, id: savedObjectID }],
-          ];
-        },
-        [[], []]
-      );
+    const [attachmentsWithIds, entities]: [
+      Array<{ id: string } & AttachmentRequest>,
+      OwnerEntity[]
+    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
+      ([a, e], attachment) => {
+        const savedObjectID = SavedObjectsUtils.generateId();
+        return [
+          [...a, { id: savedObjectID, ...attachment }],
+          [...e, { owner: attachment.owner, id: savedObjectID }],
+        ];
+      },
+      [[], []]
+    );
 
     await authorization.ensureAuthorized({
       operation: Operations.bulkCreateAttachments,

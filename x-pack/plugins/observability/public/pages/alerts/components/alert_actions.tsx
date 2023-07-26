@@ -17,7 +17,7 @@ import {
 import React, { useMemo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
@@ -94,7 +94,7 @@ export function AlertActions({
           {
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             rule: getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
           },
         ]

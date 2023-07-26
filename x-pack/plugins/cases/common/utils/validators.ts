@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CaseAssignees } from '../api';
 import { MAX_ASSIGNEES_PER_CASE } from '../constants';
+import type { CaseAssignees } from '../types/domain';
 
 export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => {
   if (assignees == null) {

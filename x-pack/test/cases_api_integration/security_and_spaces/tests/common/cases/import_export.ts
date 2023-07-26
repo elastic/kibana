@@ -15,12 +15,11 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  AttributesTypeUser,
+  UserCommentAttachmentAttributes,
   CaseAttributes,
-  CasePostRequest,
   CaseStatuses,
   CaseSeverity,
-} from '@kbn/cases-plugin/common/api';
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
@@ -32,6 +31,7 @@ import {
   CreateCaseUserAction,
   PushedUserAction,
 } from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest } from '@kbn/cases-plugin/common';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: findResponse.cases[0].id,
       });
 
-      const comment = commentsResponse.comments[0] as unknown as AttributesTypeUser;
+      const comment = commentsResponse.comments[0] as unknown as UserCommentAttachmentAttributes;
       expect(comment.comment).to.eql('A comment for my case');
 
       const userActions = await getCaseUserActions({
@@ -268,7 +268,10 @@ const expectCreateCommentUserAction = (
 };
 
 const expectExportToHaveAComment = (objects: SavedObject[]) => {
-  const commentSOs = findSavedObjectsByType<AttributesTypeUser>(objects, CASE_COMMENT_SAVED_OBJECT);
+  const commentSOs = findSavedObjectsByType<UserCommentAttachmentAttributes>(
+    objects,
+    CASE_COMMENT_SAVED_OBJECT
+  );
 
   expect(commentSOs.length).to.eql(1);
 
