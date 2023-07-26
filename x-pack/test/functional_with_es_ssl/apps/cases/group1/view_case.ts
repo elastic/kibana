@@ -636,12 +636,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('filters by all by default', async () => {
+        const allBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
+        );
+
+        expect(await allBadge.getAttribute('aria-label')).equal('1 active filters');
+      });
+
       it('filters by comment successfully', async () => {
         const commentBadge = await find.byCssSelector(
           '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
         );
 
-        expect(await commentBadge.getVisibleText()).equal('0');
+        expect(await commentBadge.getAttribute('aria-label')).equal('0 available filters');
 
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -652,7 +660,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await commentBadge.getVisibleText()).equal('1');
+        await testSubjects.click('user-actions-filter-activity-button-comments');
+
+        expect(await commentBadge.getAttribute('aria-label')).equal('1 active filters');
       });
 
       it('filters by history successfully', async () => {
@@ -660,7 +670,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
         );
 
-        expect(await historyBadge.getVisibleText()).equal('1');
+        expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
@@ -670,7 +680,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('user-actions-filter-activity-button-history');
 
-        expect(await historyBadge.getVisibleText()).equal('3');
+        expect(await historyBadge.getAttribute('aria-label')).equal('3 active filters');
       });
 
       it('sorts by newest first successfully', async () => {
