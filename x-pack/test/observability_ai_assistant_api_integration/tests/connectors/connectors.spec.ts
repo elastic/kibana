@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { EXPECTED_COLOR } from 'jest-matcher-utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
