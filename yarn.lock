@@ -1438,29 +1438,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.17.0":
-  version "5.17.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.17.0.tgz#660b02b46cb2e98063f2438b1b41350d88f28489"
-  integrity sha512-GN1UyyeL8+AD9crKi2lR1MlariKlL5aIlsuVxR9SM1pGBBno1uVUW8Cu6KqzGpscYGf78LNdDezlc5Amx4vJbw==
+"@elastic/apm-rum-core@^5.18.0":
+  version "5.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.18.0.tgz#d1c25594c8e81a929b1f9444ecc081359a97b3d5"
+  integrity sha512-KGU+ZFtdXdD7pR+arDq0JRIC4IKIH0D16p+7SMkq9Lq8wq70Uy6r5SKZgW7X6ahnJP35hStMXT2mjStjD9a+wA==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.2.tgz#f9d6d80dec1ad28c469ea3a25971f81688f30a58"
-  integrity sha512-Dg+ayytBbgvmojIcsczZ3lUP0jRG7a87qFinb7xpU/B3IsO1Z0uMr9/HsGLGZSYEcGYI1+fuX7PiVn7/MK5GGw==
+"@elastic/apm-rum-react@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.3.tgz#cbbde9d8e0f9aaf8459e07626d88b15188f99d37"
+  integrity sha512-9OSy373fNkLfnf6g8lEBjycm03NJnTPeTYTLUh+Gvlf5NGic+mLZbm7d4dQvUxgIcjKzlx94et3SGysG6JzDrg==
   dependencies:
-    "@elastic/apm-rum" "^5.12.0"
+    "@elastic/apm-rum" "^5.13.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.12.0":
-  version "5.12.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.12.0.tgz#8391e32d5d6b4f6c95b625da410b3fd4c2b50ce5"
-  integrity sha512-WEyzOhrtaExV9iFH2YxHbjuQNESunn5mMlmPfGan/rD6grzamN5vPOo844wgKy7/f5DsQoAIxFTf1VjvOaHcjA==
+"@elastic/apm-rum@^5.13.0":
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.13.0.tgz#a79df440a2e80a492b24e9c04b62c408a6863fa4"
+  integrity sha512-b3H9EEwUpDsGhtqY9oiVILR3nFh8jM9rA9LQGZxw155d2x1MEFyqOhI1uXkhgxirnC+RZHRuQKcfWxZtPQnrfA==
   dependencies:
-    "@elastic/apm-rum-core" "^5.17.0"
+    "@elastic/apm-rum-core" "^5.18.0"
 
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
@@ -5063,6 +5063,10 @@
   uid ""
 
 "@kbn/security-solution-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/security_solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-navigation@link:x-pack/packages/security-solution/navigation":
   version "0.0.0"
   uid ""
 
