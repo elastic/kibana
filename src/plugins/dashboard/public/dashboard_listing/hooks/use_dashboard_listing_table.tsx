@@ -148,14 +148,7 @@ export const useDashboardListingTable = ({
                 });
 
                 if (!validTitle) {
-                  throw new Error(
-                    i18n.translate('dashboard.dashboardListingEditErrorTitle.duplicateWarning', {
-                      defaultMessage: 'Saving "{value}" creates a duplicate title',
-                      values: {
-                        value,
-                      },
-                    })
-                  );
+                  throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning());
                 }
               } catch (e) {
                 return e.message;
