@@ -20,5 +20,3 @@ export const PLUGIN_NAME = 'AIOps';
  * "Change Point Detection UI" during development until the first release.
  */
 export const CHANGE_POINT_DETECTION_ENABLED = true;
-
-export { LOG_RATE_ANALYSIS_TYPE } from './constants';

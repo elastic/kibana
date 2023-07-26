@@ -188,7 +188,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const coPilotService = useCoPilot();
   const hasLogRateAnalysisParams =
-    logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
+    logRateAnalysisType &&
+    logRateAnalysisParams &&
+    logRateAnalysisParams.significantFieldValues?.length > 0;
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -239,7 +241,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
             <CoPilotPrompt
               coPilot={coPilotService}
               title={logRateAnalysisTitle}
-              params={logRateAnalysisParams}
+              params={{ ...logRateAnalysisParams, analysisType: logRateAnalysisType }}
               promptId={CoPilotPromptId.LogRateAnalysis}
               feedbackEnabled={false}
             />

@@ -10,7 +10,6 @@ import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-plugin/common';
 import { CoPilotPromptId } from '.';
 
 const PERF_GPT_SYSTEM_MESSAGE = {
@@ -59,10 +58,7 @@ const logEntryRt = t.type({
   ),
 });
 
-const logRateAnalysisTypeRt = t.union([
-  t.literal(LOG_RATE_ANALYSIS_TYPE.SPIKE),
-  t.literal(LOG_RATE_ANALYSIS_TYPE.DIP),
-]);
+const logRateAnalysisTypeRt = t.union([t.literal('spike'), t.literal('dip')]);
 const logRateAnalysisSignificantFieldValuesRt = t.array(
   t.type({
     field: t.string,
@@ -306,7 +302,9 @@ export const coPilotPrompts = {
 
       Based on the above analysis results and your observability expert knowledge, output the following:
       Analyse the type of these logs and explain their usual purpose (1 paragraph).
-      Based on the type of these logs do a root cause analysis on why the field and value combinations from the anlaysis results are causing this ${analysisType} in logs (2 parapraphs).
+      Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this ${analysisType} in logs (2 parapraphs). Hint: In case of a ${analysisType} in logs, the statistically significant field/values are ${
+        analysisType === 'spike' ? 'part of the spike' : 'missing from the dip'
+      }.
       Recommend concrete remediations to resolve the root cause (3 bullet points).
       Do not repeat the given instructions in your output.`;
 
