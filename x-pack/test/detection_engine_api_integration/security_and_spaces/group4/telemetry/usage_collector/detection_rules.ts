@@ -24,6 +24,7 @@ import {
   deleteAllAlerts,
   getEqlRuleForSignalTesting,
   getRule,
+  getRuleForSignalTesting,
   getRuleWithWebHookAction,
   getSimpleMlRule,
   getSimpleRule,
