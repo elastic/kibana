@@ -7,12 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { PackagePolicy, PackagePolicyInput } from '../../common';
+
 import { useKibanaVersion } from './use_kibana_version';
 import { useGetSettings } from './use_request';
+
+type AwsAccountType = 'single_account' | 'organization_account';
+
+const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
+
+const getAwsAccountType = (input?: PackagePolicyInput): AwsAccountType | undefined =>
+  input?.streams[0].vars?.['aws.account_type'].value;
 
 export const useCreateCloudFormationUrl = ({
   enrollmentAPIKey,
   cloudFormationTemplateUrl,
+  packagePolicy,
 }: {
   enrollmentAPIKey: string | undefined;
   cloudFormationTemplateUrl: string | undefined;
@@ -20,6 +30,9 @@ export const useCreateCloudFormationUrl = ({
   const { data, isLoading } = useGetSettings();
 
   const kibanaVersion = useKibanaVersion();
+
+  const awsInput = packagePolicy?.inputs?.find((input) => input.type === CLOUDBEAT_AWS);
+  const awsAccountType = getAwsAccountType(awsInput) || '';
 
   let isError = false;
   let error: string | undefined;
@@ -47,7 +60,8 @@ export const useCreateCloudFormationUrl = ({
           cloudFormationTemplateUrl,
           enrollmentAPIKey,
           fleetServerHost,
-          kibanaVersion
+          kibanaVersion,
+          awsAccountType
         )
       : undefined;
 
@@ -63,12 +77,19 @@ const createCloudFormationUrl = (
   templateURL: string,
   enrollmentToken: string,
   fleetUrl: string,
-  kibanaVersion: string
+  kibanaVersion: string,
+  awsAccountType: string
 ) => {
-  const cloudFormationUrl = templateURL
+  let cloudFormationUrl;
+
+  cloudFormationUrl = templateURL
     .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
     .replace('FLEET_URL', fleetUrl)
     .replace('KIBANA_VERSION', kibanaVersion);
+
+  if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
+    cloudFormationUrl = cloudFormationUrl.replace('ACCOUNT_TYPE', awsAccountType);
+  }
 
   return new URL(cloudFormationUrl).toString();
 };

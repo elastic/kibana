@@ -265,3 +265,7 @@ export interface BulkEditActionErrorResponse {
 }
 
 export type BulkEditActionResponse = BulkEditActionSuccessResponse | BulkEditActionErrorResponse;
+
+export type BulkExportActionResponse = string;
+
+export type PerformBulkActionResponse = BulkEditActionResponse | BulkExportActionResponse;
