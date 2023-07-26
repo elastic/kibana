@@ -7,10 +7,12 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 
+import type { SnakeToCamelCase } from '../../../../common/types';
+import type { CommentUserAction } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { CommentUserAction } from '../../../../common/api';
-import { Actions, CommentType } from '../../../../common/api';
-import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
+import { CommentType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { CommentUI } from '../../../containers/types';
 import * as i18n from './translations';
@@ -24,7 +26,7 @@ import type { AttachmentType } from '../../../client/attachment_framework/types'
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 
 interface DeleteLabelTitle {
-  userAction: UserActionResponse<CommentUserAction>;
+  userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
   persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
@@ -113,7 +115,7 @@ const getDeleteCommentUserAction = ({
   persistableStateAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
-  userAction: UserActionResponse<CommentUserAction>;
+  userAction: SnakeToCamelCase<CommentUserAction>;
 } & Pick<
   UserActionBuilderArgs,
   | 'handleOutlineComment'
@@ -163,7 +165,7 @@ const getCreateCommentUserAction = ({
   onShowAlertDetails,
   actionsNavigation,
 }: {
-  userAction: UserActionResponse<CommentUserAction>;
+  userAction: SnakeToCamelCase<CommentUserAction>;
   comment: CommentUI;
 } & Omit<
   UserActionBuilderArgs,
@@ -269,9 +271,9 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseConnectors,
 }) => ({
   build: () => {
-    const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
+    const commentUserAction = userAction as SnakeToCamelCase<CommentUserAction>;
 
-    if (commentUserAction.action === Actions.delete) {
+    if (commentUserAction.action === UserActionActions.delete) {
       return getDeleteCommentUserAction({
         userAction: commentUserAction,
         caseData,
@@ -288,7 +290,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       return [];
     }
 
-    if (commentUserAction.action === Actions.create) {
+    if (commentUserAction.action === UserActionActions.create) {
       const commentAction = getCreateCommentUserAction({
         appId,
         caseData,

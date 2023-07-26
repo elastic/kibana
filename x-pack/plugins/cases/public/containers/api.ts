@@ -8,6 +8,11 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type {
+  CaseUserActionStatsResponse,
+  GetCaseConnectorsResponse,
+  UserActionFindResponse,
+} from '../../common/types/api';
+import type {
   CaseConnectors,
   CaseUpdateRequest,
   FetchCasesProps,
@@ -25,13 +30,10 @@ import type {
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
-  UserActionFindResponse,
   CommentRequest,
   User,
   SingleCaseMetricsResponse,
   CasesFindResponse,
-  GetCaseConnectorsResponse,
-  CaseUserActionStatsResponse,
   Case,
   Cases,
 } from '../../common/api';

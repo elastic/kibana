@@ -15,13 +15,14 @@ import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
-  ...parts,
   buildNum: 42,
   buildSha: 'sha',
   dist: true,
   branch: 'master',
   version: '8.0.0',
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
+  buildFlavor: 'traditional',
+  ...parts,
 });
 
 const createUiPlugins = (...ids: string[]): UiPlugins => ({

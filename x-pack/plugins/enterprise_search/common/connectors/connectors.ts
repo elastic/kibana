@@ -161,6 +161,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 's3',
   },
   {
+    iconPath: 'servicenow.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['servicenow', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {
+      defaultMessage: 'ServiceNow',
+    }),
+    serviceType: 'servicenow',
+  },
+  {
     iconPath: 'sharepoint_server.svg',
     isBeta: true,
     isNative: false,

@@ -13,3 +13,5 @@ export enum FetchStatus {
   COMPLETE = 'complete',
   ERROR = 'error',
 }
+
+export type DiscoverDisplayMode = 'embedded' | 'standalone';

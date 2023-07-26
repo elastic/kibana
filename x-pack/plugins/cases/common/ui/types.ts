@@ -16,13 +16,9 @@ import type {
   CasePatchRequest,
   CaseStatuses,
   User,
-  ActionConnector,
-  UserAction,
   SingleCaseMetricsResponse,
   Comment,
   Case as CaseSnakeCase,
-  UserActionFindResponse,
-  FindTypeField as UserActionFindTypeField,
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
@@ -30,12 +26,17 @@ import type {
   CaseSeverity,
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
-  GetCaseConnectorsResponse,
   GetCaseUsersResponse,
-  CaseUserActionStatsResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
+import type { ActionConnector, UserAction } from '../types/domain';
+import type {
+  CaseUserActionStatsResponse,
+  GetCaseConnectorsResponse,
+  UserActionFindRequestTypes,
+  UserActionFindResponse,
+} from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -67,7 +68,7 @@ export const SeverityAll = 'all' as const;
 export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 export const UserActionTypeAll = 'all' as const;
-export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
+export type CaseUserActionTypeWithAll = UserActionFindRequestTypes | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.

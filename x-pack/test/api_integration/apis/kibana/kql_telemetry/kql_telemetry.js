@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
@@ -15,9 +17,10 @@ export default function ({ getService }) {
     describe('no auth', () => {
       it('should return 401', async () => {
         return supertestNoAuth
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/internal/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .set('kbn-xsrf', 'much access')
+          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           .send({ opt_in: true })
           .expect(401);
       });
@@ -26,9 +29,10 @@ export default function ({ getService }) {
     describe('with auth', () => {
       it('should return 200 for a successful request', async () => {
         return supertest
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/internal/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .set('kbn-xsrf', 'such token, wow')
+          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           .send({ opt_in: true })
           .expect('Content-Type', /json/)
           .expect(200)

@@ -9,8 +9,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { copyToClipboard } from '@elastic/eui';
 import { ShareButton } from './share_button';
 import React from 'react';
-import { FLYOUT_URL_PARAM } from '../../url/use_sync_flyout_state_with_url';
 import { FLYOUT_HEADER_SHARE_BUTTON_TEST_ID } from './test_ids';
+import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

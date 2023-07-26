@@ -10,8 +10,8 @@ import type {
   FieldConfig,
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ConnectorTypeFields } from '../../common/api';
-import { ConnectorTypes } from '../../common/api';
+import type { ConnectorTypeFields } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
 import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';

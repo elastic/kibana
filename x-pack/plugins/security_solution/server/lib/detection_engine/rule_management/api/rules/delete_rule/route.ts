@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import {
   QueryRuleByIds,
   validateQueryRuleByIds,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';

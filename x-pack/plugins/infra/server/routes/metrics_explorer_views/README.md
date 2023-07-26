@@ -77,38 +77,32 @@ Status code: 200
     "updatedAt": 1681398305034,
     "attributes": {
       "name": "Ad-hoc",
-      "isDefault": true,
-      "isStatic": false,
-      "metric": {
-        "type": "cpu"
+      "options": {
+        "aggregation": "avg",
+        "metrics": [
+          {
+            "aggregation": "avg",
+            "field": "system.cpu.total.norm.pct",
+            "color": "color0"
+          },
+        ],
+        "source": "default",
+        "groupBy": [
+          "host.name"
+        ]
       },
-      "sort": {
-        "by": "name",
-        "direction": "desc"
+      "chartOptions": {
+        "type": "line",
+        "yAxisMode": "fromZero",
+        "stack": false
       },
-      "groupBy": [],
-      "nodeType": "host",
-      "view": "map",
-      "customOptions": [],
-      "customMetrics": [],
-      "boundsOverride": {
-        "max": 1,
-        "min": 0
+      "currentTimerange": {
+        "from": "now-1h",
+        "to": "now",
+        "interval": ">=10s"
       },
-      "autoBounds": true,
-      "accountId": "",
-      "region": "",
-      "autoReload": false,
-      "filterQuery": {
-        "expression": "",
-        "kind": "kuery"
-      },
-      "legend": {
-        "palette": "cool",
-        "reverseColors": false,
-        "steps": 10
-      },
-      "timelineOpen": false
+      "isDefault": false,
+      "isStatic": false
     }
   }
 }
@@ -130,23 +124,47 @@ Status code: 404
 
 Creates a new metrics explorer view.
 
+`aggregation`: `"avg" | "max" | "min" | "cardinality" | "rate" | "count" | "sum" | "p95" | "p99" | "custom"`
+
+`metrics.aggregation`: `"avg" | "max" | "min" | "cardinality" | "rate" | "count" | "sum" | "p95" | "p99" | "custom"`
+
+`chartOptions.type`: `"line" | "area" | "bar"`
+`chartOptions.yAxisMode`: `"fromZero" | "auto" | "bar"`
+
 ### Request
 
 - **Method**: POST
 - **Path**: /api/infra/metrics_explorer_views
 - **Request body**:
+
   ```json
   {
     "attributes": {
       "name": "View name",
-      "metric": {
-        "type": "cpu"
+      "options": {
+        "aggregation": "avg",
+        "metrics": [
+          {
+            "aggregation": "avg",
+            "field": "system.cpu.total.norm.pct",
+            "color": "color0"
+          },
+        ],
+        "source": "default",
+        "groupBy": [
+          "host.name"
+        ]
       },
-      "sort": {
-        "by": "name",
-        "direction": "desc"
+      "chartOptions": {
+        "type": "line",
+        "yAxisMode": "fromZero",
+        "stack": false
       },
-      //...
+      "currentTimerange": {
+        "from": "now-1h",
+        "to": "now",
+        "interval": ">=10s"
+      },
     }
   }
   ```
@@ -165,38 +183,32 @@ Status code: 201
     "updatedAt": 1681398305034,
     "attributes": {
       "name": "View name",
+      "options": {
+        "aggregation": "avg",
+        "metrics": [
+          {
+            "aggregation": "avg",
+            "field": "system.cpu.total.norm.pct",
+            "color": "color0"
+          },
+        ],
+        "source": "default",
+        "groupBy": [
+          "host.name"
+        ]
+      },
+      "chartOptions": {
+        "type": "line",
+        "yAxisMode": "fromZero",
+        "stack": false
+      },
+      "currentTimerange": {
+        "from": "now-1h",
+        "to": "now",
+        "interval": ">=10s"
+      },
       "isDefault": false,
-      "isStatic": false,
-      "metric": {
-        "type": "cpu"
-      },
-      "sort": {
-        "by": "name",
-        "direction": "desc"
-      },
-      "groupBy": [],
-      "nodeType": "host",
-      "view": "map",
-      "customOptions": [],
-      "customMetrics": [],
-      "boundsOverride": {
-        "max": 1,
-        "min": 0
-      },
-      "autoBounds": true,
-      "accountId": "",
-      "region": "",
-      "autoReload": false,
-      "filterQuery": {
-        "expression": "",
-        "kind": "kuery"
-      },
-      "legend": {
-        "palette": "cool",
-        "reverseColors": false,
-        "steps": 10
-      },
-      "timelineOpen": false
+      "isStatic": false
     }
   }
 }
@@ -234,14 +246,30 @@ Any attempt to update the static view with id `0` will return a `400 The metrics
   {
     "attributes": {
       "name": "View name",
-      "metric": {
-        "type": "cpu"
+      "options": {
+        "aggregation": "avg",
+        "metrics": [
+          {
+            "aggregation": "avg",
+            "field": "system.cpu.total.norm.pct",
+            "color": "color0"
+          },
+        ],
+        "source": "default",
+        "groupBy": [
+          "host.name"
+        ]
       },
-      "sort": {
-        "by": "name",
-        "direction": "desc"
+      "chartOptions": {
+        "type": "line",
+        "yAxisMode": "fromZero",
+        "stack": false
       },
-      //...
+      "currentTimerange": {
+        "from": "now-1h",
+        "to": "now",
+        "interval": ">=10s"
+      }
     }
   }
   ```
@@ -260,38 +288,32 @@ Status code: 200
     "updatedAt": 1681398305034,
     "attributes": {
       "name": "View name",
+      "options": {
+        "aggregation": "avg",
+        "metrics": [
+          {
+            "aggregation": "avg",
+            "field": "system.cpu.total.norm.pct",
+            "color": "color0"
+          },
+        ],
+        "source": "default",
+        "groupBy": [
+          "host.name"
+        ]
+      },
+      "chartOptions": {
+        "type": "line",
+        "yAxisMode": "fromZero",
+        "stack": false
+      },
+      "currentTimerange": {
+        "from": "now-1h",
+        "to": "now",
+        "interval": ">=10s"
+      },
       "isDefault": false,
-      "isStatic": false,
-      "metric": {
-        "type": "cpu"
-      },
-      "sort": {
-        "by": "name",
-        "direction": "desc"
-      },
-      "groupBy": [],
-      "nodeType": "host",
-      "view": "map",
-      "customOptions": [],
-      "customMetrics": [],
-      "boundsOverride": {
-        "max": 1,
-        "min": 0
-      },
-      "autoBounds": true,
-      "accountId": "",
-      "region": "",
-      "autoReload": false,
-      "filterQuery": {
-        "expression": "",
-        "kind": "kuery"
-      },
-      "legend": {
-        "palette": "cool",
-        "reverseColors": false,
-        "steps": 10
-      },
-      "timelineOpen": false
+      "isStatic": false
     }
   }
 }

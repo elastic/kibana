@@ -267,9 +267,6 @@ export class ChromeService {
     const getHeaderComponent = () => {
       if (chromeStyle$.getValue() === 'project') {
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-        const projectNavigation$ = projectNavigation
-          .getProjectNavigation$()
-          .pipe(takeUntil(this.stop$));
         const projectBreadcrumbs$ = projectNavigation
           .getProjectBreadcrumbs$()
           .pipe(takeUntil(this.stop$));
@@ -279,11 +276,7 @@ export class ChromeService {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
           const activeNodes = useObservable(activeNodes$, []);
 
-          const currentProjectNavigation = useObservable(projectNavigation$, undefined);
-          // TODO: remove this switch once security sets project navigation tree
-          const currentProjectBreadcrumbs$ = currentProjectNavigation
-            ? projectBreadcrumbs$
-            : breadcrumbs$;
+          const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
 
           let SideNavComponent: ISideNavComponent = () => null;
 

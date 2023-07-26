@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useKibana } from '../../../../common/lib/kibana';
