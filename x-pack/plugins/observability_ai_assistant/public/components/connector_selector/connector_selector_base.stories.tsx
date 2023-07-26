@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { ComponentProps } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { ConnectorSelectorBase as Component } from './connector_selector_base';
 
 const meta: ComponentMeta<typeof Component> = {
@@ -15,6 +17,14 @@ const meta: ComponentMeta<typeof Component> = {
 };
 
 export default meta;
+
+const render = (props: ComponentProps<typeof Component>) => {
+  return (
+    <EuiPanel hasBorder hasShadow={false}>
+      <Component {...props} />
+    </EuiPanel>
+  );
+};
 
 export const Loaded: ComponentStoryObj<typeof Component> = {
   args: {
@@ -25,12 +35,14 @@ export const Loaded: ComponentStoryObj<typeof Component> = {
       { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
     ] as FindActionResult[],
   },
+  render,
 };
 
 export const Loading: ComponentStoryObj<typeof Component> = {
   args: {
     loading: true,
   },
+  render,
 };
 
 export const Empty: ComponentStoryObj<typeof Component> = {
@@ -38,6 +50,7 @@ export const Empty: ComponentStoryObj<typeof Component> = {
     loading: false,
     connectors: [],
   },
+  render,
 };
 
 export const FailedToLoad: ComponentStoryObj<typeof Component> = {
@@ -45,4 +58,5 @@ export const FailedToLoad: ComponentStoryObj<typeof Component> = {
     loading: false,
     error: new Error('Failed to load connectors'),
   },
+  render,
 };

@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 
 interface Props {
   error?: Error;

@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useChatConversation } from '../../hooks/use_chat_conversation';
-import { ChatTimeline } from './chat_timeline';
+import React, { useState } from 'react';
+import { ConversationCreateRequest } from '../../../common/types';
+import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
-import { AssistantAvatar } from '../assistant_avatar';
+import { ChatTimeline } from './chat_timeline';
 
 export interface ChatFlyoutProps {
-  conversationId?: string;
+  conversation: ConversationCreateRequest;
+  connectors: UseGenAIConnectorsResult;
 }
 
-export function ChatFlyout({ conversationId }: ChatFlyoutProps) {
-  const { title, messages } = useChatConversation({ conversationId });
+export function ChatFlyout({ conversation, connectors }: ChatFlyoutProps) {
+  const {
+    conversation: { title },
+    messages,
+  } = conversation;
 
   const [isOpen, setIsOpen] = useState(true);
 
@@ -35,16 +32,7 @@ export function ChatFlyout({ conversationId }: ChatFlyoutProps) {
   return isOpen ? (
     <EuiFlyout onClose={() => setIsOpen(false)} size="m">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AssistantAvatar size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2>{title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ChatHeader title={title} connectors={connectors} />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

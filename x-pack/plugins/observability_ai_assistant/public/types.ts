@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
@@ -42,10 +46,13 @@ export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssi
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   triggersActions: TriggersAndActionsUIPublicPluginSetup;
+  security: SecurityPluginSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   triggersActions: TriggersAndActionsUIPublicPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
 }
 
 export interface ConfigSchema {}
