@@ -12,10 +12,12 @@ import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../..';
+import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
 import { ExportType } from '../../../../export_types/common';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../../lib';
@@ -31,9 +33,10 @@ import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs'
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('GET /internal/reporting/jobs/download', () => {
+describe('GET ${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
@@ -48,6 +51,21 @@ describe('GET /internal/reporting/jobs/download', () => {
         hits: sources.map((source: object) => ({ _source: source })),
       },
     } as estypes.SearchResponseBody;
+  };
+
+  const mockJobTypeUnencoded = 'unencodedJobType';
+  const mockJobTypeBase64Encoded = 'base64EncodedJobType';
+  const getCompleteHits = ({
+    jobType = mockJobTypeUnencoded,
+    outputContentType = 'text/plain',
+    title = '',
+  } = {}) => {
+    return getHits({
+      jobtype: jobType,
+      status: 'completed',
+      output: { content_type: outputContentType },
+      payload: { title },
+    }) as estypes.SearchResponseBody;
   };
 
   const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
@@ -84,16 +102,21 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
+    usageCounter = {
+      incrementCounter: jest.fn(),
+    };
+    core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
+
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
       id: 'unencoded',
-      jobType: 'unencodedJobType',
+      jobType: mockJobTypeUnencoded,
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
     } as ExportType);
     exportTypesRegistry.register({
       id: 'base64Encoded',
-      jobType: 'base64EncodedJobType',
+      jobType: mockJobTypeBase64Encoded,
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
@@ -107,6 +130,9 @@ describe('GET /internal/reporting/jobs/download', () => {
         this.push(null);
       },
     }) as typeof stream;
+    stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+      callback();
+    });
 
     (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
   });
@@ -122,7 +148,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/1')
+      .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -148,7 +174,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/dope')
+      .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
       .expect(401)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
@@ -162,7 +188,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/poo')
+      .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
       .expect(404);
   });
 
@@ -178,14 +204,14 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/poo')
+      .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
       .expect(403);
   });
 
   it(`returns job's info`, async () => {
     mockEsClient.search.mockResponseOnce(
       getHits({
-        jobtype: 'base64EncodedJobType',
+        jobtype: mockJobTypeBase64Encoded,
         payload: {}, // payload is irrelevant
       })
     );
@@ -195,7 +221,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/info/test')
+      .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
       .expect(200);
   });
 
@@ -212,14 +238,14 @@ describe('GET /internal/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/info/test')
+      .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
       .expect(403);
   });
 
   it('when a job is incomplete', async () => {
     mockEsClient.search.mockResponseOnce(
       getHits({
-        jobtype: 'unencodedJobType',
+        jobtype: mockJobTypeUnencoded,
         status: 'pending',
         payload: { title: 'incomplete!' },
       })
@@ -228,7 +254,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/dank')
+      .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
       .expect(503)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect('Retry-After', '30')
@@ -238,7 +264,7 @@ describe('GET /internal/reporting/jobs/download', () => {
   it('when a job fails', async () => {
     mockEsClient.search.mockResponse(
       getHits({
-        jobtype: 'unencodedJobType',
+        jobtype: mockJobTypeUnencoded,
         status: 'failed',
         output: { content: 'job failure message' },
         payload: { title: 'failing job!' },
@@ -248,7 +274,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get('/internal/reporting/jobs/download/dank')
+      .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .then(({ body }) =>
@@ -257,26 +283,13 @@ describe('GET /internal/reporting/jobs/download', () => {
   });
 
   describe('successful downloads', () => {
-    const getCompleteHits = ({
-      jobType = 'unencodedJobType',
-      outputContentType = 'text/plain',
-      title = '',
-    } = {}) => {
-      return getHits({
-        jobtype: jobType,
-        status: 'completed',
-        output: { content_type: outputContentType },
-        payload: { title },
-      }) as estypes.SearchResponseBody;
-    };
-
     it('when a known job-type is complete', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dank')
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
@@ -293,7 +306,7 @@ describe('GET /internal/reporting/jobs/download', () => {
       await server.start();
 
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dope')
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
@@ -302,14 +315,14 @@ describe('GET /internal/reporting/jobs/download', () => {
     it('forwards job content stream', async () => {
       mockEsClient.search.mockResponseOnce(
         getCompleteHits({
-          jobType: 'unencodedJobType',
+          jobType: mockJobTypeUnencoded,
         })
       );
       registerJobInfoRoutes(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dank')
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .then(({ text }) => expect(text).toEqual('test'));
@@ -318,7 +331,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     it('refuses to return unknown content-types', async () => {
       mockEsClient.search.mockResponseOnce(
         getCompleteHits({
-          jobType: 'unencodedJobType',
+          jobType: mockJobTypeUnencoded,
           outputContentType: 'application/html',
         })
       );
@@ -326,7 +339,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dank')
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(400)
         .then(({ body }) => {
           expect(body).toEqual({
@@ -340,7 +353,7 @@ describe('GET /internal/reporting/jobs/download', () => {
     it('allows multi-byte characters in file names', async () => {
       mockEsClient.search.mockResponseOnce(
         getCompleteHits({
-          jobType: 'base64EncodedJobType',
+          jobType: mockJobTypeBase64Encoded,
           title: '日本語ダッシュボード',
         })
       );
@@ -348,7 +361,7 @@ describe('GET /internal/reporting/jobs/download', () => {
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/japanese-dashboard')
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/japanese-dashboard`)
         .expect(200)
         .expect('Content-Type', 'application/pdf')
         .expect(
@@ -386,7 +399,7 @@ describe('GET /internal/reporting/jobs/download', () => {
       await server.start();
 
       await supertest(httpSetup.server.listener)
-        .get('/internal/reporting/jobs/download/dope')
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
         .expect(403)
         .then(({ body }) =>
           expect(body.message).toMatchInlineSnapshot(`
@@ -394,6 +407,60 @@ describe('GET /internal/reporting/jobs/download', () => {
                                 target=\\"_blank\\" rel=\\"noopener\\">Learn more</a>."
           `)
         );
+    });
+  });
+
+  describe('usage counters', () => {
+    it('increments the info api counter', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/dank`)
+        .expect(200)
+        .expect('Content-Type', 'application/json; charset=utf-8');
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `get ${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/{docId}:${mockJobTypeUnencoded}`,
+        counterType: 'reportingApi',
+      });
+    });
+
+    it('increments the download api counter', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
+        .expect(200)
+        .expect('Content-Type', 'text/csv; charset=utf-8')
+        .expect('content-disposition', 'attachment; filename=report.csv');
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `get ${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/{docId}:${mockJobTypeUnencoded}`,
+        counterType: 'reportingApi',
+      });
+    });
+
+    it('increments the delete api counter', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
+        .expect(200)
+        .expect('Content-Type', 'application/json; charset=utf-8');
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `delete ${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/{docId}:${mockJobTypeUnencoded}`,
+        counterType: 'reportingApi',
+      });
     });
   });
 });

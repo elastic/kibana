@@ -12,10 +12,12 @@ import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
+import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
 import { ExportType } from '../../../export_types/common';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
@@ -27,13 +29,14 @@ import {
   createMockReportingCore,
 } from '../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../types';
-import { registerJobRoutes } from '../jobs';
+import { registerJobInfoRoutesPublic } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('GET /api/reporting/jobs/download', () => {
+describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
@@ -48,6 +51,19 @@ describe('GET /api/reporting/jobs/download', () => {
         hits: sources.map((source: object) => ({ _source: source })),
       },
     } as estypes.SearchResponseBody;
+  };
+
+  const getCompleteHits = ({
+    jobType = 'unencodedJobType',
+    outputContentType = 'text/plain',
+    title = '',
+  } = {}) => {
+    return getHits({
+      jobtype: jobType,
+      status: 'completed',
+      output: { content_type: outputContentType },
+      payload: { title },
+    }) as estypes.SearchResponseBody;
   };
 
   const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
@@ -84,18 +100,16 @@ describe('GET /api/reporting/jobs/download', () => {
 
     core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
+    usageCounter = {
+      incrementCounter: jest.fn(),
+    };
+    core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
+
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
       id: 'unencoded',
       jobType: 'unencodedJobType',
       jobContentExtension: 'csv',
-      validLicenses: ['basic', 'gold'],
-    } as ExportType);
-    exportTypesRegistry.register({
-      id: 'base64Encoded',
-      jobType: 'base64EncodedJobType',
-      jobContentEncoding: 'base64',
-      jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
     } as ExportType);
     core.getExportTypesRegistry = () => exportTypesRegistry;
@@ -107,6 +121,9 @@ describe('GET /api/reporting/jobs/download', () => {
         this.push(null);
       },
     }) as typeof stream;
+    stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+      callback();
+    });
 
     (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
   });
@@ -117,12 +134,12 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('fails on malformed download IDs', async () => {
     mockEsClient.search.mockResponseOnce(getHits());
-    registerJobRoutes(core);
+    registerJobInfoRoutesPublic(core);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/1')
+      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/1`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -143,12 +160,12 @@ describe('GET /api/reporting/jobs/download', () => {
       mockConfigSchema
     );
     core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-    registerJobRoutes(core);
+    registerJobInfoRoutesPublic(core);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/dope')
+      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dope`)
       .expect(401)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
@@ -157,11 +174,13 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('returns 404 if job not found', async () => {
     mockEsClient.search.mockResponseOnce(getHits());
-    registerJobRoutes(core);
+    registerJobInfoRoutesPublic(core);
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(404);
+    await supertest(httpSetup.server.listener)
+      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/poo`)
+      .expect(404);
   });
 
   it('returns a 403 if not a valid job type', async () => {
@@ -171,11 +190,13 @@ describe('GET /api/reporting/jobs/download', () => {
         payload: { title: 'invalid!' },
       })
     );
-    registerJobRoutes(core);
+    registerJobInfoRoutesPublic(core);
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(403);
+    await supertest(httpSetup.server.listener)
+      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/poo`)
+      .expect(403);
   });
 
   it('when a job is incomplete', async () => {
@@ -186,11 +207,11 @@ describe('GET /api/reporting/jobs/download', () => {
         payload: { title: 'incomplete!' },
       })
     );
-    registerJobRoutes(core);
+    registerJobInfoRoutesPublic(core);
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/dank')
+      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
       .expect(503)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect('Retry-After', '30')
@@ -206,11 +227,11 @@ describe('GET /api/reporting/jobs/download', () => {
         payload: { title: 'failing job!' },
       })
     );
-    registerJobRoutes(core);
+    registerJobInfoRoutesPublic(core);
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/dank')
+      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .then(({ body }) =>
@@ -219,29 +240,53 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   describe('successful downloads', () => {
-    const getCompleteHits = ({
-      jobType = 'unencodedJobType',
-      outputContentType = 'text/plain',
-      title = '',
-    } = {}) => {
-      return getHits({
-        jobtype: jobType,
-        status: 'completed',
-        output: { content_type: outputContentType },
-        payload: { title },
-      }) as estypes.SearchResponseBody;
-    };
-
     it('when a known job-type is complete', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
-      registerJobRoutes(core);
+      registerJobInfoRoutesPublic(core);
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get('/api/reporting/jobs/download/dank')
+        .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
+    });
+  });
+
+  describe('usage counters', () => {
+    it('increments the download api counter', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutesPublic(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
+        .expect(200)
+        .expect('Content-Type', 'text/csv; charset=utf-8')
+        .expect('content-disposition', 'attachment; filename=report.csv');
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `get ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/{docId}:unencodedJobType`,
+        counterType: 'reportingApi',
+      });
+    });
+
+    it('increments the delete api counter', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutesPublic(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete(`/api/reporting/jobs/delete/dank`)
+        .expect(200)
+        .expect('Content-Type', 'application/json; charset=utf-8');
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'delete /api/reporting/jobs/delete/{docId}:unencodedJobType',
+        counterType: 'reportingApi',
+      });
     });
   });
 });

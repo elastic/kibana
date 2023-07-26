@@ -52,7 +52,6 @@ export const jobManagementPreRouting = async (
     });
   }
 
-  // Count usage once allowing the request
   counters.usageCounter(jobtype);
 
   try {
