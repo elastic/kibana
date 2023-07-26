@@ -68,7 +68,7 @@ describe('Invalid Indicators', () => {
       esArchiverUnload('threat_intelligence/invalid_indicators_data');
     });
 
-    it.skip('should display data grid despite the missing fields', () => {
+    it('should display data grid despite the missing fields', () => {
       cy.get(INDICATORS_TABLE).should('exist');
 
       // there are 19 documents in the x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence/invalid_indicators_data/data.json
