@@ -78,6 +78,8 @@ export const getMSearch = <ReturnItem, SOAttributes extends object>({
         ReturnItem,
         ReturnItem
       >(
+        // Ran into a case where a schema was broken by a SO attribute that wasn't part of the definition
+        // so we specify which attributes are allowed
         savedObjectToItem<SOAttributes>(
           savedObject as SavedObjectsFindResult<SOAttributes>,
           allowedSavedObjectAttributes
