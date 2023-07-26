@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCspmUsageRecord } from './cspm_metring_task';
+import { getCspmUsageRecord } from './cspm_metering_task';
 import type { MeteringCallbackInput, UsageRecord } from '../types';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
@@ -16,6 +16,7 @@ export const cloudSecurityMetringCallback = async ({
   logger,
   taskId,
   lastSuccessfulReport,
+  abortController,
 }: MeteringCallbackInput): Promise<UsageRecord[]> => {
   const projectId = cloudSetup?.serverless?.projectId || 'missing project id';
 
@@ -32,6 +33,7 @@ export const cloudSecurityMetringCallback = async ({
       logger,
       taskId,
       lastSuccessfulReport,
+      abortController,
     });
 
     if (cspmUsageRecord) {
