@@ -22,7 +22,7 @@ export function SloList({ autoRefresh }: Props) {
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortField | undefined>('error_budget_remaining');
+  const [sort, setSort] = useState<SortField | undefined>('status');
 
   const { isInitialLoading, isLoading, isRefetching, isError, sloList, refetch } = useFetchSloList({
     page: activePage + 1,

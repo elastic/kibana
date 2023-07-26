@@ -46,6 +46,7 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
       defaultMessage: 'SLO status',
     }),
     type: 'status',
+    checked: 'on',
   },
   {
     label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
@@ -58,7 +59,6 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
       defaultMessage: 'Error budget remaining',
     }),
     type: 'error_budget_remaining',
-    checked: 'on',
   },
 ];
 
