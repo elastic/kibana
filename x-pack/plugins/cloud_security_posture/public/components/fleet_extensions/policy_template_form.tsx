@@ -79,8 +79,8 @@ interface IntegrationInfoFieldsProps {
   onChange(field: string, value: string): void;
 }
 
-const SINGLE_ACCOUNT = 'single_account';
-const ORGANIZATION_ACCOUNT = 'organization_account';
+const SINGLE_ACCOUNT = 'single-account';
+const ORGANIZATION_ACCOUNT = 'organization-account';
 type AwsAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
