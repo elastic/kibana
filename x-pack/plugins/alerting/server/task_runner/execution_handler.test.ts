@@ -902,7 +902,6 @@ describe('Execution Handler', () => {
       ruleId: '1',
       spaceId: 'test1',
       excludedAlertInstanceIds: ['foo'],
-      isLifecycleAlert: false,
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1023,7 +1022,6 @@ describe('Execution Handler', () => {
       ruleId: '1',
       spaceId: 'test1',
       excludedAlertInstanceIds: ['foo'],
-      isLifecycleAlert: false,
     });
     expect(result).toEqual({
       throttledSummaryActions: {
@@ -1374,7 +1372,6 @@ describe('Execution Handler', () => {
       alertsFilter: {
         query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
       },
-      isLifecycleAlert: false,
     });
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
@@ -1439,7 +1436,6 @@ describe('Execution Handler', () => {
       alertsFilter: {
         query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
       },
-      isLifecycleAlert: false,
     });
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
@@ -1497,7 +1493,6 @@ describe('Execution Handler', () => {
       alertsFilter: {
         query: { kql: 'kibana.alert.instance.id:1', dsl: '{}', filters: [] },
       },
-      isLifecycleAlert: false,
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
       {
