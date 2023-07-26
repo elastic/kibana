@@ -95,10 +95,25 @@ export const INTRODUCTION_TITLE = i18n.translate(
   }
 );
 
-export const INTRODUCTION_STEP = i18n.translate(
+export const INTRODUCTION_STEP1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step',
   {
     defaultMessage: 'Get to know Elastic Security',
+  }
+);
+
+export const INTRODUCTION_STEP1_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1.description1',
+  {
+    defaultMessage: `Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.
+    `,
+  }
+);
+
+export const INTRODUCTION_STEP1_DESCRIPTION2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1.description2',
+  {
+    defaultMessage: `To explore the platform’s core features, watch the video:`,
   }
 );
 
@@ -123,27 +138,6 @@ export const PRODUCT_BADGE_EDR = i18n.translate(
   }
 );
 
-export const WATCH_OVERVIEW_VIDEO_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.description1',
-  {
-    defaultMessage: `Elastic security keeps your organization’s data safe from attack. `,
-  }
-);
-
-export const WATCH_OVERVIEW_VIDEO_DESCRIPTION2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.description2',
-  {
-    defaultMessage: `Our unified security platform combines Analytics, EDR, and cloud security capabilities into a single SaaS product, providing organizations with a comprehensive solution to protect against a wide range of security threats. With centralized management, real-time threat detection and response, and scalability, our platform can help organizations improve their security posture and reduce the risk of data breaches.`,
-  }
-);
-
-export const WATCH_OVERVIEW_VIDEO_DESCRIPTION3 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.description3',
-  {
-    defaultMessage: `Watch the video to explore the core features that allow you to keep your data safe.`,
-  }
-);
-
 export const WATCH_OVERVIEW_VIDEO_HEADER = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.header',
   {
@@ -165,10 +159,40 @@ export const CONFIGURE_STEP1 = i18n.translate(
   }
 );
 
+export const CONFIGURE_STEP1_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1',
+  {
+    defaultMessage:
+      'Deploy the Elastic Agent to each endpoint you want to protect. This allows it to monitor and protect them by collecting data and enforcing your security policies. It sends that data to the Elastic Stack for analysis and storage.',
+  }
+);
+
+export const CONFIGURE_STEP1_DESCRIPTION2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description2',
+  {
+    defaultMessage: 'In the next step, you will deploy the Elastic Agent to your endpoints.',
+  }
+);
+
 export const CONFIGURE_STEP2 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2',
   {
     defaultMessage: 'Deploy Elastic Agent to protect your endpoints',
+  }
+);
+
+export const CONFIGURE_STEP2_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description1',
+  {
+    defaultMessage:
+      'In order to begin detecting security misconfigurations, you’ll need to deploy Elastic Agent to the cloud account or Kubernetes cluster you want to monitor.',
+  }
+);
+
+export const CONFIGURE_STEP2_BUTTON = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.button.title',
+  {
+    defaultMessage: 'Install Agent',
   }
 );
 
@@ -179,10 +203,32 @@ export const CONFIGURE_STEP3 = i18n.translate(
   }
 );
 
+export const CONFIGURE_STEP3_BUTTON = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.button.title',
+  {
+    defaultMessage: 'Add integrations',
+  }
+);
+
 export const CONFIGURE_STEP4 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4',
   {
     defaultMessage: 'Enable pre-built rules',
+  }
+);
+
+export const CONFIGURE_STEP4_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description1',
+  {
+    defaultMessage:
+      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are  met.',
+  }
+);
+
+export const CONFIGURE_STEP4_BUTTON = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.button.title',
+  {
+    defaultMessage: 'Add Elastic rules',
   }
 );
 
@@ -200,10 +246,24 @@ export const EXPLORE_STEP1 = i18n.translate(
   }
 );
 
+export const EXPLORE_STEP1_BUTTON = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.button.title',
+  {
+    defaultMessage: 'View alerts',
+  }
+);
+
 export const EXPLORE_STEP2 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2',
   {
     defaultMessage: 'Analyze data dashboards',
+  }
+);
+
+export const EXPLORE_STEP2_BUTTON = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.button.title',
+  {
+    defaultMessage: 'Go to dashboards',
   }
 );
 
@@ -249,6 +309,20 @@ export const MASTER_THE_INVESTIGATION_STEP3 = i18n.translate(
   }
 );
 
+export const MASTER_THE_INVESTIGATION_STEP4 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.step4',
+  {
+    defaultMessage: 'Explore threat hunting in Timeline',
+  }
+);
+
+export const MASTER_THE_INVESTIGATION_STEP5 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.step5',
+  {
+    defaultMessage: 'Introduction to cases',
+  }
+);
+
 export const RESPOND_TO_THREATS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.title',
   {
@@ -256,10 +330,59 @@ export const RESPOND_TO_THREATS_TITLE = i18n.translate(
   }
 );
 
+export const RESPOND_TO_THREATS_STEP1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.step1',
+  {
+    defaultMessage: 'Automate response actions with rules',
+  }
+);
+
+export const RESPOND_TO_THREATS_STEP2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.step1',
+  {
+    defaultMessage: 'Take control of your endpoints with the Response Console',
+  }
+);
+
 export const OPTIMIZE_YOUR_WORKSPACE_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.title',
   {
     defaultMessage: 'Optimize your workspace',
+  }
+);
+
+export const OPTIMIZE_YOUR_WORKSPACE_STEP1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.step1',
+  {
+    defaultMessage: 'Enable Threat Intelligence',
+  }
+);
+
+export const OPTIMIZE_YOUR_WORKSPACE_STEP2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.step2',
+  {
+    defaultMessage: 'Enable Entity Analytics',
+  }
+);
+
+export const OPTIMIZE_YOUR_WORKSPACE_STEP3 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.step3',
+  {
+    defaultMessage: 'Create custom rules',
+  }
+);
+
+export const OPTIMIZE_YOUR_WORKSPACE_STEP4 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.step4',
+  {
+    defaultMessage: 'Introduction to exceptions',
+  }
+);
+
+export const OPTIMIZE_YOUR_WORKSPACE_STEP5 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.step5',
+  {
+    defaultMessage: 'Connect notification systems to get alerts in real-time',
   }
 );
 

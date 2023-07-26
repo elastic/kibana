@@ -71,17 +71,17 @@ describe('useTogglePanel', () => {
           [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
             id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 5,
           },
           [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
             id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 5,
           },
           [GetMoreFromElasticSecurityCardId.respondToThreats]: {
             id: GetMoreFromElasticSecurityCardId.respondToThreats,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
           },
         },
       })
@@ -123,17 +123,17 @@ describe('useTogglePanel', () => {
           [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
             id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 5,
           },
           [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
             id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 5,
           },
           [GetMoreFromElasticSecurityCardId.respondToThreats]: {
             id: GetMoreFromElasticSecurityCardId.respondToThreats,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
           },
         },
       })
@@ -176,17 +176,17 @@ describe('useTogglePanel', () => {
           [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
             id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 5,
           },
           [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
             id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 5,
           },
           [GetMoreFromElasticSecurityCardId.respondToThreats]: {
             id: GetMoreFromElasticSecurityCardId.respondToThreats,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
           },
         },
       })

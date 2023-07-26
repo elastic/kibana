@@ -40,12 +40,8 @@ const edrBadge = {
 export const introductionSteps = [
   {
     id: IntroductionSteps.getToKnowElasticSecurity,
-    title: i18n.INTRODUCTION_STEP,
-    description: [
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION3,
-    ],
+    title: i18n.INTRODUCTION_STEP1,
+    description: [i18n.INTRODUCTION_STEP1_DESCRIPTION1, i18n.INTRODUCTION_STEP1_DESCRIPTION2],
     splitPanel: (
       <iframe
         allowFullScreen
@@ -69,22 +65,34 @@ const configureSteps = [
   {
     id: ConfigureSteps.learnAbout,
     title: i18n.CONFIGURE_STEP1,
+    description: [i18n.CONFIGURE_STEP1_DESCRIPTION1, i18n.CONFIGURE_STEP1_DESCRIPTION2],
     badges: [cloudBadge, edrBadge],
   },
   {
     id: ConfigureSteps.deployElasticAgent,
     title: i18n.CONFIGURE_STEP2,
     badges: [cloudBadge, edrBadge],
+    description: [i18n.CONFIGURE_STEP2_DESCRIPTION1],
+    button: {
+      children: i18n.CONFIGURE_STEP2_BUTTON,
+    },
   },
   {
     id: ConfigureSteps.connectToDataSources,
     title: i18n.CONFIGURE_STEP3,
     badges: [analyticsBadge, cloudBadge, edrBadge],
+    button: {
+      children: i18n.CONFIGURE_STEP3_BUTTON,
+    },
   },
   {
     id: ConfigureSteps.enablePrebuiltRules,
     title: i18n.CONFIGURE_STEP4,
     badges: [analyticsBadge, cloudBadge, edrBadge],
+    description: [i18n.CONFIGURE_STEP4_DESCRIPTION1],
+    button: {
+      children: i18n.CONFIGURE_STEP4_BUTTON,
+    },
   },
 ];
 
@@ -93,11 +101,17 @@ const exploreSteps = [
     id: ExploreSteps.viewAlerts,
     title: i18n.EXPLORE_STEP1,
     badges: [analyticsBadge, cloudBadge, edrBadge],
+    button: {
+      children: i18n.EXPLORE_STEP1_BUTTON,
+    },
   },
   {
     id: ExploreSteps.analyzeData,
     title: i18n.EXPLORE_STEP2,
     badges: [analyticsBadge, cloudBadge, edrBadge],
+    button: {
+      children: i18n.EXPLORE_STEP2_BUTTON,
+    },
   },
 ];
 
@@ -119,12 +133,12 @@ const masterTheInvestigationsWorkflowSteps = [
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-    title: '',
+    title: i18n.MASTER_THE_INVESTIGATION_STEP4,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.introductionToCases,
-    title: '',
+    title: i18n.MASTER_THE_INVESTIGATION_STEP5,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
 ];
@@ -132,12 +146,12 @@ const masterTheInvestigationsWorkflowSteps = [
 const respondToThreatsSteps = [
   {
     id: RespondToThreatsSteps.automated,
-    title: '',
+    title: i18n.RESPOND_TO_THREATS_STEP1,
     badges: [edrBadge],
   },
   {
     id: RespondToThreatsSteps.takeControlOfEndpoint,
-    title: '',
+    title: i18n.RESPOND_TO_THREATS_STEP2,
     badges: [edrBadge],
   },
 ];
@@ -145,27 +159,27 @@ const respondToThreatsSteps = [
 const optimizeYourWorkSpaceSteps = [
   {
     id: OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-    title: '',
+    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP1,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-    title: '',
+    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP2,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.createCustomRules,
-    title: '',
+    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP3,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.introductionToExceptions,
-    title: '',
+    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP4,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.connectNotification,
-    title: '',
+    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP5,
     badges: [analyticsBadge, cloudBadge, edrBadge],
   },
 ];
@@ -184,7 +198,6 @@ export const sections: Section[] = [
           (totalMin, { timeInMinutes }) => totalMin + timeInMinutes,
           0
         ),
-        stepsLeft: introductionSteps.length,
       },
       {
         icon: { type: 'agentApp', size: 'xl' },

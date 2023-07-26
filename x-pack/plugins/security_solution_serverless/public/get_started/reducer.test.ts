@@ -141,17 +141,17 @@ describe('getActiveCardsInitialStates', () => {
       [SectionId.getMoreFromElasticSecurity]: {
         [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
           id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-          stepsLeft: 0,
+          stepsLeft: 5,
           timeInMins: 0,
         },
         [GetMoreFromElasticSecurityCardId.respondToThreats]: {
           id: GetMoreFromElasticSecurityCardId.respondToThreats,
-          stepsLeft: 0,
+          stepsLeft: 2,
           timeInMins: 0,
         },
         [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
           id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-          stepsLeft: 0,
+          stepsLeft: 5,
           timeInMins: 0,
         },
       },

@@ -16,6 +16,7 @@ import {
   EuiText,
   useEuiTheme,
   EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
@@ -35,7 +36,7 @@ const CardStepComponent: React.FC<{
 }> = ({
   sectionId,
   cardId,
-  step: { id: stepId, title, badges, description, splitPanel },
+  step: { id: stepId, title, badges, description, splitPanel, button },
   onStepClicked,
   onStepButtonClicked,
   finishedStepsByCard = new Set(),
@@ -52,6 +53,8 @@ const CardStepComponent: React.FC<{
   );
 
   const isDone = finishedStepsByCard.has(stepId);
+
+  const hasStepContent = description || splitPanel || button;
 
   const handleStepButtonClicked = useCallback(
     (e) => {
@@ -79,7 +82,13 @@ const CardStepComponent: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={1} onClick={toggleStep}>
           <strong>
-            {title}
+            <span
+              css={css`
+                padding-right: ${euiTheme.size.m};
+              `}
+            >
+              {title}
+            </span>
             {badges.map((badge) => (
               <EuiBadge key={`${stepId}-badge-${badge.id}`} color="hollow">
                 {badge.name}
@@ -102,7 +111,7 @@ const CardStepComponent: React.FC<{
                 border-radius: ${euiTheme.base * 0.375}px;
                 border: 1px solid ${euiTheme.colors.lightShade};
                 .euiIcon {
-                  inline-size: ${euiTheme.size.m}px;
+                  inline-size: ${euiTheme.size.m};
                 }
               `}
               onClick={handleStepButtonClicked}
@@ -120,7 +129,7 @@ const CardStepComponent: React.FC<{
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {expandStep && (description || splitPanel) && (
+      {expandStep && hasStepContent && (
         <>
           <EuiSpacer size="l" />
           <EuiSplitPanel.Outer
@@ -130,9 +139,13 @@ const CardStepComponent: React.FC<{
             hasShadow={false}
             borderRadius="none"
           >
-            {description && (
-              <EuiSplitPanel.Inner>
-                <EuiSpacer size="s" />
+            {(description || button) && (
+              <EuiSplitPanel.Inner
+                paddingSize="none"
+                css={css`
+                  padding-left: ${euiTheme.size.l};
+                `}
+              >
                 <EuiText size="s">
                   {description?.map((desc, index) => (
                     <p key={`${stepId}-description-${index}`} className="eui-displayBlock">
@@ -140,10 +153,23 @@ const CardStepComponent: React.FC<{
                     </p>
                   ))}
                 </EuiText>
+                {button && (
+                  <>
+                    <EuiSpacer size="xl" />
+                    <EuiButton {...button} fill={button.fill ?? true} />
+                  </>
+                )}
               </EuiSplitPanel.Inner>
             )}
             {splitPanel && (
-              <EuiSplitPanel.Inner paddingSize="none">{splitPanel}</EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner
+                paddingSize="none"
+                css={css`
+                  padding-left: ${euiTheme.size.m};
+                `}
+              >
+                {splitPanel}
+              </EuiSplitPanel.Inner>
             )}
           </EuiSplitPanel.Outer>
         </>
