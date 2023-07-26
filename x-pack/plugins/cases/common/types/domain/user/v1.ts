@@ -41,11 +41,14 @@ export const UsersRt = rt.array(UserRt);
 export type User = rt.TypeOf<typeof UserRt>;
 export type UserWithProfileInfo = rt.TypeOf<typeof UserWithProfileInfoRt>;
 
-export const GetCaseUsersResponseRt = rt.strict({
-  assignees: rt.array(UserWithProfileInfoRt),
-  unassignedUsers: rt.array(UserWithProfileInfoRt),
-  participants: rt.array(UserWithProfileInfoRt),
-  reporter: UserWithProfileInfoRt,
+export const CaseUserProfileRt = rt.strict({
+  uid: rt.string,
 });
 
-export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;
+export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
+
+/**
+ * Assignees
+ */
+export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
+export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;

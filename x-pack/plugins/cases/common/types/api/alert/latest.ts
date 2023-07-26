@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseUserProfileRt } from './user_profiles';
-
-export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
-
-export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;
+export * from './v1';

@@ -6,9 +6,22 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_SUGGESTED_PROFILES } from '../../constants';
-import { limitedNumberSchema } from '../../schema';
+import { MAX_SUGGESTED_PROFILES } from '../../../constants';
+import { limitedNumberSchema } from '../../../schema';
+import { UserWithProfileInfoRt } from '../../domain/user/v1';
 
+export const GetCaseUsersResponseRt = rt.strict({
+  assignees: rt.array(UserWithProfileInfoRt),
+  unassignedUsers: rt.array(UserWithProfileInfoRt),
+  participants: rt.array(UserWithProfileInfoRt),
+  reporter: UserWithProfileInfoRt,
+});
+
+export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;
+
+/**
+ * User Profiles
+ */
 export const SuggestUserProfilesRequestRt = rt.intersection([
   rt.strict({
     name: rt.string,
@@ -22,9 +35,3 @@ export const SuggestUserProfilesRequestRt = rt.intersection([
 ]);
 
 export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
-
-export const CaseUserProfileRt = rt.strict({
-  uid: rt.string,
-});
-
-export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
