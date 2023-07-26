@@ -1104,10 +1104,7 @@ describe('Alerts Client', () => {
   });
 
   describe('getSummarizedAlerts', () => {
-    let alertsClient: AlertsClient<{}, {}, {}, 'default', 'recovered'>;
-
     beforeEach(() => {
-      alertsClient = new AlertsClient(alertsClientParams);
       clusterClient.search.mockReturnValue({
         // @ts-ignore
         hits: { total: { value: 0 }, hits: [] },
@@ -1143,6 +1140,7 @@ describe('Alerts Client', () => {
           hits: { total: { value: 0 }, hits: [] },
         });
 
+      const alertsClient = new AlertsClient(alertsClientParams);
       const result = await alertsClient.getSummarizedAlerts(getParamsByExecutionUuid);
 
       expect(clusterClient.search).toHaveBeenCalledTimes(3);
@@ -1182,11 +1180,15 @@ describe('Alerts Client', () => {
         // @ts-ignore
         hits: { total: { value: 1 }, hits: [mockAAD] },
       });
-
-      const result = await alertsClient.getSummarizedAlerts({
-        ...getParamsByExecutionUuid,
-        isLifecycleAlert: false,
+      const alertsClient = new AlertsClient({
+        ...alertsClientParams,
+        ruleType: {
+          ...alertsClientParams.ruleType,
+          autoRecoverAlerts: false,
+        },
       });
+
+      const result = await alertsClient.getSummarizedAlerts(getParamsByExecutionUuid);
 
       expect(clusterClient.search).toHaveBeenCalledTimes(1);
 
@@ -1210,10 +1212,11 @@ describe('Alerts Client', () => {
       interface AlertData extends RuleAlertData {
         'signal.rule.consumer': string;
       }
-      const newAlertsClient = new AlertsClient<AlertData, {}, {}, 'default', 'recovered'>({
+      const alertsClient = new AlertsClient<AlertData, {}, {}, 'default', 'recovered'>({
         ...alertsClientParams,
         ruleType: {
           ...alertsClientParams.ruleType,
+          autoRecoverAlerts: false,
           alerts: {
             context: 'test',
             mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
@@ -1241,10 +1244,7 @@ describe('Alerts Client', () => {
         },
       });
 
-      const result = await newAlertsClient.getSummarizedAlerts({
-        ...getParamsByExecutionUuid,
-        isLifecycleAlert: false,
-      });
+      const result = await alertsClient.getSummarizedAlerts(getParamsByExecutionUuid);
 
       expect(clusterClient.search).toHaveBeenCalledTimes(1);
 
@@ -1365,7 +1365,14 @@ describe('Alerts Client', () => {
             }),
           },
         ])('$text', async ({ params, call1, call2, call3 }) => {
-          await alertsClient.getSummarizedAlerts({ ...params, isLifecycleAlert });
+          const alertsClient = new AlertsClient({
+            ...alertsClientParams,
+            ruleType: {
+              ...alertsClientParams.ruleType,
+              autoRecoverAlerts: isLifecycleAlert,
+            },
+          });
+          await alertsClient.getSummarizedAlerts(params);
           expect(clusterClient.search).toHaveBeenCalledTimes(isLifecycleAlert ? 3 : 1);
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, call1);
           if (isLifecycleAlert) {
@@ -1377,6 +1384,11 @@ describe('Alerts Client', () => {
     });
 
     describe('throws error', () => {
+      let alertsClient: AlertsClient<{}, {}, {}, 'default', 'recovered'>;
+
+      beforeEach(() => {
+        alertsClient = new AlertsClient(alertsClientParams);
+      });
       test('if ruleId is not specified', async () => {
         const { ruleId, ...paramsWithoutRuleId } = getParamsByExecutionUuid;
 

@@ -66,14 +66,12 @@ export const getParamsByExecutionUuid: GetSummarizedAlertsParams<{}> = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],
-  isLifecycleAlert: true,
   executionUuid: '111',
 };
 export const getParamsByTimeQuery: GetSummarizedAlertsParams<{}> = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],
-  isLifecycleAlert: true,
   end: new Date(),
   start: new Date(),
 };
