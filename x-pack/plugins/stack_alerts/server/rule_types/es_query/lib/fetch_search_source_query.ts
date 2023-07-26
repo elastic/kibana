@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit, pickBy, mapValues } from 'lodash';
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
@@ -221,19 +220,5 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  const dataViewSpec = dataView.toSpec(false);
-
-  if (dataViewSpec.fieldAttrs) {
-    // remove `count` props
-    dataViewSpec.fieldAttrs = pickBy(
-      mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
-      (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
-    );
-
-    if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
-      dataViewSpec.fieldAttrs = undefined;
-    }
-  }
-
-  return dataViewSpec;
+  return dataView.toMinimalSpec();
 }
