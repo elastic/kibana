@@ -59,7 +59,7 @@ Kibana should also not have the ability to modify system/hidden indices for whic
 |-------|--------|-----
 | User-defined data index | none | `my-data`, `kibana-metrics` |
 | System index not owned by Kibana | `read` | `.security` |
-| System indices owned by Kibana | `all` | `.kibana*` |
+| System indices owned by Kibana | `all` | `.kibana*`, '.fleet*' |
 
 #### Decision tree
 <DocWhimsical id="kibana-system-privilege-decision-tree-VTTGaTtjs9SnpbRNSg2Ptp" title="Decision tree" />
