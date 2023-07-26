@@ -40,5 +40,6 @@
     "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/tooling-log",
     "@kbn/fleet-plugin",
+    "@kbn/cases-plugin",
   ]
 }
