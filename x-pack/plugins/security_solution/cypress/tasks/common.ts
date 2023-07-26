@@ -269,7 +269,7 @@ export const deleteDataView = (dataSource: string) => {
 export const scrollToBottom = () => cy.scrollTo('bottom');
 
 export const waitForPageToBeLoaded = () => {
-  cy.waitForNetworkIdle(2000);
+  cy.waitForNetworkIdle(10000);
 };
 
 export const waitForWelcomePanelToBeLoaded = () => {
