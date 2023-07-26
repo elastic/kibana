@@ -117,6 +117,10 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor);
 
       expect(apiResponse.status).eql(200);
+
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
       expect(apiResponse.body).eql(
         omit(
           {
@@ -124,6 +128,8 @@ export default function ({ getService }: FtrProviderContext) {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
             revision: 1,
           },
           secretKeys
@@ -186,7 +192,12 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertestAPI
-        .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', apiResponse.body.id))
+        .get(
+          SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace(
+            '{monitorId}',
+            apiResponse.body.config_id
+          )
+        )
         .set('kbn-xsrf', 'true')
         .expect(200);
 
