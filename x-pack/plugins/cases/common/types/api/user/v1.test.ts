@@ -5,137 +5,11 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
-import { UserRt, UserWithProfileInfoRt, UsersRt, GetCaseUsersResponseRt } from './user';
+import { MAX_SUGGESTED_PROFILES } from '../../../constants';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { GetCaseUsersResponseRt, SuggestUserProfilesRequestRt } from './v1';
 
 describe('User', () => {
-  describe('UserRt', () => {
-    const defaultRequest = {
-      full_name: 'elastic',
-      email: 'testemail@elastic.co',
-      username: 'elastic',
-      profile_uid: 'profile-uid-1',
-    };
-    it('has expected attributes in request', () => {
-      const query = UserRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = UserRt.decode({
-        ...defaultRequest,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-  });
-
-  describe('UserWithProfileInfoRt', () => {
-    const defaultRequest = {
-      uid: '1',
-      avatar: {
-        initials: 'SU',
-        color: 'red',
-        imageUrl: 'https://google.com/image1',
-      },
-      user: {
-        username: 'user',
-        email: 'some.user@google.com',
-        full_name: 'Some Super User',
-      },
-    };
-
-    it('has expected attributes in request', () => {
-      const query = UserWithProfileInfoRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it.each(['initials', 'color', 'imageUrl'])('does not returns an error if %s is null', (key) => {
-      const reqWithNullImage = set(defaultRequest, `avatar.${key}`, null);
-      const query = UserWithProfileInfoRt.decode(reqWithNullImage);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: reqWithNullImage,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = UserWithProfileInfoRt.decode({
-        ...defaultRequest,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from avatar', () => {
-      const query = UserWithProfileInfoRt.decode({
-        ...defaultRequest,
-        avatar: { ...defaultRequest.avatar, foo: 'bar' },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-  });
-
-  describe('UsersRt', () => {
-    const defaultRequest = [
-      {
-        email: 'reporter_no_uid@elastic.co',
-        full_name: 'Reporter No UID',
-        username: 'reporter_no_uid',
-        profile_uid: 'reporter-uid',
-      },
-      {
-        full_name: 'elastic',
-        email: 'testemail@elastic.co',
-        username: 'elastic',
-      },
-    ];
-
-    it('has expected attributes in request', () => {
-      const query = UsersRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = UsersRt.decode([
-        {
-          ...defaultRequest[0],
-          foo: 'bar',
-        },
-      ]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: [defaultRequest[0]],
-      });
-    });
-  });
-
   describe('GetCaseUsersResponseRt', () => {
     const defaultRequest = {
       assignees: [
@@ -268,6 +142,91 @@ describe('User', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+  });
+
+  describe('UserProfile', () => {
+    describe('SuggestUserProfilesRequestRt', () => {
+      const defaultRequest = {
+        name: 'damaged_raccoon',
+        owners: ['cases'],
+        size: 5,
+      };
+
+      it('has expected attributes in request', () => {
+        const query = SuggestUserProfilesRequestRt.decode(defaultRequest);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            name: 'damaged_raccoon',
+            owners: ['cases'],
+            size: 5,
+          },
+        });
+      });
+
+      it('has only name and owner in request', () => {
+        const query = SuggestUserProfilesRequestRt.decode({
+          name: 'damaged_raccoon',
+          owners: ['cases'],
+          foo: 'bar',
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            name: 'damaged_raccoon',
+            owners: ['cases'],
+          },
+        });
+      });
+
+      it('missing size parameter works correctly', () => {
+        const query = SuggestUserProfilesRequestRt.decode({
+          name: 'di maria',
+          owners: ['benfica'],
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            name: 'di maria',
+            owners: ['benfica'],
+          },
+        });
+      });
+
+      it('removes foo:bar attributes from request', () => {
+        const query = SuggestUserProfilesRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: {
+            name: 'damaged_raccoon',
+            owners: ['cases'],
+            size: 5,
+          },
+        });
+      });
+
+      it(`does not accept size param bigger than ${MAX_SUGGESTED_PROFILES}`, () => {
+        const query = SuggestUserProfilesRequestRt.decode({
+          ...defaultRequest,
+          size: MAX_SUGGESTED_PROFILES + 1,
+        });
+
+        expect(PathReporter.report(query)).toContain('The size field cannot be more than 10.');
+      });
+
+      it('does not accept size param lower than 1', () => {
+        const query = SuggestUserProfilesRequestRt.decode({
+          ...defaultRequest,
+          size: 0,
+        });
+
+        expect(PathReporter.report(query)).toContain('The size field cannot be less than 1.');
       });
     });
   });

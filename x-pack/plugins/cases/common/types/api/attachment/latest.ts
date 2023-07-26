@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './case';
-export * from './comment';
-export * from './status';
-export * from './constants';
-export * from './alerts';
-export * from './user_profiles';
-export * from './assignee';
+export * from './v1';
