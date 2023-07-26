@@ -43,8 +43,17 @@ declare global {
 
     interface Chainable<Subject = any> {
       /**
-       * Get Elements by `data-test-subj`
+       * Get Elements by `data-test-subj`. Note that his is a parent query and can only be used
+       * from `cy`
+       *
        * @param args
+       *
+       * @example
+       * // Correct:
+       * cy.getByTestSubj('some-subject);
+       *
+       * // Incorrect:
+       * cy.get('someElement').getByTestSubj('some-subject);
        */
       getByTestSubj<E extends Node = HTMLElement>(
         ...args: Parameters<Cypress.Chainable<E>['get']>
