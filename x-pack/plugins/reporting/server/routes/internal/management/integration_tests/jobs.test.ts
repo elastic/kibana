@@ -33,7 +33,7 @@ import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs'
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('GET ${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}', () => {
+describe(`GET ${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
@@ -459,6 +459,23 @@ describe('GET ${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}', () => {
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: `delete ${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/{docId}:${mockJobTypeUnencoded}`,
+        counterType: 'reportingApi',
+      });
+    });
+
+    it('increments the count api counter', async () => {
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(INTERNAL_ROUTES.JOBS.COUNT)
+        .expect(200)
+        .expect('Content-Type', 'text/plain; charset=utf-8');
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `get ${INTERNAL_ROUTES.JOBS.COUNT}`,
         counterType: 'reportingApi',
       });
     });

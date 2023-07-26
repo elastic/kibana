@@ -30,7 +30,7 @@ import { registerGenerationRoutesPublic } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('POST /api/reporting/generate', () => {
+describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;

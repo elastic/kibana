@@ -30,7 +30,7 @@ import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('POST /internal/reporting/generate', () => {
+describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;

@@ -26,7 +26,7 @@ type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
-describe('POST /diagnose/browser', () => {
+describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = loggingSystemMock.createLogger();
