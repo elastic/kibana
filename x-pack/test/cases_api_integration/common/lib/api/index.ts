@@ -26,28 +26,30 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import {
-  Case,
-  CaseStatuses,
-  Cases,
-  CasesFindResponse,
-  CasesPatchRequest,
-  CasesStatusResponse,
-  AlertResponse,
-  ConnectorMappingsAttributes,
-  CasesByAlertId,
-  CaseResolveResponse,
-  SingleCaseMetricsResponse,
-  CasesMetricsResponse,
-  CasesBulkGetResponse,
-} from '@kbn/cases-plugin/common/api';
+import { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common/api';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
-import { Configurations, Configuration } from '@kbn/cases-plugin/common/types/domain';
-import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import {
+  Configurations,
+  Configuration,
+  ConnectorMappingsAttributes,
+  Case,
+  Cases,
+  CaseStatuses,
+} from '@kbn/cases-plugin/common/types/domain';
+import {
+  AlertResponse,
+  CaseResolveResponse,
+  CasesBulkGetResponse,
+  CasesFindResponse,
+  CasesPatchRequest,
+  CasesStatusResponse,
+  ConfigurationPatchRequest,
+  GetRelatedCasesByAlertResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -608,7 +610,7 @@ export const getCasesByAlert = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CasesByAlertId> => {
+}): Promise<GetRelatedCasesByAlertResponse> => {
   const { body: res } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/alerts/${alertID}`)
     .auth(auth.user.username, auth.user.password)

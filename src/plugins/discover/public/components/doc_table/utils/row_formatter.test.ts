@@ -12,7 +12,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('Row formatter', () => {
   let services: DiscoverServices;

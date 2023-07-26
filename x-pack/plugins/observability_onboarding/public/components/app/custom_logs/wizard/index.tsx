@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
-import { createWizardContext } from '../../../../context/create_wizard_context';
+import { i18n } from '@kbn/i18n';
+import {
+  createWizardContext,
+  Step,
+} from '../../../../context/create_wizard_context';
 import { ConfigureLogs } from './configure_logs';
 import { Inspect } from './inspect';
 import { InstallElasticAgent } from './install_elastic_agent';
@@ -51,11 +54,19 @@ export type CustomLogsSteps =
   | 'installElasticAgent'
   | 'inspect';
 
-const steps: Record<CustomLogsSteps, ComponentType<{}>> = {
-  selectLogs: SelectLogs,
-  configureLogs: ConfigureLogs,
-  installElasticAgent: InstallElasticAgent,
-  inspect: Inspect,
+const steps: Record<CustomLogsSteps, Step> = {
+  selectLogs: { component: SelectLogs },
+  configureLogs: { component: ConfigureLogs },
+  installElasticAgent: {
+    component: InstallElasticAgent,
+    title: i18n.translate(
+      'xpack.observability_onboarding.customLogs.installShipper.title',
+      {
+        defaultMessage: 'Install shipper to collect logs',
+      }
+    ),
+  },
+  inspect: { component: Inspect },
 };
 
 const {
@@ -64,7 +75,7 @@ const {
   routes: customLogsRoutes,
 } = createWizardContext({
   initialState,
-  initialStep: 'selectLogs',
+  initialStep: 'configureLogs',
   steps,
   basePath: '/customLogs',
 });

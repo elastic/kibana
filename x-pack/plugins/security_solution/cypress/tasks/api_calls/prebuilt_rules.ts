@@ -199,6 +199,6 @@ export const createAndInstallMockedPrebuiltRules = ({
     createNewRuleAsset({ rule });
   });
   if (installToKibana) {
-    installAllPrebuiltRulesRequest();
+    return installAllPrebuiltRulesRequest();
   }
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { SyntheticsMonitorWithSecrets } from '../../../../../common/runtime_types';
+import { SyntheticsMonitorWithSecretsAttributes } from '../../../../../common/runtime_types';
 
 export const httpUI = {
   type: 'synthetics-monitor',
@@ -46,4 +46,4 @@ export const httpUI = {
   coreMigrationVersion: '8.8.0',
   updated_at: '2023-04-11T17:42:11.734Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;

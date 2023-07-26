@@ -401,20 +401,18 @@ export const ControlGeneralViewResponse = ({
                 onChange={onToggleAction}
               />
             </EuiFlexItem>
-            {response.type === 'file' && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.actionBlockHelp}>
-                  <EuiCheckbox
-                    id={`response_${index}_block`}
-                    data-test-subj="cloud-defend-chkblockaction"
-                    label={i18n.actionBlock}
-                    checked={blockSelected}
-                    onChange={onToggleAction}
-                    disabled={!alertSelected}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.actionBlockHelp}>
+                <EuiCheckbox
+                  id={`response_${index}_block`}
+                  data-test-subj="cloud-defend-chkblockaction"
+                  label={i18n.actionBlock}
+                  checked={blockSelected}
+                  onChange={onToggleAction}
+                  disabled={!alertSelected}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
       </EuiForm>

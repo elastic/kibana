@@ -3901,6 +3901,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.uninstall_tokens",
+            "type": "Function",
+            "tags": [],
+            "label": "uninstall_tokens",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.pagePathGetters.data_streams",
             "type": "Function",
             "tags": [],
@@ -20638,9 +20654,7 @@
         "parentPluginId": "fleet",
         "id": "def-common.ListWithKuery",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": [],
         "label": "ListWithKuery",
         "description": [],
         "signature": [
@@ -20661,9 +20675,8 @@
           }
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/common.ts",
-        "deprecated": true,
+        "deprecated": false,
         "trackAdoption": false,
-        "references": [],
         "children": [
           {
             "parentPluginId": "fleet",
@@ -22630,6 +22643,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.lifecycle]",
+            "description": [],
+            "signature": [
+              "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -24189,6 +24217,21 @@
           "\"endpoint\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_ENROLLMENT_API_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_ENROLLMENT_API_PREFIX",
+        "description": [],
+        "signature": [
+          "\"fleet-enrollment-api-keys\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
