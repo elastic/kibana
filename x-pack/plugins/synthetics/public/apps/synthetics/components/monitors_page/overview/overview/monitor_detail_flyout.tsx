@@ -322,8 +322,6 @@ export function MonitorDetailFlyout(props: Props) {
               monitor={{
                 ...monitorObject,
                 id,
-                updated_at: monitorObject.updated_at!,
-                created_at: monitorObject.created_at!,
               }}
               loading={Boolean(loading)}
             />
