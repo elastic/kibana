@@ -50,6 +50,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
+import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -68,13 +69,14 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { NavigationLink } from './common/links';
+import type { AppLinkItems, NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
+import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -136,6 +138,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 }
 
 export interface ContractStartServices {
+  extraRoutes$: Observable<RouteProps[]>;
   isSidebarEnabled$: Observable<boolean>;
   getStartedComponent$: Observable<React.ComponentType | null>;
   upselling: UpsellingService;
@@ -161,6 +164,7 @@ export type StartServices = CoreStart &
     telemetry: TelemetryClientStart;
     discoverFilterManager: FilterManager;
     customDataService: DataPublicPluginStart;
+    topValuesPopover: TopValuesPopoverService;
   };
 
 export interface PluginSetup {
@@ -170,6 +174,8 @@ export interface PluginSetup {
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
+  setExtraAppLinks: (extraAppLinks: AppLinkItems) => void;
+  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
