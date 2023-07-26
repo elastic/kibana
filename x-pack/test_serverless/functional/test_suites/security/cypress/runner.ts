@@ -25,6 +25,9 @@ export async function SecuritySolutionCypressTestRunner(
     CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
     ...envVars,
   };
 }
