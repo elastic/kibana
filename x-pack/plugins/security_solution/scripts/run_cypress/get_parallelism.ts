@@ -57,7 +57,7 @@ import { getRun, getRunsFeed } from './gql';
     );
 
     // try to fit into 20min per agent due to some long running tests
-    const parallelism = Math.ceil(totalRunTime / 1200000);
+    const parallelism = Math.ceil(totalRunTime / 1000000);
 
     // eslint-disable-next-line no-console
     console.log(parallelism);
