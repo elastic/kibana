@@ -740,7 +740,16 @@ export class Embeddable
     return String(language).toUpperCase();
   }
 
-  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+  async updateAllAttributes(attrs: LensSavedObjectAttributes) {
+    const viz = this.savedVis;
+    const newViz = {
+      ...viz,
+      ...attrs,
+    };
+    this.updateInput({ attributes: newViz });
+  }
+
+  async updateSuggestion(datasourceState: unknown, visualizationState: unknown) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
@@ -797,7 +806,8 @@ export class Embeddable
         <Component
           attributes={attributes}
           dataView={dataView}
-          updateAll={this.updateVisualization.bind(this)}
+          updateSuggestion={this.updateSuggestion.bind(this)}
+          updateAllAttributes={this.updateAllAttributes.bind(this)}
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
           panelId={this.id}

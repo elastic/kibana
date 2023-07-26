@@ -113,7 +113,7 @@ describe('LensEditConfigurationFlyout', () => {
     return {
       attributes: lensAttributes,
       dataView,
-      updateAll: jest.fn(),
+      updateSuggestion: jest.fn(),
       coreStart: coreMock.createStart(),
       startDependencies,
       visualizationMap,

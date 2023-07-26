@@ -14,7 +14,9 @@ import type { DatasourceMap, VisualizationMap } from '../../../types';
 export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
   dataView: DataView;
-  updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
+  updateSuggestion: (datasourceState: unknown, visualizationState: unknown) => void;
+  updateAllAttributes?: (attrs: TypedLensByValueInput['attributes']) => void;
+  setCurrentAttributes?: (attrs: TypedLensByValueInput['attributes']) => void;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;

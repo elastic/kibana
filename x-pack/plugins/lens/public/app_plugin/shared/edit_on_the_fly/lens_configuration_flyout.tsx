@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  getIndexPatternFromSQLQuery,
+  type AggregateQuery,
+  // type Query,
+} from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { useLensSelector } from '../../../state_management';
-
-import type { Suggestion } from '../../../types';
+// import type { Suggestion } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
 import type { EditConfigPanelProps } from './types';
 import { LayerConfiguration } from './layer_configuration';
 import { FlyoutWrapper } from './flyout_wrapper';
+import { getLensAttributes } from './get_lens_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -26,22 +31,32 @@ export function LensEditConfigurationFlyout({
   visualizationMap,
   datasourceMap,
   datasourceId,
-  updateAll,
+  updateAllAttributes,
+  setCurrentAttributes,
   dataView,
   closeFlyout,
   adaptersTables,
   canEditTextBasedQuery,
 }: EditConfigPanelProps) {
-  const query = attributes.state.query;
-  const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(query);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>();
+  // const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(query);
+  // const [suggestions, setSuggestions] = useState<Suggestion[]>();
 
   const runQuery = useCallback(
     async (q: AggregateQuery) => {
-      setQueryTextBased(q);
+      // setQueryTextBased(q);
+      let indexPattern = '';
+      if ('sql' in q) {
+        indexPattern = getIndexPatternFromSQLQuery(q.sql);
+      }
+      const dv =
+        indexPattern && indexPattern !== dataView.name
+          ? await startDependencies.dataViews.create({
+              title: indexPattern,
+            })
+          : dataView;
       const table = await fetchDataFromAggregateQuery(
         q,
-        dataView,
+        dv,
         startDependencies.data,
         startDependencies.expressions
       );
@@ -49,7 +64,7 @@ export function LensEditConfigurationFlyout({
       const columns = table?.columns?.map(({ name }) => name);
 
       const context = {
-        dataViewSpec: dataView?.toSpec(),
+        dataViewSpec: dv?.toSpec(),
         fieldName: '',
         contextualFields: columns,
         query: q,
@@ -57,15 +72,26 @@ export function LensEditConfigurationFlyout({
 
       const allSuggestions =
         suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
-
-      setSuggestions(allSuggestions);
+      const currentSuggestion = allSuggestions[0];
+      const attrs = getLensAttributes({
+        filters: [],
+        query: q,
+        dataView: dv,
+        suggestion: currentSuggestion,
+      });
+      updateAllAttributes?.(attrs);
+      setCurrentAttributes?.(attrs);
+      // setSuggestions(allSuggestions);
     },
     [
       dataView,
       datasourceMap,
       startDependencies.data,
+      startDependencies.dataViews,
       startDependencies.expressions,
       visualizationMap,
+      updateAllAttributes,
+      setCurrentAttributes,
     ]
   );
 
@@ -91,7 +117,7 @@ export function LensEditConfigurationFlyout({
 
   return (
     <>
-      {isOfAggregateQueryType(query) && (
+      {isOfAggregateQueryType(attributes.state.query) && (
         <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
           <EuiTitle size="xs">
             <h2 id="Edit Lens configuration">
@@ -104,9 +130,9 @@ export function LensEditConfigurationFlyout({
       )}
       <FlyoutWrapper datasourceId={datasourceId} closeFlyout={closeFlyout}>
         <>
-          {isOfAggregateQueryType(queryTextBased) && (
+          {isOfAggregateQueryType(attributes.state.query) && (
             <TextBasedLangEditor
-              query={queryTextBased}
+              query={attributes.state.query}
               onTextLangQueryChange={(q) => {}}
               expandCodeEditor={(status: boolean) => {}}
               isCodeEditorExpanded={true}

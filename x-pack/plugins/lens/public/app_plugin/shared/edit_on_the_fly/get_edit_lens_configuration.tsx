@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -24,6 +24,7 @@ import {
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 
@@ -84,7 +85,8 @@ export async function getEditLensConfiguration(
   return ({
     attributes,
     dataView,
-    updateAll,
+    updateSuggestion,
+    updateAllAttributes,
     closeFlyout,
     wrapInFlyout,
     datasourceId,
@@ -95,7 +97,9 @@ export async function getEditLensConfiguration(
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
-    const datasourceState = attributes.state.datasourceStates[datasourceId];
+    const [currentAttributes, setCurrentAttributes] =
+      useState<TypedLensByValueInput['attributes']>(attributes);
+    const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
     const storeDeps = {
       lensServices,
       datasourceMap,
@@ -108,12 +112,12 @@ export async function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(
       storeDeps,
       undefined,
-      updatingMiddleware(updateAll)
+      updatingMiddleware(updateSuggestion)
     );
     lensStore.dispatch(
       loadInitial({
         initialInput: {
-          attributes,
+          attributes: currentAttributes,
           id: panelId ?? generateId(),
         },
       })
@@ -146,9 +150,10 @@ export async function getEditLensConfiguration(
     };
 
     const configPanelProps = {
-      attributes,
+      attributes: currentAttributes,
       dataView,
-      updateAll,
+      updateSuggestion,
+      updateAllAttributes,
       closeFlyout,
       datasourceId,
       adaptersTables,
@@ -157,6 +162,7 @@ export async function getEditLensConfiguration(
       visualizationMap,
       datasourceMap,
       canEditTextBasedQuery,
+      setCurrentAttributes,
     };
 
     return getWrapper(

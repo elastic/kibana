@@ -68,7 +68,7 @@ export function ChartConfigPanel({
           attributes={lensAttributesContext.attributes}
           dataView={dataView}
           adaptersTables={lensTablesAdapter}
-          updateAll={updateSuggestion}
+          updateSuggestion={updateSuggestion}
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
