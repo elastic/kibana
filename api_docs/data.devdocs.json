@@ -13253,8 +13253,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -13541,12 +13541,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -20916,8 +20916,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -21204,12 +21204,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",

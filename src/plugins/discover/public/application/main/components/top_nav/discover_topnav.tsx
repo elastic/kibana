@@ -178,7 +178,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onCreateDefaultAdHocDataView: stateContainer.actions.onCreateDefaultAdHocDataView,
+    onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
     onChangeDataView: stateContainer.actions.onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,
@@ -201,8 +201,13 @@ export const DiscoverTopNav = ({
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
+  );
+
   return (
-    <AggregateQueryTopNavMenu
+    <SearchBar
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}

@@ -6,6 +6,7 @@
  */
 
 import { getDataTestSubjectSelector } from '../helpers/common';
+import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
@@ -65,7 +66,7 @@ export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-d
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const ALERTS_REFRESH_BTN = '[data-test-subj="querySubmitButton"]';
+export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="querySubmitButton"]`;
 
 export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
