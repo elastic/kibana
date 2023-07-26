@@ -104,11 +104,9 @@ const getFullTargetFieldName = (
   targetField: string | undefined,
   isTextExpansionModelSelected: boolean
 ) => {
-  let suffixedTargetField = (targetField ?? '').length > 0 ? targetField! : sourceField;
-  if (isTextExpansionModelSelected) {
-    suffixedTargetField = `${suffixedTargetField}_expanded`;
-  }
-
+  const suffixedTargetField = `${targetField || sourceField}${
+    isTextExpansionModelSelected ? '_expanded' : ''
+  }`;
   return getMlInferencePrefixedFieldName(suffixedTargetField);
 };
 

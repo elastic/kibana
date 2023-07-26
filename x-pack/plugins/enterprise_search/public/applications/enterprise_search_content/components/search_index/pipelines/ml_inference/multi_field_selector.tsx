@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -84,7 +84,7 @@ export const MultiFieldMapping: React.FC = () => {
   } = useValues(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { addSelectedFieldsToMapping, selectFields, setTargetField } = useActions(MLInferenceLogic);
-  const [placeholderText, setPlaceholderText] = React.useState<string>(
+  const [placeholderText, setPlaceholderText] = useState<string>(
     getInitialTargetFieldPlaceholderText(isTextExpansionModelSelected)
   );
 
@@ -184,10 +184,7 @@ export const MultiFieldMapping: React.FC = () => {
             fullWidth
           >
             <EuiFieldText
-              prepend={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetFieldPrefix',
-                { defaultMessage: 'ml.inference.' }
-              )}
+              prepend='ml.inference.'
               onChange={(e) => setTargetField(e.target.value)}
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
               disabled={isTextExpansionModelSelected || !isExactlyOneSourceFieldSelected}
