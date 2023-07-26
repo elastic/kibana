@@ -12,19 +12,19 @@ import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
  * Returned type for useTableState hook
  */
 export interface UseTableState<T> {
-  /*
+  /**
    * Callback function which gets called whenever the pagination or sorting state of the table changed
    */
   onTableChange: EuiInMemoryTable<T>['onTableChange'];
-  /*
+  /**
    * Pagination object which contains pageIndex, pageSize
    */
   pagination: Pagination;
-  /*
+  /**
    * Sort field and sort direction
    */
   sorting: { sort: { field: string; direction: Direction } };
-  /*
+  /**
    * setPageIndex setter function which updates page index
    */
   setPageIndex: Dispatch<SetStateAction<number>>;
