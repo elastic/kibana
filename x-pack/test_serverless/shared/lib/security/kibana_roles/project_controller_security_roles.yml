@@ -498,6 +498,14 @@ platform_engineer:
       privileges:
         - all
       resources: "*"
+    - application: fleet
+      privileges:
+        - all
+      resources: "*"
+    - application: fleetv2
+      privileges:
+        - all
+      resources: "*"
     - application: spaces
       privileges:
         - all
@@ -574,6 +582,10 @@ endpoint_operations_analyst:
       privileges:
         - all
       resources: "*"
+    - application: fleetv2
+      privileges:
+        - all
+      resources: "*"
     - application: spaces
       privileges:
         - all
@@ -625,6 +637,7 @@ endpoint_policy_manager:
         - event_filters_all
         - host_isolation_exceptions_all
         - blocklist_all
+        - endpoint_list_all
       resources: "*"
     - application: securitySolutionCases
       privileges:
@@ -646,7 +659,12 @@ endpoint_policy_manager:
       privileges:
         - all
       resources: "*"
+    - application: fleetv2
+      privileges:
+        - all
+      resources: "*"
     - application: spaces
       privileges:
         - all
       resources: "*"
+
