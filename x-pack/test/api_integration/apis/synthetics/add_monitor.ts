@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
@@ -49,12 +50,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
       expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
