@@ -72,7 +72,7 @@ export const MultiFieldMapping: React.FC = () => {
             label={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel',
               {
-                defaultMessage: 'Source field',
+                defaultMessage: 'Source text field',
               }
             )}
             helpText={i18n.translate(
@@ -169,7 +169,7 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.sourceFieldHeader',
         {
-          defaultMessage: 'Source field',
+          defaultMessage: 'Source text field',
         }
       ),
     },
@@ -220,12 +220,7 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
                 type: 'icon',
               },
             ],
-            name: i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions',
-              {
-                defaultMessage: 'Actions',
-              }
-            ),
+            name: '',
             width: '10%',
           } as EuiBasicTableColumn<FieldMapping>,
         ]),

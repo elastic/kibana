@@ -13595,7 +13595,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.pipelineNameExistsError": "名称已由其他管道使用。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.title": "创建或选择管道",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel": "选择已训练 ML 模型",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions": "操作",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping": "删除此映射",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping.caption": "删除映射“{sourceField}”-“{targetField}”",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.addMapping": "添加",
