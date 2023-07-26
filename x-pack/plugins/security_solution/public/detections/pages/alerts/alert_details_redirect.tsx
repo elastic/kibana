@@ -19,7 +19,7 @@ import { inputsSelectors } from '../../../common/store';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { resolveFlyoutParams } from './utils';
-import { FLYOUT_URL_PARAM } from '../../../flyout/url/use_sync_flyout_state_with_url';
+import { FLYOUT_URL_PARAM } from '../../../flyout/shared/hooks/url/use_sync_flyout_state_with_url';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
