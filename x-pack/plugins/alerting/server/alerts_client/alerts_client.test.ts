@@ -1210,9 +1210,23 @@ describe('Alerts Client', () => {
       interface AlertData extends RuleAlertData {
         'signal.rule.consumer': string;
       }
-      const newAlertsClient = new AlertsClient<AlertData, {}, {}, 'default', 'recovered'>(
-        alertsClientParams
-      );
+      const newAlertsClient = new AlertsClient<AlertData, {}, {}, 'default', 'recovered'>({
+        ...alertsClientParams,
+        ruleType: {
+          ...alertsClientParams.ruleType,
+          alerts: {
+            context: 'test',
+            mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+            shouldWrite: true,
+            formatAlert: (alert) => {
+              const alertCopy = { ...alert } as Partial<AlertData>;
+              alertCopy['kibana.alert.rule.consumer'] = alert['signal.rule.consumer'];
+              delete alertCopy['signal.rule.consumer'];
+              return alertCopy;
+            },
+          },
+        },
+      });
 
       clusterClient.search.mockReturnValueOnce({
         // @ts-ignore
@@ -1230,12 +1244,6 @@ describe('Alerts Client', () => {
       const result = await newAlertsClient.getSummarizedAlerts({
         ...getParamsByExecutionUuid,
         isLifecycleAlert: false,
-        formatAlert: (alert) => {
-          const alertCopy = { ...alert } as Partial<AlertData>;
-          alertCopy['kibana.alert.rule.consumer'] = alert['signal.rule.consumer'];
-          delete alertCopy['signal.rule.consumer'];
-          return alertCopy;
-        },
       });
 
       expect(clusterClient.search).toHaveBeenCalledTimes(1);

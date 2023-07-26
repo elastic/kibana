@@ -623,15 +623,12 @@ export class ExecutionHandler<
     ruleId: string;
     spaceId: string;
   }): Promise<CombinedSummarizedAlerts> {
-    const formatAlert = this.ruleType.alerts?.formatAlert;
-
     const optionsBase = {
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       alertsFilter: action.alertsFilter,
       isLifecycleAlert: this.ruleType.autoRecoverAlerts || false,
-      ...(formatAlert ? { formatAlert } : {}),
     };
 
     let options: GetSummarizedAlertsParams<AlertData>;

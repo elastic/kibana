@@ -13,7 +13,6 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsFilter,
-  FormatAlert,
   SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
@@ -161,7 +160,6 @@ export type GetSummarizedAlertsParams<AlertData extends RuleAlertData> = {
   spaceId: string;
   excludedAlertInstanceIds: string[];
   alertsFilter?: AlertsFilter | null;
-  formatAlert?: FormatAlert<AlertData>;
   isLifecycleAlert: boolean;
 } & (
   | { start: Date; end: Date; executionUuid?: never }

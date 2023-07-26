@@ -424,7 +424,6 @@ export class AlertsClient<
     start,
     end,
     executionUuid,
-    formatAlert,
     isLifecycleAlert = false,
   }: GetSummarizedAlertsParams<AlertData>): Promise<SummarizedAlerts> {
     if (!ruleId || !spaceId) {
@@ -449,21 +448,23 @@ export class AlertsClient<
       alertsFilter,
     };
 
+    const formatAlert = this.ruleType.alerts?.formatAlert;
+
     if (isLifecycleAlert) {
       const queryBodies = getLifecycleAlertsQueries(getQueryParams);
       const responses = await Promise.all(queryBodies.map((queryBody) => this.search(queryBody)));
 
       return {
-        new: getHitsWithCount<AlertData>(responses[0], formatAlert),
-        ongoing: getHitsWithCount<AlertData>(responses[1], formatAlert),
-        recovered: getHitsWithCount<AlertData>(responses[2], formatAlert),
+        new: getHitsWithCount(responses[0], formatAlert),
+        ongoing: getHitsWithCount(responses[1], formatAlert),
+        recovered: getHitsWithCount(responses[2], formatAlert),
       };
     }
 
     const response = await this.search(getContinualAlertsQuery(getQueryParams));
 
     return {
-      new: getHitsWithCount<AlertData>(response, formatAlert),
+      new: getHitsWithCount(response, formatAlert),
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     };
