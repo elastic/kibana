@@ -11,7 +11,7 @@ import { ObservabilityOnboardingState } from '../../saved_objects/observability_
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { createShipperApiKey } from './api_key/create_shipper_api_key';
 import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
-import { getFallbackUrls } from './get_fallback_urls';
+import { getFallbackKibanaUrl } from './get_fallback_urls';
 import { getHasLogs } from './get_has_logs';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
@@ -52,7 +52,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const kibanaUrl =
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
-      getFallbackUrls(coreStart).kibanaUrl; // falls back to local network binding
+      getFallbackKibanaUrl(coreStart); // falls back to local network binding
     const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
     const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
 
