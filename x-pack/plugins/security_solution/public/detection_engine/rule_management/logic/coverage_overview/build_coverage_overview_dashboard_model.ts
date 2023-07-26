@@ -10,18 +10,27 @@ import type {
   CoverageOverviewRuleAttributes,
 } from '../../../../../common/api/detection_engine';
 import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
-import {
-  subtechniques,
-  tactics,
-  technique as techniques,
-} from '../../../../detections/mitre/mitre_tactics_techniques';
+
 import type { CoverageOverviewDashboard } from '../../model/coverage_overview/dashboard';
 import type { CoverageOverviewRule } from '../../model/coverage_overview/rule';
 import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre_graph';
 
-export function buildCoverageOverviewDashboardModel(
+const lazyMitreConfiguration = () => {
+  /**
+   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+   * See https://webpack.js.org/api/module-methods/#magic-comments
+   */
+  return import(
+    /* webpackChunkName: "lazy_mitre_configuration" */
+    '../../../../detections/mitre/mitre_tactics_techniques'
+  );
+};
+
+export async function buildCoverageOverviewDashboardModel(
   apiResponse: CoverageOverviewResponse
-): CoverageOverviewDashboard {
+): Promise<CoverageOverviewDashboard> {
+  const mitreConfig = await lazyMitreConfiguration();
+  const { tactics, technique: techniques, subtechniques } = mitreConfig;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {
