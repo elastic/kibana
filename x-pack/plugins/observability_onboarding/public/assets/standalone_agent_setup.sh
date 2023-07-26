@@ -21,6 +21,7 @@ API_ENDPOINT=$2
 ELASTIC_AGENT_VERSION=$3
 ONBOARDING_ID=$4
 AUTO_DOWNLOAD_CONFIG=${5:-}
+CONFIG_TYPE=${6:-} #TODO this is temporary, the ONBOARDING_ID should be sufficient to download the correct config
 
 # require curl
 [ $(builtin type -P curl) ] || fail "curl required"
@@ -67,7 +68,7 @@ updateStepProgress() {
 ELASTIC_AGENT_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/beats/elastic-agent/${artifact}.tar.gz"
 echo "Downloading Elastic Agent archive from ${ELASTIC_AGENT_DOWNLOAD_URL}"
 updateStepProgress "ea-download" "loading"
-curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail
+echo "curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL";sleep 1 # curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail
 if [ "$?" -eq 0 ]; then
   echo "Downloaded Elastic Agent"
   updateStepProgress "ea-download" "complete"
@@ -136,7 +137,7 @@ downloadElasticAgentConfig() {
   echo "Downloading elastic-agent.yml"
   updateStepProgress "ea-config" "loading"
   curl --request GET \
-    --url "${API_ENDPOINT}/elastic_agent/config?onboardingId=${ONBOARDING_ID}" \
+    --url "${API_ENDPOINT}/elastic_agent/${CONFIG_TYPE}/config?onboardingId=${ONBOARDING_ID}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \

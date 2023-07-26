@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -16,34 +15,36 @@ import {
 import { i18n } from '@kbn/i18n';
 import { default as React, useCallback, useEffect, useState } from 'react';
 import { useWizard } from '.';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
-} from '../../../shared/get_elastic_agent_setup_command';
+} from '../../shared/get_elastic_agent_setup_command';
 import {
   InstallElasticAgentSteps,
   ProgressStepId,
   EuiStepStatus,
-} from '../../../shared/install_elastic_agent_steps';
+} from '../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
-} from '../../../shared/step_panel';
-import { ApiKeyBanner } from './api_key_banner';
-import { BackButton } from './back_button';
+} from '../../shared/step_panel';
+import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
 
 export function InstallElasticAgent() {
   const { navigateToKibanaUrl } = useKibanaNavigation();
-  const { goBack, goToStep, getState, setState } = useWizard();
+  const { getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  function onInspect() {
-    goToStep('inspect');
+  const datasetName = 'elastic-agent';
+  const namespace = 'default';
+
+  function onBack() {
+    navigateToKibanaUrl('/app/observabilityOnboarding');
   }
   function onContinue() {
     navigateToKibanaUrl('/app/logs/stream');
@@ -58,11 +59,9 @@ export function InstallElasticAgent() {
 
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
-      if (!hasAlreadySavedFlow(getState())) {
-        return callApi(
-          'GET /internal/observability_onboarding/custom_logs/privileges'
-        );
-      }
+      return callApi(
+        'GET /internal/observability_onboarding/custom_logs/privileges'
+      );
     },
     []
   );
@@ -79,14 +78,7 @@ export function InstallElasticAgent() {
     error,
   } = useFetcher(
     (callApi) => {
-      const {
-        datasetName,
-        serviceName,
-        namespace,
-        customConfigurations,
-        logFilePaths,
-      } = getState();
-      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
+      if (monitoringRole?.hasPrivileges) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/save',
           {
@@ -95,10 +87,7 @@ export function InstallElasticAgent() {
                 name: datasetName,
                 state: {
                   datasetName,
-                  serviceName,
                   namespace,
-                  customConfigurations,
-                  logFilePaths,
                 },
               },
             },
@@ -110,14 +99,7 @@ export function InstallElasticAgent() {
   );
 
   const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
-    const {
-      onboardingId,
-      datasetName,
-      serviceName,
-      namespace,
-      customConfigurations,
-      logFilePaths,
-    } = getState();
+    const { onboardingId } = getState();
     if (onboardingId) {
       return callApi(
         'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
@@ -127,10 +109,7 @@ export function InstallElasticAgent() {
             body: {
               state: {
                 datasetName,
-                serviceName,
                 namespace,
-                customConfigurations,
-                logFilePaths,
               },
             },
           },
@@ -145,7 +124,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (apiKeyEncoded && onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/elastic_agent/custom_logs/config',
+          'GET /internal/observability_onboarding/elastic_agent/system_logs/config',
           {
             headers: { authorization: `ApiKey ${apiKeyEncoded}` },
             params: { query: { onboardingId } },
@@ -224,16 +203,13 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <BackButton onBack={goBack} />,
+            <EuiButton color="text" onClick={onBack}>
+              {i18n.translate(
+                'xpack.observability_onboarding.systemLogs.back',
+                { defaultMessage: 'Back' }
+              )}
+            </EuiButton>,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onInspect}>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.steps.inspect',
-                    { defaultMessage: 'Inspect' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="success"
@@ -299,7 +275,7 @@ export function InstallElasticAgent() {
             elasticAgentVersion: setup?.elasticAgentVersion,
             autoDownloadConfig: wizardState.autoDownloadConfig,
             onboardingId,
-            configType: 'custom_logs',
+            configType: 'system_logs',
           })}
           autoDownloadConfig={wizardState.autoDownloadConfig}
           onToggleAutoDownloadConfig={onAutoDownloadConfig}
@@ -330,11 +306,6 @@ export function InstallElasticAgent() {
       </StepPanelContent>
     </StepPanel>
   );
-}
-
-type WizardState = ReturnType<ReturnType<typeof useWizard>['getState']>;
-function hasAlreadySavedFlow({ apiKeyEncoded, onboardingId }: WizardState) {
-  return Boolean(apiKeyEncoded && onboardingId);
 }
 
 const CHECK_LOGS_LABELS = {
