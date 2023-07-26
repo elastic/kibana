@@ -35,5 +35,7 @@
     "@kbn/default-nav-analytics",
     "@kbn/default-nav-management",
     "@kbn/default-nav-devtools",
+    "@kbn/es-archiver",
+    "@kbn/tooling-log",
   ]
 }
