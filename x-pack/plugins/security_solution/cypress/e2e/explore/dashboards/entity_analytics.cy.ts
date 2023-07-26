@@ -9,12 +9,8 @@ import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import {
-  cleanKibana,
-  deleteAlertsAndRules,
-  waitForPageToBeLoaded,
-  waitForTableToLoad,
-} from '../../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, waitForPageToBeLoaded } from '../../../tasks/common';
+
 import {
   ANOMALIES_TABLE,
   ANOMALIES_TABLE_ROWS,
@@ -32,8 +28,6 @@ import {
   USERS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ALERT_CELL,
   HOSTS_TABLE,
-  ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
-  ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../../screens/entity_analytics';
@@ -49,6 +43,11 @@ import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import {
+  enableJob,
+  navigateToNextPage,
+  waitForAnomaliesToBeLoaded,
+} from '../../../tasks/entity_analytics';
 
 const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';
@@ -304,46 +303,40 @@ describe('Entity Analytics Dashboard', () => {
     });
   });
 
-  // tracked by https://github.com/elastic/kibana/issues/161874
-  describe.skip('With anomalies data', () => {
+  describe('With anomalies data', () => {
     before(() => {
       cy.task('esArchiverLoad', 'network');
+      login();
+      visit(ENTITY_ANALYTICS_URL);
+      waitForPageToBeLoaded();
+      cy.get(ANOMALIES_TABLE).should('be.visible');
+      waitForAnomaliesToBeLoaded();
     });
 
     after(() => {
       cy.task('esArchiverUnload', 'network');
     });
 
-    beforeEach(() => {
-      login();
-      visit(ENTITY_ANALYTICS_URL);
-      waitForPageToBeLoaded();
-    });
+    it('should enable a job and renders the table with pagination', () => {
+      // Enables the job and perform checks
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
+        .eq(5)
+        .within(() => {
+          enableJob();
+          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
+          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
+        });
 
-    it('renders table with pagination', () => {
-      cy.get(ANOMALIES_TABLE).should('be.visible');
-      waitForTableToLoad();
-
-      // Increase default timeout because anomalies table takes a while to load
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 20000 }).should('have.length', 10);
+      // Checks pagination
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
 
       // navigates to next page
-      cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
+      navigateToNextPage();
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
 
       // updates rows per page to 25 items
       setRowsPerPageTo(25);
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
-    });
-
-    it('enables a job', () => {
-      cy.get(ANOMALIES_TABLE_ROWS)
-        .eq(5)
-        .within(() => {
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
-          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
-        });
     });
   });
 });
