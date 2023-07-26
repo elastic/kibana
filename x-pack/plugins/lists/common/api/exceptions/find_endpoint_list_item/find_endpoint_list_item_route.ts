@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export {
-  findEndpointListItemSchema as findEndpointListItemRequest,
+  findEndpointListItemSchema as findEndpointListItemRequestQuery,
   foundExceptionListItemSchema as findEndpointListItemResponse,
 };
-export type { FindEndpointListItemSchemaDecoded as FindEndpointListItemRequestDecoded };
+export type { FindEndpointListItemSchemaDecoded as FindEndpointListItemRequestQueryDecoded };

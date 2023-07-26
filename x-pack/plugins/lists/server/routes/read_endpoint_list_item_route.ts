@@ -11,8 +11,8 @@ import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import {
-  ReadEndpointListItemRequestDecoded,
-  readEndpointListItemRequest,
+  ReadEndpointListItemRequestQueryDecoded,
+  readEndpointListItemRequestQuery,
   readEndpointListItemResponse,
 } from '../../common/api';
 
@@ -32,9 +32,9 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         query: buildRouteValidation<
-          typeof readEndpointListItemRequest,
-          ReadEndpointListItemRequestDecoded
-        >(readEndpointListItemRequest),
+          typeof readEndpointListItemRequestQuery,
+          ReadEndpointListItemRequestQueryDecoded
+        >(readEndpointListItemRequestQuery),
       },
     },
     async (context, request, response) => {

@@ -11,8 +11,8 @@ import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-
 
 import type { ListsPluginRouter } from '../types';
 import {
-  FindEndpointListItemRequestDecoded,
-  findEndpointListItemRequest,
+  FindEndpointListItemRequestQueryDecoded,
+  findEndpointListItemRequestQuery,
   findEndpointListItemResponse,
 } from '../../common/api';
 
@@ -27,9 +27,9 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
       path: `${ENDPOINT_LIST_ITEM_URL}/_find`,
       validate: {
         query: buildRouteValidation<
-          typeof findEndpointListItemRequest,
-          FindEndpointListItemRequestDecoded
-        >(findEndpointListItemRequest),
+          typeof findEndpointListItemRequestQuery,
+          FindEndpointListItemRequestQueryDecoded
+        >(findEndpointListItemRequestQuery),
       },
     },
     async (context, request, response) => {

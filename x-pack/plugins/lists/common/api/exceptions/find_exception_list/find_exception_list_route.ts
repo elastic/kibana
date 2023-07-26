@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export {
-  findExceptionListSchema as findExceptionListRequest,
+  findExceptionListSchema as findExceptionListRequestQuery,
   foundExceptionListSchema as findExceptionListResponse,
 };
-export type { FindExceptionListSchemaDecoded as FindExceptionListRequestDecoded };
+export type { FindExceptionListSchemaDecoded as FindExceptionListRequestQueryDecoded };

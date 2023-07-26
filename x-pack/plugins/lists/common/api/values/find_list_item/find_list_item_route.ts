@@ -11,5 +11,8 @@ import {
   foundListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-export { findListItemSchema as findListItemRequest, foundListItemSchema as findListItemResponse };
-export type { FindListItemSchemaDecoded as FindListItemRequestDecoded };
+export {
+  findListItemSchema as findListItemRequestQuery,
+  foundListItemSchema as findListItemResponse,
+};
+export type { FindListItemSchemaDecoded as FindListItemRequestQueryDecoded };

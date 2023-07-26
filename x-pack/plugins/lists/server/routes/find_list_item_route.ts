@@ -12,8 +12,8 @@ import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
 import {
-  FindListItemRequestDecoded,
-  findListItemRequest,
+  FindListItemRequestQueryDecoded,
+  findListItemRequestQuery,
   findListItemResponse,
 } from '../../common/api';
 
@@ -27,9 +27,10 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_find`,
       validate: {
-        query: buildRouteValidation<typeof findListItemRequest, FindListItemRequestDecoded>(
-          findListItemRequest
-        ),
+        query: buildRouteValidation<
+          typeof findListItemRequestQuery,
+          FindListItemRequestQueryDecoded
+        >(findListItemRequestQuery),
       },
     },
     async (context, request, response) => {

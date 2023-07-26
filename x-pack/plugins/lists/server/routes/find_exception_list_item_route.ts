@@ -11,8 +11,8 @@ import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import {
-  FindExceptionListItemRequestDecoded,
-  findExceptionListItemRequest,
+  FindExceptionListItemRequestQueryDecoded,
+  findExceptionListItemRequestQuery,
   findExceptionListItemResponse,
 } from '../../common/api';
 
@@ -27,9 +27,9 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       validate: {
         query: buildRouteValidation<
-          typeof findExceptionListItemRequest,
-          FindExceptionListItemRequestDecoded
-        >(findExceptionListItemRequest),
+          typeof findExceptionListItemRequestQuery,
+          FindExceptionListItemRequestQueryDecoded
+        >(findExceptionListItemRequestQuery),
       },
     },
     async (context, request, response) => {

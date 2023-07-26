@@ -12,7 +12,7 @@ import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import type { ListsPluginRouter } from '../types';
 import {
   deleteListItemArrayResponse,
-  deleteListItemRequest,
+  deleteListItemRequestQuery,
   deleteListItemResponse,
 } from '../../common/api';
 
@@ -28,7 +28,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       },
       path: LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(deleteListItemRequest),
+        query: buildRouteValidation(deleteListItemRequestQuery),
       },
     },
     async (context, request, response) => {

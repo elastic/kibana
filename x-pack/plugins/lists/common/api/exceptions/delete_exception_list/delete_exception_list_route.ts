@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export {
-  deleteExceptionListSchema as deleteExceptionListRequest,
+  deleteExceptionListSchema as deleteExceptionListRequestQuery,
   exceptionListSchema as deleteExceptionListResponse,
 };
-export type { DeleteExceptionListSchemaDecoded as DeleteExceptionListRequestDecoded };
+export type { DeleteExceptionListSchemaDecoded as DeleteExceptionListRequestQueryDecoded };

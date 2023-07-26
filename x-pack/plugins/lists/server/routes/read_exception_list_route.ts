@@ -11,8 +11,8 @@ import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import {
-  ReadExceptionListRequestDecoded,
-  readExceptionListRequest,
+  ReadExceptionListRequestQueryDecoded,
+  readExceptionListRequestQuery,
   readExceptionListResponse,
 } from '../../common/api';
 
@@ -32,9 +32,9 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       validate: {
         query: buildRouteValidation<
-          typeof readExceptionListRequest,
-          ReadExceptionListRequestDecoded
-        >(readExceptionListRequest),
+          typeof readExceptionListRequestQuery,
+          ReadExceptionListRequestQueryDecoded
+        >(readExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {

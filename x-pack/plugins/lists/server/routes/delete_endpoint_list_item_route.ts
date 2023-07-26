@@ -11,8 +11,8 @@ import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import {
-  DeleteEndpointListItemRequestDecoded,
-  deleteEndpointListItemRequest,
+  DeleteEndpointListItemRequestQueryDecoded,
+  deleteEndpointListItemRequestQuery,
   deleteEndpointListItemResponse,
 } from '../../common/api';
 
@@ -32,9 +32,9 @@ export const deleteEndpointListItemRoute = (router: ListsPluginRouter): void => 
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         query: buildRouteValidation<
-          typeof deleteEndpointListItemRequest,
-          DeleteEndpointListItemRequestDecoded
-        >(deleteEndpointListItemRequest),
+          typeof deleteEndpointListItemRequestQuery,
+          DeleteEndpointListItemRequestQueryDecoded
+        >(deleteEndpointListItemRequestQuery),
       },
     },
     async (context, request, response) => {

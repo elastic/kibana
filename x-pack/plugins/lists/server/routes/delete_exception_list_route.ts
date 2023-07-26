@@ -11,8 +11,8 @@ import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import {
-  DeleteExceptionListRequestDecoded,
-  deleteExceptionListRequest,
+  DeleteExceptionListRequestQueryDecoded,
+  deleteExceptionListRequestQuery,
   deleteExceptionListResponse,
 } from '../../common/api';
 
@@ -32,9 +32,9 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       validate: {
         query: buildRouteValidation<
-          typeof deleteExceptionListRequest,
-          DeleteExceptionListRequestDecoded
-        >(deleteExceptionListRequest),
+          typeof deleteExceptionListRequestQuery,
+          DeleteExceptionListRequestQueryDecoded
+        >(deleteExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {

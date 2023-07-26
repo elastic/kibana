@@ -7,4 +7,4 @@
 
 import { findListSchema, foundListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-export { findListSchema as findListRequest, foundListSchema as findListResponse };
+export { findListSchema as findListRequestQuery, foundListSchema as findListResponse };

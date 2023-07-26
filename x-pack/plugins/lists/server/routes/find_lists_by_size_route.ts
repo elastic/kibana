@@ -16,7 +16,7 @@ import { chunk } from 'lodash';
 
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
-import { findListsBySizeRequest, findListsBySizeResponse } from '../../common/api';
+import { findListsBySizeRequestQuery, findListsBySizeResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
@@ -28,7 +28,7 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
       },
       path: `${FIND_LISTS_BY_SIZE}`,
       validate: {
-        query: buildRouteValidation(findListsBySizeRequest),
+        query: buildRouteValidation(findListsBySizeRequestQuery),
       },
     },
     async (context, request, response) => {

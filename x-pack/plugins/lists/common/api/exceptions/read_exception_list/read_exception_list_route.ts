@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export {
-  readExceptionListSchema as readExceptionListRequest,
+  readExceptionListSchema as readExceptionListRequestQuery,
   exceptionListSchema as readExceptionListResponse,
 };
-export type { ReadExceptionListSchemaDecoded as ReadExceptionListRequestDecoded };
+export type { ReadExceptionListSchemaDecoded as ReadExceptionListRequestQueryDecoded };

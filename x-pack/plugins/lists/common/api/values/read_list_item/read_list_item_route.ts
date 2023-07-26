@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export {
-  readListItemSchema as readListItemRequest,
+  readListItemSchema as readListItemRequestQuery,
   listItemSchema as readListItemResponse,
   listItemArraySchema as readListItemArrayResponse,
 };

@@ -8,6 +8,6 @@
 import { findListSchema, foundListsBySizeSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export {
-  findListSchema as findListsBySizeRequest,
+  findListSchema as findListsBySizeRequestQuery,
   foundListsBySizeSchema as findListsBySizeResponse,
 };

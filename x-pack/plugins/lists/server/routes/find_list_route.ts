@@ -11,7 +11,7 @@ import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
-import { findListRequest, findListResponse } from '../../common/api';
+import { findListRequestQuery, findListResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
@@ -23,7 +23,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
       },
       path: `${LIST_URL}/_find`,
       validate: {
-        query: buildRouteValidation(findListRequest),
+        query: buildRouteValidation(findListRequestQuery),
       },
     },
     async (context, request, response) => {

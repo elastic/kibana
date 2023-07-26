@@ -12,7 +12,7 @@ import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import type { ListsPluginRouter } from '../types';
 import {
   readListItemArrayResponse,
-  readListItemRequest,
+  readListItemRequestQuery,
   readListItemResponse,
 } from '../../common/api';
 
@@ -28,7 +28,7 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
       },
       path: LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(readListItemRequest),
+        query: buildRouteValidation(readListItemRequestQuery),
       },
     },
     async (context, request, response) => {

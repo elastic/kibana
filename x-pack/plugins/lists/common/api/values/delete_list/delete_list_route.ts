@@ -7,4 +7,4 @@
 
 import { deleteListSchema, listSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-export { deleteListSchema as deleteListRequest, listSchema as deleteListResponse };
+export { deleteListSchema as deleteListRequestQuery, listSchema as deleteListResponse };
