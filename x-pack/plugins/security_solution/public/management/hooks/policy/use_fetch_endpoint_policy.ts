@@ -27,7 +27,7 @@ interface ApiDataResponse {
   artifactManifest: ManifestSchema;
 }
 
-type UseFetchEndpointPolicyResponse = UseQueryResult<ApiDataResponse, IHttpFetchError>;
+export type UseFetchEndpointPolicyResponse = UseQueryResult<ApiDataResponse, IHttpFetchError>;
 
 /**
  * Retrieve a single endpoint integration policy (details)
@@ -36,7 +36,7 @@ type UseFetchEndpointPolicyResponse = UseQueryResult<ApiDataResponse, IHttpFetch
  */
 export const useFetchEndpointPolicy = (
   policyId: string,
-  options: UseQueryOptions<ApiDataResponse, IHttpFetchError> = {}
+  options: Omit<UseQueryOptions<ApiDataResponse, IHttpFetchError>, 'queryFn'> = {}
 ): UseFetchEndpointPolicyResponse => {
   const http = useHttp();
 

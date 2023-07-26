@@ -69,11 +69,10 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless, management, observabilityShared }: ServerlessSearchPluginStartDependencies
+    { serverless, management, cloud }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
-    serverless.setSideNavComponent(createComponent(core, { serverless }));
-    observabilityShared.setIsSidebarEnabled(false);
+    serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],

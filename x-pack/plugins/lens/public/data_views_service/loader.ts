@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components/public';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';

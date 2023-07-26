@@ -21,7 +21,7 @@ import {
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -522,7 +522,7 @@ describe('Test discover state actions', () => {
       timeFieldName: 'mock-time-field-name',
     };
     const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => ({
+    dataViewsCreateMock.mockImplementationOnce(() => ({
       ...dataViewMock,
       ...dataViewSpecMock,
       isPersisted: () => false,
@@ -678,7 +678,7 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
-    await state.actions.onCreateDefaultAdHocDataView({ title: 'ad-hoc-test' });
+    await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
     expect(state.appState.getState().index).toBe('ad-hoc-id');
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();

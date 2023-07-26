@@ -12,8 +12,9 @@ import type {
   UserAction,
   UserActions,
   UserActionType,
+  CaseConnector,
 } from '../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../common/types/domain';
+import { UserActionActions, UserActionTypes, ConnectorTypes } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
 import type {
@@ -31,7 +32,6 @@ import type {
   CasesUI,
 } from '../../common/ui/types';
 import type {
-  CaseConnector,
   Case,
   CasesFindResponse,
   Cases,
@@ -41,7 +41,6 @@ import type {
 import {
   CaseStatuses,
   CommentType,
-  ConnectorTypes,
   CaseSeverity,
   ExternalReferenceStorageType,
 } from '../../common/api';

@@ -350,6 +350,62 @@ export function defineRoutes(
         });
         return res.noContent();
       } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/bulk_enqueue_actions',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [, { actions, security, spaces }] = await core.getStartServices();
+        const actionsClient = await actions.getActionsClientWithRequest(req);
+
+        const createAPIKeyResult =
+          security &&
+          (await security.authc.apiKeys.grantAsInternalUser(req, {
+            name: `alerts_fixture:bulk_enqueue_actions:${uuidv4()}`,
+            role_descriptors: {},
+          }));
+
+        await actionsClient.bulkEnqueueExecution([
+          {
+            id: req.params.id,
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            executionId: uuidv4(),
+            apiKey: createAPIKeyResult
+              ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+                  'base64'
+                )
+              : null,
+            params: req.body.params,
+          },
+        ]);
+        return res.noContent();
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
         return res.badRequest({ body: err });
       }
     }
