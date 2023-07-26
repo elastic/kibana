@@ -17,10 +17,6 @@ import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
-function isPdfJob(job: TaskPayloadPDF): job is TaskPayloadPDF {
-  return (job as TaskPayloadPDF).objects !== undefined;
-}
-
 export function getFullUrls(
   serverInfo: ReportingServerInfo,
   config: ReportingConfigType,
@@ -36,17 +32,15 @@ export function getFullUrls(
     port: port ?? serverInfo.port,
   });
 
-  // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  if (isPdfJob(job)) {
+  try {
     relativeUrls = job.objects.map((obj) => obj.relativeUrl);
-  } else {
+  } catch (error) {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
     );
   }
-
   validateUrls(relativeUrls);
 
   const urls = relativeUrls.map((relativeUrl) => {
