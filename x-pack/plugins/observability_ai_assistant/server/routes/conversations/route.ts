@@ -102,7 +102,7 @@ const updateConversationRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.create(
+    return client.update(
       merge({}, params.body.conversation, { conversation: { id: params.path.conversationId } })
     );
   },

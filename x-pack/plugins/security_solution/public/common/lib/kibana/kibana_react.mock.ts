@@ -10,6 +10,8 @@
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -48,6 +50,8 @@ import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
 import { UpsellingService } from '../upsellings';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -102,23 +106,29 @@ export const createStartServicesMock = (
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
+  const customDataService = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const navigation = navigationPluginMock.createStartContract();
+  const discover = discoverPluginMock.createStartContract();
   const cases = mockCasesContract();
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
+  const cloud = cloudMock.createStart();
 
   return {
     ...core,
     apm,
     cases,
     unifiedSearch,
+    navigation,
+    discover,
     dataViews: dataViewServiceMock,
     data: {
       ...data,
@@ -191,8 +201,13 @@ export const createStartServicesMock = (
     triggersActionsUi,
     cloudExperiments,
     guidedOnboarding,
+    cloud: {
+      ...cloud,
+      isCloudEnabled: false,
+    },
     isSidebarEnabled$: of(true),
     upselling: new UpsellingService(),
+    customDataService,
   } as unknown as StartServices;
 };
 
@@ -208,7 +223,11 @@ export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(KibanaContextProvider, { services }, children);
+    React.createElement(
+      KibanaContextProvider,
+      { services },
+      React.createElement(NavigationProvider, { core: services }, children)
+    );
 };
 
 export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>

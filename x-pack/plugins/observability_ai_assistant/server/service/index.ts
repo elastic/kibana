@@ -49,8 +49,6 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
   constructor({ logger, core }: { logger: Logger; core: CoreSetup }) {
     this.core = core;
     this.logger = logger;
-
-    this.init();
   }
 
   init = once(async () => {
