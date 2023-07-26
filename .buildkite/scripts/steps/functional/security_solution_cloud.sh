@@ -12,4 +12,4 @@ echo "--- Security Solution tests (Chrome)"
 
 cd x-pack/plugins/security_solution
 
-yarn cypress:run-cloud; status=$?; yarn junit:merge && exit $status
+yarn cypress:run:cloud; status=$?; yarn junit:merge && exit $status
