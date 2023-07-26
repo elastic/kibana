@@ -47,7 +47,7 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
           cores: 4,
           total: {
             norm: {
-              pct: randomBetween(),
+              pct: 0.8,
             },
           },
           user: {
@@ -134,6 +134,20 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
       container: {
         id: `container-${index}`,
         name: 'container-name',
+        cpu: {
+          cores: 4,
+          total: {
+            norm: {
+              pct: 0.8,
+            },
+          },
+          user: {
+            pct: randomBetween(1, 4),
+          },
+          system: {
+            pct: randomBetween(1, 4),
+          },
+        },
       },
     },
   ];
