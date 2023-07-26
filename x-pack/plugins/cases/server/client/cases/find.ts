@@ -8,13 +8,10 @@
 import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 
+import type { CasesFindRequest, CasesFindResponse } from '../../../common/types/api';
+import { CasesFindRequestRt, CasesFindResponseRt } from '../../../common/types/api';
 import { MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
-import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
-import {
-  CasesFindRequestRt,
-  decodeWithExcessOrThrow,
-  CasesFindResponseRt,
-} from '../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
