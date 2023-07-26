@@ -10,6 +10,7 @@ import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import { run as cypressRun } from 'cypress-cloud';
 
+// eslint-disable-next-line import/no-default-export
 export default run(
   async () => {
     const { argv } = yargs(process.argv.slice(2));

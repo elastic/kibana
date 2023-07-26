@@ -8,11 +8,15 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 
 export default defineCypressConfig({
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './reporter_config.json',
+  },
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,
   responseTimeout: 60000,
-  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../../../../target/kibana-security-serverless/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   viewportHeight: 946,
