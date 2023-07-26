@@ -17,7 +17,7 @@ describe('utils', () => {
     const SINGLE_CASE_FEATURES: CaseMetricsFeatureField[] = [
       CaseMetricsFeature.ALERTS_COUNT,
       CaseMetricsFeature.ALERTS_HOSTS,
-      CaseMetricsFeature.ALERTS_HOSTS,
+      CaseMetricsFeature.ALERTS_USERS,
       CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
       CaseMetricsFeature.CONNECTORS,
       CaseMetricsFeature.LIFESPAN,

@@ -54,7 +54,9 @@ describe('useCasesFeatures', () => {
   it('returns the metrics correctly', async () => {
     const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
       wrapper: ({ children }) => (
-        <TestProviders features={{ metrics: [] }}>{children}</TestProviders>
+        <TestProviders features={{ metrics: [CaseMetricsFeature.CONNECTORS] }}>
+          {children}
+        </TestProviders>
       ),
     });
 
