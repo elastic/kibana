@@ -108,7 +108,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = React.me
     onRuleChange,
   } = props;
 
-  console.log("I AM RE_RENDERING!!");
+  console.log('I AM RE_RENDERING!!');
   const oldProps = useRef<DetectionEngineAlertTableProps | null>(null);
 
   useEffect(() => {

@@ -33,8 +33,6 @@ import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 
-
-
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -56,7 +54,7 @@ const basicRenderCellValue = ({
   ecsData?: FetchAlertData['ecsAlertsData'][number];
   columnId: string;
 }) => {
-  console.log("BASIC IS CALLED!");
+  console.log('BASIC IS CALLED!');
   const value = data.find((d) => d.field === columnId)?.value ?? [];
   if (Array.isArray(value)) {
     return <>{value.length ? value.join() : '--'}</>;
@@ -234,7 +232,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     if (controlProps.current !== null) {
       Object.keys(controlProps.current).forEach((key) => {
         if (currentControlProps[key] !== controlProps.current[key]) {
-          console.log("IN RESPONSE OPS: ", key, " has changed");
+          console.log('IN RESPONSE OPS: ', key, ' has changed');
         }
       });
     }
@@ -323,7 +321,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     };
 
     return controlColumns;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     actionsColumnWidth,
     alerts,
@@ -383,7 +381,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
-      console.log("RENDER CELL VALUE IS CALLED!: ", renderCellValue);
+      console.log('RENDER CELL VALUE IS CALLED!: ', renderCellValue);
       // https://github.com/elastic/eui/issues/5811
       const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
       const alert = alerts[idx];

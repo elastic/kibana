@@ -137,7 +137,7 @@ export const getUseActionColumnHook =
         ecsAlert,
         nonEcsData,
       }) => {
-        console.log("RE RENDERING! WRAPPED!"); // eslint-disable-line no-console
+        console.log('RE RENDERING! WRAPPED!'); // eslint-disable-line no-console
         return (
           <WrappedRowAction
             columns={columns}
