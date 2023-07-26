@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import {
   GetRuleManagementFiltersResponse,
   RULE_MANAGEMENT_FILTERS_URL,
@@ -59,7 +60,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
         tags: ['access:securitySolution'],
       },
     },
-    async (context, _, response) => {
+    async (context, _, response): Promise<IKibanaResponse<GetRuleManagementFiltersResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const ctx = await context.resolve(['alerting']);
       const rulesClient = ctx.alerting.getRulesClient();
@@ -84,7 +85,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
         if (validationError != null) {
           return siemResponse.error({ statusCode: 500, body: validationError });
         } else {
-          return response.ok({ body: validatedBody ?? {} });
+          return response.ok({ body: validatedBody });
         }
       } catch (err) {
         const error = transformError(err);

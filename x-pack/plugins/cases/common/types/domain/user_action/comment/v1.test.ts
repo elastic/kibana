@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CommentType } from '../../../../api';
+import { AttachmentType } from '../../attachment/v1';
 import { UserActionTypes } from '../action/v1';
 import { CommentUserActionPayloadRt, CommentUserActionRt } from './v1';
 
-describe('Comment', () => {
+describe('Attachment', () => {
   describe('CommentUserActionPayloadRt', () => {
     const defaultRequest = {
       comment: {
         comment: 'this is a sample comment',
-        type: CommentType.user,
+        type: AttachmentType.user,
         owner: 'cases',
       },
     };
@@ -54,7 +54,7 @@ describe('Comment', () => {
       payload: {
         comment: {
           comment: 'this is a sample comment',
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'cases',
         },
       },

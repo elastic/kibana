@@ -19,6 +19,7 @@
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-preboot-server",
+    "@kbn/core-base-common",
   ],
   "exclude": [
     "target/**/*",
