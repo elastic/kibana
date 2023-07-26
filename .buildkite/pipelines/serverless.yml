@@ -65,6 +65,7 @@ steps:
     agents:
       queue: n2-4-spot
     depends_on: build
+    parallelism: 4
     timeout_in_minutes: 40
     retry:
       automatic:
