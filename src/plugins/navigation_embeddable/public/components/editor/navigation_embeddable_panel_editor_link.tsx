@@ -106,7 +106,12 @@ export const NavigationEmbeddablePanelEditorLink = ({
 
     return () =>
       dashboardError ? (
-        <EuiToolTip content={dashboardError.message}>{labelText}</EuiToolTip>
+        <EuiToolTip
+          content={dashboardError.message}
+          title={DashboardLinkStrings.getDashboardErrorLabel()}
+        >
+          {labelText}
+        </EuiToolTip>
       ) : (
         labelText
       );
