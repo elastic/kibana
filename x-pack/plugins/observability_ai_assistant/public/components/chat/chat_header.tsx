@@ -6,18 +6,33 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { AssistantAvatar } from '../assistant_avatar';
+import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 
-export function ChatHeader({ title }: { title: string }) {
+export function ChatHeader({
+  title,
+  connectors,
+}: {
+  title: string;
+  connectors: UseGenAIConnectorsResult;
+}) {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="center" gutterSize="l">
       <EuiFlexItem grow={false}>
-        <AssistantAvatar size="m" />
+        <AssistantAvatar size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle size="m">
-          <h2>{title}</h2>
-        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ConnectorSelectorBase {...connectors} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

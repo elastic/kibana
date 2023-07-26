@@ -10,6 +10,8 @@ import { useKibana } from '../hooks/use_kibana';
 
 const pageSectionClassName = css`
   width: 100%;
+  display: flex;
+  flex-grow: 1;
 `;
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {

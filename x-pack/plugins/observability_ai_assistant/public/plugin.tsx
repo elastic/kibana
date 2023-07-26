@@ -45,7 +45,7 @@ export class ObservabilityAIAssistantPlugin
     coreSetup: CoreSetup,
     pluginsSetup: ObservabilityAIAssistantPluginSetupDependencies
   ): ObservabilityAIAssistantPluginSetup {
-    this.service = createService(coreSetup);
+    const service = (this.service = createService(coreSetup));
 
     coreSetup.application.register({
       id: 'observabilityAIAssistant',
@@ -76,6 +76,7 @@ export class ObservabilityAIAssistantPlugin
         ReactDOM.render(
           <Application
             {...appMountParameters}
+            service={service}
             coreStart={coreStart}
             pluginsStart={pluginsStart as ObservabilityAIAssistantPluginStartDependencies}
           />,

@@ -12,19 +12,25 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import type { History } from 'history';
 import React from 'react';
 import type { Observable } from 'rxjs';
+import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { observabilityAIAssistantRouter } from './routes/config';
-import type { ObservabilityAIAssistantPluginStartDependencies } from './types';
+import type {
+  ObservabilityAIAssistantPluginStartDependencies,
+  ObservabilityAIAssistantService,
+} from './types';
 
 export function Application({
   theme$,
   history,
   coreStart,
   pluginsStart,
+  service,
 }: {
   theme$: Observable<CoreTheme>;
   history: History;
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
+  service: ObservabilityAIAssistantService;
 }) {
   return (
     <EuiErrorBoundary>
@@ -38,9 +44,11 @@ export function Application({
         >
           <RedirectAppLinks coreStart={coreStart}>
             <coreStart.i18n.Context>
-              <RouterProvider history={history} router={observabilityAIAssistantRouter as any}>
-                <RouteRenderer />
-              </RouterProvider>
+              <ObservabilityAIAssistantProvider value={service}>
+                <RouterProvider history={history} router={observabilityAIAssistantRouter as any}>
+                  <RouteRenderer />
+                </RouterProvider>
+              </ObservabilityAIAssistantProvider>
             </coreStart.i18n.Context>
           </RedirectAppLinks>
         </KibanaContextProvider>
