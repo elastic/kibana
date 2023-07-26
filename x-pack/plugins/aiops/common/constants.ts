@@ -9,7 +9,7 @@ export const LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD = 0.02;
 
 export const LOG_RATE_ANALYSIS_TYPE = {
   SPIKE: 'spike',
-  DROP: 'drop',
+  DIP: 'dip',
 } as const;
 export type LogRateAnalysisType =
   typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE];

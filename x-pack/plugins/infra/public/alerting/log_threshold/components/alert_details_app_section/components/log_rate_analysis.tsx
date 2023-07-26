@@ -98,7 +98,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
           break;
         case Comparator.LT:
         case Comparator.LT_OR_EQ:
-          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.DROP);
+          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.DIP);
           break;
         default:
           setLogRateAnalysisType(undefined);

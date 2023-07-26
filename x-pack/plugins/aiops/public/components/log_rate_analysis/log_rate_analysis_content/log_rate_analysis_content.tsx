@@ -48,7 +48,7 @@ export function getDocumentCountStatsSplitLabel(
 export interface LogRateAnalysisContentProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The type of analysis, whether it's a spike or drop */
+  /** The type of analysis, whether it's a spike or dip */
   analysisType?: LogRateAnalysisType;
   setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
@@ -99,7 +99,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   const { documentStats, earliest, latest } = useData(
     dataView,
-    'explain_log_rage_spikes',
+    'log_rate_analysis',
     esSearchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,
@@ -178,7 +178,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptTitle"
-                defaultMessage="Click a spike in the histogram chart to start the analysis."
+                defaultMessage="Click a spike or dip in the histogram chart to start the analysis."
               />
             </h2>
           }
@@ -187,7 +187,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptBody"
-                defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or drop."
+                defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip."
               />
             </p>
           }

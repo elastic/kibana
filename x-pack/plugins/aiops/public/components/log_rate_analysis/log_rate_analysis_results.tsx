@@ -80,7 +80,7 @@ export interface LogRateAnalysisResultsData {
 interface LogRateAnalysisResultsProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The type of analysis, whether it's a spike or drop */
+  /** The type of analysis, whether it's a spike or dip */
   analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
   earliest: number;
@@ -175,7 +175,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       grouping: true,
       flushFix: true,
       // If analysis type is `spike`, pass on window parameters as is,
-      // if it's `drop`, swap baseline and deviation.
+      // if it's `dip`, swap baseline and deviation.
       ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
         ? windowParameters
         : {
@@ -397,7 +397,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptBody"
-                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this spike in log rates."
+                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this deviation in log rate."
               />
             </p>
           }

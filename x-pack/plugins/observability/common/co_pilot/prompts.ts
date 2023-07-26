@@ -10,6 +10,7 @@ import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-plugin/common';
 import { CoPilotPromptId } from '.';
 
 const PERF_GPT_SYSTEM_MESSAGE = {
@@ -58,7 +59,11 @@ const logEntryRt = t.type({
   ),
 });
 
-const significantFieldValuesRt = t.array(
+const logRateAnalysisTypeRt = t.union([
+  t.literal(LOG_RATE_ANALYSIS_TYPE.SPIKE),
+  t.literal(LOG_RATE_ANALYSIS_TYPE.DIP),
+]);
+const logRateAnalysisSignificantFieldValuesRt = t.array(
   t.type({
     field: t.string,
     value: t.union([t.string, t.number]),
@@ -284,23 +289,24 @@ export const coPilotPrompts = {
   }),
   [CoPilotPromptId.LogRateAnalysis]: prompt({
     params: t.type({
-      significantFieldValues: significantFieldValuesRt,
+      analysisType: logRateAnalysisTypeRt,
+      significantFieldValues: logRateAnalysisSignificantFieldValuesRt,
     }),
-    messages: ({ significantFieldValues }) => {
+    messages: ({ analysisType, significantFieldValues }) => {
       const header = 'Field name,Field value,Doc count,p-value';
       const rows = significantFieldValues.map((item) => Object.values(item).join(',')).join('\n');
 
-      const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a spike of log messages. Your job is to take immediate action and proceed with both urgency and precision.
-      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases in log rates. It makes it easy to find and investigate causes of unusual spikes by using the analysis workflow view.
+      const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${analysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
+      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
       You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
-      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that contribute to the log messages spike:
+      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that contribute to the log messages ${analysisType}:
 
       ${header}
       ${rows}
 
       Based on the above analysis results and your observability expert knowledge, output the following:
       Analyse the type of these logs and explain their usual purpose (1 paragraph).
-      Based on the type of these logs do a root cause analysis on why the field and value combinations from the anlaysis results are causing this spike in logs (2 parapraphs).
+      Based on the type of these logs do a root cause analysis on why the field and value combinations from the anlaysis results are causing this ${analysisType} in logs (2 parapraphs).
       Recommend concrete remediations to resolve the root cause (3 bullet points).
       Do not repeat the given instructions in your output.`;
 

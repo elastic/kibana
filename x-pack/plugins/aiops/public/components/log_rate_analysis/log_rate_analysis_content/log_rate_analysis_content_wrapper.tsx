@@ -35,7 +35,7 @@ const localStorage = new Storage(window.localStorage);
 export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The type of analysis, whether it's a spike or drop */
+  /** The type of analysis, whether it's a spike or dip */
   analysisType?: LogRateAnalysisType;
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;

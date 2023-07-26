@@ -70,7 +70,7 @@ const AlertDetailsAppSection = ({
   });
 
   const { hasAtLeast } = useLicense();
-  const hasLicenseForExplainLogSpike = hasAtLeast('platinum');
+  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
 
   useEffect(() => {
     /**
@@ -238,7 +238,7 @@ const AlertDetailsAppSection = ({
   };
 
   const getLogRateAnalysisSection = () => {
-    return hasLicenseForExplainLogSpike ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
+    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (
