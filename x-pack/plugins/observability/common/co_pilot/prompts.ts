@@ -295,17 +295,27 @@ export const coPilotPrompts = {
       const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${analysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
       "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
       You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
-      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that contribute to the log messages ${analysisType}:
+      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
+        analysisType === 'spike'
+          ? 'contribute to the log rate spike'
+          : 'are less or not present in the log rate dip'
+      }:
 
       ${header}
       ${rows}
 
       Based on the above analysis results and your observability expert knowledge, output the following:
       Analyse the type of these logs and explain their usual purpose (1 paragraph).
-      Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this ${analysisType} in logs (2 parapraphs). Hint: In case of a ${analysisType} in logs, the statistically significant field/values are ${
-        analysisType === 'spike' ? 'part of the spike' : 'missing from the dip'
+      ${
+        analysisType === 'spike'
+          ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
+          : 'Based on the type of these logs do a concise analysis why the statistically significant field and value combinations are less present or missing from the log rate dip with concrete examples based on the analysis results data. Do not guess, just output what you are sure of (2 paragraphs)'
       }.
-      Recommend concrete remediations to resolve the root cause (3 bullet points).
+      ${
+        analysisType === 'spike'
+          ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
+          : ''
+      }
       Do not repeat the given instructions in your output.`;
 
       return [
