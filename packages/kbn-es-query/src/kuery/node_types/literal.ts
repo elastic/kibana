@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { escapeQuotes } from '@kbn/unified-search-plugin/public/autocomplete/providers/kql_query_suggestion/lib/escape_kuery';
-import { type KueryNode, escapeKuery } from '..';
+import { type KueryNode, escapeKuery, escapeQuotes } from '..';
 
 export const KQL_NODE_TYPE_LITERAL = 'literal';
 
