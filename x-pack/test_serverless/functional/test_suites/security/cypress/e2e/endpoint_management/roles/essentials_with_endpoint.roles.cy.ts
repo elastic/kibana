@@ -15,7 +15,11 @@ import {
   getEndpointManagementPageList,
   EndpointArtifactPageId,
 } from '../../../screens/endpoint_management';
-import { ensurePermissionDeniedScreen, visitFleetAgentList } from '../../../screens';
+import {
+  ensurePermissionDeniedScreen,
+  getAgentListTable,
+  visitFleetAgentList,
+} from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import { visitPolicyList } from '../../../screens/endpoint_management';
 
@@ -260,7 +264,7 @@ describe(
 
         it('should have access to Fleet', () => {
           visitFleetAgentList();
-          ensurePermissionDeniedScreen();
+          getAgentListTable().should('exist');
         });
       });
     });

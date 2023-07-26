@@ -20,7 +20,11 @@ import {
   visitEndpointList,
   visitPolicyList,
 } from '../../../screens/endpoint_management';
-import { ensurePermissionDeniedScreen, visitFleetAgentList } from '../../../screens';
+import {
+  ensurePermissionDeniedScreen,
+  getAgentListTable,
+  visitFleetAgentList,
+} from '../../../screens';
 import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
@@ -301,75 +305,114 @@ describe(
       });
     });
 
-    (
-      [
-        'platform_engineer',
-        `endpoint_operations_analyst`,
-        'endpoint_policy_manager',
-      ] as ServerlessRoleName[]
-    ).forEach((roleName) => {
-      describe(`for role: ${roleName}`, () => {
-        const artifactPagesFullAccess = [
-          pageById.trustedApps,
-          pageById.eventFilters,
-          pageById.blocklist,
-          pageById.hostIsolationExceptions,
-        ];
-        const grantedAccessPages = [pageById.endpointList, pageById.policyList];
+    describe('for role: endpoint_operations_analyst', () => {
+      const artifactPagesFullAccess = [
+        pageById.trustedApps,
+        pageById.eventFilters,
+        pageById.blocklist,
+        pageById.hostIsolationExceptions,
+      ];
 
-        beforeEach(() => {
-          login(roleName);
+      const grantedAccessPages = [pageById.endpointList, pageById.policyList];
+
+      beforeEach(() => {
+        login('endpoint_operations_analyst');
+      });
+
+      for (const { id, url, title } of artifactPagesFullAccess) {
+        it(`should have CRUD access to: ${title}`, () => {
+          cy.visit(url);
+          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
         });
+      }
 
-        for (const { id, url, title } of artifactPagesFullAccess) {
-          it(`should have CRUD access to: ${title}`, () => {
-            cy.visit(url);
-            getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
-          });
-        }
-
-        for (const { url, title } of grantedAccessPages) {
-          it(`should have access to: ${title}`, () => {
-            cy.visit(url);
-            getNoPrivilegesPage().should('not.exist');
-          });
-        }
-
-        it('should have access to Fleet', () => {
-          visitFleetAgentList();
-          ensurePermissionDeniedScreen();
+      for (const { url, title } of grantedAccessPages) {
+        it(`should have access to: ${title}`, () => {
+          cy.visit(url);
+          getNoPrivilegesPage().should('not.exist');
         });
+      }
 
-        it('should have access to Response Actions Log', () => {
-          cy.visit(pageById.responseActionLog);
-
-          if (roleName !== 'endpoint_policy_manager') {
-            getNoPrivilegesPage().should('not.exist');
-          } else {
-            getNoPrivilegesPage().should('not.exist');
-          }
-        });
-
-        describe('Response Actions access', () => {
-          if (roleName === 'platform_engineer') {
-            it('should NOT have access to execute response actions', () => {
-              visitEndpointList();
-              openRowActionMenu().getByTestSubj('console').should('not.exist');
-            });
-          } else if (roleName === 'endpoint_operations_analyst') {
-            Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(
-              ([action, testSubj]) => {
-                it(`should have access to execute action: ${action}`, () => {
-                  visitEndpointList();
-                  openConsoleFromEndpointList();
-                  openConsoleHelpPanel();
-                  cy.getByTestSubj(testSubj).should('exist');
-                });
-              }
-            );
-          }
+      Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(([action, testSubj]) => {
+        it(`should have access to response action: ${action}`, () => {
+          visitEndpointList();
+          openConsoleFromEndpointList();
+          openConsoleHelpPanel();
+          cy.getByTestSubj(testSubj).should('exist');
         });
       });
+
+      it('should have access to Fleet', () => {
+        visitFleetAgentList();
+        getAgentListTable().should('exist');
+      });
     });
+
+    (['platform_engineer', 'endpoint_policy_manager'] as ServerlessRoleName[]).forEach(
+      (roleName) => {
+        describe(`for role: ${roleName}`, () => {
+          const artifactPagesFullAccess = [
+            pageById.trustedApps,
+            pageById.eventFilters,
+            pageById.blocklist,
+            pageById.hostIsolationExceptions,
+          ];
+          const grantedAccessPages = [pageById.endpointList, pageById.policyList];
+
+          beforeEach(() => {
+            login(roleName);
+          });
+
+          for (const { id, url, title } of artifactPagesFullAccess) {
+            it(`should have CRUD access to: ${title}`, () => {
+              cy.visit(url);
+              getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+            });
+          }
+
+          for (const { url, title } of grantedAccessPages) {
+            it(`should have access to: ${title}`, () => {
+              cy.visit(url);
+              getNoPrivilegesPage().should('not.exist');
+            });
+          }
+
+          it('should have access to Fleet', () => {
+            visitFleetAgentList();
+            getAgentListTable().should('exist');
+          });
+
+          it('should have access to Response Actions Log', () => {
+            cy.visit(pageById.responseActionLog);
+
+            if (roleName !== 'endpoint_policy_manager') {
+              getNoPrivilegesPage().should('exist');
+            } else {
+              getNoPrivilegesPage().should('not.exist');
+            }
+          });
+
+          describe('Response Actions access', () => {
+            if (roleName === 'platform_engineer') {
+              it('should NOT have access to execute response actions', () => {
+                visitEndpointList();
+                openRowActionMenu().getByTestSubj('console').should('not.exist');
+              });
+            } else if (roleName === 'endpoint_operations_analyst') {
+              Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(
+                ([action, testSubj]) => {
+                  it(`should have access to execute action: ${action}`, () => {
+                    visitEndpointList();
+                    openConsoleFromEndpointList();
+                    openConsoleHelpPanel();
+                    cy.getByTestSubj(testSubj).should('exist');
+                  });
+                }
+              );
+            }
+          });
+        });
+      }
+    );
   }
 );

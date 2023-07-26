@@ -23,6 +23,7 @@ const ROLE_NAMES = [
   'detections_admin',
   'platform_engineer',
   'endpoint_operations_analyst',
+  'endpoint_policy_manager',
 ] as const;
 
 export type ServerlessRoleName = typeof ROLE_NAMES[number];
