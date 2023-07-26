@@ -628,7 +628,6 @@ export class ExecutionHandler<
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       alertsFilter: action.alertsFilter,
-      isLifecycleAlert: this.ruleType.autoRecoverAlerts || false,
     };
 
     let options: GetSummarizedAlertsParams<AlertData>;

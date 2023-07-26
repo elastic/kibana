@@ -160,7 +160,6 @@ export type GetSummarizedAlertsParams<AlertData extends RuleAlertData> = {
   spaceId: string;
   excludedAlertInstanceIds: string[];
   alertsFilter?: AlertsFilter | null;
-  isLifecycleAlert: boolean;
 } & (
   | { start: Date; end: Date; executionUuid?: never }
   | { executionUuid: string; start?: never; end?: never }

@@ -424,7 +424,6 @@ export class AlertsClient<
     start,
     end,
     executionUuid,
-    isLifecycleAlert = false,
   }: GetSummarizedAlertsParams<AlertData>): Promise<SummarizedAlerts> {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
@@ -449,6 +448,8 @@ export class AlertsClient<
     };
 
     const formatAlert = this.ruleType.alerts?.formatAlert;
+
+    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
 
     if (isLifecycleAlert) {
       const queryBodies = getLifecycleAlertsQueries(getQueryParams);
