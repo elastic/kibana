@@ -11,5 +11,3 @@ export const SavedSearchType = 'search';
 export const LATEST_VERSION = 1;
 
 export type SavedSearchContentType = typeof SavedSearchType;
-
-export const SEARCH_EMBEDDABLE_TYPE = 'search';

@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { type DiscoverAppLocator, SEARCH_EMBEDDABLE_TYPE } from '../../common';
+import type { DiscoverAppLocator } from '../../common';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';

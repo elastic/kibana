@@ -46,9 +46,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { VIEW_MODE } from '../../common/constants';
-import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import type { DiscoverServices } from '../build_services';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -59,10 +56,10 @@ import {
   buildDataTableRecord,
 } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../common/constants';
+import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
-import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SEARCH_EMBEDDABLE_TYPE as EMBEDDABLE_TYPE } from '@kbn/saved-search-plugin/common';
-
 export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
 

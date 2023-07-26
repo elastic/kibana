@@ -11,8 +11,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getSavedSearchAttributeService } from './saved_search_attribute_service';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { AttributeService, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { saveSearchSavedObject } from './save_saved_searches';
 import {
   SavedSearchByValueAttributes,

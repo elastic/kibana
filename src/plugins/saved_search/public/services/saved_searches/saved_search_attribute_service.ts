@@ -8,13 +8,13 @@
 
 import type { AttributeService, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type {
   SavedSearch,
   SavedSearchByValueAttributes,
   SearchByReferenceInput,
   SearchByValueInput,
 } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../common';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
 import {
   getSearchSavedObject,
