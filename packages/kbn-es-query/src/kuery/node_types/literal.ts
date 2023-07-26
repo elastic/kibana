@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { escapeQuotes } from '@kbn/unified-search-plugin/public/autocomplete/providers/kql_query_suggestion/lib/escape_kuery';
 import { type KueryNode, escapeKuery } from '..';
 
 export const KQL_NODE_TYPE_LITERAL = 'literal';
@@ -35,5 +36,5 @@ export function toElasticsearchQuery(node: KqlLiteralNode) {
 }
 
 export function toKqlExpression(node: KqlLiteralNode): string {
-  return node.isQuoted ? `"${node.value}"` : escapeKuery(`${node.value}`);
+  return node.isQuoted ? `"${escapeQuotes(`${node.value}`)}"` : escapeKuery(`${node.value}`);
 }
