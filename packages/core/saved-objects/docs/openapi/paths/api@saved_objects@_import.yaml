@@ -39,7 +39,7 @@ post:
   requestBody:
     required: true
     content:
-      multipart/form:
+      multipart/form-data:
         schema:
           type: object
           description: >

@@ -44,9 +44,12 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json:
+         multipart/form-data:
           schema:
-            type: object
+            type: string
+          examples:
+            exportSavedObjectsResponse:
+              $ref: '../components/examples/export_objects_response.yaml'
     '400':
       description: Bad request.
       content:

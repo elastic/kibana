@@ -101,9 +101,14 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json": {
+              "multipart/form-data": {
                 "schema": {
-                  "type": "object"
+                  "type": "string"
+                },
+                "examples": {
+                  "exportSavedObjectsResponse": {
+                    "$ref": "#/components/examples/export_objects_response"
+                  }
                 }
               }
             }
@@ -175,7 +180,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "multipart/form": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "description": "A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.\n"
@@ -283,6 +288,10 @@
           ],
           "includeReferencesDeep": false
         }
+      },
+      "export_objects_response": {
+        "summary": "The export objects API response contains a JSON record for each exported object and an export result details record.",
+        "value": "{\"attributes\":{\"fieldFormatMap\":\"{\\\"hour_of_day\\\":{}}\",\"name\":\"Kibana Sample Data Logs\",\"runtimeFieldMap\":\"{\\\"hour_of_day\\\":{\\\"type\\\":\\\"long\\\",\\\"script\\\":{\\\"source\\\":\\\"emit(doc['timestamp'].value.getHour());\\\"}}}\",\"timeFieldName\":\"timestamp\",\"title\":\"kibana_sample_data_logs\"},\"coreMigrationVersion\":\"8.8.0\",\"created_at\":\"2023-07-25T19:36:36.695Z\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"managed\":false,\"references\":[],\"type\":\"index-pattern\",\"typeMigrationVersion\":\"8.0.0\",\"updated_at\":\"2023-07-25T19:36:36.695Z\",\"version\":\"WzM5LDJd\"}\n{\"excludedObjects\":[],\"excludedObjectsCount\":0,\"exportedCount\":1,\"missingRefCount\":0,\"missingReferences\":[]}\n"
       },
       "import_objects_response": {
         "summary": "The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.",
