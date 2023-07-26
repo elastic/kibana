@@ -338,7 +338,7 @@ export const RESPOND_TO_THREATS_STEP1 = i18n.translate(
 );
 
 export const RESPOND_TO_THREATS_STEP2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.step1',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.step2',
   {
     defaultMessage: 'Take control of your endpoints with the Response Console',
   }
