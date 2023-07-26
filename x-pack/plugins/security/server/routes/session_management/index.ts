@@ -13,5 +13,8 @@ import { defineInvalidateSessionsRoutes } from './invalidate';
 export function defineSessionManagementRoutes(params: RouteDefinitionParams) {
   defineSessionInfoRoutes(params);
   defineSessionExtendRoutes(params);
-  defineInvalidateSessionsRoutes(params);
+
+  if (params.buildFlavor !== 'serverless') {
+    defineInvalidateSessionsRoutes(params);
+  }
 }

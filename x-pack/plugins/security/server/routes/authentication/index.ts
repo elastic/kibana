@@ -17,7 +17,12 @@ export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
     defineSAMLRoutes(params);
   }
 
-  if (params.config.authc.sortedProviders.some(({ type }) => type === 'oidc')) {
+  if (
+    // this is not abdsolutely necessary, as OIDC provider isn't configured in serverless
+    // but should we add this just to make sure?
+    params.buildFlavor !== 'serverless' &&
+    params.config.authc.sortedProviders.some(({ type }) => type === 'oidc')
+  ) {
     defineOIDCRoutes(params);
   }
 }

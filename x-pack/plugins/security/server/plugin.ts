@@ -359,6 +359,7 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
     return Object.freeze<SecurityPluginSetup>({

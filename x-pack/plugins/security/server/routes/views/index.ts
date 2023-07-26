@@ -15,17 +15,20 @@ import { defineLogoutRoutes } from './logout';
 import { defineOverwrittenSessionRoutes } from './overwritten_session';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
-  if (
-    params.config.authc.selector.enabled ||
-    params.config.authc.sortedProviders.some(({ type }) => type === 'basic' || type === 'token')
-  ) {
-    defineLoginRoutes(params);
-  }
-
-  defineAccessAgreementRoutes(params);
   defineAccountManagementRoutes(params);
+  defineCaptureURLRoutes(params);
   defineLoggedOutRoutes(params);
   defineLogoutRoutes(params);
   defineOverwrittenSessionRoutes(params);
-  defineCaptureURLRoutes(params);
+
+  if (params.buildFlavor !== 'serverless') {
+    defineAccessAgreementRoutes(params);
+
+    if (
+      params.config.authc.selector.enabled ||
+      params.config.authc.sortedProviders.some(({ type }) => type === 'basic' || type === 'token')
+    ) {
+      defineLoginRoutes(params);
+    }
+  }
 }

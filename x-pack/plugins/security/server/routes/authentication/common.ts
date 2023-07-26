@@ -32,9 +32,14 @@ export function defineCommonRoutes({
   basePath,
   license,
   logger,
+  buildFlavor,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/logout', '/api/security/v1/logout']) {
+  // For a serverless build, do not register deprecated versioned routes
+  for (const path of [
+    '/api/security/logout',
+    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/logout'] : []),
+  ]) {
     router.get(
       {
         path,
@@ -79,7 +84,11 @@ export function defineCommonRoutes({
   }
 
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/internal/security/me', '/api/security/v1/me']) {
+  // For a serverless build, do not register deprecated versioned routes
+  for (const path of [
+    '/internal/security/me',
+    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
+  ]) {
     router.get(
       { path, validate: false },
       createLicensedRouteHandler((context, request, response) => {
@@ -123,66 +132,68 @@ export function defineCommonRoutes({
     return undefined;
   }
 
-  router.post(
-    {
-      path: '/internal/security/login',
-      validate: {
-        body: schema.object({
-          providerType: schema.string(),
-          providerName: schema.string(),
-          currentURL: schema.string(),
-          params: schema.conditional(
-            schema.siblingRef('providerType'),
-            schema.oneOf([
-              schema.literal(BasicAuthenticationProvider.type),
-              schema.literal(TokenAuthenticationProvider.type),
-            ]),
-            basicParamsSchema,
-            schema.never()
-          ),
-        }),
+  if (buildFlavor !== 'serverless') {
+    router.post(
+      {
+        path: '/internal/security/login',
+        validate: {
+          body: schema.object({
+            providerType: schema.string(),
+            providerName: schema.string(),
+            currentURL: schema.string(),
+            params: schema.conditional(
+              schema.siblingRef('providerType'),
+              schema.oneOf([
+                schema.literal(BasicAuthenticationProvider.type),
+                schema.literal(TokenAuthenticationProvider.type),
+              ]),
+              basicParamsSchema,
+              schema.never()
+            ),
+          }),
+        },
+        options: { authRequired: false },
       },
-      options: { authRequired: false },
-    },
-    createLicensedRouteHandler(async (context, request, response) => {
-      const { providerType, providerName, currentURL, params } = request.body;
-      logger.info(`Logging in with provider "${providerName}" (${providerType})`);
+      createLicensedRouteHandler(async (context, request, response) => {
+        const { providerType, providerName, currentURL, params } = request.body;
+        logger.info(`Logging in with provider "${providerName}" (${providerType})`);
 
-      const redirectURL = parseNext(currentURL, basePath.serverBasePath);
-      const authenticationResult = await getAuthenticationService().login(request, {
-        provider: { name: providerName },
-        redirectURL,
-        value: getLoginAttemptForProviderType(providerType, redirectURL, params),
-      });
+        const redirectURL = parseNext(currentURL, basePath.serverBasePath);
+        const authenticationResult = await getAuthenticationService().login(request, {
+          provider: { name: providerName },
+          redirectURL,
+          value: getLoginAttemptForProviderType(providerType, redirectURL, params),
+        });
 
-      if (authenticationResult.redirected() || authenticationResult.succeeded()) {
-        return response.ok({
-          body: { location: authenticationResult.redirectURL || redirectURL },
+        if (authenticationResult.redirected() || authenticationResult.succeeded()) {
+          return response.ok({
+            body: { location: authenticationResult.redirectURL || redirectURL },
+            headers: authenticationResult.authResponseHeaders,
+          });
+        }
+
+        return response.unauthorized({
+          body: authenticationResult.error,
           headers: authenticationResult.authResponseHeaders,
         });
-      }
+      })
+    );
 
-      return response.unauthorized({
-        body: authenticationResult.error,
-        headers: authenticationResult.authResponseHeaders,
-      });
-    })
-  );
+    router.post(
+      { path: '/internal/security/access_agreement/acknowledge', validate: false },
+      createLicensedRouteHandler(async (context, request, response) => {
+        // If license doesn't allow access agreement we shouldn't handle request.
+        if (!license.getFeatures().allowAccessAgreement) {
+          logger.warn(`Attempted to acknowledge access agreement when license doesn't allow it.`);
+          return response.forbidden({
+            body: { message: `Current license doesn't support access agreement.` },
+          });
+        }
 
-  router.post(
-    { path: '/internal/security/access_agreement/acknowledge', validate: false },
-    createLicensedRouteHandler(async (context, request, response) => {
-      // If license doesn't allow access agreement we shouldn't handle request.
-      if (!license.getFeatures().allowAccessAgreement) {
-        logger.warn(`Attempted to acknowledge access agreement when license doesn't allow it.`);
-        return response.forbidden({
-          body: { message: `Current license doesn't support access agreement.` },
-        });
-      }
+        await getAuthenticationService().acknowledgeAccessAgreement(request);
 
-      await getAuthenticationService().acknowledgeAccessAgreement(request);
-
-      return response.noContent();
-    })
-  );
+        return response.noContent();
+      })
+    );
+  }
 }

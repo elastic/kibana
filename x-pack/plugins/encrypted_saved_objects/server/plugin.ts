@@ -95,19 +95,21 @@ export class EncryptedSavedObjectsPlugin
       getStartServices: core.getStartServices,
     });
 
-    defineRoutes({
-      router: core.http.createRouter(),
-      logger: this.initializerContext.logger.get('routes'),
-      encryptionKeyRotationService: Object.freeze(
-        new EncryptionKeyRotationService({
-          logger: this.logger.get('key-rotation-service'),
-          service,
-          getStartServices: core.getStartServices,
-          security: deps.security,
-        })
-      ),
-      config,
-    });
+    if (this.initializerContext.env.packageInfo.buildFlavor !== 'serverless') {
+      defineRoutes({
+        router: core.http.createRouter(),
+        logger: this.initializerContext.logger.get('routes'),
+        encryptionKeyRotationService: Object.freeze(
+          new EncryptionKeyRotationService({
+            logger: this.logger.get('key-rotation-service'),
+            service,
+            getStartServices: core.getStartServices,
+            security: deps.security,
+          })
+        ),
+        config,
+      });
+    }
 
     return {
       canEncrypt,

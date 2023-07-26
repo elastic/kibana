@@ -7,6 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -54,20 +55,24 @@ export interface RouteDefinitionParams {
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   analyticsService: AnalyticsServiceSetup;
+  buildFlavor: BuildFlavor;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
-  defineAuthenticationRoutes(params);
-  defineAuthorizationRoutes(params);
-  defineSessionManagementRoutes(params);
-  defineApiKeysRoutes(params);
-  defineIndicesRoutes(params);
-  defineUsersRoutes(params);
-  defineUserProfileRoutes(params);
-  defineRoleMappingRoutes(params);
-  defineViewRoutes(params);
-  defineDeprecationsRoutes(params);
-  defineAnonymousAccessRoutes(params);
-  defineSecurityCheckupGetStateRoutes(params);
   defineAnalyticsRoutes(params);
+  defineApiKeysRoutes(params);
+  defineAuthenticationRoutes(params);
+  defineSessionManagementRoutes(params);
+  defineViewRoutes(params);
+
+  if (params.buildFlavor !== 'serverless') {
+    defineAnonymousAccessRoutes(params);
+    defineAuthorizationRoutes(params); // We probably should revisit these. Do we need ANY? The audit table lists a few, but I am not sure
+    defineDeprecationsRoutes(params);
+    defineIndicesRoutes(params);
+    defineRoleMappingRoutes(params);
+    defineSecurityCheckupGetStateRoutes(params);
+    defineUserProfileRoutes(params);
+    defineUsersRoutes(params);
+  }
 }

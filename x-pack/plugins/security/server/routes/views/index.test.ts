@@ -19,12 +19,12 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
-        "/security/access_agreement",
         "/security/account",
+        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/internal/security/capture-url",
+        "/security/access_agreement",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -44,19 +44,19 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
-        "/login",
-        "/security/access_agreement",
         "/security/account",
+        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/internal/security/capture-url",
+        "/security/access_agreement",
+        "/login",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/internal/security/login_state",
         "/internal/security/access_agreement/state",
+        "/internal/security/login_state",
       ]
     `);
   });
@@ -71,19 +71,19 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
-        "/login",
-        "/security/access_agreement",
         "/security/account",
+        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/internal/security/capture-url",
+        "/security/access_agreement",
+        "/login",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/internal/security/login_state",
         "/internal/security/access_agreement/state",
+        "/internal/security/login_state",
       ]
     `);
   });
@@ -98,19 +98,19 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
-        "/login",
-        "/security/access_agreement",
         "/security/account",
+        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/internal/security/capture-url",
+        "/security/access_agreement",
+        "/login",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/internal/security/login_state",
         "/internal/security/access_agreement/state",
+        "/internal/security/login_state",
       ]
     `);
   });
