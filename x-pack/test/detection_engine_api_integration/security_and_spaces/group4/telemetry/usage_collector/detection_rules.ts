@@ -105,7 +105,11 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           };
-          expect(stats).to.eql(expected);
+          // expect(stats).to.eql(expected);
+          expect(stats).to.eql(
+            expected,
+            `\n\n\nexpected: ${JSON.stringify(expected)}, \n\n\nactual: ${JSON.stringify(stats)}`
+          );
         });
       });
 
