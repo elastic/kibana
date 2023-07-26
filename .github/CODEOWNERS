@@ -301,10 +301,10 @@ packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
-test/plugin_functional/plugins/data_search @elastic/kibana-app-services
+test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
-examples/data_view_field_editor_example @elastic/kibana-app-services
+examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
@@ -382,7 +382,7 @@ src/plugins/expression_reveal_image @elastic/kibana-presentation
 src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
-examples/expressions_explorer @elastic/kibana-app-services
+examples/expressions_explorer @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
@@ -434,7 +434,7 @@ packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
-test/plugin_functional/plugins/index_patterns @elastic/kibana-app-services
+test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/actionable-observability
 x-pack/plugins/infra @elastic/infra-monitoring-ui
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
@@ -448,7 +448,7 @@ packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 test/health_gateway/plugins/status @elastic/kibana-core
-test/plugin_functional/plugins/kbn_sample_panel_action @elastic/kibana-app-services
+test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
@@ -457,7 +457,7 @@ packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 src/plugins/kibana_overview @elastic/appex-sharedux
 src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
-src/plugins/kibana_utils @elastic/kibana-app-services
+src/plugins/kibana_utils @elastic/kibana-core
 x-pack/plugins/kubernetes_security @elastic/sec-cloudnative-integrations
 packages/kbn-language-documentation-popover @elastic/kibana-visualizations
 x-pack/plugins/lens @elastic/kibana-visualizations
@@ -467,8 +467,8 @@ x-pack/plugins/licensing @elastic/kibana-core
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
-examples/locator_examples @elastic/kibana-app-services
-examples/locator_explorer @elastic/kibana-app-services
+examples/locator_examples @elastic/appex-sharedux
+examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/logs_shared @elastic/infra-monitoring-ui
@@ -478,7 +478,7 @@ packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
 packages/kbn-management/storybook/config @elastic/platform-deployment-management
-test/plugin_functional/plugins/management_test_plugin @elastic/kibana-app-services
+test/plugin_functional/plugins/management_test_plugin @elastic/platform-deployment-management
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
@@ -576,7 +576,7 @@ packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 src/plugins/saved_search @elastic/kibana-data-discovery
-examples/screenshot_mode_example @elastic/kibana-app-services
+examples/screenshot_mode_example @elastic/appex-sharedux
 src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
@@ -621,7 +621,7 @@ packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 x-pack/plugins/session_view @elastic/sec-cloudnative-integrations
 packages/kbn-set-map @elastic/kibana-operations
-examples/share_examples @elastic/kibana-app-services
+examples/share_examples @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
 packages/kbn-shared-svg @elastic/apm-ui
 packages/shared-ux/avatar/solution @elastic/appex-sharedux
@@ -738,7 +738,7 @@ src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/uptime @elastic/uptime
-x-pack/plugins/drilldowns/url_drilldown @elastic/kibana-app-services
+x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 src/plugins/url_forwarding @elastic/kibana-visualizations
 packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
