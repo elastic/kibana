@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { lazy } from 'react';
-import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
   PageUpsellings,

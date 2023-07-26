@@ -13,7 +13,6 @@ import {
   type SolutionSideNavProps,
   type SolutionSideNavItem,
   SolutionSideNavItemPosition,
-  LinkCategoryType,
 } from '..';
 
 const items: SolutionSideNavItem[] = [
@@ -195,15 +194,15 @@ SolutionSideNav.argTypes = {
     control: 'object',
     defaultValue: [
       {
-        type: LinkCategoryType.separator,
+        type: 'separator',
         linkIds: ['simpleLink', 'panelLink', 'categoriesPanelLink'],
       },
       {
-        type: LinkCategoryType.separator,
+        type: 'separator',
         linkIds: ['linkWrapped'],
       },
       {
-        type: LinkCategoryType.separator,
+        type: 'separator',
         linkIds: ['bottomLink', 'bottomLinkPanel', 'bottomLinkSeparator', 'bottomLinkIcon'],
       },
     ],
