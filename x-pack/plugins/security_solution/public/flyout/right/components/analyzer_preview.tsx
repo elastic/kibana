@@ -38,6 +38,7 @@ export const AnalyzerPreview: React.FC = () => {
     isActiveTimeline: isActiveTimeline(scopeId),
     documentId: processDocumentId,
     indices,
+    descendantLevels: 3,
   });
 
   useEffect(() => {

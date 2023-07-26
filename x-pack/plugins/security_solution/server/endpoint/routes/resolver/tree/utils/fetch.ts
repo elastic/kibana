@@ -226,7 +226,8 @@ export class Fetcher {
     // if the ancestry was specified then ignore the levels
     while (
       numNodesLeftToRequest > 0 &&
-      (options.schema.ancestry !== undefined || levelsLeftToRequest > 0)
+      options.schema.ancestry !== undefined &&
+      levelsLeftToRequest > 0
     ) {
       const results: FieldsObject[] = await query.search(this.client, nodes, numNodesLeftToRequest);
       if (results.length <= 0) {

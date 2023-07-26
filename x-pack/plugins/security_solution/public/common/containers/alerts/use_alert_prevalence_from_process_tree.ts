@@ -45,6 +45,7 @@ interface UseAlertPrevalenceFromProcessTree {
   documentId: string;
   isActiveTimeline: boolean;
   indices: string[];
+  descendantLevels?: number;
 }
 
 interface UseAlertDocumentAnalyzerSchema {
@@ -98,6 +99,7 @@ export function useAlertPrevalenceFromProcessTree({
   documentId,
   isActiveTimeline,
   indices,
+  descendantLevels,
 }: UseAlertPrevalenceFromProcessTree): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
@@ -118,6 +120,7 @@ export function useAlertPrevalenceFromProcessTree({
           indexPatterns: alertAndOriginalIndices,
           nodes: [id],
           includeHits: true,
+          descendantLevels,
         }),
       });
     },

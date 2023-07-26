@@ -63,6 +63,7 @@ describe('<AnalyzerPreview />', () => {
       isActiveTimeline: false,
       documentId: 'ancestors-id',
       indices: ['rule-parameters-index'],
+      descendantLevels: 3,
     });
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId(ANALYZER_TREE_TEST_ID)).toBeInTheDocument();
@@ -87,6 +88,7 @@ describe('<AnalyzerPreview />', () => {
       isActiveTimeline: false,
       documentId: '',
       indices: [],
+      descendantLevels: 3,
     });
     expect(queryByTestId(ANALYZER_TREE_TEST_ID)).not.toBeInTheDocument();
   });
