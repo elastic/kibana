@@ -9,6 +9,7 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import rison from '@kbn/rison';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -32,6 +33,7 @@ type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 describe('POST /api/reporting/generate', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let mockReportingCore: ReportingCore;
@@ -84,6 +86,11 @@ describe('POST /api/reporting/generate', () => {
       mockSetupDeps,
       mockStartDeps
     );
+
+    usageCounter = {
+      incrementCounter: jest.fn(),
+    };
+    mockReportingCore.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
 
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register(mockPdfExportType);
@@ -225,5 +232,31 @@ describe('POST /api/reporting/generate', () => {
           path: '/mock-server-basepath/api/reporting/jobs/download/foo',
         });
       });
+  });
+
+  describe('usage counters', () => {
+    it('increments generation api counter', async () => {
+      registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+        .send({
+          jobParams: rison.encode({
+            title: `abc`,
+            relativeUrls: ['test'],
+            layout: { id: 'test' },
+            objectType: 'canvas workpad',
+          }),
+        })
+        .expect(200);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `post /api/reporting/generate/printablePdf`,
+        counterType: 'reportingApi',
+      });
+    });
   });
 });
