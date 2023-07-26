@@ -61,7 +61,7 @@ const generateCustomLogsConfig = createObservabilityOnboardingServerRoute({
   },
 });
 
-//TODO these API should be consolidated and the config/onboarding type should be looked up by the onboardingId param from the saved object
+// TODO these API should be consolidated and the config/onboarding type should be looked up by the onboardingId param from the saved object
 const generateSystemLogsConfig = createObservabilityOnboardingServerRoute({
   endpoint:
     'GET /internal/observability_onboarding/elastic_agent/system_logs/config',
@@ -100,7 +100,7 @@ const generateSystemLogsConfig = createObservabilityOnboardingServerRoute({
         ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}`
         : '$API_KEY',
       esHost: [elasticsearchUrl],
-      uuid: 'd5f26bfa-714f-40cf-a629-e04f33abf68'
+      uuid: 'd5f26bfa-714f-40cf-a629-e04f33abf68',
     });
 
     return yaml;

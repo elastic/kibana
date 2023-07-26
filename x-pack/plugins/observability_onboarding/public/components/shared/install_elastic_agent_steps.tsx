@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
 import React from 'react';
-import { StepStatus } from '../app/custom_logs/wizard/step_status';
 import { intersection } from 'lodash';
+import { StepStatus } from '../app/custom_logs/wizard/step_status';
 
 export type EuiStepStatus = EuiStepsProps['steps'][number]['status'];
 
