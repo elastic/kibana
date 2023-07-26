@@ -130,7 +130,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   };
 
   if (!isAuthorized) {
-    return null;
+    return <>{'TODO: Add RiskScore Upsell'}</>;
   }
 
   if (status.isDisabled || status.isDeprecated) {
