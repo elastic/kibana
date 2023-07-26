@@ -111,7 +111,7 @@
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",
     "@elastic/react-search-ui": "^1.6.0",
-    "@elastic/request-crypto": "2.0.1",
+    "@elastic/request-crypto": "2.0.2",
     "@elastic/safer-lodash-set": "link:bazel-bin/packages/elastic-safer-lodash-set",
     "@elastic/search-ui-app-search-connector": "^1.6.0",
     "@emotion/react": "^11.4.0",
