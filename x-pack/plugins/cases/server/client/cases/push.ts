@@ -12,10 +12,9 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type { ActionConnector, ConfigurationAttributes } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import type {
-  ActionConnector,
   Case,
   ExternalServiceResponse,
   CommentRequestAlertType,

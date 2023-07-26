@@ -9,7 +9,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
+import { CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -73,6 +73,7 @@ import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
+import { ConnectorTypes } from '../../common/types/domain';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

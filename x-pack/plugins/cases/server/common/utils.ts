@@ -15,6 +15,7 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { ConnectorTypes } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -43,7 +44,6 @@ import {
   CaseSeverity,
   CaseStatuses,
   CommentType,
-  ConnectorTypes,
   ExternalReferenceSORt,
   FileAttachmentMetadataRt,
 } from '../../common/api';
@@ -252,6 +252,16 @@ export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
+};
+
+/**
+ * Returns true if a Comment Request is trying to create either a persistableState or an
+ * externalReference attachment.
+ */
+export const isPersistableStateOrExternalReference = (context: CommentRequest): boolean => {
+  return (
+    context.type === CommentType.persistableState || context.type === CommentType.externalReference
+  );
 };
 
 /**

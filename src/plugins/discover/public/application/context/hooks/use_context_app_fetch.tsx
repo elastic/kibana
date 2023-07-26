@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
@@ -22,7 +23,6 @@ import {
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from '../utils/sorting';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../../types';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
