@@ -65,53 +65,89 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - type: object
-                    properties:
-                      attributes:
-                        type: object
-                      coreMigrationVersion:
-                        type: string
-                      created_at:
-                        type: string
-                        format: date
-                      id:
-                        type: string
-                      managed:
-                        type: boolean
-                      references:
-                        type: array
-                      sort:
-                        type: array
-                      type:
-                        type: string
-                      typeMigrationVersion:
-                        type: string
-                      updated_at:
-                        type: string
-                        format: date
-                      version:
-                        type: string
-                  - type: object
-                    properties:
-                      exportedCount:
-                        type: integer
-                      missingRefCount:
-                        type: integer
-                      missingReferences:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            type:
-                              type: string
+                type: object
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/saved_objects/_import:
+    post:
+      summary: Create sets of Kibana saved objects from a file created by the export API.
+      operationId: importSavedObjects
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: compatibilityMode
+          schema:
+            type: boolean
+          required: false
+          description: |
+            Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.
+        - in: query
+          name: createNewCopies
+          schema:
+            type: boolean
+          required: false
+          description: |
+            Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.
+        - in: query
+          name: overwrite
+          schema:
+            type: boolean
+          required: false
+          description: |
+            Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.
+      requestBody:
+        required: true
+        content:
+          multipart/form:
+            schema:
+              type: object
+              description: |
+                A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    description: |
+                      Indicates the import was unsuccessful and specifies the objects that failed to import. One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.
+                  success:
+                    type: boolean
+                    description: |
+                      Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.
+                  successCount:
+                    type: integer
+                    description: Indicates the number of successfully imported records.
+                  successResults:
+                    type: array
+                    items:
+                      type: object
+                    description: |
+                      Indicates the objects that are successfully imported, with any metadata if applicable. Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.
+                  warnings:
+                    type: array
               examples:
-                exportObjectsRequest:
-                  $ref: '#/components/examples/export_objects_request'
-        '401':
-          description: Authorization information is missing or invalid.
+                importObjectsResponse:
+                  $ref: '#/components/examples/import_objects_response'
+        '400':
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -146,6 +182,20 @@ components:
           - type: index-pattern
             id: 90943e30-9a47-11e8-b64d-95841ca0b247
         includeReferencesDeep: false
+    import_objects_response:
+      summary: The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.
+      value:
+        successCount: 1
+        success: true
+        warnings: []
+        successResults:
+          - type: index-pattern
+            id: 90943e30-9a47-11e8-b64d-95841ca0b247
+            meta:
+              title: Kibana Sample Data Logs
+              icon: indexPatternApp
+            managed: false
+            destinationId: 82d2760c-468f-49cf-83aa-b9a35b6a8943
 security:
   - basicAuth: []
   - apiKeyAuth: []

@@ -46,53 +46,9 @@ post:
       content:
          application/json:
           schema:
-            allOf:
-             - type: object
-               properties:
-                attributes:
-                  type: object
-                coreMigrationVersion:
-                  type: string
-                created_at:
-                  type: string
-                  format: date
-                id:
-                  type: string
-                managed:
-                  type: boolean
-                references:
-                  type: array
-                sort:
-                  type: array
-                type:
-                  type: string
-                typeMigrationVersion:
-                  type: string
-                updated_at:
-                  type: string
-                  format: date
-                version:
-                  type: string
-             - type: object
-               properties:
-                 exportedCount:
-                   type: integer
-                 missingRefCount:
-                   type: integer
-                 missingReferences:
-                   type: array
-                   items:
-                     type: object
-                     properties:
-                      id:
-                        type: string
-                      type:
-                        type: string
-          examples:
-            exportObjectsRequest:
-              $ref: '../components/examples/export_objects_request.yaml'
-    '401':
-      description: Authorization information is missing or invalid.
+            type: object
+    '400':
+      description: Bad request.
       content:
         application/json:
           schema:
