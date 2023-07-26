@@ -306,8 +306,6 @@ describe('Entity Analytics Dashboard', () => {
   describe('With anomalies data', () => {
     before(() => {
       cy.task('esArchiverLoad', 'network');
-      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies1');
-      cy.intercept('POST', 'internal/ml/results/anomaly_search').as('anomalies2');
       login();
       visit(ENTITY_ANALYTICS_URL);
       waitForPageToBeLoaded();
