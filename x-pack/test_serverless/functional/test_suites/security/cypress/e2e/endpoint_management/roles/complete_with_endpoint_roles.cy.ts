@@ -97,7 +97,7 @@ describe(
 
         it('should NOT have access to execute response actions', () => {
           visitEndpointList();
-          openRowActionMenu().getByTestSubj('console').should('not.exist');
+          openRowActionMenu().findByTestSubj('console').should('not.exist');
         });
       });
     });
@@ -203,7 +203,7 @@ describe(
 
       it('should NOT have access to execute response actions', () => {
         visitEndpointList();
-        openRowActionMenu().getByTestSubj('console').should('not.exist');
+        openRowActionMenu().findByTestSubj('console').should('not.exist');
       });
     });
 
@@ -254,7 +254,7 @@ describe(
 
       it('should NOT have access to execute response actions', () => {
         visitEndpointList();
-        openRowActionMenu().getByTestSubj('console').should('not.exist');
+        openRowActionMenu().findByTestSubj('console').should('not.exist');
       });
     });
 
@@ -385,31 +385,16 @@ describe(
           it('should have access to Response Actions Log', () => {
             cy.visit(pageById.responseActionLog);
 
-            if (roleName !== 'endpoint_policy_manager') {
+            if (roleName === 'endpoint_policy_manager') {
               getNoPrivilegesPage().should('exist');
             } else {
               getNoPrivilegesPage().should('not.exist');
             }
           });
 
-          describe('Response Actions access', () => {
-            if (roleName === 'platform_engineer') {
-              it('should NOT have access to execute response actions', () => {
-                visitEndpointList();
-                openRowActionMenu().getByTestSubj('console').should('not.exist');
-              });
-            } else if (roleName === 'endpoint_operations_analyst') {
-              Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(
-                ([action, testSubj]) => {
-                  it(`should have access to execute action: ${action}`, () => {
-                    visitEndpointList();
-                    openConsoleFromEndpointList();
-                    openConsoleHelpPanel();
-                    cy.getByTestSubj(testSubj).should('exist');
-                  });
-                }
-              );
-            }
+          it('should NOT have access to execute response actions', () => {
+            visitEndpointList();
+            openRowActionMenu().findByTestSubj('console').should('not.exist');
           });
         });
       }
