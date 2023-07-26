@@ -19,9 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
 
-  // Failing: See https://github.com/elastic/kibana/issues/134517
-  // Failing: See https://github.com/elastic/kibana/issues/149942
-  describe.skip(`Usage Counters`, () => {
+  describe(`Usage Counters`, () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await reportingAPI.initEcommerce();
@@ -49,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       const paths = {
         LIST: INTERNAL_ROUTES.JOBS.LIST,
         COUNT: INTERNAL_ROUTES.JOBS.COUNT,
-        INFO: INTERNAL_ROUTES.JOBS.COUNT + '/kraz0qle154g0763b569zz83',
+        INFO: INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/kraz0qle154g0763b569zz83',
         ILM: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS,
         DIAG_BROWSER: INTERNAL_ROUTES.DIAGNOSE.BROWSER,
         DIAG_SCREENSHOT: INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT,
