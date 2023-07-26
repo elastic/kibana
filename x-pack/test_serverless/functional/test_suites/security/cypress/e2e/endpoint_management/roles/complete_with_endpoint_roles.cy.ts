@@ -318,7 +318,7 @@ describe(
         const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
         beforeEach(() => {
-          login('platform_engineer');
+          login(roleName);
         });
 
         for (const { id, url, title } of artifactPagesFullAccess) {
