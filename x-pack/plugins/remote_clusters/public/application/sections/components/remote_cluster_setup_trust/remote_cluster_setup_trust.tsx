@@ -112,7 +112,16 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
         )}
 
         <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
-          <EuiCard title={i18nTexts.certTitle} paddingSize="l" data-test-subj="setupTrustCertCard">
+          <EuiCard
+            title={
+              <>
+                <EuiSpacer size="s" />
+                {i18nTexts.certTitle}
+              </>
+            }
+            paddingSize="l"
+            data-test-subj="setupTrustCertCard"
+          >
             <EuiText size="s">
               <p>{i18nTexts.certDescription}</p>
             </EuiText>
