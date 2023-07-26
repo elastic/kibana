@@ -7,7 +7,9 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import type { DeleteRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   QueryRuleByIds,
   validateQueryRuleByIds,
@@ -32,7 +34,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<DeleteRuleResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validateQueryRuleByIds(request.query);
       if (validationErrors.length) {

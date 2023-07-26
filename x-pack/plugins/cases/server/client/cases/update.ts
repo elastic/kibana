@@ -17,24 +17,9 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { CasePatchRequest, CasesPatchRequest } from '../../../common/types/api';
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
-import type {
-  CaseAssignees,
-  CaseAttributes,
-  CasePatchRequest,
-  Case,
-  CasesPatchRequest,
-  Cases,
-  CommentAttributes,
-  User,
-} from '../../../common/api';
-import {
-  CasesPatchRequestRt,
-  CasesRt,
-  CaseStatuses,
-  CommentType,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -59,6 +44,16 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type {
+  Cases,
+  Case,
+  CaseAttributes,
+  User,
+  CaseAssignees,
+  AttachmentAttributes,
+} from '../../../common/types/domain';
+import { CasesPatchRequestRt } from '../../../common/types/api';
+import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -136,7 +131,7 @@ function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase
  * Get the id from a reference in a comment for a specific type.
  */
 function getID(
-  comment: SavedObject<CommentAttributes>,
+  comment: SavedObject<AttachmentAttributes>,
   type: typeof CASE_SAVED_OBJECT
 ): string | undefined {
   return comment.references.find((ref) => ref.type === type)?.id;
@@ -151,14 +146,14 @@ async function getAlertComments({
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-}): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+}): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
   return caseService.getAllCaseComments({
     id: idsOfCasesToSync,
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
   });
 }
@@ -170,7 +165,7 @@ function getSyncStatusForComment({
   alertComment,
   casesToSyncToStatus,
 }: {
-  alertComment: SavedObjectsFindResult<CommentAttributes>;
+  alertComment: SavedObjectsFindResult<AttachmentAttributes>;
   casesToSyncToStatus: Map<string, CaseStatuses>;
 }): CaseStatuses {
   const id = getID(alertComment, CASE_SAVED_OBJECT);
