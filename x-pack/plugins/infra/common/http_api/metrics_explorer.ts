@@ -74,12 +74,16 @@ export const metricsExplorerMetricRT = rt.intersection([
   metricsExplorerMetricOptionalFieldsRT,
 ]);
 
-export const timeRangeRT = rt.type({
-  from: rt.number,
-  to: rt.number,
-  interval: rt.string,
-  timeFieldName: rt.union([rt.string, rt.undefined]),
-});
+export const timeRangeRT = rt.intersection([
+  rt.type({
+    from: rt.number,
+    to: rt.number,
+    interval: rt.string,
+  }),
+  rt.partial({
+    timeFieldName: rt.string,
+  }),
+]);
 
 export const metricsExplorerRequestBodyRequiredFieldsRT = rt.type({
   timerange: timeRangeRT,
