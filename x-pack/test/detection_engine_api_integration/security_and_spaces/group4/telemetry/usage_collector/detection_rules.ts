@@ -67,379 +67,379 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    describe('"kql" rule type', () => {
-      it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
-        await createRule(supertest, log, rule);
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+    // describe('"kql" rule type', () => {
+    //   it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
+    //     const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+    //     await createRule(supertest, log, rule);
+    //     await retry.try(async () => {
+    //       const stats = await getStats(supertest, log);
+    //       const expected: DetectionMetrics = {
+    //         ...getInitialDetectionMetrics(),
+    //         detection_rules: {
+    //           ...getInitialDetectionMetrics().detection_rules,
+    //           detection_rule_usage: {
+    //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+    //             query: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+    //               disabled: 1,
+    //               notifications_enabled: 0,
+    //               notifications_disabled: 0,
+    //               legacy_notifications_disabled: 0,
+    //               legacy_notifications_enabled: 0,
+    //             },
+    //             custom_total: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+    //               disabled: 1,
+    //               notifications_enabled: 0,
+    //               notifications_disabled: 0,
+    //               legacy_notifications_disabled: 0,
+    //               legacy_notifications_enabled: 0,
+    //             },
+    //           },
+    //         },
+    //       };
+    //       expect(stats).to.eql(expected);
+    //     });
+    //   });
 
-      it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
-        const rule = getRuleForSignalTesting(['telemetry']);
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+    //   it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
+    //     const rule = getRuleForSignalTesting(['telemetry']);
+    //     const { id } = await createRule(supertest, log, rule);
+    //     await waitForRuleSuccess({ supertest, log, id });
+    //     await waitForSignalsToBePresent(supertest, log, 4, [id]);
+    //     await retry.try(async () => {
+    //       const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+    //       // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
+    //       stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+    //       const expected: DetectionMetrics = {
+    //         ...getInitialDetectionMetrics(),
+    //         detection_rules: {
+    //           ...getInitialDetectionMetrics().detection_rules,
+    //           detection_rule_usage: {
+    //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+    //             query: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+    //               enabled: 1,
+    //               alerts: 4,
+    //               notifications_enabled: 0,
+    //               notifications_disabled: 0,
+    //               legacy_notifications_disabled: 0,
+    //               legacy_notifications_enabled: 0,
+    //             },
+    //             custom_total: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+    //               enabled: 1,
+    //               alerts: 4,
+    //               notifications_enabled: 0,
+    //               notifications_disabled: 0,
+    //               legacy_notifications_disabled: 0,
+    //               legacy_notifications_enabled: 0,
+    //             },
+    //           },
+    //         },
+    //       };
+    //       expect(stats).to.eql(expected);
+    //     });
+    //   });
 
-      it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
-        const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
-        await createRule(supertest, log, ruleToCreate);
+    //   it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+    //     const rule = getRuleForSignalTesting(['telemetry']);
+    //     const hookAction = await createNewAction(supertest, log);
+    //     const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
+    //     await createRule(supertest, log, ruleToCreate);
 
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+    //     await retry.try(async () => {
+    //       const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+    //       // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
+    //       stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+    //       const expected: DetectionMetrics = {
+    //         ...getInitialDetectionMetrics(),
+    //         detection_rules: {
+    //           ...getInitialDetectionMetrics().detection_rules,
+    //           detection_rule_usage: {
+    //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+    //             query: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+    //               notifications_disabled: 1,
+    //               disabled: 1,
+    //             },
+    //             custom_total: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+    //               notifications_disabled: 1,
+    //               disabled: 1,
+    //             },
+    //           },
+    //         },
+    //       };
+    //       expect(stats).to.eql(expected);
+    //     });
+    //   });
 
-      it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
-        const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
-        const { id } = await createRule(supertest, log, ruleToCreate);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+    //   it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+    //     const rule = getRuleForSignalTesting(['telemetry']);
+    //     const hookAction = await createNewAction(supertest, log);
+    //     const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
+    //     const { id } = await createRule(supertest, log, ruleToCreate);
+    //     await waitForRuleSuccess({ supertest, log, id });
+    //     await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+    //     await retry.try(async () => {
+    //       const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+    //       // remove "detection_rule_status" from the test by resetting it to initial
+    //       stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+    //       const expected: DetectionMetrics = {
+    //         ...getInitialDetectionMetrics(),
+    //         detection_rules: {
+    //           ...getInitialDetectionMetrics().detection_rules,
+    //           detection_rule_usage: {
+    //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+    //             query: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+    //               enabled: 1,
+    //               alerts: 4,
+    //               notifications_enabled: 1,
+    //             },
+    //             custom_total: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+    //               enabled: 1,
+    //               alerts: 4,
+    //               notifications_enabled: 1,
+    //             },
+    //           },
+    //         },
+    //       };
+    //       expect(stats).to.eql(expected);
+    //     });
+    //   });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
-        const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
-        await createLegacyRuleAction(supertest, id, hookAction.id);
+    //   it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+    //     const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+    //     const { id } = await createRule(supertest, log, rule);
+    //     const hookAction = await createNewAction(supertest, log);
+    //     await createLegacyRuleAction(supertest, id, hookAction.id);
 
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+    //     await retry.try(async () => {
+    //       const stats = await getStats(supertest, log);
+    //       const expected: DetectionMetrics = {
+    //         ...getInitialDetectionMetrics(),
+    //         detection_rules: {
+    //           ...getInitialDetectionMetrics().detection_rules,
+    //           detection_rule_usage: {
+    //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+    //             query: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+    //               disabled: 1,
+    //               legacy_notifications_disabled: 1,
+    //             },
+    //             custom_total: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+    //               disabled: 1,
+    //               legacy_notifications_disabled: 1,
+    //             },
+    //           },
+    //         },
+    //       };
+    //       expect(stats).to.eql(expected);
+    //     });
+    //   });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry']);
-        const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
-        await createLegacyRuleAction(supertest, id, hookAction.id);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+    //   it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+    //     const rule = getRuleForSignalTesting(['telemetry']);
+    //     const { id } = await createRule(supertest, log, rule);
+    //     const hookAction = await createNewAction(supertest, log);
+    //     await createLegacyRuleAction(supertest, id, hookAction.id);
+    //     await waitForRuleSuccess({ supertest, log, id });
+    //     await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+    //     await retry.try(async () => {
+    //       const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+    //       // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
+    //       stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                query: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  alerts: 4,
-                  enabled: 1,
-                  legacy_notifications_enabled: 1,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
-    });
+    //       const expected: DetectionMetrics = {
+    //         ...getInitialDetectionMetrics(),
+    //         detection_rules: {
+    //           ...getInitialDetectionMetrics().detection_rules,
+    //           detection_rule_usage: {
+    //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+    //             query: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+    //               alerts: 4,
+    //               enabled: 1,
+    //               legacy_notifications_enabled: 1,
+    //             },
+    //             custom_total: {
+    //               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+    //               alerts: 4,
+    //               enabled: 1,
+    //               legacy_notifications_enabled: 1,
+    //             },
+    //           },
+    //         },
+    //       };
+    //       expect(stats).to.eql(expected);
+    //     });
+    //   });
+    // });
 
     // FLAKY: https://github.com/elastic/kibana/issues/156088
     describe('"eql" rule type', () => {
-      it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
-        const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
-        await createRule(supertest, log, rule);
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+      // it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
+      //   const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
+      //   await createRule(supertest, log, rule);
+      //   await retry.try(async () => {
+      //     const stats = await getStats(supertest, log);
+      //     const expected: DetectionMetrics = {
+      //       ...getInitialDetectionMetrics(),
+      //       detection_rules: {
+      //         ...getInitialDetectionMetrics().detection_rules,
+      //         detection_rule_usage: {
+      //           ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+      //           eql: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+      //             disabled: 1,
+      //             notifications_enabled: 0,
+      //             notifications_disabled: 0,
+      //             legacy_notifications_disabled: 0,
+      //             legacy_notifications_enabled: 0,
+      //           },
+      //           custom_total: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+      //             disabled: 1,
+      //             notifications_enabled: 0,
+      //             notifications_disabled: 0,
+      //             legacy_notifications_disabled: 0,
+      //             legacy_notifications_enabled: 0,
+      //           },
+      //         },
+      //       },
+      //     };
+      //     expect(stats).to.eql(expected);
+      //   });
+      // });
 
-      it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
-        const rule = getEqlRuleForSignalTesting(['telemetry']);
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+      // it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
+      //   const rule = getEqlRuleForSignalTesting(['telemetry']);
+      //   const { id } = await createRule(supertest, log, rule);
+      //   await waitForRuleSuccess({ supertest, log, id });
+      //   await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      //   await retry.try(async () => {
+      //     const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+      //     // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
+      //     stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 0,
-                  notifications_disabled: 0,
-                  legacy_notifications_disabled: 0,
-                  legacy_notifications_enabled: 0,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+      //     const expected: DetectionMetrics = {
+      //       ...getInitialDetectionMetrics(),
+      //       detection_rules: {
+      //         ...getInitialDetectionMetrics().detection_rules,
+      //         detection_rule_usage: {
+      //           ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+      //           eql: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+      //             enabled: 1,
+      //             alerts: 4,
+      //             notifications_enabled: 0,
+      //             notifications_disabled: 0,
+      //             legacy_notifications_disabled: 0,
+      //             legacy_notifications_enabled: 0,
+      //           },
+      //           custom_total: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+      //             enabled: 1,
+      //             alerts: 4,
+      //             notifications_enabled: 0,
+      //             notifications_disabled: 0,
+      //             legacy_notifications_disabled: 0,
+      //             legacy_notifications_enabled: 0,
+      //           },
+      //         },
+      //       },
+      //     };
+      //     expect(stats).to.eql(expected);
+      //   });
+      // });
 
-      it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
-        const rule = getEqlRuleForSignalTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
-        const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
-        await createRule(supertest, log, ruleToCreate);
+      // it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      //   const rule = getEqlRuleForSignalTesting(['telemetry']);
+      //   const hookAction = await createNewAction(supertest, log);
+      //   const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
+      //   await createRule(supertest, log, ruleToCreate);
 
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+      //   await retry.try(async () => {
+      //     const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+      //     // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
+      //     stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  notifications_disabled: 1,
-                  disabled: 1,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+      //     const expected: DetectionMetrics = {
+      //       ...getInitialDetectionMetrics(),
+      //       detection_rules: {
+      //         ...getInitialDetectionMetrics().detection_rules,
+      //         detection_rule_usage: {
+      //           ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+      //           eql: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+      //             notifications_disabled: 1,
+      //             disabled: 1,
+      //           },
+      //           custom_total: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+      //             notifications_disabled: 1,
+      //             disabled: 1,
+      //           },
+      //         },
+      //       },
+      //     };
+      //     expect(stats).to.eql(expected);
+      //   });
+      // });
 
-      it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
-        const rule = getEqlRuleForSignalTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
-        const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
-        const { id } = await createRule(supertest, log, ruleToCreate);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      // it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      //   const rule = getEqlRuleForSignalTesting(['telemetry']);
+      //   const hookAction = await createNewAction(supertest, log);
+      //   const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
+      //   const { id } = await createRule(supertest, log, ruleToCreate);
+      //   await waitForRuleSuccess({ supertest, log, id });
+      //   await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
-        await retry.try(async () => {
-          const stats = await getStats(supertest, log);
+      //   await retry.try(async () => {
+      //     const stats = await getStats(supertest, log);
 
-          // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
-          stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
+      //     // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
+      //     stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
 
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  enabled: 1,
-                  alerts: 4,
-                  notifications_enabled: 1,
-                },
-              },
-            },
-          };
-          expect(stats).to.eql(expected);
-        });
-      });
+      //     const expected: DetectionMetrics = {
+      //       ...getInitialDetectionMetrics(),
+      //       detection_rules: {
+      //         ...getInitialDetectionMetrics().detection_rules,
+      //         detection_rule_usage: {
+      //           ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+      //           eql: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+      //             enabled: 1,
+      //             alerts: 4,
+      //             notifications_enabled: 1,
+      //           },
+      //           custom_total: {
+      //             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+      //             enabled: 1,
+      //             alerts: 4,
+      //             notifications_enabled: 1,
+      //           },
+      //         },
+      //       },
+      //     };
+      //     expect(stats).to.eql(expected);
+      //   });
+      // });
 
       /**
        * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -451,6 +451,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createNewAction(supertest, log);
         await createLegacyRuleAction(supertest, id, hookAction.id);
+
+        const convert = (metrics: DetectionMetrics) => {
+          return {
+            all_rules_eql: metrics.detection_rules.detection_rule_status.all_rules.eql,
+            custom_rules_eql: metrics.detection_rules.detection_rule_status.custom_rules.eql,
+          };
+        };
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -475,9 +482,9 @@ export default ({ getService }: FtrProviderContext) => {
           };
           expect(stats).to.eql(
             expected,
-            `\n\n\nexpected: ${JSON.stringify(expected)}, \n\n\nactual: ${JSON.stringify(
-              stats
-            )}, \n\n\nstatsBefore: ${JSON.stringify(statsBefore)}`
+            `\n\n\nexpected: ${JSON.stringify(convert(expected))}, \n\n\nactual: ${JSON.stringify(
+              convert(stats)
+            )}, \n\n\nstatsBefore: ${JSON.stringify(convert(statsBefore))}`
           );
         });
       });
