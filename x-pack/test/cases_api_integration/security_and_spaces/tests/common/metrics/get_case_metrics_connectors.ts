@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['connectors'],
+          features: [CaseMetricsFeature.CONNECTORS],
         });
 
         expect(metrics).to.eql({

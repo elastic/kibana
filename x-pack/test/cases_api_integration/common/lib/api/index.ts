@@ -26,7 +26,11 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common/api';
+import {
+  SingleCaseMetricsResponse,
+  CasesMetricsResponse,
+  CaseMetricsFeature,
+} from '@kbn/cases-plugin/common/api';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
@@ -537,7 +541,7 @@ export const getCaseMetrics = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
-  features: string[] | string;
+  features: CaseMetricsFeature[] | CaseMetricsFeature;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<SingleCaseMetricsResponse> => {

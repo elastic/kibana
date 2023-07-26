@@ -10,12 +10,13 @@ import {
   CasesMetricsRequestRt,
   SingleCaseMetricsResponseRt,
   CasesMetricsResponseRt,
+  CaseMetricsFeature,
 } from './case';
 
 describe('Metrics case', () => {
   describe('SingleCaseMetricsRequestRt', () => {
     const defaultRequest = {
-      features: ['alerts.count', 'lifespan'],
+      features: [CaseMetricsFeature.ALERTS_COUNT, CaseMetricsFeature.LIFESPAN],
     };
 
     it('has expected attributes in request', () => {
@@ -41,7 +42,12 @@ describe('Metrics case', () => {
   });
 
   describe('CasesMetricsRequestRt', () => {
-    const defaultRequest = { features: ['mttr'], to: 'now-1d', from: 'now-1d', owner: ['cases'] };
+    const defaultRequest = {
+      features: [CaseMetricsFeature.MTTR],
+      to: 'now-1d',
+      from: 'now-1d',
+      owner: ['cases'],
+    };
 
     it('has expected attributes in request', () => {
       const query = CasesMetricsRequestRt.decode(defaultRequest);
@@ -65,12 +71,16 @@ describe('Metrics case', () => {
     });
 
     it('removes foo:bar attributes from when partial fields', () => {
-      const query = CasesMetricsRequestRt.decode({ features: ['mttr'], to: 'now-1d', foo: 'bar' });
+      const query = CasesMetricsRequestRt.decode({
+        features: [CaseMetricsFeature.MTTR],
+        to: 'now-1d',
+        foo: 'bar',
+      });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           to: 'now-1d',
         },
       });

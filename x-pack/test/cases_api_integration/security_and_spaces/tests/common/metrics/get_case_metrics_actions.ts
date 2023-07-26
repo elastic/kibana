@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
 import { getPostCaseRequest, postCommentActionsReq } from '../../../../common/lib/mock';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -33,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['actions.isolateHost'],
+          features: [CaseMetricsFeature.ACTIONS_ISOLATE_HOST],
         });
 
         expect(metrics).to.eql({
@@ -66,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['actions.isolateHost'],
+          features: [CaseMetricsFeature.ACTIONS_ISOLATE_HOST],
         });
 
         expect(metrics).to.eql({
@@ -103,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['actions.isolateHost'],
+          features: [CaseMetricsFeature.ACTIONS_ISOLATE_HOST],
         });
 
         expect(metrics).to.eql({

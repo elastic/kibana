@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -36,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const metrics = await getCaseMetrics({
         supertest,
         caseId: newCase.id,
-        features: 'connectors',
+        features: CaseMetricsFeature.CONNECTORS,
       });
 
       expect(metrics).to.eql({
@@ -68,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: closedCaseId,
-          features: ['lifespan'],
+          features: [CaseMetricsFeature.LIFESPAN],
         });
 
         expect(metrics.lifespan?.creationDate).to.be('2021-06-17T18:57:41.682Z');
@@ -79,6 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const errorResponse = (await getCaseMetrics({
           supertest,
           caseId: closedCaseId,
+          // @ts-expect-error: testing invalid feature
           features: ['bananas'],
           expectedHttpCode: 400,
           // casting here because we're expecting an error with a message field
@@ -110,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['lifespan'],
+          features: [CaseMetricsFeature.LIFESPAN],
         });
 
         expect(metrics).to.eql({
@@ -148,12 +150,12 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: newCase.id,
             features: [
-              'lifespan',
-              'alerts.hosts',
-              'alerts.users',
-              'alerts.count',
-              'connectors',
-              'actions.isolateHost',
+              CaseMetricsFeature.LIFESPAN,
+              CaseMetricsFeature.ALERTS_COUNT,
+              CaseMetricsFeature.ALERTS_HOSTS,
+              CaseMetricsFeature.ALERTS_USERS,
+              CaseMetricsFeature.CONNECTORS,
+              CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
             ],
             auth: { user, space: 'space1' },
           });
@@ -189,12 +191,12 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: newCase.id,
             features: [
-              'lifespan',
-              'alerts.hosts',
-              'alerts.users',
-              'alerts.count',
-              'connectors',
-              'actions.isolateHost',
+              CaseMetricsFeature.LIFESPAN,
+              CaseMetricsFeature.ALERTS_COUNT,
+              CaseMetricsFeature.ALERTS_HOSTS,
+              CaseMetricsFeature.ALERTS_USERS,
+              CaseMetricsFeature.CONNECTORS,
+              CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
             ],
             expectedHttpCode: 403,
             auth: { user, space: 'space1' },
@@ -217,12 +219,12 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: newCase.id,
           features: [
-            'lifespan',
-            'alerts.hosts',
-            'alerts.users',
-            'alerts.count',
-            'connectors',
-            'actions.isolateHost',
+            CaseMetricsFeature.LIFESPAN,
+            CaseMetricsFeature.ALERTS_COUNT,
+            CaseMetricsFeature.ALERTS_HOSTS,
+            CaseMetricsFeature.ALERTS_USERS,
+            CaseMetricsFeature.CONNECTORS,
+            CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
           ],
           expectedHttpCode: 403,
           auth: { user: secOnly, space: 'space2' },

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { CaseMetricsFeature } from '../../../../common/api';
 
 import { INTERNAL_CASE_METRICS_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -34,7 +35,9 @@ export const getCaseMetricRoute = createCasesRoute({
       return response.ok({
         body: await client.metrics.getCaseMetrics({
           caseId: request.params.case_id,
-          features: Array.isArray(features) ? features : [features],
+          features: Array.isArray(features)
+            ? (features as CaseMetricsFeature[])
+            : [features as CaseMetricsFeature],
         }),
       });
     } catch (error) {

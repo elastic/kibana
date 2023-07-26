@@ -6,13 +6,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CaseMetricsFeatureField } from '../../../common/api/metrics/case';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
 export interface MetricsHandler<R> {
-  getFeatures(): Set<string>;
+  getFeatures(): Set<CaseMetricsFeatureField>;
   compute(): Promise<R>;
-  setupFeature?(feature: string): void;
+  setupFeature?(feature: CaseMetricsFeatureField): void;
 }
 
 export interface AggregationBuilder<R> {
@@ -40,5 +41,5 @@ export interface AllCasesBaseHandlerCommonOptions extends BaseHandlerCommonOptio
 
 export interface GetCaseMetricsParams {
   caseId: string;
-  features: string[];
+  features: CaseMetricsFeatureField[];
 }
