@@ -81,7 +81,6 @@ describe(
       const artifactPagesFullAccess = [
         pageById.trustedApps,
         pageById.eventFilters,
-        pageById.hostIsolationExceptions,
         pageById.blocklist,
       ];
 
@@ -100,6 +99,11 @@ describe(
           getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
         });
       }
+
+      it(`should NOT have access to Host Isolation Exceptions`, () => {
+        cy.visit(pageById.hostIsolationExceptions.url);
+        getNoPrivilegesPage().should('exist');
+      });
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
@@ -167,11 +171,9 @@ describe(
         getNoPrivilegesPage().should('not.exist');
       });
 
-      it(`should have Read access only to: Host Isolation Exceptions`, () => {
+      it(`should NOT have access to Host Isolation Exceptions`, () => {
         cy.visit(pageById.hostIsolationExceptions.url);
-        getArtifactListEmptyStateAddButton(
-          pageById.hostIsolationExceptions.id as EndpointArtifactPageId
-        ).should('not.exist');
+        getNoPrivilegesPage().should('exist');
       });
 
       it('should NOT have access to Fleet', () => {
@@ -185,7 +187,6 @@ describe(
         pageById.trustedApps,
         pageById.eventFilters,
         pageById.blocklist,
-        pageById.hostIsolationExceptions,
       ];
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
@@ -207,6 +208,11 @@ describe(
         });
       }
 
+      it(`should NOT have access to Host Isolation Exceptions`, () => {
+        cy.visit(pageById.hostIsolationExceptions.url);
+        getNoPrivilegesPage().should('exist');
+      });
+
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensurePermissionDeniedScreen();
@@ -226,7 +232,6 @@ describe(
           pageById.trustedApps,
           pageById.eventFilters,
           pageById.blocklist,
-          pageById.hostIsolationExceptions,
         ];
         const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
@@ -247,6 +252,11 @@ describe(
             getNoPrivilegesPage().should('not.exist');
           });
         }
+
+        it(`should NOT have access to Host Isolation Exceptions`, () => {
+          cy.visit(pageById.hostIsolationExceptions.url);
+          getNoPrivilegesPage().should('exist');
+        });
 
         it('should have access to Fleet', () => {
           visitFleetAgentList();
