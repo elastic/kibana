@@ -26,6 +26,9 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
+/**
+ * Props for ProgressControlProps
+ */
 interface ProgressControlProps {
   isBrushCleared: boolean;
   progress: number;
@@ -38,6 +41,36 @@ interface ProgressControlProps {
   runAnalysisDisabled?: boolean;
 }
 
+/**
+ * Component with ability to Run & cancel analysis
+ * by default use `Baseline` and `Deviation` for the badge name
+ * @param children - List of Kibana services that are required as dependencies
+ * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
+ * @param width - Optional width
+ * @param chartPoints - Data chart points
+ * @param chartPointsSplit - Data chart points split
+ * @param timeRangeEarliest - Start time range for the chart
+ * @param timeRangeLatest - Ending time range for the chart
+ * @param interval - Time interval for the document count buckets
+ * @param chartPointsSplitLabel - Label to name the adjustedChartPointsSplit histogram
+ * @param isBrushCleared - Whether or not brush has been reset
+ * @param autoAnalysisStart - Timestamp for start of initial analysis
+ * @param barColorOverride - Optional color override for the default bar color for charts
+ * @param barStyleAccessor - Optional style to override bar chart
+ * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
+ * @param deviationBrush - Optional settings override for the 'deviation' brush
+ * @param baselineBrush - Optional settings override for the 'baseline' brush
+ * @constructor
+ */
+
+/**
+ * ProgressControls React Component
+ * Component with ability to Run & cancel analysis
+ * by default use `Baseline` and `Deviation` for the badge name
+ * @type {FC<ProgressControlProps>}
+ * @param props - `ProgressControlProps` component props
+ * @returns {React.ReactElement} The ProgressControls component.
+ */
 export const ProgressControls: FC<ProgressControlProps> = ({
   children,
   isBrushCleared,

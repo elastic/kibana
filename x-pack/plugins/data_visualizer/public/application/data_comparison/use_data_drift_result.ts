@@ -21,6 +21,7 @@ import { RandomSampler, RandomSamplerWrapper } from '@kbn/ml-random-sampler-util
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -332,8 +333,7 @@ const fetchComparisonDriftedData = async ({
   fields: DataComparisonField[];
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
-  // @TODO: Fix any
-  baselineResponseAggs: any;
+  baselineResponseAggs: object;
 }) => {
   const driftedRequest = { ...baseRequest };
   const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
@@ -412,9 +412,8 @@ const fetchHistogramData = async ({
   fields: DataComparisonField[];
   randomSamplerWrapper: RandomSamplerWrapper;
   signal: AbortSignal;
-  // @TODO: Fix any
-  baselineResponseAggs: any;
-  driftedRespAggs: any;
+  baselineResponseAggs: Record<string, estypes.AggregationsStatsAggregate>;
+  driftedRespAggs: Record<string, estypes.AggregationsStatsAggregate>;
 }) => {
   const histogramRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   const fieldRange: { [field: string]: Range } = {};
@@ -428,12 +427,12 @@ const fetchHistogramData = async ({
     ) {
       const numBins = 10;
       const min = Math.min(
-        baselineResponseAggs[`${field}_stats`].min,
-        driftedRespAggs[`${field}_stats`].min
+        baselineResponseAggs[`${field}_stats`].min!,
+        driftedRespAggs[`${field}_stats`].min!
       );
       const max = Math.max(
-        baselineResponseAggs[`${field}_stats`].max,
-        driftedRespAggs[`${field}_stats`].max
+        baselineResponseAggs[`${field}_stats`].max!,
+        driftedRespAggs[`${field}_stats`].max!
       );
       const interval = (max - min) / numBins;
 
@@ -455,16 +454,17 @@ const fetchHistogramData = async ({
       };
     }
   }
+  if (isPopulatedObject(histogramRequestAggs)) {
+    const histogramRequest = {
+      ...baseRequest,
+      body: {
+        ...baseRequest.body,
+        aggs: randomSamplerWrapper.wrap(histogramRequestAggs),
+      },
+    };
 
-  const histogramRequest = {
-    ...baseRequest,
-    body: {
-      ...baseRequest.body,
-      aggs: randomSamplerWrapper.wrap(histogramRequestAggs),
-    },
-  };
-
-  return dataSearch(histogramRequest, signal);
+    return dataSearch(histogramRequest, signal);
+  }
 };
 
 const isFulfilled = <T>(
@@ -516,8 +516,13 @@ export const fetchInParallelChunks = async <
     .filter(isFulfilled)
     .filter((r) => r.value)
     .map((r) => {
-      return unwrap(r?.value.aggregations);
-    });
+      try {
+        return unwrap(r?.value.aggregations);
+      } catch (e) {
+        return undefined;
+      }
+    })
+    .filter(isDefined);
 
   if (mergedResults.length === 0) {
     const error = results.find(isRejected);

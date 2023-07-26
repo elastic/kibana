@@ -52,46 +52,70 @@ interface TimeFilterRange {
   to: number;
 }
 
-/* Datum for the bar chart */
+/**
+ * Datum for the bar chart
+ */
 export interface DocumentCountChartPoint {
+  /**
+   * Time of bucket
+   */
   time: number | string;
+  /**
+   * Number of doc count for that time bucket
+   */
   value: number;
 }
 
-/* Optional brush settings to override the default */
+/**
+ * Brush settings
+ */
 export interface BrushSettings {
+  /**
+   * Optional label name for brush
+   */
   label?: string;
+  /**
+   * Optional style for brush
+   */
   annotationStyle?: RectAnnotationSpec['style'];
+  /**
+   * Optional width for brush
+   */
   badgeWidth?: number;
 }
+
+/**
+ * Props for document count chart
+ */
 export interface DocumentCountChartProps {
-  /* List of Kibana services that are required as dependencies */
+  /** List of Kibana services that are required as dependencies */
   dependencies: {
     data: DataPublicPluginStart;
     charts: ChartsPluginStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
   };
-  /* Optional callback function which gets called the brush selection has changed */
-  brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
-  /* Optional width */
+  /** Optional callback function which gets called the brush selection has changed */
+  brushSelectionUpdateHandler?: (windowParameters: WindowParameters, force: boolean) => void;
+  /** Optional width */
   width?: number;
-  /* Data chart points */
+  /** Data chart points */
   chartPoints: DocumentCountChartPoint[];
-  /* Data chart points */
+  /** Data chart points split */
   chartPointsSplit?: DocumentCountChartPoint[];
-  /* Start time range for the chart */
+  /** Start time range for the chart */
   timeRangeEarliest: number;
-  /* Ending time range for the chart */
+  /** Ending time range for the chart */
   timeRangeLatest: number;
+  /** Time interval for the document count buckets */
   interval: number;
-  /* Label to name the adjustedChartPointsSplit histogram */
+  /** Label to name the adjustedChartPointsSplit histogram */
   chartPointsSplitLabel: string;
-  /* Whether or not brush has been reseted */
+  /** Whether or not brush has been reset */
   isBrushCleared: boolean;
-  /* Timestamp for start of initial analysis */
+  /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
-  /** Optional style to be overrided  */
+  /** Optional style to override bar chart  */
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
@@ -138,23 +162,23 @@ function getBaselineBadgeOverflow(
 
 /**
  * Document count chart with draggable brushes to select time ranges
- * by default use `Baseline` and `Deviatation` for the badge naems
- * @param dependencies
- * @param brushSelectionUpdateHandler
- * @param width
- * @param chartPoints
- * @param chartPointsSplit
- * @param timeRangeEarliest
- * @param timeRangeLatest
- * @param interval
- * @param chartPointsSplitLabel
- * @param isBrushCleared
- * @param autoAnalysisStart
- * @param barColorOverride
- * @param barStyleAccessor
- * @param barHighlightColorOverride
- * @param deviationBrush
- * @param baselineBrush
+ * by default use `Baseline` and `Deviation` for the badge names
+ * @param dependencies - List of Kibana services that are required as dependencies
+ * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
+ * @param width - Optional width
+ * @param chartPoints - Data chart points
+ * @param chartPointsSplit - Data chart points split
+ * @param timeRangeEarliest - Start time range for the chart
+ * @param timeRangeLatest - Ending time range for the chart
+ * @param interval - Time interval for the document count buckets
+ * @param chartPointsSplitLabel - Label to name the adjustedChartPointsSplit histogram
+ * @param isBrushCleared - Whether or not brush has been reset
+ * @param autoAnalysisStart - Timestamp for start of initial analysis
+ * @param barColorOverride - Optional color override for the default bar color for charts
+ * @param barStyleAccessor - Optional style to override bar chart
+ * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
+ * @param deviationBrush - Optional settings override for the 'deviation' brush
+ * @param baselineBrush - Optional settings override for the 'baseline' brush
  * @constructor
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({

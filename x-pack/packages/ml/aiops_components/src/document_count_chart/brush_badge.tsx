@@ -24,11 +24,11 @@ interface BrushBadgeProps {
 
 /**
  * Badge component
- * @param label
- * @param marginLeft
- * @param timestampFrom
- * @param timestampTo
- * @param width
+ * @param label - label
+ * @param marginLeft - margin left
+ * @param timestampFrom - start timestamp
+ * @param timestampTo - ending timestamp
+ * @param width - width of badge
  * @constructor
  */
 export const BrushBadge: FC<BrushBadgeProps> = ({
