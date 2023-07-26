@@ -420,4 +420,6 @@ enabled:
   - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+  - test/api_integration/apis/local_and_ess_is_es_archiver_slow/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/config.ts
 

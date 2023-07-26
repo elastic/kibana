@@ -15,17 +15,17 @@ import { Readable, PassThrough, TransformOptions } from 'stream';
  *  provider will be active at a time.
  *
  *  @param {Array<() => ReadableStream>} sourceProviders
- *  @param {PassThroughOptions} options options passed to the PassThrough constructor
- *  @return {WritableStream} combined stream
+ *  @param {TransformOptions} options options passed to the PassThrough constructor
+ *  @return {PassThrough} combined stream
  */
 export function concatStreamProviders(
   sourceProviders: Array<() => Readable>,
   options?: TransformOptions
-) {
+): PassThrough {
   const destination = new PassThrough(options);
   const queue = sourceProviders.slice();
 
-  (function pipeNext() {
+  (function pipeNext(): void {
     const provider = queue.shift();
 
     if (!provider) {
