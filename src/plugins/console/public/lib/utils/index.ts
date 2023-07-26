@@ -118,6 +118,11 @@ export const replaceVariables = (
   variables: DevToolsVariable[]
 ) => {
   const urlRegex = /\${(\w+)}/g;
+
+  // The forward part '([\\"]?)"' of regex matches '\\"', '""', and '"', but the only
+  // last match is preferable. The unwanted ones can be filtered out by checking whether
+  // the first capturing group is empty. This functionality is identical to the one
+  // achievable by negative lookbehind assertion - i.e. '(?<![\\"])"'
   const bodyRegexSingleQuote = /([\\"]?)"\${(\w+)}"(?!")/g;
   const bodyRegexTripleQuotes = /([\\"]?)"""\${(\w+)}"""(?!")/g;
 
