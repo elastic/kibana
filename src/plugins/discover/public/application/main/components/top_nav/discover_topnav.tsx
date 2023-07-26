@@ -204,8 +204,13 @@ export const DiscoverTopNav = ({
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
+  );
+
   return (
-    <AggregateQueryTopNavMenu
+    <SearchBar
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}
