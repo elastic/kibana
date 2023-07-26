@@ -117,7 +117,7 @@ components:
         - scores_written
       properties:
         after_keys:
-          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request.
+          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
           allOf:
             - $ref: '#/components/schemas/AfterKeys'
         errors:
@@ -137,7 +137,7 @@ components:
         - scores
       properties:
         after_keys:
-          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request.
+          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
           allOf:
             - $ref: '#/components/schemas/AfterKeys'
         debug:

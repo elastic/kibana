@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { calculateRiskScores } from './calculate_risk_scores';
-import { calculateRiskScoreMock } from './calculate_risk_scores.mock';
+import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -135,7 +135,7 @@ describe('calculateRiskScores()', () => {
     beforeEach(() => {
       // stub out a reasonable response
       (esClient.search as jest.Mock).mockResolvedValueOnce({
-        aggregations: calculateRiskScoreMock.buildAggregationResponse(),
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
 
@@ -192,14 +192,14 @@ describe('calculateRiskScores()', () => {
     beforeEach(() => {
       // stub out a rejected response
       (esClient.search as jest.Mock).mockRejectedValueOnce({
-        aggregations: calculateRiskScoreMock.buildAggregationResponse(),
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
 
     it('raises an error if elasticsearch client rejects', () => {
       expect.assertions(1);
       expect(() => calculateRiskScores(params)).rejects.toEqual({
-        aggregations: calculateRiskScoreMock.buildAggregationResponse(),
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
   });

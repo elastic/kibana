@@ -111,7 +111,7 @@ const buildResponseMock = (
   ...overrides,
 });
 
-export const calculateRiskScoreMock = {
+export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,
   buildAggregationResponse: buildAggregationResponseMock,
   buildRiskScoreBucket: buildRiskScoreBucketMock,

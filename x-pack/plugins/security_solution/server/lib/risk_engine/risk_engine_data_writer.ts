@@ -37,6 +37,10 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
 
   public bulk = async (params: BulkParams) => {
     try {
+      if (!params.host?.length && !params.user?.length) {
+        return { errors: [], docs_written: 0, took: 0 };
+      }
+
       const { errors, items, took } = await this.options.esClient.bulk({
         operations: this.buildBulkOperations(params),
       });

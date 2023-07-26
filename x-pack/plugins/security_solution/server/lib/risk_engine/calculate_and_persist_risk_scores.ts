@@ -22,6 +22,11 @@ export const calculateAndPersistRiskScores = async (
   const { riskEngineDataClient, spaceId, ...rest } = params;
   const writer = await riskEngineDataClient.getWriter({ namespace: spaceId });
   const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
+
+  if (!scores.host?.length && !scores.user?.length) {
+    return { after_keys: {}, errors: [], scores_written: 0 };
+  }
+
   const { errors, docs_written: scoresWritten } = await writer.bulk(scores);
 
   return { after_keys: afterKeys, errors, scores_written: scoresWritten };

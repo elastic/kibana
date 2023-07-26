@@ -122,6 +122,147 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
       });
+
+      describe('paging through calculationss', () => {
+        let documentId: string;
+        beforeEach(async () => {
+          documentId = uuidv4();
+          const baseEvent = buildDocument({ host: { name: 'host-1' } }, documentId);
+          await indexListOfDocuments(
+            Array(10)
+              .fill(baseEvent)
+              .map((_baseEvent, index) => ({
+                ..._baseEvent,
+                'host.name': `host-${index}`,
+              }))
+          );
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: 10,
+            riskScore: 40,
+          });
+        });
+
+        it('calculates and persists a single page of risk scores', async () => {
+          const results = await calculateRiskScores({
+            body: {
+              data_view_id: '.alerts-security.alerts-default',
+              identifier_type: 'host',
+              range: { start: 'now-30d', end: 'now' },
+            },
+          });
+          expect(results).to.eql({
+            after_keys: {
+              host: {
+                'host.name': 'host-9',
+              },
+            },
+            errors: [],
+            scores_written: 10,
+          });
+
+          await waitForRiskScoresToBePresent(es, log);
+          const scores = await readRiskScores(es);
+
+          expect(scores.length).to.eql(10);
+        });
+
+        it('calculates and persists multiple pages of risk scores', async () => {
+          const results = await calculateRiskScores({
+            body: {
+              data_view_id: '.alerts-security.alerts-default',
+              identifier_type: 'host',
+              range: { start: 'now-30d', end: 'now' },
+              page_size: 5,
+            },
+          });
+          expect(results).to.eql({
+            after_keys: {
+              host: {
+                'host.name': 'host-4',
+              },
+            },
+            errors: [],
+            scores_written: 5,
+          });
+
+          const secondResults = await calculateRiskScores({
+            body: {
+              after_keys: {
+                host: {
+                  'host.name': 'host-4',
+                },
+              },
+              data_view_id: '.alerts-security.alerts-default',
+              identifier_type: 'host',
+              range: { start: 'now-30d', end: 'now' },
+              page_size: 5,
+            },
+          });
+
+          expect(secondResults).to.eql({
+            after_keys: {
+              host: {
+                'host.name': 'host-9',
+              },
+            },
+            errors: [],
+            scores_written: 5,
+          });
+
+          await waitForRiskScoresToBePresent(es, log);
+          const scores = await readRiskScores(es);
+
+          expect(scores.length).to.eql(10);
+        });
+
+        it('returns an appropriate response if there are no inputs left to score/persist', async () => {
+          const results = await calculateRiskScores({
+            body: {
+              data_view_id: '.alerts-security.alerts-default',
+              identifier_type: 'host',
+              range: { start: 'now-30d', end: 'now' },
+              page_size: 10,
+            },
+          });
+          expect(results).to.eql({
+            after_keys: {
+              host: {
+                'host.name': 'host-9',
+              },
+            },
+            errors: [],
+            scores_written: 10,
+          });
+
+          const noopCalculationResults = await calculateRiskScores({
+            body: {
+              after_keys: {
+                host: {
+                  'host.name': 'host-9',
+                },
+              },
+              debug: true,
+              data_view_id: '.alerts-security.alerts-default',
+              identifier_type: 'host',
+              range: { start: 'now-30d', end: 'now' },
+              page_size: 5,
+            },
+          });
+
+          expect(noopCalculationResults).to.eql({
+            after_keys: {},
+            errors: [],
+            scores_written: 0,
+          });
+
+          await waitForRiskScoresToBePresent(es, log);
+          const scores = await readRiskScores(es);
+
+          expect(scores.length).to.eql(10);
+        });
+      });
     });
   });
 };

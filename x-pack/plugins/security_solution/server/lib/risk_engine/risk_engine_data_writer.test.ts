@@ -306,5 +306,12 @@ describe('RiskEngineDataWriter', () => {
         expect(errors).toEqual(['something went wrong']);
       });
     });
+
+    describe('when there are no risk scores to write', () => {
+      it('returns an appropriate response', async () => {
+        const response = await writer.bulk({});
+        expect(response).toEqual({ errors: [], docs_written: 0, took: 0 });
+      });
+    });
   });
 });
