@@ -62,7 +62,7 @@ export const UserPanel = React.memo(
   ({ data, selectedPatterns, openUserDetailsPanel }: UserPanelProps) => {
     const userName = useMemo(() => getTimelineEventData('user.name', data), [data]);
 
-    const { data: userRisk, isLicenseValid: isRiskLicenseValid } = useRiskScore({
+    const { data: userRisk, isAuthorized: isRiskScoreAuthorized } = useRiskScore({
       riskEntity: RiskScoreEntity.user,
       skip: userName == null,
     });
@@ -114,7 +114,7 @@ export const UserPanel = React.memo(
               </UserPanelSection>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-            {isRiskLicenseValid && (
+            {isRiskScoreAuthorized && (
               <>
                 <EuiFlexGroup data-test-subj="user-panel-risk">
                   {userRiskScore && (

@@ -17,27 +17,28 @@ import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
-  CaseStatuses,
-  CommentRequest,
   CaseSeverity,
-  CommentRequestExternalReferenceType,
-  CasesFindRequestSortFields,
-} from '../../common/api';
+  CaseStatuses,
+  ExternalReferenceAttachmentPayload,
+} from '../../common/types/domain';
+import {
+  ActionsAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  ExternalReferenceSOAttachmentPayloadRt,
+  ExternalReferenceStorageType,
+  PersistableStateAttachmentPayloadRt,
+  UserCommentAttachmentPayloadRt,
+} from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
 
+import { decodeWithExcessOrThrow } from '../../common/api';
 import {
+  CASE_SAVED_OBJECT,
+  NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
-  AlertCommentRequestRt,
-  ActionsCommentRequestRt,
-  ContextTypeUserRt,
-  ExternalReferenceStorageType,
-  ExternalReferenceSORt,
-  ExternalReferenceNoSORt,
-  PersistableStateAttachmentRt,
-  decodeWithExcessOrThrow,
-} from '../../common/api';
-import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+} from '../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -52,18 +53,19 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
-  comment: CommentRequest,
+  comment: AttachmentRequest,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
-    decodeWithExcessOrThrow(ContextTypeUserRt)(comment);
+    decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
-    decodeWithExcessOrThrow(ActionsCommentRequestRt)(comment);
+    decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {
-    decodeWithExcessOrThrow(AlertCommentRequestRt)(comment);
+    decodeWithExcessOrThrow(AlertAttachmentPayloadRt)(comment);
 
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
@@ -110,7 +112,7 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
-    decodeWithExcessOrThrow(PersistableStateAttachmentRt)(comment);
+    decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -122,13 +124,13 @@ export const decodeCommentRequest = (
 };
 
 const decodeExternalReferenceAttachment = (
-  attachment: CommentRequestExternalReferenceType,
+  attachment: ExternalReferenceAttachmentPayload,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    decodeWithExcessOrThrow(ExternalReferenceSORt)(attachment);
+    decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
   } else {
-    decodeWithExcessOrThrow(ExternalReferenceNoSORt)(attachment);
+    decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
   }
 
   const metadata = attachment.externalReferenceMetadata;
@@ -142,7 +144,7 @@ const decodeExternalReferenceAttachment = (
 /**
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
  */
-export const getAlertIds = (comment: CommentRequest): string[] => {
+export const getAlertIds = (comment: AttachmentRequest): string[] => {
   if (isCommentRequestTypeAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   }
