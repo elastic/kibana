@@ -98,7 +98,6 @@ const floatTopRight = css`
   position: absolute;
   top: -8px;
   right: -8px;
-  scale: 1.2;
 `;
 
 export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
@@ -115,7 +114,7 @@ export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
   return (
     <React.Fragment>
       {renderedTitle}{' '}
-      <EuiNotificationBadge color="subdued" className={floatTopRight}>
+      <EuiNotificationBadge color="subdued" size="m" className={floatTopRight}>
         {counter}
       </EuiNotificationBadge>
     </React.Fragment>

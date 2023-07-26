@@ -5,8 +5,9 @@ exports[`TitleWithBadge component renders with MountPoint titles 1`] = `
   <span />
    
   <EuiNotificationBadge
-    className="css-1cd3kxh"
+    className="css-1f5ny76"
     color="subdued"
+    size="m"
   >
     7
   </EuiNotificationBadge>
@@ -24,8 +25,9 @@ exports[`TitleWithBadge component renders with ReactNode titles 1`] = `
   </span>
    
   <EuiNotificationBadge
-    className="css-1cd3kxh"
+    className="css-1f5ny76"
     color="subdued"
+    size="m"
   >
     9
   </EuiNotificationBadge>
@@ -39,8 +41,9 @@ exports[`TitleWithBadge component renders with string titles 1`] = `
   </span>
    
   <EuiNotificationBadge
-    className="css-1cd3kxh"
+    className="css-1f5ny76"
     color="subdued"
+    size="m"
   >
     5
   </EuiNotificationBadge>
