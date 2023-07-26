@@ -9,7 +9,7 @@ import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@ela
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NoChartsData } from './no_charts_data';
-import type { ComparisionHistogram, DataComparisonField } from '../types';
+import type { ComparisonHistogram, DataComparisonField } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
 
@@ -19,7 +19,7 @@ export const OverlapDistributionComparison = ({
   fieldType,
   fieldName,
 }: {
-  data: ComparisionHistogram[];
+  data: ComparisonHistogram[];
   colors: { referenceColor: string; productionColor: string };
   fieldType?: DataComparisonField['type'];
   fieldName?: DataComparisonField['field'];

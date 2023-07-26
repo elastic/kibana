@@ -113,7 +113,7 @@ export const DataComparisonOverviewTable = ({
       'data-test-subj': 'mlDataComparisonOverviewTableFeatureType',
       sortable: true,
       textOnly: true,
-      render: (fieldType: DataComparisonField['type']) => {
+      render: (fieldType: DataComparisonField['type'], feature) => {
         return <span>{DATA_COMPARISON_TYPE_LABEL[fieldType]}</span>;
       },
     },

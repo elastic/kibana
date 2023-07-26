@@ -8,7 +8,7 @@
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import React from 'react';
 import { NoChartsData } from './no_charts_data';
-import { ComparisionHistogram } from '../types';
+import { ComparisonHistogram } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE } from '../constants';
 
@@ -20,7 +20,7 @@ export const DataComparisonDistributionChart = ({
 }: {
   featureName: string;
   fieldType: string;
-  data: ComparisionHistogram[];
+  data: ComparisonHistogram[];
   colors: { referenceColor: string; productionColor: string };
 }) => {
   if (data.length === 0) return <NoChartsData />;

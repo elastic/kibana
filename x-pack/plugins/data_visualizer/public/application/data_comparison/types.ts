@@ -41,7 +41,7 @@ export interface Histogram {
   percentage?: number;
 }
 
-export interface ComparisionHistogram extends Histogram {
+export interface ComparisonHistogram extends Histogram {
   g: string;
 }
 
@@ -53,7 +53,7 @@ export interface Feature {
   similarityTestPValue: number;
   productionHistogram: Histogram[];
   referenceHistogram: Histogram[];
-  comparisonDistribution: ComparisionHistogram[];
+  comparisonDistribution: ComparisonHistogram[];
 }
 
 export interface DataComparisonField {
