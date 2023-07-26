@@ -29,6 +29,7 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
+
   const {
     data: endpointHostInfo,
     isFetching,
@@ -36,13 +37,13 @@ export const useResponderActionData = ({
   } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
-    if (!endpointId) {
-      return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
-    }
-
     // Still loading Endpoint host info
     if (isFetching) {
       return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
+    }
+
+    if (!endpointHostInfo) {
+      return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
     }
 
     // if we got an error and it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
@@ -61,7 +62,7 @@ export const useResponderActionData = ({
     }
 
     return [false, undefined];
-  }, [endpointHostInfo, endpointId, error, isFetching]);
+  }, [endpointHostInfo, error, isFetching]);
 
   const handleResponseActionsClick = useCallback(() => {
     if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
