@@ -50,6 +50,7 @@ import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
 import { UpsellingService } from '../upsellings';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 
 const mockUiSettings: Record<string, unknown> = {
@@ -119,6 +120,7 @@ export const createStartServicesMock = (
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
+  const cloud = cloudMock.createStart();
 
   return {
     ...core,
@@ -199,6 +201,10 @@ export const createStartServicesMock = (
     triggersActionsUi,
     cloudExperiments,
     guidedOnboarding,
+    cloud: {
+      ...cloud,
+      isCloudEnabled: false,
+    },
     isSidebarEnabled$: of(true),
     upselling: new UpsellingService(),
     customDataService,
