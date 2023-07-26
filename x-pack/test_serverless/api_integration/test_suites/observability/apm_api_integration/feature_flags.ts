@@ -133,15 +133,13 @@ export default function ({ getService }: APMFtrContextProvider) {
         }
       });
 
-      // Not possible to test the DELETE, as first we will need to get the service
-      xit('rejects requests to delete agent configuration', async () => {
+      it('rejects requests to delete agent configuration', async () => {
         try {
           await apmApiClient.slsUser({
             endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
             params: {
               body: {
                 service: {},
-                settings: { transaction_sample_rate: '0.55' },
               },
             },
           });
@@ -206,8 +204,8 @@ export default function ({ getService }: APMFtrContextProvider) {
           expect(err.res.body).toStrictEqual(sourceMapsResponse);
         }
       });
-      // Not possible to test the DELETE, as first we will need to get the id of a source map
-      xit('rejects requests to delete source map', async () => {
+
+      it('rejects requests to delete source map', async () => {
         try {
           await apmApiClient.slsUser({
             endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
