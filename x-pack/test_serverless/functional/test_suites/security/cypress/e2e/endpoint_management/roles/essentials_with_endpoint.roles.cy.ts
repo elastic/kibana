@@ -223,7 +223,7 @@ describe(
     (
       [
         'platform_engineer',
-        `endpoint_operations_manager`,
+        `endpoint_operations_analyst`,
         'endpoint_policy_manager',
       ] as ServerlessRoleName[]
     ).forEach((roleName) => {

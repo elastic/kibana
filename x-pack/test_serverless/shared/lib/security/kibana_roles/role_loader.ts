@@ -47,6 +47,13 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 
   async load(name: keyof R): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
+
+    if (!role) {
+      throw new Error(
+        `Unknown role: [${name}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
+      );
+    }
+
     const roleName = role.name;
 
     await this.createRole(role);

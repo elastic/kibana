@@ -304,7 +304,7 @@ describe(
     (
       [
         'platform_engineer',
-        `endpoint_operations_manager`,
+        `endpoint_operations_analyst`,
         'endpoint_policy_manager',
       ] as ServerlessRoleName[]
     ).forEach((roleName) => {
@@ -356,7 +356,7 @@ describe(
               visitEndpointList();
               openRowActionMenu().findByTestSubj('console').should('not.exist');
             });
-          } else if (roleName === 'endpoint_operations_manager') {
+          } else if (roleName === 'endpoint_operations_analyst') {
             Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(
               ([action, testSubj]) => {
                 it(`should have access to execute action: ${action}`, () => {
