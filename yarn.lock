@@ -1334,19 +1334,19 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.1.tgz#b6b8d81780b9a9f6459f4bfe9226ac6aefaefe87"
   integrity sha512-aG20vknL4/YjQF9BSV7ts4EWm/yrjagAN7OWBNmlbEOUiu0llj4OGrFoOKK3g2vey4/p2omKCoHrWtPxSwV3HA==
 
-"@cypress/code-coverage@^3.11.0":
-  version "3.11.0"
-  resolved "https://registry.yarnpkg.com/@cypress/code-coverage/-/code-coverage-3.11.0.tgz#f695b53f5e2b89144ca418fd6608a63720e2880f"
-  integrity sha512-ihSO1s03gmLRE224oIjrbdG1ey63vw/UY+VSqQ5m/TKkAvyz6GIiniq6juk3AV/+0vQC1Eb4UWFu8ndtji4M1g==
+"@cypress/code-coverage@^3.10.0":
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/@cypress/code-coverage/-/code-coverage-3.10.0.tgz#2132dbb7ae068cab91790926d50a9bf85140cab4"
+  integrity sha512-K5pW2KPpK4vKMXqxd6vuzo6m9BNgpAv1LcrrtmqAtOJ1RGoEILXYZVost0L6Q+V01NyY7n7jXIIfS7LR3nP6YA==
   dependencies:
     "@cypress/webpack-preprocessor" "^5.11.0"
     chalk "4.1.2"
-    dayjs "1.11.9"
+    dayjs "1.10.7"
     debug "4.3.4"
     execa "4.1.0"
     globby "11.0.4"
     istanbul-lib-coverage "3.0.0"
-    js-yaml "4.1.0"
+    js-yaml "3.14.1"
     nyc "15.1.0"
 
 "@cypress/commit-info@^2.2.0":
@@ -1408,22 +1408,13 @@
     snap-shot-compare "2.8.3"
     snap-shot-store "1.2.3"
 
-"@cypress/webpack-preprocessor@^5.11.0":
+"@cypress/webpack-preprocessor@^5.11.0", "@cypress/webpack-preprocessor@^5.12.2":
   version "5.12.2"
   resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.12.2.tgz#9cc623a5629980d7f2619569bffc8e3f05a701ae"
   integrity sha512-t29wEFvI87IMnCd8taRunwStNsFjFWg138fGF0hPQOYgSj30fbzCEwFD9cAQLYMMcjjuXcnnw8yOfkzIZBBNVQ==
   dependencies:
     bluebird "3.7.1"
     debug "^4.3.2"
-    lodash "^4.17.20"
-
-"@cypress/webpack-preprocessor@^5.17.1":
-  version "5.17.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.17.1.tgz#19c3f6ceb89e156824917b4ec31717ade34592ec"
-  integrity sha512-FE/e8ikPc8z4EVopJCaior3RGy0jd2q9Xcp5NtiwNG4XnLfEnUFTZlAGwXe75sEh4fNMPrBJW1KIz77PX5vGAw==
-  dependencies:
-    bluebird "3.7.1"
-    debug "^4.3.4"
     lodash "^4.17.20"
 
 "@cypress/xvfb@^1.2.4":
@@ -13940,12 +13931,7 @@ dateformat@^4.5.1:
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-4.6.3.tgz#556fa6497e5217fedb78821424f8a1c22fa3f4b5"
   integrity sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==
 
-dayjs@1.11.9:
-  version "1.11.9"
-  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.9.tgz#9ca491933fadd0a60a2c19f6c237c03517d71d1a"
-  integrity sha512-QvzAURSbQ0pKdIye2txOzNaHmxtUBXerpY0FJsFXUMKbIZeFm5ht1LS/jFsrncjnmtv8HsG0W2g6c0zUjZWmpA==
-
-dayjs@^1.10.4:
+dayjs@1.10.7, dayjs@^1.10.4:
   version "1.10.7"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.10.7.tgz#2cf5f91add28116748440866a0a1d26f3a6ce468"
   integrity sha512-P6twpd70BcPK34K26uJ1KT3wlhpuOAPoMwJzpsIWUxHZ7wpmbdZL/hQqBDfz7hGurYSa5PhzdhDHtt319hL3ig==
@@ -15533,7 +15519,7 @@ eslint-plugin-ban@^1.5.2:
   dependencies:
     requireindex "~1.2.0"
 
-eslint-plugin-cypress@^2.13.3:
+eslint-plugin-cypress@^2.13.2:
   version "2.13.3"
   resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-2.13.3.tgz#5fc1afdc939aaa7daa9181f651f2f35429733ff2"
   integrity sha512-nAPjZE5WopCsgJwl3vHm5iafpV+ZRO76Z9hMyRygWhmg5ODXDPd+9MaPl7kdJ2azj+sO87H3P1PRnggIrz848g==
@@ -19962,20 +19948,20 @@ js-string-escape@^1.0.1:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-yaml@4.1.0, js-yaml@^4.0.0, js-yaml@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
-  integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
-  dependencies:
-    argparse "^2.0.1"
-
-js-yaml@^3.13.1, js-yaml@^3.14.1:
+js-yaml@3.14.1, js-yaml@^3.13.1, js-yaml@^3.14.1:
   version "3.14.1"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
   integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+js-yaml@4.1.0, js-yaml@^4.0.0, js-yaml@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
+  integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
+  dependencies:
+    argparse "^2.0.1"
 
 jsbn@~0.1.0:
   version "0.1.1"
