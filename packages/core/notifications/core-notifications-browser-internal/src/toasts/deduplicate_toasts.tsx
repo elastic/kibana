@@ -26,7 +26,7 @@ export interface DeduplicateResult {
 }
 
 interface TitleWithBadgeProps {
-  title: MountPoint | ReactNode;
+  title: string | undefined;
   counter: number;
 }
 
@@ -47,9 +47,11 @@ export function deduplicateToasts(allToasts: Toast[]): DeduplicateResult {
     if (toastGroup.length === 1) {
       distinctToasts.push(firstElement);
     } else {
+      // Grouping will only happen for toasts whose titles are strings (or missing)
+      const title = firstElement.title as string | undefined;
       distinctToasts.push({
         ...firstElement,
-        title: <TitleWithBadge title={firstElement.title} counter={toastGroup.length} />,
+        title: <TitleWithBadge title={title} counter={toastGroup.length} />,
       });
     }
   }
@@ -66,12 +68,12 @@ export function deduplicateToasts(allToasts: Toast[]): DeduplicateResult {
 function getKeyOf(toast: Toast): string {
   if (isString(toast.title) && isString(toast.text)) {
     return toast.title + ' ' + toast.text;
-  } else if (isString(toast.text)) {
-    return toast.text;
-  } else if (isString(toast.title)) {
+  } else if (isString(toast.title) && !toast.text) {
     return toast.title;
+  } else if (isString(toast.text) && !toast.title) {
+    return toast.text;
   } else {
-    // Both title & text is missing or a mount function
+    // Either toast or text is a mount function, or both missing
     return 'KEY_' + toast.id.toString();
   }
 }
@@ -100,20 +102,15 @@ const floatTopRight = css`
   right: -8px;
 `;
 
+/**
+ * A component that renders a title with a floating counter
+ * @param title {string} The title string
+ * @param counter {number} The count of notifications represented
+ */
 export function TitleWithBadge({ title, counter }: TitleWithBadgeProps) {
-  const hostRef = React.useRef<HTMLSpanElement>(null);
-  const hostElement = <span ref={hostRef} />;
-  const renderedTitle = title instanceof Function ? hostElement : <span>{title}</span>;
-
-  React.useEffect(() => {
-    if (title instanceof Function && hostRef.current) {
-      return title(hostRef.current);
-    }
-  }, [title]);
-
   return (
     <React.Fragment>
-      {renderedTitle}{' '}
+      {title}{' '}
       <EuiNotificationBadge color="subdued" size="m" className={floatTopRight}>
         {counter}
       </EuiNotificationBadge>

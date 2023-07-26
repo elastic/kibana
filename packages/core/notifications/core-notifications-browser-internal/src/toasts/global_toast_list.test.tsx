@@ -123,9 +123,9 @@ describe('global_toast_list with duplicate elements, using MountPoints', () => {
   const euiToastList = globalToastList.find(EuiGlobalToastList);
   const toastsProp = euiToastList.prop('toasts');
 
-  it('renders the list with a single element', () => {
+  it('renders the all separate elements element', () => {
     expect(toastsProp).toBeDefined();
-    expect(toastsProp).toHaveLength(1);
+    expect(toastsProp).toHaveLength(4);
     expect(euiToastList).toMatchSnapshot('euiToastList');
     expect(globalToastList).toMatchSnapshot('globalToastList');
   });

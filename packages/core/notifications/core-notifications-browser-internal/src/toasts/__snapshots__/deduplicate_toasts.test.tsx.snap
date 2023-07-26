@@ -1,44 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TitleWithBadge component renders with MountPoint titles 1`] = `
-<Fragment>
-  <span />
-   
-  <EuiNotificationBadge
-    className="css-1f5ny76"
-    color="subdued"
-    size="m"
-  >
-    7
-  </EuiNotificationBadge>
-</Fragment>
-`;
-
-exports[`TitleWithBadge component renders with ReactNode titles 1`] = `
-<Fragment>
-  <span>
-    <a
-      href="https://elastic.co"
-    >
-      Click me!
-    </a>
-  </span>
-   
-  <EuiNotificationBadge
-    className="css-1f5ny76"
-    color="subdued"
-    size="m"
-  >
-    9
-  </EuiNotificationBadge>
-</Fragment>
-`;
-
 exports[`TitleWithBadge component renders with string titles 1`] = `
 <Fragment>
-  <span>
-    Welcome!
-  </span>
+  Welcome!
    
   <EuiNotificationBadge
     className="css-1f5ny76"

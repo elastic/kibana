@@ -12,8 +12,9 @@ import { ReactElement, ReactNode } from 'react';
 
 import { deduplicateToasts, TitleWithBadge, ToastWithRichTitle } from './deduplicate_toasts';
 import { Toast } from '@kbn/core-notifications-browser';
+import { MountPoint } from '@kbn/core-mount-utils-browser';
 
-function toast(title: string, text: string, id = Math.random()): Toast {
+function toast(title: string | MountPoint, text: string | MountPoint, id = Math.random()): Toast {
   return {
     id: id.toString(),
     title,
@@ -41,6 +42,23 @@ describe('deduplicate toasts', () => {
     expect(deduplicatedToastList).toHaveLength(toasts.length);
     verifyTextAndTitle(deduplicatedToastList[0], 'A', 'B');
     verifyTextAndTitle(deduplicatedToastList[1], 'X', 'Y');
+  });
+
+  it(`doesn't group notifications with MountPoints for text or title`, () => {
+    const fakeMountPoint = () => () => {};
+    const toasts: Toast[] = [
+      toast('A', 'B'),
+      toast('A', fakeMountPoint),
+      toast('A', fakeMountPoint),
+      toast(fakeMountPoint, 'B'),
+      toast(fakeMountPoint, 'B'),
+      toast(fakeMountPoint, fakeMountPoint),
+      toast(fakeMountPoint, fakeMountPoint),
+    ];
+
+    const { toasts: deduplicatedToastList } = deduplicateToasts(toasts);
+
+    expect(deduplicatedToastList).toHaveLength(toasts.length);
   });
 
   it('groups toasts based on title + name', () => {
@@ -71,35 +89,6 @@ describe('TitleWithBadge component', () => {
     const fullRender = mount(titleComponent);
 
     expect(fullRender.text()).toBe('Welcome! 5');
-    expect(shallowRender).toMatchSnapshot();
-  });
-
-  it('renders with MountPoint titles', () => {
-    const title = (element: HTMLElement) => {
-      const a = document.createElement('a');
-      a.innerHTML = 'Click me!';
-      a.href = 'https://elastic.co';
-      element.appendChild(a);
-      return () => element.removeChild(a);
-    };
-
-    const titleComponent = <TitleWithBadge title={title} counter={7} />;
-    const shallowWrapper = shallow(titleComponent);
-    const fullWrapper = mount(titleComponent);
-    // ^ We need the full mount, because enzyme's shallow doesn't run effects
-
-    expect(fullWrapper.text()).toBe('Click me! 7');
-    expect(shallowWrapper).toMatchSnapshot();
-  });
-
-  it('renders with ReactNode titles', () => {
-    const title = <a href="https://elastic.co">Click me!</a>;
-
-    const titleComponent = <TitleWithBadge title={title} counter={9} />;
-    const shallowRender = shallow(titleComponent);
-    const fullRender = mount(titleComponent);
-
-    expect(fullRender.text()).toBe('Click me! 9');
     expect(shallowRender).toMatchSnapshot();
   });
 });
