@@ -108,7 +108,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -123,7 +123,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf?jobParams=foo:`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
@@ -134,7 +134,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
       .send({ jobParams: `foo:` })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
@@ -146,7 +146,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/TonyHawksProSkater2`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/TonyHawksProSkater2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -160,7 +160,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -176,7 +176,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
   });
@@ -187,7 +187,7 @@ describe('POST /internal/reporting/generate', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
       .send({
         jobParams: rison.encode({
           title: `abc`,
