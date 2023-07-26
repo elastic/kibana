@@ -55,7 +55,7 @@ interface CyLoginTask {
  * @param user
  */
 export const login: CyLoginTask = (
-  user: ServerlessRoleName = 'soc_manager'
+  user?: ServerlessRoleName
 ): Cypress.Chainable<Cypress.Response<unknown>> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
