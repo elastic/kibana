@@ -58,7 +58,6 @@ export default ({ getService }: FtrProviderContext): void => {
         data_view_id: '.alerts-security.alerts-default',
         range: { start: 'now-30d', end: 'now' },
         identifier_type: 'host',
-        debug: true,
       },
     });
   };

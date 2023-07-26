@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
   ) => {
     await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
 
-    return await previewRiskScores({ body: { debug: true } });
+    return await previewRiskScores({ body: {} });
   };
 
   describe('Risk Engine Scoring - Preview', () => {
