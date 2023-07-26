@@ -18,7 +18,7 @@ export const updateTotalUsage = ({
   detectionRuleMetric,
   updatedUsage,
   totalType,
-}: UpdateTotalUsageOptions): FeatureTypeUsage => {
+}: UpdateTotalUsageOptions): FeatureTypeUsage & { legacy_notification_count: number } => {
   const {
     legacyNotificationEnabled,
     legacyNotificationDisabled,
@@ -47,5 +47,6 @@ export const updateTotalUsage = ({
     notifications_disabled: notificationDisabled
       ? updatedUsage[totalType].notifications_disabled + 1
       : updatedUsage[totalType].notifications_disabled,
+    legacy_notification_count: 0,
   };
 };
