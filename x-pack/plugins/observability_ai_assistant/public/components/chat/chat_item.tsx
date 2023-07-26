@@ -148,9 +148,12 @@ export function ChatItem({
                 anchorPosition="downLeft"
                 button={
                   <EuiButtonIcon
-                    aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.actions', {
-                      defaultMessage: 'Actions',
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatTimeline.actions',
+                      {
+                        defaultMessage: 'Actions',
+                      }
+                    )}
                     color="text"
                     display="empty"
                     iconType="boxesHorizontal"
