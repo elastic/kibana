@@ -137,6 +137,14 @@ export function ChatItem({
     [MessageRole.Elastic]: [],
   };
 
+  const canReceiveFeedback = [
+    MessageRole.Assistant,
+    MessageRole.Elastic,
+    MessageRole.Function,
+  ].includes(message.message.role);
+
+  const canRegenerateResponse = message.message.role === MessageRole.Assistant;
+
   return (
     <EuiComment
       key={message['@timestamp']}
@@ -188,11 +196,15 @@ export function ChatItem({
         <MessagePanel
           body={<MessageText content={message.message.content} loading={isLoading} />}
           controls={
-            <ChatItemControls
-              role={message.message.role}
-              onFeedbackClick={onFeedbackClick}
-              onRegenerateClick={() => onRegenerateMessage?.(message['@timestamp'])}
-            />
+            canReceiveFeedback || canRegenerateResponse ? (
+              <ChatItemControls
+                role={message.message.role}
+                onFeedbackClick={onFeedbackClick}
+                canReceiveFeedback={canReceiveFeedback}
+                canRegenerateResponse={canRegenerateResponse}
+                onRegenerateClick={() => onRegenerateMessage?.(message['@timestamp'])}
+              />
+            ) : null
           }
         />
       ) : null}

@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 
 interface Props {
   error?: Error;
@@ -44,7 +45,9 @@ export function MessagePanel(props: Props) {
       ) : null}
       {props.controls ? (
         <>
-          <EuiHorizontalRule margin="m" />
+          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="s" />
           {props.controls}
         </>
       ) : null}
