@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
 import { getDataViewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
@@ -17,10 +18,13 @@ import {
   DATA_VIEW_DETAILS,
 } from '../../../screens/rule_details';
 
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import {
+  goToRuleDetails,
+  waitForRulesTableToBeLoaded,
+} from '../../../tasks/alerts_detection_rules';
 import { postDataView } from '../../../tasks/common';
 
-import { login } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getDetails } from '../../../tasks/rule_details';
 
 // Only testing components in the rule details page unique to rules using dataviews
@@ -38,6 +42,8 @@ describe('Custom query rule with dataview', () => {
     }
     createRule(rule);
     login();
+    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    waitForRulesTableToBeLoaded();
   });
 
   it('Displays data view details', function () {

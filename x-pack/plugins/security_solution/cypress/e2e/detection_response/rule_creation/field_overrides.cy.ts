@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { getNewOverrideRule } from '../../../objects/rule';
 
 import {
@@ -28,7 +29,12 @@ import { RULE_CREATION } from '../../../urls/navigation';
 describe('Detection rules, override', () => {
   const rule = getNewOverrideRule();
 
+  before(() => {
+    cleanKibana();
+  });
+
   beforeEach(() => {
+    deleteAlertsAndRules();
     login();
   });
 
