@@ -132,7 +132,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="rightCenter"
-      style={{ maxHeight: '500px' }}
     >
       <EuiPopoverTitle>
         <EuiFlexGroup gutterSize="xs" alignItems="flexStart" direction="column">

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { getTechniqueBackgroundColor } from './helpers';
 import { CoverageOverviewPanelMetadata } from './shared_components';
@@ -21,6 +21,10 @@ export interface CoverageOverviewMitreTechniquePanelProps {
   isExpanded: boolean;
 }
 
+const TechniquePanel = styled(EuiPanel)<{ $techniqueBackgroundColor?: string }>`
+  background: ${({ $techniqueBackgroundColor }) => `${$techniqueBackgroundColor}`};
+`;
+
 const CoverageOverviewMitreTechniquePanelComponent = ({
   technique,
   coveredSubtechniques,
@@ -32,11 +36,6 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
     () => getTechniqueBackgroundColor(technique),
     [technique]
   );
-  const TechniquePanel = styled(EuiPanel)`
-    ${({ theme }) => css`
-      background: ${techniqueBackgroundColor};
-    `}
-  `;
 
   const handlePanelOnClick = useCallback(
     () => setIsPopoverOpen(!isPopoverOpen),
@@ -60,6 +59,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   return (
     <TechniquePanel
       data-test-subj="coverageOverviewTechniquePanel"
+      $techniqueBackgroundColor={techniqueBackgroundColor}
       hasShadow={false}
       hasBorder={!techniqueBackgroundColor}
       paddingSize="s"

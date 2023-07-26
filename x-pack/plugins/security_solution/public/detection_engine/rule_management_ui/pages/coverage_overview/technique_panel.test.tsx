@@ -31,9 +31,17 @@ const renderTechniquePanel = (
 };
 
 describe('CoverageOverviewMitreTechniquePanel', () => {
-  test('it renders', () => {
+  test('it renders collapsed view', () => {
     const wrapper = renderTechniquePanel();
 
     expect(wrapper.getByTestId('coverageOverviewTechniquePanel')).toBeInTheDocument();
+    expect(wrapper.queryByTestId('coverageOverviewPanelMetadata')).not.toBeInTheDocument();
+  });
+
+  test('it renders expanded view', () => {
+    const wrapper = renderTechniquePanel(getMockCoverageOverviewMitreTechnique(), true);
+
+    expect(wrapper.getByTestId('coverageOverviewTechniquePanel')).toBeInTheDocument();
+    expect(wrapper.getByTestId('coverageOverviewPanelMetadata')).toBeInTheDocument();
   });
 });

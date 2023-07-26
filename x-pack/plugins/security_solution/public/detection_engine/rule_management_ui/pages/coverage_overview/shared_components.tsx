@@ -16,18 +16,19 @@ export interface CoverageOverviewPanelMetadataProps {
   enabledRules: number;
 }
 
+const MetadataLabel = styled(EuiText)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 export const CoverageOverviewPanelMetadata = ({
   availableRules,
   disabledRules,
   enabledRules,
 }: CoverageOverviewPanelMetadataProps) => {
-  const MetadataLabel = styled(EuiText)`
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  `;
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup data-test-subj="coverageOverviewPanelMetadata" direction="column" gutterSize="xs">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <MetadataLabel size="xs">{i18n.AVAILABLE_RULES_METADATA_LABEL}</MetadataLabel>

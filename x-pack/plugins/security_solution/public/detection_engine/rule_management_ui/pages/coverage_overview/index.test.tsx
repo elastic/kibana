@@ -13,6 +13,7 @@ import { getMockCoverageOverviewDashboard } from '../../../rule_management/model
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewPage } from '.';
 
+jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview');
 
 (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({

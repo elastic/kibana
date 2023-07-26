@@ -17,21 +17,22 @@ export interface CoverageOverviewTacticPanelProps {
   tactic: CoverageOverviewMitreTactic;
 }
 
-const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTacticPanelProps) => {
-  const TacticPanel = styled(EuiPanel)`
-    ${({ theme }) => css`
-      background: ${theme.eui.euiColorLightestShade};
-      border-color: ${theme.eui.euiColorMediumShade};
-    `}
-  `;
-  const TacticTitle = styled(EuiText)`
-    h4 {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  `;
+const TacticPanel = styled(EuiPanel)`
+  ${({ theme }) => css`
+    background: ${theme.eui.euiColorLightestShade};
+    border-color: ${theme.eui.euiColorMediumShade};
+  `}
+`;
 
+const TacticTitle = styled(EuiText)`
+  h4 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTacticPanelProps) => {
   const coveredTechniques = useMemo(() => getCoveredTechniques(tactic), [tactic]);
 
   const ProgressLabel = useMemo(
