@@ -24,10 +24,8 @@ import {
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
+import type { EditConfigPanelProps } from './types';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,

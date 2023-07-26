@@ -21,10 +21,8 @@ import { createMockStartDependencies } from '../../../editor_frame_service/mocks
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
+import type { EditConfigPanelProps } from './types';
 
 let container: HTMLDivElement | undefined;
 
