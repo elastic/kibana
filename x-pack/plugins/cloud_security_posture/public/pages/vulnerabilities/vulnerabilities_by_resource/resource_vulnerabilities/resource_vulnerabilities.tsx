@@ -22,7 +22,7 @@ import { Link, useParams, generatePath } from 'react-router-dom';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
 import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from '../../hooks/use_latest_vulnerabilities';
-import { VulnerabilityRecord } from '../../types';
+import type { VulnerabilityRecord, VulnerabilitiesQueryData } from '../../types';
 import { ErrorCallout } from '../../../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../../../configurations/layout/findings_search_bar';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../../../components/vulnerability_badges';
@@ -63,14 +63,13 @@ const getDefaultQuery = ({ query, filters }: any) => ({
   pageIndex: 0,
 });
 
-// TODO: fix any type for data
 const ResourceVulnerabilitiesDataGrid = ({
   dataView,
   data,
   isFetching,
 }: {
   dataView: DataView;
-  data: any;
+  data: VulnerabilitiesQueryData;
   isFetching: boolean;
 }) => {
   const {

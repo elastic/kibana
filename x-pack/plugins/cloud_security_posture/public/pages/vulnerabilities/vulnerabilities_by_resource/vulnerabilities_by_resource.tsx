@@ -41,6 +41,7 @@ import { EmptyState } from '../../../components/empty_state';
 import { SeverityMap } from './severity_map';
 import { VULNERABILITY_RESOURCE_COUNT } from './test_subjects';
 import { getVulnerabilitiesGridCellActions } from '../utils/get_vulnerabilities_grid_cell_actions';
+import type { VulnerabilitiesByResourceQueryData } from '../types';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -49,14 +50,13 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
   pageIndex: 0,
 });
 
-// TODO: fix any type for data
 const VulnerabilitiesByResourceDataGrid = ({
   dataView,
   data,
   isFetching,
 }: {
   dataView: DataView;
-  data: any;
+  data: VulnerabilitiesByResourceQueryData | undefined;
   isFetching: boolean;
 }) => {
   const {
@@ -150,7 +150,7 @@ const VulnerabilitiesByResourceDataGrid = ({
     return Cell;
   }, [data?.page, pageSize, isFetching]);
 
-  if (data.page.length === 0) {
+  if (data?.page.length === 0) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 

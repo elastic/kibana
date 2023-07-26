@@ -22,7 +22,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
-import { VulnerabilityRecord } from './types';
+import type { VulnerabilityRecord, VulnerabilitiesQueryData } from './types';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
@@ -100,14 +100,13 @@ export const Vulnerabilities = () => {
   );
 };
 
-// TODO: fix any type for data
 const VulnerabilitiesDataGrid = ({
   dataView,
   data,
   isFetching,
 }: {
   dataView: DataView;
-  data: any;
+  data: VulnerabilitiesQueryData | undefined;
   isFetching: boolean;
 }) => {
   const {
@@ -306,7 +305,7 @@ const VulnerabilitiesDataGrid = ({
 
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
-  if (data.page.length === 0) {
+  if (data?.page.length === 0) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 
