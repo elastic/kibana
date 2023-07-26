@@ -11,25 +11,25 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
-import { PUBLIC_ROUTES } from '../../../../common/constants';
-import { PdfExportType } from '../../../export_types/printable_pdf_v2';
-import { ReportingStore } from '../../../lib';
-import { ExportTypesRegistry } from '../../../lib/export_types_registry';
-import { Report } from '../../../lib/store';
-import { reportingMock } from '../../../mocks';
+import { ReportingCore } from '../../../..';
+import { INTERNAL_ROUTES } from '../../../../../common/constants';
+import { PdfExportType } from '../../../../export_types/printable_pdf_v2';
+import { ReportingStore } from '../../../../lib';
+import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
+import { Report } from '../../../../lib/store';
+import { reportingMock } from '../../../../mocks';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
-import { registerGenerationRoutesPublic } from '../generate_from_jobparams';
+} from '../../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../../types';
+import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('POST /api/reporting/generate', () => {
+describe('POST /internal/reporting/generate', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -103,12 +103,12 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -118,35 +118,35 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 if job params query is invalid', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf?jobParams=foo:`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
       .send({ jobParams: `foo:` })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/TonyHawksProSkater2`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/TonyHawksProSkater2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -155,12 +155,12 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 400 on invalid browser timezone', async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -171,23 +171,23 @@ describe('POST /api/reporting/generate', () => {
   it('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    registerGenerationRoutesPublic(mockReportingCore, mockLogger);
+    registerGenerationRoutesInternal(mockReportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE}/printablePdf`)
       .send({
         jobParams: rison.encode({
           title: `abc`,

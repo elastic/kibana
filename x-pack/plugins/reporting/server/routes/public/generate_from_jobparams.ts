@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../..';
 import { PUBLIC_ROUTES } from '../../../common/constants';
@@ -26,11 +27,18 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
       options: { tags: kibanaAccessControlTags },
     },
     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
-      return await requestHandler.handleGenerateRequest(
-        req.params.exportType,
-        requestHandler.getJobParams()
-      );
+      try {
+        const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
+        return await requestHandler.handleGenerateRequest(
+          req.params.exportType,
+          requestHandler.getJobParams()
+        );
+      } catch (err) {
+        if (err instanceof KibanaResponse) {
+          return err;
+        }
+        throw err;
+      }
     })
   );
 

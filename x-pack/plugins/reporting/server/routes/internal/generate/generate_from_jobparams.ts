@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
@@ -30,11 +31,18 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
       options: { tags: kibanaAccessControlTags },
     },
     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
-      return await requestHandler.handleGenerateRequest(
-        req.params.exportType,
-        requestHandler.getJobParams()
-      );
+      try {
+        const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
+        const jobParams = requestHandler.getJobParams();
+        console.log({ jobParams });
+        return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
+      } catch (err) {
+        console.log(err);
+        if (err instanceof KibanaResponse) {
+          return err;
+        }
+        throw err;
+      }
     })
   );
 }
