@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
@@ -73,7 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = httpMonitorJson;
 
       const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
-      const monitorId = savedMonitor.id;
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
+
+      const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
       expect(savedMonitor).eql(
         omit(
@@ -81,6 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: monitorId,
             [ConfigKey.CONFIG_ID]: monitorId,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -134,7 +140,10 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = httpMonitorJson;
 
       const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
-      const monitorId = savedMonitor.id;
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
+
+      const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
       expect(savedMonitor).eql(
         omit(
@@ -142,6 +151,8 @@ export default function ({ getService }: FtrProviderContext) {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: monitorId,
             [ConfigKey.CONFIG_ID]: monitorId,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -257,7 +268,9 @@ export default function ({ getService }: FtrProviderContext) {
         ...(newMonitor as MonitorFields),
         [ConfigKey.CONFIG_HASH]: configHash,
       });
-      const monitorId = savedMonitor.id;
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
+      const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
       expect(savedMonitor).eql(
         omit(
@@ -266,6 +279,8 @@ export default function ({ getService }: FtrProviderContext) {
             [ConfigKey.CONFIG_ID]: monitorId,
             [ConfigKey.MONITOR_QUERY_ID]: monitorId,
             [ConfigKey.CONFIG_HASH]: configHash,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -348,7 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
-        monitorId = savedMonitor.id;
+        monitorId = savedMonitor[ConfigKey.CONFIG_ID];
         const toUpdate = {
           ...savedMonitor,
           name: '!@#$%^&*()_++[\\-\\]- wow',
@@ -404,7 +419,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const savedMonitor = response.body;
-      const monitorId = savedMonitor.id;
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
       const toUpdate = {
         ...savedMonitor,
         urls: 'https://google.com',

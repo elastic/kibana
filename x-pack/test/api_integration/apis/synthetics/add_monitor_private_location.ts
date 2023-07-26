@@ -191,12 +191,16 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson);
 
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
       expect(apiResponse.body).eql(
         omit(
           {
             ...httpMonitorJson,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            updated_at: updatedAt,
             revision: 2,
           },
           secretKeys
@@ -347,6 +351,9 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
 
+        const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+        expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
         expect(apiResponse.body).eql(
           omit(
             {
@@ -354,6 +361,8 @@ export default function ({ getService }: FtrProviderContext) {
               [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
               [ConfigKey.CONFIG_ID]: apiResponse.body.id,
               [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+              created_at: createdAt,
+              updated_at: updatedAt,
             },
             secretKeys
           )

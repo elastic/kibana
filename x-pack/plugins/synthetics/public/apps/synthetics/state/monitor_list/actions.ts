@@ -10,7 +10,7 @@ import { UpsertMonitorError, UpsertMonitorRequest } from '..';
 import {
   MonitorManagementListResult,
   MonitorFiltersResult,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
@@ -25,7 +25,7 @@ export const quietFetchMonitorListAction = createAction<MonitorListPageState>(
 );
 
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
-export const fetchUpsertSuccessAction = createAction<EncryptedSyntheticsMonitor>(
+export const fetchUpsertSuccessAction = createAction<EncryptedSyntheticsSavedMonitor>(
   'fetchUpsertMonitorSuccess'
 );
 export const fetchUpsertFailureAction = createAction<UpsertMonitorError>(
@@ -34,7 +34,7 @@ export const fetchUpsertFailureAction = createAction<UpsertMonitorError>(
 
 export const enableMonitorAlertAction = createAsyncAction<
   UpsertMonitorRequest,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsSavedMonitor,
   UpsertMonitorError
 >('enableMonitorAlertAction');
 
