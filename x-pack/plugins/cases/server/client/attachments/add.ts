@@ -7,13 +7,12 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case } from '../../../common/api';
-import { CommentRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
-
+import { AttachmentRequestRt } from '../../../common/types/api';
+import type { Case } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
-
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
@@ -35,7 +34,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(CommentRequestRt)(comment);
+    const query = decodeWithExcessOrThrow(AttachmentRequestRt)(comment);
 
     decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
 
