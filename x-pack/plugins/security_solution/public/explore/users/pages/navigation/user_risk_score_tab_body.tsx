@@ -24,7 +24,6 @@ import {
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
-import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -37,8 +36,6 @@ export const UserRiskScoreQueryTabBody = ({
   startDate: from,
   type,
 }: UsersComponentsQueryProps) => {
-  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
-
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getUserRiskScoreSelector(state)
@@ -75,6 +72,7 @@ export const UserRiskScoreQueryTabBody = ({
     loading,
     refetch,
     totalCount,
+    isAuthorized,
   } = useRiskScore({
     filterQuery,
     pagination,
@@ -95,8 +93,8 @@ export const UserRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (RiskScoreUpsell) {
-    return <RiskScoreUpsell />;
+  if (!isAuthorized) {
+    return <>{'TODO: Add RiskScore Upsell'}</>;
   }
 
   if (status.isDisabled || status.isDeprecated) {

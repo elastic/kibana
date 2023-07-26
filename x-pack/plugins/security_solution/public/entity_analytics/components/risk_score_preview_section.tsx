@@ -157,7 +157,7 @@ export const RiskScorePreviewSection = () => {
       <EuiSpacer size={'s'} />
       <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
       <EuiSpacer />
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth data-test-subj="risk-score-preview-search-bar">
         {indexPattern && (
           <SearchBar
             appName="siem"
