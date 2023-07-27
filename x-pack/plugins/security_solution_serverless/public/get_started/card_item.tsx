@@ -9,22 +9,24 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from 
 import type { EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
+import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, Step, StepId } from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
 import { getSections } from './sections';
 
 const CardItemComponent: React.FC<{
+  activeSteps: Step[] | undefined;
+  cardId: CardId;
   euiTheme: EuiThemeComputed;
+  finishedSteps: Record<CardId, Set<StepId>>;
+  onStepButtonClicked: OnStepButtonClicked;
+  onStepClicked: OnStepClicked;
+  sectionId: SectionId;
   shadow?: string;
   stepsLeft?: number;
   timeInMins?: number;
-  onStepClicked: OnStepClicked;
-  onStepButtonClicked: OnStepButtonClicked;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  sectionId: SectionId;
-  cardId: CardId;
 }> = ({
+  activeSteps,
   stepsLeft,
   timeInMins,
   shadow,
@@ -45,7 +47,8 @@ const CardItemComponent: React.FC<{
     },
     [expandCard]
   );
-  return cardItem ? (
+  const hasActiveSteps = activeSteps != null && activeSteps.length > 0;
+  return cardItem && hasActiveSteps ? (
     <EuiPanel
       hasBorder
       paddingSize="m"
@@ -107,9 +110,9 @@ const CardItemComponent: React.FC<{
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {expandCard && cardItem.steps && (
+        {expandCard && hasActiveSteps && (
           <EuiFlexItem>
-            {cardItem.steps.map((step) => {
+            {activeSteps.map((step) => {
               return (
                 <CardStep
                   key={step.id}

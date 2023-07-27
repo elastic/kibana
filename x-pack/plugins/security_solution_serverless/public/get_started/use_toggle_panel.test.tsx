@@ -48,7 +48,7 @@ describe('useTogglePanel', () => {
     expect(state.activeProducts).toEqual(new Set([ProductLine.security, ProductLine.endpoint]));
     expect(state.finishedSteps).toEqual({});
 
-    expect(state.activeCards).toEqual(
+    expect(state.activeSections).toEqual(
       expect.objectContaining({
         [SectionId.getSetUp]: {
           [GetSetUpCardId.introduction]: {
@@ -100,7 +100,7 @@ describe('useTogglePanel', () => {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
 
-    expect(state.activeCards).toEqual(
+    expect(state.activeSections).toEqual(
       expect.objectContaining({
         [SectionId.getSetUp]: {
           [GetSetUpCardId.introduction]: {
@@ -153,7 +153,7 @@ describe('useTogglePanel', () => {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
 
-    expect(state.activeCards).toEqual(
+    expect(state.activeSections).toEqual(
       expect.objectContaining({
         [SectionId.getSetUp]: {
           [GetSetUpCardId.introduction]: {

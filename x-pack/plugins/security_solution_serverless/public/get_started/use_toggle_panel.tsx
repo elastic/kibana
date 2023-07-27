@@ -54,7 +54,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
   const [state, dispatch] = useReducer(reducer, {
     activeProducts: activeSectionsInitialStates,
     finishedSteps: finishedStepsInitialStates,
-    activeCards: activeCardsInitialStates,
+    activeSections: activeCardsInitialStates,
   });
 
   const onStepClicked: OnStepClicked = useCallback(

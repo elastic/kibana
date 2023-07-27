@@ -8,17 +8,19 @@
 import {
   getCardTimeInMinutes,
   getCardStepsLeft,
-  isCardActive,
   setupCards,
   updateCard,
+  isStepActive,
 } from './helpers';
-import type { ActiveCards, Card, CardId, Section, StepId } from './types';
+import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
 import {
+  ConfigureSteps,
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
   SectionId,
 } from './types';
+
 import * as sectionsConfigs from './sections';
 import { ProductLine } from '../../common/product';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
@@ -31,18 +33,23 @@ describe('getCardTimeInMinutes', () => {
         { id: 'step3', timeInMinutes: 15 },
       ],
     } as unknown as Card;
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
 
-    const timeInMinutes = getCardTimeInMinutes(card, stepsDone);
+    const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
 
     expect(timeInMinutes).toEqual(45);
   });
 
   it('should return 0 if the card is null or has no steps', () => {
     const card = {} as Card;
+
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set(['step1']) as unknown as Set<StepId>;
 
-    const timeInMinutes = getCardTimeInMinutes(card, stepsDone);
+    const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
 
     expect(timeInMinutes).toEqual(0);
   });
@@ -51,47 +58,59 @@ describe('getCardTimeInMinutes', () => {
 describe('getCardStepsLeft', () => {
   it('should calculate the number of steps left for a card correctly', () => {
     const card = { steps: ['step1', 'step2', 'step3'] } as unknown as Card;
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
 
-    const stepsLeft = getCardStepsLeft(card, stepsDone);
+    const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
 
     expect(stepsLeft).toEqual(1);
   });
 
   it('should return the total number of steps if the card is null or has no steps', () => {
     const card = {} as Card;
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set() as unknown as Set<StepId>;
 
-    const stepsLeft = getCardStepsLeft(card, stepsDone);
+    const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
 
     expect(stepsLeft).toEqual(0);
   });
 });
 
-describe('isCardActive', () => {
-  it('should return true if the card is active based on the active products', () => {
-    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
-    const activeProducts = new Set([ProductLine.security]);
+describe('isStepActive', () => {
+  it('should return true if the step is active based on the active products', () => {
+    const step = {
+      productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+      id: ConfigureSteps.learnAbout,
+    } as Step;
+    const activeProducts = new Set([ProductLine.cloud]);
 
-    const isActive = isCardActive(card, activeProducts);
+    const isActive = isStepActive(step, activeProducts);
 
     expect(isActive).toBe(true);
   });
 
   it('should return true if the card has no product type requirement', () => {
-    const card = {} as Card;
+    const step = {
+      id: ConfigureSteps.enablePrebuiltRules,
+    } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
-    const isActive = isCardActive(card, activeProducts);
+    const isActive = isStepActive(step, activeProducts);
 
     expect(isActive).toBe(true);
   });
 
   it('should return false if the card is not active based on the active products', () => {
-    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
-    const activeProducts = new Set([ProductLine.endpoint]);
+    const step = {
+      productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+      id: ConfigureSteps.learnAbout,
+    } as Step;
+    const activeProducts = new Set([ProductLine.security]);
 
-    const isActive = isCardActive(card, activeProducts);
+    const isActive = isStepActive(step, activeProducts);
 
     expect(isActive).toBe(false);
   });
@@ -124,7 +143,7 @@ describe('setupCards', () => {
       },
       [GetMoreFromElasticSecurityCardId.respondToThreats]: {
         id: GetMoreFromElasticSecurityCardId.respondToThreats,
-        stepsLeft: 2,
+        stepsLeft: 0,
         timeInMins: 0,
       },
       [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
@@ -134,13 +153,13 @@ describe('setupCards', () => {
       },
     },
   };
-  it('should set up active cards based on active products', () => {
+  it('should set up active steps based on active products', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupCards(finishedSteps, activeProducts);
 
-    expect(activeCards).toEqual(analyticProductActiveCards);
+    expect(activeSections).toEqual(analyticProductActiveCards);
   });
 
   it('should set up active cards based on finished steps', () => {
@@ -149,9 +168,9 @@ describe('setupCards', () => {
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupCards(finishedSteps, activeProducts);
 
-    expect(activeCards).toEqual({
+    expect(activeSections).toEqual({
       ...analyticProductActiveCards,
       [SectionId.getSetUp]: {
         ...analyticProductActiveCards[SectionId.getSetUp],
@@ -159,6 +178,19 @@ describe('setupCards', () => {
           id: GetSetUpCardId.introduction,
           timeInMins: 0,
           stepsLeft: 0,
+        },
+        [GetSetUpCardId.configure]: {
+          id: GetSetUpCardId.configure,
+          timeInMins: 0,
+          stepsLeft: 2,
+        },
+      },
+      [SectionId.getMoreFromElasticSecurity]: {
+        ...analyticProductActiveCards[SectionId.getMoreFromElasticSecurity],
+        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
+          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
+          stepsLeft: 3,
+          timeInMins: 0,
         },
       },
     });
@@ -169,9 +201,9 @@ describe('setupCards', () => {
 
     const activeProducts: Set<ProductLine> = new Set();
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupCards(finishedSteps, activeProducts);
 
-    expect(activeCards).toBeNull();
+    expect(activeSections).toBeNull();
   });
 
   it('should handle null or empty cards in sections', () => {
@@ -186,9 +218,9 @@ describe('setupCards', () => {
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupCards(finishedSteps, activeProducts);
 
-    expect(activeCards).toEqual({});
+    expect(activeSections).toEqual({});
 
     mockSections.mockRestore();
   });
@@ -198,9 +230,8 @@ describe('updateCard', () => {
   const finishedSteps = {
     [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
   } as unknown as Record<CardId, Set<StepId>>;
-  const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
-  const activeCards = {
+  const activeSections = {
     [SectionId.getSetUp]: {
       [GetSetUpCardId.introduction]: {
         id: GetSetUpCardId.introduction,
@@ -235,7 +266,7 @@ describe('updateCard', () => {
         timeInMins: 0,
       },
     },
-  } as ActiveCards;
+  } as ActiveSections;
 
   it('should update the active card based on finished steps and active products', () => {
     const sectionId = SectionId.getSetUp;
@@ -243,16 +274,15 @@ describe('updateCard', () => {
 
     const updatedCards = updateCard({
       finishedSteps,
-      activeProducts,
-      activeCards,
+      activeSections,
       sectionId,
       cardId,
     });
 
     expect(updatedCards).toEqual({
-      ...activeCards,
+      ...activeSections,
       [SectionId.getSetUp]: {
-        ...activeCards[SectionId.getSetUp],
+        ...activeSections[SectionId.getSetUp],
         [GetSetUpCardId.introduction]: {
           id: GetSetUpCardId.introduction,
           timeInMins: 0,
@@ -268,8 +298,7 @@ describe('updateCard', () => {
 
     const updatedCards = updateCard({
       finishedSteps,
-      activeProducts,
-      activeCards: null,
+      activeSections: null,
       sectionId,
       cardId,
     });
@@ -277,18 +306,17 @@ describe('updateCard', () => {
     expect(updatedCards).toBeNull();
   });
 
-  it('should return null if the card or activeCards is not found', () => {
+  it('should return null if the card or activeSections is not found', () => {
     const sectionId = SectionId.getSetUp;
     const cardId = 'test' as CardId;
 
     const updatedCards = updateCard({
       finishedSteps,
-      activeProducts,
-      activeCards,
+      activeSections,
       sectionId,
       cardId,
     });
 
-    expect(updatedCards).toEqual(activeCards);
+    expect(updatedCards).toEqual(activeSections);
   });
 });

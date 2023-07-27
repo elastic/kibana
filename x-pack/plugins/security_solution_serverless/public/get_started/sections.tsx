@@ -21,6 +21,7 @@ import {
 import * as i18n from './translations';
 import respond from './images/respond.svg';
 import explore from './images/explore.svg';
+import { ProductLine } from '../../common/product';
 
 const analyticsBadge = {
   id: BadgeId.analytics,
@@ -67,6 +68,7 @@ const configureSteps = [
     title: i18n.CONFIGURE_STEP1,
     description: [i18n.CONFIGURE_STEP1_DESCRIPTION1, i18n.CONFIGURE_STEP1_DESCRIPTION2],
     badges: [cloudBadge, edrBadge],
+    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
   },
   {
     id: ConfigureSteps.deployElasticAgent,
@@ -76,6 +78,7 @@ const configureSteps = [
     button: {
       children: i18n.CONFIGURE_STEP2_BUTTON,
     },
+    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
   },
   {
     id: ConfigureSteps.connectToDataSources,
@@ -125,11 +128,13 @@ const masterTheInvestigationsWorkflowSteps = [
     id: MasterTheInvestigationsWorkflowSteps.exploreProcess,
     title: i18n.MASTER_THE_INVESTIGATION_STEP2,
     badges: [cloudBadge, edrBadge],
+    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.exploreUser,
     title: i18n.MASTER_THE_INVESTIGATION_STEP3,
     badges: [cloudBadge, edrBadge],
+    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
@@ -148,11 +153,13 @@ const respondToThreatsSteps = [
     id: RespondToThreatsSteps.automated,
     title: i18n.RESPOND_TO_THREATS_STEP1,
     badges: [edrBadge],
+    productLineRequired: [ProductLine.endpoint],
   },
   {
     id: RespondToThreatsSteps.takeControlOfEndpoint,
     title: i18n.RESPOND_TO_THREATS_STEP2,
     badges: [edrBadge],
+    productLineRequired: [ProductLine.endpoint],
   },
 ];
 

@@ -10,7 +10,7 @@ import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elast
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type {
-  ActiveCards,
+  ActiveSections,
   CardId,
   OnStepButtonClicked,
   OnStepClicked,
@@ -21,7 +21,7 @@ import type {
 import { CardItem } from './card_item';
 import { getSections } from './sections';
 
-export const useSetUpCardSections = ({
+export const useSetUpSections = ({
   euiTheme,
   shadow = '',
 }: {
@@ -33,21 +33,22 @@ export const useSetUpCardSections = ({
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,
-      activeCards,
+      activeSections,
       sectionId,
     }: {
       onStepClicked: OnStepClicked;
       onStepButtonClicked: OnStepButtonClicked;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: ActiveCards | null;
+      activeSections: ActiveSections | null;
       sectionId: SectionId;
     }) => {
-      const section = activeCards?.[sectionId];
+      const section = activeSections?.[sectionId];
       return section
         ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
               <CardItem
                 data-test-subj={cardItem.id}
+                activeSteps={cardItem.activeSteps}
                 stepsLeft={cardItem.stepsLeft}
                 timeInMins={cardItem.timeInMins}
                 sectionId={sectionId}
@@ -70,12 +71,12 @@ export const useSetUpCardSections = ({
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,
-      activeCards,
+      activeSections,
     }: {
       onStepClicked: OnStepClicked;
       onStepButtonClicked: OnStepButtonClicked;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: ActiveCards | null;
+      activeSections: ActiveSections | null;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
@@ -83,7 +84,7 @@ export const useSetUpCardSections = ({
           onStepClicked,
           onStepButtonClicked,
           finishedSteps,
-          activeCards,
+          activeSections,
         });
         if (cardNodes && cardNodes.length > 0) {
           acc.push(

@@ -41,6 +41,7 @@ export interface Step {
   button?: EuiButtonProps;
   description?: string[];
   id: StepId;
+  productLineRequired?: ProductLine[];
   splitPanel?: React.ReactNode;
   title: string;
   timeInMinutes?: number;
@@ -49,7 +50,6 @@ export interface Step {
 export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
 
 export interface Card {
-  productLineRequired?: ProductLine[];
   description?: string | React.ReactNode;
   icon?: EuiIconProps;
   id: CardId;
@@ -58,7 +58,7 @@ export interface Card {
   timeInMins?: number;
 }
 
-export type ActiveCards = Record<SectionId, Record<CardId, ActiveCard>>;
+export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;
 
 export enum SectionId {
   getSetUp = 'getSetUp',
@@ -124,11 +124,12 @@ export interface ActiveCard {
   id: CardId;
   timeInMins: number;
   stepsLeft: number;
+  activeSteps: Step[] | undefined;
 }
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
-  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+  activeSections: ActiveSections | null;
 }
 
 export interface ToggleProductAction {

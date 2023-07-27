@@ -18,7 +18,7 @@ import {
   IntroductionSteps,
   SectionId,
   GetMoreFromElasticSecurityCardId,
-  type ActiveCards,
+  type ActiveSections,
   type CardId,
   type StepId,
   type ToggleProductAction,
@@ -30,7 +30,7 @@ describe('reducer', () => {
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeCards: {} as ActiveCards | null,
+      activeSections: {} as ActiveSections | null,
     };
 
     const action: ToggleProductAction = {
@@ -41,14 +41,14 @@ describe('reducer', () => {
     const nextState = reducer(initialState, action);
 
     expect(nextState.activeProducts.has(ProductLine.security)).toBe(false);
-    expect(nextState.activeCards).toBeNull();
+    expect(nextState.activeSections).toBeNull();
   });
 
   it('should add a finished step correctly', () => {
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeCards: {
+      activeSections: {
         getSetUp: {
           [GetSetUpCardId.introduction]: {
             id: GetSetUpCardId.introduction,
@@ -56,7 +56,7 @@ describe('reducer', () => {
             timeInMins: 3,
           },
         },
-      } as unknown as ActiveCards | null,
+      } as unknown as ActiveSections | null,
     };
 
     const action: AddFinishedStepAction = {
@@ -73,7 +73,7 @@ describe('reducer', () => {
     expect(nextState.finishedSteps[GetSetUpCardId.introduction]).toEqual(
       new Set([IntroductionSteps.getToKnowElasticSecurity])
     );
-    expect(nextState.activeCards).toEqual({
+    expect(nextState.activeSections).toEqual({
       getSetUp: {
         [GetSetUpCardId.introduction]: {
           id: GetSetUpCardId.introduction,

@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useSetUpCardSections } from './use_setup_cards';
-import type { ActiveCards, CardId, StepId } from './types';
+import { useSetUpSections } from './use_setup_cards';
+import type { ActiveSections, CardId, StepId } from './types';
 import {
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
@@ -25,14 +25,14 @@ const mockEuiTheme: EuiThemeComputed = {
 const finishedSteps = {
   [GetSetUpCardId.introduction]: new Set<StepId>([IntroductionSteps.getToKnowElasticSecurity]),
 } as Record<CardId, Set<StepId>>;
-describe('useSetUpCardSections', () => {
+describe('useSetUpSections', () => {
   const onStepClicked = jest.fn();
   const onStepButtonClicked = jest.fn();
 
   it('should return the sections', () => {
-    const { result } = renderHook(() => useSetUpCardSections({ euiTheme: mockEuiTheme }));
+    const { result } = renderHook(() => useSetUpSections({ euiTheme: mockEuiTheme }));
 
-    const activeCards = {
+    const activeSections = {
       [SectionId.getSetUp]: {
         [GetSetUpCardId.introduction]: {
           id: GetSetUpCardId.introduction,
@@ -45,10 +45,10 @@ describe('useSetUpCardSections', () => {
           id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
         },
       },
-    } as ActiveCards;
+    } as ActiveSections;
 
     const sections = result.current.setUpSections({
-      activeCards,
+      activeSections,
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,
@@ -58,12 +58,12 @@ describe('useSetUpCardSections', () => {
   });
 
   it('should return no section if no active cards', () => {
-    const { result } = renderHook(() => useSetUpCardSections({ euiTheme: mockEuiTheme }));
+    const { result } = renderHook(() => useSetUpSections({ euiTheme: mockEuiTheme }));
 
-    const activeCards = null;
+    const activeSections = null;
 
     const sections = result.current.setUpSections({
-      activeCards,
+      activeSections,
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,
