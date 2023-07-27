@@ -19,6 +19,7 @@ export const mockFindingsHit: CspFinding = {
   },
   orchestrator: {
     cluster: {
+      id: '087606d6-c71a-4892-9b27-67ab937770ce',
       name: 'kind-multi',
     },
   },
@@ -30,7 +31,6 @@ export const mockFindingsHit: CspFinding = {
     type: 'cloudbeat',
     version: '8.6.0',
   },
-  cluster_id: '087606d6-c71a-4892-9b27-67ab937770ce',
   '@timestamp': '2022-11-24T22:27:19.515Z',
   ecs: {
     version: '8.0.0',

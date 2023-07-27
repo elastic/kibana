@@ -26,6 +26,7 @@ export const getClusterMockData = (): Cluster => ({
       version: 'v1.5.0',
     },
     cluster: {
+      id: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
       name: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
     },
   },

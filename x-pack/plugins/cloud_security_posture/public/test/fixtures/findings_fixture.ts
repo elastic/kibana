@@ -12,7 +12,6 @@ import { CspFinding } from '../../../common/schemas/csp_finding';
 const chance = new Chance();
 
 export const getFindingsFixture = (): CspFinding & { id: string } => ({
-  cluster_id: chance.guid(),
   id: chance.word(),
   result: {
     expected: {
@@ -58,6 +57,11 @@ export const getFindingsFixture = (): CspFinding & { id: string } => ({
     raw: {} as any,
     sub_type: chance.string(),
     id: chance.string(),
+  },
+  orchestrator: {
+    cluster: {
+      id: chance.guid(),
+    },
   },
   host: {} as any,
   ecs: {} as any,

@@ -23,7 +23,7 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
     'failed.failed_counter': {
       type: 'integer',
     },
-    cluster_id: {
+    'orchestrator.cluster.id': {
       type: 'keyword',
     },
     'cloud.account.id': {

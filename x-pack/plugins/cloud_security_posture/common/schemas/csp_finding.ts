@@ -11,8 +11,7 @@ import type { CspRuleTemplateMetadata } from './csp_rule_template_metadata';
 
 export interface CspFinding {
   '@timestamp': string;
-  cluster_id: string;
-  orchestrator?: CspFindingOrchestrator;
+  orchestrator: CspFindingOrchestrator;
   cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
@@ -26,8 +25,8 @@ export interface CspFinding {
 }
 
 interface CspFindingOrchestrator {
-  cluster?: {
-    id?: string;
+  cluster: {
+    id: string;
     name?: string;
   };
 }

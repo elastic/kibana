@@ -50,7 +50,7 @@ describe('<ResourceFindingsTable />', () => {
       items: data,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       sorting: {
-        sort: { field: 'cluster_id', direction: 'desc' },
+        sort: { field: '@timestamp', direction: 'desc' },
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
