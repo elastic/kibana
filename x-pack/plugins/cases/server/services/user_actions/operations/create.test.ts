@@ -17,6 +17,18 @@ import { UserActionPersister } from './create';
 import { createUserActionSO } from '../test_utils';
 import type { BulkCreateAttachmentUserAction, CreateUserActionClient } from '../types';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
+import {
+  getAssigneesAddedRemovedUserActions,
+  getAssigneesAddedUserActions,
+  getAssigneesRemovedUserActions,
+  getBuiltUserActions,
+  getTagsAddedRemovedUserActions,
+  patchAddRemoveAssigneesCasesRequest,
+  patchAssigneesCasesRequest,
+  patchCasesRequest,
+  patchRemoveAssigneesCasesRequest,
+  patchTagsCasesRequest,
+} from '../mocks';
 import { AttachmentType } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
@@ -28,6 +40,11 @@ describe('UserActionPersister', () => {
 
   let persister: UserActionPersister;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+  });
+
   beforeEach(() => {
     jest.resetAllMocks();
     persister = new UserActionPersister({
@@ -37,6 +54,10 @@ describe('UserActionPersister', () => {
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
     });
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   const getRequest = () =>
@@ -61,6 +82,8 @@ describe('UserActionPersister', () => {
     ],
     user: { email: '', full_name: '', username: '' },
   });
+
+  const testUser = { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' };
 
   describe('Decoding requests', () => {
     describe('createUserAction', () => {
@@ -139,6 +162,61 @@ describe('UserActionPersister', () => {
 
         expect(persistedAttributes.payload).not.toHaveProperty('foo');
       });
+    });
+  });
+
+  describe('buildUserActions', () => {
+    it('creates the correct user actions when bulk updating cases', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(getBuiltUserActions({ isMock: false }));
+    });
+
+    it('creates the correct user actions when an assignee is added', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchAssigneesCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(getAssigneesAddedUserActions({ isMock: false }));
+    });
+
+    it('creates the correct user actions when an assignee is removed', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchRemoveAssigneesCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(getAssigneesRemovedUserActions({ isMock: false }));
+    });
+
+    it('creates the correct user actions when assignees are added and removed', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchAddRemoveAssigneesCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(
+        getAssigneesAddedRemovedUserActions({
+          isMock: false,
+        })
+      );
+    });
+
+    it('creates the correct user actions when tags are added and removed', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchTagsCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(
+        getTagsAddedRemovedUserActions({
+          isMock: false,
+        })
+      );
     });
   });
 });
