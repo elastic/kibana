@@ -83,11 +83,8 @@ export const registerCleanUpTask = (
                 const remaining = allItems.filter((item) => !item.shouldDelete);
                 if (remaining.length === 0) {
                   return { state, schedule: { interval: '24h' } };
-                }
-                if (remaining.some((item) => !item.isBrowser)) {
-                  return { state, schedule: { interval: '2m' } };
                 } else {
-                  return { state, schedule: { interval: '5m' } };
+                  return { state, schedule: { interval: '15m' } };
                 }
               }
             } catch (e) {

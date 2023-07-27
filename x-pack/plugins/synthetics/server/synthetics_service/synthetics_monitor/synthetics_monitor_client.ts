@@ -33,6 +33,7 @@ import {
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 export const LIGHTWEIGHT_TEST_NOW_RUN = 'LIGHTWEIGHT_SYNTHETICS_TEST_NOW_RUN';
 export const BROWSER_TEST_NOW_RUN = 'BROWSER_SYNTHETICS_TEST_NOW_RUN';
+const LONG_TIME_MONTH = '43800';
 
 export class SyntheticsMonitorClient {
   public server: SyntheticsServerSetup;
@@ -195,7 +196,7 @@ export class SyntheticsMonitorClient {
         config: {
           ...formattedConfig,
           [ConfigKey.SCHEDULE]: {
-            number: '240',
+            number: LONG_TIME_MONTH,
             unit: ScheduleUnit.MINUTES,
           },
           [ConfigKey.ENABLED]: true,
