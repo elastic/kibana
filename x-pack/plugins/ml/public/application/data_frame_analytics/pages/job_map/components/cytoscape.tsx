@@ -147,7 +147,7 @@ export function Cytoscape({
       // Refitting because it's possible the the width/height have changed
       cy.fit();
     }
-  }, [cy, resetCy]);
+  }, [cy, resetCy, width, height]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
