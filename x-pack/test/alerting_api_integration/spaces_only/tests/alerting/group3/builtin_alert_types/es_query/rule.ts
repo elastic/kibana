@@ -151,9 +151,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           // during the first execution, the latestTimestamp value should be empty
           // since this rule always fires, the latestTimestamp value should be updated each execution
           if (!i) {
-            expect(previousTimestamp.length).to.be(0);
+            expect(previousTimestamp).to.be.empty();
           } else {
-            expect(previousTimestamp.length).to.be.greaterThan(0);
+            expect(previousTimestamp).not.to.be.empty();
           }
         }
       })

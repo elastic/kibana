@@ -23,6 +23,16 @@ import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
+import { ALERT_RULE_NAME, ALERT_URL } from '@kbn/rule-data-utils';
+import {
+  ALERT_CONDITIONS,
+  ALERT_CONDITIONS_MET_VALUE,
+  ALERT_HITS_COUNT,
+  ALERT_HITS_HITS,
+  ALERT_MESSAGE,
+  ALERT_STATE_LAST_TIMESTAMP,
+  ALERT_TITLE,
+} from './fields';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -670,10 +680,31 @@ describe('ruleType', () => {
         hits: { total: 3, hits: [{}, {}, {}] },
       });
 
-      await invokeExecutor({ params, ruleServices });
+      await invokeExecutor({
+        params,
+        ruleServices,
+        state: { latestTimestamp: '01.01.2000', dateStart: '', dateEnd: '' },
+      });
 
-      const instance = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.scheduleActions).toHaveBeenCalled();
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledTimes(1);
+
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionGroup: 'query matched',
+          id: 'query matched',
+          payload: expect.objectContaining({
+            [ALERT_RULE_NAME]: 'rule-name',
+            [ALERT_URL]: expect.any(String),
+            [ALERT_HITS_COUNT]: 3,
+            [ALERT_HITS_HITS]: [{}, {}, {}],
+            [ALERT_MESSAGE]: expect.any(String),
+            [ALERT_TITLE]: "rule 'rule-name' matched query",
+            [ALERT_CONDITIONS]: 'Number of matching documents is greater than or equal to 3',
+            [ALERT_CONDITIONS_MET_VALUE]: 3,
+            [ALERT_STATE_LAST_TIMESTAMP]: '1999-12-31T22:00:00.000Z',
+          }),
+        })
+      );
     });
   });
 });
@@ -744,7 +775,7 @@ async function invokeExecutor({
     spaceId: uuidv4(),
     rule: {
       id: uuidv4(),
-      name: uuidv4(),
+      name: 'rule-name',
       tags: [],
       consumer: '',
       producer: '',
