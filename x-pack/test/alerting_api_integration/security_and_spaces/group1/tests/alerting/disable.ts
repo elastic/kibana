@@ -14,8 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../../common/lib';
 
@@ -83,11 +82,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               // Ensure task still exists and is still enabled
@@ -158,7 +153,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'disable',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -210,7 +205,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'disable',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -223,7 +218,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'disable',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
@@ -273,7 +268,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('disable', 'test.noop', 'alerts'),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -281,11 +276,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -344,11 +335,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               // Ensure task still exists and is still enabled

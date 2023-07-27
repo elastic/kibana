@@ -14,8 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -72,11 +71,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'unsnooze',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('unsnooze', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -138,7 +133,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unsnooze',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -193,7 +188,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unsnooze',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -206,7 +201,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unsnooze',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
@@ -260,11 +255,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'unsnooze',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('unsnooze', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -274,7 +265,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unsnooze',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'

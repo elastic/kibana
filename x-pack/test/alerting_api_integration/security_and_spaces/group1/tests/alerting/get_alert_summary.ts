@@ -11,8 +11,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
   getTestRuleData,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../../scenarios';
@@ -50,7 +49,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -119,7 +118,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -132,7 +131,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'

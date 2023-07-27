@@ -14,8 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
 const NOW = new Date().toISOString();
@@ -84,11 +83,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('snooze', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -155,7 +150,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'snooze',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -215,7 +210,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'snooze',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -228,7 +223,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'snooze',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
@@ -287,11 +282,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('snooze', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -301,7 +292,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'snooze',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -380,11 +371,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'snooze',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('snooze', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;

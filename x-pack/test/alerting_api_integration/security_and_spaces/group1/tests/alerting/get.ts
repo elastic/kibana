@@ -12,8 +12,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -50,7 +49,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -134,7 +133,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -179,7 +178,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -192,7 +191,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
@@ -237,11 +236,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'get',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('get', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -250,7 +245,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'

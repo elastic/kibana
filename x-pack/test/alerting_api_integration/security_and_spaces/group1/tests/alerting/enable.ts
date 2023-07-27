@@ -14,8 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../../common/lib';
 
@@ -82,11 +81,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'enable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -94,11 +89,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'enable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -168,7 +159,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'enable',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -215,7 +206,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'enable',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -228,7 +219,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'enable',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
@@ -268,7 +259,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('enable', 'test.noop', 'alerts'),
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -276,11 +267,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'enable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -333,11 +320,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'enable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('enable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;

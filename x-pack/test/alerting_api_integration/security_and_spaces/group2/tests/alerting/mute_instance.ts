@@ -14,8 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -72,11 +71,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -137,7 +132,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -191,7 +186,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -204,7 +199,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.unrestricted-noop',
                   'alertsRestrictedFixture'
@@ -257,11 +252,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -271,7 +262,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -324,11 +315,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;

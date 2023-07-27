@@ -15,7 +15,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -422,7 +422,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(403);
       expect(response.body).to.eql({
         error: 'Forbidden',
-        message: getConsumerUnauthorizedErrorMessage(
+        message: getUnauthorizedErrorMessage(
           'create',
           'test.noop',
           'some consumer patrick invented'
