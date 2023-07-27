@@ -56,11 +56,18 @@ export class AnalyticsManager {
 
   private async initTransformData() {
     if (!this._transforms) {
-      const body = await this._client.asCurrentUser.transform.getTransform({
-        size: 1000,
-      });
-      this._transforms = body.transforms;
-      return body.transforms;
+      try {
+        const body = await this._client.asCurrentUser.transform.getTransform({
+          size: 1000,
+        });
+        this._transforms = body.transforms;
+        return body.transforms;
+      } catch (e) {
+        if (e.meta?.statusCode !== 403) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        }
+      }
     }
   }
 
@@ -602,10 +609,23 @@ export class AnalyticsManager {
         });
         result.details[modelNodeId] = model;
 
-        // Then, find the pipelines that have the trained model set as index.default_pipelines
-        const pipelinesResponse = await modelsProvider(this._client).getModelsPipelines([modelId]);
+        let pipelinesResponse;
+        let indicesSettings;
+        try {
+          // Then, find the pipelines that have the trained model set as index.default_pipelines
+          pipelinesResponse = await modelsProvider(this._client).getModelsPipelines([modelId]);
+        } catch (e) {
+          // Possible that the user doesn't have permissions to view ingest pipelines
+          // If so, gracefully exit
+          if (e.meta?.statusCode !== 403) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
 
-        const pipelines = pipelinesResponse.get(modelId);
+          return result;
+        }
+
+        const pipelines = pipelinesResponse?.get(modelId);
 
         if (pipelines) {
           const pipelineIds = new Set(Object.keys(pipelines));
@@ -630,7 +650,18 @@ export class AnalyticsManager {
             });
           }
           const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
-          const indicesSettings = await this._client.asInternalUser.indices.getSettings();
+
+          try {
+            indicesSettings = await this._client.asCurrentUser.indices.getSettings();
+          } catch (e) {
+            // Possible that the user doesn't have permissions to view ingest pipelines
+            // If so, gracefully exit
+            if (e.meta?.statusCode !== 403) {
+              // eslint-disable-next-line no-console
+              console.error(e);
+            }
+            return result;
+          }
 
           for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
             if (
@@ -683,6 +714,8 @@ export class AnalyticsManager {
           // From these destination indices, see if there's any transforms that have the indexId as the source destination index
           if (destinationIndices.length > 0) {
             const transforms = await this.initTransformData();
+
+            if (!transforms) return result;
 
             for (const destinationIndex of destinationIndices) {
               const destinationIndexNodeId = `${destinationIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
