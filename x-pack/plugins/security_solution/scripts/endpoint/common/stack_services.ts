@@ -11,7 +11,8 @@ import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
 import nodeFetch from 'node-fetch';
-import { getLocalhostRealIp, isLocalhost } from './localhost_services';
+import { isLocalhost } from './is_localhost';
+import { getLocalhostRealIp } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface RuntimeServices {

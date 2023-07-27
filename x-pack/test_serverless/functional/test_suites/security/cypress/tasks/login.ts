@@ -6,6 +6,7 @@
  */
 
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
+import { isLocalhost } from '@kbn/security-solution-plugin/scripts/endpoint/common/is_localhost';
 import { ServerlessRoleName } from '../../../../../shared/lib';
 
 /**
@@ -27,7 +28,7 @@ const sendApiLoginRequest = (username: string, password: string) => {
     url: url.toString(),
     body: {
       providerType: 'basic',
-      providerName: !url.toString().includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: isLocalhost(url.hostname) ? 'basic' : 'cloud-basic',
       currentURL: '/',
       params: {
         username,

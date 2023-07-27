@@ -11,6 +11,7 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
+import { isLocalhost } from '../../../../scripts/endpoint/common/is_localhost';
 import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
 import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
 import { request } from './common';
@@ -195,6 +196,12 @@ const credentialsProvidedByEnvironment = (): boolean =>
 const loginViaEnvironmentCredentials = () => {
   const url = Cypress.config().baseUrl;
 
+  if (!url) {
+    throw Error(`Cypress config baseUrl not set!`);
+  }
+
+  const urlObj = new URL(url);
+
   let username: string;
   let password: string;
   let usernameEnvVar: string;
@@ -220,7 +227,7 @@ const loginViaEnvironmentCredentials = () => {
   request({
     body: {
       providerType: 'basic',
-      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: url && !isLocalhost(urlObj.hostname) ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username,
