@@ -95,7 +95,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           ruleOverwrites: {
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1h' },
-            throttle: null,
+            throttle: '30s',
             params: {
               pattern: { instance: [true] },
             },
@@ -238,11 +238,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
-      expect(telemetry.throttle_time.avg).to.equal('0s');
-      expect(telemetry.throttle_time.max).to.equal('0s');
+      expect(telemetry.throttle_time.avg).to.equal('12s');
+      expect(telemetry.throttle_time.max).to.equal('30s');
       expect(telemetry.throttle_time_number_s.min).to.equal(0);
-      expect(telemetry.throttle_time_number_s.avg).to.equal(0);
-      expect(telemetry.throttle_time_number_s.max).to.equal(0);
+      expect(telemetry.throttle_time_number_s.avg).to.equal(12);
+      expect(telemetry.throttle_time_number_s.max).to.equal(30);
 
       // schedule interval stats
       expect(telemetry.schedule_time.min).to.equal('3600s');
@@ -262,7 +262,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // number of rule executions - just checking for non-zero as we can't set an exact number
       // each rule should have had a chance to execute once
-      expect(telemetry.count_rules_executions_per_day >= 0).to.be(true);
+      expect(telemetry.count_rules_executions_per_day >= 9).to.be(true);
 
       // number of rule executions broken down by rule type
       expect(telemetry.count_by_type.test__patternFiring >= 3).to.be(true);
