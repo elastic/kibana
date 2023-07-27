@@ -50,81 +50,134 @@ export async function getMobileFilters({
   start: number;
   end: number;
 }): Promise<MobileFiltersResponse> {
-  const response = await apmEventClient.search('get_mobile_filters', {
-    apm: {
-      events: [ProcessorEvent.transaction],
-    },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
+  async function getMobileTransactionEventsFilters(): Promise<
+    Array<{
+      key: MobileFiltersTypes;
+      options: string[];
+    }>
+  > {
+    const response = await apmEventClient.search(
+      'get_mobile_transaction_events_filters',
+      {
+        apm: {
+          events: [ProcessorEvent.transaction],
         },
-      },
-      aggs: {
-        devices: {
-          terms: {
-            field: DEVICE_MODEL_IDENTIFIER,
-            size: 10,
+        body: {
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...termQuery(TRANSACTION_TYPE, transactionType),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+              ],
+            },
+          },
+          aggs: {
+            devices: {
+              terms: {
+                field: DEVICE_MODEL_IDENTIFIER,
+                size: 10,
+              },
+            },
+            osVersions: {
+              terms: {
+                field: HOST_OS_VERSION,
+                size: 10,
+              },
+            },
+            appVersions: {
+              terms: {
+                field: SERVICE_VERSION,
+                size: 10,
+              },
+            },
           },
         },
-        osVersions: {
-          terms: {
-            field: HOST_OS_VERSION,
-            size: 10,
-          },
-        },
-        appVersions: {
-          terms: {
-            field: SERVICE_VERSION,
-            size: 10,
-          },
-        },
-        netConnectionTypes: {
-          terms: {
-            field: NETWORK_CONNECTION_TYPE,
-            size: 10,
-          },
-        },
-      },
-    },
-  });
+      }
+    );
 
-  return [
-    {
-      key: 'device',
-      options:
-        response.aggregations?.devices?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
-    },
-    {
-      key: 'osVersion',
-      options:
-        response.aggregations?.osVersions?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
-    },
-    {
-      key: 'appVersion',
-      options:
-        response.aggregations?.appVersions?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
-    },
-    {
-      key: 'netConnectionType',
-      options:
-        response.aggregations?.netConnectionTypes?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
-    },
-  ];
+    return [
+      {
+        key: 'device',
+        options:
+          response.aggregations?.devices?.buckets?.map(
+            ({ key }) => key as string
+          ) || [],
+      },
+      {
+        key: 'osVersion',
+        options:
+          response.aggregations?.osVersions?.buckets?.map(
+            ({ key }) => key as string
+          ) || [],
+      },
+      {
+        key: 'appVersion',
+        options:
+          response.aggregations?.appVersions?.buckets?.map(
+            ({ key }) => key as string
+          ) || [],
+      },
+    ];
+  }
+
+  async function getMobileNetworkConnectionTypeFilters(): Promise<
+    Array<{
+      key: MobileFiltersTypes;
+      options: string[];
+    }>
+  > {
+    const response = await apmEventClient.search(
+      'get_mobile_network_connection_type_filters',
+      {
+        apm: {
+          events: [ProcessorEvent.span],
+        },
+        body: {
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+              ],
+            },
+          },
+          aggs: {
+            netConnectionTypes: {
+              terms: {
+                field: NETWORK_CONNECTION_TYPE,
+                size: 10,
+              },
+            },
+          },
+        },
+      }
+    );
+
+    return [
+      {
+        key: 'netConnectionType',
+        options:
+          response.aggregations?.netConnectionTypes?.buckets?.map(
+            ({ key }) => key as string
+          ) || [],
+      },
+    ];
+  }
+
+  const [transactionEventFilters, networkConnectionTypeFilters] =
+    await Promise.all([
+      getMobileTransactionEventsFilters(),
+      getMobileNetworkConnectionTypeFilters(),
+    ]);
+
+  return [...transactionEventFilters, ...networkConnectionTypeFilters];
 }
