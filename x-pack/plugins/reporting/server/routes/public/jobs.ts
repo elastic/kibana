@@ -5,12 +5,48 @@
  * 2.0.
  */
 
+import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../..';
 import { PUBLIC_ROUTES } from '../../../common/constants';
-import { getCommonJobManagementRoutes } from '../common/jobs';
+import { authorizedUserPreRouting } from '../common';
+import { commonJobsRouteHandlerFactory } from '../common/jobs';
 
 export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
-  const commonRoutes = getCommonJobManagementRoutes(reporting);
-  commonRoutes.registerDownloadReport(PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}');
-  commonRoutes.registerDeleteReport(PUBLIC_ROUTES.JOBS.DELETE_PREFIX + '/{docId}');
+  const setupDeps = reporting.getPluginSetupDeps();
+  const { router } = setupDeps;
+
+  // use common route handlers that are shared for public and internal routes
+  const jobHandlers = commonJobsRouteHandlerFactory(reporting);
+
+  const registerDownloadReport = () => {
+    // trigger a download of the output from a job
+    const path = PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
+    router.get(
+      {
+        path,
+        validate: jobHandlers.validate,
+        options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        return jobHandlers.handleDownloadReport({ path, user, context, req, res });
+      })
+    );
+  };
+
+  const registerDeleteReport = () => {
+    // allow a report to be deleted
+    const path = PUBLIC_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
+    router.delete(
+      {
+        path,
+        validate: jobHandlers.validate,
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        return jobHandlers.handleDeleteReport({ path, user, context, req, res });
+      })
+    );
+  };
+
+  registerDownloadReport();
+  registerDeleteReport();
 }

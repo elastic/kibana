@@ -6,27 +6,25 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/generate';
 import {
-  getCommonJobManagementRoutes,
+  commonJobsRouteHandlerFactory,
   jobManagementPreRouting,
   jobsQueryFactory,
 } from '../../common/jobs';
 
 export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
-  const commonRoutes = getCommonJobManagementRoutes(reporting);
-  commonRoutes.registerDownloadReport(INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}');
-  commonRoutes.registerDeleteReport(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/{docId}');
-
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
   const jobsQuery = jobsQueryFactory(reporting);
 
-  // list jobs in the queue, paginated
-  const registerGetList = (path: string) => {
+  const registerGetList = () => {
+    // list jobs in the queue, paginated
+    const path = INTERNAL_ROUTES.JOBS.LIST;
     router.get(
       {
         path,
@@ -68,7 +66,9 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   };
 
   // return the count of all jobs in the queue
-  const registerGetCount = (path: string) => {
+  const registerGetCount = () => {
+    // return the count of all jobs in the queue
+    const path = INTERNAL_ROUTES.JOBS.COUNT;
     router.get(
       { path, validate: false },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
@@ -97,17 +97,16 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerGetInfo = (path: string) => {
-    // return some info about the job
+  // use common route handlers that are shared for public and internal routes
+  const jobHandlers = commonJobsRouteHandlerFactory(reporting);
 
+  const registerGetInfo = () => {
+    // return some info about the job
+    const path = INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/{docId}';
     router.get(
       {
         path,
-        validate: {
-          params: schema.object({
-            docId: schema.string({ minLength: 2 }),
-          }),
-        },
+        validate: jobHandlers.validate,
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
@@ -130,7 +129,38 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  registerGetList(INTERNAL_ROUTES.JOBS.LIST);
-  registerGetCount(INTERNAL_ROUTES.JOBS.COUNT);
-  registerGetInfo(INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/{docId}');
+  const registerDownloadReport = () => {
+    // trigger a download of the output from a job
+    const path = INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
+    router.get(
+      {
+        path,
+        validate: jobHandlers.validate,
+        options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        return jobHandlers.handleDownloadReport({ path, user, context, req, res });
+      })
+    );
+  };
+
+  const registerDeleteReport = () => {
+    // allow a report to be deleted
+    const path = INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
+    router.delete(
+      {
+        path,
+        validate: jobHandlers.validate,
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        return jobHandlers.handleDeleteReport({ path, user, context, req, res });
+      })
+    );
+  };
+
+  registerGetList();
+  registerGetCount();
+  registerGetInfo();
+  registerDownloadReport();
+  registerDeleteReport();
 }
