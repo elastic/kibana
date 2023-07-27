@@ -30,12 +30,6 @@
   }
 }
 
-.optionsList__popoverTitle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .optionsList__filterInvalid {
   color: $euiTextSubduedColor;
   text-decoration: line-through;

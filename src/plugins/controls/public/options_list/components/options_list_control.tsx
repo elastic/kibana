@@ -9,9 +9,9 @@
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, useResizeObserver } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -153,7 +153,6 @@ export const OptionsListControl = ({
       panelPaddingSize="none"
       anchorPosition="downCenter"
       className="optionsList__popoverOverride"
-      anchorClassName="optionsList__anchorOverride"
       closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       initialFocus={'[data-test-subj=optionsList-control-search-input]'}
