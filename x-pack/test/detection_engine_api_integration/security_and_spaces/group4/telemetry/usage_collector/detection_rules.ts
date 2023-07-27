@@ -14,6 +14,7 @@ import type {
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { SingleEventMetric } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -53,6 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const es = getService('es');
+  const statuses: SingleEventMetric[] = [];
 
   describe('Detection rule telemetry', async () => {
     before(async () => {
@@ -313,6 +315,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
+          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
           const expected: DetectionMetrics = {
             ...getInitialDetectionMetrics(),
             detection_rules: {
@@ -349,6 +352,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
+          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
 
           // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
           stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
@@ -392,6 +396,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
+          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
 
           // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
           stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
@@ -429,6 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
+          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
 
           // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
           stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
@@ -471,6 +477,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
+          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
           const expected: DetectionMetrics = {
             ...getInitialDetectionMetrics(),
             detection_rules: {
@@ -495,7 +502,9 @@ export default ({ getService }: FtrProviderContext) => {
             expected,
             `\n\n\nexpected: ${JSON.stringify(convert(expected))}, \n\n\nactual: ${JSON.stringify(
               convert(stats)
-            )}, \n\n\nstatsBefore: ${JSON.stringify(convert(statsBefore))}`
+            )}, \n\n\nstatsBefore: ${JSON.stringify(
+              convert(statsBefore)
+            )}, \n\n\nEQL Statuses: ${JSON.stringify(statuses)}`
           );
         });
       });
