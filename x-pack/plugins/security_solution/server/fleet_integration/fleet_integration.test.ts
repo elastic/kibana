@@ -69,7 +69,9 @@ describe('ingest_integration tests ', () => {
   const Platinum = licenseMock.createLicense({
     license: { type: 'platinum', mode: 'platinum', uid: 'updated-uid' },
   });
-  const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: 'updated-uid' } });
+  const Gold = licenseMock.createLicense({
+    license: { type: 'gold', mode: 'gold', uid: 'updated-uid' },
+  });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
 
