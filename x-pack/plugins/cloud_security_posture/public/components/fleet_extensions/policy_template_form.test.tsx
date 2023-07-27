@@ -6,7 +6,11 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CspPolicyTemplateForm } from './policy_template_form';
+import {
+  CspPolicyTemplateForm,
+  AWS_ORGANIZATION_ACCOUNT,
+  AWS_SINGLE_ACCOUNT,
+} from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
   getMockPackageInfoCspmAWS,
@@ -715,6 +719,60 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('AWS Credentials input fields', () => {
+    it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Organization is enabled for supported versions`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.account_type': { value: AWS_ORGANIZATION_ACCOUNT },
+      });
+
+      const { getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.5.0' } as PackageInfo} />
+      );
+
+      expect(getByLabelText('Single Account')).toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeEnabled();
+    });
+
+    it(`${CLOUDBEAT_AWS} form displays upgrade message for unsupported versions and aws organization option is disabled`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'cloud_formation' },
+        'aws.account_type': { value: AWS_SINGLE_ACCOUNT },
+      });
+
+      const { getByText, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.4.0' } as PackageInfo} />
+      );
+
+      expect(
+        getByText(
+          'AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration.'
+        )
+      ).toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeDisabled();
+      expect(getByLabelText('Single Account')).toBeEnabled();
+    });
+
+    it(`${CLOUDBEAT_AWS} form do not displays upgrade message for supported versions and aws organization option is enabled`, () => {
+      let policy = getMockPolicyAWS();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'cloud_formation' },
+        'aws.account_type': { value: AWS_ORGANIZATION_ACCOUNT },
+      });
+
+      const { queryByText, getByLabelText } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={{ version: '1.5.0' } as PackageInfo} />
+      );
+
+      expect(
+        queryByText(
+          'AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration.'
+        )
+      ).not.toBeInTheDocument();
+      expect(getByLabelText('AWS Organization')).toBeEnabled();
+    });
+
     it(`renders ${CLOUDBEAT_AWS} Assume Role fields`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
