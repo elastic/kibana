@@ -329,8 +329,7 @@ describe('Case View Page activity tab', () => {
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
