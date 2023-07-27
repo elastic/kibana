@@ -597,6 +597,7 @@ export class AnalyticsManager {
             id: modelNodeId,
             label: modelId,
             type: JOB_MAP_NODE_TYPES.TRAINED_MODEL,
+            isRoot: true,
           },
         });
         result.details[modelNodeId] = model;
