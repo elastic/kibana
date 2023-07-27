@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import supertest from 'supertest';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import supertest from 'supertest';
+import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import {
   createMockConfigSchema,
@@ -25,21 +27,13 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let usageCounter: IUsageCounter;
+  let core: ReportingCore;
   let httpSetup: SetupServerReturn['httpSetup'];
 
   const mockConfig = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
   });
-  const createReportingCore = async ({
-    security,
-  }: {
-    security?: ReturnType<typeof securityMock.createSetup>;
-  }) =>
-    createMockReportingCore(
-      mockConfig,
-      createMockPluginSetup({ security, router: httpSetup.createRouter('') }),
-      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
-    );
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -51,8 +45,14 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   });
 
   it('correctly handles authz when security is unavailable', async () => {
-    const core = await createReportingCore({});
-
+    core = await createMockReportingCore(
+      mockConfig,
+      createMockPluginSetup({
+        security: undefined,
+        router: httpSetup.createRouter(''),
+      }),
+      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
+    );
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
@@ -65,7 +65,11 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   it('correctly handles authz when security is disabled', async () => {
     const security = securityMock.createSetup();
     security.license.isEnabled.mockReturnValue(false);
-    const core = await createReportingCore({ security });
+    core = await createMockReportingCore(
+      mockConfig,
+      createMockPluginSetup({ security, router: httpSetup.createRouter('') }),
+      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
+    );
 
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
@@ -74,5 +78,39 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
       .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);
+  });
+
+  describe('usage counter', () => {
+    it('increments the download api counter', async () => {
+      const security = securityMock.createSetup();
+      security.license.isEnabled.mockReturnValue(false);
+      core = await createMockReportingCore(
+        mockConfig,
+        createMockPluginSetup({
+          security,
+          router: httpSetup.createRouter(''),
+        }),
+        await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
+      );
+
+      usageCounter = {
+        incrementCounter: jest.fn(),
+      };
+      core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
+
+      registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
+        .expect(200)
+        .then(/* Ignore result */);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `get ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`,
+        counterType: 'reportingApi',
+      });
+    });
   });
 });
