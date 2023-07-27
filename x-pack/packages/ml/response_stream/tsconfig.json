@@ -2,7 +2,6 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "stripInternal": false,
     "types": [
       "jest",
       "node",
@@ -13,10 +12,13 @@
     "**/*.ts",
     "**/*.tsx",
   ],
-  "kbn_references": [
-    "@kbn/ml-is-populated-object",
-  ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/ml-is-populated-object",
   ]
 }
