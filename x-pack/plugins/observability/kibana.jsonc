@@ -6,7 +6,10 @@
     "id": "observability",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observability"],
+    "configPath": [
+      "xpack",
+      "observability"
+    ],
     "requiredPlugins": [
       "alerting",
       "cases",
@@ -14,6 +17,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "discoverLogExplorer",
       "embeddable",
       "exploratoryView",
       "features",
@@ -29,8 +33,25 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "stackAlerts", "spaces"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "discover",
+      "home",
+      "licensing",
+      "usageCollection",
+      "cloud",
+      "spaces"
+    ],
+    "requiredBundles": [
+      "data",
+      "kibanaReact",
+      "kibanaUtils",
+      "unifiedSearch",
+      "cloudChat",
+      "stackAlerts",
+      "spaces"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }
