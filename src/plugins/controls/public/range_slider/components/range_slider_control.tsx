@@ -9,12 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
 
-import {
-  EuiDualRange,
-  EuiFieldNumber,
-  EuiFormControlLayoutDelimited,
-  EuiRangeTick,
-} from '@elastic/eui';
+import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
 
 import { pluginServices } from '../../services';
 import { RangeValue } from '../../../common/range_slider/types';
@@ -88,10 +83,17 @@ export const RangeSliderControl: FC = () => {
     ];
   }, [min, max, fieldFormatter]);
 
+  const canOpenPopover = useMemo(
+    () =>
+      isLoading || min === undefined || max === undefined || min === -Infinity || max === Infinity,
+    [isLoading, min, max]
+  );
+
   const getCommonInputProps = useCallback(
     ({ inputValue, inputPlaceholder }: { inputValue: string; inputPlaceholder: string }) => {
       return {
         isInvalid,
+        readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
         value: inputValue,
         placeholder: inputPlaceholder,
         className: 'rangeSliderAnchor__fieldNumber',
@@ -102,47 +104,18 @@ export const RangeSliderControl: FC = () => {
 
   return error ? (
     <ControlError error={error} />
-  ) : min === undefined || max === undefined || min === -Infinity || max === Infinity ? (
-    <EuiFormControlLayoutDelimited
-      fullWidth
-      isLoading={isLoading}
-      startControl={
-        <EuiFieldNumber
-          controlOnly
-          {...getCommonInputProps({
-            inputValue: displayedValue[0],
-            inputPlaceholder: String(min ?? -Infinity),
-          })}
-          onChange={(newValue) => {
-            setDisplayedValue([newValue.target.value, displayedValue[1]]);
-          }}
-        />
-      }
-      endControl={
-        <EuiFieldNumber
-          controlOnly
-          {...getCommonInputProps({
-            inputValue: displayedValue[1],
-            inputPlaceholder: String(max ?? Infinity),
-          })}
-          onChange={(newValue) => {
-            setDisplayedValue([displayedValue[0], newValue.target.value]);
-          }}
-        />
-      }
-    />
   ) : (
     <EuiDualRange
       id={id}
-      min={min}
-      max={max}
+      min={min ?? -Infinity}
+      max={max ?? Infinity}
       fullWidth
       showTicks
       ticks={ticks}
-      readOnly={isLoading}
       isLoading={isLoading}
+      readOnly={canOpenPopover}
       showInput={'inputWithPopover'}
-      value={[displayedValue[0] || min, displayedValue[1] || max]}
+      value={[displayedValue[0] || (min ?? -Infinity), displayedValue[1] || (max ?? Infinity)]}
       minInputProps={getCommonInputProps({
         inputPlaceholder: String(min),
         inputValue: String(min) === displayedValue[0] ? '' : displayedValue[0],
