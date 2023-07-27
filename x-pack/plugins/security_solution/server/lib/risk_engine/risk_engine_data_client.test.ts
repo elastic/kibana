@@ -140,21 +140,18 @@ describe('RiskEngineDataClient', () => {
                       "id_value": Object {
                         "type": "keyword",
                       },
-                      "notes": Object {
-                        "type": "keyword",
-                      },
                       "inputs": Object {
                         "properties": Object {
-                          "id": Object {
-                            "type": "keyword",
-                          },
-                          "index": Object {
-                            "type": "keyword",
-                          },
                           "category": Object {
                             "type": "keyword",
                           },
                           "description": Object {
+                            "type": "keyword",
+                          },
+                          "id": Object {
+                            "type": "keyword",
+                          },
+                          "index": Object {
                             "type": "keyword",
                           },
                           "risk_score": Object {
@@ -165,6 +162,9 @@ describe('RiskEngineDataClient', () => {
                           },
                         },
                         "type": "object",
+                      },
+                      "notes": Object {
+                        "type": "keyword",
                       },
                     },
                     "type": "object",
@@ -196,21 +196,18 @@ describe('RiskEngineDataClient', () => {
                       "id_value": Object {
                         "type": "keyword",
                       },
-                      "notes": Object {
-                        "type": "keyword",
-                      },
                       "inputs": Object {
                         "properties": Object {
-                          "id": Object {
-                            "type": "keyword",
-                          },
-                          "index": Object {
-                            "type": "keyword",
-                          },
                           "category": Object {
                             "type": "keyword",
                           },
                           "description": Object {
+                            "type": "keyword",
+                          },
+                          "id": Object {
+                            "type": "keyword",
+                          },
+                          "index": Object {
                             "type": "keyword",
                           },
                           "risk_score": Object {
@@ -221,6 +218,9 @@ describe('RiskEngineDataClient', () => {
                           },
                         },
                         "type": "object",
+                      },
+                      "notes": Object {
+                        "type": "keyword",
                       },
                     },
                     "type": "object",
