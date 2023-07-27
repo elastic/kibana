@@ -39,26 +39,26 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
       }
     );
     return (
-        <EuiPageTemplate.EmptyPrompt
-          iconType="plusInCircle"
-          data-test-subj="policy-artifacts-empty-unexisting"
-          title={<h2>{labels.emptyUnexistingTitle}</h2>}
-          body={labels.emptyUnexistingMessage}
-          actions={
-            canWriteArtifact ? (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
-              <EuiButton
-                color="primary"
-                fill
-                onClick={onClickHandler}
-                href={toRouteUrl}
-                data-test-subj="unexisting-manage-artifacts-button"
-              >
-                {labels.emptyUnexistingPrimaryActionButtonTitle}
-              </EuiButton>
-            ) : null
-          }
-        />
+      <EuiPageTemplate.EmptyPrompt
+        iconType="plusInCircle"
+        data-test-subj="policy-artifacts-empty-unexisting"
+        title={<h2>{labels.emptyUnexistingTitle}</h2>}
+        body={labels.emptyUnexistingMessage}
+        actions={
+          canWriteArtifact ? (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              color="primary"
+              fill
+              onClick={onClickHandler}
+              href={toRouteUrl}
+              data-test-subj="unexisting-manage-artifacts-button"
+            >
+              {labels.emptyUnexistingPrimaryActionButtonTitle}
+            </EuiButton>
+          ) : null
+        }
+      />
     );
   }
 );
