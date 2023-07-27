@@ -20,7 +20,7 @@ import {
 
 export default {
   component: Component,
-  title: 'app/Molecules/ChatTimeline',
+  title: 'app/Organisms/ChatTimeline',
   parameters: {
     backgrounds: {
       default: 'white',
@@ -62,10 +62,7 @@ const defaultProps = {
     }),
     buildMessage({
       '@timestamp': String(new Date(currentDate.getTime() + 2000)),
-      message: buildAssistantInnerMessage({
-        content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
-      A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
-      }),
+      message: buildAssistantInnerMessage(),
     }),
     buildMessage({
       '@timestamp': String(new Date(currentDate.getTime() + 3000)),
