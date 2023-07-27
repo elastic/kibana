@@ -7,7 +7,7 @@
  */
 
 import { debounce } from 'lodash';
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
 
 import {
   EuiDualRange,
@@ -88,35 +88,46 @@ export const RangeSliderControl: FC = () => {
     ];
   }, [min, max, fieldFormatter]);
 
+  const getCommonInputProps = useCallback(
+    ({ inputValue, inputPlaceholder }: { inputValue: string; inputPlaceholder: string }) => {
+      return {
+        isInvalid,
+        value: inputValue,
+        placeholder: inputPlaceholder,
+        className: 'rangeSliderAnchor__fieldNumber',
+      };
+    },
+    [isInvalid]
+  );
+
   return error ? (
     <ControlError error={error} />
   ) : min === undefined || max === undefined || min === -Infinity || max === Infinity ? (
     <EuiFormControlLayoutDelimited
       fullWidth
+      isLoading={isLoading}
       startControl={
         <EuiFieldNumber
           controlOnly
-          isInvalid={isInvalid}
+          {...getCommonInputProps({
+            inputValue: displayedValue[0],
+            inputPlaceholder: String(min ?? -Infinity),
+          })}
           onChange={(newValue) => {
             setDisplayedValue([newValue.target.value, displayedValue[1]]);
           }}
-          value={displayedValue[0]}
-          placeholder={String(min)}
-          className="rangeSliderAnchor__fieldNumber"
-          aria-label="Use aria labels when no actual label is in use"
         />
       }
       endControl={
         <EuiFieldNumber
           controlOnly
-          isInvalid={isInvalid}
+          {...getCommonInputProps({
+            inputValue: displayedValue[1],
+            inputPlaceholder: String(max ?? Infinity),
+          })}
           onChange={(newValue) => {
             setDisplayedValue([displayedValue[0], newValue.target.value]);
           }}
-          value={displayedValue[1]}
-          placeholder={String(max)}
-          className="rangeSliderAnchor__fieldNumber"
-          aria-label="Use aria labels when no actual label is in use"
         />
       }
     />
@@ -132,18 +143,14 @@ export const RangeSliderControl: FC = () => {
       isLoading={isLoading}
       showInput={'inputWithPopover'}
       value={[displayedValue[0] || min, displayedValue[1] || max]}
-      minInputProps={{
-        isInvalid,
-        placeholder: String(min),
-        className: 'rangeSliderAnchor__fieldNumber',
-        value: String(min) === displayedValue[0] ? '' : displayedValue[0],
-      }}
-      maxInputProps={{
-        isInvalid,
-        placeholder: String(max),
-        className: 'rangeSliderAnchor__fieldNumber',
-        value: String(max) === displayedValue[1] ? '' : displayedValue[1],
-      }}
+      minInputProps={getCommonInputProps({
+        inputPlaceholder: String(min),
+        inputValue: String(min) === displayedValue[0] ? '' : displayedValue[0],
+      })}
+      maxInputProps={getCommonInputProps({
+        inputPlaceholder: String(max),
+        inputValue: String(max) === displayedValue[1] ? '' : displayedValue[1],
+      })}
       onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
         setDisplayedValue([String(minSelection), String(maxSelection)]);
       }}
