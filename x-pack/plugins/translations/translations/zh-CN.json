@@ -13609,7 +13609,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.helpText": "选择现有字段或键入字段名称。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.placeholder": "选择架构字段",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel": "源字段",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.defaultValue": "这是自动创建的内容",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText": "此名称基于您的源字段自动创建。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label": "目标字段（可选）",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetFieldLabel": "目标字段",
