@@ -40,6 +40,7 @@ import {
 
 const convert = (metrics: DetectionMetrics) => {
   return {
+    custom_total: metrics.detection_rules.detection_rule_usage.custom_total,
     all_rules: metrics.detection_rules.detection_rule_status.all_rules,
     custom_rules: metrics.detection_rules.detection_rule_status.custom_rules,
   };
@@ -460,7 +461,7 @@ export default ({ getService }: FtrProviderContext) => {
       /**
        * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
        */
-      it('TEST should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const statsBefore = await getStats(supertest, log);
 
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
