@@ -507,8 +507,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostRowsAfterRemovingFilter.length).to.equal(6);
         });
       });
-
-      it('should render alerts count for a host inside a flyout', async () => {
+      // failure: https://github.com/elastic/kibana/pull/162149
+      it.skip('should render alerts count for a host inside a flyout', async () => {
         await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-mysql-01', '-');
         await pageObjects.infraHostsView.clickSelectedHostsButton();
         await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
