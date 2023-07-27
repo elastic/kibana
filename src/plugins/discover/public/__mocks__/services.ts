@@ -22,7 +22,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
   SEARCH_ON_PAGE_LOAD_SETTING,
-} from '../../common';
+} from '@kbn/discover-utils';
 import {
   UI_SETTINGS,
   calculateBounds,

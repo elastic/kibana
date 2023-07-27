@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import { StatusFilter } from './status_filter';
 
 const stats = {

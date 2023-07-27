@@ -84,6 +84,7 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/event-annotation-components",
     "@kbn/text-based-languages",
+    "@kbn/content-management-utils",
   ],
   "exclude": [
     "target/**/*",
