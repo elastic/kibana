@@ -9,20 +9,20 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { createToasterPlainError } from '../containers/utils';
-import { throwErrors } from '../../common';
 import type {
   CasesFindResponse,
   CasesStatusResponse,
-  CasesMetricsResponse,
   CasesBulkGetResponse,
-} from '../../common/api';
+} from '../../common/types/api';
 import {
-  CasesBulkGetResponseRt,
   CasesFindResponseRt,
   CasesStatusResponseRt,
-  CasesMetricsResponseRt,
-} from '../../common/api';
+  CasesBulkGetResponseRt,
+} from '../../common/types/api';
+import { createToasterPlainError } from '../containers/utils';
+import { throwErrors } from '../../common';
+import type { CasesMetricsResponse } from '../../common/api';
+import { CasesMetricsResponseRt } from '../../common/api';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
