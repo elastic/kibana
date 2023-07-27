@@ -165,10 +165,15 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.createErrors).not.toHaveLength(0);
         MLInferenceLogic.actions.makeCreatePipelineRequest({
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           indexName: 'test',
-          modelId: 'test-model',
+          pipelineDefinition: {},
           pipelineName: 'unit-test',
-          sourceField: 'body',
         });
         expect(MLInferenceLogic.values.createErrors).toHaveLength(0);
       });
@@ -334,6 +339,7 @@ describe('MlInferenceLogic', () => {
           modelID: '',
           pipelineName: 'unit-test',
           sourceField: '',
+          fieldMappings: [],
         });
 
         expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
@@ -345,6 +351,7 @@ describe('MlInferenceLogic', () => {
           modelID: nerModel.model_id,
           pipelineName: 'unit-test',
           sourceField: 'body',
+          fieldMappings: [],
         });
 
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
@@ -356,6 +363,7 @@ describe('MlInferenceLogic', () => {
           modelID: '',
           pipelineName: '',
           sourceField: '',
+          fieldMappings: [],
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
       });
@@ -374,6 +382,7 @@ describe('MlInferenceLogic', () => {
           modelID: '',
           pipelineName: 'unit-test',
           sourceField: '',
+          fieldMappings: [],
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
         expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
@@ -532,89 +541,76 @@ describe('MlInferenceLogic', () => {
       const mockModelConfiguration = {
         ...DEFAULT_VALUES.addInferencePipelineModal,
         configuration: {
-          destinationField: '',
+          destinationField: 'mock_destination_field',
           modelID: 'mock-model-id',
           pipelineName: 'mock-pipeline-name',
           sourceField: 'mock_text_field',
         },
         indexName: 'my-index-123',
       };
-      it('calls makeCreatePipelineRequest when no destinationField is passed', () => {
-        mount({
-          ...DEFAULT_VALUES,
-          addInferencePipelineModal: {
-            ...mockModelConfiguration,
-          },
-        });
-        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
-        MLInferenceLogic.actions.createPipeline();
-
-        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
-          destinationField: undefined,
-          indexName: mockModelConfiguration.indexName,
-          modelId: mockModelConfiguration.configuration.modelID,
-          pipelineName: mockModelConfiguration.configuration.pipelineName,
-          sourceField: mockModelConfiguration.configuration.sourceField,
-        });
-      });
-
-      it('calls makeCreatePipelineRequest with passed destinationField', () => {
+      it('calls makeCreatePipelineRequest with passed pipelineDefinition and fieldMappings', () => {
         mount({
           ...DEFAULT_VALUES,
           addInferencePipelineModal: {
             ...mockModelConfiguration,
             configuration: {
               ...mockModelConfiguration.configuration,
-              destinationField: 'mockDestinationField',
+              modelID: textExpansionModel.model_id,
             },
-          },
-        });
-        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
-        MLInferenceLogic.actions.createPipeline();
-
-        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
-          destinationField: 'mockDestinationField',
-          indexName: mockModelConfiguration.indexName,
-          modelId: mockModelConfiguration.configuration.modelID,
-          pipelineName: mockModelConfiguration.configuration.pipelineName,
-          sourceField: mockModelConfiguration.configuration.sourceField,
-        });
-      });
-
-      it('calls makeCreatePipelineRequest with passed pipelineDefinition when text_expansion model is selected', () => {
-        mount({
-          ...DEFAULT_VALUES,
-          addInferencePipelineModal: {
-            ...mockModelConfiguration,
           },
         });
         jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
 
         MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
-        MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          destinationField: mockModelConfiguration.configuration.destinationField,
-          fieldMappings: [
-            {
-              sourceField: 'source',
-              targetField: 'ml.inference.dest',
-            },
-          ],
-          modelID: textExpansionModel.model_id,
-          pipelineName: mockModelConfiguration.configuration.pipelineName,
-          sourceField: mockModelConfiguration.configuration.sourceField,
-        });
+        MLInferenceLogic.actions.selectFields(['my_source_field1', 'my_source_field2']);
+        MLInferenceLogic.actions.addSelectedFieldsToMapping();
         MLInferenceLogic.actions.createPipeline();
 
         expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
           indexName: mockModelConfiguration.indexName,
-          pipelineName: mockModelConfiguration.configuration.pipelineName,
-          pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
+          inferenceConfig: undefined,
           fieldMappings: [
             {
-              sourceField: 'source',
-              targetField: 'ml.inference.dest',
+              sourceField: 'my_source_field1',
+              targetField: 'ml.inference.my_source_field1_expanded',
+            },
+            {
+              sourceField: 'my_source_field2',
+              targetField: 'ml.inference.my_source_field2_expanded',
             },
           ],
+          pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+        });
+      });
+
+      it('calls makeCreatePipelineRequest with passed pipelineDefinition and default fieldMappings', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+            configuration: {
+              ...mockModelConfiguration.configuration,
+              modelID: nerModel.model_id,
+            },
+          },
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
+
+        MLModelsApiLogic.actions.apiSuccess([nerModel]);
+        MLInferenceLogic.actions.createPipeline();
+
+        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
+          indexName: mockModelConfiguration.indexName,
+          inferenceConfig: undefined,
+          fieldMappings: [
+            {
+              sourceField: mockModelConfiguration.configuration.sourceField,
+              targetField: `ml.inference.${mockModelConfiguration.configuration.destinationField}`,
+            },
+          ],
+          pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
         });
       });
     });

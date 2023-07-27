@@ -8,7 +8,7 @@
 
 import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('getDataViewByTextBasedQueryLang', () => {

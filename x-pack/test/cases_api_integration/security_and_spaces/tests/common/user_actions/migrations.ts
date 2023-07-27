@@ -7,11 +7,9 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import {
-  ActionTypes,
-  CaseUserActionsDeprecatedResponse,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import { CaseUserActionsDeprecatedResponse } from '@kbn/cases-plugin/common/types/api';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
 
@@ -917,7 +915,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         const userAction = getUserActionById(userActions, 'a5509250-cf9d-11eb-a603-13e7747d215c')!;
 
-        expect(userAction.payload.comment.type).to.be(CommentType.alert);
+        expect(userAction.payload.comment.type).to.be(AttachmentType.alert);
         expect(userAction.payload.comment.alertId).to.be(
           '4eb4cd05b85bc65c7b9f22b776e0136f970f7538eb0d1b2e6e8c7d35b2e875cb'
         );
@@ -1372,7 +1370,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           const userActionsWithoutCreateAction = userActions.filter(
-            (userAction) => userAction.type !== ActionTypes.create_case
+            (userAction) => userAction.type !== UserActionTypes.create_case
           );
 
           for (const userAction of userActionsWithoutCreateAction) {
@@ -1451,7 +1449,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           const userActionsWithoutCreateAction = userActions.filter(
-            (userAction) => userAction.type !== ActionTypes.create_case
+            (userAction) => userAction.type !== UserActionTypes.create_case
           );
 
           for (const userAction of userActionsWithoutCreateAction) {

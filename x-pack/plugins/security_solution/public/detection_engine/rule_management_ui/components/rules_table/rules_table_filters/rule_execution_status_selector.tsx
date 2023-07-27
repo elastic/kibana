@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
+import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring/model/execution_status';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
 import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
 

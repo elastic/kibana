@@ -239,7 +239,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp"
-            defaultMessage="Increase to improve throughput of all requests."
+            defaultMessage="Increase to improve document ingest throughput."
           />
         }
       >
@@ -282,7 +282,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           description={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-              defaultMessage="Increase to improve latency for each request."
+              defaultMessage="Increase to improve inference latency."
             />
           }
         >

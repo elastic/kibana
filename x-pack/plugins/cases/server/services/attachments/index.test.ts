@@ -22,7 +22,7 @@ import {
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createErrorSO, createUserAttachment } from './test_utils';
-import { CommentType } from '../../../common';
+import { AttachmentType } from '../../../common/types/domain';
 import { createSOFindResponse } from '../test_utils';
 
 describe('AttachmentService', () => {
@@ -278,7 +278,7 @@ describe('AttachmentService', () => {
 
         await expect(
           service.update({
-            updatedAttributes: { comment: 'yes', type: CommentType.user, owner: 'hi' },
+            updatedAttributes: { comment: 'yes', type: AttachmentType.user, owner: 'hi' },
             attachmentId: '1',
           })
         ).resolves.not.toThrow();
@@ -288,7 +288,7 @@ describe('AttachmentService', () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment({ foo: 'bar' }));
 
         const res = await service.update({
-          updatedAttributes: { comment: 'yes', type: CommentType.user, owner: 'hi' },
+          updatedAttributes: { comment: 'yes', type: AttachmentType.user, owner: 'hi' },
           attachmentId: '1',
         });
 
@@ -535,6 +535,113 @@ describe('AttachmentService', () => {
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );
       });
+    });
+  });
+
+  describe('countPersistableStateAndExternalReferenceAttachments', () => {
+    it('does not throw and calls unsecuredSavedObjectsClient.find with the right parameters', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await expect(
+        service.countPersistableStateAndExternalReferenceAttachments({ caseId: 'test-id' })
+      ).resolves.not.toThrow();
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases-comments.attributes.type",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "persistableState",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases-comments.attributes.type",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "externalReference",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "or",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": ".files",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "not",
+                "type": "function",
+              },
+            ],
+            "function": "and",
+            "type": "function",
+          },
+          "hasReference": Object {
+            "id": "test-id",
+            "type": "cases",
+          },
+          "page": 1,
+          "perPage": 1,
+          "sortField": "created_at",
+          "type": "cases-comments",
+        }
+      `);
+    });
+
+    it('returns the expected total', async () => {
+      const total = 3;
+
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse(
+          Array(total).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 })
+        )
+      );
+
+      const res = await service.countPersistableStateAndExternalReferenceAttachments({
+        caseId: 'test-id',
+      });
+
+      expect(res).toBe(total);
     });
   });
 });

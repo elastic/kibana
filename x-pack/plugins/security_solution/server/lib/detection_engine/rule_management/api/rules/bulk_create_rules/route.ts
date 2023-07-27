@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
@@ -13,7 +13,7 @@ import {
   BulkCreateRulesRequestBody,
   validateCreateRuleProps,
   BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
@@ -52,7 +52,7 @@ export const bulkCreateRulesRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
       logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
 
       const siemResponse = buildSiemResponse(response);

@@ -16,12 +16,17 @@ const integrationNameRT = rt.partial({
   name: rt.string,
 });
 
+const integrationTitleRT = rt.partial({
+  title: rt.string,
+});
+
 const integrationVersionRT = rt.partial({
   version: rt.string,
 });
 
 const singleDatasetSelectionPayloadRT = rt.intersection([
   integrationNameRT,
+  integrationTitleRT,
   integrationVersionRT,
   rt.type({
     dataset: datasetRT,

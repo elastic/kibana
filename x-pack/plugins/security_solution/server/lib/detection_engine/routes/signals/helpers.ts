@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertTags } from '../../../../../common/detection_engine/schemas/common';
+import type { AlertTags } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
 export const validateAlertTagsArrays = (tags: AlertTags, ids: string[]) => {

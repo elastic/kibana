@@ -11,7 +11,7 @@ import { ObservabilityOnboardingState } from '../../saved_objects/observability_
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { createShipperApiKey } from './api_key/create_shipper_api_key';
 import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
-import { getFallbackUrls } from './get_fallback_urls';
+import { getFallbackKibanaUrl } from './get_fallback_urls';
 import { getHasLogs } from './get_has_logs';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
@@ -52,7 +52,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const kibanaUrl =
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
-      getFallbackUrls(coreStart).kibanaUrl; // falls back to local network binding
+      getFallbackKibanaUrl(coreStart); // falls back to local network binding
     const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
     const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
 
@@ -97,7 +97,10 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
 
     const { id } = await saveObservabilityOnboardingState({
       savedObjectsClient,
-      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
+      observabilityOnboardingState: {
+        state: state as ObservabilityOnboardingState['state'],
+        progress: {},
+      },
     });
 
     return { apiKeyEncoded, onboardingId: id };
@@ -145,15 +148,18 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       id: t.string,
       name: t.string,
     }),
-    body: t.type({
-      status: t.string,
-    }),
+    body: t.intersection([
+      t.type({
+        status: t.string,
+      }),
+      t.partial({ message: t.string }),
+    ]),
   }),
-  async handler(resources): Promise<object> {
+  async handler(resources) {
     const {
       params: {
         path: { id, name },
-        body: { status },
+        body: { status, message },
       },
       core,
     } = resources;
@@ -186,11 +192,11 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         ...observabilityOnboardingState,
         progress: {
           ...observabilityOnboardingState.progress,
-          [name]: status,
+          [name]: { status, message },
         },
       },
     });
-    return { name, status };
+    return { name, status, message };
   },
 });
 
@@ -203,7 +209,9 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       onboardingId: t.string,
     }),
   }),
-  async handler(resources): Promise<{ progress: Record<string, string> }> {
+  async handler(resources): Promise<{
+    progress: Record<string, { status: string; message?: string }>;
+  }> {
     const {
       params: {
         path: { onboardingId },
@@ -233,7 +241,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     const {
       state: { datasetName: dataset, namespace },
     } = savedObservabilityOnboardingState;
-    if (progress['ea-status'] === 'complete') {
+    if (progress['ea-status']?.status === 'complete') {
       try {
         const hasLogs = await getHasLogs({
           dataset,
@@ -241,15 +249,15 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
           esClient,
         });
         if (hasLogs) {
-          progress['logs-ingest'] = 'complete';
+          progress['logs-ingest'] = { status: 'complete' };
         } else {
-          progress['logs-ingest'] = 'loading';
+          progress['logs-ingest'] = { status: 'loading' };
         }
       } catch (error) {
-        progress['logs-ingest'] = 'warning';
+        progress['logs-ingest'] = { status: 'warning', message: error.message };
       }
     } else {
-      progress['logs-ingest'] = 'incomplete';
+      progress['logs-ingest'] = { status: 'incomplete' };
     }
 
     return { progress };

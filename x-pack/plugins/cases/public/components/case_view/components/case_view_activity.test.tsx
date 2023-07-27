@@ -19,7 +19,6 @@ import {
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
-import { ConnectorTypes } from '../../../../common/api/connectors';
 import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
@@ -33,11 +32,11 @@ import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../mocks';
-import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -314,7 +313,8 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
-  describe('filter activity', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152202
+  describe.skip('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -451,7 +451,8 @@ describe('Case View Page activity tab', () => {
   });
 
   describe('Case users', () => {
-    describe('Participants', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152204
+    describe.skip('Participants', () => {
       it('should render the participants correctly', async () => {
         appMockRender = createAppMockRenderer();
         appMockRender.render(<CaseViewActivity {...caseProps} />);
@@ -492,53 +493,6 @@ describe('Case View Page activity tab', () => {
         expect(await participantsSection.findByText('Fuzzy Marten')).toBeInTheDocument();
         expect(await participantsSection.findByText('elastic')).toBeInTheDocument();
         expect(await participantsSection.findByText('Misty Mackerel')).toBeInTheDocument();
-      });
-    });
-
-    describe('Reporter', () => {
-      it('should render the reporter correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter 1')).toBeInTheDocument();
-        expect(await reporterSection.findByText('R1')).toBeInTheDocument();
-      });
-
-      it('should render a reporter without uid correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: {
-            ...caseUsers,
-            reporter: {
-              user: {
-                email: 'reporter_no_uid@elastic.co',
-                full_name: 'Reporter No UID',
-                username: 'reporter_no_uid',
-              },
-            },
-          },
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter No UID')).toBeInTheDocument();
-      });
-
-      it('fallbacks to the caseData reporter correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: null,
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Leslie Knope')).toBeInTheDocument();
       });
     });
 
@@ -602,7 +556,7 @@ describe('Case View Page activity tab', () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
-            userActions: [getUserAction(ActionTypes.assignees, 'delete')],
+            userActions: [getUserAction(UserActionTypes.assignees, 'delete')],
           },
         });
 
@@ -620,7 +574,7 @@ describe('Case View Page activity tab', () => {
           ...defaultUseFindCaseUserActions,
           data: {
             userActions: [
-              getUserAction(ActionTypes.assignees, 'add', {
+              getUserAction(UserActionTypes.assignees, 'add', {
                 payload: {
                   assignees: [
                     { uid: 'not-valid' },

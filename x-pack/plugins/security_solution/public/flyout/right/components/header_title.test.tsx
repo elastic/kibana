@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import {
   FLYOUT_HEADER_CHAT_BUTTON_TEST_ID,
@@ -21,7 +22,7 @@ import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
 import { useAssistant } from '../hooks/use_assistant';
-import { MockAssistantProvider } from '../../../common/mock/mock_assistant_provider';
+import { TestProvidersComponent } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -31,13 +32,17 @@ moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
+const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+
 const renderHeader = (contextValue: RightPanelContext) =>
   render(
-    <MockAssistantProvider>
-      <RightPanelContext.Provider value={contextValue}>
-        <HeaderTitle />
-      </RightPanelContext.Provider>
-    </MockAssistantProvider>
+    <TestProvidersComponent>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={contextValue}>
+          <HeaderTitle />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </TestProvidersComponent>
   );
 
 describe('<HeaderTitle />', () => {

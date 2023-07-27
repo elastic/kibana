@@ -16,7 +16,7 @@ import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plu
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import {
@@ -546,7 +546,7 @@ export function getTextBasedDatasource({
           const allColumns = currentLayer.allColumns.filter((c) => c.columnId !== target.columnId);
           allColumns.push(newColumn);
 
-          props.setState({
+          return {
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -556,11 +556,10 @@ export function getTextBasedDatasource({
                 allColumns,
               },
             },
-          });
+          };
         });
-        return true;
       }
-      return false;
+      return undefined;
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {

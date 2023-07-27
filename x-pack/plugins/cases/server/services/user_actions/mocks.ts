@@ -7,11 +7,11 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 import { alertComment, comment } from '../../mocks';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 export const casePayload: CasePostRequest = {
   title: 'Case SIR',

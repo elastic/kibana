@@ -99,7 +99,7 @@ const ContainerActions = styled.div.attrs(
   ${({ $caseIndexes }) =>
     $caseIndexes.map(
       (index) => `
-        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__padding--l {
+        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__children {
           padding: 0px;
           .euiFlexGroup {
             display: none;

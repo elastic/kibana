@@ -14,12 +14,12 @@ import { GetStateReturn } from './services/context_state';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 
 describe('ContextAppContent test', () => {

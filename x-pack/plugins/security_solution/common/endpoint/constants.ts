@@ -45,6 +45,8 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
+export const ENDPOINT_HEARTBEAT_INDEX = 'logs-endpoint.heartbeat-default';
+
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
 export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');

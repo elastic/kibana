@@ -13,15 +13,14 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { ExternalService, CaseAttributes, CaseConnector } from '../../common/types/domain';
+import { CaseStatuses, CaseSeverity, ConnectorTypes } from '../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
-import type {
-  CaseAttributes,
-  CaseConnector,
-  CaseExternalServiceBasic,
-  CaseFullExternalService,
-} from '../../common/api';
-import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  NONE_CONNECTOR_ID,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import { getNoneCaseConnector } from '../common/utils';
 import type { ConnectorPersistedFields } from '../common/types/connectors';
 import type { CasePersistedAttributes } from '../common/types/case';
@@ -87,9 +86,7 @@ export const createJiraConnector = ({
   };
 };
 
-export const createExternalService = (
-  overrides?: Partial<CaseExternalServiceBasic>
-): CaseExternalServiceBasic => ({
+export const createExternalService = (overrides?: Partial<ExternalService>): ExternalService => ({
   connector_id: '100',
   connector_name: '.jira',
   external_id: '100',
@@ -175,7 +172,7 @@ export const createCaseSavedObjectResponse = ({
   caseId,
 }: {
   connector?: ESCaseConnectorWithId;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   overrides?: Partial<CasePersistedAttributes>;
   caseId?: string;
 } = {}): SavedObject<CasePersistedAttributes> => {
@@ -227,7 +224,7 @@ export const createSavedObjectReferences = ({
   externalService,
 }: {
   connector?: ESCaseConnectorWithId;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
 } = {}): SavedObjectReference[] => [
   ...(connector && connector.id !== NONE_CONNECTOR_ID
     ? [

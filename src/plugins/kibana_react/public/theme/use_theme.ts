@@ -11,9 +11,9 @@ import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useKibana } from '../context/context';
 
-export const useKibanaTheme = (): CoreTheme => {
-  const defaultTheme: CoreTheme = { darkMode: false };
+const defaultTheme: CoreTheme = { darkMode: false };
 
+export const useKibanaTheme = (): CoreTheme => {
   const {
     services: { theme },
   } = useKibana();

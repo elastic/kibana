@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ActionConnector } from '../../../common/api';
+import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { schema } from './schema';
