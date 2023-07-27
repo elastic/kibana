@@ -15,6 +15,7 @@ import {
   EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
+  ensurePolicyListPageAuthzAccess,
 } from '../../../screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
@@ -22,7 +23,6 @@ import {
   visitFleetAgentList,
 } from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
-import { visitPolicyList } from '../../../screens/endpoint_management';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -96,6 +96,10 @@ describe(
         ensureEndpointListPageAuthzAccess('all', true);
       });
 
+      it('should have read access to Endpoint Policy Management', () => {
+        ensurePolicyListPageAuthzAccess('read', true);
+      });
+
       for (const { title, id } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
           ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
@@ -126,7 +130,7 @@ describe(
         ensureEndpointListPageAuthzAccess('read', true);
       });
 
-      it(`should have CRUD access to: Blocklist`, () => {
+      it(`should have ALL access to: Blocklist`, () => {
         cy.visit(pageById.blocklist.url);
         getArtifactListEmptyStateAddButton(pageById.blocklist.id as EndpointArtifactPageId).should(
           'exist'
@@ -168,8 +172,7 @@ describe(
       });
 
       it('should have access to policy management', () => {
-        visitPolicyList();
-        getNoPrivilegesPage().should('not.exist');
+        ensurePolicyListPageAuthzAccess('all', true);
       });
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {

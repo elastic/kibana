@@ -32,7 +32,7 @@ export const visitEndpointList = (): Cypress.Chainable => {
 export const ensureEndpointListPageAuthzAccess = (
   accessLevel: UserAuthzAccessLevel,
   visitPage: boolean = false
-) => {
+): Cypress.Chainable => {
   if (visitPage) {
     visitEndpointList();
   }
@@ -41,7 +41,7 @@ export const ensureEndpointListPageAuthzAccess = (
     return getNoPrivilegesPage().should('exist');
   }
 
-  // Read and All
+  // Read and All are currently the same
   return getNoPrivilegesPage().should('not.exist');
 };
 
