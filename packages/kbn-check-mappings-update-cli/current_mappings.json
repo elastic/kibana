@@ -551,7 +551,6 @@
       },
       "config": {
         "dynamic": false,
-        "type": "nested",
         "properties": {
           "apiProvider": {
             "type": "keyword"
