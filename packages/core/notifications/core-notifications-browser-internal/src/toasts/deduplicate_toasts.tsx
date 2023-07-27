@@ -60,16 +60,22 @@ export function deduplicateToasts(allToasts: Toast[]): DeduplicateResult {
 }
 
 /**
- * Extracts a key from a toast message
+ * Derives a key from a toast object
  * these keys decide what makes between different toasts, and which ones should be merged
- * Ideally we want different (header+text) combinations to appear as separate toast messages
- * @param toast
+ * These toasts will be merged:
+ *  - where title and text are strings, and the same
+ *  - where titles are the same, and texts are missing
+ *  - where titles are the same, and the text's mount function is the same string
+ *  - where titles are missing, but the texts are the same string
+ * @param toast The toast whose key we're deriving
  */
 function getKeyOf(toast: Toast): string {
   if (isString(toast.title) && isString(toast.text)) {
     return toast.title + ' ' + toast.text;
   } else if (isString(toast.title) && !toast.text) {
     return toast.title;
+  } else if (isString(toast.title) && typeof toast.text === 'function') {
+    return toast.title + ' ' + djb2Hash(toast.text.toString());
   } else if (isString(toast.text) && !toast.title) {
     return toast.text;
   } else {
@@ -80,6 +86,19 @@ function getKeyOf(toast: Toast): string {
 
 function isString(a: string | any): a is string {
   return typeof a === 'string';
+}
+
+// Based on: https://gist.github.com/eplawless/52813b1d8ad9af510d85
+function djb2Hash(str: string): number {
+  const len = str.length;
+  let hash = 5381;
+
+  for (let i = 0; i < len; i++) {
+    // eslint-disable-next-line no-bitwise
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  // eslint-disable-next-line no-bitwise
+  return hash >>> 0;
 }
 
 function groupByKey(allToasts: Toast[]) {
