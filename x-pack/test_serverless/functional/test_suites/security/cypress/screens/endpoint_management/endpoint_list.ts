@@ -7,6 +7,8 @@
 
 import { DeepReadonly } from 'utility-types';
 import { EndpointManagementPageMap, getEndpointManagementPageMap } from './page_reference';
+import { UserAuthzAccessLevel } from './types';
+import { getNoPrivilegesPage } from './common';
 
 interface ListRowOptions {
   endpointId?: string;
@@ -19,6 +21,28 @@ const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementP
 
 export const visitEndpointList = (): Cypress.Chainable => {
   return cy.visit(pageById.endpointList.url);
+};
+
+/**
+ * Validate that the endpoint list has the proper level of authz
+ *
+ * @param accessLevel
+ * @param visitPage if `true`, then the endpoint list page will be visited first
+ */
+export const ensureEndpointListPageAuthzAccess = (
+  accessLevel: UserAuthzAccessLevel,
+  visitPage: boolean = false
+) => {
+  if (visitPage) {
+    visitEndpointList();
+  }
+
+  if (accessLevel === 'none') {
+    return getNoPrivilegesPage().should('exist');
+  }
+
+  // Read and All
+  return getNoPrivilegesPage().should('not.exist');
 };
 
 export const getTableRow = ({

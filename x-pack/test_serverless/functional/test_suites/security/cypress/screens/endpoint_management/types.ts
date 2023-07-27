@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './artifacts';
-export * from './endpoint_list';
-export * from './policy_list';
-export * from './page_reference';
-export { UserAuthzAccessLevel } from './types';
+export type UserAuthzAccessLevel = 'all' | 'read' | 'none';

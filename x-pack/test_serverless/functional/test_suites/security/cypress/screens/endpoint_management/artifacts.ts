@@ -12,8 +12,7 @@ import {
   EndpointManagementPageMap,
   getEndpointManagementPageMap,
 } from './page_reference';
-
-type UserAuthzAccessLevel = 'all' | 'read' | 'none';
+import { UserAuthzAccessLevel } from './types';
 
 const artifactPageTopTestSubjPrefix: Readonly<Record<EndpointArtifactPageId, string>> = {
   trustedApps: 'trustedAppsListPage',

@@ -9,12 +9,12 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { login } from '../../../tasks/login';
 import {
   getNoPrivilegesPage,
-  visitEndpointList,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageMap,
   getEndpointManagementPageList,
   EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
+  ensureEndpointListPageAuthzAccess,
 } from '../../../screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
@@ -64,8 +64,7 @@ describe(
         });
 
         it('should have READ access to Endpoint list page', () => {
-          visitEndpointList();
-          getNoPrivilegesPage().should('not.exist');
+          ensureEndpointListPageAuthzAccess('read', true);
         });
 
         for (const { url, title } of deniedPages) {
@@ -94,8 +93,7 @@ describe(
       });
 
       it('should have access to Endpoint list page', () => {
-        visitEndpointList();
-        getNoPrivilegesPage().should('not.exist');
+        ensureEndpointListPageAuthzAccess('all', true);
       });
 
       for (const { title, id } of artifactPagesFullAccess) {
@@ -125,8 +123,7 @@ describe(
       });
 
       it('should have access to Endpoint list page', () => {
-        visitEndpointList();
-        getNoPrivilegesPage().should('not.exist');
+        ensureEndpointListPageAuthzAccess('read', true);
       });
 
       it(`should have CRUD access to: Blocklist`, () => {
@@ -167,8 +164,7 @@ describe(
       }
 
       it('should have access to Endpoint list page', () => {
-        visitEndpointList();
-        getNoPrivilegesPage().should('not.exist');
+        ensureEndpointListPageAuthzAccess('all', true);
       });
 
       it('should have access to policy management', () => {

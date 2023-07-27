@@ -12,6 +12,7 @@ import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import {
   EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
+  ensureEndpointListPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageList,
   getEndpointManagementPageMap,
@@ -72,8 +73,7 @@ describe(
         });
 
         it('should have READ access to Endpoint list page', () => {
-          visitEndpointList();
-          getNoPrivilegesPage().should('not.exist');
+          ensureEndpointListPageAuthzAccess('read', true);
         });
 
         for (const { id, url, title } of deniedPages) {
@@ -129,8 +129,7 @@ describe(
       });
 
       it('should have access to Endpoint list page', () => {
-        visitEndpointList();
-        getNoPrivilegesPage().should('not.exist');
+        ensureEndpointListPageAuthzAccess('all', true);
       });
 
       for (const { title, id } of artifactPagesFullAccess) {
@@ -173,8 +172,7 @@ describe(
       });
 
       it('should have access to Endpoint list page', () => {
-        visitEndpointList();
-        getNoPrivilegesPage().should('not.exist');
+        ensureEndpointListPageAuthzAccess('read', true);
       });
 
       it(`should have CRUD access to: Blocklist`, () => {
@@ -225,8 +223,7 @@ describe(
       }
 
       it('should have access to Endpoint list page', () => {
-        visitEndpointList();
-        getNoPrivilegesPage().should('not.exist');
+        ensureEndpointListPageAuthzAccess('all', true);
       });
 
       it('should have access to policy management', () => {
