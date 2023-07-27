@@ -54,5 +54,15 @@ describe('validators', () => {
         `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
     });
+
+    it('the caseId does not exist in the response', async () => {
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        foobar: MAX_USER_ACTIONS_PER_CASE - 1,
+      });
+
+      await expect(
+        validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 })
+      ).resolves.not.toThrow();
+    });
   });
 });

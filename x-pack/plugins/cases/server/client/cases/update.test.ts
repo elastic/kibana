@@ -739,13 +739,13 @@ describe('update', () => {
       );
     });
 
-    describe('MAX_USER_ACTIONS_PER_CASE', () => {
+    describe('Validate max user actions per page', () => {
       const casesClient = createCasesClientMockArgs();
 
       beforeEach(() => {
         jest.clearAllMocks();
         casesClient.services.caseService.getCases.mockResolvedValue({
-          saved_objects: [{ ...mockCases[0] }],
+          saved_objects: [{ ...mockCases[0] }, { ...mockCases[1] }],
         });
         casesClient.services.caseService.getAllCaseComments.mockResolvedValue({
           saved_objects: [],
@@ -803,6 +803,42 @@ describe('update', () => {
                   id: mockCases[0].id,
                   version: mockCases[0].version ?? '',
                   title: 'This is a test case!!',
+                },
+              ],
+            },
+            casesClient
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+
+      it('throws an error when trying to update multiple cases and one of them is expected to fail', async () => {
+        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
+          [mockCases[1].id]: 0,
+        });
+
+        // @ts-ignore: only the array length matters here
+        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [1, 2, 3],
+          [mockCases[1].id]: [1],
+        });
+
+        await expect(
+          update(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  title: 'This is supposed to fail',
+                },
+
+                {
+                  id: mockCases[1].id,
+                  version: mockCases[1].version ?? '',
+                  title: 'This is supposed to pass',
                 },
               ],
             },
