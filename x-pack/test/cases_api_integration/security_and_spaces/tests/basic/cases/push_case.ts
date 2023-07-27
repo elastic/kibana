@@ -21,6 +21,7 @@ import {
   createConnector,
   getServiceNowConnector,
 } from '../../../../common/lib/api';
+import { noConnector } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -70,6 +71,41 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         connectorId: 'not-exist',
         expectedHttpCode: 404,
+      });
+    });
+
+    it('should get 401 when trying to push to a case without API tag', async () => {
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: 'not-exist',
+          name: 'Not exist',
+          type: ConnectorTypes.serviceNowITSM,
+        })
+      );
+
+      const postedCase = await createCase(supertest, {
+        ...postCaseReq,
+        connector: {
+          id: 'not-exist',
+          name: 'Not exist',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: {
+            urgency: '2',
+            impact: '2',
+            severity: '2',
+            category: 'software',
+            subcategory: 'os',
+          },
+        },
+      });
+
+      await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: 'not-exist',
+        expectedHttpCode: 401,
+        auth: { user: noConnector, space: null },
       });
     });
   });

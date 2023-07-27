@@ -39,7 +39,12 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: [
+            'casesSuggestUserProfiles',
+            'bulkGetUserProfiles',
+            'writeCasesConnector',
+            'readCasesConnector',
+          ],
           app: ['kibana'],
           cases: {
             create: ['securitySolutionFixture'],
@@ -54,7 +59,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'readCasesConnector'],
           app: ['kibana'],
           cases: {
             read: ['securitySolutionFixture'],
@@ -116,6 +121,41 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           app: ['kibana'],
           cases: {
             read: ['testDisabledFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
+
+    features.registerKibanaFeature({
+      id: 'testNoCasesConnectorFixture',
+      name: 'TestNoCasesConnectorFixture',
+      app: ['kibana'],
+      category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      cases: ['testNoCasesConnectorFixture'],
+      privileges: {
+        all: {
+          api: [],
+          app: ['kibana'],
+          cases: {
+            create: ['testNoCasesConnectorFixture'],
+            read: ['testNoCasesConnectorFixture'],
+            update: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
+          },
+          ui: [],
+        },
+        read: {
+          app: ['kibana'],
+          cases: {
+            read: [],
           },
           savedObject: {
             all: [],

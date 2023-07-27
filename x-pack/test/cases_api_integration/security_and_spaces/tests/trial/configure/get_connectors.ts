@@ -20,6 +20,7 @@ import {
   getCaseConnectors,
   getCasesWebhookConnector,
 } from '../../../../common/lib/api';
+import { noConnector } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -183,6 +184,20 @@ export default ({ getService }: FtrProviderContext): void => {
           referencedByCount: 0,
         },
       ]);
+    });
+
+    it('should return unauthorized error when API tag not present', async () => {
+      const sir = await createConnector({ supertest, req: getServiceNowSIRConnector() });
+
+      actionsRemover.add('default', sir.id, 'action', 'actions');
+
+      const connectors = await getCaseConnectors({
+        supertest,
+        auth: { user: noConnector, space: null },
+        expectedHttpCode: 401,
+      });
+
+      expect(connectors).to.eql([]);
     });
   });
 };

@@ -21,6 +21,7 @@ import {
   securitySolutionOnlyReadAlerts,
   securitySolutionOnlyReadNoIndexAlerts,
   securitySolutionOnlyReadDelete,
+  noCasesConnector as noCasesConnectorRole,
 } from './roles';
 import { User } from './types';
 
@@ -126,6 +127,12 @@ export const noCasesPrivilegesSpace1: User = {
   roles: [noCasesPrivilegesSpace1Role.name],
 };
 
+export const noConnector: User = {
+  username: 'no_connector',
+  password: 'no_connector',
+  roles: [noCasesConnectorRole.name],
+};
+
 /**
  * These users will have access to all spaces.
  */
@@ -154,4 +161,5 @@ export const users = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
   testDisabled,
+  noConnector,
 ];

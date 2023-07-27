@@ -44,6 +44,30 @@ export const noCasesPrivilegesSpace1: Role = {
   },
 };
 
+export const noCasesConnector: Role = {
+  name: 'no_kibana_privileges',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          testNoCasesConnectorFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const globalRead: Role = {
   name: 'global_read',
   privileges: {
@@ -353,6 +377,7 @@ export const securitySolutionOnlyAllSpacesRole: Role = {
 export const roles = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
+  noCasesConnector,
   globalRead,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,
