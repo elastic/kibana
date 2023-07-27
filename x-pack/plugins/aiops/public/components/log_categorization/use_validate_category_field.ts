@@ -38,8 +38,8 @@ export function useValidateFieldRequest() {
             timeField,
             start,
             end,
-            // only text fields are supported in patten analysis,
-            // and it is not possible to create a text run time field
+            // only text fields are supported in pattern analysis,
+            // and it is not possible to create a text runtime field
             // so runtimeMappings are not needed
             runtimeMappings: undefined,
             indicesOptions: undefined,
