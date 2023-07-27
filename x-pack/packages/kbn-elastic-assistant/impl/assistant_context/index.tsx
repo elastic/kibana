@@ -46,7 +46,7 @@ type ShowAssistantOverlay = ({
   promptContextId,
   conversationId,
 }: ShowAssistantOverlayProps) => void;
-interface AssistantProviderProps {
+export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
