@@ -1347,3 +1347,5 @@ export interface AdditionalOnSwitchChangeParams {
 export type MetadataListResponse = BaseListResponse<HostInfo>;
 
 export type { EndpointPrivileges } from './authz';
+
+export type { EndpointHeartbeat } from './heartbeat';
