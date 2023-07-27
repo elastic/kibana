@@ -45,10 +45,10 @@ export const RISK_SCORE_TITLE = i18n.translate(
   }
 );
 
-export const VIEW_RULE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.viewRuleText',
+export const RULE_SUMMARY_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.ruleSummaryText',
   {
-    defaultMessage: 'View rule',
+    defaultMessage: 'Rule summary',
   }
 );
 
@@ -66,6 +66,11 @@ export const RULE_DESCRIPTION_TITLE = i18n.translate(
   {
     defaultMessage: 'Rule description',
   }
+);
+
+export const PREVIEW_RULE_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.previewRuleDetailsText',
+  { defaultMessage: 'Preview rule details' }
 );
 
 export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(
