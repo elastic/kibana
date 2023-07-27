@@ -14,6 +14,7 @@ import type {
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -98,11 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           };
-          // expect(stats).to.eql(expected);
-          expect(stats).to.eql(
-            expected,
-            `\n\n\nexpected: ${JSON.stringify(expected)}, \n\n\nactual: ${JSON.stringify(stats)}`
-          );
+          expect(stats).to.eql(expected);
         });
       });
 
@@ -288,10 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           };
-          expect(stats).to.eql(
-            expected,
-            `\n\n\nexpected: ${JSON.stringify(expected)}, \n\n\nactual: ${JSON.stringify(stats)}`
-          );
+          expect(stats).to.eql(expected);
         });
       });
     });
@@ -456,7 +450,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          expect(stats.detection_rules.detection_rule_usage).to.eql({
+          const expected: RulesTypeUsage = {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             eql: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
@@ -468,7 +462,11 @@ export default ({ getService }: FtrProviderContext) => {
               disabled: 1,
               legacy_notifications_disabled: 1,
             },
-          });
+          };
+          expect(stats.detection_rules.detection_rule_usage).to.eql(
+            expected,
+            `\n\n\nexpected: ${JSON.stringify(expected)}, \n\n\nactual: ${JSON.stringify(stats)}`
+          );
         });
       });
 
