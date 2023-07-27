@@ -42,6 +42,7 @@ export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pag
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
+export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
