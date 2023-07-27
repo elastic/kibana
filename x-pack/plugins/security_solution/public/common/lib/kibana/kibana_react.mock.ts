@@ -195,6 +195,7 @@ export const createStartServicesMock = (
     ml: {
       locator,
     },
+    telemetry: {},
     theme: {
       theme$: themeServiceMock.createTheme$(),
     },
