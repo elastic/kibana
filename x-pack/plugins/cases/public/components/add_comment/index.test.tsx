@@ -12,7 +12,7 @@ import { noop } from 'lodash/fp';
 
 import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
 
-import { CommentType } from '../../../common/api';
+import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { AddCommentProps, AddCommentRefObject } from '.';
@@ -46,7 +46,7 @@ const defaultResponse = {
 
 const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
-  type: CommentType.user as const,
+  type: AttachmentType.user as const,
 };
 const appId = 'testAppId';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
