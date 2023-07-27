@@ -79,6 +79,9 @@
           "id": "kibBuildingBlocks"
         },
         {
+          "id": "kibDevDocsSecurityIntro"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
@@ -179,7 +182,10 @@
           "id": "kibDevTutorialScreenshotting"
         },
         {
-          "id": "kibDevTutorialsContentManagementOnboarding"
+          "id": "kibDevTutorialsContentManagementOnboarding",
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
         }
       ]
     },
