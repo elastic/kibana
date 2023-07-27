@@ -46,7 +46,7 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
 
-import { policyHasEndpointSecurity } from '../../../../../../../common/services';
+import { isAgentPolicy, policyHasEndpointSecurity } from '../../../../../../../common/services';
 
 import {
   useOutputOptions,
@@ -108,9 +108,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
-
-  const isAgentPolicy = (policy: Partial<NewAgentPolicy | AgentPolicy>): policy is AgentPolicy =>
-    (policy as AgentPolicy).is_protected !== undefined;
 
   return (
     <>

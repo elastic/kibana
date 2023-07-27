@@ -17,7 +17,6 @@ describe('generateNewAgentPolicyWithDefaults', () => {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
-      is_protected: false,
     });
   });
 
@@ -27,7 +26,6 @@ describe('generateNewAgentPolicyWithDefaults', () => {
       description: 'test description',
       namespace: 'test-namespace',
       monitoring_enabled: ['logs'],
-      is_protected: true,
     });
 
     expect(newAgentPolicy).toEqual({
