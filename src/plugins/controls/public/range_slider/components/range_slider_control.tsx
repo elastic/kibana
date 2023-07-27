@@ -7,27 +7,53 @@
  */
 
 import { debounce } from 'lodash';
-import React, { FC, useState, useRef, useMemo, useEffect } from 'react';
+import React, { FC, useState, useMemo, useEffect } from 'react';
 
-import { EuiInputPopover } from '@elastic/eui';
+import {
+  EuiDualRange,
+  EuiFieldNumber,
+  EuiFormControlLayoutDelimited,
+  EuiRangeTick,
+} from '@elastic/eui';
 
-import { useRangeSlider } from '../embeddable/range_slider_embeddable';
-import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
-
-import { ControlError } from '../../control_group/component/control_error_component';
+import { pluginServices } from '../../services';
 import { RangeValue } from '../../../common/range_slider/types';
-import { RangeSliderButton } from './range_slider_button';
+import { useRangeSlider } from '../embeddable/range_slider_embeddable';
+import { ControlError } from '../../control_group/component/control_error_component';
+
 import './range_slider.scss';
 
 export const RangeSliderControl: FC = () => {
-  const rangeRef = useRef<EuiDualRangeRef>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-
+  /** Controls Services Context */
+  const {
+    dataViews: { get: getDataViewById },
+  } = pluginServices.getServices();
   const rangeSlider = useRangeSlider();
 
-  const error = rangeSlider.select((state) => state.componentState.error);
+  // Embeddable explicit input
+  const id = rangeSlider.select((state) => state.explicitInput.id);
   const value = rangeSlider.select((state) => state.explicitInput.value);
+
+  // Embeddable cmponent state
+  const min = rangeSlider.select((state) => state.componentState.min);
+  const max = rangeSlider.select((state) => state.componentState.max);
+  const error = rangeSlider.select((state) => state.componentState.error);
+  const fieldSpec = rangeSlider.select((state) => state.componentState.field);
+  const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
+
+  // Embeddable output
+  const isLoading = rangeSlider.select((state) => state.output.loading);
+  const dataViewId = rangeSlider.select((state) => state.output.dataViewId);
+
+  // React component state
   const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
+  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+
+  useEffect(() => {
+    // Ensures that changes to the value (for example, from the `reset` button on the dashboard) are reflected
+    // in the displayed value
+    setDisplayedValue(value ?? ['', '']);
+  }, [value]);
 
   const debouncedOnChange = useMemo(
     () =>
@@ -41,41 +67,86 @@ export const RangeSliderControl: FC = () => {
     debouncedOnChange(displayedValue);
   }, [debouncedOnChange, displayedValue]);
 
+  // derive field formatter from fieldSpec and dataViewId
   useEffect(() => {
-    setDisplayedValue(value ?? ['', '']);
-  }, [value]);
+    (async () => {
+      if (!dataViewId || !fieldSpec) return;
+      // dataViews are cached, and should always be available without having to hit ES.
+      const dataView = await getDataViewById(dataViewId);
+      setFieldFormatter(
+        () =>
+          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
+          ((toFormat: string) => toFormat)
+      );
+    })();
+  }, [fieldSpec, dataViewId, getDataViewById]);
 
-  const button = (
-    <RangeSliderButton
-      value={displayedValue}
-      onChange={setDisplayedValue}
-      isPopoverOpen={isPopoverOpen}
-      setIsPopoverOpen={setIsPopoverOpen}
-    />
-  );
+  const ticks: EuiRangeTick[] = useMemo(() => {
+    return [
+      { value: min ?? -Infinity, label: fieldFormatter(String(min)) },
+      { value: max ?? Infinity, label: fieldFormatter(String(max)) },
+    ];
+  }, [min, max, fieldFormatter]);
 
   return error ? (
     <ControlError error={error} />
+  ) : min === undefined || max === undefined || min === -Infinity || max === Infinity ? (
+    <EuiFormControlLayoutDelimited
+      fullWidth
+      startControl={
+        <EuiFieldNumber
+          controlOnly
+          isInvalid={isInvalid}
+          onChange={(newValue) => {
+            setDisplayedValue([newValue.target.value, displayedValue[1]]);
+          }}
+          value={displayedValue[0]}
+          placeholder={String(min)}
+          className="rangeSliderAnchor__fieldNumber"
+          aria-label="Use aria labels when no actual label is in use"
+        />
+      }
+      endControl={
+        <EuiFieldNumber
+          controlOnly
+          isInvalid={isInvalid}
+          onChange={(newValue) => {
+            setDisplayedValue([displayedValue[0], newValue.target.value]);
+          }}
+          value={displayedValue[1]}
+          placeholder={String(max)}
+          className="rangeSliderAnchor__fieldNumber"
+          aria-label="Use aria labels when no actual label is in use"
+        />
+      }
+    />
   ) : (
-    <EuiInputPopover
-      input={button}
-      isOpen={isPopoverOpen}
-      display="block"
-      panelPaddingSize="s"
-      className="rangeSlider__popoverOverride"
-      anchorClassName="rangeSlider__anchorOverride"
-      panelClassName="rangeSlider__panelOverride"
-      closePopover={() => {
-        setIsPopoverOpen(false);
+    <EuiDualRange
+      id={id}
+      min={min}
+      max={max}
+      fullWidth
+      showTicks
+      ticks={ticks}
+      readOnly={isLoading}
+      isLoading={isLoading}
+      showInput={'inputWithPopover'}
+      value={[displayedValue[0] || min, displayedValue[1] || max]}
+      minInputProps={{
+        isInvalid,
+        placeholder: String(min),
+        className: 'rangeSliderAnchor__fieldNumber',
+        value: String(min) === displayedValue[0] ? '' : displayedValue[0],
       }}
-      anchorPosition="downCenter"
-      attachToAnchor={false}
-      disableFocusTrap
-      onPanelResize={(width) => {
-        rangeRef.current?.onResize(width);
+      maxInputProps={{
+        isInvalid,
+        placeholder: String(max),
+        className: 'rangeSliderAnchor__fieldNumber',
+        value: String(max) === displayedValue[1] ? '' : displayedValue[1],
       }}
-    >
-      <RangeSliderPopover rangeRef={rangeRef} value={displayedValue} onChange={setDisplayedValue} />
-    </EuiInputPopover>
+      onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+        setDisplayedValue([String(minSelection), String(maxSelection)]);
+      }}
+    />
   );
 };
