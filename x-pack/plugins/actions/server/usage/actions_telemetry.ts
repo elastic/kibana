@@ -26,7 +26,12 @@ export async function getTotalCount(
       init_script: 'state.types = [:]',
       map_script: `
         String actionType = doc['action.actionTypeId'].value;
-        state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 1);
+        if (actionType =~ /.gen-ai/) {
+          String genAiActionType = actionType +"__"+ doc['action.config.apiProvider'].value;
+          state.types.put(genAiActionType, state.types.containsKey(genAiActionType) ? state.types.get(genAiActionType) + 1 : 1);
+        } else {
+          state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 19);
+        }
       `,
       // Combine script is executed per cluster, but we already have a key-value pair per cluster.
       // Despite docs that say this is optional, this script can't be blank.
@@ -63,6 +68,7 @@ export async function getTotalCount(
         },
       },
     });
+
     // @ts-expect-error aggegation type is not specified
     const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
     const countByType = Object.keys(aggs).reduce(
@@ -420,7 +426,7 @@ export async function getExecutionsPerDayCount(
   countFailedByType: Record<string, number>;
   avgExecutionTime: number;
   avgExecutionTimeByType: Record<string, number>;
-  countRunOutcomeByConnectorType: Record<string, number>;
+  countRunOutcomeByConnectorType: Record<string, Record<string, number>>;
 }> {
   const scriptedMetric = {
     scripted_metric: {
