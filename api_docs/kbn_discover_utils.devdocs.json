@@ -877,7 +877,323 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_DEFAULT_SIZE_SETTING",
+        "description": [],
+        "signature": [
+          "\"context:defaultSize\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CONTEXT_STEP_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_STEP_SETTING",
+        "description": [],
+        "signature": [
+          "\"context:step\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CONTEXT_TIE_BREAKER_FIELDS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_TIE_BREAKER_FIELDS_SETTING",
+        "description": [],
+        "signature": [
+          "\"context:tieBreakerFields\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DEFAULT_COLUMNS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_COLUMNS_SETTING",
+        "description": [],
+        "signature": [
+          "\"defaultColumns\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_HIDE_TIME_COLUMN_SETTING",
+        "description": [],
+        "signature": [
+          "\"doc_table:hideTimeColumn\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DOC_TABLE_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_TABLE_LEGACY",
+        "description": [],
+        "signature": [
+          "\"doc_table:legacy\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ENABLE_SQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SQL",
+        "description": [],
+        "signature": [
+          "\"discover:enableSql\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.FIELDS_LIMIT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "FIELDS_LIMIT_SETTING",
+        "description": [],
+        "signature": [
+          "\"fields:popularLimit\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.HIDE_ANNOUNCEMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
+        "type": "string",
+        "tags": [],
+        "label": "MAX_DOC_FIELDS_DISPLAYED",
+        "description": [],
+        "signature": [
+          "\"discover:maxDocFieldsDisplayed\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.MODIFY_COLUMNS_ON_SWITCH",
+        "type": "string",
+        "tags": [],
+        "label": "MODIFY_COLUMNS_ON_SWITCH",
+        "description": [],
+        "signature": [
+          "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ROW_HEIGHT_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ROW_HEIGHT_OPTION",
+        "description": [],
+        "signature": [
+          "\"discover:rowHeightOption\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SAMPLE_ROWS_PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAMPLE_ROWS_PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sampleRowsPerPage\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SAMPLE_SIZE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAMPLE_SIZE_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sampleSize\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"search\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SEARCH_FIELDS_FROM_SOURCE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_FIELDS_FROM_SOURCE",
+        "description": [],
+        "signature": [
+          "\"discover:searchFieldsFromSource\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SEARCH_ON_PAGE_LOAD_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_ON_PAGE_LOAD_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:searchOnPageLoad\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SHOW_FIELD_STATISTICS",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_FIELD_STATISTICS",
+        "description": [],
+        "signature": [
+          "\"discover:showFieldStatistics\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SHOW_MULTIFIELDS",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_MULTIFIELDS",
+        "description": [],
+        "signature": [
+          "\"discover:showMultiFields\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SORT_DEFAULT_ORDER_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SORT_DEFAULT_ORDER_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sort:defaultOrder\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRUNCATE_MAX_HEIGHT",
+        "type": "string",
+        "tags": [],
+        "label": "TRUNCATE_MAX_HEIGHT",
+        "description": [],
+        "signature": [
+          "\"truncate:maxHeight\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
