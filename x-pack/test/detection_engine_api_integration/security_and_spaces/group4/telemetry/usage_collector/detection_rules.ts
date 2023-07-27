@@ -14,7 +14,6 @@ import type {
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
-import { SingleEventMetric } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -39,14 +38,6 @@ import {
   deleteAllEventLogExecutionEvents,
 } from '../../../../utils';
 
-const convert = (metrics: DetectionMetrics) => {
-  return {
-    custom_total: metrics.detection_rules.detection_rule_usage.custom_total,
-    all_rules: metrics.detection_rules.detection_rule_status.all_rules,
-    custom_rules: metrics.detection_rules.detection_rule_status.custom_rules,
-  };
-};
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -54,7 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const es = getService('es');
-  const statuses: SingleEventMetric[] = [];
 
   describe('Detection rule telemetry', async () => {
     before(async () => {
@@ -313,7 +303,6 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
           const expected: DetectionMetrics = {
             ...getInitialDetectionMetrics(),
             detection_rules: {
@@ -350,7 +339,6 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
 
           // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
           stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
@@ -394,7 +382,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
 
           // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
           stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
@@ -432,7 +419,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
 
           // remove "detection_rule_status" from the test by resetting it to initial (see detection_rule_status.ts for more in-depth testing of this structure)
           stats.detection_rules.detection_rule_status = getInitialEventLogUsage();
@@ -462,12 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      /**
-       * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
-       */
       it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
-        const statsBefore = await getStats(supertest, log);
-
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createNewAction(supertest, log);
@@ -475,34 +456,19 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          statuses.push(stats.detection_rules.detection_rule_status.custom_rules.eql);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+          expect(stats.detection_rules.detection_rule_usage).to.eql({
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
-          };
-          expect(stats).to.eql(
-            expected,
-            `\n\n\nexpected: ${JSON.stringify(convert(expected))}, \n\n\nactual: ${JSON.stringify(
-              convert(stats)
-            )}, \n\n\nstatsBefore: ${JSON.stringify(
-              convert(statsBefore)
-            )}, \n\n\nEQL Statuses: ${JSON.stringify(statuses)}`
-          );
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+          });
         });
       });
 
