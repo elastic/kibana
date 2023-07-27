@@ -10,10 +10,12 @@ import { services as xpackApiIntegrationServices } from '../../../test/api_integ
 import { services as svlSharedServices } from '../../shared/services';
 
 import { SvlCommonApiServiceProvider } from './svl_common_api';
+import { AlertingApiProvider } from './alerting_api';
 
 export const services = {
   ...xpackApiIntegrationServices,
   ...svlSharedServices,
 
   svlCommonApi: SvlCommonApiServiceProvider,
+  alertingApi: AlertingApiProvider,
 };
