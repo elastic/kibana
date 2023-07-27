@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
-import { getPolicyPayload } from './fixtures';
+import { getPolicyPayload, getPolicyPayloadWithSearchableSnapshots } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   const {
     createIndex,
@@ -27,7 +28,11 @@ export default function ({ getService }) {
     createPolicy,
     deletePolicy,
     cleanUp: cleanUpPolicies,
-  } = registerPoliciesHelpers({ supertest });
+    createRepository,
+    createSLMPolicy,
+    deleteSLMPolicy,
+    deleteRepository,
+  } = registerPoliciesHelpers({ supertest, es });
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
@@ -39,7 +44,9 @@ export default function ({ getService }) {
         // Create a policy
         const policy = getPolicyPayload('link-test-policy');
         const { name: policyName } = policy;
-        await createPolicy(policy);
+
+        const response = await createPolicy(policy);
+        expect(response.statusCode).to.eql(200);
 
         // Create a new index
         const indexName = await createIndex();
@@ -83,6 +90,71 @@ export default function ({ getService }) {
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
         const policy = getPolicyPayload('create-test-policy');
+        const { name } = policy;
+
+        // Load current policies
+        const { body: bodyFirstLoad } = await loadPolicies();
+        expect(getPolicyNames(bodyFirstLoad)).not.to.contain(name);
+
+        // Create new policy
+        await createPolicy(policy).expect(200);
+
+        // Make sure the new policy is returned
+        const { body: bodySecondLoad } = await loadPolicies();
+        expect(getPolicyNames(bodySecondLoad)).to.contain(name);
+      });
+    });
+
+    describe('searchable snapshots', function () {
+      this.tags(['skipCloud']); // file system repositories are not supported in cloud
+
+      before(async () => {
+        try {
+          await createRepository('backing_repo'); // This corresponds to the name set in the ILM policy
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating repository');
+          throw err;
+        }
+
+        try {
+          await createSLMPolicy({
+            schedule: '0 30 1 * * ?',
+            policyName: 'policy', // Name corresponds to the policy name specified in the ILM policy
+            repository: 'backing_repo',
+            name: 'default_snapshot',
+            config: {
+              indices: ['data-*', 'important'],
+              ignoreUnavailable: true,
+            },
+          });
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating SLM policy');
+          throw err;
+        }
+      });
+
+      after(async () => {
+        try {
+          await deleteSLMPolicy('policy');
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Cleanup error] Error deleting SLM policy');
+          throw err;
+        }
+
+        try {
+          await deleteRepository('backing_repo');
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Cleanup error] Error deleting snapshot repository');
+          throw err;
+        }
+      });
+
+      it('should create a lifecycle policy with searchable snapshot action', async () => {
+        const policy = getPolicyPayloadWithSearchableSnapshots('create-searchable-snapshot-policy');
         const { name } = policy;
 
         // Load current policies
