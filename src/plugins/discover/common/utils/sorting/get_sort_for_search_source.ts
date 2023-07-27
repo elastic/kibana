@@ -10,13 +10,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { getSort } from './get_sort';
 import {
   getESQuerySortForTimeField,
   // getESQuerySortForTieBreaker,
   // getTieBreakerField,
 } from './get_es_query_sort';
-import { SORT_DEFAULT_ORDER_SETTING } from '../..';
 
 /**
  * Prepares sort for search source, that's sending the request to ES

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SORT_DEFAULT_ORDER_SETTING } from '../..';
 
 describe('getSortForSearchSource function', function () {
   const core = coreMock.createStart();

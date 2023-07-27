@@ -7,7 +7,7 @@
 
 // / <reference types="cypress" />
 
-import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
 import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';

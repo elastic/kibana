@@ -10,7 +10,7 @@ import { updateSearchSource } from './update_search_source';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 
 const uiSettingWithAscSorting = coreMock.createStart().uiSettings;
 jest

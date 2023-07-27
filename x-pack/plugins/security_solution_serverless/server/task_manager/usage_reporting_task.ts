@@ -26,9 +26,9 @@ export class SecurityUsageReportingTask {
   private wasStarted: boolean = false;
   private cloudSetup: CloudSetup;
   private taskType: string;
-  private taskId: string;
   private version: string;
   private logger: Logger;
+  private abortController = new AbortController();
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -45,7 +45,6 @@ export class SecurityUsageReportingTask {
     this.cloudSetup = cloudSetup;
     this.taskType = taskType;
     this.version = version;
-    this.taskId = this.getTaskId(taskType, version);
     this.logger = logFactory.get(this.taskId);
 
     try {
@@ -121,6 +120,7 @@ export class SecurityUsageReportingTask {
       logger: this.logger,
       taskId: this.taskId,
       lastSuccessfulReport,
+      abortController: this.abortController,
     });
 
     this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
@@ -152,7 +152,7 @@ export class SecurityUsageReportingTask {
     return { state };
   };
 
-  private getTaskId = (taskType: string, version: string): string => {
-    return `${taskType}:${version}`;
-  };
+  private get taskId() {
+    return `${this.taskType}:${this.version}`;
+  }
 }

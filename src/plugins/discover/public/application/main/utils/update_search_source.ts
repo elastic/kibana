@@ -9,7 +9,7 @@
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
 
