@@ -255,7 +255,6 @@ export default ({ getService }: FtrProviderContext) => {
                   ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
                   disabled: 1,
                   legacy_notifications_disabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -295,7 +294,6 @@ export default ({ getService }: FtrProviderContext) => {
                   alerts: 4,
                   enabled: 1,
                   legacy_notifications_enabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -493,7 +491,6 @@ export default ({ getService }: FtrProviderContext) => {
                   ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
                   disabled: 1,
                   legacy_notifications_disabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -540,7 +537,6 @@ export default ({ getService }: FtrProviderContext) => {
                   alerts: 4,
                   enabled: 1,
                   legacy_notifications_enabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -758,7 +754,6 @@ export default ({ getService }: FtrProviderContext) => {
                   ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
                   disabled: 1,
                   legacy_notifications_disabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -804,7 +799,6 @@ export default ({ getService }: FtrProviderContext) => {
                   alerts: 4,
                   enabled: 1,
                   legacy_notifications_enabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -990,7 +984,6 @@ export default ({ getService }: FtrProviderContext) => {
                   ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
                   disabled: 1,
                   legacy_notifications_disabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -1027,7 +1020,6 @@ export default ({ getService }: FtrProviderContext) => {
                   ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
                   enabled: 1,
                   legacy_notifications_enabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -1245,7 +1237,6 @@ export default ({ getService }: FtrProviderContext) => {
                   ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
                   disabled: 1,
                   legacy_notifications_disabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -1300,7 +1291,6 @@ export default ({ getService }: FtrProviderContext) => {
                   alerts: 4,
                   enabled: 1,
                   legacy_notifications_enabled: 1,
-                  legacy_notification_count: 1,
                 },
               },
             },
@@ -1339,7 +1329,6 @@ export default ({ getService }: FtrProviderContext) => {
             legacy_notifications_disabled: 0,
             notifications_enabled: 0,
             notifications_disabled: 0,
-            legacy_notification_count: 0,
           });
         });
       });
@@ -1526,7 +1515,6 @@ export default ({ getService }: FtrProviderContext) => {
           ).to.eql(0);
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql({
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-            legacy_notification_count: 1,
           });
         });
       });
@@ -1579,7 +1567,6 @@ export default ({ getService }: FtrProviderContext) => {
           ).to.eql(0);
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql({
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-            legacy_notification_count: 1,
           });
         });
       });

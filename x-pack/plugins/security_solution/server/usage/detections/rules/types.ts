@@ -24,7 +24,7 @@ export interface RulesTypeUsage {
   threat_match: FeatureTypeUsage;
   new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
-  custom_total: FeatureTypeUsage & { legacy_notification_count: number };
+  custom_total: FeatureTypeUsage;
 }
 
 export interface RuleAdoption {
