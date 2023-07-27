@@ -21,7 +21,6 @@ export function generateNewAgentPolicyWithDefaults(
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),
     inactivity_timeout: TWO_WEEKS_SECONDS,
-    is_protected: false,
     ...overrideProps,
   };
 }

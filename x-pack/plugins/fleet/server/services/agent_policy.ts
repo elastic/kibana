@@ -245,8 +245,6 @@ class AgentPolicyService {
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
-    this.checkTamperProtectionLicense(agentPolicy);
-
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -261,7 +259,6 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-        is_protected: agentPolicy.is_protected ?? false,
       } as AgentPolicy,
       options
     );

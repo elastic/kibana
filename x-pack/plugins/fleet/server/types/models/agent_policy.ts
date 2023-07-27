@@ -47,7 +47,6 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
-  is_protected: schema.maybe(schema.boolean()),
   overrides: schema.maybe(
     schema.nullable(
       schema.recordOf(schema.string(), schema.any(), {
@@ -73,6 +72,7 @@ export const AgentPolicySchema = schema.object({
     schema.literal(agentPolicyStatuses.Active),
     schema.literal(agentPolicyStatuses.Inactive),
   ]),
+  is_protected: schema.maybe(schema.boolean()),
   package_policies: schema.oneOf([
     schema.arrayOf(schema.string()),
     schema.arrayOf(PackagePolicySchema),
