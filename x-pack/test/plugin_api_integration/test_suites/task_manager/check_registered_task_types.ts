@@ -115,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:xpack.uptime.alerts.tls',
         'alerting:xpack.uptime.alerts.tlsCertificate',
         'alerting_health_check',
+        'alerting:observability.rules.threshold',
         'alerting_telemetry',
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
