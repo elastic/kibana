@@ -173,7 +173,7 @@ export const syncNewMonitor = async ({
   routeContext: RouteContext;
   privateLocations: PrivateLocationAttributes[];
 }) => {
-  const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
+  const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
 
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
@@ -192,7 +192,6 @@ export const syncNewMonitor = async ({
 
     const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
       [{ monitor: monitorWithNamespace as MonitorFields, id: newMonitorId }],
-      request,
       savedObjectsClient,
       privateLocations,
       spaceId
