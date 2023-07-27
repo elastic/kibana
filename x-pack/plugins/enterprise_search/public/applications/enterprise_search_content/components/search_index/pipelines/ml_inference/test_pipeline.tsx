@@ -34,7 +34,7 @@ import './add_inference_pipeline_flyout.scss';
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: {
-      configuration: { sourceField, fieldMappings },
+      configuration: { fieldMappings },
       indexName,
     },
     getDocumentsErr,
@@ -168,7 +168,7 @@ export const TestPipeline: React.FC = () => {
                                   `"${fieldMapping.sourceField}": "${sampleFieldValue}"`
                               )
                               .join(', ')
-                          : `"${sourceField}":"${sampleFieldValue}"`
+                          : "N/A" // TODO: see if we can make fieldMappings required
                       }}}]`
                     ),
                     null,

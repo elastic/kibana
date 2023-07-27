@@ -89,10 +89,8 @@ import {
 } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
-  destinationField: '',
   modelID: '',
   pipelineName: '',
-  sourceField: '',
   targetField: '',
 };
 
@@ -309,13 +307,7 @@ export const MLInferenceLogic = kea<
       actions.makeCreatePipelineRequest({
         indexName,
         inferenceConfig: configuration.inferenceConfig,
-        fieldMappings: configuration.fieldMappings || [
-          // Temporary while we're using single fields for non-ELSER pipelines
-          {
-            sourceField: configuration.sourceField,
-            targetField: getMlInferencePrefixedFieldName(configuration.destinationField),
-          },
-        ],
+        fieldMappings: configuration.fieldMappings ?? [],
         modelId: configuration.modelID,
         pipelineDefinition: mlInferencePipeline!,
         pipelineName: configuration.pipelineName,
@@ -327,13 +319,11 @@ export const MLInferenceLogic = kea<
       const params = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
       if (params === null) return;
       actions.setInferencePipelineConfiguration({
-        destinationField: params.destination_field ?? '',
         existingPipeline: true,
         modelID: params.model_id,
         pipelineName,
-        sourceField: params.source_field,
         fieldMappings: params.field_mappings,
-        targetField: params.destination_field ?? '',
+        targetField: '',
       });
     },
     setIndexName: ({ indexName }) => {
@@ -545,13 +535,7 @@ export const MLInferenceLogic = kea<
         return generateMlInferencePipelineBody({
           model,
           pipelineName: configuration.pipelineName,
-          fieldMappings: configuration.fieldMappings || [
-            {
-              sourceField: configuration.sourceField,
-              targetField:
-                configuration.destinationField || formatPipelineName(configuration.pipelineName),
-            },
-          ],
+          fieldMappings: configuration.fieldMappings ?? [],
           inferenceConfig: configuration.inferenceConfig,
         });
       },
