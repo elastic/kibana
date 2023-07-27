@@ -14601,6 +14601,32 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.getSourceFiltering",
             "type": "Function",
             "tags": [],
@@ -22260,6 +22286,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {

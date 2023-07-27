@@ -83,6 +83,7 @@ export const registerStatusRoute = ({
       options: {
         authRequired: 'optional',
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
+        access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
       },
       validate: {
         query: schema.object(
