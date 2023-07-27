@@ -22,7 +22,7 @@ describe('getDiscoverLocatorParams', () => {
     const input = {} as SearchInput;
     expect(getDiscoverLocatorParams({ input, savedSearch: savedSearchMock })).toEqual({
       dataViewId: savedSearchMock.searchSource.getField('index')?.id,
-      dataViewSpec: savedSearchMock.searchSource.getField('index')?.toSpec(),
+      dataViewSpec: savedSearchMock.searchSource.getField('index')?.toMinimalSpec(),
       timeRange: savedSearchMock.timeRange,
       refreshInterval: savedSearchMock.refreshInterval,
       filters: savedSearchMock.searchSource.getField('filter'),

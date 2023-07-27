@@ -25,7 +25,7 @@ export const getDiscoverLocatorParams = ({
     ? { savedSearchId: savedObjectId }
     : {
         dataViewId: dataView?.id,
-        dataViewSpec: dataView?.toSpec(),
+        dataViewSpec: dataView?.toMinimalSpec(),
         timeRange: savedSearch.timeRange,
         refreshInterval: savedSearch.refreshInterval,
         filters: savedSearch.searchSource.getField('filter') as Filter[],
