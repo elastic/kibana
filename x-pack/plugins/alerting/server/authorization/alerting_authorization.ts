@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { map, mapValues, fromPairs, has } from 'lodash';
+import { fromPairs, has } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
@@ -169,42 +169,24 @@ export class AlertingAuthorization {
     );
   }
 
-  public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
+  public async ensureAuthorized({
+    ruleTypeId,
+    consumer: legacyConsumer,
+    operation,
+    entity,
+  }: EnsureAuthorizedOpts) {
     const { authorization } = this;
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
+    // We have some rules with consumer of "alerts" which indirectly means the same as
+    // a consumer of the rule type producer. Let's simplify the code and set it accordingly
+    const consumer = legacyConsumer === ALERTS_FEATURE_ID ? ruleType.producer : legacyConsumer;
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
-      const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
-      const requiredPrivilegesByScope = {
-        consumer: authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
-        producer: authorization.actions.alerting.get(
-          ruleTypeId,
-          ruleType.producer,
-          entity,
-          operation
-        ),
-      };
-
-      // Skip authorizing consumer if consumer is the Rules Management consumer (`alerts`)
-      // This means that rules and their derivative alerts created in the Rules Management UI
-      // will only be subject to checking if user has access to the rule producer.
-      const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
-
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, privileges } = await checkPrivileges({
-        kibana:
-          shouldAuthorizeConsumer && consumer !== ruleType.producer
-            ? [
-                // check for access at consumer level
-                requiredPrivilegesByScope.consumer,
-                // check for access at producer level
-                requiredPrivilegesByScope.producer,
-              ]
-            : [
-                // skip consumer privilege checks under `alerts` as all rule types can
-                // be created under `alerts` if you have producer level privileges
-                requiredPrivilegesByScope.producer,
-              ],
+
+      const { hasAllRequested } = await checkPrivileges({
+        kibana: [authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)],
       });
 
       if (!isAvailableConsumer) {
@@ -215,40 +197,14 @@ export class AlertingAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(
-          getUnauthorizedMessage(ruleTypeId, ScopeType.Consumer, consumer, operation, entity)
-        );
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
       }
 
       if (!hasAllRequested) {
-        const authorizedPrivileges = map(
-          privileges.kibana.filter((privilege) => privilege.authorized),
-          'privilege'
-        );
-        const unauthorizedScopes = mapValues(
-          requiredPrivilegesByScope,
-          (privilege) => !authorizedPrivileges.includes(privilege)
-        );
-
-        const [unauthorizedScopeType, unauthorizedScope] =
-          shouldAuthorizeConsumer && unauthorizedScopes.consumer
-            ? [ScopeType.Consumer, consumer]
-            : [ScopeType.Producer, ruleType.producer];
-
-        throw Boom.forbidden(
-          getUnauthorizedMessage(
-            ruleTypeId,
-            unauthorizedScopeType,
-            unauthorizedScope,
-            operation,
-            entity
-          )
-        );
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
       }
     } else if (!isAvailableConsumer) {
-      throw Boom.forbidden(
-        getUnauthorizedMessage(ruleTypeId, ScopeType.Consumer, consumer, operation, entity)
-      );
+      throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
     }
   }
 
@@ -300,13 +256,7 @@ export class AlertingAuthorization {
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
-              getUnauthorizedMessage(
-                ruleTypeId,
-                ScopeType.Consumer,
-                consumer,
-                'find',
-                authorizationEntity
-              )
+              getUnauthorizedMessage(ruleTypeId, consumer, 'find', authorizationEntity)
             );
           } else {
             if (authorizedEntries.has(ruleTypeId)) {
@@ -460,19 +410,11 @@ function asAuthorizedConsumers(
   return fromPairs(consumers.map((feature) => [feature, hasPrivileges]));
 }
 
-enum ScopeType {
-  Consumer,
-  Producer,
-}
-
 function getUnauthorizedMessage(
   alertTypeId: string,
-  scopeType: ScopeType,
   scope: string,
   operation: string,
   entity: string
 ): string {
-  return `Unauthorized to ${operation} a "${alertTypeId}" ${entity} ${
-    scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
-  }`;
+  return `Unauthorized to ${operation} a "${alertTypeId}" ${entity} for "${scope}"`;
 }

@@ -64,7 +64,7 @@ import {
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
+import { hasAllPrivilegeWithProducerCheck, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
@@ -85,6 +85,22 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
 
+const authorizedToDisplayRuleType = ({
+  rule,
+  ruleType,
+  ruleTypeModel,
+}: {
+  rule: InitialRule;
+  ruleType: RuleType;
+  ruleTypeModel: RuleTypeModel;
+}) => {
+  const consumer = rule.consumer === ALERTS_FEATURE_ID ? ruleType.producer : rule.consumer;
+
+  return ruleType && hasAllPrivilegeWithProducerCheck(consumer, ruleType);
+};
+
+export type RuleTypeItems = Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>;
+
 interface RuleFormProps<MetaData = Record<string, any>> {
   rule: InitialRule;
   config: TriggersActionsUiConfig;
@@ -100,6 +116,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   filteredRuleTypes?: string[];
   hideInterval?: boolean;
   connectorFeatureId?: string;
+  onSetAvailableRuleTypes?: (ruleTypes: RuleTypeItems) => void;
   onChangeMetaData: (metadata: MetaData) => void;
 }
 
@@ -119,6 +136,7 @@ export const RuleForm = ({
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   onChangeMetaData,
+  onSetAvailableRuleTypes,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -150,12 +168,8 @@ export const RuleForm = ({
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
-  const [availableRuleTypes, setAvailableRuleTypes] = useState<
-    Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>
-  >([]);
-  const [filteredRuleTypes, setFilteredRuleTypes] = useState<
-    Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>
-  >([]);
+  const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
+  const [filteredRuleTypes, setFilteredRuleTypes] = useState<RuleTypeItems>([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
@@ -177,31 +191,27 @@ export const RuleForm = ({
     const getAvailableRuleTypes = (ruleTypesResult: RuleType[]) =>
       ruleTypeRegistry
         .list()
-        .reduce(
-          (
-            arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
-            ruleTypeRegistryItem: RuleTypeModel
-          ) => {
-            const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
-            if (ruleType) {
-              arr.push({
-                ruleType,
-                ruleTypeModel: ruleTypeRegistryItem,
-              });
-            }
-            return arr;
-          },
-          []
-        )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
-        .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
-            ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
+        .reduce((arr: RuleTypeItems, ruleTypeRegistryItem: RuleTypeModel) => {
+          const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
+          if (ruleType) {
+            arr.push({
+              ruleType,
+              ruleTypeModel: ruleTypeRegistryItem,
+            });
+          }
+          return arr;
+        }, [])
+        .filter(({ ruleType, ruleTypeModel: ruleTypeRegistryItem }) =>
+          authorizedToDisplayRuleType({
+            rule,
+            ruleType,
+            ruleTypeModel: ruleTypeRegistryItem,
+          })
         );
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
+    onSetAvailableRuleTypes?.(availableRuleTypesResult);
 
     const solutionsResult = availableRuleTypesResult.reduce(
       (result: Map<string, string>, ruleTypeItem) => {
@@ -221,6 +231,7 @@ export const RuleForm = ({
     setSolutions(
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
 
   useEffect(() => {
