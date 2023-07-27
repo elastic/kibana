@@ -98,14 +98,8 @@ export function loadInitial(
   },
   autoApplyDisabled: boolean
 ) {
-  const {
-    lensServices,
-    datasourceMap,
-    embeddableEditorIncomingState,
-    initialContext,
-    initialStateFromLocator,
-    visualizationMap,
-  } = storeDeps;
+  const { lensServices, datasourceMap, initialContext, initialStateFromLocator, visualizationMap } =
+    storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
@@ -338,7 +332,6 @@ export function loadInitial(
                     query: doc.state.query,
                     searchSessionId:
                       dashboardFeatureFlag.allowByValueEmbeddables &&
-                      Boolean(embeddableEditorIncomingState?.originatingApp) &&
                       !(initialInput as LensByReferenceInput)?.savedObjectId &&
                       currentSessionId
                         ? currentSessionId

@@ -11,12 +11,13 @@ import { SecurityPageName } from '../../../app/types';
 import { TestProviders } from '../../../common/mock';
 import { DashboardsLandingPage } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
-import * as telemetry from '../../../common/lib/telemetry';
-import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
+import { METRIC_TYPE, TELEMETRY_EVENT } from '../../../common/lib/telemetry/constants';
+import * as telemetry from '../../../common/lib/telemetry/track';
 import { MOCK_TAG_NAME } from '../../../common/containers/tags/__mocks__/api';
 import { DashboardContextProvider } from '../../context/dashboard_context';
 import { act } from 'react-dom/test-utils';
 import type { NavigationLink } from '../../../common/links/types';
+import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 
 jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
@@ -188,10 +189,7 @@ describe('Dashboards landing', () => {
       it('should send telemetry', async () => {
         await renderDashboardLanding();
         screen.getByTestId('createDashboardButton').click();
-        expect(spyTrack).toHaveBeenCalledWith(
-          telemetry.METRIC_TYPE.CLICK,
-          telemetry.TELEMETRY_EVENT.CREATE_DASHBOARD
-        );
+        expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.CREATE_DASHBOARD);
       });
     });
   });
