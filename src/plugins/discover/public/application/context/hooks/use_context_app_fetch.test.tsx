@@ -9,7 +9,7 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
 import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';

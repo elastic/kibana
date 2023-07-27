@@ -7,7 +7,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { SearchResponseInterceptedWarning } from '../../../types';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 
 export interface ContextFetchState {
   /**

@@ -6,21 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { ReactNode } from 'react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { SearchResponseWarning } from '@kbn/data-plugin/public';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 
 export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
   options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
-
-export interface SearchResponseInterceptedWarning {
-  originalWarning: SearchResponseWarning;
-  action?: ReactNode;
-}
 
 export interface RecordsFetchResponse {
   records: DataTableRecord[];

@@ -36,17 +36,11 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import {
+  getSearchResponseInterceptedWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
-import { VIEW_MODE } from '../../common/constants';
-import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import type { SearchResponseInterceptedWarning } from '../types';
-import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
-import { DiscoverServices } from '../build_services';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import { SavedSearchEmbeddableBadge } from './saved_search_embeddable_badge';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -54,8 +48,15 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../common';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
+  buildDataTableRecord,
+} from '@kbn/discover-utils';
+import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
+import { getSortForEmbeddable, SortPair } from '../utils/sorting';
+import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
+import { DiscoverServices } from '../build_services';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { SavedSearchEmbeddableBadge } from './saved_search_embeddable_badge';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';

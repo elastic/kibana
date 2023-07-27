@@ -6,22 +6,22 @@
  */
 
 import { type EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
-import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
+import type { RelatedCase } from '@kbn/cases-plugin/common';
 import React, { type FC } from 'react';
 import { CaseDetailsLink } from '../../../common/components/links';
 
 import * as i18n from './translations';
 
 export interface CorrelationsCasesTableProps {
-  cases: RelatedCaseInfo[];
+  cases: RelatedCase[];
 }
 
-const columns: Array<EuiBasicTableColumn<RelatedCaseInfo>> = [
+const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
   {
     field: 'title',
     name: i18n.CORRELATIONS_CASE_NAME_COLUMN_TITLE,
     truncateText: true,
-    render: (value: string, caseData: RelatedCaseInfo) => (
+    render: (value: string, caseData: RelatedCase) => (
       <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
         {caseData.title}
       </CaseDetailsLink>

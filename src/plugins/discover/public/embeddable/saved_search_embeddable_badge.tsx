@@ -16,8 +16,10 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { SearchResponseWarnings } from '@kbn/search-response-warnings';
-import type { SearchResponseInterceptedWarning } from '../types';
+import {
+  SearchResponseWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 
 export interface SavedSearchEmbeddableBadgeProps {
   interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;

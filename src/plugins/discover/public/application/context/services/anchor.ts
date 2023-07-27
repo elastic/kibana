@@ -12,8 +12,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
-import type { SearchResponseInterceptedWarning } from '../../../types';
+import {
+  getSearchResponseInterceptedWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
 import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 
