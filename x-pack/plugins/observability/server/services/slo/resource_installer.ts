@@ -49,12 +49,12 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();
 
     if (alreadyInstalled) {
-      this.logger.info('SLO resources already installed - skipping');
+      this.logger.debug('SLO resources already installed - skipping');
       return;
     }
 
     try {
-      this.logger.info('Installing SLO shared resources');
+      this.logger.debug('Installing SLO shared resources');
       await Promise.all([
         this.createOrUpdateComponentTemplate(
           getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)

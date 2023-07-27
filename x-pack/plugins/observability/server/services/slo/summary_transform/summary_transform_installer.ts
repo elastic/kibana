@@ -37,7 +37,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
       summaryTransforms.transforms.every((transform) => allTransformIds.includes(transform.id));
 
     if (alreadyInstalled) {
-      this.logger.info(`SLO summary transforms already installed - skipping`);
+      this.logger.debug(`SLO summary transforms already installed - skipping`);
       return;
     }
 
@@ -51,7 +51,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
         !!transform && transform._meta?.version !== SLO_RESOURCES_VERSION;
 
       if (transformAlreadyInstalled) {
-        this.logger.info(`SLO summary transform: ${transformId} already installed - skipping`);
+        this.logger.debug(`SLO summary transform '${transformId}' already installed - skipping`);
         continue;
       }
 
@@ -63,7 +63,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
       await this.startTransform(transformId);
     }
 
-    this.logger.info(`All SLO summary transforms installed and started`);
+    this.logger.debug(`All SLO summary transforms installed and started`);
   }
 
   private async installTransform(
@@ -77,7 +77,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
   }
 
   private async deletePreviousTransformVersion(transformId: string) {
-    this.logger.info(`Deleting previous SLO summary transform: ${transformId}`);
+    this.logger.info(`Deleting previous SLO summary transform '${transformId}'`);
     await this.execute(() =>
       this.esClient.transform.stopTransform(
         { transform_id: transformId, allow_no_match: true, force: true },
@@ -93,7 +93,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
   }
 
   private async startTransform(transformId: string) {
-    this.logger.info(`Starting SLO summary transform: ${transformId} - noop if already running`);
+    this.logger.info(`Starting SLO summary transform '${transformId}'`);
     await this.execute(() =>
       this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] })
     );

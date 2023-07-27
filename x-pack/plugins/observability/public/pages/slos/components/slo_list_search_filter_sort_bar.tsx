@@ -103,7 +103,6 @@ export function SloListSearchFilterSortBar({
             unifiedSearch,
           }}
           disableAutoFocus
-          submitOnBlur={true}
           onSubmit={() => onChangeQuery(query)}
           disableLanguageSwitcher
           isDisabled={loading}
