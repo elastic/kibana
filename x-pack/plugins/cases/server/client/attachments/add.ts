@@ -7,6 +7,7 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { validateMaxUserActions } from '../../../common/utils';
 import { AttachmentRequestRt } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
@@ -31,11 +32,13 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     authorization,
     persistableStateAttachmentTypeRegistry,
     externalReferenceAttachmentTypeRegistry,
+    services: { userActionService },
   } = clientArgs;
 
   try {
     const query = decodeWithExcessOrThrow(AttachmentRequestRt)(comment);
 
+    await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
     decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
 
     const savedObjectID = SavedObjectsUtils.generateId();
