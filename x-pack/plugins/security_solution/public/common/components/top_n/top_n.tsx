@@ -113,13 +113,6 @@ const TopNComponent: React.FC<Props> = ({
 
   return (
     <TopNContainer data-test-subj="topN-container">
-      <CloseButton
-        aria-label={i18n.CLOSE}
-        data-test-subj="close"
-        iconType="cross"
-        onClick={toggleTopN}
-      />
-
       <TopNContent>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
@@ -159,6 +152,13 @@ const TopNComponent: React.FC<Props> = ({
           />
         )}
       </TopNContent>
+
+      <CloseButton
+        aria-label={i18n.CLOSE}
+        data-test-subj="close"
+        iconType="cross"
+        onClick={toggleTopN}
+      />
     </TopNContainer>
   );
 };

@@ -10,7 +10,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEmpty, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -187,6 +187,20 @@ export const useColumns = ({
     [defaultColumns]
   );
 
+  const setColumnsByColumnIds = useCallback(
+    (columnIds: string[]) => {
+      setVisibleColumns(columnIds);
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
+        columns,
+        visibleColumns: columnIds,
+      });
+    },
+    [columns, id, storage, storageAlertsTable]
+  );
+
   useEffect(() => {
     // if defaultColumns have changed,
     // get the latest columns provided by client and
@@ -199,13 +213,22 @@ export const useColumns = ({
   }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
-    if (isEmpty(browserFields) || isColumnsPopulated) return;
+    if (isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
+    const columnIds = getColumnIds(columns);
 
     setColumnsPopulated(true);
     setColumns(populatedColumns);
-  }, [browserFields, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated, columns]);
+    setColumnsByColumnIds(columnIds);
+  }, [
+    browserFields,
+    defaultColumns,
+    isBrowserFieldDataLoading,
+    isColumnsPopulated,
+    columns,
+    setColumnsByColumnIds,
+  ]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
@@ -219,20 +242,6 @@ export const useColumns = ({
       });
     },
     [id, storage, storageAlertsTable]
-  );
-
-  const setColumnsByColumnIds = useCallback(
-    (columnIds: string[]) => {
-      setVisibleColumns(columnIds);
-      persist({
-        id,
-        storage,
-        storageAlertsTable,
-        columns,
-        visibleColumns: columnIds,
-      });
-    },
-    [columns, id, storage, storageAlertsTable]
   );
 
   const onToggleColumn = useCallback(
@@ -279,7 +288,7 @@ export const useColumns = ({
    * In some case such security, we need some special fields such as threat.enrichments which are
    * not fetched when passing only EMPTY_FIELDS. Hence, we will fetch all the fields that user has added to the table.
    *
-   * Additionaly, system such as o11y needs fields which are not even added in the table such as rule_type_id and hence we
+   * Additionally, system such as o11y needs fields which are not even added in the table such as rule_type_id and hence we
    * additionly pass EMPTY_FIELDS so that it brings all fields apart from special fields
    *
    * */
