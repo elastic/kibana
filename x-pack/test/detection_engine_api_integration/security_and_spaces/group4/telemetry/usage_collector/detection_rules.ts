@@ -1513,9 +1513,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
           ).to.eql(0);
-          expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql({
-            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-          });
+          expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
+            getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
+          );
         });
       });
 
@@ -1565,9 +1565,9 @@ export default ({ getService }: FtrProviderContext) => {
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
           ).to.eql(0);
-          expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql({
-            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-          });
+          expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
+            getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
+          );
         });
       });
     });

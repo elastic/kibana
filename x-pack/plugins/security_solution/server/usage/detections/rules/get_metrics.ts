@@ -118,7 +118,6 @@ export const getRuleMetrics = async ({
       (usage, rule) => updateRuleUsage(rule, usage),
       getInitialRulesUsage()
     );
-    rulesUsage.custom_total.legacy_notification_count = legacyRuleActions.length;
 
     return {
       detection_rule_detail: elasticRuleObjects,
