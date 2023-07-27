@@ -42,13 +42,22 @@ jest.mock('../../common/api/use_package_policy_list');
 
 const onChange = jest.fn();
 
+const createReactQueryResponseWithRefetch = (
+  data: Parameters<typeof createReactQueryResponse>[0]
+) => {
+  return {
+    ...createReactQueryResponse(data),
+    refetch: jest.fn(),
+  };
+};
+
 describe('<CspPolicyTemplateForm />', () => {
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
     (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           items: [],
@@ -57,7 +66,7 @@ describe('<CspPolicyTemplateForm />', () => {
     );
     onChange.mockClear();
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: { status: 'indexed', installedPackageVersion: '1.2.13' },
       })
@@ -240,7 +249,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
@@ -249,7 +258,7 @@ describe('<CspPolicyTemplateForm />', () => {
     );
 
     (usePackagePolicyList as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           items: [
@@ -329,7 +338,7 @@ describe('<CspPolicyTemplateForm />', () => {
       integration: 'vuln_mgmt',
     });
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           vuln_mgmt: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
@@ -337,7 +346,7 @@ describe('<CspPolicyTemplateForm />', () => {
       })
     );
     (usePackagePolicyList as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           items: [
@@ -419,7 +428,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
@@ -427,7 +436,7 @@ describe('<CspPolicyTemplateForm />', () => {
       })
     );
     (usePackagePolicyList as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
+      createReactQueryResponseWithRefetch({
         status: 'success',
         data: {
           items: [

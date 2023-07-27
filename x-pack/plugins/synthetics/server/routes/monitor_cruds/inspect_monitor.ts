@@ -26,7 +26,6 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     body: schema.any(),
     query: schema.object({
       id: schema.maybe(schema.string()),
-      preserve_namespace: schema.maybe(schema.boolean()),
       hideParams: schema.maybe(schema.boolean()),
     }),
   },
@@ -73,8 +72,6 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
       const result = await syntheticsMonitorClient.inspectMonitor(
         { monitor: monitorWithNamespace as MonitorFields, id: newMonitorId },
-        request,
-        savedObjectsClient,
         privateLocations,
         spaceId,
         hideParams,

@@ -58,8 +58,8 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
 export type MetricThresholdAlertContext = AlertContext; // no specific instance state used
 
-export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
-export const NO_DATA_ACTIONS_ID = 'metrics.threshold.nodata';
+export const FIRED_ACTIONS_ID = 'threshold.fired';
+export const NO_DATA_ACTIONS_ID = 'threshold.nodata';
 
 type MetricThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
@@ -398,14 +398,14 @@ export const createMetricThresholdExecutor = ({
   };
 
 export const FIRED_ACTIONS = {
-  id: 'metrics.threshold.fired',
+  id: 'threshold.fired',
   name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.fired', {
     defaultMessage: 'Alert',
   }),
 };
 
 export const NO_DATA_ACTIONS = {
-  id: 'metrics.threshold.nodata',
+  id: 'threshold.nodata',
   name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.nodata', {
     defaultMessage: 'No Data',
   }),

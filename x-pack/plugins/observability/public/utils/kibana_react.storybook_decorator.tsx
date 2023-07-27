@@ -37,6 +37,9 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
     compositeSlo: { enabled: false },
     aiAssistant: {
       enabled: false,
+      feedback: {
+        enabled: false,
+      },
     },
   };
   const mockTheme: CoreTheme = {

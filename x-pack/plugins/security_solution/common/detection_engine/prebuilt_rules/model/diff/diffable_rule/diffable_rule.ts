@@ -114,7 +114,7 @@ export type DiffableCustomQueryFields = t.TypeOf<typeof DiffableCustomQueryField
 export const DiffableCustomQueryFields = buildSchema({
   required: {
     type: t.literal('query'),
-    data_query: RuleKqlQuery, // NOTE: new field
+    kql_query: RuleKqlQuery, // NOTE: new field
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
@@ -126,7 +126,7 @@ export type DiffableSavedQueryFields = t.TypeOf<typeof DiffableSavedQueryFields>
 export const DiffableSavedQueryFields = buildSchema({
   required: {
     type: t.literal('saved_query'),
-    data_query: RuleKqlQuery, // NOTE: new field
+    kql_query: RuleKqlQuery, // NOTE: new field
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
@@ -138,7 +138,7 @@ export type DiffableEqlFields = t.TypeOf<typeof DiffableEqlFields>;
 export const DiffableEqlFields = buildSchema({
   required: {
     type: t.literal('eql'),
-    data_query: RuleEqlQuery, // NOTE: new field
+    eql_query: RuleEqlQuery, // NOTE: new field
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
@@ -152,7 +152,7 @@ export type DiffableThreatMatchFields = t.TypeOf<typeof DiffableThreatMatchField
 export const DiffableThreatMatchFields = buildSchema({
   required: {
     type: t.literal('threat_match'),
-    data_query: RuleKqlQuery, // NOTE: new field
+    kql_query: RuleKqlQuery, // NOTE: new field
     threat_query: InlineKqlQuery, // NOTE: new field
     threat_index,
     threat_mapping,
@@ -169,7 +169,7 @@ export type DiffableThresholdFields = t.TypeOf<typeof DiffableThresholdFields>;
 export const DiffableThresholdFields = buildSchema({
   required: {
     type: t.literal('threshold'),
-    data_query: RuleKqlQuery, // NOTE: new field
+    kql_query: RuleKqlQuery, // NOTE: new field
     threshold: Threshold,
   },
   optional: {
@@ -191,7 +191,7 @@ export type DiffableNewTermsFields = t.TypeOf<typeof DiffableNewTermsFields>;
 export const DiffableNewTermsFields = buildSchema({
   required: {
     type: t.literal('new_terms'),
-    data_query: InlineKqlQuery, // NOTE: new field
+    kql_query: InlineKqlQuery, // NOTE: new field
     new_terms_fields: NewTermsFields,
     history_window_start: HistoryWindowStart,
   },
@@ -239,3 +239,21 @@ export const DiffableRule = t.intersection([
     DiffableNewTermsFields,
   ]),
 ]);
+
+/**
+ * This is a merge of all fields from all rule types into a single TS type.
+ * This is NOT a union discriminated by rule type, as DiffableRule is.
+ */
+export type DiffableAllFields = DiffableCommonFields &
+  Omit<DiffableCustomQueryFields, 'type'> &
+  Omit<DiffableSavedQueryFields, 'type'> &
+  Omit<DiffableEqlFields, 'type'> &
+  Omit<DiffableThreatMatchFields, 'type'> &
+  Omit<DiffableThresholdFields, 'type'> &
+  Omit<DiffableMachineLearningFields, 'type'> &
+  Omit<DiffableNewTermsFields, 'type'> &
+  DiffableRuleTypeField;
+
+interface DiffableRuleTypeField {
+  type: DiffableRule['type'];
+}

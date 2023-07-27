@@ -130,6 +130,6 @@
     "@kbn/slo-schema",
     "@kbn/lens-plugin",
     "@kbn/telemetry-tools",
-    "@kbn/notifications-plugin"
+    "@kbn/notifications-plugin",
   ]
 }

@@ -21,6 +21,7 @@ export enum ErrorCode {
   PIPELINE_NOT_FOUND = 'pipeline_not_found',
   RESOURCE_NOT_FOUND = 'resource_not_found',
   SEARCH_APPLICATION_ALREADY_EXISTS = 'search_application_already_exists',
+  SEARCH_APPLICATION_NAME_INVALID = 'search_application_name_invalid',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
 }

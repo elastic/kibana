@@ -5,51 +5,34 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
-
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import {
-  SecuritySolutionLinkButton,
-  useGetSecuritySolutionLinkProps,
-} from '../../../../common/components/links';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../../../detections/components/callouts/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { LoadPrePackagedRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules_button';
+import { AddElasticRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
-
-import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
-import { importRules } from '../../../rule_management/logic';
-
-import { AllRules } from '../../components/rules_table';
-import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
-
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
-import { MiniCallout } from '../../components/mini_callout/mini_callout';
-import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
-
+import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
+import { importRules } from '../../../rule_management/logic';
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
+import { AllRules } from '../../components/rules_table';
+import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { SuperHeader } from './super_header';
-import {
-  NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
-  getUpdateRulesCalloutTitle,
-} from '../../components/mini_callout/translations';
-import { AllRulesTabs } from '../../components/rules_table/rules_table_toolbar';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -61,15 +44,6 @@ const RulesPageComponent: React.FC = () => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
   }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
-
-  const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
-
-  const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_to_install ?? 0;
-  const rulesToUpgradeCount = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
-
-  // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
-  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0;
-  const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
 
   const [
     {
@@ -86,19 +60,6 @@ const RulesPageComponent: React.FC = () => {
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-  const { href } = getSecuritySolutionLinkProps({
-    deepLinkId: SecurityPageName.rules,
-    path: AllRulesTabs.updates,
-  });
-  const {
-    application: { navigateToUrl },
-  } = useKibana().services;
-
-  const updateCallOutOnClick = useCallback(() => {
-    navigateToUrl(href);
-  }, [navigateToUrl, href]);
 
   if (
     redirectToDetections(
@@ -144,7 +105,7 @@ const RulesPageComponent: React.FC = () => {
           <SuperHeader>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                <LoadPrePackagedRulesButton />
+                <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
@@ -169,41 +130,18 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RulesPageTourComponent>
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                </RulesPageTourComponent>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>
-
-          {shouldDisplayUpdateRulesCallout && (
-            <MiniCallout
-              iconType={'iInCircle'}
-              data-test-subj="prebuilt-rules-update-callout"
-              title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
-            />
-          )}
-
-          {shouldDisplayUpdateRulesCallout && shouldDisplayNewRulesCallout && (
-            <EuiSpacer size={'s'} />
-          )}
-
-          {shouldDisplayNewRulesCallout && (
-            <MiniCallout
-              color="success"
-              data-test-subj="prebuilt-rules-new-callout"
-              iconType={'iInCircle'}
-              title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
-            />
-          )}
           <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>

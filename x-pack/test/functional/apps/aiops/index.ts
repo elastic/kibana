@@ -31,5 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./explain_log_rate_spikes'));
     loadTestFile(require.resolve('./change_point_detection'));
+    loadTestFile(require.resolve('./log_pattern_analysis'));
+    loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));
   });
 }

@@ -50,5 +50,9 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     async selectSourceForChangePointDetection(sourceName: string) {
       await this.selectSource(sourceName, 'aiopsChangePointDetectionPage');
     },
+
+    async selectSourceForLogPatternAnalysisDetection(sourceName: string) {
+      await this.selectSource(sourceName, 'aiopsLogPatternAnalysisPage');
+    },
   };
 }

@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButtonEmpty,
@@ -29,22 +29,33 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
+import { Meta } from '../../../../../../../common/types';
+
 import { Result } from '../../../../../shared/result/result';
 import { resultMetaData } from '../../../../../shared/result/result_metadata';
 
-import { DocumentsLogic } from '../../documents_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
-export const DocumentList: React.FC = () => {
-  const {
-    docsPerPage,
-    isLoading,
-    meta,
-    results,
-    simplifiedMapping: mappings,
-  } = useValues(DocumentsLogic);
+interface DocumentListProps {
+  docs: SearchHit[];
+  docsPerPage: number;
+  isLoading: boolean;
+  mappings: Record<string, MappingProperty> | undefined;
+  meta: Meta;
+  onPaginate: (newPageIndex: number) => void;
+  setDocsPerPage: (docsPerPage: number) => void;
+}
+
+export const DocumentList: React.FC<DocumentListProps> = ({
+  docs,
+  docsPerPage,
+  isLoading,
+  mappings,
+  meta,
+  onPaginate,
+  setDocsPerPage,
+}) => {
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { onPaginate, setDocsPerPage } = useActions(DocumentsLogic);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const resultToField = (result: SearchHit) => {
@@ -88,7 +99,7 @@ export const DocumentList: React.FC = () => {
               maximum: <FormattedNumber value={10000} />,
               results: (
                 <strong>
-                  <FormattedNumber value={results.length} />
+                  <FormattedNumber value={docs.length} />
                 </strong>
               ),
               total: (
@@ -102,10 +113,10 @@ export const DocumentList: React.FC = () => {
       </EuiText>
       {isLoading && <EuiProgress size="xs" color="primary" />}
       <EuiSpacer size="m" />
-      {results.map((result) => {
+      {docs.map((doc) => {
         return (
-          <React.Fragment key={result._id}>
-            <Result fields={resultToField(result)} metaData={resultMetaData(result)} />
+          <React.Fragment key={doc._id}>
+            <Result fields={resultToField(doc)} metaData={resultMetaData(doc)} />
             <EuiSpacer size="s" />
           </React.Fragment>
         );

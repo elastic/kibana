@@ -137,4 +137,4 @@ export * from './actions';
 export * from './effects';
 export * from './selectors';
 export * from './helpers';
-export { fetchDeleteMonitor, fetchUpsertMonitor, fetchCreateMonitor } from './api';
+export { fetchDeleteMonitor, fetchUpsertMonitor, createGettingStartedMonitor } from './api';

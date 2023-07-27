@@ -17,55 +17,56 @@ interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
   showDocumentationLink?: boolean;
 }
 
-export const TooltipContent = ({
-  description,
-  formula,
-  showDocumentationLink = false,
-  style,
-}: Props) => {
-  return (
-    <EuiText size="xs" style={style}>
-      <p>{description}</p>
-      {formula && (
-        <p>
-          <strong>
+export const TooltipContent = React.memo(
+  ({ description, formula, showDocumentationLink = false, style }: Props) => {
+    const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.stopPropagation();
+    };
+
+    return (
+      <EuiText size="xs" style={style} onClick={onClick}>
+        <p>{description}</p>
+        {formula && (
+          <p>
+            <strong>
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.table.tooltip.formula"
+                defaultMessage="Formula Calculation:"
+              />
+            </strong>
+            <br />
+            <code
+              css={css`
+                word-break: break-word;
+              `}
+            >
+              {formula}
+            </code>
+          </p>
+        )}
+        {showDocumentationLink && (
+          <p>
             <FormattedMessage
-              id="xpack.infra.hostsViewPage.table.tooltip.formula"
-              defaultMessage="Formula Calculation:"
+              id="xpack.infra.hostsViewPage.table.tooltip.documentationLabel"
+              defaultMessage="See {documentation} for more information"
+              values={{
+                documentation: (
+                  <EuiLink
+                    data-test-subj="hostsViewTooltipDocumentationLink"
+                    href={HOST_METRICS_DOC_HREF}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.hostsViewPage.table.tooltip.documentationLink"
+                      defaultMessage="documentation"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
-          </strong>
-          <br />
-          <code
-            css={css`
-              word-break: break-word;
-            `}
-          >
-            {formula}
-          </code>
-        </p>
-      )}
-      {showDocumentationLink && (
-        <p>
-          <FormattedMessage
-            id="xpack.infra.hostsViewPage.table.tooltip.documentationLabel"
-            defaultMessage="See {documentation} for more information"
-            values={{
-              documentation: (
-                <EuiLink
-                  data-test-subj="hostsViewTooltipDocumentationLink"
-                  href={HOST_METRICS_DOC_HREF}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.infra.hostsViewPage.table.tooltip.documentationLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      )}
-    </EuiText>
-  );
-};
+          </p>
+        )}
+      </EuiText>
+    );
+  }
+);

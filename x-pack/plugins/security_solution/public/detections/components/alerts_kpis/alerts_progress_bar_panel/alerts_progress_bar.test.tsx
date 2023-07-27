@@ -27,7 +27,6 @@ describe('Alert by grouping', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('progress bars renders correctly', () => {

@@ -27,7 +27,7 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 const alertsService = alertsServiceMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   mockedLicenseState = licenseStateMock.create();
   ruleTypeRegistryParams = {
     logger,
@@ -96,16 +96,18 @@ describe('Create Lifecycle', () => {
 
       const invalidCharacters = [' ', ':', '*', '*', '/'];
       for (const char of invalidCharacters) {
-        expect(() => registry.register({ ...ruleType, id: `${ruleType.id}${char}` })).toThrowError(
-          new Error(`expected RuleType Id not to include invalid character: ${char}`)
+        expect(() =>
+          registry.register({ ...ruleType, id: `${ruleType.id}${char}` })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"expected RuleType Id not to include invalid character: ${char}"`
         );
       }
 
       const [first, second] = invalidCharacters;
       expect(() =>
         registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` })
-      ).toThrowError(
-        new Error(`expected RuleType Id not to include invalid characters: ${first}, ${second}`)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"expected RuleType Id not to include invalid characters: ${first}, ${second}"`
       );
     });
 
@@ -130,8 +132,8 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
-        new Error(`expected value of type [string] but got [number]`)
+      expect(() => registry.register(ruleType)).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [string] but got [number]"`
       );
     });
 
@@ -704,6 +706,7 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
+            "hasFieldsForAAD": false,
             "hasGetSummarizedAlerts": false,
             "id": "test",
             "isExportable": true,

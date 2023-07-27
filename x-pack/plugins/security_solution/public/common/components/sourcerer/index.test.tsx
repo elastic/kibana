@@ -100,10 +100,6 @@ describe('Sourcerer component', () => {
     (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
   });
 
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   it('renders data view title', () => {
     const wrapper = mount(
       <TestProviders store={store}>
@@ -896,8 +892,8 @@ describe('Sourcerer integration tests', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
+
   it('Selects a different index pattern', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
@@ -941,8 +937,8 @@ describe('No data', () => {
     });
     store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
+
   test('Hide sourcerer - default ', () => {
     const wrapper = mount(
       <TestProviders store={store}>

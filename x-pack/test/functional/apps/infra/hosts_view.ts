@@ -150,6 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
@@ -313,37 +314,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to Uptime after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        const url = parse(await browser.getCurrentUrl());
+      describe('Flyout links', () => {
+        it('should navigate to Uptime after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutUptimeLink();
+          const url = parse(await browser.getCurrentUrl());
 
-        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
-        const query = decodeURIComponent(url.query ?? '');
+          const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
+          const query = decodeURIComponent(url.query ?? '');
 
-        expect(url.pathname).to.eql('/app/uptime/');
-        expect(query).to.contain(search);
+          expect(url.pathname).to.eql('/app/uptime/');
+          expect(query).to.contain(search);
 
-        await returnTo(HOSTS_VIEW_PATH);
-      });
+          await returnTo(HOSTS_VIEW_PATH);
+        });
 
-      it('should navigate to APM services after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        const url = parse(await browser.getCurrentUrl());
+        it('should navigate to APM services after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+          const url = parse(await browser.getCurrentUrl());
+          const query = decodeURIComponent(url.query ?? '');
+          const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
 
-        const query = decodeURIComponent(url.query ?? '');
+          expect(url.pathname).to.eql('/app/apm/services');
+          expect(query).to.contain(kuery);
 
-        const environment = 'environment=ENVIRONMENT_ALL';
-        const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-        const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
-        const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
-
-        expect(url.pathname).to.eql('/app/apm/services');
-        expect(query).to.contain(environment);
-        expect(query).to.contain(kuery);
-        expect(query).to.contain(rangeFrom);
-        expect(query).to.contain(rangeTo);
-
-        await returnTo(HOSTS_VIEW_PATH);
+          await returnTo(HOSTS_VIEW_PATH);
+        });
       });
 
       describe('Processes Tab', () => {

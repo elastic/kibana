@@ -20,6 +20,9 @@ export interface PrebuiltRulesStatusStats {
   /** Number of installed prebuilt rules available for upgrade (stock + customized) */
   num_prebuilt_rules_to_upgrade: number;
 
+  /** Total number of prebuilt rules available in package (including already installed) */
+  num_prebuilt_rules_total_in_package: number;
+
   // In the future we could add more stats such as:
   // - number of installed prebuilt rules which were deprecated
   // - number of installed prebuilt rules which are not compatible with the current version of Kibana

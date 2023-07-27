@@ -329,7 +329,6 @@ describe('AlertsTable', () => {
     updatedAt: Date.now(),
     onToggleColumn: () => {},
     onResetColumns: () => {},
-    onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},

@@ -218,6 +218,27 @@ export const deleteConnectors = () => {
   });
 };
 
+export const deletePrebuiltRulesAssets = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'security-rule',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+};
+
 export const postDataView = (dataSource: string) => {
   rootRequest({
     method: 'POST',

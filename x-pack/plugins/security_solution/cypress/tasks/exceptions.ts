@@ -167,6 +167,9 @@ export const addExceptionConditions = (exception: Exception) => {
 export const validateExceptionConditionField = (value: string) => {
   cy.get(EXCEPTION_ITEM_CONTAINER).contains('span', value);
 };
+export const validateEmptyExceptionConditionField = () => {
+  cy.get(FIELD_INPUT).should('be.empty');
+};
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
@@ -278,4 +281,9 @@ export const deleteFirstExceptionItemInListDetailPage = () => {
 
   // Delete exception
   cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE).click();
+};
+export const validateHighlightedFieldsPopulatedAsExceptionConditions = (
+  highlightedFields: string[]
+) => {
+  return highlightedFields.every((field) => validateExceptionConditionField(field));
 };

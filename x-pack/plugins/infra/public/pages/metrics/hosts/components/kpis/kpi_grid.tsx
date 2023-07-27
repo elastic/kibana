@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,8 +14,13 @@ import { HostCountProvider } from '../../hooks/use_host_count';
 import { TOOLTIP } from '../../translations';
 import { HostsTile } from './hosts_tile';
 import { HostMetricsDocsLink } from '../metric_explanation/host_metrics_docs_link';
+import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
+const lensStyle: CSSProperties = {
+  height: KPI_CHART_MIN_HEIGHT,
+};
+
+const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle' | 'style'>> = [
   {
     type: 'cpuUsage',
     trendLine: true,
@@ -32,7 +37,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
       defaultMessage: 'Normalized Load',
     }),
-    toolTip: TOOLTIP.rx,
+    toolTip: TOOLTIP.normalizedLoad1m,
   },
   {
     type: 'memoryUsage',
@@ -41,9 +46,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
       defaultMessage: 'Memory Usage',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.tooltip', {
-      defaultMessage: 'Main memory usage excluding page cache.',
-    }),
+    toolTip: TOOLTIP.memoryUsage,
   },
   {
     type: 'diskSpaceUsage',
@@ -68,11 +71,11 @@ export const KPIGrid = () => {
         data-test-subj="hostsViewKPIGrid"
       >
         <EuiFlexItem>
-          <HostsTile />
+          <HostsTile style={lensStyle} />
         </EuiFlexItem>
         {KPI_CHARTS.map(({ ...chartProp }) => (
           <EuiFlexItem key={chartProp.type}>
-            <Tile {...chartProp} />
+            <Tile {...chartProp} style={lensStyle} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

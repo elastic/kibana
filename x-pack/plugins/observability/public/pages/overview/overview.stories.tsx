@@ -90,6 +90,9 @@ const withCore = makeDecorator({
       compositeSlo: { enabled: false },
       aiAssistant: {
         enabled: false,
+        feedback: {
+          enabled: false,
+        },
       },
     };
 

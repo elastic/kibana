@@ -34,31 +34,44 @@ interface Row {
   rank: number;
   frame: StackFrameMetadata;
   samples: number;
+  exclusiveCPUPerc: number;
+  inclusiveCPUPerc: number;
   exclusiveCPU: number;
   inclusiveCPU: number;
   impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
+    exclusiveCPUPerc: number;
+    inclusiveCPUPerc: number;
     exclusiveCPU: number;
     inclusiveCPU: number;
   };
 }
 
 function TotalSamplesStat({
-  totalSamples,
-  newSamples,
+  baselineTotalSamples,
+  baselineScaleFactor,
+  comparisonTotalSamples,
+  comparisonScaleFactor,
 }: {
-  totalSamples: number;
-  newSamples: number | undefined;
+  baselineTotalSamples: number;
+  baselineScaleFactor?: number;
+  comparisonTotalSamples?: number;
+  comparisonScaleFactor?: number;
 }) {
-  const value = totalSamples.toLocaleString();
+  const scaledBaselineTotalSamples = scaleValue({
+    value: baselineTotalSamples,
+    scaleFactor: baselineScaleFactor,
+  });
+
+  const value = scaledBaselineTotalSamples.toLocaleString();
 
   const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
     defaultMessage: ' Total sample estimate: ',
   });
 
-  if (newSamples === undefined || newSamples === 0) {
+  if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
@@ -67,8 +80,13 @@ function TotalSamplesStat({
     );
   }
 
-  const diffSamples = totalSamples - newSamples;
-  const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const scaledComparisonTotalSamples = scaleValue({
+    value: comparisonTotalSamples,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledBaselineTotalSamples - scaledComparisonTotalSamples;
+  const percentDelta = (diffSamples / (scaledBaselineTotalSamples - diffSamples)) * 100;
 
   return (
     <EuiStat
@@ -190,15 +208,15 @@ export function TopNFunctionsTable({
         scaleFactor: baselineScaleFactor,
       });
 
-      const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-      const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+      const inclusiveCPUPerc = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+      const exclusiveCPUPerc = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
       const totalSamples = topN.CountExclusive;
 
       const impactEstimates =
         totalSeconds > 0
           ? calculateImpactEstimates({
-              countExclusive: exclusiveCPU,
-              countInclusive: inclusiveCPU,
+              countExclusive: topN.CountExclusive,
+              countInclusive: topN.CountInclusive,
               totalSamples,
               totalSeconds,
             })
@@ -214,11 +232,13 @@ export function TopNFunctionsTable({
           return {
             rank: topN.Rank - comparisonRow.Rank,
             samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-            exclusiveCPU:
-              exclusiveCPU -
+            exclusiveCPU: comparisonRow.CountExclusive,
+            inclusiveCPU: comparisonRow.CountInclusive,
+            exclusiveCPUPerc:
+              exclusiveCPUPerc -
               (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-            inclusiveCPU:
-              inclusiveCPU -
+            inclusiveCPUPerc:
+              inclusiveCPUPerc -
               (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
           };
         }
@@ -228,8 +248,10 @@ export function TopNFunctionsTable({
         rank: topN.Rank,
         frame: topN.Frame,
         samples: topNCountExclusiveScaled,
-        exclusiveCPU,
-        inclusiveCPU,
+        exclusiveCPUPerc,
+        inclusiveCPUPerc,
+        exclusiveCPU: topN.CountExclusive,
+        inclusiveCPU: topN.CountInclusive,
         impactEstimates,
         diff: calculateDiff(),
       };
@@ -290,8 +312,8 @@ export function TopNFunctionsTable({
           iconSize="s"
         />
       ),
-      render: (_, { exclusiveCPU, diff }) => {
-        return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
+      render: (_, { exclusiveCPUPerc, diff }) => {
+        return <CPUStat cpu={exclusiveCPUPerc} diffCPU={diff?.exclusiveCPUPerc} />;
       },
       align: 'right',
     },
@@ -305,8 +327,8 @@ export function TopNFunctionsTable({
           iconSize="s"
         />
       ),
-      render: (_, { inclusiveCPU, diff }) => {
-        return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
+      render: (_, { inclusiveCPUPerc, diff }) => {
+        return <CPUStat cpu={inclusiveCPUPerc} diffCPU={diff?.inclusiveCPUPerc} />;
       },
       align: 'right',
     },
@@ -404,8 +426,10 @@ export function TopNFunctionsTable({
   return (
     <>
       <TotalSamplesStat
-        totalSamples={totalCount}
-        newSamples={comparisonTopNFunctions?.TotalCount}
+        baselineTotalSamples={totalCount}
+        baselineScaleFactor={baselineScaleFactor}
+        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
+        comparisonScaleFactor={comparisonScaleFactor}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
@@ -444,7 +468,7 @@ export function TopNFunctionsTable({
             sourceLine: selectedRow.frame.SourceLine,
           }}
           totalSeconds={totalSeconds ?? 0}
-          totalSamples={selectedRow.samples}
+          totalSamples={totalCount}
           samplingRate={topNFunctions?.SamplingRate ?? 1.0}
         />
       )}

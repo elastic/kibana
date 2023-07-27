@@ -7,22 +7,25 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { merge } from 'lodash';
 import {
   PROCESSOR_EVENT,
   METRICSET_NAME,
   METRICSET_INTERVAL,
   TRANSACTION_DURATION_SUMMARY,
+  INDEX,
 } from '../../../../common/es_fields/apm';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getTypedSearch, TypedSearch } from '../create_typed_es_client';
 import { getApmIndexPatterns } from './get_indices';
 
 export interface ApmEvent {
+  legacy?: boolean;
   name: string;
   kuery: string;
   index: string[];
   docCount: number;
-  intervals?: Record<string, number>;
+  intervals?: Record<string, { metricDocCount: number; eventDocCount: number }>;
 }
 
 export async function getApmEvents({
@@ -53,7 +56,7 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Service transaction (with summary field)',
+      name: 'Metric: Service transaction (8.7+)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_transaction" AND ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -62,7 +65,7 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Transaction (with summary field)',
+      name: 'Metric: Transaction (8.7+)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "transaction" AND ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -71,7 +74,8 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Service transaction (without summary field)',
+      legacy: true,
+      name: 'Metric: Service transaction (pre-8.7)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_transaction" AND not ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -80,19 +84,11 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Transaction (without summary field)',
+      legacy: true,
+      name: 'Metric: Transaction (pre-8.7)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "transaction" AND not ${TRANSACTION_DURATION_SUMMARY} :* `,
-        kuery
-      ),
-    }),
-    getEventWithMetricsetInterval({
-      ...commonProps,
-      name: 'Metric: Span breakdown',
-      index: getApmIndexPatterns([apmIndices.metric]),
-      kuery: mergeKueries(
-        `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
         kuery
       ),
     }),
@@ -102,6 +98,15 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_summary"`,
+        kuery
+      ),
+    }),
+    getEvent({
+      ...commonProps,
+      name: 'Metric: Span breakdown',
+      index: getApmIndexPatterns([apmIndices.metric]),
+      kuery: mergeKueries(
+        `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
         kuery
       ),
     }),
@@ -129,6 +134,7 @@ export async function getApmEvents({
 }
 
 async function getEventWithMetricsetInterval({
+  legacy,
   name,
   index,
   start,
@@ -136,6 +142,7 @@ async function getEventWithMetricsetInterval({
   kuery,
   typedSearch,
 }: {
+  legacy?: boolean;
   name: string;
   index: string[];
   start: number;
@@ -159,21 +166,40 @@ async function getEventWithMetricsetInterval({
           size: 1000,
           field: METRICSET_INTERVAL,
         },
+        aggs: {
+          metric_doc_count: {
+            value_count: {
+              field: INDEX,
+            },
+          },
+        },
       },
     },
   });
 
+  const defaultIntervals = {
+    '1m': { metricDocCount: 0, eventDocCount: 0 },
+    '10m': { metricDocCount: 0, eventDocCount: 0 },
+    '60m': { metricDocCount: 0, eventDocCount: 0 },
+  };
+  const foundIntervals = res.aggregations?.metricset_intervals.buckets.reduce<
+    Record<string, { metricDocCount: number; eventDocCount: number }>
+  >((acc, item) => {
+    acc[item.key] = {
+      metricDocCount: item.metric_doc_count.value,
+      eventDocCount: item.doc_count,
+    };
+    return acc;
+  }, {});
+
+  const intervals = merge(defaultIntervals, foundIntervals);
   return {
+    legacy,
     name,
     kuery,
     index,
     docCount: res.hits.total.value,
-    intervals: res.aggregations?.metricset_intervals.buckets.reduce<
-      Record<string, number>
-    >((acc, item) => {
-      acc[item.key] = item.doc_count;
-      return acc;
-    }, {}),
+    intervals,
   };
 }
 

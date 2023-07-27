@@ -6,6 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
+import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '../../common/utils/format_page_filter_search_param';
 import { TOP_N_CONTAINER } from '../screens/network/flows';
 import {
@@ -63,14 +64,14 @@ import {
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
+  CONTROL_FRAME_TITLE,
   DETECTION_PAGE_FILTERS_LOADING,
-  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
-  OPTION_LISTS_EXISTS,
   OPTION_LISTS_LOADING,
   OPTION_LIST_VALUES,
+  OPTION_LIST_CLEAR_BTN,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
@@ -78,6 +79,7 @@ import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import type { FilterItemObj } from '../../public/common/components/filter_group/types';
 import { visit } from './login';
+import { openFilterGroupContextMenu } from './common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -92,16 +94,18 @@ export const openAddEndpointExceptionFromFirstAlert = () => {
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
-export const openAddExceptionFromAlertDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-
+export const openAddRuleExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(TAKE_ACTION_MENU).should('be.visible');
 
-  cy.get(ADD_EXCEPTION_BTN).click();
-  cy.get(ADD_EXCEPTION_BTN).should('not.be.visible');
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
 };
 
+export const openAddEndpointExceptionFromAlertActionButton = () => {
+  cy.get(TAKE_ACTION_BTN).click();
+  cy.get(TAKE_ACTION_MENU).should('be.visible');
+  cy.get(ADD_ENDPOINT_EXCEPTION_BTN, { timeout: 10000 }).first().click();
+};
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).click();
@@ -173,23 +177,21 @@ export const closePageFilterPopover = (filterIndex: number) => {
   cy.get(OPTION_LIST_VALUES(filterIndex)).should('not.have.class', 'euiFilterButton-isSelected');
 };
 
-export const clearAllSelections = () => {
-  cy.get(OPTION_LISTS_EXISTS).click({ force: true });
-
-  cy.get(OPTION_LISTS_EXISTS).then(($el) => {
-    if ($el.attr('aria-checked', 'false')) {
-      // check it
-      $el.click();
-    }
-    // uncheck it
-    $el.click();
-  });
+export const clearAllSelections = (filterIndex: number) => {
+  recurse(
+    () => {
+      cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
+      return cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex);
+    },
+    ($el) => $el.is(':visible')
+  );
+  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).should('be.visible').trigger('click');
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
   refreshAlertPageFilter();
+  clearAllSelections(filterIndex);
   openPageFilterPopover(filterIndex);
-  clearAllSelections();
   values.forEach((value) => {
     cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
   });
@@ -405,9 +407,10 @@ export const waitForPageFilters = () => {
 };
 
 export const resetFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  openFilterGroupContextMenu();
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).trigger('click');
   waitForPageFilters();
+  cy.log('Resetting filters complete');
 };
 
 export const parseAlertsCountToInt = (count: string | number) =>

@@ -56,6 +56,9 @@
                     "$ref": "#/components/schemas/create_connector_request_email"
                   },
                   {
+                    "$ref": "#/components/schemas/create_connector_request_genai"
+                  },
+                  {
                     "$ref": "#/components/schemas/create_connector_request_index"
                   },
                   {
@@ -308,6 +311,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_email"
+                  },
+                  {
+                    "$ref": "#/components/schemas/create_connector_request_genai"
                   },
                   {
                     "$ref": "#/components/schemas/create_connector_request_index"
@@ -1566,6 +1572,64 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_email"
+          }
+        }
+      },
+      "config_properties_genai": {
+        "title": "Connector request properties for a generative AI connector",
+        "description": "Defines properties for connectors when type is `.gen-ai`.",
+        "type": "object",
+        "properties": {
+          "apiProvider": {
+            "type": "string",
+            "description": "The OpenAI API provider."
+          },
+          "apiUrl": {
+            "type": "string",
+            "description": "The OpenAI API endpoint."
+          }
+        }
+      },
+      "secrets_properties_genai": {
+        "title": "Connector secrets properties for a generative AI connector",
+        "description": "Defines secrets for connectors when type is `.gen-ai`.",
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "The OpenAI API key."
+          }
+        }
+      },
+      "create_connector_request_genai": {
+        "title": "Create generative AI connector request",
+        "description": "The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_genai"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".gen-ai"
+            ],
+            "example": ".gen-ai"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_genai"
           }
         }
       },
@@ -3640,6 +3704,7 @@
         "enum": [
           ".cases-webhook",
           ".email",
+          ".gen-ai",
           ".index",
           ".jira",
           ".opsgenie",

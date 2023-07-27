@@ -59,11 +59,20 @@ export const INTEGRATIONS_POPOVER = '[data-test-subj="IntegrationsDisplayPopover
 
 export const INTEGRATIONS_POPOVER_TITLE = '[data-test-subj="IntegrationsPopoverTitle"]';
 
-export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
+export const ADD_ELASTIC_RULES_BTN = '[data-test-subj="addElasticRulesButton"]';
 
-export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
+export const ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN =
+  '[data-test-subj="add-elastc-rules-empty-empty-prompt-button"]';
 
 export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"]';
+
+export const INSTALL_SELECTED_RULES_BUTTON = '[data-test-subj="installSelectedRulesButton"]';
+
+export const UPGRADE_ALL_RULES_BUTTON = '[data-test-subj="upgradeAllRulesButton"]';
+
+export const UPGRADE_SELECTED_RULES_BUTTON = '[data-test-subj="upgradeSelectedRulesButton"]';
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = '[data-test-subj="addRulesGoBackToRulesTableBtn"]';
 
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
@@ -90,9 +99,15 @@ export const RULES_MANAGEMENT_TAB = '[data-test-subj="navigation-management"]';
 
 export const RULES_MONITORING_TAB = '[data-test-subj="navigation-monitoring"]';
 
+export const RULES_UPDATES_TAB = '[data-test-subj="navigation-updates"]';
+
 export const RULES_MANAGEMENT_TABLE = '[data-test-subj="rules-management-table"]';
 
 export const RULES_MONITORING_TABLE = '[data-test-subj="rules-monitoring-table"]';
+
+export const RULES_UPDATES_TABLE = '[data-test-subj="rules-upgrades-table"]';
+
+export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
@@ -163,3 +178,22 @@ export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]
 export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
+
+export const RULE_EXECUTION_STATUS_BADGE = '[data-test-subj="ruleExecutionStatus"]';
+
+export const EXECUTION_STATUS_FILTER_BUTTON = '[data-test-subj="executionStatusFilterButton"]';
+
+export const EXECUTION_STATUS_FILTER_OPTION = '[data-test-subj="executionStatusFilterOption"]';
+
+export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="installSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE =
+  '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE =
+  '[data-test-subj="noPrebuiltRulesAvailableForUpgrade"]';

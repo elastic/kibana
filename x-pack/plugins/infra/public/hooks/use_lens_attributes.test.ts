@@ -209,6 +209,6 @@ describe('useHostTable hook', () => {
       ],
     });
 
-    expect(extraActions.openInLens).not.toBeNull();
+    expect(extraActions).toHaveLength(1);
   });
 });

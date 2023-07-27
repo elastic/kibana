@@ -17,11 +17,14 @@ import {
   HOST_TABLE_HOST_NAME_BTN,
   HOST_TABLE_ROW_SEV,
   HOST_TABLE_ROW_TOTAL_ALERTS,
+  HOST_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON,
   RULE_TABLE_ROW_RULE_NAME_BTN,
   RULE_TABLE_ROW_TOTAL_ALERTS,
+  RULE_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON,
   RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN,
   USER_TABLE_ROW_SEV,
   USER_TABLE_ROW_TOTAL_ALERTS,
+  USER_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON,
   USER_TABLE_USER_NAME_BTN,
 } from '../../../screens/detection_response';
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../../screens/timeline';
@@ -105,7 +108,7 @@ describe('Detection response view', () => {
             .first()
             .then((hostNameEl) => {
               const hostName = hostNameEl.text();
-              investigateDashboardItemInTimeline(HOST_TABLE_ROW_TOTAL_ALERTS);
+              investigateDashboardItemInTimeline(HOST_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON);
               cy.get(QUERY_TAB_BUTTON).should('be.visible').should('contain.text', alertCount);
               cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
                 .should('be.visible')
@@ -126,7 +129,7 @@ describe('Detection response view', () => {
             .first()
             .then((userNameEl) => {
               const userName = userNameEl.text();
-              investigateDashboardItemInTimeline(USER_TABLE_ROW_TOTAL_ALERTS);
+              investigateDashboardItemInTimeline(USER_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON);
               cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
               cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
                 .should('be.visible')
@@ -137,7 +140,8 @@ describe('Detection response view', () => {
             });
         });
     });
-    it(`opens timeline with correct query count for open alerts by rule table`, () => {
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip(`opens timeline with correct query count for open alerts by rule table`, () => {
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS)
         .first()
         .then((sub) => {
@@ -146,7 +150,7 @@ describe('Detection response view', () => {
             .first()
             .then((ruleNameEl) => {
               const ruleName = ruleNameEl.text();
-              investigateDashboardItemInTimeline(RULE_TABLE_ROW_TOTAL_ALERTS);
+              investigateDashboardItemInTimeline(RULE_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON);
               cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
               cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
                 .should('be.visible')

@@ -21,10 +21,9 @@ import {
   MetricsExplorerChartType,
   type MetricsExplorerOptionsMetric,
 } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import type { MetricsExplorerSeries } from '../../../../../common/http_api';
-import { getTimelineChartThemes } from '../../../../utils/get_chart_theme';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 
 import { ChartHeader } from './chart_header';
 
@@ -58,7 +57,7 @@ export const ChartSection = ({
   domain,
   stack = false,
 }: Props) => {
-  const isDarkMode = useIsDarkMode();
+  const chartTheme = useTimelineChartTheme();
   const metrics = series.map((chartSeries) => chartSeries.metric);
 
   return (
@@ -92,7 +91,11 @@ export const ChartSection = ({
           }}
         />
         <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
-        <Settings {...getTimelineChartThemes(isDarkMode)} onPointerUpdate={onPointerUpdate} />
+        <Settings
+          onPointerUpdate={onPointerUpdate}
+          baseTheme={chartTheme.baseTheme}
+          theme={chartTheme.theme}
+        />
       </Chart>
     </>
   );

@@ -313,7 +313,8 @@ describe('Entity Analytics Dashboard', () => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
-    it('renders table with pagination', () => {
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip('renders table with pagination', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
 

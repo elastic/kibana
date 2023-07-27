@@ -268,9 +268,11 @@ export class EventAnnotationGroupStorage
       EventAnnotationGroupSearchQuery,
       EventAnnotationGroupSearchQuery
     >(options);
+
     if (optionsError) {
       throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
     }
+
     const { searchFields = ['title^3', 'description'], types = [SO_TYPE] } = optionsToLatest;
 
     const { included, excluded } = query.tags ?? {};

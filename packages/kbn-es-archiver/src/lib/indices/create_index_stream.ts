@@ -141,19 +141,34 @@ export function createCreateIndexStream({
           log.debug(`Deleted saved object index [${index}]`);
         }
 
+        // create the index without the aliases
         await client.indices.create(
           {
             index,
             body: {
               settings,
               mappings,
-              aliases,
             },
           },
           {
             headers: ES_CLIENT_HEADERS,
           }
         );
+
+        // create the aliases on a separate step (see https://github.com/elastic/kibana/issues/158918)
+        const actions: estypes.IndicesUpdateAliasesAction[] = Object.keys(aliases ?? {}).map(
+          (alias) => ({
+            add: {
+              index,
+              alias,
+              ...aliases![alias],
+            },
+          })
+        );
+
+        if (actions.length) {
+          await client.indices.updateAliases({ body: { actions } });
+        }
 
         stats.createdIndex(index, { settings });
       } catch (err) {
