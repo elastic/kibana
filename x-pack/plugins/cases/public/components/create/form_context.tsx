@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -15,8 +16,7 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
