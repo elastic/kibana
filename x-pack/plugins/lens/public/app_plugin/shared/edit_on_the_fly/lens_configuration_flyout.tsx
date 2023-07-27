@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import {
   isOfAggregateQueryType,
@@ -13,8 +13,10 @@ import {
   type AggregateQuery,
   // type Query,
 } from '@kbn/es-query';
+// import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { useLensSelector } from '../../../state_management';
 // import type { Suggestion } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
@@ -23,6 +25,7 @@ import type { EditConfigPanelProps } from './types';
 import { LayerConfiguration } from './layer_configuration';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { getLensAttributes } from './get_lens_attributes';
+import { mapDataToColumns } from './map_to_columns';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -40,10 +43,12 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   // const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(query);
   // const [suggestions, setSuggestions] = useState<Suggestion[]>();
+  const [dataTable, setDataTable] = useState<Datatable | undefined>(
+    adaptersTables ? Object.values(adaptersTables)[0] : undefined
+  );
 
   const runQuery = useCallback(
     async (q: AggregateQuery) => {
-      // setQueryTextBased(q);
       let indexPattern = '';
       if ('sql' in q) {
         indexPattern = getIndexPatternFromSQLQuery(q.sql);
@@ -79,6 +84,13 @@ export function LensEditConfigurationFlyout({
         dataView: dv,
         suggestion: currentSuggestion,
       });
+      if (table) {
+        const activeDatasource = datasourceMap[datasourceId];
+        const datasourceState = attrs.state.datasourceStates[datasourceId];
+        const fields = activeDatasource?.getColumns?.(datasourceState) ?? [];
+        const updatedTable = mapDataToColumns(table, fields);
+        setDataTable(updatedTable);
+      }
       updateAllAttributes?.(attrs);
       setCurrentAttributes?.(attrs);
       // setSuggestions(allSuggestions);
@@ -90,6 +102,7 @@ export function LensEditConfigurationFlyout({
       startDependencies.dataViews,
       startDependencies.expressions,
       visualizationMap,
+      datasourceId,
       updateAllAttributes,
       setCurrentAttributes,
     ]
@@ -109,7 +122,7 @@ export function LensEditConfigurationFlyout({
           visualizationMap={visualizationMap}
           datasourceMap={datasourceMap}
           datasourceId={datasourceId}
-          adaptersTables={adaptersTables}
+          dataTable={dataTable}
         />
       </FlyoutWrapper>
     );
@@ -169,7 +182,7 @@ export function LensEditConfigurationFlyout({
               visualizationMap={visualizationMap}
               datasourceMap={datasourceMap}
               datasourceId={datasourceId}
-              adaptersTables={adaptersTables}
+              dataTable={dataTable}
             />
           </EuiAccordion>
         </>

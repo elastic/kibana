@@ -358,6 +358,9 @@ export function getTextBasedDatasource({
         Object.values(state?.layers)?.flatMap((l) => Object.values(l.columns))
       );
     },
+    getColumns(state) {
+      return state?.fieldList ?? [];
+    },
 
     DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
       const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);

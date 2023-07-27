@@ -20,7 +20,7 @@ export function LayerConfiguration({
   visualizationMap,
   datasourceMap,
   datasourceId,
-  adaptersTables,
+  dataTable,
 }: LayerConfigurationProps) {
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
@@ -31,11 +31,10 @@ export function LayerConfiguration({
   }, []);
   const layers = activeDatasource.getLayers(datasourceState);
   layers.forEach((layer) => {
-    if (adaptersTables) {
-      activeData[layer] = Object.values(adaptersTables)[0];
+    if (dataTable) {
+      activeData[layer] = dataTable;
     }
   });
-
   const framePublicAPI = useLensSelector((state) => {
     const newState = {
       ...state,

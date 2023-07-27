@@ -36,5 +36,5 @@ export interface LayerConfigurationProps {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   datasourceId: 'formBased' | 'textBased';
-  adaptersTables?: Record<string, Datatable>;
+  dataTable?: Datatable;
 }

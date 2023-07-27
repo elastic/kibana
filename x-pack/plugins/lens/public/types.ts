@@ -15,6 +15,7 @@ import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
   Datatable,
+  DatatableColumn,
   ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
@@ -366,7 +367,7 @@ export interface Datasource<T = unknown, P = unknown> {
     indexPatterns: IndexPatternMap;
   }) => T;
   getSelectedFields?: (state: T) => string[];
-
+  getColumns?: (state: T) => DatatableColumn[];
   LayerSettingsComponent?: (
     props: DatasourceLayerSettingsProps<T>
   ) => React.ReactElement<DatasourceLayerSettingsProps<T>> | null;
