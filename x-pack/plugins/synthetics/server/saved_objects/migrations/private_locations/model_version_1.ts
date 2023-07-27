@@ -5,8 +5,11 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import type { SavedObjectMigrationFn } from '@kbn/core/server';
-import type { SyntheticsPrivateLocationsAttributes } from '../../../../../runtime_types/private_locations';
+import {
+  SavedObjectModelTransformationFn,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
+import { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 
 export const PrivateLocationAttributesCodecLegacy = t.intersection([
   t.interface({
@@ -29,22 +32,33 @@ export type SyntheticsPrivateLocationsAttributesLegacy = t.TypeOf<
   typeof SyntheticsPrivateLocationsAttributesCodecLegacy
 >;
 
-export const migration8100: SavedObjectMigrationFn<
+export const transformGeoProperty: SavedObjectModelTransformationFn<
   SyntheticsPrivateLocationsAttributesLegacy,
   SyntheticsPrivateLocationsAttributes
 > = (privateLocationDoc) => {
   const { locations } = privateLocationDoc.attributes;
   return {
-    ...privateLocationDoc,
-    attributes: {
-      locations: locations.map((location) => ({
-        ...location,
-        geo: {
-          lat: location.geo?.lat ? Number(location.geo?.lat) : null,
-          lon: location.geo?.lon ? Number(location.geo.lon) : null,
-        },
-        isServiceManaged: false,
-      })),
+    document: {
+      ...privateLocationDoc,
+      attributes: {
+        locations: locations.map((location) => ({
+          ...location,
+          geo: {
+            lat: Number(location.geo?.lat ?? 0),
+            lon: Number(location.geo?.lon ?? 0),
+          },
+          isServiceManaged: false,
+        })),
+      },
     },
   };
+};
+
+export const modelVersion1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'unsafe_transform',
+      transformFn: transformGeoProperty,
+    },
+  ],
 };
