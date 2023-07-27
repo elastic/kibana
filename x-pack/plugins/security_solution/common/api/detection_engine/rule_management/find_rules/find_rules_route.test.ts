@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { FindRulesRequestQuery } from './request_schema';
+import { FindRulesRequestQuery } from './find_rules_route';
 
 describe('Find rules request schema', () => {
   test('empty objects do validate', () => {
