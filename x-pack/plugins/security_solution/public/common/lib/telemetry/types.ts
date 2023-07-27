@@ -84,6 +84,8 @@ export type TelemetryEventParams =
   | ReportAlertsGroupingToggledParams
   | ReportAlertsTakeActionParams
   | ReportAssistantInvokedParams
+  | ReportAssistantMessageSentParams
+  | ReportAssistantQuickPromptParams
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
   | ReportEntityRiskFilteredParams
