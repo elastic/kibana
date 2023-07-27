@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType } from '../../common/api';
+import { AttachmentType } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
@@ -33,7 +33,7 @@ describe('useCreateAttachments', () => {
   const attachmentsWithoutOwner = [
     {
       comment: 'a comment',
-      type: CommentType.user as const,
+      type: AttachmentType.user as const,
     },
   ];
 

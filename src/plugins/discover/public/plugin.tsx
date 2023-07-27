@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
   AppMountParameters,
@@ -43,6 +43,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -60,7 +61,6 @@ import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
-import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
@@ -78,6 +78,7 @@ import {
   createProfileRegistry,
 } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
+import { DiscoverContainerInternal, DiscoverContainerProps } from './components/discover_container';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -162,6 +163,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
   readonly registerCustomizationProfile: RegisterCustomizationProfile;
 }
 
@@ -420,18 +422,31 @@ export class DiscoverPlugin
     // initializeServices are assigned at start and used
     // when the application/embeddable is mounted
 
-    const { uiActions } = plugins;
-
-    uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
-    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
-    setUiActions(plugins.uiActions);
 
+    plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
+    plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
+    setUiActions(plugins.uiActions);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
+
+    const isDev = this.initializerContext.env.mode.dev;
+
+    const getDiscoverServicesInternal = () => {
+      return this.getDiscoverServices(core, plugins);
+    };
 
     return {
       locator: this.locator,
+      DiscoverContainer: ({ overrideServices, ...restProps }: DiscoverContainerProps) => {
+        return (
+          <DiscoverContainerInternal
+            overrideServices={overrideServices}
+            getDiscoverServices={getDiscoverServicesInternal}
+            isDev={isDev}
+            {...restProps}
+          />
+        );
+      },
       registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
     };
   }
@@ -442,6 +457,23 @@ export class DiscoverPlugin
     }
   }
 
+  private getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
+    const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+      locator: this.locator!,
+      contextLocator: this.contextLocator!,
+      singleDocLocator: this.singleDocLocator!,
+    });
+
+    return buildServices(
+      core,
+      plugins,
+      this.initializerContext,
+      locator,
+      contextLocator,
+      singleDocLocator
+    );
+  };
+
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
@@ -451,25 +483,12 @@ export class DiscoverPlugin
       };
     };
 
-    const getDiscoverServices = async () => {
-      const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
-        locator: this.locator!,
-        contextLocator: this.contextLocator!,
-        singleDocLocator: this.singleDocLocator!,
-      });
-
-      return buildServices(
-        coreStart,
-        discoverStartPlugins,
-        this.initializerContext,
-        locator,
-        contextLocator,
-        singleDocLocator
-      );
+    const getDiscoverServicesInternal = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return this.getDiscoverServices(coreStart, deps);
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);
+    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
