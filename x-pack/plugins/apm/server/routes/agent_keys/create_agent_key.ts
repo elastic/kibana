@@ -11,10 +11,7 @@ import { ApmPluginRequestHandlerContext } from '../typings';
 import { ClusterPrivilegeType } from '../../../common/privilege_type';
 
 const resource = '*';
-const CLUSTER_PRIVILEGES = [
-  ClusterPrivilegeType.MANAGE_API_KEY,
-  ClusterPrivilegeType.MANAGE_OWN_API_KEY,
-];
+const CLUSTER_PRIVILEGES = [ClusterPrivilegeType.MANAGE_OWN_API_KEY];
 
 export interface CreateAgentKeyResponse {
   agentKey: SecurityCreateApiKeyResponse;

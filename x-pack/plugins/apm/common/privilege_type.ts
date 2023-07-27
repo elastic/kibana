@@ -13,7 +13,6 @@ export enum PrivilegeType {
 }
 
 export enum ClusterPrivilegeType {
-  MANAGE_API_KEY = 'manage_api_key',
   MANAGE_OWN_API_KEY = 'manage_own_api_key',
 }
 

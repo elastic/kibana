@@ -26,7 +26,6 @@ export enum ApmCustomRolename {
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
-  apmManageAllAgentKeys = 'apm_manage_all_agent_keys',
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
   apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
   apmManageServiceAccount = 'apm_manage_service_account',
@@ -72,11 +71,6 @@ export const customRoles = {
   [ApmCustomRolename.apmManageOwnAgentKeys]: {
     elasticsearch: {
       cluster: [ClusterPrivilegeType.MANAGE_OWN_API_KEY],
-    },
-  },
-  [ApmCustomRolename.apmManageAllAgentKeys]: {
-    elasticsearch: {
-      cluster: [ClusterPrivilegeType.MANAGE_API_KEY],
     },
   },
   [ApmCustomRolename.apmManageOwnAndCreateAgentKeys]: {
@@ -132,7 +126,6 @@ export const users: Record<
     builtInRoleNames: ['editor'],
     customRoleNames: [
       ApmCustomRolename.apmManageOwnAgentKeys,
-      ApmCustomRolename.apmManageAllAgentKeys,
       ApmCustomRolename.apmManageOwnAndCreateAgentKeys,
     ],
   },
