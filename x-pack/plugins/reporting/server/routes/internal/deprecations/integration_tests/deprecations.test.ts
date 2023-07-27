@@ -27,13 +27,21 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
-  let usageCounter: IUsageCounter;
-  let core: ReportingCore;
   let httpSetup: SetupServerReturn['httpSetup'];
 
   const mockConfig = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
   });
+  const createReportingCore = async ({
+    security,
+  }: {
+    security?: ReturnType<typeof securityMock.createSetup>;
+  }) =>
+    createMockReportingCore(
+      mockConfig,
+      createMockPluginSetup({ security, router: httpSetup.createRouter('') }),
+      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
+    );
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -45,14 +53,8 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   });
 
   it('correctly handles authz when security is unavailable', async () => {
-    core = await createMockReportingCore(
-      mockConfig,
-      createMockPluginSetup({
-        security: undefined,
-        router: httpSetup.createRouter(''),
-      }),
-      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
-    );
+    const core = await createReportingCore({});
+
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
@@ -65,11 +67,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   it('correctly handles authz when security is disabled', async () => {
     const security = securityMock.createSetup();
     security.license.isEnabled.mockReturnValue(false);
-    core = await createMockReportingCore(
-      mockConfig,
-      createMockPluginSetup({ security, router: httpSetup.createRouter('') }),
-      await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
-    );
+    const core = await createReportingCore({ security });
 
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
@@ -82,18 +80,8 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
 
   describe('usage counter', () => {
     it('increments the download api counter', async () => {
-      const security = securityMock.createSetup();
-      security.license.isEnabled.mockReturnValue(false);
-      core = await createMockReportingCore(
-        mockConfig,
-        createMockPluginSetup({
-          security,
-          router: httpSetup.createRouter(''),
-        }),
-        await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
-      );
-
-      usageCounter = {
+      const core = await createReportingCore({});
+      const usageCounter = {
         incrementCounter: jest.fn(),
       };
       core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
