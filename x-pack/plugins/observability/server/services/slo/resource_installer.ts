@@ -88,13 +88,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         )
       );
 
-      await this.execute(() => this.esClient.indices.create({ index: SLO_DESTINATION_INDEX_NAME }));
-      await this.execute(() =>
-        this.esClient.indices.create({ index: SLO_SUMMARY_DESTINATION_INDEX_NAME })
-      );
-      await this.execute(() =>
-        this.esClient.indices.create({ index: SLO_SUMMARY_TEMP_INDEX_NAME })
-      );
+      await this.createIndex(SLO_DESTINATION_INDEX_NAME);
+      await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
+      await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
 
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
@@ -193,6 +189,16 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   private async createOrUpdateIngestPipelineTemplate(template: IngestPutPipelineRequest) {
     this.logger.info(`Installing SLO ingest pipeline [${template.id}]`);
     return this.execute(() => this.esClient.ingest.putPipeline(template));
+  }
+
+  private async createIndex(indexName: string) {
+    try {
+      await this.execute(() => this.esClient.indices.create({ index: indexName }));
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw err;
+      }
+    }
   }
 
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
