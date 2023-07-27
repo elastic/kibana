@@ -47,7 +47,7 @@ export function createUsageServices({ getService }: FtrProviderContext) {
       if (!ignoreFailure) {
         const jobInfo = await supertest.get(
           downloadReportPath.replace(
-            PUBLIC_ROUTES.DOWNLOAD_PREFIX,
+            PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX,
             INTERNAL_ROUTES.JOBS.INFO_PREFIX
           )
         );
