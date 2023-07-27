@@ -41,5 +41,6 @@
     "@kbn/tooling-log",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
+    "@kbn/test-subj-selector",
   ]
 }
