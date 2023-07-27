@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, useResizeObserver } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -28,9 +28,7 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
-  const resizeRef = useRef(null);
   const optionsList = useOptionsList();
-  const dimensions = useResizeObserver(resizeRef.current);
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
@@ -41,7 +39,6 @@ export const OptionsListControl = ({
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
-  const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
@@ -124,13 +121,12 @@ export const OptionsListControl = ({
   }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
-    <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
+    <EuiFilterGroup className={'optionsList--filterGroup'}>
       <EuiFilterButton
         badgeColor="success"
         iconType="arrowDown"
         isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
-          'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
           'optionsList--filterBtnPlaceholder': !hasSelections,
         })}
         data-test-subj={`optionsList-control-${id}`}
@@ -143,37 +139,30 @@ export const OptionsListControl = ({
           ? selectionDisplayNode
           : placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
-    </div>
+    </EuiFilterGroup>
   );
 
   return error ? (
     <ControlError error={error} />
   ) : (
-    <EuiFilterGroup
-      className={classNames('optionsList--filterGroup', {
-        'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
-      })}
+    <EuiInputPopover
+      ownFocus
+      input={button}
+      repositionOnScroll
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      className="optionsList__popoverOverride"
+      anchorClassName="optionsList__anchorOverride"
+      closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
+      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+      initialFocus={'[data-test-subj=optionsList-control-search-input]'}
     >
-      <EuiPopover
-        ownFocus
-        button={button}
-        repositionOnScroll
-        isOpen={isPopoverOpen}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        className="optionsList__popoverOverride"
-        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-        anchorClassName="optionsList__anchorOverride"
-        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
-      >
-        <OptionsListPopover
-          width={dimensions.width}
-          isLoading={debouncedLoading}
-          updateSearchString={updateSearchString}
-          loadMoreSuggestions={loadMoreSuggestions}
-        />
-      </EuiPopover>
-    </EuiFilterGroup>
+      <OptionsListPopover
+        isLoading={debouncedLoading}
+        updateSearchString={updateSearchString}
+        loadMoreSuggestions={loadMoreSuggestions}
+      />
+    </EuiInputPopover>
   );
 };

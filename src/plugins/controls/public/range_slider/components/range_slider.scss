@@ -1,15 +1,15 @@
 .rangeSliderAnchor__button {
-  width: 100%;
-  height: 100%;
-  background-color: $euiFormBackgroundColor;
-  padding: 0;
+  .euiFormControlLayout {
+    box-shadow: none;
+    background-color: transparent;
+    padding: 0 0 2px 0;
 
-  .euiFormControlLayout__childrenWrapper {
-    border-radius: 0 $euiFormControlBorderRadius $euiFormControlBorderRadius 0 !important;
-  }
-
-  .euiToolTipAnchor {
-    width: 100%;
+    .euiFormControlLayout__childrenWrapper {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: $euiBorderRadius - 1px;
+      border-bottom-right-radius: $euiBorderRadius - 1px;      
+    }
   }
 }
 
@@ -17,7 +17,7 @@
   font-weight: $euiFontWeightBold;
   box-shadow: none;
   text-align: center;
-  background-color: unset;
+  background-color: transparent;
 
   &:invalid {
     color: $euiTextSubduedColor;

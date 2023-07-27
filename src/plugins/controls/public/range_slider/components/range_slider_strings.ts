@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
   popover: {
-    getNoDataHelpText: () =>
-      i18n.translate('controls.rangeSlider.popover.noDataHelpText', {
+    getMinInputAriaLabel: () =>
+      i18n.translate('controls.rangeSlider.control.', {
         defaultMessage: 'Selected range resulted in no data. No filter was applied.',
       }),
     getNoAvailableDataHelpText: () =>

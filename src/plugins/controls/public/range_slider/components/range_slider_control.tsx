@@ -105,28 +105,30 @@ export const RangeSliderControl: FC = () => {
   return error ? (
     <ControlError error={error} />
   ) : (
-    <EuiDualRange
-      id={id}
-      min={min ?? -Infinity}
-      max={max ?? Infinity}
-      fullWidth
-      showTicks
-      ticks={ticks}
-      isLoading={isLoading}
-      readOnly={canOpenPopover}
-      showInput={'inputWithPopover'}
-      value={[displayedValue[0] || (min ?? -Infinity), displayedValue[1] || (max ?? Infinity)]}
-      minInputProps={getCommonInputProps({
-        inputPlaceholder: String(min),
-        inputValue: String(min) === displayedValue[0] ? '' : displayedValue[0],
-      })}
-      maxInputProps={getCommonInputProps({
-        inputPlaceholder: String(max),
-        inputValue: String(max) === displayedValue[1] ? '' : displayedValue[1],
-      })}
-      onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
-        setDisplayedValue([String(minSelection), String(maxSelection)]);
-      }}
-    />
+    <span className="rangeSliderAnchor__button">
+      <EuiDualRange
+        id={id}
+        min={min ?? -Infinity}
+        max={max ?? Infinity}
+        fullWidth
+        showTicks
+        ticks={ticks}
+        isLoading={isLoading}
+        readOnly={canOpenPopover}
+        showInput={'inputWithPopover'}
+        value={[displayedValue[0] || (min ?? -Infinity), displayedValue[1] || (max ?? Infinity)]}
+        minInputProps={getCommonInputProps({
+          inputPlaceholder: String(min),
+          inputValue: String(min) === displayedValue[0] ? '' : displayedValue[0],
+        })}
+        maxInputProps={getCommonInputProps({
+          inputPlaceholder: String(max),
+          inputValue: String(max) === displayedValue[1] ? '' : displayedValue[1],
+        })}
+        onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+          setDisplayedValue([String(minSelection), String(maxSelection)]);
+        }}
+      />
+    </span>
   );
 };

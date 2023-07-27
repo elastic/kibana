@@ -74,13 +74,14 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
-.controlFrame__labelToolTip {
-  max-width: 40%;
-}
-
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
+
+  .controlFrame__labelToolTip {
+    max-width: 40%;
+  }
+  
 
   &.controlFrameWrapper-isEditable {
     .controlFrame__formControlLayoutLabel {
@@ -113,6 +114,14 @@ $controlMinWidth: $euiSize * 14;
     .controlFrame__control {
       height: 100%;
       transition: opacity .1s;
+      background-color: $euiFormBackgroundColor;
+
+      &.controlFrame--oneLine {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: $euiBorderRadius - 1px;
+        border-bottom-right-radius: $euiBorderRadius - 1px;
+      }
 
       &.controlFrame--twoLine {
         width: 100%;
@@ -130,6 +139,10 @@ $controlMinWidth: $euiSize * 14;
   &--small {
     width: $smallControl;
     min-width: $smallControl;
+
+    .controlFrame__labelToolTip {
+      max-width: 20%;
+    }
   }
 
   &--medium {
