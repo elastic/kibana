@@ -33,9 +33,8 @@ describe(
       allPages.trustedApps,
       allPages.blocklist,
       allPages.eventFilters,
-      allPages.hostIsolationExceptions,
     ];
-    const deniedPages = [allPages.responseActionLog];
+    const deniedPages = [allPages.responseActionLog, allPages.hostIsolationExceptions];
 
     for (const { url, title, pageTestSubj } of allowedPages) {
       it(`should allow access to ${title}`, () => {
