@@ -22,7 +22,7 @@ export class DefaultSLOInstaller implements SLOInstaller {
   ) {}
 
   public async install() {
-    if (this.isInstalling) {
+    if (this.isInstalling || process.env.CI) {
       return;
     }
     this.isInstalling = true;
