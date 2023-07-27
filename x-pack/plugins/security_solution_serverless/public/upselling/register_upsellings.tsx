@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import type { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
   PageUpsellings,
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
+import React, { lazy } from 'react';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
+
+const InvestigationGuideUpsellingLazy = lazy(() => import('./pages/investigation_guide_upselling'));
 
 interface UpsellingsConfig {
   pli: AppFeatureKey;
@@ -72,4 +76,12 @@ export const upsellingSections: UpsellingSections = [
   //   pli: AppFeatureKey.advancedInsights,
   //   component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   // },
+
+  {
+    id: 'investigation_guide',
+    pli: AppFeatureKey.investigationGuide,
+    component: () => (
+      <InvestigationGuideUpsellingLazy requiredPLI={AppFeatureKey.investigationGuide} />
+    ),
+  },
 ];

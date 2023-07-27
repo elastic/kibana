@@ -8,6 +8,7 @@
 import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
+import type { ComponentType } from 'react';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import {
@@ -541,13 +542,22 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+export const plugin = ({
+  licenseIsPlatinum,
+  UpsellInvestigationGuide,
+}: {
+  licenseIsPlatinum: boolean;
+  UpsellInvestigationGuide: ComponentType | null;
+}) => {
+  const upsellComponent = UpsellInvestigationGuide && <UpsellInvestigationGuide />;
+  const label = licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INSIGHT_UPSELL;
+
   return {
     name: 'insights',
     button: {
-      label: licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INIGHT_UPSELL,
+      label: upsellComponent ?? label,
       iconType: 'timelineWithArrow',
-      isDisabled: !licenseIsPlatinum,
+      isDisabled: !licenseIsPlatinum || !!UpsellInvestigationGuide,
     },
     helpText: (
       <div>

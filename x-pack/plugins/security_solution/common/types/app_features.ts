@@ -10,6 +10,12 @@ export enum AppFeatureSecurityKey {
    * Enables Advanced Insights (Entity Risk, GenAI)
    */
   advancedInsights = 'advanced_insights',
+
+  /**
+   * Enables Investigation guide in Timeline
+   */
+  investigationGuide = 'investigation_guide',
+
   /**
    * Enables Endpoint Response Actions like isolate host, trusted apps, blocklist, etc.
    */

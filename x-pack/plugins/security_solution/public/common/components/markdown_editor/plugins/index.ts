@@ -11,6 +11,7 @@ import {
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 
+import type { ComponentType } from 'react';
 import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
@@ -27,14 +28,30 @@ export const {
 
 export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
-export const uiPlugins = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+export const uiPlugins = ({
+  licenseIsPlatinum,
+  UpsellInvestigationGuide,
+}: {
+  licenseIsPlatinum: boolean;
+  UpsellInvestigationGuide: ComponentType | null;
+}) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
-  const insightPluginWithLicense = insightMarkdownPlugin.plugin({ licenseIsPlatinum });
+  const insightPluginWithLicense = insightMarkdownPlugin.plugin({
+    licenseIsPlatinum,
+    UpsellInvestigationGuide,
+  });
   if (currentPlugins.includes(insightPluginWithLicense.name) === false) {
     nonStatefulUiPlugins.push(timelineMarkdownPlugin.plugin);
     nonStatefulUiPlugins.push(osqueryMarkdownPlugin.plugin);
     nonStatefulUiPlugins.push(insightPluginWithLicense);
+  } else {
+    // When called for the second time we need to update insightMarkdownPlugin
+    const index = nonStatefulUiPlugins.findIndex(
+      (plugin) => plugin.name === insightPluginWithLicense.name
+    );
+    nonStatefulUiPlugins[index] = insightPluginWithLicense;
   }
+
   return nonStatefulUiPlugins;
 };
 
