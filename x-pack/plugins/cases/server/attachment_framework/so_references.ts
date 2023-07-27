@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { AttachmentRequest } from '../../common/types/api';
+import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
 import { isCommentRequestTypePersistableState } from '../../common/utils/attachments';
-import type { CommentRequest, CommentRequestPersistableStateType } from '../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 
 interface SavedObjectAttributesAndReferences {
-  state: CommentRequestPersistableStateType;
+  state: PersistableStateAttachmentPayload;
   references: SavedObjectReference[];
 }
 
@@ -22,7 +23,7 @@ interface ExtractDeps {
 type InjectDeps = ExtractDeps;
 
 export function extractPersistableStateReferences(
-  state: CommentRequestPersistableStateType,
+  state: PersistableStateAttachmentPayload,
   deps: ExtractDeps
 ): SavedObjectAttributesAndReferences {
   const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = state;
@@ -49,7 +50,7 @@ export function extractPersistableStateReferences(
 export function injectPersistableReferences(
   { state, references = [] }: SavedObjectAttributesAndReferences,
   deps: InjectDeps
-): CommentRequestPersistableStateType {
+): PersistableStateAttachmentPayload {
   const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = state;
 
   if (!deps.persistableStateAttachmentTypeRegistry.has(persistableStateAttachmentTypeId)) {
@@ -71,7 +72,7 @@ export function injectPersistableReferences(
   return { ...state, ...injectedState, persistableStateAttachmentTypeId };
 }
 
-export const extractPersistableStateReferencesFromSO = <T extends CommentRequest>(
+export const extractPersistableStateReferencesFromSO = <T extends AttachmentRequest>(
   attachmentAttributes: T,
   deps: ExtractDeps
 ) => {
@@ -91,7 +92,7 @@ export const extractPersistableStateReferencesFromSO = <T extends CommentRequest
   return { attributes, references };
 };
 
-export const injectPersistableReferencesToSO = <T extends Partial<CommentRequest>>(
+export const injectPersistableReferencesToSO = <T extends Partial<AttachmentRequest>>(
   attachmentAttributes: T,
   references: SavedObjectReference[],
   deps: InjectDeps

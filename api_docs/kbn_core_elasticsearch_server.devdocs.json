@@ -732,6 +732,10 @@
                 "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
               },
               {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_onboarding/server/plugin.ts"
+              },
+              {
                 "plugin": "console",
                 "path": "src/plugins/console/server/plugin.ts"
               },

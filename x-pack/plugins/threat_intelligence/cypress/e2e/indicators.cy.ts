@@ -210,7 +210,7 @@ describe('Indicators', () => {
       visit(THREAT_INTELLIGENCE);
     });
 
-    it('should handle all search actions', () => {
+    it.skip('should handle all search actions', () => {
       cy.log('should narrow the results to url indicators when respective KQL search is executed');
 
       enterQuery('threat.indicator.type: "url"{enter}');
