@@ -10,6 +10,12 @@ import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
+import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../common/constants';
+import {
+  commentExternalReference,
+  commentFileExternalReference,
+  commentPersistableState,
+} from '../../client/cases/mock';
 
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
@@ -266,6 +272,52 @@ describe('CaseCommentModel', () => {
       });
 
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    describe('validation', () => {
+      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
+        MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
+      );
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('throws if limit is reached when creating persistable state attachment', async () => {
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: commentPersistableState,
+            createdDate,
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('throws if limit is reached when creating external reference', async () => {
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: commentExternalReference,
+            createdDate,
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('does not throw if creating a file external reference and the limit is reached', async () => {
+        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
+
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: commentFileExternalReference,
+            createdDate,
+          })
+        ).resolves.not.toThrow();
+      });
     });
   });
 
@@ -525,6 +577,46 @@ describe('CaseCommentModel', () => {
 
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    describe('validation', () => {
+      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
+        MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
+      );
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('throws if limit is reached when creating persistable state attachment', async () => {
+        await expect(
+          model.bulkCreate({
+            attachments: [commentPersistableState],
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('throws if limit is reached when creating external reference', async () => {
+        await expect(
+          model.bulkCreate({
+            attachments: [commentExternalReference],
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('does not throw if creating a file external reference and the limit is reached', async () => {
+        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
+
+        await expect(
+          model.bulkCreate({
+            attachments: [commentFileExternalReference],
+          })
+        ).resolves.not.toThrow();
+      });
     });
   });
 });
