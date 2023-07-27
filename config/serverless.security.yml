@@ -22,3 +22,8 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
+
+# Serverless security specific options
+xpack.securitySolution.enableExperimental:
+   - discoverInTimeline
+
