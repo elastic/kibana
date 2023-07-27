@@ -24,7 +24,7 @@ import { User } from '../../../cases_api_integration/common/lib/authentication/t
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
-type OmitSupertest<T> = Omit<T, 'supertest'>;
+type GetParams<T extends (...args: any) => any> = Omit<Parameters<T>[0], 'supertest'>;
 
 export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
@@ -56,14 +56,8 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       await deleteAllCaseItems(es);
     },
 
-    async createAttachment({
-      caseId,
-      params,
-    }: {
-      caseId: Parameters<typeof createComment>[0]['caseId'];
-      params: Parameters<typeof createComment>[0]['params'];
-    }): Promise<Case> {
-      return createComment({ supertest: kbnSupertest, params, caseId });
+    async createAttachment(params: GetParams<typeof createComment>): Promise<Case> {
+      return createComment({ supertest: supertestWithoutAuth, ...params });
     },
 
     async setStatus(
@@ -96,8 +90,8 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       return suggestUserProfiles({ supertest: kbnSupertest, req: options });
     },
 
-    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<Case> {
-      return getCase({ supertest: kbnSupertest, caseId });
+    async getCase(params: GetParams<typeof getCase>): Promise<Case> {
+      return getCase({ supertest: supertestWithoutAuth, ...params });
     },
 
     async generateUserActions({
