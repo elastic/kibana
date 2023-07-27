@@ -502,6 +502,7 @@ x-pack/packages/ml/number_utils @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
+x-pack/packages/ml/response_stream @elastic/ml-ui
 x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui

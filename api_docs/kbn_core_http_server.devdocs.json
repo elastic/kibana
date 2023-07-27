@@ -5528,6 +5528,14 @@
                 "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-resources-server-internal",
+                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
@@ -5542,6 +5550,26 @@
               {
                 "plugin": "@kbn/core-apps-server-internal",
                 "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundle_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-rendering-server-internal",
+                "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-rendering-server-internal",
+                "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-rendering-server-internal",
+                "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.test.ts"
               },
               {
                 "plugin": "fleet",
@@ -7132,10 +7160,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/generate_assets/generate_assets_route.ts"
               },
               {
                 "plugin": "securitySolution",
