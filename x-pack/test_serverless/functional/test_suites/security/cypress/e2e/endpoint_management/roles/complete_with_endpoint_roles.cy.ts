@@ -11,7 +11,7 @@ import { login } from '../../../tasks/login';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import {
   EndpointArtifactPageId,
-  ensureProperArtifactPageAuthzAccess,
+  ensureArtifactPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageList,
   getEndpointManagementPageMap,
@@ -135,7 +135,7 @@ describe(
 
       for (const { title, id } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -220,7 +220,7 @@ describe(
 
       for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -235,7 +235,7 @@ describe(
       });
 
       it(`should have Read access only to: Host Isolation Exceptions`, () => {
-        ensureProperArtifactPageAuthzAccess(
+        ensureArtifactPageAuthzAccess(
           'read',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
@@ -272,7 +272,7 @@ describe(
 
       for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -319,7 +319,7 @@ describe(
 
       for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -362,7 +362,7 @@ describe(
 
           for (const { id, title } of artifactPagesFullAccess) {
             it(`should have CRUD access to: ${title}`, () => {
-              ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+              ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
             });
           }
 

@@ -74,7 +74,7 @@ export const isArtifactPageShowingEmptyState = (
  * @param accessLevel
  * @param visitPage If defined, then the page (id) provided will first be `visit`ed and then auth is checked
  */
-export const ensureProperArtifactPageAuthzAccess = (
+export const ensureArtifactPageAuthzAccess = (
   accessLevel: UserAuthzAccessLevel,
   visitPage?: EndpointArtifactPageId
 ): Cypress.Chainable => {

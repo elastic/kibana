@@ -14,7 +14,7 @@ import {
   getEndpointManagementPageMap,
   getEndpointManagementPageList,
   EndpointArtifactPageId,
-  ensureProperArtifactPageAuthzAccess,
+  ensureArtifactPageAuthzAccess,
 } from '../../../screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
@@ -100,12 +100,12 @@ describe(
 
       for (const { title, id } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
-        ensureProperArtifactPageAuthzAccess(
+        ensureArtifactPageAuthzAccess(
           'none',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
@@ -162,7 +162,7 @@ describe(
 
       for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -177,7 +177,7 @@ describe(
       });
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
-        ensureProperArtifactPageAuthzAccess(
+        ensureArtifactPageAuthzAccess(
           'none',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
@@ -203,7 +203,7 @@ describe(
 
       for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -215,7 +215,7 @@ describe(
       }
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
-        ensureProperArtifactPageAuthzAccess(
+        ensureArtifactPageAuthzAccess(
           'none',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
@@ -249,7 +249,7 @@ describe(
 
         for (const { id, title } of artifactPagesFullAccess) {
           it(`should have CRUD access to: ${title}`, () => {
-            ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+            ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
           });
         }
 
@@ -261,7 +261,7 @@ describe(
         }
 
         it(`should NOT have access to Host Isolation Exceptions`, () => {
-          ensureProperArtifactPageAuthzAccess(
+          ensureArtifactPageAuthzAccess(
             'none',
             pageById.hostIsolationExceptions.id as EndpointArtifactPageId
           );
