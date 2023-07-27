@@ -37,6 +37,9 @@ describe('Display not found page', () => {
   });
 
   it('navigates to the exceptions page with incorrect link', () => {
+    // Explicitly fail this test
+    expect(true).to.equal(false);
+
     visit(`${EXCEPTIONS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
