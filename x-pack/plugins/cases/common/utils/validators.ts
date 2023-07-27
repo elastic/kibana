@@ -8,8 +8,8 @@
 import Boom from '@hapi/boom';
 
 import type { CaseUserActionService } from '../../server/services';
-import type { CaseAssignees } from '../api';
 import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../constants';
+import type { CaseAssignees } from '../types/domain';
 
 export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => {
   if (assignees == null) {

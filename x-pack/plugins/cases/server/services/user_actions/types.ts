@@ -21,16 +21,12 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-} from '../../../common/types/domain';
-import type { CaseAssignees } from '../../../common/api/cases/assignee';
-import type {
-  CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CommentRequest,
   User,
-} from '../../../common/api';
+  CaseAssignees,
+} from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
@@ -38,7 +34,11 @@ import type {
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
-import type { UserActionFindRequest } from '../../../common/types/api';
+import type {
+  AttachmentRequest,
+  CasePostRequest,
+  UserActionFindRequest,
+} from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {
@@ -305,7 +305,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
 }
 
 export type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &

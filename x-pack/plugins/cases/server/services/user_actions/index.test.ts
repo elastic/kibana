@@ -17,7 +17,6 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
 import type { UserActionEvent } from './types';
 
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { createSOFindResponse } from '../test_utils';
 import {
@@ -45,7 +44,12 @@ import {
   pushConnectorUserAction,
 } from './test_utils';
 import { comment } from '../../mocks';
-import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  CaseSeverity,
+  CaseStatuses,
+} from '../../../common/types/domain';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();

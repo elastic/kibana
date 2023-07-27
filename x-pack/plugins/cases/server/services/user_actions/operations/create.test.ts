@@ -17,7 +17,6 @@ import { UserActionPersister } from './create';
 import { createUserActionSO } from '../test_utils';
 import type { BulkCreateAttachmentUserAction, CreateUserActionClient } from '../types';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
-import { CommentType } from '../../../../common';
 import {
   getAssigneesAddedRemovedUserActions,
   getAssigneesAddedUserActions,
@@ -30,6 +29,7 @@ import {
   patchRemoveAssigneesCasesRequest,
   patchTagsCasesRequest,
 } from '../mocks';
+import { AttachmentType } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -77,7 +77,7 @@ describe('UserActionPersister', () => {
       {
         id: '1',
         owner: 'cases',
-        attachment: { comment: 'test', type: CommentType.user, owner: 'cases' },
+        attachment: { comment: 'test', type: AttachmentType.user, owner: 'cases' },
       },
     ],
     user: { email: '', full_name: '', username: '' },
