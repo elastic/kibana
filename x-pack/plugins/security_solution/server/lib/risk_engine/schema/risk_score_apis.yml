@@ -208,28 +208,28 @@ components:
       type: object
       required:
         - '@timestamp'
-        - identifier_field
-        - identifier_value
+        - id_field
+        - id_value
         - calculated_level
         - calculated_score
         - calculated_score_norm
         - category_1_score
         - category_1_count
-        - riskiest_inputs
+        - inputs
       properties:
         '@timestamp':
           type: string
           format: 'date-time'
           example: '2017-07-21T17:32:28Z'
           description: The time at which the risk score was calculated.
-        identifier_field:
+        id_field:
           type: string
           example: 'host.name'
-          description: The identifier field defining this risk score. Coupled with `identifier_value`, uniquely identifies the entity being scored.
-        identifier_value:
+          description: The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
+        id_value:
           type: string
           example: 'example.host'
-          description: The identifier value defining this risk score. Coupled with `identifier_field`, uniquely identifies the entity being scored.
+          description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
         calculated_level:
           type: string
           example: 'Critical'
@@ -252,7 +252,7 @@ components:
           type: number
           format: integer
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-        riskiest_inputs:
+        inputs:
           type: array
           description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
@@ -270,11 +270,11 @@ components:
           type: string
           example: .internal.alerts-security.alerts-default-000001
           description: The unique index (`_index`) of the original source document
-        risk_category:
+        category:
           type: string
           example: category_1
           description: The risk category of the risk input document.
-        risk_description:
+        description:
           type: string
           example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
           description: A human-readable description of the risk input document.

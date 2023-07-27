@@ -117,8 +117,8 @@ export default ({ getService }: FtrProviderContext): void => {
             calculated_score_norm: 8.039816232771823,
             category_1_score: 21,
             category_1_count: 1,
-            identifier_field: 'host.name',
-            identifier_value: 'host-1',
+            id_field: 'host.name',
+            id_value: 'host-1',
           },
         ]);
       });

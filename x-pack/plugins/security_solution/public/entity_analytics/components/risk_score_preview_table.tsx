@@ -28,7 +28,7 @@ export const RiskScorePreviewTable = ({
 }) => {
   const columns: RiskScoreColumn[] = [
     {
-      field: 'identifier_value',
+      field: 'id_value',
       name: 'Name',
       render: (itemName: string) => {
         return type === RiskScoreEntity.host ? (

@@ -44,21 +44,19 @@ const bucketToResponse = ({
   identifierField: string;
 }): RiskScore => ({
   '@timestamp': now,
-  identifier_field: identifierField,
-  identifier_value: bucket.key[identifierField],
+  id_field: identifierField,
+  id_value: bucket.key[identifierField],
   calculated_level: bucket.risk_details.value.level,
   calculated_score: bucket.risk_details.value.score,
   calculated_score_norm: bucket.risk_details.value.normalized_score,
   category_1_score: bucket.risk_details.value.category_1_score,
   category_1_count: bucket.risk_details.value.category_1_count,
   notes: bucket.risk_details.value.notes,
-  risk_inputs: bucket.risk_inputs.hits.hits.map((riskInput) => ({
+  inputs: bucket.inputs.hits.hits.map((riskInput) => ({
     id: riskInput._id,
     index: riskInput._index,
-    risk_description: `Alert from Rule: ${
-      riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'
-    }`,
-    risk_category: RiskCategories.category_1,
+    description: `Alert from Rule: ${riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'}`,
+    category: RiskCategories.category_1,
     risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
     timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
   })),
@@ -153,7 +151,7 @@ const buildIdentifierTypeAggregation = ({
       after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
     },
     aggs: {
-      risk_inputs: {
+      inputs: {
         top_hits: {
           size: 10,
           sort: { [ALERT_RISK_SCORE]: 'desc' },

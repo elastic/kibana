@@ -73,16 +73,16 @@ export default ({ getService }: FtrProviderContext) => {
                   category_1_score: {
                     type: 'float',
                   },
-                  identifier_field: {
+                  id_field: {
                     type: 'keyword',
                   },
-                  identifier_value: {
+                  id_value: {
                     type: 'keyword',
                   },
                   notes: {
                     type: 'keyword',
                   },
-                  risk_inputs: {
+                  inputs: {
                     properties: {
                       id: {
                         type: 'keyword',
@@ -90,10 +90,10 @@ export default ({ getService }: FtrProviderContext) => {
                       index: {
                         type: 'keyword',
                       },
-                      risk_category: {
+                      category: {
                         type: 'keyword',
                       },
-                      risk_description: {
+                      description: {
                         type: 'keyword',
                       },
                       risk_score: {
@@ -129,16 +129,16 @@ export default ({ getService }: FtrProviderContext) => {
                   category_1_score: {
                     type: 'float',
                   },
-                  identifier_field: {
+                  id_field: {
                     type: 'keyword',
                   },
-                  identifier_value: {
+                  id_value: {
                     type: 'keyword',
                   },
                   notes: {
                     type: 'keyword',
                   },
-                  risk_inputs: {
+                  inputs: {
                     properties: {
                       id: {
                         type: 'keyword',
@@ -146,10 +146,10 @@ export default ({ getService }: FtrProviderContext) => {
                       index: {
                         type: 'keyword',
                       },
-                      risk_category: {
+                      category: {
                         type: 'keyword',
                       },
-                      risk_description: {
+                      description: {
                         type: 'keyword',
                       },
                       risk_score: {

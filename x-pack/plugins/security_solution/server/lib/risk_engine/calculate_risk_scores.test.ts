@@ -154,8 +154,8 @@ describe('calculateRiskScores()', () => {
       expect(score).toEqual(
         expect.objectContaining({
           '@timestamp': expect.any(String),
-          identifier_field: expect.any(String),
-          identifier_value: expect.any(String),
+          id_field: expect.any(String),
+          id_value: expect.any(String),
           calculated_level: 'Unknown',
           calculated_score: expect.any(Number),
           calculated_score_norm: expect.any(Number),
@@ -173,12 +173,12 @@ describe('calculateRiskScores()', () => {
       const [score] = userScores ?? [];
       expect(score).toEqual(
         expect.objectContaining({
-          risk_inputs: expect.arrayContaining([
+          inputs: expect.arrayContaining([
             expect.objectContaining({
               id: expect.any(String),
               index: expect.any(String),
-              risk_category: expect.any(String),
-              risk_description: expect.any(String),
+              category: expect.any(String),
+              description: expect.any(String),
               risk_score: expect.any(Number),
               timestamp: expect.any(String),
             }),

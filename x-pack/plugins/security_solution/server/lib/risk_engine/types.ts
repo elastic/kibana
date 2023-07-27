@@ -60,8 +60,8 @@ export interface CalculateScoresResponse {
 export interface SimpleRiskInput {
   id: string;
   index: string;
-  risk_category: RiskCategories;
-  risk_description: string;
+  category: RiskCategories;
+  description: string;
   risk_score: string | number | undefined;
   timestamp: string | undefined;
 }
@@ -80,15 +80,15 @@ export interface EcsRiskScore {
 
 export interface RiskScore {
   '@timestamp': string;
-  identifier_field: string;
-  identifier_value: string;
+  id_field: string;
+  id_value: string;
   calculated_level: string;
   calculated_score: number;
   calculated_score_norm: number;
   category_1_score: number;
   category_1_count: number;
   notes: string[];
-  risk_inputs: SimpleRiskInput[] | RiskInput[];
+  inputs: SimpleRiskInput[] | RiskInput[];
 }
 
 export interface CalculateRiskScoreAggregations {
@@ -115,5 +115,5 @@ export interface RiskScoreBucket {
       category_1_count: number;
     };
   };
-  risk_inputs: SearchResponse;
+  inputs: SearchResponse;
 }

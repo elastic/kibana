@@ -87,7 +87,7 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
     return {
       '@timestamp': score['@timestamp'],
       [identifierType]: {
-        name: score.identifier_value,
+        name: score.id_value,
         risk: {
           ...rest,
         },

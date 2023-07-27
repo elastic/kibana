@@ -25,7 +25,7 @@ import {
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   delete score['@timestamp'];
-  delete score.risk_inputs;
+  delete score.inputs;
   delete score.notes;
   // delete score.category_1_score;
   return score;

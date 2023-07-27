@@ -29,7 +29,7 @@ const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ris
       category_1_count: 1,
     },
   },
-  risk_inputs: {
+  inputs: {
     took: 17,
     timed_out: false,
     _shards: {
@@ -86,20 +86,20 @@ const buildResponseMock = (
     host: [
       {
         '@timestamp': '2021-08-19T20:55:59.000Z',
-        identifier_field: 'host.name',
-        identifier_value: 'hostname',
+        id_field: 'host.name',
+        id_value: 'hostname',
         calculated_level: 'Unknown',
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
         category_1_count: 12,
         notes: [],
-        risk_inputs: [
+        inputs: [
           {
             id: '_id',
             index: '_index',
-            risk_category: RiskCategories.category_1,
-            risk_description: 'Alert from Rule: My rule',
+            category: RiskCategories.category_1,
+            description: 'Alert from Rule: My rule',
             risk_score: 30,
             timestamp: '2021-08-19T18:55:59.000Z',
           },

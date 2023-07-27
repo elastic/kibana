@@ -100,8 +100,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
               category_1_score: 21,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -124,8 +124,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
               category_1_score: 21,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
             {
               calculated_level: 'Unknown',
@@ -133,8 +133,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
               category_1_score: 21,
-              identifier_field: 'host.name',
-              identifier_value: 'host-2',
+              id_field: 'host.name',
+              id_value: 'host-2',
             },
           ]);
         });
@@ -157,8 +157,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 10.88232052161514,
               category_1_count: 2,
               category_1_score: 28,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -179,8 +179,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 18.091552473412246,
               category_1_count: 30,
               category_1_score: 37,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -204,8 +204,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 18.091552473412246,
               category_1_count: 30,
               category_1_score: 37,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
             {
               calculated_level: 'Unknown',
@@ -213,8 +213,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
               category_1_score: 21,
-              identifier_field: 'host.name',
-              identifier_value: 'host-2',
+              id_field: 'host.name',
+              id_value: 'host-2',
             },
           ]);
         });
@@ -235,8 +235,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 19.399064346392823,
               category_1_count: 100,
               category_1_score: 37,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -260,8 +260,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 92.37649688758484,
               category_1_count: 100,
               category_1_score: 209,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -291,8 +291,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 97.59362951445543,
               category_1_count: 1000,
               category_1_score: 209,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -319,7 +319,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           // if after_key was not respected, 'aaa' would be included here
           expect(scores.user).to.have.length(1);
-          expect(scores.user?.[0].identifier_value).to.equal('zzz');
+          expect(scores.user?.[0].id_value).to.equal('zzz');
         });
       });
 
@@ -358,7 +358,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(scores.host).to.have.length(1);
-          expect(scores.host?.[0].risk_inputs).to.have.length(1);
+          expect(scores.host?.[0].inputs).to.have.length(1);
         });
       });
 
@@ -387,8 +387,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 86.18326192354185,
               category_1_count: 100,
               category_1_score: 203,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -416,8 +416,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 46.18824844379242,
               category_1_count: 100,
               category_1_score: 209,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
         });
@@ -443,8 +443,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 64.66354782130938,
               category_1_count: 100,
               category_1_score: 209,
-              identifier_field: 'user.name',
-              identifier_value: 'user-1',
+              id_field: 'user.name',
+              id_value: 'user-1',
             },
           ]);
         });
@@ -472,8 +472,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 35.695861854790394,
               category_1_count: 50,
               category_1_score: 209,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
 
@@ -484,8 +484,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 71.39172370958079,
               category_1_count: 50,
               category_1_score: 209,
-              identifier_field: 'user.name',
-              identifier_value: 'user-1',
+              id_field: 'user.name',
+              id_value: 'user-1',
             },
           ]);
         });
@@ -522,8 +522,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 35.695861854790394,
               category_1_score: 77,
               category_1_count: 50,
-              identifier_field: 'host.name',
-              identifier_value: 'host-1',
+              id_field: 'host.name',
+              id_value: 'host-1',
             },
           ]);
 
@@ -534,8 +534,8 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 71.39172370958079,
               category_1_score: 165,
               category_1_count: 50,
-              identifier_field: 'user.name',
-              identifier_value: 'user-1',
+              id_field: 'user.name',
+              id_value: 'user-1',
             },
           ]);
         });

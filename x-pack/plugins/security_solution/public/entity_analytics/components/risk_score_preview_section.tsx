@@ -40,7 +40,7 @@ interface IRiskScorePreviewPanel {
 
 const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
   scores
-    ?.filter((item) => item?.identifier_field === field)
+    ?.filter((item) => item?.id_field === field)
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 

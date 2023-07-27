@@ -26,12 +26,12 @@ export const ilmPolicy = {
 };
 
 const commonRiskFields: FieldMap = {
-  identifier_field: {
+  id_field: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  identifier_value: {
+  id_value: {
     type: 'keyword',
     array: false,
     required: false,
@@ -56,37 +56,37 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
-  risk_inputs: {
+  inputs: {
     type: 'object',
     array: true,
     required: false,
   },
-  'risk_inputs.id': {
+  'inputs.id': {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'risk_inputs.index': {
+  'inputs.index': {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'risk_inputs.risk_category': {
+  'inputs.category': {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'risk_inputs.risk_description': {
+  'inputs.description': {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'risk_inputs.risk_score': {
+  'inputs.risk_score': {
     type: 'float',
     array: false,
     required: false,
   },
-  'risk_inputs.timestamp': {
+  'inputs.timestamp': {
     type: 'date',
     array: false,
     required: false,
