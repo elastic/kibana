@@ -20,6 +20,7 @@ const artifactPageTopTestSubjPrefix: Readonly<Record<EndpointArtifactPageId, str
   hostIsolationExceptions: 'hostIsolationExceptionsListPage',
   blocklist: 'blocklistPage',
 };
+
 const pagesById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();
 
 const createSubjectSelector = (selectorSuffix: string, pageId?: EndpointArtifactPageId): string => {
@@ -30,6 +31,10 @@ const createSubjectSelector = (selectorSuffix: string, pageId?: EndpointArtifact
   return Object.values(artifactPageTopTestSubjPrefix)
     .map((testSubjPrefix) => testSubjSelector(testSubjPrefix + selectorSuffix))
     .join(',');
+};
+
+export const visitEndpointArtifactPage = (page: EndpointArtifactPageId): Cypress.Chainable => {
+  return cy.visit(pagesById[page]);
 };
 
 export const getArtifactListEmptyStateAddButton = (
@@ -78,7 +83,7 @@ export const ensureArtifactPageAuthzAccess = (
   visitPage?: EndpointArtifactPageId
 ): Cypress.Chainable => {
   if (visitPage) {
-    cy.visit(pagesById[visitPage]);
+    visitEndpointArtifactPage(visitPage);
   }
 
   isArtifactPageShowingEmptyState().then((isEmptyState) => {
