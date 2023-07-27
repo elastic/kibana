@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/public';
 import getPort from 'get-port';
-import http from 'http';
+import http, { Server } from 'http';
 import { PassThrough } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -42,10 +42,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     let connectorId: string;
 
+    let server: Server;
+
     before(async () => {
       const port = await getPort({ port: getPort.makeRange(9000, 9100) });
 
-      http
+      server = http
         .createServer((request, response) => {
           requestHandler(request, response);
         })
@@ -68,6 +70,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       connectorId = response.body.id;
+    });
+
+    after(() => {
+      server.close();
     });
 
     it("returns a 4xx if the connector doesn't exist", async () => {

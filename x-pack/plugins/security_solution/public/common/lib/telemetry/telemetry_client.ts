@@ -18,7 +18,7 @@ import type {
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
 } from './types';
-import { TelemetryEventTypes } from './types';
+import { TelemetryEventTypes } from './constants';
 
 /**
  * Client which aggregate all the available telemetry tracking functions

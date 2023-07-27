@@ -26,6 +26,7 @@ const wrapperClassName = css`
     border: none;
     box-shadow: none;
     background: none;
+    padding-left: 0;
   }
 `;
 
