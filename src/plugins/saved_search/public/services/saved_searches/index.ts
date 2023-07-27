@@ -24,5 +24,6 @@ export {
   getSavedSearchAttributeService,
   toSavedSearch,
   type SavedSearchAttributeService,
+  type SavedSearchUnwrapMetaInfo,
   type SavedSearchUnwrapResult,
 } from './saved_search_attribute_service';

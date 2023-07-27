@@ -16,6 +16,7 @@ export type {
   SearchByValueInput,
   SavedSearchByValueAttributes,
   SavedSearchAttributeService,
+  SavedSearchUnwrapMetaInfo,
   SavedSearchUnwrapResult,
 } from './services/saved_searches';
 export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
