@@ -77,7 +77,14 @@ export const ConfigureFields: React.FC = () => {
       <EuiForm component="form">
         {isTextExpansionModelSelected ? (
           <>
-            {areInputsDisabled || <MultiFieldMapping />}
+            {areInputsDisabled ? (
+              <></>
+            ) : (
+              <>
+                <MultiFieldMapping />
+                <EuiSpacer size="l" />
+              </>
+            )}
             <SelectedFieldMappings isReadOnly={areInputsDisabled} />
           </>
         ) : (
