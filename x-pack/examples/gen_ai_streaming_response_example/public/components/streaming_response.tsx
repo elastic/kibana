@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiAccordion,
@@ -27,15 +26,8 @@ export interface StreamingResponseProps {
   http: CoreStart['http'];
   prompt: string;
   selectedConnectorId: string;
+  initialIsOpen?: boolean;
 }
-
-export interface PromptObservableState {
-  chunks: Chunk[];
-  message?: string;
-  error?: string;
-  loading: boolean;
-}
-
 interface ChunkChoice {
   index: 0;
   delta: { role: string; content: string };
@@ -75,11 +67,12 @@ export const StreamingResponse = ({
   http,
   prompt,
   selectedConnectorId,
+  initialIsOpen = false,
 }: StreamingResponseProps) => {
   const { euiTheme } = useEuiTheme();
-  const [hasOpened, setHasOpened] = useState(false);
+  const [hasOpened, setHasOpened] = useState(initialIsOpen);
 
-  const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream(
+  const { errors, start, cancel, data, isRunning } = useFetchStream(
     http,
     `/internal/examples/execute_gen_ai_connector`,
     undefined,
@@ -90,19 +83,16 @@ export const StreamingResponse = ({
     { reducer: streamReducer, initialState: '' }
   );
 
+  // Start fetching when the accordion was opened
   useEffect(() => {
     if (hasOpened && !isRunning && errors.length === 0 && data === '') {
       start();
     }
   }, [data, errors, hasOpened, isRunning, start]);
 
-  function refreshHandler() {
-    if (isRunning) {
-      cancel();
-    }
-    dispatch('RESET');
-    start();
-  }
+  // Cancel fetching when the component unmounts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => cancel, []);
 
   let content = data;
 
@@ -179,26 +169,13 @@ export const StreamingResponse = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        initialIsOpen={false}
+        initialIsOpen={initialIsOpen}
         onToggle={() => {
           setHasOpened(true);
         }}
       >
         <EuiSpacer size="s" />
         {inner}
-        {hasOpened && !isRunning && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiButton onClick={refreshHandler} size="s" iconType={'refresh'}>
-              {i18n.translate(
-                'genAiStreamingResponseExample.app.component.streamingResponseRefresh',
-                {
-                  defaultMessage: 'Refresh',
-                }
-              )}
-            </EuiButton>
-          </>
-        )}
       </EuiAccordion>
     </EuiPanel>
   );
