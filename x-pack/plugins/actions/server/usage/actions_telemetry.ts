@@ -30,7 +30,7 @@ export async function getTotalCount(
           String genAiActionType = actionType +"__"+ doc['action.config.apiProvider'].value;
           state.types.put(genAiActionType, state.types.containsKey(genAiActionType) ? state.types.get(genAiActionType) + 1 : 1);
         } else {
-          state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 19);
+          state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 1);
         }
       `,
       // Combine script is executed per cluster, but we already have a key-value pair per cluster.
