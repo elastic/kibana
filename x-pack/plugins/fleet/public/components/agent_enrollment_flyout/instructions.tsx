@@ -80,8 +80,8 @@ export const Instructions = (props: InstructionProps) => {
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   useEffect(() => {
-    // If we have a cloudFormationTemplateUrl, we want to hide the selection type
-    if (props.cloudSecurityIntegration?.cloudFormationUrl) {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (props.cloudSecurityIntegration?.isCloudFormation) {
       setSelectionType(undefined);
     } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
