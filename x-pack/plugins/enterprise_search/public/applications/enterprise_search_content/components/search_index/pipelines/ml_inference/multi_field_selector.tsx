@@ -220,7 +220,12 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
                 type: 'icon',
               },
             ],
-            name: '',
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions',
+              {
+                defaultMessage: 'Actions',
+              }
+            ),
             width: '10%',
           } as EuiBasicTableColumn<FieldMapping>,
         ]),
