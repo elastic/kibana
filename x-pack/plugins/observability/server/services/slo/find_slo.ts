@@ -20,12 +20,10 @@ export class FindSLO {
   ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
-    const pagination: Pagination = toPagination(params);
-
     const sloSummaryList = await this.summarySearchClient.search(
       params.kqlQuery ?? '',
       toSort(params),
-      pagination
+      toPagination(params)
     );
 
     const sloList = await this.repository.findAllByIds(sloSummaryList.results.map((slo) => slo.id));
@@ -41,10 +39,12 @@ export class FindSLO {
 }
 
 function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
-  return sloSummaryList.map((sloSummary) => ({
-    ...sloList.find((s) => s.id === sloSummary.id)!,
-    summary: sloSummary.summary,
-  }));
+  return sloSummaryList
+    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+    .map((sloSummary) => ({
+      ...sloList.find((s) => s.id === sloSummary.id)!,
+      summary: sloSummary.summary,
+    }));
 }
 
 function toPagination(params: FindSLOParams): Pagination {

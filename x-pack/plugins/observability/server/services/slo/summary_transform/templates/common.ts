@@ -61,6 +61,12 @@ export const groupBy = {
       field: 'errorBudgetEstimated',
     },
   },
+  // Differentiate the temporary document from the summary one
+  isTempDoc: {
+    terms: {
+      field: 'isTempDoc',
+    },
+  },
   // optional fields: only specified for APM indicators. Must include missing_bucket:true
   'service.name': {
     terms: {

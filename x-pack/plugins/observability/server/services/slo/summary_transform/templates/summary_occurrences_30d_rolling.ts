@@ -28,6 +28,10 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
         type: 'boolean',
         script: 'emit(false)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {
@@ -134,11 +138,12 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
   sync: {
     time: {
       field: '@timestamp',
-      delay: '60s',
+      delay: '125s',
     },
   },
   settings: {
     deduce_mappings: false,
+    max_page_search_size: 8000,
   },
   _meta: {
     version: SLO_RESOURCES_VERSION,

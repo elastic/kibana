@@ -106,6 +106,19 @@ describe('UpdateSLO', () => {
     expectInstallationOfNewSLOTransform();
   });
 
+  it('index a temporary summary document', async () => {
+    const slo = createSLO({
+      id: 'unique-id',
+      indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+    });
+    mockRepository.findById.mockResolvedValueOnce(slo);
+
+    const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+    await updateSLO.execute(slo.id, { indicator: newIndicator });
+
+    expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
+  });
+
   it('removes the obsolete data from the SLO previous revision', async () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),

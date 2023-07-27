@@ -85,6 +85,11 @@ Array [
               "field": "errorBudgetEstimated",
             },
           },
+          "isTempDoc": Object {
+            "terms": Object {
+              "field": "isTempDoc",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -200,11 +205,15 @@ Array [
             "script": "emit(false)",
             "type": "boolean",
           },
+          "isTempDoc": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
         },
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -297,6 +306,11 @@ Array [
           "errorBudgetEstimated": Object {
             "terms": Object {
               "field": "errorBudgetEstimated",
+            },
+          },
+          "isTempDoc": Object {
+            "terms": Object {
+              "field": "isTempDoc",
             },
           },
           "service.environment": Object {
@@ -414,11 +428,15 @@ Array [
             "script": "emit(false)",
             "type": "boolean",
           },
+          "isTempDoc": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
         },
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -511,6 +529,11 @@ Array [
           "errorBudgetEstimated": Object {
             "terms": Object {
               "field": "errorBudgetEstimated",
+            },
+          },
+          "isTempDoc": Object {
+            "terms": Object {
+              "field": "isTempDoc",
             },
           },
           "service.environment": Object {
@@ -628,11 +651,15 @@ Array [
             "script": "emit(false)",
             "type": "boolean",
           },
+          "isTempDoc": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
         },
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -738,6 +765,11 @@ Array [
           "errorBudgetEstimated": Object {
             "terms": Object {
               "field": "errorBudgetEstimated",
+            },
+          },
+          "isTempDoc": Object {
+            "terms": Object {
+              "field": "isTempDoc",
             },
           },
           "service.environment": Object {
@@ -855,11 +887,15 @@ Array [
             "script": "emit(false)",
             "type": "boolean",
           },
+          "isTempDoc": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
         },
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },
@@ -982,6 +1018,11 @@ Array [
               "field": "errorBudgetEstimated",
             },
           },
+          "isTempDoc": Object {
+            "terms": Object {
+              "field": "isTempDoc",
+            },
+          },
           "service.environment": Object {
             "terms": Object {
               "field": "service.environment",
@@ -1097,11 +1138,15 @@ Array [
             "script": "emit(false)",
             "type": "boolean",
           },
+          "isTempDoc": Object {
+            "script": "emit(false)",
+            "type": "boolean",
+          },
         },
       },
       "sync": Object {
         "time": Object {
-          "delay": "60s",
+          "delay": "125s",
           "field": "@timestamp",
         },
       },

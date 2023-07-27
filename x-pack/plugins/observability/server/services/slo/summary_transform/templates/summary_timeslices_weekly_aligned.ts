@@ -28,6 +28,10 @@ export const SUMMARY_TIMESLICES_WEEKLY_ALIGNED: TransformPutTransformRequest = {
         type: 'boolean',
         script: 'emit(false)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {
@@ -147,7 +151,7 @@ export const SUMMARY_TIMESLICES_WEEKLY_ALIGNED: TransformPutTransformRequest = {
   sync: {
     time: {
       field: '@timestamp',
-      delay: '60s',
+      delay: '125s',
     },
   },
   settings: {

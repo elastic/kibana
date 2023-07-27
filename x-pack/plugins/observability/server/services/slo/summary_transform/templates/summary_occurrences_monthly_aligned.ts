@@ -28,6 +28,10 @@ export const SUMMARY_OCCURRENCES_MONTHLY_ALIGNED: TransformPutTransformRequest =
         type: 'boolean',
         script: 'emit(true)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {
@@ -132,7 +136,7 @@ export const SUMMARY_OCCURRENCES_MONTHLY_ALIGNED: TransformPutTransformRequest =
   sync: {
     time: {
       field: '@timestamp',
-      delay: '60s',
+      delay: '125s',
     },
   },
   settings: {

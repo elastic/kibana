@@ -28,6 +28,10 @@ export const SUMMARY_OCCURRENCES_90D_ROLLING: TransformPutTransformRequest = {
         type: 'boolean',
         script: 'emit(false)',
       },
+      isTempDoc: {
+        type: 'boolean',
+        script: 'emit(false)',
+      },
     },
     query: {
       bool: {
@@ -134,7 +138,7 @@ export const SUMMARY_OCCURRENCES_90D_ROLLING: TransformPutTransformRequest = {
   sync: {
     time: {
       field: '@timestamp',
-      delay: '60s',
+      delay: '125s',
     },
   },
   settings: {

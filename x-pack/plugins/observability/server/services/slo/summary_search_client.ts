@@ -7,8 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { assertNever } from '@kbn/std';
+import _ from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
+import { toHighPrecision } from '../../utils/number';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
 
 interface EsSummaryDocument {
@@ -23,6 +25,7 @@ interface EsSummaryDocument {
   errorBudgetEstimated: boolean;
   statusCode: number;
   status: Status;
+  isTempDoc: boolean;
 }
 
 export interface Paginated<T> {
@@ -61,39 +64,72 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     pagination: Pagination
   ): Promise<Paginated<SLOSummary>> {
     try {
-      const result = await this.esClient.search<EsSummaryDocument>({
+      const { count: total } = await this.esClient.count({
+        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        query: getElastichsearchQueryOrThrow(kqlQuery),
+      });
+
+      if (total === 0) {
+        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
+      }
+
+      const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         query: getElastichsearchQueryOrThrow(kqlQuery),
         sort: {
+          // non-temp first, then temp documents
+          isTempDoc: {
+            order: 'asc',
+          },
           [toDocumentSortField(sort.field)]: {
             order: sort.direction,
           },
         },
         from: (pagination.page - 1) * pagination.perPage,
-        size: pagination.perPage,
+        size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
       });
 
-      const total =
-        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value;
+      const [tempSummaryDocuments, summaryDocuments] = _.partition(
+        summarySearch.hits.hits,
+        (doc) => !!doc._source?.isTempDoc
+      );
 
-      if (total === undefined || total === 0) {
-        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
-      }
+      // Always attempt to delete temporary summary documents with an existing non-temp summary document
+      // The temp summary documents are _eventually_ removed as we get through the real summary documents
+      const summarySloIds = summaryDocuments.map((doc) => doc._source?.slo.id);
+      await this.esClient.deleteByQuery({
+        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        query: {
+          bool: {
+            filter: [{ terms: { 'slo.id': summarySloIds } }, { term: { isTempDoc: true } }],
+          },
+        },
+      });
 
+      const tempSummaryDocumentsDeduped = tempSummaryDocuments.filter(
+        (doc) => !summarySloIds.includes(doc._source?.slo.id)
+      );
+
+      const finalResults = summaryDocuments
+        .concat(tempSummaryDocumentsDeduped)
+        .slice(0, pagination.perPage);
+
+      const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
       return {
-        total,
+        total: finalTotal,
         perPage: pagination.perPage,
         page: pagination.page,
-        results: result.hits.hits.map((doc) => ({
+        results: finalResults.map((doc) => ({
           id: doc._source!.slo.id,
           summary: {
             errorBudget: {
-              initial: doc._source!.errorBudgetInitial,
-              consumed: doc._source!.errorBudgetConsumed,
-              remaining: doc._source!.errorBudgetRemaining,
+              initial: toHighPrecision(doc._source!.errorBudgetInitial),
+              consumed: toHighPrecision(doc._source!.errorBudgetConsumed),
+              remaining: toHighPrecision(doc._source!.errorBudgetRemaining),
               isEstimated: doc._source!.errorBudgetEstimated,
             },
-            sliValue: doc._source!.sliValue,
+            sliValue: toHighPrecision(doc._source!.sliValue),
             status: doc._source!.status,
           },
         })),

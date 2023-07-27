@@ -11,32 +11,32 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-
-import {
-  SLO_INGEST_PIPELINE_NAME,
-  SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_INDEX_TEMPLATE_NAME,
-  SLO_RESOURCES_VERSION,
-  SLO_INDEX_TEMPLATE_PATTERN,
-  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
-  SLO_DESTINATION_INDEX_NAME,
-  SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  SLO_SUMMARY_INGEST_PIPELINE_NAME,
-} from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
-import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
-import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryMappingsTemplate } from '../../assets/component_templates/slo_summary_mappings_template';
 import { getSLOSummarySettingsTemplate } from '../../assets/component_templates/slo_summary_settings_template';
+import {
+  SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_DESTINATION_INDEX_NAME,
+  SLO_INDEX_TEMPLATE_NAME,
+  SLO_INDEX_TEMPLATE_PATTERN,
+  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
+  SLO_INGEST_PIPELINE_NAME,
+  SLO_RESOURCES_VERSION,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+  SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
+  SLO_SUMMARY_INGEST_PIPELINE_NAME,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
+} from '../../assets/constants';
+import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../../assets/index_templates/slo_summary_index_templates';
-import { retryTransientEsErrors } from '../../utils/retry';
+import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
+import { retryTransientEsErrors } from '../../utils/retry';
 
 export interface ResourceInstaller {
   ensureCommonResourcesInstalled(): Promise<void>;
@@ -88,10 +88,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         )
       );
 
-      await this.execute(() => this.esClient.indices.create({ index: SLO_DESTINATION_INDEX_NAME }));
-      await this.execute(() =>
-        this.esClient.indices.create({ index: SLO_SUMMARY_DESTINATION_INDEX_NAME })
-      );
+      await this.createIndex(SLO_DESTINATION_INDEX_NAME);
+      await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
+      await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
 
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
@@ -178,18 +177,28 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   }
 
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {
-    this.logger.debug(`Installing SLO component template ${template.name}`);
+    this.logger.info(`Installing SLO component template [${template.name}]`);
     return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
   }
 
   private async createOrUpdateIndexTemplate(template: IndicesPutIndexTemplateRequest) {
-    this.logger.debug(`Installing SLO index template ${template.name}`);
+    this.logger.info(`Installing SLO index template [${template.name}]`);
     return this.execute(() => this.esClient.indices.putIndexTemplate(template));
   }
 
   private async createOrUpdateIngestPipelineTemplate(template: IngestPutPipelineRequest) {
-    this.logger.debug(`Installing SLO ingest pipeline template ${template.id}`);
+    this.logger.info(`Installing SLO ingest pipeline [${template.id}]`);
     return this.execute(() => this.esClient.ingest.putPipeline(template));
+  }
+
+  private async createIndex(indexName: string) {
+    try {
+      await this.execute(() => this.esClient.indices.create({ index: indexName }));
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw err;
+      }
+    }
   }
 
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {

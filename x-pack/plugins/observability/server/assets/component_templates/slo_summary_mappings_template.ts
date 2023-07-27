@@ -113,6 +113,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
           type: 'keyword',
           ignore_above: 32,
         },
+        isTempDoc: {
+          type: 'boolean',
+        },
       },
     },
   },

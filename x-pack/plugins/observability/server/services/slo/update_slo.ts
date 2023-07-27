@@ -11,10 +11,12 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../assets/constants';
 import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
+import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 
 export class UpdateSLO {
@@ -37,6 +39,12 @@ export class UpdateSLO {
     await this.repository.save(updatedSlo);
     await this.transformManager.install(updatedSlo);
     await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
+
+    await this.esClient.index({
+      index: SLO_SUMMARY_TEMP_INDEX_NAME,
+      id: `slo-${updatedSlo.id}`,
+      document: createTempSummaryDocument(updatedSlo),
+    });
 
     return this.toResponse(updatedSlo);
   }

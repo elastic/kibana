@@ -27617,7 +27617,6 @@
     "xpack.observability.slo.duration.minutely": "每分钟",
     "xpack.observability.slo.duration.monthly": "每月",
     "xpack.observability.slo.duration.weekly": "每周",
-    "xpack.observability.slo.duration.yearly": "每年",
     "xpack.observability.slo.feedbackButtonLabel": "告诉我们您的看法！",
     "xpack.observability.slo.globalDiagnosis.errorNotification": "您没有适当权限，无法使用此功能。",
     "xpack.observability.slo.indicators.apmAvailability": "APM 可用性",
