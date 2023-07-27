@@ -32,7 +32,8 @@ import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import { riskEngineConfigurationTypeName } from './saved_object';
-import { RiskEngineStatus } from './types';
+import type { InitRiskEngineResult } from '../../../common/risk_engine/types';
+import { RiskEngineStatus } from '../../../common/risk_engine/types';
 import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
@@ -42,7 +43,7 @@ interface SavedObjectsClients {
   savedObjectsClient: SavedObjectsClientContract;
 }
 interface InitOpts extends SavedObjectsClients {
-  namespace?: string;
+  namespace: string;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -64,8 +65,46 @@ export class RiskEngineDataClient {
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
   public async init({ namespace, savedObjectsClient }: InitOpts) {
-    await this.initializeResources({ namespace });
-    return this.initSavedObjects({ savedObjectsClient });
+    const result: InitRiskEngineResult = {
+      leggacyRiskEngineDisabled: false,
+      riskEngineResourcesInstalled: false,
+      riskEngineConfigurationCreated: false,
+      riskEngineEnabled: false,
+      errors: [] as string[],
+    };
+
+    try {
+      result.leggacyRiskEngineDisabled = await this.disableLegacyRiskEngine({ namespace });
+    } catch (e) {
+      result.leggacyRiskEngineDisabled = false;
+      result.errors.push(e.message);
+    }
+
+    try {
+      await this.initializeResources({ namespace });
+      result.riskEngineResourcesInstalled = true;
+    } catch (e) {
+      result.errors.push(e.message);
+      return result;
+    }
+
+    try {
+      await this.initSavedObjects({ savedObjectsClient });
+      result.riskEngineConfigurationCreated = true;
+    } catch (e) {
+      result.errors.push(e.message);
+      return result;
+    }
+
+    try {
+      await this.enableRiskEngine({ savedObjectsClient });
+      result.riskEngineEnabled = true;
+    } catch (e) {
+      result.errors.push(e.message);
+      return result;
+    }
+
+    return result;
   }
 
   public async getWriter({ namespace }: { namespace: string }): Promise<Writer> {
@@ -100,6 +139,85 @@ export class RiskEngineDataClient {
     return { riskEgineStatus, legacyRiskEgineStatus };
   }
 
+  public async enableRiskEngine({ savedObjectsClient }: SavedObjectsClients) {
+    // code to run task
+
+    return this.udpateSavedObjectAttribute({
+      savedObjectsClient,
+      attributes: {
+        enable: true,
+      },
+    });
+  }
+
+  public async disableRiskEngine({ savedObjectsClient }: SavedObjectsClients) {
+    // code to stop task
+
+    return this.udpateSavedObjectAttribute({
+      savedObjectsClient,
+      attributes: {
+        enable: false,
+      },
+    });
+  }
+
+  private async udpateSavedObjectAttribute({
+    savedObjectsClient,
+    attributes,
+  }: SavedObjectsClients & {
+    attributes: {
+      enable: boolean;
+    };
+  }) {
+    const savedObjectConfiguration = await this.getConfigurationSavedObject({
+      savedObjectsClient,
+    });
+
+    if (!savedObjectConfiguration) {
+      throw new Error('There no saved object configuration for risk engine');
+    }
+
+    const result = await savedObjectsClient.update(
+      riskEngineConfigurationTypeName,
+      savedObjectConfiguration.id,
+      attributes,
+      {
+        refresh: 'wait_for',
+      }
+    );
+
+    return result;
+  }
+
+  private async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
+    const legacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
+
+    if (
+      legacyRiskEgineStatus === RiskEngineStatus.DISABLED ||
+      legacyRiskEgineStatus === RiskEngineStatus.NOT_INSTALLED
+    ) {
+      return true;
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+    const transforms = await this.getLegacyTransforms({ namespace });
+
+    const stopTransformRequests = transforms
+      .filter((t) => t.state !== 'stopped')
+      .map((t) =>
+        esClient.transform.stopTransform({
+          transform_id: t.id,
+          wait_for_completion: true,
+        })
+      );
+
+    await Promise.allSettled(stopTransformRequests);
+
+    const newLegacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
+
+    return newLegacyRiskEgineStatus === RiskEngineStatus.DISABLED;
+  }
+
   private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {
     const configuration = await this.getConfiguration({ savedObjectsClient });
 
@@ -110,7 +228,7 @@ export class RiskEngineDataClient {
     return RiskEngineStatus.NOT_INSTALLED;
   }
 
-  private async getLegacyStatus({ namespace }: { namespace: string }) {
+  private async getLegacyTransforms({ namespace }: { namespace: string }) {
     const esClient = await this.options.elasticsearchClientPromise;
 
     const getTransformStatsRequests: Array<Promise<TransformGetTransformStatsResponse>> = [];
@@ -137,6 +255,12 @@ export class RiskEngineDataClient {
       return [...acc, ...val.transforms];
     }, [] as TransformGetTransformStatsTransformStats[]);
 
+    return transforms;
+  }
+
+  private async getLegacyStatus({ namespace }: { namespace: string }) {
+    const transforms = await this.getLegacyTransforms({ namespace });
+
     if (transforms.length === 0) {
       return RiskEngineStatus.NOT_INSTALLED;
     }
@@ -150,14 +274,21 @@ export class RiskEngineDataClient {
     return RiskEngineStatus.DISABLED;
   }
 
+  private async getConfigurationSavedObject({ savedObjectsClient }: SavedObjectsClients) {
+    const savedObjectsResponse = await savedObjectsClient.find({
+      type: riskEngineConfigurationTypeName,
+    });
+    return savedObjectsResponse.saved_objects?.[0];
+  }
+
   private async getConfiguration({
     savedObjectsClient,
   }: SavedObjectsClients): Promise<Configuration | null> {
     try {
-      const savedObjectsResponse = await savedObjectsClient.find({
-        type: riskEngineConfigurationTypeName,
+      const savedObjectConfiguration = await this.getConfigurationSavedObject({
+        savedObjectsClient,
       });
-      const configuration = savedObjectsResponse.saved_objects?.[0]?.attributes;
+      const configuration = savedObjectConfiguration?.attributes;
 
       if (configuration) {
         return configuration as Configuration;

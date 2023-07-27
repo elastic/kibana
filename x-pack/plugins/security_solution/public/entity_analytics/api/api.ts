@@ -66,27 +66,17 @@ export const initRiskEngine = async (): Promise<InitRiskEngineResponse> => {
 /**
  * Enable risk score engine
  */
-export const enableRiskEngine = async ({
-  signal,
-}: {
-  signal?: AbortSignal;
-}): Promise<GetRiskEngineEnableResponse> => {
+export const enableRiskEngine = async (): Promise<GetRiskEngineEnableResponse> => {
   return KibanaServices.get().http.fetch<GetRiskEngineEnableResponse>(RISK_ENGINE_ENABLE_URL, {
     method: 'POST',
-    signal,
   });
 };
 
 /**
  * Disable risk score engine
  */
-export const disableRiskEngine = async ({
-  signal,
-}: {
-  signal?: AbortSignal;
-}): Promise<GetRiskEngineDisableResponse> => {
+export const disableRiskEngine = async (): Promise<GetRiskEngineDisableResponse> => {
   return KibanaServices.get().http.fetch<GetRiskEngineDisableResponse>(RISK_ENGINE_DISABLE_URL, {
     method: 'POST',
-    signal,
   });
 };

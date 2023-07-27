@@ -14,7 +14,7 @@ import type {
   RiskCategories,
   RiskWeights,
 } from '../../../common/risk_engine';
-
+import type { RiskEngineStatus, InitRiskEngineResult } from '../../../common/risk_engine/types';
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
   debug?: boolean;
@@ -57,14 +57,8 @@ export interface CalculateScoresResponse {
   };
 }
 
-export enum RiskEngineStatus {
-  NOT_INSTALLED = 'NOT_INSTALLED',
-  DISABLED = 'DISABLED',
-  ENABLED = 'ENABLED',
-}
-
 export interface GetRiskEngineStatusResponse {
-  legacy_transform_engine_status: RiskEngineStatus;
+  legacy_risk_engine_status: RiskEngineStatus;
   risk_engine_status: RiskEngineStatus;
 }
 
@@ -73,9 +67,27 @@ export interface InitStep {
   success: boolean;
   error?: string;
 }
+
 export interface InitRiskEngineResponse {
-  success: boolean;
-  steps: InitStep[];
+  result: InitRiskEngineResult;
+}
+
+export interface InitRiskEngineError {
+  body: {
+    message: {
+      message: string;
+      full_error: InitRiskEngineResult | string;
+    };
+  };
+}
+
+export interface EnableDisableRiskEngineResponse {
+  body: {
+    message: {
+      message: string;
+      full_error: string;
+    };
+  };
 }
 
 export interface GetRiskEngineEnableResponse {

@@ -12,8 +12,6 @@ import { RISK_ENGINE_DISABLE_URL } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-import { riskScoreService } from '../risk_score_service';
-
 export const riskEngineDisableRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
     {
@@ -25,16 +23,16 @@ export const riskEngineDisableRoute = (router: SecuritySolutionPluginRouter, log
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+      const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
-      const siemClient = (await context.securitySolution).getAppClient();
-      const riskScore = riskScoreService({
-        esClient,
-        logger,
-      });
+      const riskEgineClient = securitySolution.getRiskEngineDataClient();
 
       try {
-        return response.ok({ body: { isOK: 'ok' } });
+        const result = await riskEgineClient.disableRiskEngine({
+          savedObjectsClient: soClient,
+        });
+        return response.ok({ body: { result } });
       } catch (e) {
         const error = transformError(e);
 

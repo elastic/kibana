@@ -23,16 +23,33 @@ export const riskEngineInitRoute = (router: SecuritySolutionPluginRouter, logger
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
       const riskEgineClient = securitySolution.getRiskEngineDataClient();
+      const spaceId = securitySolution.getSpaceId();
 
       try {
-        const result = await riskEgineClient.init({
+        const initResult = await riskEgineClient.init({
           savedObjectsClient: soClient,
+          namespace: spaceId,
         });
-        return response.ok({ body: { result } });
+
+        if (
+          !initResult.riskEngineEnabled ||
+          !initResult.riskEngineResourcesInstalled ||
+          !initResult.riskEngineConfigurationCreated
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return siemResponse.error({
+            statusCode: 400,
+            body: {
+              message: initResult.errors.join('\n'),
+              full_error: initResult,
+            },
+          });
+        }
+
+        return response.ok({ body: { result: initResult } });
       } catch (e) {
         const error = transformError(e);
 
