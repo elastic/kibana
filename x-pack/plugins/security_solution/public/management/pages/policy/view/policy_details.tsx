@@ -78,7 +78,7 @@ export const PolicyDetails = React.memo(() => {
   const pageBody: React.ReactNode = useMemo(() => {
     if (policyApiError) {
       return (
-        <EuiPageTemplate.EmptyPrompt>
+        <EuiPageTemplate.EmptyPrompt alignment="center">
           <EuiCallOut color="danger" title={policyApiError?.error}>
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
@@ -88,7 +88,7 @@ export const PolicyDetails = React.memo(() => {
 
     if (!policyItem) {
       return (
-        <EuiPageTemplate.EmptyPrompt>
+        <EuiPageTemplate.EmptyPrompt alignment="center">
           <EuiLoadingSpinner
             className="essentialAnimation"
             size="xl"

@@ -42,7 +42,6 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
       }
     );
     return (
-      <EuiPageTemplate>
         <EuiPageTemplate.EmptyPrompt
           iconType="plusInCircle"
           data-test-subj="policy-artifacts-empty-unexisting"
@@ -63,7 +62,6 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
             ) : null
           }
         />
-      </EuiPageTemplate>
     );
   }
 );
