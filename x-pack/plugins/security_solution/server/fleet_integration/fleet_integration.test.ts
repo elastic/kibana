@@ -67,9 +67,9 @@ describe('ingest_integration tests ', () => {
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   const Platinum = licenseMock.createLicense({
-    license: { type: 'platinum', mode: 'platinum', uid: '' },
+    license: { type: 'platinum', mode: 'platinum', uid: 'updated-uid' },
   });
-  const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
+  const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: 'updated-uid' } });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
 
@@ -100,7 +100,7 @@ describe('ingest_integration tests ', () => {
       manifest: ManifestSchema,
       license = 'platinum',
       cloud = cloudService.isCloudEnabled,
-      licenseUuid = '',
+      licenseUuid = 'updated-uid',
       clusterUuid = '',
       clusterName = ''
     ) => ({
@@ -449,6 +449,7 @@ describe('ingest_integration tests ', () => {
     const infoResponse = {
       cluster_name: 'updated-name',
       cluster_uuid: 'updated-uuid',
+      license_uid: 'updated-uid',
       name: 'name',
       tagline: 'tagline',
       version: {
@@ -475,6 +476,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
+      mockPolicy.meta.license_uid = 'updated-uid';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
@@ -491,6 +493,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'gold';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'original-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'original-uid';
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,
@@ -507,6 +510,7 @@ describe('ingest_integration tests ', () => {
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       mockPolicy.meta.cluster_name = 'updated-name';
       mockPolicy.meta.cluster_uuid = 'updated-uuid';
+      mockPolicy.meta.license_uid = 'updated-uid';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
@@ -522,6 +526,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'platinum';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'updated-name';
       policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'updated-uid';
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,
