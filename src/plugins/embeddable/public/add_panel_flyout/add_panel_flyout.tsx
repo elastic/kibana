@@ -65,11 +65,9 @@ const runAddTelemetry = (
 export const AddPanelFlyout = ({
   container,
   onAddPanel,
-  onClose,
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
-  onClose?: () => void;
 }) => {
   const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
     return [...embeddableStart.getEmbeddableFactories()]

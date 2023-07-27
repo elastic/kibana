@@ -8,13 +8,13 @@
 
 import React from 'react';
 
-import {
+import type {
   IContainer,
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  tracksOverlays,
 } from '@kbn/embeddable-plugin/public';
+import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { ReplacePanelFlyout } from './replace_panel_flyout';

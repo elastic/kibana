@@ -15,6 +15,7 @@ import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
     ...jest.requireActual('@kbn/embeddable-plugin/public'),
+    openAddPanelFlyout: jest.fn(),
     ErrorEmbeddable: jest.fn(),
   };
 });
