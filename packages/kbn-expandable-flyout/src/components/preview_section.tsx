@@ -150,11 +150,13 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION}
       >
-        <EuiSplitPanel.Inner grow={false} color={banner?.backgroundColor} paddingSize="none">
-          <EuiText textAlign="center" color={banner?.textColor} size="s">
-            {banner?.title}
+        {isPreviewBanner(banner) && (
+        <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
+          <EuiText textAlign="center" color={banner.textColor} size="s">
+            {banner.title}
           </EuiText>
-        </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Inner>)
+        }
         <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>
           {header}
         </EuiSplitPanel.Inner>
