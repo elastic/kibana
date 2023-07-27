@@ -9,19 +9,19 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
-import { ExecutorType, ActionType } from './types';
+import { ExecutorType, ActionType } from '../types';
 import {
   ActionExecutor,
   TaskRunnerFactory,
   ILicenseState,
   asHttpRequestExecutionSource,
-} from './lib';
+} from '../lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { actionsConfigMock } from './actions_config.mock';
-import { getActionsConfigurationUtilities } from './actions_config';
-import { licenseStateMock } from './lib/license_state.mock';
+import { actionsConfigMock } from '../actions_config.mock';
+import { getActionsConfigurationUtilities } from '../actions_config';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   httpServerMock,
@@ -31,26 +31,26 @@ import {
 } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { actionExecutorMock } from './lib/action_executor.mock';
+import { actionExecutorMock } from '../lib/action_executor.mock';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionsAuthorization } from './authorization/actions_authorization';
+import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   AuthorizationMode,
   getBulkAuthorizationModeBySource,
-} from './authorization/get_authorization_mode_by_source';
-import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { ConnectorTokenClient } from './lib/connector_token_client';
+} from '../authorization/get_authorization_mode_by_source';
+import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
+import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
+import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
-import { connectorTokenClientMock } from './lib/connector_token_client.mock';
-import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
-import { getOAuthJwtAccessToken } from './lib/get_oauth_jwt_access_token';
-import { getOAuthClientCredentialsAccessToken } from './lib/get_oauth_client_credentials_access_token';
-import { OAuthParams } from './routes/get_oauth_access_token';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
+import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../common';
+import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -62,11 +62,11 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('./lib/track_legacy_rbac_exemption', () => ({
+jest.mock('../lib/track_legacy_rbac_exemption', () => ({
   trackLegacyRBACExemption: jest.fn(),
 }));
 
-jest.mock('./authorization/get_authorization_mode_by_source', () => {
+jest.mock('../authorization/get_authorization_mode_by_source', () => {
   return {
     getAuthorizationModeBySource: jest.fn(() => {
       return 1;
@@ -81,10 +81,10 @@ jest.mock('./authorization/get_authorization_mode_by_source', () => {
   };
 });
 
-jest.mock('./lib/get_oauth_jwt_access_token', () => ({
+jest.mock('../lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
 }));
-jest.mock('./lib/get_oauth_client_credentials_access_token', () => ({
+jest.mock('../lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
@@ -3585,172 +3585,6 @@ describe('bulkEnqueueExecution()', () => {
     );
 
     expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
-  });
-});
-
-describe('listType()', () => {
-  it('filters action types by feature ID', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type-2',
-      name: 'My action type 2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
-      {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-    ]);
-  });
-
-  it('filters out system action types when not defining options', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type-2',
-      name: 'My action type 2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
-
-    expect(await actionsClient.listTypes()).toEqual([
-      {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-      {
-        id: 'my-action-type-2',
-        name: 'My action type 2',
-        isSystemActionType: false,
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['cases'],
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    ]);
-  });
-
-  it('return system action types when defining options', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
-
-    expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
-      {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-      {
-        id: '.cases',
-        name: 'Cases',
-        isSystemActionType: true,
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    ]);
   });
 });
 

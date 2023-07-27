@@ -27,12 +27,11 @@ import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import {
-  ActionType,
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
-} from '../common';
-import { ActionTypeRegistry } from './action_type_registry';
+} from '../../common';
+import { ActionTypeRegistry } from '../action_type_registry';
 import {
   validateConfig,
   validateSecrets,
@@ -40,7 +39,7 @@ import {
   validateConnector,
   ActionExecutionSource,
   parseDate,
-} from './lib';
+} from '../lib';
 import {
   ActionResult,
   FindActionResult,
@@ -48,46 +47,48 @@ import {
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
-} from './types';
-import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
-import { ExecuteOptions } from './lib/action_executor';
+} from '../types';
+import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
+import { ExecuteOptions } from '../lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
-} from './create_execute_function';
-import { ActionsAuthorization } from './authorization/actions_authorization';
+} from '../create_execute_function';
+import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   getBulkAuthorizationModeBySource,
   AuthorizationMode,
-} from './authorization/get_authorization_mode_by_source';
-import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
-import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { isConnectorDeprecated } from './lib/is_connector_deprecated';
-import { ActionsConfigurationUtilities } from './actions_config';
+} from '../authorization/get_authorization_mode_by_source';
+import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
+import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
+import { isConnectorDeprecated } from '../lib/is_connector_deprecated';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   OAuthClientCredentialsParams,
   OAuthJwtParams,
   OAuthParams,
-} from './routes/get_oauth_access_token';
+} from '../routes/get_oauth_access_token';
 import {
   getOAuthJwtAccessToken,
   GetOAuthJwtConfig,
   GetOAuthJwtSecrets,
-} from './lib/get_oauth_jwt_access_token';
+} from '../lib/get_oauth_jwt_access_token';
 import {
   getOAuthClientCredentialsAccessToken,
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
-} from './lib/get_oauth_client_credentials_access_token';
+} from '../lib/get_oauth_client_credentials_access_token';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,
   formatExecutionLogResult,
   getExecutionKPIAggregation,
   getExecutionLogAggregation,
-} from './lib/get_execution_log_aggregation';
+} from '../lib/get_execution_log_aggregation';
+import { ActionsClientContext } from './types';
+import { ListTypesParams, listTypes } from '../application/connector/methods/list_types/list_types';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -109,7 +110,7 @@ export interface CreateOptions {
   options?: { id?: string };
 }
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
@@ -136,64 +137,11 @@ export interface UpdateOptions {
 interface GetAllOptions {
   includeSystemActions?: boolean;
 }
-
-interface ListTypesOptions {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
-}
-
 export class ActionsClient {
-  private readonly logger: Logger;
-  private readonly kibanaIndices: string[];
-  private readonly scopedClusterClient: IScopedClusterClient;
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  private readonly actionTypeRegistry: ActionTypeRegistry;
-  private readonly inMemoryConnectors: InMemoryConnector[];
-  private readonly actionExecutor: ActionExecutorContract;
-  private readonly request: KibanaRequest;
-  private readonly authorization: ActionsAuthorization;
-  private readonly executionEnqueuer: ExecutionEnqueuer<void>;
-  private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  private readonly bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
-  private readonly auditLogger?: AuditLogger;
-  private readonly usageCounter?: UsageCounter;
-  private readonly connectorTokenClient: ConnectorTokenClientContract;
-  private readonly getEventLogClient: () => Promise<IEventLogClient>;
+  private readonly context: ActionsClientContext;
 
-  constructor({
-    logger,
-    actionTypeRegistry,
-    kibanaIndices,
-    scopedClusterClient,
-    unsecuredSavedObjectsClient,
-    inMemoryConnectors,
-    actionExecutor,
-    executionEnqueuer,
-    ephemeralExecutionEnqueuer,
-    bulkExecutionEnqueuer,
-    request,
-    authorization,
-    auditLogger,
-    usageCounter,
-    connectorTokenClient,
-    getEventLogClient,
-  }: ConstructorOptions) {
-    this.logger = logger;
-    this.actionTypeRegistry = actionTypeRegistry;
-    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
-    this.scopedClusterClient = scopedClusterClient;
-    this.kibanaIndices = kibanaIndices;
-    this.inMemoryConnectors = inMemoryConnectors;
-    this.actionExecutor = actionExecutor;
-    this.executionEnqueuer = executionEnqueuer;
-    this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
-    this.bulkExecutionEnqueuer = bulkExecutionEnqueuer;
-    this.request = request;
-    this.authorization = authorization;
-    this.auditLogger = auditLogger;
-    this.usageCounter = usageCounter;
-    this.connectorTokenClient = connectorTokenClient;
-    this.getEventLogClient = getEventLogClient;
+  constructor(context: ConstructorOptions) {
+    this.context = context;
   }
 
   /**
@@ -206,9 +154,9 @@ export class ActionsClient {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
-      await this.authorization.ensureAuthorized({ operation: 'create', actionTypeId });
+      await this.context.authorization.ensureAuthorized({ operation: 'create', actionTypeId });
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.CREATE,
           savedObject: { type: 'action', id },
@@ -218,10 +166,12 @@ export class ActionsClient {
       throw error;
     }
 
-    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
+      (connector) => connector.id === id
+    );
 
     if (
-      this.actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      this.context.actionTypeRegistry.isSystemActionType(actionTypeId) ||
       foundInMemoryConnector?.isSystemAction
     ) {
       throw Boom.badRequest(
@@ -245,8 +195,8 @@ export class ActionsClient {
       );
     }
 
-    const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    const configurationUtilities = this.context.actionTypeRegistry.getUtils();
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
@@ -256,9 +206,9 @@ export class ActionsClient {
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }
-    this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    this.auditLogger?.log(
+    this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id },
@@ -266,7 +216,7 @@ export class ActionsClient {
       })
     );
 
-    const result = await this.unsecuredSavedObjectsClient.create(
+    const result = await this.context.unsecuredSavedObjectsClient.create(
       'action',
       {
         actionTypeId,
@@ -295,9 +245,9 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     try {
-      await this.authorization.ensureAuthorized({ operation: 'update' });
+      await this.context.authorization.ensureAuthorized({ operation: 'update' });
 
-      const foundInMemoryConnector = this.inMemoryConnectors.find(
+      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
         (connector) => connector.id === id
       );
 
@@ -324,7 +274,7 @@ export class ActionsClient {
         );
       }
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.UPDATE,
           savedObject: { type: 'action', id },
@@ -334,11 +284,11 @@ export class ActionsClient {
       throw error;
     }
     const { attributes, references, version } =
-      await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+      await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
-    const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    const configurationUtilities = this.context.actionTypeRegistry.getUtils();
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
@@ -349,9 +299,9 @@ export class ActionsClient {
       validateConnector(actionType, { config, secrets });
     }
 
-    this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    this.auditLogger?.log(
+    this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.UPDATE,
         savedObject: { type: 'action', id },
@@ -359,7 +309,7 @@ export class ActionsClient {
       })
     );
 
-    const result = await this.unsecuredSavedObjectsClient.create<RawAction>(
+    const result = await this.context.unsecuredSavedObjectsClient.create<RawAction>(
       'action',
       {
         ...attributes,
@@ -381,9 +331,9 @@ export class ActionsClient {
     );
 
     try {
-      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
     } catch (e) {
-      this.logger.error(
+      this.context.logger.error(
         `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
       );
     }
@@ -411,9 +361,9 @@ export class ActionsClient {
     throwIfSystemAction?: boolean;
   }): Promise<ActionResult> {
     try {
-      await this.authorization.ensureAuthorized({ operation: 'get' });
+      await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
           savedObject: { type: 'action', id },
@@ -423,7 +373,9 @@ export class ActionsClient {
       throw error;
     }
 
-    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
+      (connector) => connector.id === id
+    );
 
     /**
      * Getting system connector is not allowed
@@ -439,7 +391,7 @@ export class ActionsClient {
     }
 
     if (foundInMemoryConnector !== undefined) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
           savedObject: { type: 'action', id },
@@ -456,9 +408,9 @@ export class ActionsClient {
       };
     }
 
-    const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const result = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
 
-    this.auditLogger?.log(
+    this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.GET,
         savedObject: { type: 'action', id },
@@ -484,9 +436,9 @@ export class ActionsClient {
     FindActionResult[]
   > {
     try {
-      await this.authorization.ensureAuthorized({ operation: 'get' });
+      await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.FIND,
           error,
@@ -496,7 +448,7 @@ export class ActionsClient {
     }
 
     const savedObjectsActions = (
-      await this.unsecuredSavedObjectsClient.find<RawAction>({
+      await this.context.unsecuredSavedObjectsClient.find<RawAction>({
         perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
@@ -505,7 +457,7 @@ export class ActionsClient {
     );
 
     savedObjectsActions.forEach(({ id }) =>
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.FIND,
           savedObject: { type: 'action', id },
@@ -514,8 +466,8 @@ export class ActionsClient {
     );
 
     const inMemoryConnectorsFiltered = includeSystemActions
-      ? this.inMemoryConnectors
-      : this.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
+      ? this.context.inMemoryConnectors
+      : this.context.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
 
     const mergedResult = [
       ...savedObjectsActions,
@@ -528,7 +480,11 @@ export class ActionsClient {
         isSystemAction: inMemoryConnector.isSystemAction,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
-    return await injectExtraFindData(this.kibanaIndices, this.scopedClusterClient, mergedResult);
+    return await injectExtraFindData(
+      this.context.kibanaIndices,
+      this.context.scopedClusterClient,
+      mergedResult
+    );
   }
 
   /**
@@ -539,10 +495,10 @@ export class ActionsClient {
     throwIfSystemAction: boolean = true
   ): Promise<ActionResult[]> {
     try {
-      await this.authorization.ensureAuthorized({ operation: 'get' });
+      await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       ids.forEach((id) =>
-        this.auditLogger?.log(
+        this.context.auditLogger?.log(
           connectorAuditEvent({
             action: ConnectorAuditAction.GET,
             savedObject: { type: 'action', id },
@@ -556,7 +512,7 @@ export class ActionsClient {
     const actionResults = new Array<ActionResult>();
 
     for (const actionId of ids) {
-      const action = this.inMemoryConnectors.find(
+      const action = this.context.inMemoryConnectors.find(
         (inMemoryConnector) => inMemoryConnector.id === actionId
       );
 
@@ -585,11 +541,13 @@ export class ActionsClient {
     ];
 
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
-    const bulkGetResult = await this.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
+    const bulkGetResult = await this.context.unsecuredSavedObjectsClient.bulkGet<RawAction>(
+      bulkGetOpts
+    );
 
     bulkGetResult.saved_objects.forEach(({ id, error }) => {
-      if (!error && this.auditLogger) {
-        this.auditLogger.log(
+      if (!error && this.context.auditLogger) {
+        this.context.auditLogger.log(
           connectorAuditEvent({
             action: ConnectorAuditAction.GET,
             savedObject: { type: 'action', id },
@@ -615,7 +573,7 @@ export class ActionsClient {
     configurationUtilities: ActionsConfigurationUtilities
   ) {
     // Verify that user has edit access
-    await this.authorization.ensureAuthorized({ operation: 'update' });
+    await this.context.authorization.ensureAuthorized({ operation: 'update' });
 
     // Verify that token url is allowed by allowed hosts config
     try {
@@ -645,7 +603,7 @@ export class ActionsClient {
 
       try {
         accessToken = await getOAuthJwtAccessToken({
-          logger: this.logger,
+          logger: this.context.logger,
           configurationUtilities,
           credentials: {
             config: tokenOpts.config as GetOAuthJwtConfig,
@@ -654,13 +612,13 @@ export class ActionsClient {
           tokenUrl: tokenOpts.tokenUrl,
         });
 
-        this.logger.debug(
+        this.context.logger.debug(
           `Successfully retrieved access token using JWT OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           } and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
-        this.logger.debug(
+        this.context.logger.debug(
           `Failed to retrieve access token using JWT OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
@@ -671,7 +629,7 @@ export class ActionsClient {
       const tokenOpts = options as OAuthClientCredentialsParams;
       try {
         accessToken = await getOAuthClientCredentialsAccessToken({
-          logger: this.logger,
+          logger: this.context.logger,
           configurationUtilities,
           credentials: {
             config: tokenOpts.config as GetOAuthClientCredentialsConfig,
@@ -681,13 +639,13 @@ export class ActionsClient {
           oAuthScope: tokenOpts.scope,
         });
 
-        this.logger.debug(
+        this.context.logger.debug(
           `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
-        this.logger.debug(
+        this.context.logger.debug(
           `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
@@ -706,9 +664,9 @@ export class ActionsClient {
    */
   public async delete({ id }: { id: string }) {
     try {
-      await this.authorization.ensureAuthorized({ operation: 'delete' });
+      await this.context.authorization.ensureAuthorized({ operation: 'delete' });
 
-      const foundInMemoryConnector = this.inMemoryConnectors.find(
+      const foundInMemoryConnector = this.context.inMemoryConnectors.find(
         (connector) => connector.id === id
       );
 
@@ -735,7 +693,7 @@ export class ActionsClient {
         );
       }
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.DELETE,
           savedObject: { type: 'action', id },
@@ -745,7 +703,7 @@ export class ActionsClient {
       throw error;
     }
 
-    this.auditLogger?.log(
+    this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.DELETE,
         outcome: 'unknown',
@@ -754,23 +712,23 @@ export class ActionsClient {
     );
 
     try {
-      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
     } catch (e) {
-      this.logger.error(
+      this.context.logger.error(
         `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
       );
     }
 
-    return await this.unsecuredSavedObjectsClient.delete('action', id);
+    return await this.context.unsecuredSavedObjectsClient.delete('action', id);
   }
 
   private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
-    const inMemoryConnector = this.inMemoryConnectors.find(
+    const inMemoryConnector = this.context.inMemoryConnectors.find(
       (connector) => connector.id === connectorId
     );
 
     const additionalPrivileges = inMemoryConnector?.isSystemAction
-      ? this.actionTypeRegistry.getSystemActionKibanaPrivileges(
+      ? this.context.actionTypeRegistry.getSystemActionKibanaPrivileges(
           inMemoryConnector.actionTypeId,
           params
         )
@@ -788,20 +746,23 @@ export class ActionsClient {
     ActionTypeExecutorResult<unknown>
   > {
     if (
-      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
-      await this.authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+      await this.context.authorization.ensureAuthorized({
+        operation: 'execute',
+        additionalPrivileges,
+      });
     } else {
-      trackLegacyRBACExemption('execute', this.usageCounter);
+      trackLegacyRBACExemption('execute', this.context.usageCounter);
     }
 
-    return this.actionExecutor.execute({
+    return this.context.actionExecutor.execute({
       actionId,
       params,
       source,
-      request: this.request,
+      request: this.context.request,
       relatedSavedObjects,
       actionExecutionId: uuidv4(),
     });
@@ -810,7 +771,7 @@ export class ActionsClient {
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
     const { source } = options;
     if (
-      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       /**
@@ -819,11 +780,11 @@ export class ActionsClient {
        * inside the ActionExecutor at execution time
        */
 
-      await this.authorization.ensureAuthorized({ operation: 'execute' });
+      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
-      trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
+      trackLegacyRBACExemption('enqueueExecution', this.context.usageCounter);
     }
-    return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+    return this.context.executionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
   }
 
   public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
@@ -835,7 +796,7 @@ export class ActionsClient {
     });
 
     const authCounts = await getBulkAuthorizationModeBySource(
-      this.unsecuredSavedObjectsClient,
+      this.context.unsecuredSavedObjectsClient,
       sources
     );
     if (authCounts[AuthorizationMode.RBAC] > 0) {
@@ -844,63 +805,51 @@ export class ActionsClient {
        * for system actions (kibana privileges) will be performed
        * inside the ActionExecutor at execution time
        */
-      await this.authorization.ensureAuthorized({ operation: 'execute' });
+      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
     }
     if (authCounts[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
         'bulkEnqueueExecution',
-        this.usageCounter,
+        this.context.usageCounter,
         authCounts[AuthorizationMode.Legacy]
       );
     }
-    return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
+    return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
   }
 
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
     const { source } = options;
     if (
-      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized({ operation: 'execute' });
+      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
-      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.usageCounter);
+      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
     }
-    return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
+    return this.context.ephemeralExecutionEnqueuer(
+      this.context.unsecuredSavedObjectsClient,
+      options
+    );
   }
 
-  /**
-   * Return all available action types
-   * expect system action types
-   */
-  public async listTypes({
-    featureId,
-    includeSystemActionTypes = false,
-  }: ListTypesOptions = {}): Promise<ActionType[]> {
-    const actionTypes = this.actionTypeRegistry.list(featureId);
-
-    const filteredActionTypes = includeSystemActionTypes
-      ? actionTypes
-      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
-
-    return filteredActionTypes;
-  }
+  public listTypes = (params: ListTypesParams) => listTypes(this.context, params);
 
   public isActionTypeEnabled(
     actionTypeId: string,
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
-    return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
+    return this.context.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
   }
 
   public isPreconfigured(connectorId: string): boolean {
-    return !!this.inMemoryConnectors.find(
+    return !!this.context.inMemoryConnectors.find(
       (connector) => connector.isPreconfigured && connector.id === connectorId
     );
   }
 
   public isSystemAction(connectorId: string): boolean {
-    return !!this.inMemoryConnectors.find(
+    return !!this.context.inMemoryConnectors.find(
       (connector) => connector.isSystemAction && connector.id === connectorId
     );
   }
@@ -914,13 +863,13 @@ export class ActionsClient {
     sort,
     namespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
-    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+    this.context.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized({ operation: 'get' });
+      await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
           error,
@@ -929,7 +878,7 @@ export class ActionsClient {
       throw error;
     }
 
-    this.auditLogger?.log(
+    this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
       })
@@ -939,7 +888,7 @@ export class ActionsClient {
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
-    const eventLogClient = await this.getEventLogClient();
+    const eventLogClient = await this.context.getEventLogClient();
 
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
@@ -961,7 +910,7 @@ export class ActionsClient {
 
       return formatExecutionLogResult(aggResult);
     } catch (err) {
-      this.logger.debug(
+      this.context.logger.debug(
         `actionsClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
       );
       throw err;
@@ -974,13 +923,13 @@ export class ActionsClient {
     filter,
     namespaces,
   }: GetGlobalExecutionKPIParams) {
-    this.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
+    this.context.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized({ operation: 'get' });
+      await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
-      this.auditLogger?.log(
+      this.context.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
           error,
@@ -989,7 +938,7 @@ export class ActionsClient {
       throw error;
     }
 
-    this.auditLogger?.log(
+    this.context.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
       })
@@ -999,7 +948,7 @@ export class ActionsClient {
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
-    const eventLogClient = await this.getEventLogClient();
+    const eventLogClient = await this.context.getEventLogClient();
 
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
@@ -1018,7 +967,7 @@ export class ActionsClient {
 
       return formatExecutionKPIResult(aggResult);
     } catch (err) {
-      this.logger.debug(
+      this.context.logger.debug(
         `actionsClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
       );
       throw err;

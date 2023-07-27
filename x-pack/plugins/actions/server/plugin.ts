@@ -42,7 +42,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { ActionsClient } from './actions_client';
+import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,

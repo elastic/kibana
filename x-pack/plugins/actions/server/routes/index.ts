@@ -14,7 +14,7 @@ import { deleteActionRoute } from './delete';
 import { executeActionRoute } from './execute';
 import { getActionRoute } from './get';
 import { getAllActionRoute } from './get_all';
-import { connectorTypesRoute } from './connector_types';
+import { connectorTypesRoute } from './connector/apis/connector_types/connector_types';
 import { updateActionRoute } from './update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { defineLegacyRoutes } from './legacy';
