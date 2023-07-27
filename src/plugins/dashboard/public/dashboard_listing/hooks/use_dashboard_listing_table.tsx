@@ -148,7 +148,7 @@ export const useDashboardListingTable = ({
                 });
 
                 if (!validTitle) {
-                  throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning());
+                  throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));
                 }
               } catch (e) {
                 return e.message;
