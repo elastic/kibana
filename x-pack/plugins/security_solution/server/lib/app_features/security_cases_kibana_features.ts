@@ -16,6 +16,7 @@ import {
 import {
   CASES_CONNECTOR_CAPABILITY,
   READ_CASES_CONNECTOR_API_TAG,
+  WRITE_CASES_CONNECTOR_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
 import type { AppFeaturesCasesConfig, BaseKibanaFeatureConfig } from './types';
 import { APP_ID, CASES_FEATURE_ID } from '../../../common/constants';
@@ -34,9 +35,9 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
     (capability) => capability !== CASES_CONNECTOR_CAPABILITY
   );
   const casesAllAPICapabilities = casesApiTags.all.filter(
-    (capability) => capability !== READ_CASES_CONNECTOR_API_TAG
+    (capability) => capability !== WRITE_CASES_CONNECTOR_API_TAG
   );
-  const casesreadAPICapabilities = casesApiTags.read.filter(
+  const casesReadAPICapabilities = casesApiTags.read.filter(
     (capability) => capability !== READ_CASES_CONNECTOR_API_TAG
   );
 
@@ -67,7 +68,7 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
         ui: casesAllUICapabilities,
       },
       read: {
-        api: casesreadAPICapabilities,
+        api: casesReadAPICapabilities,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
