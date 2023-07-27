@@ -15,6 +15,7 @@ import {
   EnterpriseSearchApplicationUpsertResponse,
 } from '../../../common/types/search_applications';
 import { createApiKey } from '../../lib/search_applications/create_api_key';
+import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_indices';
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
@@ -46,6 +47,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
         request.query
       )) as EnterpriseSearchApplicationsResponse;
 
+      await Promise.all(
+        engines.results.map(async (searchApp) => {
+          const getAliasResponse = await fetchAliasIndices(client, searchApp.name);
+          searchApp.indices = Object.keys(getAliasResponse);
+        })
+      );
       return response.ok({ body: engines });
     })
   );
@@ -64,7 +71,9 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       const engine = (await client.asCurrentUser.searchApplication.get({
         name: request.params.engine_name,
       })) as EnterpriseSearchApplication;
-      const indicesStats = await fetchIndicesStats(client, engine.indices);
+
+      const indices = await fetchAliasIndices(client, engine.name);
+      const indicesStats = await fetchIndicesStats(client, indices);
 
       return response.ok({ body: { ...engine, indices: indicesStats } });
     })
