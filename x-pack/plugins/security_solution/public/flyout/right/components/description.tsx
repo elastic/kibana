@@ -61,7 +61,7 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
         scopeId,
         banner: {
           title: PREVIEW_RULE_DETAILS,
-          backgroundColor: 'warning', 
+          backgroundColor: 'warning',
           textColor: 'warning',
         },
         ruleId,

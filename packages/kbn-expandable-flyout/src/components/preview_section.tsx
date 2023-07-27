@@ -30,17 +30,25 @@ import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
 
 export interface PreviewBanner {
   /**
-  * Optional title to be shown
-  */
- title?: string;
- /**
-  * Optional string for background color
-  */
- backgroundColor?: "primary" | "plain" | "warning" | "accent" | "success" | "danger" | "transparent" | "subdued";
- /**
-  * Optional string for text color
-  */
- textColor?: string;
+   * Optional title to be shown
+   */
+  title?: string;
+  /**
+   * Optional string for background color
+   */
+  backgroundColor?:
+    | 'primary'
+    | 'plain'
+    | 'warning'
+    | 'accent'
+    | 'success'
+    | 'danger'
+    | 'transparent'
+    | 'subdued';
+  /**
+   * Optional string for text color
+   */
+  textColor?: string;
 }
 
 /**
@@ -50,7 +58,7 @@ export interface PreviewBanner {
  */
 export const isPreviewBanner = (banner: unknown): banner is PreviewBanner => {
   return has(banner, 'title') || has(banner, 'backgroundColor') || has(banner, 'textColor');
-}
+};
 
 interface PreviewSectionProps {
   /**

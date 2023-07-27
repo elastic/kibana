@@ -20,12 +20,12 @@ export type PreviewPanelType = Array<{
    * Panel name
    */
   name: string;
-  /** 
-   * Main body component to be rendered in the panel 
+  /**
+   * Main body component to be rendered in the panel
    */
   content: React.ReactElement;
-  /** 
-   * Footer section in the panel 
+  /**
+   * Footer section in the panel
    */
   footer: React.ReactElement;
 }>;

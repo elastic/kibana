@@ -34,7 +34,7 @@ export type PreviewPanelProviderProps = {
    * React components to render
    */
   children: React.ReactNode;
-} & Partial<PreviewPanelProps['params']>
+} & Partial<PreviewPanelProps['params']>;
 
 export const PreviewPanelProvider = ({
   id,
