@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
           expectedStatus: 'active',
         });
-        expect(executionStatus.status).to.be('active');
+        expect(executionStatus).to.be('active');
       });
 
       it('should set correct information in the alert document', async () => {
