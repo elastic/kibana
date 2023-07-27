@@ -13,7 +13,10 @@ import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
-import { CASES_CONNECTOR_CAPABILITY } from '@kbn/cases-plugin/common/constants';
+import {
+  CASES_CONNECTOR_CAPABILITY,
+  READ_CASES_CONNECTOR_API_TAG,
+} from '@kbn/cases-plugin/common/constants';
 import type { AppFeaturesCasesConfig, BaseKibanaFeatureConfig } from './types';
 import { APP_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { CasesSubFeatureId } from './security_cases_kibana_sub_features';
@@ -30,6 +33,12 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
   const casesReadUICapabilities = casesCapabilities.read.filter(
     (capability) => capability !== CASES_CONNECTOR_CAPABILITY
   );
+  const casesAllAPICapabilities = casesApiTags.all.filter(
+    (capability) => capability !== READ_CASES_CONNECTOR_API_TAG
+  );
+  const casesreadAPICapabilities = casesApiTags.read.filter(
+    (capability) => capability !== READ_CASES_CONNECTOR_API_TAG
+  );
 
   return {
     id: CASES_FEATURE_ID,
@@ -43,14 +52,13 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: casesApiTags.all,
+        api: casesAllAPICapabilities,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
           create: [APP_ID],
           read: [APP_ID],
           update: [APP_ID],
-          push: [APP_ID],
         },
         savedObject: {
           all: [...filesSavedObjectTypes],
@@ -59,7 +67,7 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
         ui: casesAllUICapabilities,
       },
       read: {
-        api: casesApiTags.read,
+        api: casesreadAPICapabilities,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -92,10 +100,14 @@ export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
   [AppFeatureCasesKey.casesConnectors]: {
     privileges: {
       all: {
-        ui: [CASES_CONNECTOR_CAPABILITY],
+        api: [READ_CASES_CONNECTOR_API_TAG], // Add cases connector write/update/push API privileges
+        ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
+        cases: {
+          push: [APP_ID], // Add cases connector push privileges
+        },
       },
       read: {
-        ui: [CASES_CONNECTOR_CAPABILITY],
+        ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
       },
     },
   },

@@ -175,6 +175,12 @@ export const SUGGEST_USER_PROFILES_API_TAG = 'casesSuggestUserProfiles';
 export const BULK_GET_USER_PROFILES_API_TAG = 'bulkGetUserProfiles';
 
 /**
+ * This tag is registered for ALL cases connector write/update/push capabilities
+ */
+export const READ_CASES_CONNECTOR_API_TAG = 'readCasesConnector';
+export const WRITE_CASES_CONNECTOR_API_TAG = 'writeCasesConnector';
+
+/**
  * User profiles
  */
 

@@ -16,6 +16,9 @@ import type { caseDomainV1 } from '../../../../common/types/domain';
 export const pushCaseRoute: CaseRoute = createCasesRoute({
   method: 'post',
   path: CASE_PUSH_URL,
+  routerOptions: {
+    tags: ['access:writeCasesConnector'],
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
