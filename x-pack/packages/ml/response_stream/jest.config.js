@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { getSnappedWindowParameters, getWindowParameters } from './src/get_window_parameters';
-export type { WindowParameters } from './src/get_window_parameters';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/response_stream'],
+};
