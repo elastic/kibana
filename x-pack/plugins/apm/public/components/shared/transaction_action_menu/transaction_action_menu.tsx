@@ -32,10 +32,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
-import { CreateEditCustomLinkFlyout } from '../../app/settings/custom_link/create_edit_custom_link_flyout';
-import { Filter } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { convertFiltersToQuery } from '../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
+import { CustomLinkFlyoutComponent } from './custom_link_flyout_component';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -73,49 +70,21 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
   const { isProfilingPluginInitialized, profilingLocators } =
     useProfilingPlugin();
 
-  const filters = useMemo(
-    () =>
-      [
-        { key: 'service.name', value: transaction?.service.name },
-        { key: 'service.environment', value: transaction?.service.environment },
-        { key: 'transaction.name', value: transaction?.transaction.name },
-        { key: 'transaction.type', value: transaction?.transaction.type },
-      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
-    [transaction]
-  );
-  
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
-  const toggleCustomLinkFlyout = function (){
+  const openCustomLinkFlyout = function (){
     setIsCreateEditFlyoutOpen(true)
     setIsActionPopoverOpen(false)
   }
-  
-  const { refetch } = useFetcher(
-    (callApmApi) =>
-      callApmApi('GET /internal/apm/settings/custom_links', {
-        isCachable: false,
-        params: { query: convertFiltersToQuery(filters) },
-      }),
-    [filters]
-  );
+
 
   return (
     <>
-      {isCreateEditFlyoutOpen && <CreateEditCustomLinkFlyout
-          defaults={{ filters }}
-          onClose={() => {
-            setIsCreateEditFlyoutOpen(false);  
-          }}
-          onSave={() => {
-            setIsCreateEditFlyoutOpen(false);
-            refetch();
-          }}
-          onDelete={() => {
-            setIsCreateEditFlyoutOpen(false);
-            refetch();
-          }}
-        />}
+      <CustomLinkFlyoutComponent 
+        transaction={transaction}
+        isOpen={isCreateEditFlyoutOpen}
+        onClose={()=>setIsCreateEditFlyoutOpen(false)}
+        ></CustomLinkFlyoutComponent>  
 
       <ActionMenu
         id="transactionActionMenu"
@@ -138,7 +107,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           profilingLocators={profilingLocators}
         />
         {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} 
-              openCreateCustomLinkFlyout={toggleCustomLinkFlyout} />}
+              openCreateCustomLinkFlyout={openCustomLinkFlyout} />}
       </ActionMenu>
     </>
   );
