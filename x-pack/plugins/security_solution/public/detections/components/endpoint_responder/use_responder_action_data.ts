@@ -42,7 +42,8 @@ export const useResponderActionData = ({
       return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
     }
 
-    if (!endpointHostInfo) {
+    // if we got an error, and it's a 404 it means the endpoint is not from the endpoint host
+    if (error && error.body?.statusCode === 404) {
       return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
     }
 
