@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,

@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { statReducer } from './stat_reducer';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
