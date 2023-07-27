@@ -281,9 +281,28 @@ export function InstallElasticAgent() {
         <EuiSpacer size="m" />
         <InstallElasticAgentSteps
           installAgentPlatformOptions={[
-            { label: 'Linux', id: 'linux-tar', isDisabled: false },
-            { label: 'MacOS', id: 'macos', isDisabled: false },
-            { label: 'Windows', id: 'windows', isDisabled: true },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux',
+                { defaultMessage: 'Linux' }
+              ),
+              id: 'linux-tar',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS',
+                { defaultMessage: 'MacOS' }
+              ),
+              id: 'macos',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows',
+                { defaultMessage: 'Windows' }
+              ),
+              id: 'windows',
+              isDisabled: true,
+            },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
           selectedPlatform={elasticAgentPlatform}
