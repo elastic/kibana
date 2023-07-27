@@ -46,6 +46,7 @@ import { registerRoutes } from './routes/register_routes';
 import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
 import { OpenAIService } from './services/openai';
+import { DefaultSLOInstaller } from './services/slo/slo_installer';
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -264,6 +265,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
       });
+
+      const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+      const sloInstaller = new DefaultSLOInstaller(esInternalClient, this.logger);
+      sloInstaller.install();
     });
 
     /**
