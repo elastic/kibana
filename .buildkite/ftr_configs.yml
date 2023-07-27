@@ -404,6 +404,7 @@ enabled:
   - x-pack/performance/journeys/flight_dashboard.ts
   - x-pack/performance/journeys/login.ts
   - x-pack/performance/journeys/many_fields_discover.ts
+  - x-pack/performance/journeys/many_fields_lens_editor.ts
   - x-pack/performance/journeys/many_fields_transform.ts
   - x-pack/performance/journeys/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys/web_logs_dashboard.ts
