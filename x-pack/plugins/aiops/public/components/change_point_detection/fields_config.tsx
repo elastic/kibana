@@ -26,8 +26,11 @@ import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import {
   LazySavedObjectSaveModalDashboard,
+  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../embeddable/embeddable_change_point_chart_factory';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -155,6 +158,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
   onSelectionChange,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { embeddable } = useAiopsAppContext();
+
+  const { dataView } = useDataSource();
+
   const { combinedQuery, requestParams } = useChangePointDetectionContext();
 
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
@@ -183,6 +190,34 @@ const FieldPanel: FC<FieldPanelProps> = ({
       })}
     </EuiContextMenuItem>,
   ];
+
+  const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
+    ({ dashboardId, newTitle, newDescription }) => {
+      const stateTransfer = embeddable.getStateTransfer();
+
+      const embeddableInput: Partial<EmbeddableChangePointChartInput> = {
+        title: newTitle,
+        description: newDescription,
+        dataViewId: dataView.id,
+        metricField: fieldConfig.metricField,
+        partitionField: fieldConfig.splitField,
+        function: fieldConfig.fn,
+      };
+
+      const state = {
+        input: embeddableInput,
+        type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+      };
+
+      const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+        state,
+        path,
+      });
+    },
+    [dataView.id, embeddable, fieldConfig.fn, fieldConfig.metricField, fieldConfig.splitField]
+  );
 
   return (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
@@ -285,7 +320,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             description: 'Desc',
           }}
           onClose={() => {}}
-          onSave={() => {}}
+          onSave={onSaveCallback}
         />
       ) : null}
     </EuiPanel>

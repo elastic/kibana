@@ -23,7 +23,7 @@ export interface EmbeddableChangePointChartProps {
   dataViewId: string;
   timeRange: TimeRange;
   interval: string;
-  function: 'avg' | 'sum' | 'min' | 'max';
+  function: 'avg' | 'sum' | 'min' | 'max' | string;
   metricField: string;
   partitionField?: string;
   maxSeriesToPlot?: number;

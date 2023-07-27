@@ -30,6 +30,7 @@ import type {
 } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -59,6 +60,7 @@ export interface AiopsAppDependencies {
     }>;
   };
   presentationUtil: PresentationUtilPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);
