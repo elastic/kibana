@@ -10,11 +10,30 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
+import { ListClient } from '../services/lists/list_client';
 import type { ListsPluginRouter } from '../types';
 
 import { buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
+
+const removeLegacyTemplatesIfExist = async (lists: ListClient): Promise<void> => {
+  const legacyTemplateExists = await lists.getLegacyListTemplateExists();
+  const legacyTemplateListItemsExists = await lists.getLegacyListItemTemplateExists();
+  try {
+    // Check if the old legacy lists and items template exists and remove it
+    if (legacyTemplateExists) {
+      await lists.deleteLegacyListTemplate();
+    }
+    if (legacyTemplateListItemsExists) {
+      await lists.deleteLegacyListItemTemplate();
+    }
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      throw err;
+    }
+  }
+};
 
 export const createListIndexRoute = (router: ListsPluginRouter): void => {
   router.post(
@@ -33,20 +52,18 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
         const listDataStreamExists = await lists.getListDataStreamExists();
         const listItemDataStreamExists = await lists.getListItemDataStreamExists();
-        const policyExists = await lists.getListPolicyExists();
-        const policyListItemExists = await lists.getListItemPolicyExists();
+        // const policyExists = await lists.getListPolicyExists();
+        // const policyListItemExists = await lists.getListItemPolicyExists();
 
-        if (!policyExists) {
-          await lists.setListPolicy();
-        }
-        if (!policyListItemExists) {
-          await lists.setListItemPolicy();
-        }
+        // if (!policyExists) {
+        //   await lists.setListPolicy();
+        // }
+        // if (!policyListItemExists) {
+        //   await lists.setListItemPolicy();
+        // }
 
         const templateListExists = await lists.getListTemplateExists();
         const templateListItemsExists = await lists.getListItemTemplateExists();
-        const legacyTemplateExists = await lists.getLegacyListTemplateExists();
-        const legacyTemplateListItemsExists = await lists.getLegacyListItemTemplateExists();
 
         if (!templateListExists || !listDataStreamExists) {
           await lists.setListTemplate();
@@ -56,39 +73,34 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
           await lists.setListItemTemplate();
         }
 
-        try {
-          // Check if the old legacy lists and items template exists and remove it
-          if (legacyTemplateExists) {
-            await lists.deleteLegacyListTemplate();
-          }
-          if (legacyTemplateListItemsExists) {
-            await lists.deleteLegacyListItemTemplate();
-          }
-        } catch (err) {
-          if (err.statusCode !== 404) {
-            throw err;
-          }
-        }
+        await removeLegacyTemplatesIfExist(lists);
 
         if (listDataStreamExists && listItemDataStreamExists) {
           return siemResponse.error({
             body: `data stream: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
             statusCode: 409,
           });
-        } else {
-          if (!listDataStreamExists) {
-            await lists.createListDataStream();
-          }
-          if (!listItemDataStreamExists) {
-            await lists.createListItemDataStream();
-          }
+        }
 
-          const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+        if (!listDataStreamExists) {
+          const listIndexExists = await lists.getListIndexExists();
+          await (listIndexExists
+            ? lists.migrateListIndexToDataStream()
+            : lists.createListDataStream());
+        }
+
+        if (!listItemDataStreamExists) {
+          const listItemIndexExists = await lists.getListItemIndexExists();
+          await (listItemIndexExists
+            ? lists.migrateListItemIndexToDataStream()
+            : lists.createListItemDataStream());
+        }
+
+        const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+        if (errors != null) {
+          return siemResponse.error({ body: errors, statusCode: 500 });
+        } else {
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

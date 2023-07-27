@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createBootstrapIndex,
@@ -18,6 +18,8 @@ import {
   getIndexTemplateExists,
   getPolicyExists,
   getTemplateExists,
+  migrateToDataStream,
+  putMappings,
   setIndexTemplate,
   setPolicy,
 } from '@kbn/securitysolution-es-utils';
@@ -49,8 +51,10 @@ import {
   updateListItem,
 } from '../items';
 import listsItemsPolicy from '../items/list_item_policy.json';
+import listItemMappings from '../items/list_item_mappings.json';
 
 import listPolicy from './list_policy.json';
+import listMappings from './list_mappings.json';
 import type {
   ConstructorOptions,
   CreateListIfItDoesNotExistOptions,
@@ -305,6 +309,38 @@ export class ListClient {
     const { esClient } = this;
     const listIndex = this.getListIndex();
     return createDataStream(esClient, listIndex);
+  };
+
+  /**
+   * update list index mappings with @timestamp and migrates it to data stream
+   * @returns
+   */
+  public migrateListIndexToDataStream = async (): Promise<unknown> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    // first need to update mapping of existing index to add @timestamp
+    await putMappings(
+      esClient,
+      listIndex,
+      listMappings.properties as Record<string, MappingProperty>
+    );
+    return migrateToDataStream(esClient, listIndex);
+  };
+
+  /**
+   * update list items index mappings with @timestamp and migrates it to data stream
+   * @returns
+   */
+  public migrateListItemIndexToDataStream = async (): Promise<unknown> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    // first need to update mapping of existing index to add @timestamp
+    await putMappings(
+      esClient,
+      listItemIndex,
+      listItemMappings.properties as Record<string, MappingProperty>
+    );
+    return migrateToDataStream(esClient, listItemIndex);
   };
 
   /**

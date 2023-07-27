@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
   DeserializerOrUndefined,
-  Id,
+  IdOrUndefined,
   Immutable,
   ListSchema,
   MetaOrUndefined,
@@ -24,7 +24,7 @@ import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
-  id: Id;
+  id: IdOrUndefined;
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
   type: Type;
@@ -76,7 +76,7 @@ export const createList = async ({
 
   const response = await esClient.create({
     document: body,
-    id,
+    id: id ?? uuidv4(),
     index: listIndex,
     refresh: 'wait_for',
   });

@@ -12,14 +12,9 @@ export const getListItemTemplate = (index: string): Record<string, unknown> => {
     data_stream: {},
     index_patterns: [index],
     template: {
+      lifecycle: {},
       mappings: listsItemsMappings,
       settings: {
-        index: {
-          lifecycle: {
-            name: index,
-            rollover_alias: index,
-          },
-        },
         mapping: {
           total_fields: {
             limit: 10000,
