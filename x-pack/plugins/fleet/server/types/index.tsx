@@ -90,6 +90,7 @@ export type {
   PackageList,
   InstallationInfo,
   ActionStatusOptions,
+  PackageSpecTags,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';
