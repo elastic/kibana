@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  SummaryExceptionListSchemaDecoded,
-  exceptionListSummarySchema,
-  summaryExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  SummaryExceptionListRequestQueryDecoded,
+  summaryExceptionListRequestQuery,
+  summaryExceptionListResponse,
+} from '../../common/api';
 
 import {
   buildRouteValidation,
@@ -32,9 +32,9 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_URL}/summary`,
       validate: {
         query: buildRouteValidation<
-          typeof summaryExceptionListSchema,
-          SummaryExceptionListSchemaDecoded
-        >(summaryExceptionListSchema),
+          typeof summaryExceptionListRequestQuery,
+          SummaryExceptionListRequestQueryDecoded
+        >(summaryExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -55,7 +55,10 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(exceptionListSummary, exceptionListSummarySchema);
+            const [validated, errors] = validate(
+              exceptionListSummary,
+              summaryExceptionListResponse
+            );
             if (errors != null) {
               return response.ok({ body: exceptionListSummary });
             } else {
