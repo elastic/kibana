@@ -6,13 +6,13 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('security response headers', function () {
+  describe('security/response_headers', function () {
     const defaultCSP = `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
