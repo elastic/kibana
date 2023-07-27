@@ -265,6 +265,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
+        'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
@@ -322,6 +323,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
+        'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
