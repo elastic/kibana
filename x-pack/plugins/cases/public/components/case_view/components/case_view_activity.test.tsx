@@ -437,54 +437,6 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152206
-    describe.skip('Reporter', () => {
-      it('should render the reporter correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter 1')).toBeInTheDocument();
-        expect(await reporterSection.findByText('R1')).toBeInTheDocument();
-      });
-
-      it('should render a reporter without uid correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: {
-            ...caseUsers,
-            reporter: {
-              user: {
-                email: 'reporter_no_uid@elastic.co',
-                full_name: 'Reporter No UID',
-                username: 'reporter_no_uid',
-              },
-            },
-          },
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter No UID')).toBeInTheDocument();
-      });
-
-      it('fallbacks to the caseData reporter correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: null,
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Leslie Knope')).toBeInTheDocument();
-      });
-    });
-
     describe('Assignees', () => {
       it('should render assignees in the participants section', async () => {
         appMockRender = createAppMockRenderer({ license: platinumLicense });
