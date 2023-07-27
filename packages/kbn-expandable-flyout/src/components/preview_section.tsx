@@ -151,12 +151,12 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         data-test-subj={PREVIEW_SECTION}
       >
         {isPreviewBanner(banner) && (
-        <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
-          <EuiText textAlign="center" color={banner.textColor} size="s">
-            {banner.title}
-          </EuiText>
-        </EuiSplitPanel.Inner>)
-        }
+          <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
+            <EuiText textAlign="center" color={banner.textColor} size="s">
+              {banner.title}
+            </EuiText>
+          </EuiSplitPanel.Inner>
+        )}
         <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>
           {header}
         </EuiSplitPanel.Inner>
