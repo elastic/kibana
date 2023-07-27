@@ -10,6 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { QuickPrompts } from './quick_prompts';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
+import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
 
 const setInput = jest.fn();
 const setIsSettingsModalVisible = jest.fn();
@@ -19,9 +20,9 @@ const testProps = {
   setIsSettingsModalVisible,
   trackPrompt,
 };
-
+const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
-  setSelectedSettingsTab: jest.fn(),
+  setSelectedSettingsTab,
   promptContexts: {},
   allQuickPrompts: MOCK_QUICK_PROMPTS,
 };
@@ -33,67 +34,31 @@ jest.mock('../../assistant_context', () => ({
   ...jest.requireActual('../../assistant_context'),
   useAssistantContext: () => mockUseAssistantContext,
 }));
-// wip
-describe.skip('QuickPrompts', () => {
+
+describe('QuickPrompts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('setInput function is called with a string', () => {
+  it('onClickAddQuickPrompt calls setInput with the prompt, and trackPrompt with the prompt title', () => {
     const { getByText } = render(
       <TestProviders>
         <QuickPrompts {...testProps} />
       </TestProviders>
     );
     fireEvent.click(getByText(testTitle));
+
     expect(setInput).toHaveBeenCalledWith(testPrompt);
+    expect(trackPrompt).toHaveBeenCalledWith(testTitle);
   });
 
-  it('setIsSettingsModalVisible function is called with a boolean', () => {
-    const { getByText } = render(
+  it('clicking "Add quick prompt" button opens the settings modal', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <QuickPrompts {...testProps} />
       </TestProviders>
     );
-    fireEvent.click(getByText('Add Quick Prompt'));
+    fireEvent.click(getByTestId('addQuickPrompt'));
     expect(setIsSettingsModalVisible).toHaveBeenCalledWith(true);
-  });
-
-  it('trackPrompt function is called with a string', () => {
-    const { getByText } = render(
-      <TestProviders>
-        <QuickPrompts {...testProps} />
-      </TestProviders>
-    );
-    fireEvent.click(getByText(testTitle));
-    expect(trackPrompt).toHaveBeenCalledWith(testPrompt);
-  });
-
-  it('component renders correctly when allQuickPrompts is an empty array', () => {
-    const { queryByText } = render(
-      <TestProviders>
-        <QuickPrompts {...testProps} />
-      </TestProviders>
-    );
-    expect(queryByText(testTitle)).toBeNull();
-  });
-
-  it('component renders correctly when promptContexts is an empty object', () => {
-    const { queryByText } = render(
-      <TestProviders>
-        <QuickPrompts {...testProps} />
-      </TestProviders>
-    );
-    expect(queryByText(testTitle)).toBeNull();
-  });
-
-  it('component renders correctly when allQuickPrompts contains a quick prompt with no categories', () => {
-    const allQuickPrompts = [{ title: testPrompt, prompt: testPrompt, color: 'primary' }];
-    const { getByText } = render(
-      <TestProviders>
-        <QuickPrompts {...testProps} allQuickPrompts={allQuickPrompts} />
-      </TestProviders>
-    );
-    fireEvent.click(getByText(testTitle));
-    expect(setInput).toHaveBeenCalledWith(testPrompt);
+    expect(setSelectedSettingsTab).toHaveBeenCalledWith(QUICK_PROMPTS_TAB);
   });
 });

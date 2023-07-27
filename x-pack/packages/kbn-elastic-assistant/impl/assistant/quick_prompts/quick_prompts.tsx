@@ -123,7 +123,12 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={showQuickPromptSettings} iconType="plus" size="xs">
+          <EuiButtonEmpty
+            data-test-subj="addQuickPrompt"
+            onClick={showQuickPromptSettings}
+            iconType="plus"
+            size="xs"
+          >
             {i18n.ADD_QUICK_PROMPT}
           </EuiButtonEmpty>
         </EuiFlexItem>
