@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import type { AttachmentRequest } from '../types/api';
 import type {
-  CommentRequest,
-  CommentRequestExternalReferenceType,
-  CommentRequestPersistableStateType,
-} from '../api';
-import { CommentType } from '../api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '../types/domain';
+import { AttachmentType } from '../types/domain';
 
 /**
  * A type narrowing function for external reference attachments.
  */
 export const isCommentRequestTypeExternalReference = (
-  context: CommentRequest
-): context is CommentRequestExternalReferenceType => {
-  return context.type === CommentType.externalReference;
+  context: AttachmentRequest
+): context is ExternalReferenceAttachmentPayload => {
+  return context.type === AttachmentType.externalReference;
 };
 
 /**
  * A type narrowing function for persistable state attachments.
  */
 export const isCommentRequestTypePersistableState = (
-  context: Partial<CommentRequest>
-): context is CommentRequestPersistableStateType => {
-  return context.type === CommentType.persistableState;
+  context: Partial<AttachmentRequest>
+): context is PersistableStateAttachmentPayload => {
+  return context.type === AttachmentType.persistableState;
 };
