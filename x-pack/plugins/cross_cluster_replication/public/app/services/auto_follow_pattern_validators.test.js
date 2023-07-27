@@ -14,7 +14,7 @@ describe('Auto-follow pattern validators', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('should validate all props from auto-follow pattern', () => {
+    it('should validate all props from auto-follow patten', () => {
       const autoFollowPattern = {
         name: '_wrong-name',
         leaderIndexPatterns: ['wrongpattern'],
