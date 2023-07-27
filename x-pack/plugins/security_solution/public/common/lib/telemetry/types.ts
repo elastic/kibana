@@ -9,24 +9,10 @@ import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { SecurityMetadata } from '../../../actions/types';
+import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
-}
-
-export enum TelemetryEventTypes {
-  AlertsGroupingChanged = 'Alerts Grouping Changed',
-  AlertsGroupingToggled = 'Alerts Grouping Toggled',
-  AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
-  AssistantInvoked = 'Assistant Invoked',
-  AssistantMessageSent = 'Assistant Message Sent',
-  AssistantQuickPrompt = 'Assistant Quick Prompt',
-  EntityDetailsClicked = 'Entity Details Clicked',
-  EntityAlertsClicked = 'Entity Alerts Clicked',
-  EntityRiskFiltered = 'Entity Risk Filtered',
-  MLJobUpdate = 'ML Job Update',
-  CellActionClicked = 'Cell Action Clicked',
-  AnomaliesCountClicked = 'Anomalies Count Clicked',
 }
 
 export interface ReportAlertsGroupingChangedParams {
@@ -71,15 +57,6 @@ export type ReportEntityDetailsClickedParams = EntityParam;
 export type ReportEntityAlertsClickedParams = EntityParam;
 export interface ReportEntityRiskFilteredParams extends EntityParam {
   selectedSeverity: RiskSeverity;
-}
-
-export enum ML_JOB_TELEMETRY_STATUS {
-  started = 'started',
-  startError = 'start_error',
-  stopped = 'stopped',
-  stopError = 'stop_error',
-  moduleInstalled = 'module_installed',
-  installationError = 'installationError',
 }
 
 export interface ReportMLJobUpdateParams {
