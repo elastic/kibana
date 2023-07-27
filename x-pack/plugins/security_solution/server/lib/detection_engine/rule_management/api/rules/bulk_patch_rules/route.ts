@@ -6,7 +6,7 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import {
@@ -46,7 +46,7 @@ export const bulkPatchRulesRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
       logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_UPDATE);
 
       const siemResponse = buildSiemResponse(response);
