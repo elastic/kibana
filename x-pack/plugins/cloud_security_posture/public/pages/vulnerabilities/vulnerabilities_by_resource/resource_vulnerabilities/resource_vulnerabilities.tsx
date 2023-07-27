@@ -19,6 +19,7 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Link, useParams, generatePath } from 'react-router-dom';
+import type { BoolQuery } from '@kbn/es-query';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
 import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from '../../hooks/use_latest_vulnerabilities';
@@ -379,7 +380,7 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
     query: {
       ...query,
       bool: {
-        ...query!.bool,
+        ...(query?.bool as BoolQuery),
         filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
