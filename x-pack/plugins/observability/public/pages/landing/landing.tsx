@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
-import { LOG_EXPLORER_PROFILE_ID } from '@kbn/discover-log-explorer-plugin/public';
 import React, { useEffect } from 'react';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
@@ -25,7 +24,7 @@ export function LandingPage() {
 
       if (hasLogsData) {
         navigateToApp(DISCOVER_APP_ID, {
-          deepLinkId: LOG_EXPLORER_PROFILE_ID,
+          deepLinkId: 'log-explorer',
         });
       } else if (hasApmData) {
         navigateToUrl(basePath.prepend('/app/apm/services'));

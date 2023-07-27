@@ -82,8 +82,9 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/actions-plugin",
     "@kbn/core-capabilities-common",
-    "@kbn/deeplinks-analytics",
-    "@kbn/discover-log-explorer-plugin"
+    "@kbn/deeplinks-analytics"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
