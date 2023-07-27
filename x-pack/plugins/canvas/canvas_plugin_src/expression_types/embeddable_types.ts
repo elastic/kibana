@@ -8,7 +8,7 @@
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-plugin/common/constants';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/common';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
 export const EmbeddableTypes: {
   lens: string;
