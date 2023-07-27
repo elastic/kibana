@@ -111,7 +111,7 @@ function getSavedSearchSource(savedSearch: SavedSearch) {
     : undefined;
 }
 
-/** @TODO: refactor this to kbn/ml/query_utils
+/**
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
  */

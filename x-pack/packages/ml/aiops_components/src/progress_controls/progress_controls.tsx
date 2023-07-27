@@ -42,8 +42,10 @@ interface ProgressControlProps {
 }
 
 /**
+ * ProgressControls React Component
  * Component with ability to Run & cancel analysis
  * by default use `Baseline` and `Deviation` for the badge name
+ * @type {FC<ProgressControlProps>}
  * @param children - List of Kibana services that are required as dependencies
  * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
  * @param width - Optional width
@@ -60,15 +62,6 @@ interface ProgressControlProps {
  * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
  * @param deviationBrush - Optional settings override for the 'deviation' brush
  * @param baselineBrush - Optional settings override for the 'baseline' brush
- * @constructor
- */
-
-/**
- * ProgressControls React Component
- * Component with ability to Run & cancel analysis
- * by default use `Baseline` and `Deviation` for the badge name
- * @type {FC<ProgressControlProps>}
- * @param props - `ProgressControlProps` component props
  * @returns {React.ReactElement} The ProgressControls component.
  */
 export const ProgressControls: FC<ProgressControlProps> = ({
