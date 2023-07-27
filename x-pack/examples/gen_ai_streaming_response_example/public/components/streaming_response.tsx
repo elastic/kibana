@@ -181,18 +181,9 @@ export const StreamingResponse = ({
   );
 };
 
-function streamReducer(state: string, action: Chunk | Chunk[] | 'RESET') {
-  if (action === 'RESET') {
-    return '';
-  }
-
-  return `${state}${getMessageFromChunks(Array.isArray(action) ? action : [action])}`;
-}
-
-function getMessageFromChunks(chunks: Chunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
+function streamReducer(state: string, action: Chunk | Chunk[]) {
+  return `${state}${[action]
+    .flat()
+    .map((chunk) => chunk.choices[0]?.delta.content ?? '')
+    .join('')}`;
 }
