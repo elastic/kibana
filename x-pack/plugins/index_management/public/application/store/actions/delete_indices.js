@@ -18,7 +18,8 @@ export const deleteIndices =
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      console.log(error.body);
+      notificationService.showDangerToast(error.body.message);
       return dispatch(clearRowStatus({ indexNames }));
     }
     notificationService.showSuccessToast(
