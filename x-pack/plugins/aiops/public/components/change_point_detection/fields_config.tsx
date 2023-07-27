@@ -200,8 +200,9 @@ const FieldPanel: FC<FieldPanelProps> = ({
         description: newDescription,
         dataViewId: dataView.id,
         metricField: fieldConfig.metricField,
-        partitionField: fieldConfig.splitField,
-        function: fieldConfig.fn,
+        splitField: fieldConfig.splitField,
+        fn: fieldConfig.fn,
+        // timeRange: '', // Attach custom time range! ask user
       };
 
       const state = {

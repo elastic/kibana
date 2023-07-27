@@ -21,7 +21,8 @@ import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { AiopsAppContext } from '../hooks/use_aiops_app_context';
+import { DataSourceContextProvider } from '../hooks/use_data_source';
+import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
 import { ChartComponentP } from '../components/change_point_detection/chart_component';
 
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
@@ -96,15 +97,19 @@ export class EmbeddableChangePointChart
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <AiopsAppContext.Provider value={this.deps}>
+          <AiopsAppContext.Provider value={this.deps as unknown as AiopsAppDependencies}>
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
-                <ChartComponentP
-                  fn={input.function}
-                  metricField={input.metricField}
-                  splitField={input.partitionField}
-                  timeRange={input.timeRange}
-                />
+                <DataSourceContextProvider dataViewId={input.dataViewId}>
+                  <ChartComponentP
+                    fn={input.fn}
+                    metricField={input.metricField}
+                    splitField={input.splitField}
+                    timeRange={input.timeRange}
+                    maxSeriesToPlot={6}
+                    dataViewId={input.dataViewId}
+                  />
+                </DataSourceContextProvider>
               </Suspense>
             </DatePickerContextProvider>
           </AiopsAppContext.Provider>

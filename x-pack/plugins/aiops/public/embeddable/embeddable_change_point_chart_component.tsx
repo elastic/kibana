@@ -22,10 +22,9 @@ import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart
 export interface EmbeddableChangePointChartProps {
   dataViewId: string;
   timeRange: TimeRange;
-  interval: string;
-  function: 'avg' | 'sum' | 'min' | 'max' | string;
+  fn: 'avg' | 'sum' | 'min' | 'max' | string;
   metricField: string;
-  partitionField?: string;
+  splitField?: string;
   maxSeriesToPlot?: number;
 }
 

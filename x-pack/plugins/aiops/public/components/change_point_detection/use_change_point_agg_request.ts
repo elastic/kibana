@@ -102,7 +102,7 @@ function getChangePointDetectionRequestBody(
       index,
       size: 0,
       body: {
-        query,
+        ...(query ? { query } : {}),
         aggregations,
       },
     },
@@ -164,6 +164,7 @@ export function useChangePointResults(
           },
           query
         );
+
         const result = await runRequest<
           typeof requestPayload,
           { rawResponse: ChangePointAggResponse }

@@ -26,7 +26,7 @@ export interface EmbeddableChangePointChartStartServices {
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart';
 
 export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefinition {
-  type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+  public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
   public readonly grouping = [
     {
@@ -50,6 +50,12 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     return true;
   };
 
+  getDisplayName() {
+    return i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
+      defaultMessage: 'Change point detection',
+    });
+  }
+
   /**
    * TODO
    */
@@ -66,12 +72,6 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     } catch (e) {
       return Promise.reject();
     }
-  }
-
-  getDisplayName() {
-    return i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
-      defaultMessage: 'Change point detection',
-    });
   }
 
   async create(input: EmbeddableChangePointChartInput, parent?: IContainer) {
