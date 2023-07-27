@@ -161,7 +161,7 @@ export interface FieldDescriptorRestResponse {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge' | 'position';
   timeSeriesDimension?: boolean;
   conflictDescriptions?: Record<string, string[]>;
 }
