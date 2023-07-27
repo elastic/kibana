@@ -181,7 +181,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
-      `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/${exportType}`,
+      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
       {
         method: 'POST',
         body: JSON.stringify({ jobParams: jobParamsRison }),
@@ -193,7 +193,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(INTERNAL_ROUTES.GENERATE.CSV_IMMEDIATE, {
+    return this.http.post(INTERNAL_ROUTES.DOWNLOAD_CSV, {
       asResponse: true,
       body: JSON.stringify(params),
     });

@@ -22,10 +22,8 @@ export const INTERNAL_ROUTES = {
     DELETE_PREFIX: prefixInternalPath + '/jobs/delete', // docId is added to the final path
     DOWNLOAD_PREFIX: prefixInternalPath + '/jobs/download', // docId is added to the final path
   },
-  GENERATE: {
-    EXPORT_TYPE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
-    CSV_IMMEDIATE: prefixInternalPath + '/generate/immediate/csv_searchsource',
-  },
+  DOWNLOAD_CSV: prefixInternalPath + '/generate/immediate/csv_searchsource',
+  GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
 };
 
 const prefixPublicPath = '/api/reporting';
@@ -35,14 +33,16 @@ export const PUBLIC_ROUTES = {
    * exportTypeId is added to the final path
    */
   GENERATE_PREFIX: prefixPublicPath + `/generate`,
-  /**
-   * Public endpoint used by Watcher and automated report downloads
-   * jobId is added to the final path
-   */
-  DOWNLOAD_PREFIX: prefixPublicPath + `/jobs/download`,
-  /**
-   * Public endpoint potentially used to delete a report after download in automation
-   * jobId is added to the final path
-   */
-  DELETE_PREFIX: prefixPublicPath + `/jobs/delete`,
+  JOBS: {
+    /**
+     * Public endpoint used by Watcher and automated report downloads
+     * jobId is added to the final path
+     */
+    DOWNLOAD_PREFIX: prefixPublicPath + `/jobs/download`,
+    /**
+     * Public endpoint potentially used to delete a report after download in automation
+     * jobId is added to the final path
+     */
+    DELETE_PREFIX: prefixPublicPath + `/jobs/delete`,
+  },
 };

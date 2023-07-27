@@ -33,7 +33,7 @@ import { registerJobInfoRoutesPublic } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
+describe(`GET ${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
@@ -139,7 +139,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/1`)
+      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -165,7 +165,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dope`)
+      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
       .expect(401)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
@@ -179,7 +179,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/poo`)
+      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
       .expect(404);
   });
 
@@ -195,7 +195,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/poo`)
+      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
       .expect(403);
   });
 
@@ -211,7 +211,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
+      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
       .expect(503)
       .expect('Content-Type', 'text/plain; charset=utf-8')
       .expect('Retry-After', '30')
@@ -231,7 +231,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
 
     await server.start();
     await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
+      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .then(({ body }) =>
@@ -246,7 +246,7 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
@@ -260,14 +260,14 @@ describe('GET ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}', () => {
 
       await server.start();
       await supertest(httpSetup.server.listener)
-        .get(`${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/dank`)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename=report.csv');
 
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `get ${PUBLIC_ROUTES.DOWNLOAD_PREFIX}/{docId}:unencodedJobType`,
+        counterName: `get ${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/{docId}:unencodedJobType`,
         counterType: 'reportingApi',
       });
     });

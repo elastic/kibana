@@ -30,7 +30,7 @@ import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
+describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
@@ -115,7 +115,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
@@ -130,7 +130,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf?jobParams=foo:`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
@@ -141,7 +141,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
       .send({ jobParams: `foo:` })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
@@ -153,7 +153,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/TonyHawksProSkater2`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/TonyHawksProSkater2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -167,7 +167,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
@@ -183,7 +183,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
   });
@@ -194,7 +194,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
+      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
       .send({
         jobParams: rison.encode({
           title: `abc`,
@@ -241,7 +241,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}`, () => {
       await server.start();
 
       await supertest(httpSetup.server.listener)
-        .post(`${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/printablePdf`)
+        .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdf`)
         .send({
           jobParams: rison.encode({
             title: `abc`,

@@ -15,7 +15,7 @@ import type { JobParamsDownloadCSV } from '../../../export_types/csv_searchsourc
 import { PassThroughStream } from '../../../lib';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 
-const path = INTERNAL_ROUTES.GENERATE.CSV_IMMEDIATE;
+const path = INTERNAL_ROUTES.DOWNLOAD_CSV;
 
 export type CsvFromSavedObjectRequest = KibanaRequest<unknown, unknown, JobParamsDownloadCSV>;
 

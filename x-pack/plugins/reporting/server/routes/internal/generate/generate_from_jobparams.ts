@@ -23,7 +23,7 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
 
-  const path = `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/{exportType}`;
+  const path = `${INTERNAL_ROUTES.GENERATE_PREFIX}/{exportType}`;
   router.post(
     {
       path,
