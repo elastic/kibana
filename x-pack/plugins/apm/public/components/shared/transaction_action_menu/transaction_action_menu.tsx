@@ -19,7 +19,7 @@ import {
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
 import { ProfilingLocators } from '@kbn/profiling-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
