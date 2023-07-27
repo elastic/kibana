@@ -9,14 +9,9 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { UserActionTypes } from '../../../common/types/domain';
-import type { Case, CasePostRequest } from '../../../common/api';
-import {
-  CaseRt,
-  CasePostRequestRt,
-  CaseSeverity,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
+import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
@@ -26,6 +21,8 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { CasePostRequest } from '../../../common/types/api';
+import { CasePostRequestRt } from '../../../common/types/api';
 
 /**
  * Creates a new case.
