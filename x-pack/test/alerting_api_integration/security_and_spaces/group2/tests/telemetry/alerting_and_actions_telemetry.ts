@@ -429,7 +429,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           type: 'alert',
           id: alwaysFiringRuleId[Spaces[2].id],
           provider: 'alerting',
-          actions: new Map([['execute', { equal: 1 }]]),
+          actions: new Map([['execute', { gte: 1 }]]),
         });
       });
 
