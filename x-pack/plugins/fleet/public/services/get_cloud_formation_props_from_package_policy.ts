@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import type {
+  CloudFormationProps,
+  CloudSecurityIntegrationAwsAccountType,
+} from '../components/agent_enrollment_flyout/types';
 import type { PackagePolicy } from '../types';
+
+const AWS_ACCOUNT_TYPE = 'aws.account_type';
 
 /**
  * Get the cloud formation template url from a package policy
  * It looks for a config with a cloud_formation_template_url object present in
  * the enabled inputs of the package policy
  */
-export const getCloudFormationTemplateUrlFromPackagePolicy = (packagePolicy?: PackagePolicy) => {
-  const cloudFormationTemplateUrl = packagePolicy?.inputs?.reduce((accInput, input) => {
+export const getCloudFormationPropsFromPackagePolicy = (
+  packagePolicy?: PackagePolicy
+): CloudFormationProps => {
+  const templateUrl = packagePolicy?.inputs?.reduce((accInput, input) => {
     if (accInput !== '') {
       return accInput;
     }
@@ -23,5 +31,12 @@ export const getCloudFormationTemplateUrlFromPackagePolicy = (packagePolicy?: Pa
     return accInput;
   }, '');
 
-  return cloudFormationTemplateUrl !== '' ? cloudFormationTemplateUrl : undefined;
+  const awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
+    packagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE]
+      ?.value;
+
+  return {
+    templateUrl: templateUrl !== '' ? templateUrl : undefined,
+    awsAccountType,
+  };
 };

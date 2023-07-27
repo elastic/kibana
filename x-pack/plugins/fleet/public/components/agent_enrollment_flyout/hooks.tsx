@@ -20,7 +20,12 @@ import {
   getCloudFormationTemplateUrlFromAgentPolicy,
 } from '../../services';
 
-import type { K8sMode, CloudSecurityIntegrationType } from './types';
+import type {
+  K8sMode,
+  CloudSecurityIntegrationType,
+  CloudSecurityIntegrationAwsAccountType,
+  CloudSecurityIntegration,
+} from './types';
 
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_DEFEND_PACKAGE]);
@@ -78,22 +83,29 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
 }
 
 export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
-  const integrationVersion = useMemo(() => {
-    return getCloudSecurityIntegrationVersionFromAgentPolicy(agentPolicy);
+  const cloudSecurityPackagePolicy = useMemo(() => {
+    return getCloudSecurityPackagePolicyFromAgentPolicy(agentPolicy);
   }, [agentPolicy]);
 
+  const integrationVersion = cloudSecurityPackagePolicy?.package?.version;
+
+  // Fetch the package info to get the CloudFormation template URL only
+  // if the package policy is a Cloud Security policy
   const { data: packageInfoData, isLoading } = useGetPackageInfoByKeyQuery(
     FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
     integrationVersion,
-    { full: true }
+    { full: true },
+    { enabled: Boolean(cloudSecurityPackagePolicy) }
   );
 
-  const cloudSecurityIntegration = useMemo(() => {
-    if (!agentPolicy) {
+  const cloudSecurityIntegration: CloudSecurityIntegration | undefined = useMemo(() => {
+    if (!agentPolicy || !cloudSecurityPackagePolicy) {
       return undefined;
     }
 
-    const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
+    const integrationType = cloudSecurityPackagePolicy.inputs?.find((input) => input.enabled)
+      ?.policy_template as CloudSecurityIntegrationType;
+
     if (!integrationType) return undefined;
 
     const cloudFormationTemplateFromAgentPolicy =
@@ -104,17 +116,27 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     // when the integration is upgraded.
     // In case it can't find the template for the current version,
     // it will fallback to the one from the agent policy.
-    const cloudFormationUrl = packageInfoData?.item
+    const cloudFormationTemplateUrl = packageInfoData?.item
       ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
       : cloudFormationTemplateFromAgentPolicy;
+
+    const AWS_ACCOUNT_TYPE = 'aws.account_type';
+
+    const cloudFormationAwsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
+      cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
+        AWS_ACCOUNT_TYPE
+      ]?.value;
 
     return {
       isLoading,
       integrationType,
-      cloudFormationUrl,
       isCloudFormation: Boolean(cloudFormationTemplateFromAgentPolicy),
+      cloudFormationProps: {
+        awsAccountType: cloudFormationAwsAccountType,
+        templateUrl: cloudFormationTemplateUrl,
+      },
     };
-  }, [agentPolicy, packageInfoData?.item, isLoading]);
+  }, [agentPolicy, packageInfoData?.item, isLoading, cloudSecurityPackagePolicy]);
 
   return { cloudSecurityIntegration };
 }
@@ -125,23 +147,10 @@ const isK8sPackage = (pkg: PackagePolicy) => {
   return K8S_PACKAGES.has(name);
 };
 
-const getCloudSecurityIntegrationTypeFromPackagePolicy = (
-  agentPolicy: AgentPolicy
-): CloudSecurityIntegrationType | undefined => {
-  const packagePolicy = agentPolicy?.package_policies?.find(
-    (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
-  );
-  if (!packagePolicy) return undefined;
-  return packagePolicy?.inputs?.find((input) => input.enabled)
-    ?.policy_template as CloudSecurityIntegrationType;
-};
-
-const getCloudSecurityIntegrationVersionFromAgentPolicy = (
+const getCloudSecurityPackagePolicyFromAgentPolicy = (
   agentPolicy?: AgentPolicy
-): string | undefined => {
-  const packagePolicy = agentPolicy?.package_policies?.find(
+): PackagePolicy | undefined => {
+  return agentPolicy?.package_policies?.find(
     (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
   );
-  if (!packagePolicy) return undefined;
-  return packagePolicy?.package?.version;
 };

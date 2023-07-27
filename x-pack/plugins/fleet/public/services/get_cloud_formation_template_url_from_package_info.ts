@@ -5,20 +5,7 @@
  * 2.0.
  */
 
-import type { PackageInfo, RegistryPolicyTemplate, RegistryVarsEntry } from '../types';
-
-type RegistryPolicyTemplateWithInputs = RegistryPolicyTemplate & {
-  inputs: Array<{
-    vars?: RegistryVarsEntry[];
-  }>;
-};
-
-// type guard for checking inputs
-export const hasPolicyTemplateInputs = (
-  policyTemplate: RegistryPolicyTemplate
-): policyTemplate is RegistryPolicyTemplateWithInputs => {
-  return policyTemplate.hasOwnProperty('inputs');
-};
+import type { PackageInfo } from '../types';
 
 /**
  * Get the cloud formation template url from the PackageInfo
@@ -34,15 +21,12 @@ export const getCloudFormationTemplateUrlFromPackageInfo = (
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === integrationType);
   if (!policyTemplate) return undefined;
 
-  const inputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-
-  if (!inputs) return undefined;
-
-  const cloudFormationTemplate = inputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
+  if ('inputs' in policyTemplate) {
+    const cloudFormationTemplate = policyTemplate.inputs?.reduce((acc, input): string => {
+      if (!input.vars) return acc;
+      const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+      return template ? String(template) : acc;
+    }, '');
+    return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
+  }
 };
