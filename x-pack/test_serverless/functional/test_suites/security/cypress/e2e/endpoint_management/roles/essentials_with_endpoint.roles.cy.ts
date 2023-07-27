@@ -14,6 +14,7 @@ import {
   getEndpointManagementPageMap,
   getEndpointManagementPageList,
   EndpointArtifactPageId,
+  ensureProperArtifactPageAuthzAccess,
 } from '../../../screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
@@ -97,16 +98,17 @@ describe(
         getNoPrivilegesPage().should('not.exist');
       });
 
-      for (const { url, title, id } of artifactPagesFullAccess) {
+      for (const { title, id } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
-        cy.visit(pageById.hostIsolationExceptions.url);
-        getNoPrivilegesPage().should('exist');
+        ensureProperArtifactPageAuthzAccess(
+          'none',
+          pageById.hostIsolationExceptions.id as EndpointArtifactPageId
+        );
       });
 
       it('should NOT have access to Fleet', () => {
@@ -158,10 +160,9 @@ describe(
         login('rule_author');
       });
 
-      for (const { id, url, title } of artifactPagesFullAccess) {
+      for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -176,8 +177,10 @@ describe(
       });
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
-        cy.visit(pageById.hostIsolationExceptions.url);
-        getNoPrivilegesPage().should('exist');
+        ensureProperArtifactPageAuthzAccess(
+          'none',
+          pageById.hostIsolationExceptions.id as EndpointArtifactPageId
+        );
       });
 
       it('should NOT have access to Fleet', () => {
@@ -198,10 +201,9 @@ describe(
         login('soc_manager');
       });
 
-      for (const { id, url, title } of artifactPagesFullAccess) {
+      for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -213,8 +215,10 @@ describe(
       }
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
-        cy.visit(pageById.hostIsolationExceptions.url);
-        getNoPrivilegesPage().should('exist');
+        ensureProperArtifactPageAuthzAccess(
+          'none',
+          pageById.hostIsolationExceptions.id as EndpointArtifactPageId
+        );
       });
 
       it('should NOT have access to Fleet', () => {
@@ -243,10 +247,9 @@ describe(
           login(roleName);
         });
 
-        for (const { id, url, title } of artifactPagesFullAccess) {
+        for (const { id, title } of artifactPagesFullAccess) {
           it(`should have CRUD access to: ${title}`, () => {
-            cy.visit(url);
-            getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+            ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
           });
         }
 
@@ -258,8 +261,10 @@ describe(
         }
 
         it(`should NOT have access to Host Isolation Exceptions`, () => {
-          cy.visit(pageById.hostIsolationExceptions.url);
-          getNoPrivilegesPage().should('exist');
+          ensureProperArtifactPageAuthzAccess(
+            'none',
+            pageById.hostIsolationExceptions.id as EndpointArtifactPageId
+          );
         });
 
         it('should have access to Fleet', () => {

@@ -11,6 +11,7 @@ import { login } from '../../../tasks/login';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import {
   EndpointArtifactPageId,
+  ensureProperArtifactPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageList,
   getEndpointManagementPageMap,
@@ -132,10 +133,9 @@ describe(
         getNoPrivilegesPage().should('not.exist');
       });
 
-      for (const { url, title, id } of artifactPagesFullAccess) {
+      for (const { title, id } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -218,10 +218,9 @@ describe(
         login('rule_author');
       });
 
-      for (const { id, url, title } of artifactPagesFullAccess) {
+      for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -236,10 +235,10 @@ describe(
       });
 
       it(`should have Read access only to: Host Isolation Exceptions`, () => {
-        cy.visit(pageById.hostIsolationExceptions.url);
-        getArtifactListEmptyStateAddButton(
+        ensureProperArtifactPageAuthzAccess(
+          'read',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
-        ).should('not.exist');
+        );
       });
 
       it('should NOT have access to Fleet', () => {
@@ -271,10 +270,9 @@ describe(
         login('soc_manager');
       });
 
-      for (const { id, url, title } of artifactPagesFullAccess) {
+      for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -319,10 +317,9 @@ describe(
         login('endpoint_operations_analyst');
       });
 
-      for (const { id, url, title } of artifactPagesFullAccess) {
+      for (const { id, title } of artifactPagesFullAccess) {
         it(`should have CRUD access to: ${title}`, () => {
-          cy.visit(url);
-          getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+          ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
         });
       }
 
@@ -363,10 +360,9 @@ describe(
             login(roleName);
           });
 
-          for (const { id, url, title } of artifactPagesFullAccess) {
+          for (const { id, title } of artifactPagesFullAccess) {
             it(`should have CRUD access to: ${title}`, () => {
-              cy.visit(url);
-              getArtifactListEmptyStateAddButton(id as EndpointArtifactPageId).should('exist');
+              ensureProperArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
             });
           }
 
