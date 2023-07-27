@@ -13,6 +13,7 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
+import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import type { CoreTheme } from '@kbn/core/public';
 import { getColorMode } from './utils';
 
@@ -26,12 +27,18 @@ const defaultTheme: CoreTheme = {
 };
 
 const globalCache = createCache({
-  key: 'eui',
-  container: document.querySelector(`meta[name="eui-global"]`) as HTMLElement,
+  key: EUI_STYLES_GLOBAL,
+  container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
+globalCache.compat = true;
+const utilitiesCache = createCache({
+  key: EUI_STYLES_UTILS,
+  container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
+});
+utilitiesCache.compat = true;
 const emotionCache = createCache({
   key: 'css',
-  container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
+  container: document.querySelector('meta[name="emotion"]') as HTMLElement,
 });
 emotionCache.compat = true;
 
@@ -44,7 +51,7 @@ export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modi
   return (
     <EuiProvider
       colorMode={colorMode}
-      cache={{ default: emotionCache, global: globalCache }}
+      cache={{ default: emotionCache, global: globalCache, utility: utilitiesCache }}
       globalStyles={false}
       utilityClasses={false}
       modify={modify}

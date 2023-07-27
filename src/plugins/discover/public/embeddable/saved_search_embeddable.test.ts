@@ -18,7 +18,7 @@ import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { Observable, of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { SHOW_FIELD_STATISTICS } from '../../common';
+import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { VIEW_MODE } from '../../common/constants';
