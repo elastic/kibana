@@ -6,23 +6,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
-import { promisify } from 'util';
 import { ReportingCore } from '../../..';
-import { ALLOWED_JOB_CONTENT_TYPES, INTERNAL_ROUTES } from '../../../../common/constants';
-import { getContentStream } from '../../../lib';
+import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/generate';
-import { jobManagementPreRouting, jobsQueryFactory } from '../../common/jobs';
+import {
+  getCommonJobManagementRoutes,
+  jobManagementPreRouting,
+  jobsQueryFactory,
+} from '../../common/jobs';
 
 export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
+  const commonRoutes = getCommonJobManagementRoutes(reporting);
+  commonRoutes.registerDownloadReport(INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}');
+  commonRoutes.registerDeleteReport(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/{docId}');
+
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
   const jobsQuery = jobsQueryFactory(reporting);
 
-  const registerGetList = () => {
-    // list jobs in the queue, paginated
-    const path = INTERNAL_ROUTES.JOBS.LIST;
+  // list jobs in the queue, paginated
+  const registerGetList = (path: string) => {
     router.get(
       {
         path,
@@ -63,9 +67,8 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerGetCount = () => {
-    // return the count of all jobs in the queue
-    const path = INTERNAL_ROUTES.JOBS.COUNT;
+  // return the count of all jobs in the queue
+  const registerGetCount = (path: string) => {
     router.get(
       { path, validate: false },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
@@ -94,9 +97,9 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerGetInfo = () => {
+  const registerGetInfo = (path: string) => {
     // return some info about the job
-    const path = INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/{docId}';
+
     router.get(
       {
         path,
@@ -127,97 +130,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerDownloadReport = () => {
-    // trigger a download of the output from a job
-    const path = INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
-    router.get(
-      {
-        path,
-        validate: {
-          params: schema.object({
-            docId: schema.string({ minLength: 3 }),
-          }),
-        },
-        options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
-      },
-      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
-
-        // ensure the async dependencies are loaded
-        if (!context.reporting) {
-          return handleUnavailable(res);
-        }
-
-        const { docId } = req.params;
-
-        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
-          const payload = await jobsQuery.getDocumentPayload(doc);
-          const { contentType, content, filename, statusCode } = payload;
-
-          if (!contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(contentType)) {
-            return res.badRequest({
-              body: `Unsupported content-type of ${contentType} specified by job output`,
-            });
-          }
-
-          const body = typeof content === 'string' ? Buffer.from(content) : content;
-
-          const headers = {
-            ...payload.headers,
-            'content-type': contentType,
-          };
-
-          if (filename) {
-            return res.file({ body, headers, filename });
-          }
-
-          return res.custom({ body, headers, statusCode });
-        });
-      })
-    );
-  };
-
-  const registerDeleteReport = () => {
-    // allow a report to be deleted
-    const path = INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
-    router.delete(
-      {
-        path,
-        validate: {
-          params: schema.object({
-            docId: schema.string({ minLength: 3 }),
-          }),
-        },
-      },
-      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
-
-        // ensure the async dependencies are loaded
-        if (!context.reporting) {
-          return handleUnavailable(res);
-        }
-
-        const { docId } = req.params;
-
-        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
-          const docIndex = doc.index;
-          const stream = await getContentStream(reporting, { id: docId, index: docIndex });
-
-          /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-          await promisify(stream.end.bind(stream, '', 'utf8'))();
-          await jobsQuery.delete(docIndex, docId);
-
-          return res.ok({
-            body: { deleted: true },
-          });
-        });
-      })
-    );
-  };
-
-  registerGetList();
-  registerGetCount();
-  registerGetInfo();
-  registerDownloadReport();
-  registerDeleteReport();
+  registerGetList(INTERNAL_ROUTES.JOBS.LIST);
+  registerGetCount(INTERNAL_ROUTES.JOBS.COUNT);
+  registerGetInfo(INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/{docId}');
 }
