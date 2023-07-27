@@ -69,11 +69,6 @@ export class TelemetryClient implements TelemetryClientStart {
   };
 
   public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
-    console.log('reporting assistant invoked', {
-      arg: TelemetryEventTypes.AssistantInvoked,
-      conversationId,
-      invokedBy,
-    });
     this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
       conversationId,
       invokedBy,
@@ -84,11 +79,6 @@ export class TelemetryClient implements TelemetryClientStart {
     conversationId,
     role,
   }: ReportAssistantMessageSentParams) => {
-    console.log('reporting assistant message sent', {
-      arg: TelemetryEventTypes.AssistantMessageSent,
-      conversationId,
-      role,
-    });
     this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
       conversationId,
       role,
@@ -99,11 +89,6 @@ export class TelemetryClient implements TelemetryClientStart {
     conversationId,
     promptTitle,
   }: ReportAssistantQuickPromptParams) => {
-    console.log('reporting assistant quick propmpt', {
-      arg: TelemetryEventTypes.AssistantMessageSent,
-      conversationId,
-      promptTitle,
-    });
     this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, {
       conversationId,
       promptTitle,

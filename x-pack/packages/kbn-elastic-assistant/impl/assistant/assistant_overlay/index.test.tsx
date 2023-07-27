@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { AssistantOverlay } from '../../..';
+import { AssistantOverlay } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const reportAssistantInvoked = jest.fn();
