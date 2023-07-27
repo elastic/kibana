@@ -9,13 +9,17 @@ import {
   CSPM_POLICY_TEMPLATE,
   CSP_LATEST_FINDINGS_DATA_VIEW,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metring';
+import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metering';
 import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
 
-import type { CloudSecurityMeteringCallbackInput, UsageRecord } from '../types';
+import type { UsageRecord, MeteringCallbackInput } from '../types';
 
 const CSPM_CYCLE_SCAN_FREQUENT = '24h';
 const CSPM_BUCKET_SUB_TYPE_NAME = 'CSPM';
+
+interface CloudSecurityMeteringCallbackInput extends Omit<MeteringCallbackInput, 'cloudSetup'> {
+  projectId: string;
+}
 
 interface ResourceCountAggregation {
   min_timestamp: MinTimestamp;
@@ -49,7 +53,7 @@ export const getCspmUsageRecord = async ({
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
       : new Date().toISOString();
 
-    const usageRecords = {
+    const usageRecord = {
       id: `${CLOUD_SECURITY_TASK_TYPE}:${CLOUD_SECURITY_TASK_TYPE}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
@@ -67,7 +71,7 @@ export const getCspmUsageRecord = async ({
 
     logger.debug(`Fetched CSPM metring data`);
 
-    return usageRecords;
+    return usageRecord;
   } catch (err) {
     logger.error(`Failed to fetch CSPM metering data ${err}`);
   }
