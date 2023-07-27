@@ -8,6 +8,7 @@
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import * as Rx from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../..';
@@ -32,6 +33,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   const mockLogger = loggingSystemMock.createLogger();
 
   let server: SetupServerReturn['server'];
+  let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
   let core: ReportingCore;
   let screenshotting: jest.Mocked<ScreenshottingStart>;
@@ -67,6 +69,11 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
         },
       })
     );
+
+    usageCounter = {
+      incrementCounter: jest.fn(),
+    };
+    core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
 
     screenshotting = (await core.getPluginStartDeps()).screenshotting as typeof screenshotting;
   });
@@ -135,5 +142,23 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
           }
         `);
       });
+  });
+
+  describe('usage counter', () => {
+    it('increments the counter', async () => {
+      registerDiagnoseBrowser(core, mockLogger);
+
+      await server.start();
+
+      screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
+
+      await supertest(httpSetup.server.listener).post(INTERNAL_ROUTES.DIAGNOSE.BROWSER).expect(200);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `post ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}:success`,
+        counterType: 'reportingApi',
+      });
+    });
   });
 });
