@@ -102,6 +102,22 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
+   * Returns the kibana privileges of a system action type
+   */
+  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
+    actionTypeId: string,
+    params?: Params
+  ): string[] {
+    const actionType = this.actionTypes.get(actionTypeId);
+
+    if (!actionType?.isSystemActionType) {
+      return [];
+    }
+
+    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
+  }
+
+  /**
    * Registers an action type to the action type registry
    */
   public register<
@@ -144,6 +160,15 @@ export class ActionTypeRegistry {
             connectorTypeId: actionType.id,
             ids: actionType.supportedFeatureIds.join(','),
           },
+        })
+      );
+    }
+
+    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
+          defaultMessage:
+            'Kibana privilege authorization is only supported for system action types',
         })
       );
     }

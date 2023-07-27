@@ -626,20 +626,6 @@ Array [
           Object {
             "children": undefined,
             "deepLink": undefined,
-            "href": "https://cloud.elastic.co/deployments/123456789/performance",
-            "id": "cloudLinkPerformance",
-            "isActive": false,
-            "path": Array [
-              "project_settings_project_nav",
-              "settings",
-              "cloudLinkPerformance",
-            ],
-            "renderItem": undefined,
-            "title": "Mock Performance",
-          },
-          Object {
-            "children": undefined,
-            "deepLink": undefined,
             "href": "https://cloud.elastic.co/account/billing",
             "id": "cloudLinkBilling",
             "isActive": false,

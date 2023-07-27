@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { PreloadedState } from '@reduxjs/toolkit';
+import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { isEqual } from 'lodash';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
   LensRootStore,
-  LensAppState,
-  LensState,
   loadInitial,
+  initExisting,
+  initEmpty,
 } from '../../../state_management';
-import { getPreloadedState } from '../../../state_management/lens_slice';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
   LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
-import type { LensAppServices } from '../../types';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -43,12 +42,47 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
-export function getEditLensConfiguration(
+type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => void;
+
+// exported for testing
+export const updatingMiddleware =
+  (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+    const {
+      datasourceStates: prevDatasourceStates,
+      visualization: prevVisualization,
+      activeDatasourceId: prevActiveDatasourceId,
+    } = store.getState().lens;
+    next(action);
+    const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
+    if (
+      prevActiveDatasourceId !== activeDatasourceId ||
+      !isEqual(
+        prevDatasourceStates[prevActiveDatasourceId].state,
+        datasourceStates[activeDatasourceId].state
+      ) ||
+      !isEqual(prevVisualization, visualization)
+    ) {
+      // ignore the actions that initialize the store with the state from the attributes
+      if (initExisting.match(action) || initEmpty.match(action)) {
+        return;
+      }
+      updater(datasourceStates[activeDatasourceId].state, visualization.state);
+    }
+  };
+
+export async function getEditLensConfiguration(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   visualizationMap?: VisualizationMap,
   datasourceMap?: DatasourceMap
 ) {
+  const { getLensServices, getLensAttributeService } = await import('../../../async_services');
+  const lensServices = await getLensServices(
+    coreStart,
+    startDependencies,
+    getLensAttributeService(coreStart, startDependencies)
+  );
+
   return ({
     attributes,
     dataView,
@@ -59,23 +93,6 @@ export function getEditLensConfiguration(
     adaptersTables,
     panelId,
   }: EditLensConfigurationProps) => {
-    const [lensServices, setLensServices] = useState<LensAppServices>();
-    useEffect(() => {
-      async function loadLensService() {
-        const { getLensServices, getLensAttributeService } = await import(
-          '../../../async_services'
-        );
-        const lensServicesT = await getLensServices(
-          coreStart,
-          startDependencies,
-          getLensAttributeService(coreStart, startDependencies)
-        );
-
-        setLensServices(lensServicesT);
-      }
-      loadLensService();
-    }, []);
-
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
@@ -89,9 +106,11 @@ export function getEditLensConfiguration(
           ? datasourceState.initialContext
           : undefined,
     };
-    const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-      lens: getPreloadedState(storeDeps) as LensAppState,
-    } as unknown as PreloadedState<LensState>);
+    const lensStore: LensRootStore = makeConfigureStore(
+      storeDeps,
+      undefined,
+      updatingMiddleware(updateAll)
+    );
     lensStore.dispatch(
       loadInitial({
         initialInput: {
