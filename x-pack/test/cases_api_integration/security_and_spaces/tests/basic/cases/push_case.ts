@@ -78,8 +78,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await createConfiguration(
         supertest,
         getConfigurationRequest({
-          id: 'not-exist',
-          name: 'Not exist',
+          id: 'servicenow-1',
+          name: 'servicenow',
           type: ConnectorTypes.serviceNowITSM,
         })
       );
@@ -87,8 +87,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const postedCase = await createCase(supertest, {
         ...postCaseReq,
         connector: {
-          id: 'not-exist',
-          name: 'Not exist',
+          id: 'servicenow-1',
+          name: 'servicenow',
           type: ConnectorTypes.serviceNowITSM,
           fields: {
             urgency: '2',
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await pushCase({
         supertest,
         caseId: postedCase.id,
-        connectorId: 'not-exist',
+        connectorId: postedCase.connector.id,
         expectedHttpCode: 401,
         auth: { user: noConnector, space: null },
       });
