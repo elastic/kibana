@@ -22,7 +22,7 @@ import {
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createErrorSO, createUserAttachment } from './test_utils';
-import { CommentType } from '../../../common';
+import { AttachmentType } from '../../../common/types/domain';
 import { createSOFindResponse } from '../test_utils';
 
 describe('AttachmentService', () => {
@@ -278,7 +278,7 @@ describe('AttachmentService', () => {
 
         await expect(
           service.update({
-            updatedAttributes: { comment: 'yes', type: CommentType.user, owner: 'hi' },
+            updatedAttributes: { comment: 'yes', type: AttachmentType.user, owner: 'hi' },
             attachmentId: '1',
           })
         ).resolves.not.toThrow();
@@ -288,7 +288,7 @@ describe('AttachmentService', () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment({ foo: 'bar' }));
 
         const res = await service.update({
-          updatedAttributes: { comment: 'yes', type: CommentType.user, owner: 'hi' },
+          updatedAttributes: { comment: 'yes', type: AttachmentType.user, owner: 'hi' },
           attachmentId: '1',
         });
 
