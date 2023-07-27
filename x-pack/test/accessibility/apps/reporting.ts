@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const log = getService('log');
 
-  describe.skip('Reporting Accessibility', () => {
+  describe('Reporting Accessibility', () => {
     const createReportingUser = async () => {
       await security.user.create(reporting.REPORTING_USER_USERNAME, {
         password: reporting.REPORTING_USER_PASSWORD,

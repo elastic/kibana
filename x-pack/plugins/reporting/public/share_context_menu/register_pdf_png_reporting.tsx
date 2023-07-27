@@ -64,7 +64,6 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-  enable,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -95,7 +94,7 @@ export const reportingScreenshotShareProvider = ({
     }
 
     // do not want screenshot reporting showing for serverless
-    if (!licenseHasScreenshotReporting || !enable) {
+    if (!licenseHasScreenshotReporting) {
       return [];
     }
     const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);

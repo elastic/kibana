@@ -234,22 +234,22 @@ export class ReportingPublicPlugin
             application,
             usesUiCapabilities,
             theme: core.theme,
-            enable: this.config.export_types.csv.enabled,
           })
         );
 
-        share.register(
-          reportingScreenshotShareProvider({
-            apiClient,
-            toasts,
-            uiSettings,
-            license,
-            application,
-            usesUiCapabilities,
-            theme: core.theme,
-            enable: !this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled,
-          })
-        );
+        if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+          share.register(
+            reportingScreenshotShareProvider({
+              apiClient,
+              toasts,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+            })
+          );
+        }
       });
     });
 

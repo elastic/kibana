@@ -19,7 +19,6 @@ import {
   of,
   lastValueFrom,
 } from 'rxjs';
-import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 import { decryptJobHeaders, ExportType, generatePngObservable, getFullUrls } from '../common';
 import { validateUrls } from '../common/validate_urls';
@@ -31,7 +30,6 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   PNG_JOB_TYPE,
   REPORTING_TRANSACTION_TYPE,
-  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '../../../common/constants';
 
 /**
@@ -55,16 +53,6 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('png-export-v1');
-  }
-
-  // PR 161712 needs these out of reporting
-  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
-    return this.startDeps.screenshotting.getScreenshots({
-      ...options,
-      urls: options?.urls?.map((url) =>
-        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ),
-    });
   }
 
   public createJob = async (jobParams: JobParamsPNGDeprecated) => {

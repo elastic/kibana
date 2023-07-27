@@ -72,15 +72,9 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     this.logger = this.logger.get('csv-searchsource-export');
   }
 
-  // @ts-ignore expected to have a type failure due to deprecated export type
-  public createJob = async (immediateJobParams: any): Promise<JobParamsDownloadCSV> => {
-    return {
-      ...immediateJobParams,
-      title: immediateJobParams.title,
-      objectType: 'immediate-search',
-    };
+  public createJob = async () => {
+    throw new Error(`immediate download has no create job handler!`);
   };
-
   // @ts-ignore expected type failure from deprecated export type
   public runTask = async (
     _jobId: string | null,
@@ -89,9 +83,12 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     stream: Writable,
     req: KibanaRequest
   ) => {
-    const job = await this.createJob(immediateJobParams);
+    const job = {
+      objectType: 'immediate-search',
+      ...immediateJobParams,
+    };
 
-    const dataPluginStart = await this.startDeps.data;
+    const dataPluginStart = this.startDeps.data;
     const savedObjectsClient = (await context.core).savedObjects.client;
     const uiSettings = this.getUiSettingsServiceFactory(savedObjectsClient);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);

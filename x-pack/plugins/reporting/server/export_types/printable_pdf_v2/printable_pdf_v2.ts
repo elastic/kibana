@@ -8,18 +8,8 @@
 import { Headers } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import {
-  catchError,
-  map,
-  mergeMap,
-  takeUntil,
-  tap,
-  of,
-  fromEventPattern,
-  Observable,
-  firstValueFrom,
-  throwError,
-} from 'rxjs';
+import * as Rx from 'rxjs';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -89,7 +79,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     let apmGeneratePdf: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
-    const process$: Observable<TaskRunResult> = of(1).pipe(
+    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers: Headers) => {
         const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
@@ -153,13 +143,13 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       })),
       catchError((err) => {
         jobLogger.error(err);
-        return throwError(() => err);
+        return Rx.throwError(() => err);
       })
     );
 
-    const stop$ = fromEventPattern(cancellationToken.on);
+    const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
     apmTrans?.end();
-    return firstValueFrom(process$.pipe(takeUntil(stop$)));
+    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

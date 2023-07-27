@@ -145,7 +145,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdfV2`)
+      .post(`/api/reporting/generate/printablePdf`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
