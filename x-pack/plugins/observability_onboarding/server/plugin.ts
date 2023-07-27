@@ -70,6 +70,7 @@ export class ObservabilityOnboardingPlugin
       repository: getObservabilityOnboardingServerRouteRepository(),
       plugins: resourcePlugins,
       config,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     return {};

@@ -32,6 +32,7 @@ export interface ObservabilityOnboardingRouteHandlerResources {
     start: () => Promise<CoreStart>;
   };
   config: ObservabilityOnboardingConfig;
+  kibanaVersion: string;
 }
 
 export interface ObservabilityOnboardingRouteCreateOptions {
