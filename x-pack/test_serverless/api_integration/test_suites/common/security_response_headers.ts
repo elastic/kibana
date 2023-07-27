@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { header } = await supertest
         .get(`/internal/security/me`)
         .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);
 
       expect(header).toBeDefined();
