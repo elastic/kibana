@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { DefaultResourceInstaller, ResourceInstaller } from './resource_installer';
-import {
-  DefaultSummaryTransformInstaller,
-  SummaryTransformInstaller,
-} from './summary_transform/summary_transform_installer';
+import { Logger } from '@kbn/core/server';
+import { ResourceInstaller, SummaryTransformInstaller } from '.';
 
 export interface SLOInstaller {
   install(): Promise<void>;
 }
 
 export class DefaultSLOInstaller implements SLOInstaller {
-  private sloResourceInstaller: ResourceInstaller;
-  private sloSummaryInstaller: SummaryTransformInstaller;
   private isInstalling: boolean = false;
 
-  constructor(esInternalClient: ElasticsearchClient, private logger: Logger) {
-    this.sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, logger);
-    this.sloSummaryInstaller = new DefaultSummaryTransformInstaller(esInternalClient, logger);
-  }
+  constructor(
+    private sloResourceInstaller: ResourceInstaller,
+    private sloSummaryInstaller: SummaryTransformInstaller,
+    private logger: Logger
+  ) {}
 
   public async install() {
     if (this.isInstalling) {
