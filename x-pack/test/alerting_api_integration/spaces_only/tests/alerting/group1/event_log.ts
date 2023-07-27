@@ -1584,13 +1584,8 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     const task = event?.kibana?.task;
     expect(task).to.be.ok();
     expect(typeof Date.parse(typeof task?.scheduled)).to.be('number');
-    expect(typeof task?.schedule_delay).to.be('string');
-    // TypeScript on expect(...) not happy without this check
-    const scheduleDelay =
-      typeof task?.schedule_delay === 'string'
-        ? parseInt(task.schedule_delay, 10)
-        : task?.schedule_delay;
-    expect(scheduleDelay).to.be.greaterThan(-1);
+    expect(typeof task?.schedule_delay).to.be('number');
+    expect(task?.schedule_delay).to.be.greaterThan(-1);
   } else {
     expect(event?.kibana?.task).to.be(undefined);
   }
