@@ -23,7 +23,6 @@ export interface ExportPanelShareOpts {
   license: ILicense;
   application: ApplicationStart;
   theme: ThemeServiceSetup;
-  enable: boolean;
 }
 
 export interface ReportingSharingData {
