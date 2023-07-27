@@ -27,7 +27,6 @@ export const openAddPanelFlyout = ({
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
-  onClose?: () => void;
 }): OverlayRef => {
   // send the overlay ref to the root embeddable if it is capable of tracking overlays
   const rootEmbeddable = container.getRoot();
@@ -49,7 +48,7 @@ export const openAddPanelFlyout = ({
       },
     }
   );
-  return flyoutSession;
-
   overlayTracker?.openOverlay(flyoutSession);
+
+  return flyoutSession;
 };
