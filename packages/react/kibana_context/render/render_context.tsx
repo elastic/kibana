@@ -17,6 +17,7 @@ import {
 
 /** Props for the KibanaContextProvider */
 export interface KibanaRenderContextProviderProps extends KibanaThemeProviderProps {
+  /** The `I18nStart` API from `CoreStart`. */
   i18n: I18nStart;
 }
 

@@ -15,11 +15,17 @@ import {
   EuiThemeProviderProps,
 } from '@elastic/eui';
 
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
+import {
+  getColorMode,
+  defaultTheme,
+  type ThemeServiceStart,
+} from '@kbn/react-kibana-context-common';
 
+// Extract the `theme` from `EuiThemeProviderProps` as a type.
 type EuiTheme<T = {}> = EuiThemeProviderProps<T>['theme'];
 
+// Omit the `theme` and `colorMode` props from `EuiThemeProviderProps` so we can
+// add our own `euiTheme` prop and derive `colorMode` from the Kibana theme.
 interface EuiProps<T = {}> extends Omit<EuiThemeProviderProps<T>, 'theme' | 'colorMode'> {
   euiTheme?: EuiTheme<T>;
 }
@@ -28,6 +34,7 @@ interface EuiProps<T = {}> extends Omit<EuiThemeProviderProps<T>, 'theme' | 'col
  * Props for the `KibanaThemeProvider`.
  */
 export interface KibanaThemeProviderProps extends EuiProps {
+  /** The `ThemeServiceStart` API. */
   theme: ThemeServiceStart;
 }
 

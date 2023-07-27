@@ -18,11 +18,15 @@ import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
  * A `deprecated` structure representing a Kibana theme containing variables from the current EUI theme.
  */
 export interface EuiTheme {
+  /** EUI theme vars that automaticall adjust to light and dark mode. */
   eui: typeof euiThemeVars;
+  /** True if the theme is in "dark" mode, false otherwise. */
   darkMode: boolean;
 }
 
-// Create a `styled-components` provider that uses the EUI theme.
+/**
+ * A `styled-components` `ThemeProvider` that incorporates EUI dark mode.
+ */
 const KibanaStyledComponentsThemeProvider = <
   OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
 >({
@@ -58,10 +62,15 @@ export const KibanaStyledComponentsThemeProviderDecorator: DecoratorFn = (storyF
 };
 
 const {
+  /** see https://styled-components.com/docs/api#styled */
   default: euiStyled,
+  /** see https://styled-components.com/docs/api#css-prop */
   css,
+  /** see https://styled-components.com/docs/api#createglobalstyle */
   createGlobalStyle,
+  /** see https://styled-components.com/docs/api#keyframes */
   keyframes,
+  /** see https://styled-components.com/docs/api#withtheme */
   withTheme,
 } = styledComponents as unknown as ThemedStyledComponentsModule<EuiTheme>;
 

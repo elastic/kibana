@@ -13,6 +13,7 @@ import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
 /** Props for the KibanaRootContextProvider */
 export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
+  /** The `I18nStart` API from `CoreStart`. */
   i18n: I18nStart;
 }
 

@@ -13,6 +13,8 @@ import { KibanaThemeProvider } from './theme_provider';
 
 /**
  * A React HOC that wraps a component with the `KibanaThemeProvider`.
+ * @param node The node to wrap.
+ * @param theme The `ThemeServiceStart` API.
  */
 export const wrapWithTheme = (node: React.ReactNode, theme: ThemeServiceStart) => (
   <KibanaThemeProvider {...{ theme }}>{node}</KibanaThemeProvider>
