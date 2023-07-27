@@ -6,19 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiMarkdownFormat,
   EuiSpacer,
-  EuiSteps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -38,7 +34,6 @@ enum statuses {
 interface State {
   isFlyoutVisible: boolean;
   chromeStatus: ResultStatus;
-  screenshotStatus: ResultStatus;
   help: string[];
   logs: string;
   isBusy: boolean;
@@ -47,7 +42,6 @@ interface State {
 
 const initialState: State = {
   [statuses.chromeStatus]: 'incomplete',
-  [statuses.screenshotStatus]: 'incomplete',
   isFlyoutVisible: false,
   help: [],
   logs: '',
@@ -62,7 +56,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       ...state,
       ...s,
     });
-  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success } = state;
+  const { isBusy, chromeStatus, isFlyoutVisible } = state;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -94,114 +88,6 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       });
   };
 
-  const steps = [
-    {
-      title: i18n.translate('xpack.reporting.listing.diagnosticBrowserTitle', {
-        defaultMessage: 'Check browser',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticBrowserMessage"
-            defaultMessage="Reporting uses a headless browser to generate PDF and PNGs. Validate that the browser can launch successfully."
-          />
-          <EuiSpacer />
-          <EuiButton
-            disabled={isBusy || chromeStatus === 'complete'}
-            onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
-            isLoading={isBusy && chromeStatus === 'incomplete'}
-            iconType={chromeStatus === 'complete' ? 'check' : undefined}
-          >
-            <FormattedMessage
-              id="xpack.reporting.listing.diagnosticBrowserButton"
-              defaultMessage="Check browser"
-            />
-          </EuiButton>
-        </Fragment>
-      ),
-      status: !success && chromeStatus !== 'complete' ? 'danger' : chromeStatus,
-    },
-  ];
-
-  if (chromeStatus === 'complete') {
-    steps.push({
-      title: i18n.translate('xpack.reporting.listing.diagnosticScreenshotTitle', {
-        defaultMessage: 'Check screen capture',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticScreenshotMessage"
-            defaultMessage="Ensure that the headless browser can capture a screenshot of a page."
-          />
-          <EuiSpacer />
-          <EuiButton
-            disabled={isBusy || screenshotStatus === 'complete'}
-            onClick={apiWrapper(() => apiClient.verifyScreenCapture(), statuses.screenshotStatus)}
-            isLoading={isBusy && screenshotStatus === 'incomplete'}
-            iconType={screenshotStatus === 'complete' ? 'check' : undefined}
-          >
-            <FormattedMessage
-              id="xpack.reporting.listing.diagnosticScreenshotButton"
-              defaultMessage="Capture screenshot"
-            />
-          </EuiButton>
-        </Fragment>
-      ),
-      status: !success && screenshotStatus !== 'complete' ? 'danger' : screenshotStatus,
-    });
-  }
-
-  if (screenshotStatus === 'complete') {
-    steps.push({
-      title: i18n.translate('xpack.reporting.listing.diagnosticSuccessTitle', {
-        defaultMessage: 'All set!',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticSuccessMessage"
-            defaultMessage="Everything looks good for reporting to function."
-          />
-        </Fragment>
-      ),
-      status: !success ? 'danger' : screenshotStatus,
-    });
-  }
-
-  if (!success) {
-    steps.push({
-      title: i18n.translate('xpack.reporting.listing.diagnosticFailureTitle', {
-        defaultMessage: "Something isn't working properly.",
-      }),
-      children: (
-        <Fragment>
-          {help.length ? (
-            <Fragment>
-              <EuiCallOut color="danger" iconType="warning">
-                <p>
-                  <EuiMarkdownFormat>{help.join('\n')}</EuiMarkdownFormat>
-                </p>
-              </EuiCallOut>
-            </Fragment>
-          ) : null}
-          {logs.length ? (
-            <Fragment>
-              <EuiSpacer />
-              <FormattedMessage
-                id="xpack.reporting.listing.diagnosticFailureDescription"
-                defaultMessage="Here are some details about the issue:"
-              />
-              <EuiSpacer />
-              <EuiCodeBlock>{logs}</EuiCodeBlock>
-            </Fragment>
-          ) : null}
-        </Fragment>
-      ),
-      status: 'danger',
-    });
-  }
-
   let flyout;
   if (isFlyoutVisible) {
     flyout = (
@@ -224,7 +110,24 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiSteps steps={steps} />
+          <EuiText>
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticBrowserMessage"
+              defaultMessage="Reporting uses a headless browser to generate PDF and PNGs. Validate that the browser can launch successfully."
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiButton
+            disabled={isBusy || chromeStatus === 'complete'}
+            onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
+            isLoading={isBusy && chromeStatus === 'incomplete'}
+            iconType={chromeStatus === 'complete' ? 'check' : undefined}
+          >
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticBrowserButton"
+              defaultMessage="Check browser"
+            />
+          </EuiButton>
         </EuiFlyoutBody>
       </EuiFlyout>
     );
