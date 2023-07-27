@@ -16,6 +16,7 @@ import {
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -101,8 +102,8 @@ export function LensEditConfigurationFlyout({
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
           overflow-y: scroll;
-          padding-left: 400px;
-          margin-left: -400px;
+          padding-left: ${euiThemeVars.euiFormMaxWidth};
+          margin-left: -${euiThemeVars.euiFormMaxWidth};
           pointer-events: none !important;
           .euiFlyoutBody__overflow {
             padding-left: inherit;

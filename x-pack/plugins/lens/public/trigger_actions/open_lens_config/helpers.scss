@@ -2,8 +2,8 @@
 .lnsConfigPanel__overlay {
   clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
   .kbnOverlayMountWrapper {
-    padding-left: 400px;
-    margin-left: -400px;
+    padding-left: $euiFormMaxWidth;
+    margin-left: -$euiFormMaxWidth;
     pointer-events: none;
     > * {
       pointer-events: auto;
