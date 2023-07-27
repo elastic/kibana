@@ -23,7 +23,7 @@ export const fetchDocuments = (
   searchSource: ISearchSource,
   { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
-  // TODO: for "Load more" do we want to keep this value or override it with a fixed value (200)?
+  // TODO: for "Load more" do we want to keep this value or override it with a fixed value (e.g. 200)?
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
@@ -36,10 +36,13 @@ export const fetchDocuments = (
     searchSource.setOverwriteDataViewType(undefined);
   }
   const dataView = searchSource.getField('index')!;
+  const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
 
   const executionContext = {
-    description: 'fetch documents',
+    description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
+
+  // TODO: surface shard failures after PR #161271
 
   const fetch$ = searchSource
     .fetch$({
@@ -47,7 +50,7 @@ export const fetchDocuments = (
       sessionId: searchSessionId,
       inspector: {
         adapter: inspectorAdapters.requests,
-        title: searchSource.getField('searchAfter')
+        title: isFetchingMore
           ? i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
               defaultMessage: 'More documents',
             })

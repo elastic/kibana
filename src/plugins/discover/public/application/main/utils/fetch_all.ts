@@ -10,6 +10,7 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
@@ -194,6 +195,7 @@ export function fetchMoreDocuments(
 
     // Start fetching all required requests
     const response = fetchDocuments(searchSource, fetchDeps);
+    // TODO: show it as a separate request in Inspect flyout
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
@@ -201,13 +203,19 @@ export function fetchMoreDocuments(
         sendLoadingMoreFinishedMsg(dataSubjects.documents$, records); // TODO: surface shard failures
       })
       .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        services.toastNotifications.addError(error, {
+          title: i18n.translate('discover.fetchMore.fetchingErrorTitle', {
+            defaultMessage: 'Error fetching more documents',
+          }),
+        });
         sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
       });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    services.toastNotifications.addError(error, {
+      title: i18n.translate('discover.fetchMore.requestErrorTitle', {
+        defaultMessage: 'Error requesting more documents',
+      }),
+    });
     // We also want to return a resolved promise in an error case, since it just indicates we're done with querying.
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
   }
