@@ -8,7 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "observabilityAIAssistant"],
     "requiredPlugins": ["triggersActionsUi", "actions", "security", "observabilityShared"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

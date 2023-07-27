@@ -6,10 +6,11 @@
  */
 
 import { clone } from 'lodash';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { concatMap, delay, of } from 'rxjs';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { Message } from '../../common/types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 
@@ -29,6 +30,8 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
   };
   loading: boolean;
   error?: Error;
+  abort: () => void;
+  regenerate: () => void;
 } {
   const assistant = useObservabilityAIAssistant();
 
@@ -42,8 +45,12 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const controller = new AbortController();
+  const controllerRef = useRef(new AbortController());
+
+  const regenerate = useCallback(() => {
+    controllerRef.current.abort();
+
+    const controller = (controllerRef.current = new AbortController());
 
     setResponse(undefined);
     setError(undefined);
@@ -65,6 +72,9 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
             .pipe(concatMap((value) => of(value).pipe(delay(50))))
             .subscribe({
               next: (chunk) => {
+                if (controller.signal.aborted) {
+                  return;
+                }
                 partialResponse.content += chunk.choices[0].delta.content ?? '';
                 partialResponse.function_call.name +=
                   chunk.choices[0].delta.function_call?.name ?? '';
@@ -80,12 +90,16 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
               },
             });
 
-          controller.signal.addEventListener('abort', () => {
+          controllerRef.current.signal.addEventListener('abort', () => {
             subscription.unsubscribe();
+            reject(new AbortError());
           });
         });
       })
       .catch((err) => {
+        if (controller.signal.aborted) {
+          return;
+        }
         notifications?.showErrorDialog({
           title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadChatTitle', {
             defaultMessage: 'Failed to load chat',
@@ -95,6 +109,9 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
         setError(err);
       })
       .finally(() => {
+        if (controller.signal.aborted) {
+          return;
+        }
         setLoading(false);
       });
 
@@ -103,9 +120,19 @@ export function useChat({ messages, connectorId }: { messages: Message[]; connec
     };
   }, [messages, connectorId, assistant, notifications]);
 
+  useEffect(() => {
+    return regenerate();
+  }, [regenerate]);
+
   return {
     ...response,
     error,
     loading,
+    abort: () => {
+      setLoading(false);
+      setError(new AbortError());
+      controllerRef.current.abort();
+    },
+    regenerate,
   };
 }

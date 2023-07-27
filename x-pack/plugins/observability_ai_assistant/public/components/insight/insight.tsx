@@ -14,6 +14,8 @@ import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { InsightBase } from './insight_base';
 import { InsightMissingCredentials } from './insight_missing_credentials';
+import { StopGeneratingButton } from '../stop_generating_button';
+import { RegenerateResponseButton } from '../regenerate_response_button';
 
 function ChatContent({ messages, connectorId }: { messages: Message[]; connectorId: string }) {
   const chat = useChat({ messages, connectorId });
@@ -22,7 +24,21 @@ function ChatContent({ messages, connectorId }: { messages: Message[]; connector
     <MessagePanel
       body={<MessageText content={chat.content ?? ''} loading={chat.loading} />}
       error={chat.error}
-      controls={null}
+      controls={
+        chat.loading ? (
+          <StopGeneratingButton
+            onClick={() => {
+              chat.abort();
+            }}
+          />
+        ) : (
+          <RegenerateResponseButton
+            onClick={() => {
+              chat.regenerate();
+            }}
+          />
+        )
+      }
     />
   );
 }
