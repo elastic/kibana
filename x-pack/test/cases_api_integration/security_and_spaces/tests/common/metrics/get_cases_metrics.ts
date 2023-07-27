@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import {
   secOnly,
   obsOnlyRead,
