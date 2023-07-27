@@ -15,6 +15,7 @@ import {
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingConfig } from '..';
+import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 import { ObservabilityOnboardingRequestHandlerContext } from '../types';
 import { ObservabilityOnboardingRouteHandlerResources } from './types';
 
@@ -25,6 +26,9 @@ interface RegisterRoutes {
   plugins: ObservabilityOnboardingRouteHandlerResources['plugins'];
   config: ObservabilityOnboardingConfig;
   kibanaVersion: string;
+  services: {
+    esLegacyConfigService: EsLegacyConfigService;
+  };
 }
 
 export function registerRoutes({
@@ -34,6 +38,7 @@ export function registerRoutes({
   plugins,
   config,
   kibanaVersion,
+  services,
 }: RegisterRoutes) {
   const routes = Object.values(repository);
 
@@ -80,6 +85,7 @@ export function registerRoutes({
             },
             config,
             kibanaVersion,
+            services,
           })) as any;
 
           if (data === undefined) {
