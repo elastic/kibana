@@ -67,6 +67,8 @@ describe('Prebuilt rules', () => {
 
   describe('Alerts rules, prebuilt rules', () => {
     it('Loads prebuilt rules', () => {
+      // Explicitly fail this test.
+      expect(false).to.equal(true);
       // Check that the rules table contains rules
       cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
 
