@@ -460,7 +460,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHostsView.getBetaBadgeExists();
       });
 
-      describe('Hosts table', async () => {
+      describe.only('Hosts table', async () => {
         let hostRows: WebElementWrapper[] = [];
 
         before(async () => {
@@ -507,8 +507,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostRowsAfterRemovingFilter.length).to.equal(6);
         });
       });
-      // failure: https://github.com/elastic/kibana/pull/162149
-      it.skip('should render alerts count for a host inside a flyout', async () => {
+
+      it('should render alerts count for a host inside a flyout', async () => {
         await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-mysql-01', '-');
         await pageObjects.infraHostsView.clickSelectedHostsButton();
         await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
