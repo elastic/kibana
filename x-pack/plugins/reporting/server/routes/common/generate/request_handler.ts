@@ -198,7 +198,7 @@ export class RequestHandler {
     try {
       report = await this.enqueueJob(exportTypeId, jobParams);
       const { basePath } = this.reporting.getServerInfo();
-      const publicDownloadPath = basePath + PUBLIC_ROUTES.DOWNLOAD_PREFIX;
+      const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
 
       // return task manager's task information and the download URL
       counters.usageCounter();

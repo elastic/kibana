@@ -22,7 +22,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
 
   const registerDownloadReport = () => {
     // trigger a download of the output from a job
-    const path = PUBLIC_ROUTES.DOWNLOAD_PREFIX + '/{docId}';
+    const path = PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
     router.get(
       {
         path,
@@ -72,7 +72,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
 
   const registerDeleteReport = () => {
     // allow a report to be deleted
-    const path = PUBLIC_ROUTES.DELETE_PREFIX + '/{docId}';
+    const path = PUBLIC_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
     router.delete(
       {
         path,
