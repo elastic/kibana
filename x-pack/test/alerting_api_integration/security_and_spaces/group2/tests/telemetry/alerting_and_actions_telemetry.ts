@@ -153,7 +153,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           ruleOverwrites: {
             rule_type_id: 'test.multipleSearches',
             schedule: { interval: '1h' },
-            throttle: '1s',
+            throttle: null,
             params: { numSearches: 2, delay: `2s` },
             actions: [],
           },
@@ -238,11 +238,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
-      expect(telemetry.throttle_time.avg).to.equal('0.4s');
-      expect(telemetry.throttle_time.max).to.equal('1s');
+      expect(telemetry.throttle_time.avg).to.equal('0s');
+      expect(telemetry.throttle_time.max).to.equal('0s');
       expect(telemetry.throttle_time_number_s.min).to.equal(0);
-      expect(telemetry.throttle_time_number_s.avg).to.equal(0.4);
-      expect(telemetry.throttle_time_number_s.max).to.equal(1);
+      expect(telemetry.throttle_time_number_s.avg).to.equal(0);
+      expect(telemetry.throttle_time_number_s.max).to.equal(0);
 
       // schedule interval stats
       expect(telemetry.schedule_time.min).to.equal('3600s');
