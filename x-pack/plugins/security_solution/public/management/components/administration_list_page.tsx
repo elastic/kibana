@@ -76,7 +76,9 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
             <EuiSpacer size="l" />
           </>
         )}
-        <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>{children}</EuiPageSection>
+        <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>
+          {children}
+        </EuiPageSection>
       </div>
     );
   }
