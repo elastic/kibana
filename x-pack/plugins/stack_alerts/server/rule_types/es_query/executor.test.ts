@@ -59,7 +59,7 @@ const mockAlertClient = {
   setAlertData: mockSetAlertData,
 };
 
-const mockNow = new Date('01.01.2000');
+const mockNow = jest.getRealSystemTime();
 
 describe('es_query executor', () => {
   beforeAll(() => {
@@ -268,11 +268,10 @@ describe('es_query executor', () => {
 
 - Value: 491
 - Conditions Met: Number of matching documents is greater than or equal to 200 over 5m
-- Timestamp: 1999-12-31T22:00:00.000Z
+- Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.rule.name': 'test-rule-name',
-          'kibana.alert.state.date_end': '1999-12-31T22:00:00.000Z',
-          'kibana.alert.state.date_start': '1999-12-31T22:00:00.000Z',
+          'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
+          'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
           'kibana.alert.state.latest_timestamp': undefined,
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
@@ -358,7 +357,6 @@ describe('es_query executor', () => {
 - Conditions Met: Number of matching documents for group "host-1" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.rule.name': 'test-rule-name',
           'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
           'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
           'kibana.alert.state.latest_timestamp': undefined,
@@ -402,7 +400,6 @@ describe('es_query executor', () => {
 - Conditions Met: Number of matching documents for group "host-2" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.rule.name': 'test-rule-name',
           'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
           'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
           'kibana.alert.state.latest_timestamp': undefined,
@@ -444,9 +441,8 @@ describe('es_query executor', () => {
 
 - Value: 999
 - Conditions Met: Number of matching documents for group \"host-3\" is greater than or equal to 200 over 5m
-- Timestamp: 1999-12-31T22:00:00.000Z
+- Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.rule.name': 'test-rule-name',
           'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
           'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
           'kibana.alert.state.latest_timestamp': undefined,

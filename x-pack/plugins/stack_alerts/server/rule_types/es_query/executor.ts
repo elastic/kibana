@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import { ALERT_RULE_NAME, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_URL } from '@kbn/rule-data-utils';
 
 import {
   ALERT_HITS_COUNT,
@@ -136,7 +136,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
       payload: {
-        [ALERT_RULE_NAME]: name,
         [ALERT_URL]: actionContext.link,
         [ALERT_HITS_COUNT]: actionContext.hits.length,
         [ALERT_HITS_HITS]: actionContext.hits,
