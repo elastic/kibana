@@ -35,6 +35,7 @@ properties:
     title: Case response properties for comments
     description: An array of comment objects for the case.
     type: array
+    maxItems: 10000
     items:
       discriminator:
         propertyName: type

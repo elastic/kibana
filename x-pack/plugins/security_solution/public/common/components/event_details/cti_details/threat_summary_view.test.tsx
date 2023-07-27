@@ -24,6 +24,10 @@ jest.mock('../../../lib/kibana', () => ({
   }),
 }));
 
+jest.mock('../../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => true,
+}));
+
 jest.mock('../table/field_name_cell');
 
 const RISK_SCORE_DATA_ROWS = 2;

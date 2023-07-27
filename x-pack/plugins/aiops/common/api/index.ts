@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { HttpSetup } from '@kbn/core/public';
+
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiAction,
@@ -19,6 +21,7 @@ type AiopsApiEndpointKeys = keyof typeof AIOPS_API_ENDPOINT;
 export type AiopsApiEndpoint = typeof AIOPS_API_ENDPOINT[AiopsApiEndpointKeys];
 
 export interface AiopsApiLogRateAnalysis {
+  http: HttpSetup;
   endpoint: AiopsApiEndpoint;
   apiVersion: string;
   reducer: typeof streamReducer;
