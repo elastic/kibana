@@ -35,7 +35,8 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
     (capability) => capability !== CASES_CONNECTOR_CAPABILITY
   );
   const casesAllAPICapabilities = casesApiTags.all.filter(
-    (capability) => capability !== WRITE_CASES_CONNECTOR_API_TAG
+    (capability) =>
+      capability !== WRITE_CASES_CONNECTOR_API_TAG && capability !== READ_CASES_CONNECTOR_API_TAG
   );
   const casesReadAPICapabilities = casesApiTags.read.filter(
     (capability) => capability !== READ_CASES_CONNECTOR_API_TAG
@@ -101,13 +102,14 @@ export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
   [AppFeatureCasesKey.casesConnectors]: {
     privileges: {
       all: {
-        api: [READ_CASES_CONNECTOR_API_TAG], // Add cases connector write/update/push API privileges
+        api: [READ_CASES_CONNECTOR_API_TAG, WRITE_CASES_CONNECTOR_API_TAG], // Add cases connector read/write/update/push API privileges
         ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
         cases: {
           push: [APP_ID], // Add cases connector push privileges
         },
       },
       read: {
+        api: [READ_CASES_CONNECTOR_API_TAG], // Add cases connector write/update/push API privileges
         ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
       },
     },
