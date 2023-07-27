@@ -176,6 +176,7 @@ export const LogCategorizationPage: FC = () => {
         }))
       );
       setData(null);
+      setFieldValidationResult(null);
       setTotalCount(documentStats.totalCount);
     }
   }, [
@@ -267,6 +268,7 @@ export const LogCategorizationPage: FC = () => {
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
     setData(null);
+    setFieldValidationResult(null);
     const field = value && value.length ? value[0].label : undefined;
     setSelectedField(field);
     setUrlState({ field });
