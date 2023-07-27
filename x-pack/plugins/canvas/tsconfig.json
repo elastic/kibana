@@ -81,6 +81,7 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
