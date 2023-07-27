@@ -28,6 +28,12 @@ import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { MIN_VERSION_GCP_CIS } from '../../common/constants';
 
+export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+  PROJECT_ID: 'project_id_test_id',
+  CREDENTIALS_TYPE: 'credentials_type_test_id',
+  CREDENTIALS_FILE: 'credentials_file_test_id',
+  CREDENTIALS_JSON: 'credentials_json_test_id',
+};
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 const GCPSetupInfoContent = () => (
   <>
@@ -69,19 +75,6 @@ const DocsLink = (
   </EuiText>
 );
 
-const CredentialFileText = i18n.translate(
-  'xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText',
-  { defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe' }
-);
-const CredentialJSONText = i18n.translate(
-  'xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText',
-  { defaultMessage: 'JSON blob containing the credentials and key used to subscribe' }
-);
-const CredentialSelectBoxTitle = i18n.translate(
-  'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
-  { defaultMessage: 'Credential' }
-);
-
 type GcpCredentialsType = 'credentials_file' | 'credentials_json';
 type GcpFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 interface GcpInputFields {
@@ -97,21 +90,22 @@ const gcpField: GcpInputFields = {
       type: 'text',
     },
     credentials_file: {
-      label: i18n.translate('xpack.csp.gcpIntegration.credentialsFileFieldLabel', {
-        defaultMessage: 'Credentials File',
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
+        defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
       }),
       type: 'text',
     },
     credentials_json: {
-      label: i18n.translate('xpack.csp.gcpIntegration.credentialsJSONFieldLabel', {
-        defaultMessage: 'Credentials JSON',
+      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+        defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
       }),
       type: 'text',
     },
     credentials_type: {
-      label: i18n.translate('xpack.csp.gcpIntegration.credentialsTypeFieldLabel', {
-        defaultMessage: 'Credentials Type',
-      }),
+      label: i18n.translate(
+        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        { defaultMessage: 'Credential' }
+      ),
       type: 'text',
     },
   },
@@ -275,6 +269,7 @@ const GcpInputVarFields = ({
         {projectIdFields && (
           <EuiFormRow fullWidth label={gcpField.fields.project_id.label}>
             <EuiFieldText
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
               value={projectIdFields.value || ''}
@@ -283,8 +278,9 @@ const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialFilesFields && credentialJSONFields && (
-          <EuiFormRow fullWidth label={CredentialSelectBoxTitle}>
+          <EuiFormRow fullWidth label={gcpField.fields.credentials_type.label}>
             <EuiSelect
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
               value={credentialsTypeFields?.value}
@@ -297,8 +293,9 @@ const GcpInputVarFields = ({
 
         {(credentialsTypeFields?.value || credentialsTypeField.value) === credentialFieldValue &&
           credentialFilesFields && (
-            <EuiFormRow fullWidth label={CredentialFileText}>
+            <EuiFormRow fullWidth label={gcpField.fields.credentials_file.label}>
               <EuiFieldText
+                data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
                 id={credentialFilesFields.id}
                 fullWidth
                 value={credentialFilesFields.value || ''}
@@ -307,8 +304,9 @@ const GcpInputVarFields = ({
             </EuiFormRow>
           )}
         {credentialsTypeFields?.value === credentialJSONValue && credentialJSONFields && (
-          <EuiFormRow fullWidth label={CredentialJSONText}>
+          <EuiFormRow fullWidth label={gcpField.fields.credentials_json.label}>
             <EuiTextArea
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
               fullWidth
               value={credentialJSONFields.value || ''}
