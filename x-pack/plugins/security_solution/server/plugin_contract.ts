@@ -64,7 +64,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
-export interface SecuritySolutionPluginStartDependencies {
+export interface SetupPluginsSecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
   cases?: CasesStart;
   cloud: CloudSetup;

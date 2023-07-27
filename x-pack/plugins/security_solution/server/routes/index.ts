@@ -183,9 +183,9 @@ export const initRoutes = (
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger);
-    riskEngineInitRoute(router, logger);
-    riskEngineEnableRoute(router, logger);
+    riskEngineInitRoute(router, logger, security);
+    riskEngineEnableRoute(router, logger, security);
     riskEngineStatusRoute(router, logger);
-    riskEngineDisableRoute(router, logger);
+    riskEngineDisableRoute(router, logger, security);
   }
 };

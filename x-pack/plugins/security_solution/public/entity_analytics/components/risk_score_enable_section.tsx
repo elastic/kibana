@@ -231,6 +231,7 @@ export const RiskScoreEnableSection = () => {
                       checked={currentRiskEngineStatus === RiskEngineStatus.ENABLED}
                       onChange={onSwitchClick}
                       compressed
+                      disabled={isLoading}
                       aria-describedby={'switchRiskModule'}
                     />
                   </EuiFlexItem>

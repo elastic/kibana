@@ -15,6 +15,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     enable: {
       type: 'boolean',
     },
+    last_updated_by: {
+      type: 'keyword',
+    },
   },
 };
 
@@ -23,6 +26,5 @@ export const riskEngineConfigurationType: SavedObjectsType = {
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
-  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: riskEngineConfigurationTypeMappings,
 };

@@ -9,10 +9,14 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_ENABLE_URL } from '../../../../common/constants';
-
+import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-export const riskEngineEnableRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskEngineEnableRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: RISK_ENGINE_ENABLE_URL,
@@ -26,10 +30,12 @@ export const riskEngineEnableRoute = (router: SecuritySolutionPluginRouter, logg
       const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
       const riskEgineClient = securitySolution.getRiskEngineDataClient();
+      const user = security?.authc.getCurrentUser(request);
 
       try {
         const result = await riskEgineClient.enableRiskEngine({
           savedObjectsClient: soClient,
+          user,
         });
         return response.ok({ body: { result } });
       } catch (e) {

@@ -6,6 +6,7 @@
  */
 
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import type {
   ClusterPutComponentTemplateRequest,
   TransformGetTransformStatsResponse,
@@ -44,6 +45,11 @@ interface SavedObjectsClients {
 }
 interface InitOpts extends SavedObjectsClients {
   namespace: string;
+  user: AuthenticatedUser | null | undefined;
+}
+
+interface UpdateConfigOpts extends SavedObjectsClients {
+  user: AuthenticatedUser | null | undefined;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -58,13 +64,14 @@ interface RiskEngineDataClientOpts {
 
 interface Configuration {
   enable: boolean;
+  last_updated_by: string;
 }
 
 export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace, savedObjectsClient }: InitOpts) {
+  public async init({ namespace, savedObjectsClient, user }: InitOpts) {
     const result: InitRiskEngineResult = {
       leggacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
@@ -89,7 +96,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.initSavedObjects({ savedObjectsClient });
+      await this.initSavedObjects({ savedObjectsClient, user });
       result.riskEngineConfigurationCreated = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -97,7 +104,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.enableRiskEngine({ savedObjectsClient });
+      await this.enableRiskEngine({ savedObjectsClient, user });
       result.riskEngineEnabled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -136,25 +143,28 @@ export class RiskEngineDataClient {
   }) {
     const riskEgineStatus = await this.getCurrentStatus({ savedObjectsClient });
     const legacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
-    return { riskEgineStatus, legacyRiskEgineStatus };
+    const lastUpdatedBy = await this.getLastUpdatedBy({ savedObjectsClient });
+    return { riskEgineStatus, legacyRiskEgineStatus, lastUpdatedBy };
   }
 
-  public async enableRiskEngine({ savedObjectsClient }: SavedObjectsClients) {
+  public async enableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
     // code to run task
 
     return this.udpateSavedObjectAttribute({
       savedObjectsClient,
+      user,
       attributes: {
         enable: true,
       },
     });
   }
 
-  public async disableRiskEngine({ savedObjectsClient }: SavedObjectsClients) {
+  public async disableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
     // code to stop task
 
     return this.udpateSavedObjectAttribute({
       savedObjectsClient,
+      user,
       attributes: {
         enable: false,
       },
@@ -164,7 +174,8 @@ export class RiskEngineDataClient {
   private async udpateSavedObjectAttribute({
     savedObjectsClient,
     attributes,
-  }: SavedObjectsClients & {
+    user,
+  }: UpdateConfigOpts & {
     attributes: {
       enable: boolean;
     };
@@ -180,7 +191,10 @@ export class RiskEngineDataClient {
     const result = await savedObjectsClient.update(
       riskEngineConfigurationTypeName,
       savedObjectConfiguration.id,
-      attributes,
+      {
+        ...attributes,
+        last_updated_by: user?.username ?? '',
+      },
       {
         refresh: 'wait_for',
       }
@@ -216,6 +230,16 @@ export class RiskEngineDataClient {
     const newLegacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
 
     return newLegacyRiskEgineStatus === RiskEngineStatus.DISABLED;
+  }
+
+  private async getLastUpdatedBy({ savedObjectsClient }: SavedObjectsClients) {
+    const configuration = await this.getConfiguration({ savedObjectsClient });
+
+    if (configuration) {
+      return configuration.last_updated_by;
+    }
+
+    return '';
   }
 
   private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {
@@ -301,12 +325,12 @@ export class RiskEngineDataClient {
     }
   }
 
-  private async initSavedObjects({
-    savedObjectsClient,
-  }: {
-    savedObjectsClient: SavedObjectsClientContract;
-  }) {
-    return savedObjectsClient.create(riskEngineConfigurationTypeName, { enable: false });
+
+  private async initSavedObjects({ savedObjectsClient, user }: UpdateConfigOpts) {
+    return savedObjectsClient.create(riskEngineConfigurationTypeName, {
+      enable: false,
+      last_updated_by: user?.username ?? '',
+    });
   }
 
   public async initializeResources({
