@@ -24,7 +24,7 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
     {
       path,
       validate: RequestHandler.getValidation(),
-      options: { tags: kibanaAccessControlTags },
+      options: { tags: kibanaAccessControlTags, access: 'public' },
     },
     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       try {
@@ -47,6 +47,7 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
     {
       path: `${PUBLIC_ROUTES.GENERATE_PREFIX}/{p*}`,
       validate: false,
+      options: { access: 'public' },
     },
     (_context, _req, res) => {
       return res.customError({ statusCode: 405, body: 'GET is not allowed' });

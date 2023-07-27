@@ -25,7 +25,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
       {
         path,
         validate: jobHandlers.validate,
-        options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
+        options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'public' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         return jobHandlers.handleDownloadReport({ path, user, context, req, res });
@@ -40,6 +40,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
       {
         path,
         validate: jobHandlers.validate,
+        options: { access: 'public' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         return jobHandlers.handleDeleteReport({ path, user, context, req, res });
