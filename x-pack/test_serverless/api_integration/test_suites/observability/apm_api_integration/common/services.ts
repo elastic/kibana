@@ -6,7 +6,7 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { ApmApiClient, getApmTestService } from './apm_api_supertest';
+import { ApmApiClient, getApmApiClientService } from './apm_api_supertest';
 import {
   InheritedServices,
   InheritedFtrProviderContext,
@@ -19,7 +19,7 @@ export type APMServices = InheritedServices & {
 
 export const services: APMServices = {
   ...inheritedServices,
-  apmApiClient: getApmTestService,
+  apmApiClient: getApmApiClientService,
 };
 
 export type APMFtrContextProvider = GenericFtrProviderContext<typeof services, {}>;

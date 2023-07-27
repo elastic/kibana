@@ -116,7 +116,7 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
 type ApmApiClientKey = 'slsUser';
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
-export async function getApmTestService({
+export async function getApmApiClientService({
   getService,
 }: InheritedFtrProviderContext): Promise<ApmApiClient> {
   const svlSharedConfig = getService('config');
