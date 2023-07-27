@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 import { statuses } from '../status';
 

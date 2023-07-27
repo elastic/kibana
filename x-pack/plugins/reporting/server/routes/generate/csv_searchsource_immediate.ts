@@ -11,8 +11,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import moment from 'moment';
 import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
-import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
-import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
+import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../lib';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 
@@ -73,7 +72,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
-        const runTaskFn = runTaskFnFactory(reporting, logger);
+        const csvSearchSourceImmediateExport = await reporting.getCsvSearchSourceImmediate();
+
         const stream = new PassThroughStream();
         const eventLog = reporting.getEventLogger({
           jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
@@ -87,7 +87,9 @@ export function registerGenerateCsvFromSavedObjectImmediate(
 
         try {
           eventLog.logExecutionStart();
-          const taskPromise = runTaskFn(null, req.body, context, stream, req)
+
+          const taskPromise = csvSearchSourceImmediateExport
+            .runTask(null, req.body, context, stream, req)
             .then((output) => {
               logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
