@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { CommentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
@@ -28,7 +28,7 @@ export const useAddToExistingCase = ({
       {
         persistableStateAttachmentState: { attributes: lensAttributes, timeRange },
         persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-        type: CommentType.persistableState as const,
+        type: AttachmentType.persistableState as const,
       },
     ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, timeRange]);

@@ -53,6 +53,7 @@
     "@kbn/utility-types",
     "@kbn/ml-kibana-theme",
     "@kbn/unified-field-list",
+    "@kbn/ml-response-stream",
   ],
   "exclude": [
     "target/**/*",
