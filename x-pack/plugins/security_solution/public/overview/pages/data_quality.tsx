@@ -49,6 +49,7 @@ import {
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
+import type { DataQualityCheckedParams } from '../../common/lib/telemetry';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -133,6 +134,9 @@ const DataQualityComponent: React.FC = () => {
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
+  const {
+    services: { telemetry },
+  } = useKibana();
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
       toasts.addSuccess(toast);
@@ -204,6 +208,13 @@ const DataQualityComponent: React.FC = () => {
     [createCaseFlyout]
   );
 
+  const reportDataQualityChecked = useCallback(
+    (params: DataQualityCheckedParams) => {
+      telemetry.reportDataQualityChecked(params);
+    },
+    [telemetry]
+  );
+
   if (isSourcererLoading || isSignalIndexNameLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
   }
@@ -235,6 +246,7 @@ const DataQualityComponent: React.FC = () => {
             defaultBytesFormat={defaultBytesFormat}
             defaultNumberFormat={defaultNumberFormat}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+            reportDataQualityChecked={reportDataQualityChecked}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
             isAssistantEnabled={hasAssistantPrivilege}

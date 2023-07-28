@@ -14,6 +14,7 @@ import type {
   XYChartElementEvent,
 } from '@elastic/charts';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
+import type { DataQualityCheckedParams, TelemetryClientStart } from '../../../lib/telemetry';
 
 import type { RawBucket } from '../types';
 

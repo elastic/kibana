@@ -22,6 +22,7 @@ import React, { useCallback } from 'react';
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
+import { DataQualityCheckedParams } from './types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -53,6 +54,7 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
+  reportDataQualityChecked: (params: DataQualityCheckedParams) => void;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -61,6 +63,7 @@ interface Props {
 /** Renders the `Data Quality` dashboard content */
 const DataQualityPanelComponent: React.FC<Props> = ({
   addSuccessToast,
+  baseTheme,
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
@@ -71,9 +74,9 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   lastChecked,
   openCreateCaseFlyout,
   patterns,
+  reportDataQualityChecked,
   setLastChecked,
   theme,
-  baseTheme,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -95,6 +98,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+        reportDataQualityChecked={reportDataQualityChecked}
         ilmPhases={ilmPhases}
         isAssistantEnabled={isAssistantEnabled}
         lastChecked={lastChecked}

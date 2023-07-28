@@ -49,6 +49,7 @@ export enum TelemetryEventTypes {
   MLJobUpdate = 'ML Job Update',
   CellActionClicked = 'Cell Action Clicked',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
+  DataQualityChecked = 'Data Quality Checked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

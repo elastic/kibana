@@ -17,6 +17,7 @@ import type {
   ReportMLJobUpdateParams,
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
+  DataQualityCheckedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -27,42 +28,16 @@ import { TelemetryEventTypes } from './constants';
 export class TelemetryClient implements TelemetryClientStart {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
-  public reportAlertsGroupingChanged = ({
-    tableId,
-    groupByField,
-  }: ReportAlertsGroupingChangedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingChanged, {
-      tableId,
-      groupByField,
-    });
+  public reportAlertsGroupingChanged = (params: ReportAlertsGroupingChangedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingChanged, params);
   };
 
-  public reportAlertsGroupingToggled = ({
-    isOpen,
-    tableId,
-    groupNumber,
-    groupName,
-  }: ReportAlertsGroupingToggledParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingToggled, {
-      isOpen,
-      tableId,
-      groupNumber,
-      groupName,
-    });
+  public reportAlertsGroupingToggled = (params: ReportAlertsGroupingToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingToggled, params);
   };
 
-  public reportAlertsGroupingTakeAction = ({
-    tableId,
-    groupNumber,
-    status,
-    groupByField,
-  }: ReportAlertsTakeActionParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, {
-      tableId,
-      groupNumber,
-      status,
-      groupByField,
-    });
+  public reportAlertsGroupingTakeAction = (params: ReportAlertsTakeActionParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
@@ -97,5 +72,9 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportAnomaliesCountClicked = (params: ReportAnomaliesCountClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, params);
+  };
+
+  public reportDataQualityChecked = (params: DataQualityCheckedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DataQualityChecked, params);
   };
 }

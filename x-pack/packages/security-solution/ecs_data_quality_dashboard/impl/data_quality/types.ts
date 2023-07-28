@@ -174,3 +174,13 @@ export interface SelectedIndex {
   indexName: string;
   pattern: string;
 }
+
+export interface DataQualityCheckedParams {
+  numberOfIndices: number;
+  timeConsumedMs: number;
+  error: string | undefined;
+  numberOfIncompatibleFields: number;
+  incompatibleFields: Array<{ type?: string; field?: string; value?: string }> | undefined;
+  numberOfDocuments: number;
+  sizeInBytes: number;
+}
