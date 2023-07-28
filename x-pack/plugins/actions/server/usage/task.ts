@@ -61,7 +61,6 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       params: {},
       schedule: SCHEDULE,
     });
-    await taskManager.runSoon(TASK_ID);
   } catch (e) {
     logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
   }
