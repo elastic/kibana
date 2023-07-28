@@ -41,7 +41,11 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
   const { router } = reporting.getPluginSetupDeps();
 
   router.post(
-    { path, validate: {} },
+    {
+      path,
+      validate: {},
+      options: { access: 'internal' },
+    },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 

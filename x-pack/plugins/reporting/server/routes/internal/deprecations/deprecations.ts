@@ -57,7 +57,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
   const getStatusPath = INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS;
   router.get(
-    { path: getStatusPath, validate: false },
+    {
+      path: getStatusPath,
+      validate: false,
+      options: { access: 'internal' },
+    },
     authzWrapper(async ({ core }, req, res) => {
       const counters = getCounters(req.route.method, getStatusPath, reporting.getUsageCounter());
 
@@ -94,7 +98,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
   const migrateApiPath = INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY;
   router.put(
-    { path: migrateApiPath, validate: false },
+    {
+      path: migrateApiPath,
+      validate: false,
+      options: { access: 'internal' },
+    },
     authzWrapper(async ({ core }, req, res) => {
       const counters = getCounters(req.route.method, migrateApiPath, reporting.getUsageCounter());
 

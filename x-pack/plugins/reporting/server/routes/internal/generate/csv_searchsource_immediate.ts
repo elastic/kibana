@@ -55,9 +55,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           version: schema.maybe(schema.string()),
         }),
       },
-      options: {
-        tags: kibanaAccessControlTags,
-      },
+      options: { tags: kibanaAccessControlTags, access: 'internal' },
     },
     authorizedUserPreRouting(
       reporting,

@@ -37,6 +37,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
             ids: schema.maybe(schema.string()),
           }),
         },
+        options: { access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
@@ -75,6 +76,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
       {
         path,
         validate: false,
+        options: { access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
@@ -113,6 +115,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
       {
         path,
         validate: jobHandlers.validate,
+        options: { access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
@@ -143,7 +146,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
       {
         path,
         validate: jobHandlers.validate,
-        options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
+        options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         return jobHandlers.handleDownloadReport({ path, user, context, req, res });
@@ -159,6 +162,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
       {
         path,
         validate: jobHandlers.validate,
+        options: { access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         return jobHandlers.handleDeleteReport({ path, user, context, req, res });

@@ -22,7 +22,11 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
   const { router } = setupDeps;
 
   router.post(
-    { path, validate: {} },
+    {
+      path,
+      validate: {},
+      options: { access: 'internal' },
+    },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 

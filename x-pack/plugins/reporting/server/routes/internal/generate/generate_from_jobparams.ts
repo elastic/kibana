@@ -27,7 +27,7 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
       {
         path,
         validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags },
+        options: { tags: kibanaAccessControlTags, access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
