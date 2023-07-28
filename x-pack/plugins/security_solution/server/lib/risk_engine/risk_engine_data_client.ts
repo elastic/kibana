@@ -326,7 +326,6 @@ export class RiskEngineDataClient {
     }
   }
 
-
   private async initSavedObjects({ savedObjectsClient, user }: UpdateConfigOpts) {
     return savedObjectsClient.create(riskEngineConfigurationTypeName, {
       enable: false,
