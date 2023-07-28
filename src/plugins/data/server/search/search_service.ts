@@ -269,7 +269,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns, rollupsEnabled }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
@@ -281,7 +281,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       indexPatterns,
     });
 
-    this.asScoped = this.asScopedProvider(core, rollupsEnabled);
+    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled);
     return {
       aggs,
       searchAsInternalUser: this.searchAsInternalUser,
