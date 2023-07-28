@@ -463,10 +463,7 @@ export default ({ getService }: FtrProviderContext) => {
               legacy_notifications_disabled: 1,
             },
           };
-          expect(stats.detection_rules.detection_rule_usage).to.eql(
-            expected,
-            `\n\n\nexpected: ${JSON.stringify(expected)}, \n\n\nactual: ${JSON.stringify(stats)}`
-          );
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
