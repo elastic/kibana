@@ -90,12 +90,21 @@ export const RangeSliderControl: FC = () => {
   );
 
   const getCommonInputProps = useCallback(
-    ({ inputValue, inputPlaceholder }: { inputValue: string; inputPlaceholder: string }) => {
+    ({
+      inputValue,
+      testSubj,
+      inputPlaceholder,
+    }: {
+      inputValue: string;
+      testSubj: string;
+      inputPlaceholder: string;
+    }) => {
       return {
         isInvalid,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
         value: inputValue,
         placeholder: inputPlaceholder,
+        'data-test-subj': `rangeSlider__${testSubj}`,
         className: 'rangeSliderAnchor__fieldNumber',
       };
     },
@@ -105,7 +114,7 @@ export const RangeSliderControl: FC = () => {
   return error ? (
     <ControlError error={error} />
   ) : (
-    <span className="rangeSliderAnchor__button">
+    <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
       <EuiDualRange
         id={id}
         min={min ?? -Infinity}
@@ -116,13 +125,16 @@ export const RangeSliderControl: FC = () => {
         isLoading={isLoading}
         readOnly={canOpenPopover}
         showInput={'inputWithPopover'}
+        data-test-subj="rangeSlider__slider"
         value={[displayedValue[0] || (min ?? -Infinity), displayedValue[1] || (max ?? Infinity)]}
         minInputProps={getCommonInputProps({
           inputPlaceholder: String(min),
+          testSubj: 'lowerBoundFieldNumber',
           inputValue: String(min) === displayedValue[0] ? '' : displayedValue[0],
         })}
         maxInputProps={getCommonInputProps({
           inputPlaceholder: String(max),
+          testSubj: 'upperBoundFieldNumber',
           inputValue: String(max) === displayedValue[1] ? '' : displayedValue[1],
         })}
         onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
