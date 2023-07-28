@@ -215,3 +215,32 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
     defaultMessage: 'Errors',
   }
 );
+
+export const UPDATE_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.updatePanel.title',
+  {
+    defaultMessage: 'New entity risk scoring engine available',
+  }
+);
+
+export const UPDATE_PANEL_MESSAGE = i18n.translate(
+  'xpack.securitySolution.riskScore.updatePanel.message',
+  {
+    defaultMessage:
+      'A new entity risk scoring engine is available. Update now to get the latest features.',
+  }
+);
+
+export const UPDATE_PANEL_GO_TO_MANAGE = i18n.translate(
+  'xpack.securitySolution.riskScore.updatePanel.goToManage',
+  {
+    defaultMessage: 'Manage',
+  }
+);
+
+export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
+  'xpack.securitySolution.riskScore.updatePanel.Dismiss',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
