@@ -116,6 +116,7 @@ describe('actions telemetry', () => {
           "another.type__": 1,
           "some.type": 1,
         },
+        "countGenAiProviderTypes": Object {},
         "countTotal": 4,
         "hasErrors": false,
       }
@@ -135,6 +136,7 @@ describe('actions telemetry', () => {
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
         "countByType": Object {},
+        "countGenAiProviderTypes": Object {},
         "countTotal": 0,
         "errorMessage": "oh no",
         "hasErrors": true,
@@ -456,6 +458,7 @@ describe('actions telemetry', () => {
           "another.type__": 1,
           "some.type": 1,
         },
+        "countGenAiProviderTypes": Object {},
         "countTotal": 6,
         "hasErrors": false,
       }
@@ -499,6 +502,7 @@ describe('actions telemetry', () => {
         "countByType": Object {
           "test.system-action": 1,
         },
+        "countGenAiProviderTypes": Object {},
         "countTotal": 1,
         "hasErrors": false,
       }
