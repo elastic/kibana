@@ -77,7 +77,7 @@ export const updateStateContainer =
 
     // Update
     if (shouldSetDefaultColumns) {
-      stateContainer.appState.update({ columns: [MESSAGE_FIELD] });
+      stateContainer.appState.update({ columns: [MESSAGE_FIELD] }, true);
     }
   };
 
