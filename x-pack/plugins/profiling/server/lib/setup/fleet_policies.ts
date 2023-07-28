@@ -5,110 +5,12 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
 import { PartialSetupState } from '../../../common/setup';
 import { PackageInputType } from '../..';
-
-async function createIngestAPIKey(esClient: ElasticsearchClient) {
-  const apiKeyResponse = await esClient.security.createApiKey({
-    name: 'profiling-manager',
-    role_descriptors: {
-      profiling_manager: {
-        indices: [
-          {
-            names: ['profiling-*', '.profiling-*'],
-            privileges: [
-              'read',
-              'create_doc',
-              'create',
-              'write',
-              'index',
-              'create_index',
-              'view_index_metadata',
-              'manage',
-            ],
-          },
-        ],
-        cluster: ['monitor'],
-      },
-    },
-  });
-
-  return atob(apiKeyResponse.encoded);
-}
-
-export async function validateApmPolicy({
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-  return {
-    policies: {
-      apm: {
-        installed: !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling),
-      },
-    },
-  };
-}
-
-export async function updateApmPolicy({
-  client,
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions) {
-  const esClient = client.getEsClient();
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-
-  if (!apmPolicy) {
-    throw new Error(`Could not find APM policy`);
-  }
-
-  const apmPolicyApiKey = await createIngestAPIKey(esClient);
-
-  const profilingApmConfig = {
-    profiling: {
-      enabled: true,
-      elasticsearch: {
-        api_key: apmPolicyApiKey,
-      },
-      metrics: {
-        elasticsearch: {
-          hosts: ['https://1b6c02856ea642a6ac14499b01507233.us-east-2.aws.elastic-cloud.com:443'],
-          api_key: 'woq-IoMBRbbiEbPugtWW:_iBmc1PdSout7sf5FCkEpA',
-        },
-      },
-      keyvalue_retention: {
-        // 60 days
-        age: '1440h',
-        // 200 Gib
-        size_bytes: 200 * 1024 * 1024 * 1024,
-        execution_interval: '12h',
-      },
-    },
-  };
-
-  const {
-    id,
-    revision,
-    updated_at: updateAt,
-    updated_by: updateBy,
-    ...apmPolicyModified
-  } = apmPolicy;
-
-  apmPolicyModified.inputs = apmPolicy.inputs.map((input) => {
-    return input.type === 'apm'
-      ? merge({}, input, { config: { 'apm-server': { value: profilingApmConfig } } })
-      : input;
-  });
-
-  await packagePolicyClient.update(soClient, esClient, id, apmPolicyModified);
-}
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
