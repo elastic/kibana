@@ -30,7 +30,6 @@ export const openAddPanelFlyout = ({
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {
-  console.log('openAddPanelFlyout');
   // send the overlay ref to the root embeddable if it is capable of tracking overlays
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
