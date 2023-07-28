@@ -203,7 +203,7 @@ export interface MetricAnomalyParams {
 
 export interface ThresholdParams {
   criteria: MetricExpressionParams[];
-  filterQueryText?: string;
+  filterQuery?: string;
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;

@@ -28,11 +28,11 @@ const isCustomMetricExpressionParams = (
 export function validateMetricThreshold({
   criteria,
   searchConfiguration,
-  filterQueryText,
+  filterQuery,
 }: {
   criteria: MetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
-  filterQueryText?: string;
+  filterQuery?: string;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -53,7 +53,7 @@ export function validateMetricThreshold({
       customMetrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
       equation?: string;
     };
-  } & { filterQueryText?: string[]; searchConfiguration?: string[] } = {};
+  } & { filterQuery?: string[]; searchConfiguration?: string[] } = {};
   validationResult.errors = errors;
 
   if (!searchConfiguration) {
@@ -67,11 +67,11 @@ export function validateMetricThreshold({
     ];
   }
 
-  if (filterQueryText) {
+  if (filterQuery) {
     try {
-      buildEsQuery(undefined, [{ query: filterQueryText, language: 'kuery' }], []);
+      buildEsQuery(undefined, [{ query: filterQuery, language: 'kuery' }], []);
     } catch (e) {
-      errors.filterQueryText = [
+      errors.filterQuery = [
         i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.invalidFilterQuery', {
           defaultMessage: 'Filter query is invalid.',
         }),

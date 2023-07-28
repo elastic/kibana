@@ -171,7 +171,7 @@ export default function Expressions(props: Props) {
 
   const onFilterChange = useCallback(
     (filter: any) => {
-      setRuleParams('filterQueryText', filter);
+      setRuleParams('filterQuery', filter);
     },
     [setRuleParams]
   );
@@ -243,13 +243,13 @@ export default function Expressions(props: Props) {
   const preFillAlertFilter = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('filterQueryText', md.currentOptions.filterQuery);
+      setRuleParams('filterQuery', md.currentOptions.filterQuery);
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
       const filter = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
-      setRuleParams('filterQueryText', filter);
+      setRuleParams('filterQuery', filter);
     }
   }, [metadata, setRuleParams]);
 
@@ -383,7 +383,7 @@ export default function Expressions(props: Props) {
               <ExpressionChart
                 expression={e}
                 derivedIndexPattern={derivedIndexPattern}
-                filterQuery={ruleParams.filterQueryText}
+                filterQuery={ruleParams.filterQuery}
                 groupBy={ruleParams.groupBy}
               />
             </ExpressionRow>
@@ -464,22 +464,22 @@ export default function Expressions(props: Props) {
         })}
         fullWidth
         display="rowCompressed"
-        isInvalid={!!errors.filterQueryText}
+        isInvalid={!!errors.filterQuery}
       >
         {(metadata && derivedIndexPattern && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
-            value={ruleParams.filterQueryText}
+            value={ruleParams.filterQuery}
           />
         )) || (
           <EuiFieldSearch
             data-test-subj="thresholdRuleExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
-            value={ruleParams.filterQueryText}
+            value={ruleParams.filterQuery}
             fullWidth
-            isInvalid={!!errors.filterQueryText}
+            isInvalid={!!errors.filterQuery}
           />
         )}
       </EuiFormRow>

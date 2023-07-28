@@ -21,7 +21,6 @@ export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
   filterQuery?: string;
-  filterQueryText?: string;
 }
 
 export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
@@ -46,7 +45,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   timeframe?: { start?: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
-  const { criteria, groupBy, filterQueryText } = params;
+  const { criteria, groupBy, filterQuery } = params;
 
   return Promise.all(
     criteria.map(async (criterion) => {
@@ -65,7 +64,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         criterion,
         dataView,
         groupBy,
-        filterQueryText,
+        filterQuery,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -78,7 +77,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         criterion,
         dataView,
         groupBy,
-        filterQueryText,
+        filterQuery,
         logger,
         calculatedTimerange,
         missingGroups

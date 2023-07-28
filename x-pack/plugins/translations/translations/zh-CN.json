@@ -27388,7 +27388,6 @@
     "xpack.observability.threshold.rule.threshold.errorAlertReason": "Elasticsearch 尝试查询 {metric} 的数据时出现故障",
     "xpack.observability.threshold.rule.threshold.firedAlertReason": "过去 {duration}{group}，{metric} 为 {currentValue}。{comparator} {threshold} 时告警。",
     "xpack.observability.threshold.rule.threshold.noDataAlertReason": "对于 {group}，{metric} 在过去 {interval}中未报告数据",
-    "xpack.observability.threshold.rule.threshold.queryErrorAlertReason": "告警使用格式错误的 KQL 查询：{filterQueryText}",
     "xpack.observability.threshold.rule.threshold.recoveredAlertReason": "对于 {group}，{metric} 现在{comparator}阈值 {threshold}（当前值为 {currentValue}）",
     "xpack.observability.threshold.rule.threshold.thresholdRange": "{a} 和 {b}",
     "xpack.observability.threshold.rule.thresholdExtraTitle": "{comparator} {threshold} 时告警",

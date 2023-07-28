@@ -130,7 +130,7 @@ export function thresholdRuleType(
             schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
           ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          filterQueryText: schema.maybe(
+          filterQuery: schema.maybe(
             schema.string({
               validate: validateKQLStringFilter,
             })
