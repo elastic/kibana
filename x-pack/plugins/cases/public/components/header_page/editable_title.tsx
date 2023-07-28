@@ -38,7 +38,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
       }
 
       if (newTitleValue !== title) {
-        onSubmit(newTitleValue);
+        onSubmit(newTitleValue.trim());
       }
       setEditMode(false);
       setErrors([]);
@@ -56,43 +56,46 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
   const hasErrors = errors.length > 0;
 
   return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={true} css={releasePhase && { overflow: 'hidden' }}>
-          <EuiInlineEditTitle
-            defaultValue={title}
-            readModeProps={{
-              onClick: () => setEditMode(true),
-              'data-test-subj': 'editable-title-header-value',
-            }}
-            editModeProps={{
-              formRowProps: { error: errors },
-              inputProps: { 'data-test-subj': 'editable-title-input-field' },
-              saveButtonProps: { 'data-test-subj': 'editable-title-submit-btn' },
-              cancelButtonProps: {
-                onClick: () => onCancel(),
-                'data-test-subj': 'editable-title-cancel-btn',
+    <EuiFlexGroup>
+      <EuiFlexItem grow={true} css={releasePhase && { overflow: 'hidden' }}>
+        <EuiInlineEditTitle
+          defaultValue={title}
+          readModeProps={{
+            onClick: () => setEditMode(true),
+            'data-test-subj': 'editable-title-header-value',
+          }}
+          editModeProps={{
+            formRowProps: { error: errors },
+            inputProps: {
+              'data-test-subj': 'editable-title-input-field',
+              onChange: () => {
+                setErrors([]);
               },
-            }}
-            inputAriaLabel="Editable title input field"
-            heading="h1"
-            size="s"
-            isInvalid={hasErrors}
-            isLoading={isLoading}
-            isReadOnly={!permissions.update}
-            onSave={(value) => {
-              return onClickSubmit(value);
-            }}
-            startWithEditOpen={editMode}
-            data-test-subj="header-page-title"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {releasePhase === 'experimental' && <TitleExperimentalBadge />}
-          {releasePhase === 'beta' && <TitleBetaBadge />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+            },
+            saveButtonProps: { 'data-test-subj': 'editable-title-submit-btn' },
+            cancelButtonProps: {
+              onClick: () => onCancel(),
+              'data-test-subj': 'editable-title-cancel-btn',
+            },
+          }}
+          inputAriaLabel="Editable title input field"
+          heading="h1"
+          size="s"
+          isInvalid={hasErrors}
+          isLoading={isLoading}
+          isReadOnly={!permissions.update}
+          onSave={(value) => {
+            return onClickSubmit(value);
+          }}
+          startWithEditOpen={editMode}
+          data-test-subj="header-page-title"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {releasePhase === 'experimental' && <TitleExperimentalBadge />}
+        {releasePhase === 'beta' && <TitleBetaBadge />}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 EditableTitleComponent.displayName = 'EditableTitle';
