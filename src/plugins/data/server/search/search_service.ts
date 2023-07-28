@@ -275,6 +275,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.sessionService.start(core, {});
 
+    console.log('ROOLLUPS ENABLED data ##################', this.rollupsEnabled);
+
     const aggs = this.aggsService.start({
       fieldFormats,
       uiSettings,

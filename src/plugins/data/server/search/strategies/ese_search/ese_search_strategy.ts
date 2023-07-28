@@ -154,6 +154,7 @@ export const enhancedEsSearchStrategyProvider = (
         throw new KbnServerError('Unknown indexType', 400);
       }
 
+      console.log('ROLLUP ######################### ', deps.rollupsEnabled);
       if (request.indexType === undefined || !deps.rollupsEnabled) {
         return asyncSearch(request, options, deps);
       } else {

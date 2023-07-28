@@ -87,6 +87,7 @@ export class IndexPatternsFetcher {
       fields: options.fields || ['*'],
     });
 
+    console.log('ROLLUP FETCHER ###### ', this.rollupsEnabled);
     if (this.rollupsEnabled && type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
