@@ -45,8 +45,8 @@ export default function ({ getService }) {
         const policy = getPolicyPayload('link-test-policy');
         const { name: policyName } = policy;
 
-        const response = await createPolicy(policy);
-        expect(response.statusCode).to.eql(200);
+        const { statusCode } = await createPolicy(policy);
+        expect(statusCode).to.eql(200);
 
         // Create a new index
         const indexName = await createIndex();
@@ -138,17 +138,10 @@ export default function ({ getService }) {
       after(async () => {
         try {
           await deleteSLMPolicy('policy');
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Cleanup error] Error deleting SLM policy');
-          throw err;
-        }
-
-        try {
           await deleteRepository('backing_repo');
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Cleanup error] Error deleting snapshot repository');
+          console.log('[Cleanup error] Error cleaning up test setup');
           throw err;
         }
       });
