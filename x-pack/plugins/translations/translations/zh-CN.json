@@ -515,7 +515,6 @@
     "controls.rangeSlider.description": "添加用于选择字段值范围的控件。",
     "controls.rangeSlider.displayName": "范围滑块",
     "controls.rangeSlider.popover.noAvailableDataHelpText": "没有可显示的数据。调整时间范围和筛选。",
-    "controls.rangeSlider.popover.noDataHelpText": "选定范围未生成任何数据。未应用任何筛选。",
     "controls.timeSlider.description": "添加用于选择时间范围的滑块",
     "controls.timeSlider.displayName": "时间滑块",
     "controls.timeSlider.nextLabel": "下一时间窗口",
