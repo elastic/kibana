@@ -45,7 +45,7 @@ export class IndexPatternsFetcher {
   constructor(
     elasticsearchClient: ElasticsearchClient,
     allowNoIndices: boolean = false,
-    rollupsEnabled: boolean
+    rollupsEnabled: boolean = false
   ) {
     this.elasticsearchClient = elasticsearchClient;
     this.allowNoIndices = allowNoIndices;
