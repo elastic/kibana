@@ -6,6 +6,7 @@
  */
 import { InvokeCreator } from 'xstate';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { MESSAGE_FIELD } from '../../../../common/constants';
 import {
   AllDatasetSelection,
   decodeDatasetSelectionId,
@@ -58,7 +59,28 @@ export const initializeFromUrl =
   async (context) => {
     const { index } = stateContainer.appState.getState();
 
+    stateContainer.appState.update({ columns: [MESSAGE_FIELD] });
+
     return extractDatasetSelectionFromIndex({ index, context });
+  };
+
+export const updateStateContainer =
+  ({
+    stateContainer,
+  }: LogExplorerProfileUrlStateDependencies): InvokeCreator<
+    LogExplorerProfileContext,
+    LogExplorerProfileEvent
+  > =>
+  async () => {
+    const { columns } = stateContainer.appState.getState();
+
+    const shouldSetDefaultColumns =
+      stateContainer.appState.isEmptyURL() || !columns || columns.length === 0;
+
+    // Update
+    if (shouldSetDefaultColumns) {
+      stateContainer.appState.update({ columns: [MESSAGE_FIELD] });
+    }
   };
 
 const extractDatasetSelectionFromIndex = ({

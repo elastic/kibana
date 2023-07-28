@@ -276,6 +276,7 @@ export function getInitialState(
   services: DiscoverServices
 ) {
   const stateStorageURL = stateStorage?.get(APP_STATE_URL_KEY) as AppStateUrl;
+
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,

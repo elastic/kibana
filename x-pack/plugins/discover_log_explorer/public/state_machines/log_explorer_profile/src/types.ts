@@ -28,6 +28,10 @@ export type LogExplorerProfileTypestate =
       context: WithDatasetSelection;
     }
   | {
+      value: 'initializingStateContainer';
+      context: WithDatasetSelection;
+    }
+  | {
       value: 'initialized';
       context: WithDatasetSelection;
     }
@@ -37,6 +41,10 @@ export type LogExplorerProfileTypestate =
     }
   | {
       value: 'initialized.updatingDataView';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.updatingStateContainer';
       context: WithDatasetSelection;
     };
 
