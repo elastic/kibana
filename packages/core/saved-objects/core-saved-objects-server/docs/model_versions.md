@@ -897,7 +897,9 @@ from the `search` API when the option is used.
 
 The savedObjects `update` API is effectively a partial update (using Elasticsearch's `_update` under the hood),
 allowing API consumers to only specify the subset of fields they want to update to new values, without having to
-provide the full list of attributes (the unchanged ones).
+provide the full list of attributes (the unchanged ones). We're also not changing the `version` of the document
+during updates, even when the instance performing the operation doesn't know about the current model version
+of the document (e.g an old node during an upgrade).
 
 If this was fine before zero downtime upgrades, there is an edge case in serverless when this API is used
 to update fields that are the "source" of another field's backfill.
