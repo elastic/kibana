@@ -92,6 +92,7 @@ export const useGetLinkProps = (): GetLinkProps => {
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
 ): React.FC<Omit<T & WrappedLinkProps, 'href'>> =>
+  // eslint-disable-next-line react/display-name
   React.memo(function ({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
     const { onClick, href } = getLink({ id, path, urlState, onClick: _onClick });
