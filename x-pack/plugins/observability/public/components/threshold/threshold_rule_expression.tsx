@@ -402,6 +402,7 @@ export default function Expressions(props: Props) {
                 derivedIndexPattern={derivedIndexPattern}
                 filterQuery={ruleParams.filterQueryText}
                 groupBy={ruleParams.groupBy}
+                timeFieldName={dataView?.timeFieldName}
               />
             </ExpressionRow>
           );
