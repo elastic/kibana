@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
 const ThreatIntelligencePaywall: React.FC<{ requiredPLI: AppFeatureKey }> = React.memo(
@@ -16,27 +17,31 @@ const ThreatIntelligencePaywall: React.FC<{ requiredPLI: AppFeatureKey }> = Reac
     const productTypeRequired = useProductTypeByPLI(requiredPLI);
 
     return (
-      <EuiEmptyPrompt
-        icon={<EuiIcon type="logoSecurity" size="xl" />}
-        color="subdued"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.threatIntelligence.paywall.title"
-              defaultMessage="Do more with Security!"
-            />
-          </h2>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.threatIntelligence.paywall.body"
-              defaultMessage="Upgrade your license to {productTypeRequired} to use threat intelligence."
-              values={{ productTypeRequired }}
-            />
-          </p>
-        }
-      />
+      <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
+        <KibanaPageTemplate.Section>
+          <EuiEmptyPrompt
+            icon={<EuiIcon type="logoSecurity" size="xl" />}
+            color="subdued"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.securitySolutionServerless.threatIntelligence.paywall.title"
+                  defaultMessage="Do more with Security!"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolutionServerless.threatIntelligence.paywall.body"
+                  defaultMessage="Upgrade your license to {productTypeRequired} to use threat intelligence."
+                  values={{ productTypeRequired }}
+                />
+              </p>
+            }
+          />
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
     );
   }
 );
