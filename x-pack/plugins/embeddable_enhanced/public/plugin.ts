@@ -95,6 +95,11 @@ export class EmbeddableEnhancedPlugin
             if (!embeddable) return embeddable;
             return this.enhanceEmbeddableWithDynamicActions(embeddable);
           },
+          createSkipMigrations: async (...args) => {
+            const embeddable = await factory.createSkipMigrations(...args);
+            if (!embeddable) return embeddable;
+            return this.enhanceEmbeddableWithDynamicActions(embeddable);
+          },
         };
       }
     );

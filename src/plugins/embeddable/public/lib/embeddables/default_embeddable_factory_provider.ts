@@ -13,7 +13,7 @@ import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableStateWithType } from '../../../common/types';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { migrateEmbeddableInput } from '../migrate_embeddable_input';
+import { runEmbeddableFactoryMigrations } from '../factory_migrations/run_factory_migrations';
 
 export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
@@ -38,10 +38,11 @@ export const defaultEmbeddableFactoryProvider = <
         },
     create: (...args) => {
       const [initialInput, ...otherArgs] = args;
-      const input = migrateEmbeddableInput(initialInput, def);
+      const input = runEmbeddableFactoryMigrations(initialInput, def);
       const createdEmbeddable = def.create.bind(def)(input as unknown as I, ...otherArgs);
       return createdEmbeddable;
     },
+    createSkipMigrations: def.create.bind(def),
     type: def.type,
     isEditable: def.isEditable.bind(def),
     getDisplayName: def.getDisplayName.bind(def),

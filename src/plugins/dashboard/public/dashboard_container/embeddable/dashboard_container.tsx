@@ -43,7 +43,11 @@ import {
   showPlaceholderUntil,
   addOrUpdateEmbeddable,
 } from './api';
-
+import {
+  DashboardReduxState,
+  DashboardPublicState,
+  DashboardRenderPerformanceStats,
+} from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
 import { navigateToDashboard } from './create/create_dashboard';
@@ -52,10 +56,9 @@ import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
-import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
+import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
-import { DASHBOARD_LOADED_EVENT, DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
 
 export interface InheritedChildInput {
@@ -125,8 +128,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     reduxToolsPackage: ReduxToolsPackage,
+    initialComponentState?: DashboardPublicState,
     initialSessionId?: string,
-    initialLastSavedInput?: DashboardContainerInput,
     dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
@@ -169,16 +172,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       embeddable: this,
       reducers: dashboardContainerReducers,
       additionalMiddleware: [diffingMiddleware],
-      initialComponentState: {
-        lastSavedInput: initialLastSavedInput ?? {
-          ...DEFAULT_DASHBOARD_INPUT,
-          id: initialInput.id,
-        },
-        isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
-        animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
-        hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
-        lastSavedId: savedObjectId,
-      },
+      initialComponentState,
     });
 
     this.onStateChange = reduxTools.onStateChange;

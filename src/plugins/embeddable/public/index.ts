@@ -80,7 +80,7 @@ export {
   shouldRefreshFilterCompareOptions,
   PANEL_HOVER_TRIGGER,
   panelHoverTrigger,
-  migrateEmbeddableInput,
+  runEmbeddableFactoryMigrations,
 } from './lib';
 
 export { EmbeddablePanel } from './embeddable_panel';

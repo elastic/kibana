@@ -23,6 +23,7 @@ export interface InjectExtractDeps {
 }
 
 const isPre730Panel = (panel: Record<string, string>): boolean => {
+  if ((panel.explicitInput as unknown as { version: string }).version) return false;
   return 'version' in panel && panel.version ? semverGt('7.3.0', panel.version) : true;
 };
 

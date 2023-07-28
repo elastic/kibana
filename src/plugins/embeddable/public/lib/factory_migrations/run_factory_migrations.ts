@@ -7,16 +7,25 @@
  */
 
 import { cloneDeep } from 'lodash';
+import compare from 'semver/functions/compare';
+
 import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableFactory, EmbeddableInput } from './embeddables';
+import { EmbeddableFactory, EmbeddableInput } from '../embeddables';
 
 /**
- * A helper function that migrates an Embeddable Input to its latest version.
+ * A helper function that migrates an Embeddable Input to its latest version. Note that this function
+ * only runs the embeddable factory's migrations.
  */
-export const migrateEmbeddableInput = <InputType extends EmbeddableInput>(
-  initialInput: InputType,
+export const runEmbeddableFactoryMigrations = <ToType extends EmbeddableInput>(
+  initialInput: { version?: string },
   factory: { migrations?: EmbeddableFactory['migrations']; latestVersion: string }
-): InputType => {
+): { input: ToType; migrationRun: boolean } => {
+  const inputVersion = initialInput.version ?? '0.0.0';
+  const migrationRun = compare(inputVersion, factory.latestVersion, true) !== 0;
+
+  // return early to avoid cloning the input when there are no migrations to run.
+  if (!migrationRun) return { input: initialInput as unknown as ToType, migrationRun };
+
   const factoryMigrations =
     typeof factory?.migrations === 'function' ? factory?.migrations() : factory?.migrations || {};
   const migratedInput = migrateToLatest(
@@ -24,10 +33,10 @@ export const migrateEmbeddableInput = <InputType extends EmbeddableInput>(
     {
       state: cloneDeep(initialInput),
       // any embeddable with no version set is considered to require all clientside migrations
-      version: initialInput.version ?? '0',
+      version: inputVersion,
     },
     true
   );
   migratedInput.version = factory.latestVersion;
-  return migratedInput as InputType;
+  return { input: migratedInput as ToType, migrationRun };
 };

@@ -8,18 +8,14 @@
 import { batch } from 'react-redux';
 import { Subject, Subscription } from 'rxjs';
 
-import {
-  migrateEmbeddableInput,
-  EmbeddableFactoryNotFoundError,
-} from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 
+import { DashboardPublicState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { initializeDashboard } from './initialize_dashboard';
 import { pluginServices } from '../../../services/plugin_services';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -77,12 +73,22 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Build and return the dashboard container.
   // --------------------------------------------------------------------------------------
-  const initialLastSavedInput = migrateForLastSavedInput(savedObjectResult.dashboardInput);
+  const initialComponentState: DashboardPublicState = {
+    lastSavedInput: savedObjectResult.dashboardInput ?? {
+      ...DEFAULT_DASHBOARD_INPUT,
+      id: input.id,
+    },
+    hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
+    animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
+    hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
+    lastSavedId: savedObjectId,
+  };
   const dashboardContainer = new DashboardContainer(
     input,
     reduxEmbeddablePackage,
+    initialComponentState,
     searchSessionId,
-    initialLastSavedInput,
     dashboardCreationStartTime,
     undefined,
     creationOptions,
@@ -134,50 +140,9 @@ export async function navigateToDashboard(
 
   this.updateInput(newInput);
   batch(() => {
-    this.dispatch.setLastSavedInput(migrateForLastSavedInput(loadDashboardReturn.dashboardInput));
+    this.dispatch.setLastSavedInput(loadDashboardReturn.dashboardInput);
     this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
     this.dispatch.setLastSavedId(newSavedObjectId);
   });
   dashboardContainerReady$.next(this);
 }
-
-/**
- * We know that the Embeddable children on this Dashboard will be automatically updated to their
- * latest versions via the Embeddable factory create method. This does not apply to the copy stored
- * for state-diffing and reset purposes. We need to apply all Embeddable migrations here too.
- */
-const migrateForLastSavedInput = (input: DashboardContainerInput) => {
-  const { embeddable } = pluginServices.getServices();
-  if (!input) return input;
-  if (input.controlGroupInput) {
-    const controlGroupFactory = embeddable.getEmbeddableFactory(CONTROL_GROUP_TYPE);
-    if (!controlGroupFactory) throw new EmbeddableFactoryNotFoundError(CONTROL_GROUP_TYPE);
-    input.controlGroupInput = migrateEmbeddableInput<ControlGroupInput>(
-      { ...input.controlGroupInput, id: `control_group_${input.id ?? 'new_dashboard'}` },
-      controlGroupFactory
-    );
-
-    // temporarily migrate all of the Control children as well - we need a better system for this.
-    const migratedControls: ControlGroupInput['panels'] = {};
-    Object.entries(input.controlGroupInput.panels).forEach(([id, panel]) => {
-      const factory = embeddable.getEmbeddableFactory(panel.type);
-      if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-      const newInput = migrateEmbeddableInput(panel.explicitInput, factory);
-      panel.explicitInput = newInput as DashboardPanelState['explicitInput'];
-      migratedControls[id] = panel;
-    });
-  }
-  const migratedPanels: DashboardContainerInput['panels'] = {};
-  Object.entries(input.panels).forEach(([id, panel]) => {
-    const factory = embeddable.getEmbeddableFactory(panel.type);
-    if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-    // run last saved migrations for by value panels only.
-    if (!panel.explicitInput.savedObjectId) {
-      const newInput = migrateEmbeddableInput(panel.explicitInput, factory);
-      panel.explicitInput = newInput as DashboardPanelState['explicitInput'];
-    }
-    migratedPanels[id] = panel;
-  });
-  input.panels = migratedPanels;
-  return input;
-};
