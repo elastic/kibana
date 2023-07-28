@@ -90,6 +90,7 @@ export function getSessionIndexSettings({
   indexName: string;
   aliasName: string;
 }): IndicesCreateRequest {
+  // @ts-expect-error ts upgrade to v4.7.4
   return Object.freeze({
     index: indexName,
     settings: {

@@ -420,10 +420,12 @@ export class Execution<
             : of(resolvedArgs);
 
           return args$.pipe(
+            // @ts-expect-error upgrade to ts v4.7.4
             tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
             switchMap((args) => this.invokeFunction(fn, input, args)),
             this.execution.params.partial ? identity : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
+            // @ts-expect-error upgrade to ts v4.7.4
             tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
             catchError((rawError) => {
@@ -431,6 +433,7 @@ export class Execution<
               error.error.message = `[${fnName}] > ${error.error.message}`;
 
               if (this.execution.params.debug) {
+                // @ts-expect-error upgrade to ts v4.7.4
                 Object.assign(head.debug, { error, rawError, success: false });
               }
 
@@ -440,6 +443,7 @@ export class Execution<
         }),
         finalize(() => {
           if (this.execution.params.debug) {
+            // @ts-expect-error upgrade to ts v4.7.4
             Object.assign(head.debug, { duration: now() - timeStart });
           }
         })

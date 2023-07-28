@@ -116,6 +116,7 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
+  // @ts-expect-error property is assigned with defineProperty in the constructor
   protected readonly [requestSymbol]: Request;
 
   constructor(
