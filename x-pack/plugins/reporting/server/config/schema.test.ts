@@ -64,12 +64,6 @@ describe('Reporting Config Schema', () => {
   );
 
   it('disables image reporting with serverless', () => {
-    expect(() =>
-      ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { serverless: true })
-    ).toThrow();
-    expect(() =>
-      ConfigSchema.validate({ export_types: { png: { enabled: true } } }, { serverless: true })
-    ).toThrow();
     // csv is permitted in all configs
     expect(() =>
       ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { serverless: true })
