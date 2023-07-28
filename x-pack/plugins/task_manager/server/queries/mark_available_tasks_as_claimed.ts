@@ -97,25 +97,6 @@ export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   },
 };
 
-const SortByRunAtAndRetryAtScript: ScriptBasedSortClause = {
-  _script: {
-    type: 'number',
-    order: 'asc',
-    script: {
-      lang: 'painless',
-      source: `
-if (doc['task.retryAt'].size()!=0) {
-  return doc['task.retryAt'].value.toInstant().toEpochMilli();
-}
-if (doc['task.runAt'].size()!=0) {
-  return doc['task.runAt'].value.toInstant().toEpochMilli();
-}
-    `,
-    },
-  },
-};
-export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
-
 export interface UpdateFieldsAndMarkAsFailedOpts {
   fieldUpdates: {
     [field: string]: string | number | Date;

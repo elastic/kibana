@@ -545,15 +545,17 @@ export function correctVersionConflictsForContinuation(
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
+  const now = new Date();
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
-    scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
+    scheduledAt: (doc.scheduledAt || now).toISOString(),
     startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
-    runAt: (doc.runAt || new Date()).toISOString(),
+    runAt: (doc.runAt || now).toISOString(),
+    claimAt: (doc.retryAt && doc.retryAt.toISOString()) || (doc.runAt || now).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
   } as SerializedConcreteTaskInstance;
 }
@@ -562,7 +564,7 @@ export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): ConcreteTaskInstance {
   return {
-    ...savedObject.attributes,
+    ...omit(savedObject.attributes, 'claimAt'),
     id: savedObject.id,
     version: savedObject.version,
     scheduledAt: new Date(savedObject.attributes.scheduledAt),

@@ -19,11 +19,10 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     runAt: {
       type: 'date',
     },
-    // NO NEED TO BE INDEXED
-    // startedAt: {
-    //   type: 'date',
-    // },
     retryAt: {
+      type: 'date',
+    },
+    claimAt: {
       type: 'date',
     },
     enabled: {
@@ -42,20 +41,6 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     status: {
       type: 'keyword',
     },
-    // NO NEED TO BE INDEXED
-    // traceparent: {
-    //   type: 'text',
-    // },
-    // params: {
-    //   type: 'text',
-    // },
-    // state: {
-    //   type: 'text',
-    // },
-    // NO NEED TO BE INDEXED
-    // user: {
-    //   type: 'keyword',
-    // },
     scope: {
       type: 'keyword',
     },

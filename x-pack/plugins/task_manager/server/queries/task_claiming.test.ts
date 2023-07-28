@@ -383,23 +383,9 @@ describe('TaskClaiming', () => {
         },
       });
       expect(sort).toMatchObject([
-        {
-          _script: {
-            type: 'number',
-            order: 'asc',
-            script: {
-              lang: 'painless',
-              source: `
-if (doc['task.retryAt'].size()!=0) {
-  return doc['task.retryAt'].value.toInstant().toEpochMilli();
-}
-if (doc['task.runAt'].size()!=0) {
-  return doc['task.runAt'].value.toInstant().toEpochMilli();
-}
-    `,
-            },
-          },
-        },
+        { 'task.claimAt': { order: 'asc', missing: '_first' } },
+        { 'task.retryAt': { order: 'asc' } },
+        { 'task.runAt': { order: 'asc' } },
       ]);
     });
 

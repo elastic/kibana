@@ -26,7 +26,6 @@ import {
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
   tasksOfType,
   EnabledTask,
@@ -36,7 +35,6 @@ import {
   correctVersionConflictsForContinuation,
   TaskStore,
   UpdateByQueryResult,
-  SearchOpts,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -293,12 +291,12 @@ export class TaskClaiming {
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
 
-    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
     const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
     const script = updateFieldsAndMarkAsFailed({
       fieldUpdates: {
         ownerId: this.taskStore.taskManagerId,
         retryAt: claimOwnershipUntil,
+        claimAt: claimOwnershipUntil,
       },
       claimableTaskTypes: taskTypesToClaim,
       skippedTaskTypes: taskTypesToSkip,
@@ -316,7 +314,13 @@ export class TaskClaiming {
         {
           query,
           script,
-          sort,
+          sort: [
+            // For documents that don't have this field yet, let's put them
+            // at the top of the result so they can get the field added.
+            { 'task.claimAt': { order: 'asc', missing: '_first' } },
+            { 'task.retryAt': { order: 'asc' } },
+            { 'task.runAt': { order: 'asc' } },
+          ],
         },
         {
           max_docs: size,
@@ -344,7 +348,13 @@ export class TaskClaiming {
     const { docs } = await this.taskStore.fetch({
       query: claimedTasksQuery,
       size,
-      sort: SortByRunAtAndRetryAt,
+      sort: [
+        // For documents that don't have this field yet, let's put them
+        // at the top of the result so they can get the field added.
+        { 'task.claimAt': { order: 'asc', missing: '_first' } },
+        { 'task.retryAt': { order: 'asc' } },
+        { 'task.runAt': { order: 'asc' } },
+      ],
       seq_no_primary_term: true,
     });
 

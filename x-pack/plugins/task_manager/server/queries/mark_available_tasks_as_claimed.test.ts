@@ -12,7 +12,6 @@ import {
   updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  SortByRunAtAndRetryAt,
   EnabledTask,
 } from './mark_available_tasks_as_claimed';
 
@@ -68,7 +67,11 @@ describe('mark_available_tasks_as_claimed', () => {
           return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
         }, {}),
       }),
-      sort: SortByRunAtAndRetryAt,
+      sort: [
+        { 'task.claimAt': { order: 'asc', missing: '_first' } },
+        { 'task.retryAt': { order: 'asc' } },
+        { 'task.runAt': { order: 'asc' } },
+      ],
     }).toEqual({
       query: {
         bool: {
@@ -118,23 +121,11 @@ describe('mark_available_tasks_as_claimed', () => {
           ],
         },
       },
-      sort: {
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'painless',
-            source: `
-if (doc['task.retryAt'].size()!=0) {
-  return doc['task.retryAt'].value.toInstant().toEpochMilli();
-}
-if (doc['task.runAt'].size()!=0) {
-  return doc['task.runAt'].value.toInstant().toEpochMilli();
-}
-    `,
-          },
-        },
-      },
+      sort: [
+        { 'task.claimAt': { order: 'asc', missing: '_first' } },
+        { 'task.retryAt': { order: 'asc' } },
+        { 'task.runAt': { order: 'asc' } },
+      ],
       script: {
         source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {

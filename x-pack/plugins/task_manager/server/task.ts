@@ -438,4 +438,5 @@ export type SerializedConcreteTaskInstance = Omit<
   startedAt: string | null;
   retryAt: string | null;
   runAt: string;
+  claimAt: string;
 };
