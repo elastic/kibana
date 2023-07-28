@@ -88,7 +88,7 @@ export const BrowserStepsList = ({
   testNowMode = false,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const stepEnds: JourneyStep[] = steps?.filter(isStepEnd);
+  const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
   const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>({});
   const [stepIds, setStepIds] = useState<string>(mapStepIds(stepEnds));
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
@@ -101,7 +101,7 @@ export const BrowserStepsList = ({
     const latestIds = mapStepIds(stepEnds);
     if (latestIds !== stepIds) {
       setStepIds(latestIds);
-      const failedStep = stepEnds?.find((step) => step.synthetics.step?.status === 'failed');
+      const failedStep = stepEnds.find((step) => step.synthetics.step?.status === 'failed');
       if (failedStep && showExpand && !expandedMap[failedStep._id]) {
         setExpandedMap(
           Object.assign(expandedMap, {
