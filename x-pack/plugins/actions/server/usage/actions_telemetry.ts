@@ -15,6 +15,11 @@ import {
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, InMemoryConnector } from '../types';
 
+interface InMemoryAggRes {
+  total: number;
+  actionRefs: Record<string, { actionRef: string; actionTypeId: string }>;
+}
+
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
@@ -54,7 +59,10 @@ export async function getTotalCount(
     },
   };
   try {
-    const searchResult = await esClient.search({
+    const searchResult = await esClient.search<
+      unknown,
+      { byActionTypeId: { value: { types: Record<string, number> } } }
+    >({
       index: kibanaIndex,
       size: 0,
       runtime_mappings: {
@@ -82,17 +90,13 @@ export async function getTotalCount(
       },
     });
 
-    // @ts-expect-error aggegation type is not specified
-    const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
-    const countByType = Object.keys(aggs).reduce(
-      // ES DSL aggregations are returned as `any` by esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => {
-        obj[replaceFirstAndLastDotSymbols(key)] = aggs[key];
-        return obj;
-      },
-      {}
-    );
+    const aggs = searchResult.aggregations?.byActionTypeId.value?.types ?? {};
+
+    const countByType = Object.keys(aggs).reduce<Record<string, number>>((obj, key) => {
+      obj[replaceFirstAndLastDotSymbols(key)] = aggs[key];
+      return obj;
+    }, {});
+
     if (inMemoryConnectors && inMemoryConnectors.length) {
       for (const inMemoryConnector of inMemoryConnectors) {
         const actionTypeId = replaceFirstAndLastDotSymbols(inMemoryConnector.actionTypeId);
@@ -100,13 +104,14 @@ export async function getTotalCount(
         countByType[actionTypeId]++;
       }
     }
+
+    const totals =
+      Object.keys(aggs).reduce((total, key) => parseInt(aggs[key].toString(), 10) + total, 0) +
+      (inMemoryConnectors?.length ?? 0);
+
     return {
       hasErrors: false,
-      countTotal:
-        Object.keys(aggs).reduce(
-          (total: number, key: string) => parseInt(aggs[key], 10) + total,
-          0
-        ) + (inMemoryConnectors?.length ?? 0),
+      countTotal: totals,
       countByType,
     };
   } catch (err) {
@@ -138,6 +143,44 @@ export async function getInUseTotalCount(
   countEmailByService: Record<string, number>;
   countNamespaces: number;
 }> {
+  const getInMemoryActionScriptedMetric = (actionRefPrefix: string) => ({
+    scripted_metric: {
+      init_script: 'state.actionRefs = new HashMap(); state.total = 0;',
+      map_script: `
+        String actionRef = doc['alert.actions.actionRef'].value;
+        String actionTypeId = doc['alert.actions.actionTypeId'].value;
+        if (actionRef.startsWith('${actionRefPrefix}') && state.actionRefs[actionRef] === null) {
+          HashMap map = new HashMap();
+          map.actionRef = actionRef;
+          map.actionTypeId = actionTypeId;
+          state.actionRefs[actionRef] = map;
+          state.total++;
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+          Map actionRefs = [:];
+          long total = 0;
+          for (state in states) {
+            if (state !== null) {
+              total += state.total;
+              for (String k : state.actionRefs.keySet()) {
+                actionRefs.put(k, state.actionRefs.get(k));
+              }
+            }
+          }
+          Map result = new HashMap();
+          result.total = total;
+          result.actionRefs = actionRefs;
+          return result;
+      `,
+    },
+  });
+
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -173,43 +216,8 @@ export async function getInUseTotalCount(
     },
   };
 
-  const preconfiguredActionsScriptedMetric = {
-    scripted_metric: {
-      init_script: 'state.actionRefs = new HashMap(); state.total = 0;',
-      map_script: `
-        String actionRef = doc['alert.actions.actionRef'].value;
-        String actionTypeId = doc['alert.actions.actionTypeId'].value;
-        if (actionRef.startsWith('preconfigured:') && state.actionRefs[actionRef] === null) {
-          HashMap map = new HashMap();
-          map.actionRef = actionRef;
-          map.actionTypeId = actionTypeId;
-          state.actionRefs[actionRef] = map;
-          state.total++;
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-          Map actionRefs = [:];
-          long total = 0;
-          for (state in states) {
-            if (state !== null) {
-              total += state.total;
-              for (String k : state.actionRefs.keySet()) {
-                actionRefs.put(k, state.actionRefs.get(k));
-              }
-            }
-          }
-          Map result = new HashMap();
-          result.total = total;
-          result.actionRefs = actionRefs;
-          return result;
-      `,
-    },
-  };
+  const preconfiguredActionsScriptedMetric = getInMemoryActionScriptedMetric('preconfigured:');
+  const systemActionsScriptedMetric = getInMemoryActionScriptedMetric('system_action:');
 
   const mustQuery = [
     {
@@ -257,6 +265,28 @@ export async function getInUseTotalCount(
               },
             },
           },
+          {
+            nested: {
+              path: 'alert.actions',
+              query: {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          prefix: {
+                            'alert.actions.actionRef': {
+                              value: 'system_action:',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
         ],
       },
     },
@@ -269,7 +299,14 @@ export async function getInUseTotalCount(
   }
 
   try {
-    const actionResults = await esClient.search({
+    const actionResults = await esClient.search<
+      unknown,
+      {
+        refs: { actionRefIds: { value: { total: number; connectorIds: Record<string, string> } } };
+        preconfigured_actions: { preconfiguredActionRefIds: { value: InMemoryAggRes } };
+        system_actions: { systemActionRefIds: { value: InMemoryAggRes } };
+      }
+    >({
       index: kibanaIndex,
       size: 0,
       body: {
@@ -304,15 +341,27 @@ export async function getInUseTotalCount(
               preconfiguredActionRefIds: preconfiguredActionsScriptedMetric,
             },
           },
+          system_actions: {
+            nested: {
+              path: 'alert.actions',
+            },
+            aggs: {
+              systemActionRefIds: systemActionsScriptedMetric,
+            },
+          },
         },
       },
     });
 
-    // @ts-expect-error aggegation type is not specified
-    const aggs = actionResults.aggregations.refs.actionRefIds.value;
+    const aggs = actionResults.aggregations?.refs.actionRefIds.value;
+
     const preconfiguredActionsAggs =
-      // @ts-expect-error aggegation type is not specified
-      actionResults.aggregations.preconfigured_actions?.preconfiguredActionRefIds.value;
+      actionResults.aggregations?.preconfigured_actions?.preconfiguredActionRefIds.value;
+
+    const systemActionsAggs = actionResults.aggregations?.system_actions?.systemActionRefIds.value;
+
+    const totalInMemoryActions =
+      (preconfiguredActionsAggs?.total ?? 0) + (systemActionsAggs?.total ?? 0);
 
     const { hits: actions } = await esClient.search<{
       action: ActionResult;
@@ -329,7 +378,7 @@ export async function getInUseTotalCount(
               },
               {
                 terms: {
-                  _id: Object.entries(aggs.connectorIds).map(([key]) => `action:${key}`),
+                  _id: Object.entries(aggs?.connectorIds ?? {}).map(([key]) => `action:${key}`),
                 },
               },
             ],
@@ -371,31 +420,37 @@ export async function getInUseTotalCount(
       }, {});
 
     let preconfiguredAlertHistoryConnectors = 0;
-    const preconfiguredActionsRefs: Array<{
-      actionTypeId: string;
-      actionRef: string;
-    }> = preconfiguredActionsAggs ? Object.values(preconfiguredActionsAggs?.actionRefs) : [];
-    for (const { actionRef, actionTypeId: rawActionTypeId } of preconfiguredActionsRefs) {
+
+    const inMemoryActionsRefs = [
+      ...Object.values(preconfiguredActionsAggs?.actionRefs ?? {}),
+      ...Object.values(systemActionsAggs?.actionRefs ?? {}),
+    ];
+
+    for (const { actionRef, actionTypeId: rawActionTypeId } of inMemoryActionsRefs) {
       const actionTypeId = replaceFirstAndLastDotSymbols(rawActionTypeId);
       countByActionTypeId[actionTypeId] = countByActionTypeId[actionTypeId] || 0;
       countByActionTypeId[actionTypeId]++;
+
       if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {
         preconfiguredAlertHistoryConnectors++;
       }
+
       if (inMemoryConnectors && actionTypeId === '__email') {
-        const preconfiguredConnectorId = actionRef.split(':')[1];
+        const inMemoryConnectorId = actionRef.split(':')[1];
         const service = (inMemoryConnectors.find(
-          (preconfConnector) => preconfConnector.id === preconfiguredConnectorId
+          (connector) => connector.id === inMemoryConnectorId
         )?.config?.service ?? 'other') as string;
+
         const currentCount =
           countEmailByService[service] !== undefined ? countEmailByService[service] : 0;
+
         countEmailByService[service] = currentCount + 1;
       }
     }
 
     return {
       hasErrors: false,
-      countTotal: aggs.total + (preconfiguredActionsAggs?.total ?? 0),
+      countTotal: (aggs?.total ?? 0) + totalInMemoryActions,
       countByType: countByActionTypeId,
       countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
       countEmailByService,
