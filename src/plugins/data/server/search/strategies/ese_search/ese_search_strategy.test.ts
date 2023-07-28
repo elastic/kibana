@@ -234,6 +234,30 @@ describe('ES search strategy', () => {
         expect(method).toBe('POST');
         expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
       });
+
+      it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {
+        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+
+        const params = { index: 'foo-程', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch
+          .search(
+            {
+              indexType: 'rollup',
+              params,
+            },
+            {},
+            { ...mockDeps, rollupsEnabled: false }
+          )
+          .toPromise();
+
+        expect(mockApiCaller).toBeCalledTimes(0);
+      });
     });
 
     describe('with sessionId', () => {
