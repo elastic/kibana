@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import { runtimeMappingsSchema } from './schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 import { analysisConfigSchema, anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
 

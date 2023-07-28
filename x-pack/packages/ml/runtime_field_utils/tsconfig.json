@@ -19,7 +19,5 @@
     "@kbn/data-views-plugin",
     "@kbn/data-plugin",
     "@kbn/ml-is-populated-object",
-    "@kbn/config-schema",
-    "@kbn/i18n",
   ]
 }

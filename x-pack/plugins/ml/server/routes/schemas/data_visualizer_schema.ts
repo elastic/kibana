@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { runtimeMappingsSchema } from './schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const indexPatternSchema = schema.object({
   /** Pattern of index or indices for which to return stats. */

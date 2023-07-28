@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { runtimeMappingsSchema } from './schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const dataAnalyticsJobConfigSchema = schema.object({
   description: schema.maybe(schema.string()),
