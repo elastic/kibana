@@ -87,7 +87,6 @@ export const loadSavedSearch = async (
       nextState: appState,
     });
   }
-  console.log({ appState, nextSavedSearch });
 
   // Update app state container with the next state derived from the next saved search
   const nextAppState = getInitialState(undefined, nextSavedSearch, services);

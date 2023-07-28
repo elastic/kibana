@@ -59,8 +59,6 @@ export const initializeFromUrl =
   async (context) => {
     const { index } = stateContainer.appState.getState();
 
-    stateContainer.appState.update({ columns: [MESSAGE_FIELD] });
-
     return extractDatasetSelectionFromIndex({ index, context });
   };
 
