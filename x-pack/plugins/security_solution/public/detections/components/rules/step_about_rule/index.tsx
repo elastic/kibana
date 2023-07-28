@@ -57,6 +57,7 @@ interface StepAboutRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: AboutStepRule;
+  isInPanelView?: boolean;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -367,10 +368,16 @@ const StepAboutRuleReadOnlyComponent: FC<StepAboutRuleReadOnlyProps> = ({
   addPadding,
   defaultValues: data,
   descriptionColumns,
+  isInPanelView = false,
 }) => {
   return (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={defaultSchema} data={data} />
+      <StepRuleDescription
+        columns={descriptionColumns}
+        schema={defaultSchema}
+        data={data}
+        isInPanelView={isInPanelView}
+      />
     </StepContentWrapper>
   );
 };

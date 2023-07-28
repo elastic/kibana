@@ -68,11 +68,21 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
 `;
 
+export const DescriptionListPanelContainer = styled(EuiDescriptionList)`
+  ${({ theme }) => `
+    dt {
+      font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+    text-overflow: ellipsis;
+  `}
+`;
+
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
+  isInPanelView?: boolean;
 }
 
 export const StepRuleDescriptionComponent = <T,>({
@@ -80,6 +90,7 @@ export const StepRuleDescriptionComponent = <T,>({
   columns = 'multi',
   indexPatterns,
   schema,
+  isInPanelView,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const license = useLicense();
@@ -122,6 +133,16 @@ export const StepRuleDescriptionComponent = <T,>({
             <EuiDescriptionList listItems={chunkListItems} />
           </EuiFlexItem>
         ))}
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isInPanelView) {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="listItemColumnStepRuleDescriptionPanel">
+          <DescriptionListPanelContainer listItems={listItems} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

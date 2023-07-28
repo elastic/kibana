@@ -21,7 +21,6 @@ export interface PreviewPanelProps extends FlyoutPanelProps {
     id: string;
     indexName: string;
     scopeId: string;
-    banner?: string;
     ruleId?: string;
   };
 }
@@ -38,7 +37,12 @@ export const PreviewPanel: React.FC<Partial<PreviewPanelProps>> = memo(({ path }
     return null;
   }
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" direction="column" className="eui-fullHeight">
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      direction="column"
+      gutterSize="none"
+      // className="eui-fullHeight"
+    >
       <EuiFlexItem
         css={css`
           margin-top: -15px;

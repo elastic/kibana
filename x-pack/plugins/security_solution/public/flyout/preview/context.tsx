@@ -6,7 +6,12 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import type { DataViewBase } from '@kbn/es-query';
 import type { PreviewPanelProps } from '.';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { SecurityPageName } from '../../../common/constants';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 export interface PreviewPanelContext {
   /**
@@ -25,6 +30,10 @@ export interface PreviewPanelContext {
    * Rule id if preview is rule details
    */
   ruleId: string;
+  /**
+   * Index pattern for rule details
+   */
+  indexPattern: DataViewBase;
 }
 
 export const PreviewPanelContext = createContext<PreviewPanelContext | undefined>(undefined);
@@ -43,6 +52,12 @@ export const PreviewPanelProvider = ({
   ruleId,
   children,
 }: PreviewPanelProviderProps) => {
+  const [{ pageName }] = useRouteSpy();
+  const sourcererScope =
+    pageName === SecurityPageName.detections
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default;
+  const sourcererDataView = useSourcererDataView(sourcererScope);
   const contextValue = useMemo(
     () =>
       id && indexName && scopeId
@@ -51,9 +66,10 @@ export const PreviewPanelProvider = ({
             indexName,
             scopeId,
             ruleId: ruleId ?? '',
+            indexPattern: sourcererDataView.indexPattern,
           }
         : undefined,
-    [id, indexName, scopeId, ruleId]
+    [id, indexName, scopeId, ruleId, sourcererDataView.indexPattern]
   );
 
   return (

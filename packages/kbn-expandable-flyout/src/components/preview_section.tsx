@@ -17,10 +17,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-
 import { has } from 'lodash';
 import {
-  PREVIEW_SECTION,
   PREVIEW_SECTION_BACK_BUTTON,
   PREVIEW_SECTION_CLOSE_BUTTON,
   PREVIEW_SECTION_HEADER,
@@ -124,18 +122,16 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   );
 
   return (
-    <>
-      <div
-        css={css`
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: ${left};
-          background-color: ${euiTheme.colors.shadow};
-          opacity: 0.5;
-        `}
-      />
+    <div
+      className="eui-yScroll"
+      css={css`
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: ${left};
+      `}
+    >
       <EuiSplitPanel.Outer
         css={css`
           margin: ${euiTheme.size.xs};
@@ -146,9 +142,9 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           right: 0;
           left: ${left};
           z-index: 1000;
+          box-shadow: 5px 5px 10px 10px #888888;
         `}
         className="eui-yScroll"
-        data-test-subj={PREVIEW_SECTION}
       >
         {isPreviewBanner(banner) && (
           <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
@@ -162,7 +158,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
-    </>
+    </div>
   );
 };
 
