@@ -31,16 +31,6 @@ describe('useColumn', () => {
   const featureIds: AlertConsumers[] = [AlertConsumers.LOGS, AlertConsumers.APM];
   let storage = { current: new Storage(mockStorage) };
 
-  const resetAlertsTableStorage = () => {
-    return {
-      current: {
-        columns: [],
-        visibleColumns: [],
-        sort: [],
-      } as AlertsTableStorage,
-    };
-  };
-
   const getStorageAlertsTableByDefaultColumns = (defaultColumns: EuiDataGridColumn[]) => {
     return {
       current: {
@@ -50,8 +40,6 @@ describe('useColumn', () => {
       } as AlertsTableStorage,
     };
   };
-
-  let storageAlertsTable = resetAlertsTableStorage();
 
   const defaultColumns: EuiDataGridColumn[] = [
     {
@@ -112,7 +100,6 @@ describe('useColumn', () => {
 
     setItemStorageMock.mockClear();
     storage = { current: new Storage(mockStorage) };
-    storageAlertsTable = resetAlertsTableStorage();
   });
 
   test('onColumnResize', async () => {
@@ -226,7 +213,7 @@ describe('useColumn', () => {
       /*
        *
        * TODO : it looks like when defaultColumn is changed, the storageAlertTable
-       * is also changed automatically outside this hook i.e. storageAlertsTable = localSotageColumns ?? defaultColumns
+       * is also changed automatically outside this hook i.e. storageAlertsTable = localStorageColumns ?? defaultColumns
        *
        * ideally everything related to columns should be pulled in this particular hook. So that it is easy
        * to measure the effects based on single set of props. Just by looking at this hook
