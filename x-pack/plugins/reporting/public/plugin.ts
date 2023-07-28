@@ -237,7 +237,7 @@ export class ReportingPublicPlugin
           })
         );
 
-        if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
           share.register(
             reportingScreenshotShareProvider({
               apiClient,
