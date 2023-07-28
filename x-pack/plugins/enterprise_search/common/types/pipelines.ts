@@ -76,7 +76,6 @@ export interface DeleteMlInferencePipelineResponse {
 
 export interface CreateMLInferencePipeline {
   field_mappings: FieldMapping[];
-  inference_config?: InferencePipelineInferenceConfig;
   model_id: string;
   pipeline_definition: MlInferencePipeline;
   pipeline_name: string;

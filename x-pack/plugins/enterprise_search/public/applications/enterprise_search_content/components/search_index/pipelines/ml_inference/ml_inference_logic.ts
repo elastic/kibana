@@ -306,7 +306,6 @@ export const MLInferenceLogic = kea<
 
       actions.makeCreatePipelineRequest({
         indexName,
-        inferenceConfig: configuration.inferenceConfig,
         fieldMappings: configuration.fieldMappings ?? [],
         modelId: configuration.modelID,
         pipelineDefinition: mlInferencePipeline!,
