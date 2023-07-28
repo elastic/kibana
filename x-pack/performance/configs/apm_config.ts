@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+
+// eslint-disable-next-line import/no-default-export
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xpackFunctionalConfig = await readConfigFile(
+    // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+    require.resolve('../../test/functional/config.base.js')
+  );
+
+  return {
+    ...xpackFunctionalConfig.getAll(),
+
+    esTestCluster: {
+      ...xpackFunctionalConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xpackFunctionalConfig.get('esTestCluster.serverArgs'),
+        // define custom es server here
+        // API Keys is enabled at the top level
+        'xpack.security.enabled=true',
+      ],
+    },
+
+    kbnTestServer: {
+      ...xpackFunctionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        '--home.disableWelcomeScreen=true',
+        '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
+        // define custom kibana server args here
+        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        '--http.eluMonitor.enabled=true',
+        '--http.eluMonitor.logging.enabled=true',
+        '--http.eluMonitor.logging.threshold.ela=250',
+        '--http.eluMonitor.logging.threshold.elu=0.15',
+      ],
+    },
+  };
+}
