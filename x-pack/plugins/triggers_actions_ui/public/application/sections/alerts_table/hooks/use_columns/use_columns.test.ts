@@ -41,6 +41,16 @@ describe('useColumn', () => {
     };
   };
 
+  const getStorageAlertsTableByDefaultColumns = (defaultColumns: EuiDataGridColumn[]) => {
+    return {
+      current: {
+        columns: defaultColumns,
+        visibleColumns: defaultColumns.map((col) => col.id),
+        sort: [],
+      } as AlertsTableStorage,
+    };
+  };
+
   let storageAlertsTable = resetAlertsTableStorage();
 
   const defaultColumns: EuiDataGridColumn[] = [
@@ -106,8 +116,17 @@ describe('useColumn', () => {
   });
 
   test('onColumnResize', async () => {
+    // storageTable will always be in sync with defualtColumns.
+    // it is an invariant. If that is the case, that can be considered an issue
+    const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
     const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-      useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+      useColumns({
+        defaultColumns,
+        featureIds,
+        id,
+        storageAlertsTable: localStorageAlertsTable,
+        storage,
+      })
     );
 
     act(() => {
@@ -128,8 +147,15 @@ describe('useColumn', () => {
 
   describe('visibleColumns', () => {
     test('hide all columns with onChangeVisibleColumns', async () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
 
       act(() => {
@@ -141,9 +167,17 @@ describe('useColumn', () => {
     });
 
     test('show all columns with onChangeVisibleColumns', async () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
+
       act(() => {
         result.current.onChangeVisibleColumns([]);
       });
@@ -160,8 +194,15 @@ describe('useColumn', () => {
     });
 
     test('should populate visiblecolumns correctly', async () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
 
       expect(result.current.visibleColumns).toMatchObject(defaultColumns.map((col) => col.id));
@@ -169,12 +210,13 @@ describe('useColumn', () => {
 
     test('should change visiblecolumns if provided defaultColumns change', async () => {
       let localDefaultColumns = [...defaultColumns];
+      let localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
       const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns: localDefaultColumns,
           featureIds,
           id,
-          storageAlertsTable,
+          storageAlertsTable: localStorageAlertsTable,
           storage,
         })
       );
@@ -187,13 +229,13 @@ describe('useColumn', () => {
        * is also changed automatically outside this hook i.e. storageAlertsTable = localSotageColumns ?? defaultColumns
        *
        * ideally everything related to columns should be pulled in this particular hook. So that it is easy
-       * to measure the effects based on one props. Just by looking at this hook
+       * to measure the effects based on single set of props. Just by looking at this hook
        * it is impossible to know that defaultColumn and storageAlertsTable both are always in sync and should
        * be kept in sync manually when running tests.
        *
        * */
       localDefaultColumns = localDefaultColumns.slice(0, 3);
-      storageAlertsTable.current.columns = localDefaultColumns;
+      localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
 
       rerender();
 
@@ -203,8 +245,15 @@ describe('useColumn', () => {
 
   describe('columns', () => {
     test('should changes the column list when defaultColumns has been updated', async () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
 
       await waitFor(() => expect(result.current.columns).toMatchObject(defaultColumns));
@@ -213,8 +262,15 @@ describe('useColumn', () => {
 
   describe('onToggleColumns', () => {
     test('should update the list of columns when on Toggle Columns is called', () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
 
       act(() => {
@@ -225,8 +281,15 @@ describe('useColumn', () => {
     });
 
     test('should update the list of visible columns when onToggleColumn is called', async () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
 
       // remove particular column
@@ -245,8 +308,15 @@ describe('useColumn', () => {
     });
 
     test('should update the column details in the storage when onToggleColumn is called', () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
       );
 
       // remove particular column
