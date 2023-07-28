@@ -196,6 +196,9 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           value: 'agent.type',
         },
         {
+          type: 'wait',
+        },
+        {
           type: 'click',
           customSelector: 'button[title="agent.type"]',
         },
