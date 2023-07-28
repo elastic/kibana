@@ -27,7 +27,7 @@ export type PreviewPanelType = Array<{
   /**
    * Footer section in the panel
    */
-  footer: React.ReactElement;
+  footer?: React.ReactElement;
 }>;
 
 /**

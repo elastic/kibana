@@ -9,6 +9,10 @@ import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_f
 import {
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_CREATED_BY,
+  DOCUMENT_DETAILS_FLYOUT_UPDATED_BY,
+  DOCUMENT_DETAILS_FLYOUT_RULE_SWITCH,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT,
@@ -52,10 +56,16 @@ describe(
         cy.log('rule preview panel');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).should('be.visible');
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER).should('be.visible');
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
+
+        cy.log('title');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_CREATED_BY).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_UPDATED_BY).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_SWITCH).should('not.be.disabled');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_SWITCH).should('be.enabled');
 
         cy.log('about');
 
@@ -84,6 +94,10 @@ describe(
           .and('contain.text', 'Schedule');
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT).should('be.visible');
         toggleRulePreviewScheduleSection();
+
+        cy.log('footer');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
       });
     });
   }

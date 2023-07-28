@@ -121,6 +121,7 @@ export const clickInvestigationGuideButton = () => {
  * Click `Rule summary` button to open rule preview panel
  */
 export const clickRuleSummaryButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
     .should('be.visible')
     .within(() => {

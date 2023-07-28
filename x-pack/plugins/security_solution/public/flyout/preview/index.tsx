@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { panels } from './panels';
@@ -21,7 +20,6 @@ export interface PreviewPanelProps extends FlyoutPanelProps {
     id: string;
     indexName: string;
     scopeId: string;
-    banner?: string;
     ruleId?: string;
   };
 }
@@ -38,14 +36,13 @@ export const PreviewPanel: React.FC<Partial<PreviewPanelProps>> = memo(({ path }
     return null;
   }
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" direction="column" className="eui-fullHeight">
-      <EuiFlexItem
-        css={css`
-          margin-top: -15px;
-        `}
-      >
-        {previewPanel.content}
-      </EuiFlexItem>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      direction="column"
+      gutterSize="none"
+      style={{ height: '100%' }}
+    >
+      <EuiFlexItem style={{ marginTop: '-15px' }}>{previewPanel.content}</EuiFlexItem>
       <EuiFlexItem grow={false}>{previewPanel.footer}</EuiFlexItem>
     </EuiFlexGroup>
   );
