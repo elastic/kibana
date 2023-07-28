@@ -143,6 +143,10 @@ export interface CreateTestEsClusterOptions {
    * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
    */
   onEarlyExit?: (msg: string) => void;
+  /**
+   * Is this a serverless project
+   */
+  serverless?: boolean;
 }
 
 export function createTestEsCluster<
@@ -164,6 +168,7 @@ export function createTestEsCluster<
     ssl,
     transportPort,
     onEarlyExit,
+    serverless,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -214,12 +219,12 @@ export function createTestEsCluster<
       // We only install once using the first node. If the cluster has
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
-      if (esFrom === 'source') {
+      if (serverless || esFrom === 'serverless') {
+        return await firstNode.runServerless({ basePath, port });
+      } else if (esFrom === 'source') {
         installPath = (await firstNode.installSource(config)).installPath;
       } else if (esFrom === 'snapshot') {
         installPath = (await firstNode.installSnapshot(config)).installPath;
-      } else if (esFrom === 'serverless') {
-        return await firstNode.runServerless({ basePath, port });
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
       } else {

@@ -46,6 +46,7 @@ function getEsConfig({
     : config.get('servers.elasticsearch.password');
 
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
+  const serverless: boolean = config.get('serverless');
 
   return {
     ssl,
@@ -58,6 +59,7 @@ function getEsConfig({
     password,
     dataArchive,
     ccsConfig,
+    serverless,
   };
 }
 
@@ -140,6 +142,7 @@ async function startEsNode({
     ],
     transportPort: config.transportPort,
     onEarlyExit,
+    serverless: config.serverless,
   });
 
   await cluster.start();
