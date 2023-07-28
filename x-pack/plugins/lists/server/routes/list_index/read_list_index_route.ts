@@ -9,12 +9,10 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { readListIndexResponse } from '../../common/api';
-
-import { buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import { readListIndexResponse } from '../../../common/api';
+import { buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const readListIndexRoute = (router: ListsPluginRouter): void => {
   router.get(

@@ -9,13 +9,11 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import { ListClient } from '../services/lists/list_client';
-import type { ListsPluginRouter } from '../types';
-import { deleteListIndexResponse } from '../../common/api';
-
-import { buildSiemResponse, removeLegacyTemplatesIfExist } from './utils';
-
-import { getListClient } from '.';
+import { ListClient } from '../../services/lists/list_client';
+import type { ListsPluginRouter } from '../../types';
+import { deleteListIndexResponse } from '../../../common/api';
+import { buildSiemResponse, removeLegacyTemplatesIfExist } from '../utils';
+import { getListClient } from '..';
 
 /**
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check
