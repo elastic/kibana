@@ -37,10 +37,10 @@ export const createListRoute = (router: ListsPluginRouter): void => {
         const { name, description, deserializer, id, serializer, type, meta, version } =
           request.body;
         const lists = await getListClient(context);
-        const listExists = await lists.getListIndexExists();
-        if (!listExists) {
+        const dataStreamExists = await lists.getListDataStreamExists();
+        if (!dataStreamExists) {
           return siemResponse.error({
-            body: `To create a list, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
+            body: `To create a list, the data stream must exist first. Data stream "${lists.getListIndex()}" does not exist`,
             statusCode: 400,
           });
         } else {
