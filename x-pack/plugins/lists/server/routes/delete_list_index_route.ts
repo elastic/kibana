@@ -7,11 +7,11 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import { ListClient } from '../services/lists/list_client';
 import type { ListsPluginRouter } from '../types';
+import { deleteListIndexResponse } from '../../common/api';
 
 import { buildSiemResponse, removeLegacyTemplatesIfExist } from './utils';
 
@@ -44,7 +44,6 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
-      console.log('DELETE ME');
       try {
         const lists = await getListClient(context);
         const listIndexExists = await lists.getListIndexExists();
@@ -68,7 +67,7 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
         await deleteIndexTemplates(lists);
         await removeLegacyTemplatesIfExist(lists);
 
-        const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+        const [validated, errors] = validate({ acknowledged: true }, deleteListIndexResponse);
         if (errors != null) {
           return siemResponse.error({ body: errors, statusCode: 500 });
         } else {

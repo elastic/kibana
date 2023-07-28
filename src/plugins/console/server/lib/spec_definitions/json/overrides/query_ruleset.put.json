@@ -1,0 +1,22 @@
+{
+  "query_ruleset.put": {
+    "data_autocomplete_rules": {
+      "rules": [{
+        "rule_id": "",
+        "type": "",
+        "criteria": [{
+          "type": "",
+          "metadata": "",
+          "value": ""
+        }],
+        "actions": {
+          "docs":[{
+            "_id": "",
+            "_index": ""
+          }],
+          "ids":[""]
+        }
+      }]
+    }
+  }
+}

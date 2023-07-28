@@ -12,7 +12,8 @@ import { BETA_LABEL } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
-import { SolutionSideNavItem, LinkCategories, LinkCategoryType } from './types';
+import type { SolutionSideNavItem } from './types';
+import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-navigation';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {

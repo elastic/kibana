@@ -16,5 +16,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/ci-stats-reporter",
     "@kbn/jest-serializers",
+    "@kbn/repo-info",
   ]
 }
