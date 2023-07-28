@@ -74,6 +74,7 @@ describe('search_list_item_by_values', () => {
       {
         items: [
           {
+            '@timestamp': '2020-04-20T15:25:31.830Z',
             _version: undefined,
             created_at: '2020-04-20T15:25:31.830Z',
             created_by: 'some user',

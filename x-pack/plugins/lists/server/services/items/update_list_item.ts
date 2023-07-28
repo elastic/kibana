@@ -70,6 +70,7 @@ export const updateListItem = async ({
         refresh: 'wait_for',
       });
       return {
+        '@timestamp': listItem['@timestamp'],
         _version: encodeHitVersion(response),
         created_at: listItem.created_at,
         created_by: listItem.created_by,

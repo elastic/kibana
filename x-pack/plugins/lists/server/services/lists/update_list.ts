@@ -67,6 +67,7 @@ export const updateList = async ({
       refresh: 'wait_for',
     });
     return {
+      '@timestamp': list['@timestamp'],
       _version: encodeHitVersion(response),
       created_at: list.created_at,
       created_by: list.created_by,

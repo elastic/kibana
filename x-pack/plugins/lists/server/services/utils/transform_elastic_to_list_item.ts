@@ -56,6 +56,7 @@ export const transformElasticHitsToListItem = ({
       throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);
     } else {
       return {
+        '@timestamp': _source?.['@timestamp'],
         _version: encodeHitVersion(hit),
         created_at,
         created_by,
