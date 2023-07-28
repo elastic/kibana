@@ -5,46 +5,39 @@
  * 2.0.
  */
 
-import type { ExceptionListTypeEnum, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { getException, getExceptionList } from '../../../objects/exception';
-import { getNewRule } from '../../../objects/rule';
-
-import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-
-import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  addExceptionFlyoutFromViewerHeader,
-  goToEndpointExceptionsTab,
-  goToExceptionsTab,
-  openEditException,
-  openExceptionFlyoutFromEmptyViewerPrompt,
-} from '../../../tasks/rule_details';
-import {
-  addExceptionComment,
-  addExceptionConditions,
-  addExceptionFlyoutItemName,
-  clickCopyCommentToClipboard,
-  submitEditedExceptionItem,
-  submitNewExceptionItem,
-  clickOnShowComments,
-  selectOs,
-} from '../../../tasks/exceptions';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import {
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-  EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT,
-  LOADING_SPINNER,
-} from '../../../screens/exceptions';
-import {
-  createEndpointExceptionList,
   createExceptionList,
   createExceptionListItem,
-} from '../../../tasks/api_calls/exceptions';
-import { ROLES } from '../../../../common/test';
+} from '../../../../tasks/api_calls/exceptions';
+import { ROLES } from '../../../../../common/test';
+import { getExceptionList, getException } from '../../../../objects/exception';
+import { getNewRule } from '../../../../objects/rule';
+import {
+  LOADING_SPINNER,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT,
+} from '../../../../screens/exceptions';
+import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  addExceptionComment,
+  submitNewExceptionItem,
+  clickOnShowComments,
+  clickCopyCommentToClipboard,
+  submitEditedExceptionItem,
+} from '../../../../tasks/exceptions';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import {
+  goToExceptionsTab,
+  addExceptionFlyoutFromViewerHeader,
+  openEditException,
+} from '../../../../tasks/rule_details';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
-describe('Add, copy comments in different exceptions type and validate sharing them between users', () => {
-  describe('Rule exceptions', () => {
+Cypress._.times(50, () => {
+  describe('Rule exceptions - Add, copy comments in different exceptions type and validate sharing them between users', () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');
       login();
