@@ -36,7 +36,6 @@ import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
-import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();

@@ -33,7 +33,7 @@ export const riskEngineEnableRoute = (
       const user = security?.authc.getCurrentUser(request);
 
       try {
-         await riskEgineClient.enableRiskEngine({
+        await riskEgineClient.enableRiskEngine({
           savedObjectsClient: soClient,
           user,
         });
