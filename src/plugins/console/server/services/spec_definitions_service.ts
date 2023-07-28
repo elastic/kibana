@@ -140,7 +140,7 @@ export class SpecDefinitionsService {
       // endpoints should all have unique names, but in case that happens unintentionally
       // don't silently overwrite the definition but create a new unique endpoint name
       if (jsonDefinitions[endpointName]) {
-        // add time to remove key collision
+        // add time to create a unique key
         jsonDefinitions[`${endpointName}${Date.now()}`] = endpointDescription;
       } else {
         jsonDefinitions[endpointName] = endpointDescription;
