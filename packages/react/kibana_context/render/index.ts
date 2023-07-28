@@ -9,4 +9,4 @@
 export {
   KibanaRenderContextProvider,
   type KibanaRenderContextProviderProps,
-} from './render_context';
+} from './render_provider';

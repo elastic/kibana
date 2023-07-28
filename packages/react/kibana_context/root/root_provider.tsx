@@ -18,9 +18,18 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
 }
 
 /**
- * The `KibanaRootContextProvider` provides the necessary context for Kibana's React components, including
- * the theme and i18n context.  This context should only be used _once_, and at the _very top_ of the
- * application root.
+ * The `KibanaRootContextProvider` provides the necessary context at the root of Kibana, including
+ * initialization and the theme and i18n contexts.  This context should only be used _once_, and
+ * at the _very top_ of the application root, rendered by the `RenderingService`.
+ *
+ * While this context is exposed for edge cases and tooling, (e.g. Storybook, Jest, etc.), it should
+ * _not_ be used in applications.  Instead, applications should choose the context that makes the
+ * most sense for the problem they are trying to solve:
+ *
+ * - Consider `KibanaRenderContextProvider` for rendering components outside the current tree, (e.g.
+ * with `ReactDOM.render`).
+ * - Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.
+ *
  */
 export const KibanaRootContextProvider: FC<KibanaRootContextProviderProps> = ({
   children,

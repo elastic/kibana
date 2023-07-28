@@ -18,7 +18,7 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 
 import type { DecoratorFn } from '@storybook/react';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -38,9 +38,9 @@ export const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   }, [colorMode]);
 
   return (
-    <KibanaRenderContextProvider {...{ theme: { theme$ }, i18n }}>
+    <KibanaRootContextProvider {...{ theme: { theme$ }, i18n }}>
       {storyFn()}
-    </KibanaRenderContextProvider>
+    </KibanaRootContextProvider>
   );
 };
 ```

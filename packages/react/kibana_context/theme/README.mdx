@@ -17,3 +17,50 @@ side effects.  In addition, _nesting_ of `EuiThemeProvider` has led to additiona
 This context allows us to have a single source of truth for the theme in Kibana, and ensures that the theme is applied correctly.  It also abstracts away any updates or changes
 made to the `EuiThemeProvider` in the future.
 
+```ts
+
+// Make a component always display in dark mode.
+import { BehaviorSubject } from 'rxjs';
+import { KibanaThemeContextProvider, type KibanaTheme } from '@kbn/react-kibana-context-theme';
+
+import { MyComponent } from './my_component';
+
+export const AlwaysDarkMode = () => {
+  // We've purposefully excluded `colorMode` from the props of the provider
+  // to enforce the use of the `theme$` observable.  This prevents consumers
+  // from confusing which takes precedence, (or what needs to be set in most
+  // cases).
+  const theme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true }));
+
+  return (
+    <KibanaThemeContextProvider theme={{ theme$ }}>
+      <MyComponent />
+    </KibanaThemeContextProvider>
+  );
+};
+
+
+import { EuiThemeShape, RecursivePartial } from '@elastic/eui';
+
+// Change the EUI theme colors in dark and light mode.
+export const ChangeEuiTheme = ({ theme }: CoreStart) => {
+  const modify: RecursivePartial<EuiThemeShape> = {
+    colors: {
+      DARK: {
+        text: '#abc',
+        accent: '#123',
+      },
+      LIGHT: {
+        text: '#123',
+        accent: '#abc',
+      },
+    },
+  };
+
+  return (
+    <KibanaThemeProvider {...{ theme, modify }}>
+      <MyComponent />
+    </KibanaThemeProvider>
+  );
+};
+```
