@@ -132,6 +132,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="rightCenter"
+      data-test-subj="coverageOverviewPopover"
     >
       <EuiPopoverTitle>
         <EuiFlexGroup gutterSize="xs" alignItems="flexStart" direction="column">
@@ -151,13 +152,18 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           <EuiFlexItem>{CoveredSubtechniquesLabel}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      <div className="eui-yScrollWithShadows" style={{ maxHeight: '700px', padding: '5px 0px' }}>
+      <div className="eui-yScrollWithShadows" css={{ maxHeight: '700px', padding: '5px 0px' }}>
         <EuiAccordion
           id="enabledRulesListAccordion"
           initialIsOpen={technique.enabledRules.length > 0}
           buttonContent={EnabledRulesAccordionButton}
         >
-          <EuiListGroup flush listItems={enabledRuleListItems} size="s" />
+          <EuiListGroup
+            data-test-subj="coverageOverviewEnabledRulesList"
+            flush
+            listItems={enabledRuleListItems}
+            size="s"
+          />
         </EuiAccordion>
         <EuiSpacer size="s" />
         <EuiAccordion
@@ -165,7 +171,12 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           initialIsOpen={technique.disabledRules.length > 0}
           buttonContent={DisabledRulesAccordionButton}
         >
-          <EuiListGroup flush listItems={disabledRuleListItems} size="s" />
+          <EuiListGroup
+            data-test-subj="coverageOverviewDisabledRulesList"
+            flush
+            listItems={disabledRuleListItems}
+            size="s"
+          />
         </EuiAccordion>
         <EuiSpacer size="s" />
         <EuiAccordion
@@ -173,7 +184,12 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           initialIsOpen={technique.availableRules.length > 0}
           buttonContent={AvailableRulesAccordionButton}
         >
-          <EuiListGroup flush listItems={availableRuleListItems} size="s" />
+          <EuiListGroup
+            data-test-subj="coverageOverviewAvailableRulesList"
+            flush
+            listItems={availableRuleListItems}
+            size="s"
+          />
         </EuiAccordion>
       </div>
       <EuiPopoverFooter>

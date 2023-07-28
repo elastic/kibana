@@ -105,3 +105,24 @@ export const ENABLED_RULES_LIST_LABEL = i18n.translate(
     defaultMessage: 'Enabled rules',
   }
 );
+
+export const CoverageOverviewLegendTitle = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.legendTitle',
+  {
+    defaultMessage: 'Legend',
+  }
+);
+
+export const CoverageOverviewLegendSubtitle = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.legendSubtitle',
+  {
+    defaultMessage: '(count will include all rules selected)',
+  }
+);
+
+export const CoverageOverviewLegendRulesLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.legendRulesLabel',
+  {
+    defaultMessage: 'rules',
+  }
+);

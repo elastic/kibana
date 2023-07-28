@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPanel } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
+import { CoverageOverviewLegend } from './shared_components';
 import * as i18n from './translations';
 
 export interface CoverageOverviewFiltersPanelProps {
@@ -29,21 +30,28 @@ const CoverageOverviewFiltersPanelComponent = ({
 
   return (
     <EuiPanel>
-      <EuiFilterGroup>
-        <EuiFilterButton
-          withNext
-          hasActiveFilters={!showExpandedCells}
-          onClick={handleCollapseCellsFilterClick}
-        >
-          {i18n.COLLAPSE_CELLS_FILTER_BUTTON}
-        </EuiFilterButton>
-        <EuiFilterButton
-          hasActiveFilters={showExpandedCells}
-          onClick={handleExpandCellsFilterClick}
-        >
-          {i18n.EXPAND_CELLS_FILTER_BUTTON}
-        </EuiFilterButton>
-      </EuiFilterGroup>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiFilterButton
+              withNext
+              hasActiveFilters={!showExpandedCells}
+              onClick={handleCollapseCellsFilterClick}
+            >
+              {i18n.COLLAPSE_CELLS_FILTER_BUTTON}
+            </EuiFilterButton>
+            <EuiFilterButton
+              hasActiveFilters={showExpandedCells}
+              onClick={handleExpandCellsFilterClick}
+            >
+              {i18n.EXPAND_CELLS_FILTER_BUTTON}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CoverageOverviewLegend />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

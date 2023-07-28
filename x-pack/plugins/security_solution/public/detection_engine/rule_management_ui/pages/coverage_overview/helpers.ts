@@ -9,6 +9,8 @@ import { euiPalettePositive } from '@elastic/eui';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 
+export const coverageOverviewPalatteColors = euiPalettePositive(5);
+
 export const getCoveredTechniques = (tactic: CoverageOverviewMitreTactic) =>
   tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;
 
@@ -16,14 +18,13 @@ export const getCoveredSubtechniques = (technique: CoverageOverviewMitreTechniqu
   technique.subtechniques.filter((subtechnique) => subtechnique.enabledRules.length !== 0).length;
 
 export const getTechniqueBackgroundColor = (technique: CoverageOverviewMitreTechnique) => {
-  const palatteColors = euiPalettePositive(5);
   if (technique.enabledRules.length >= 10) {
-    return palatteColors[3];
+    return coverageOverviewPalatteColors[3];
   } else if (technique.enabledRules.length >= 7) {
-    return palatteColors[2];
+    return coverageOverviewPalatteColors[2];
   } else if (technique.enabledRules.length >= 3) {
-    return palatteColors[1];
+    return coverageOverviewPalatteColors[1];
   } else if (technique.enabledRules.length >= 1) {
-    return palatteColors[0];
+    return coverageOverviewPalatteColors[0];
   }
 };

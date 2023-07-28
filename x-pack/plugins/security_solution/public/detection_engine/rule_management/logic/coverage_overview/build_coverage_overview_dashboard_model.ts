@@ -115,5 +115,10 @@ function addRule(
       id: ruleId,
       name: ruleData.name,
     });
+  } else if (ruleData.activity === CoverageOverviewRuleActivity.Available) {
+    container.availableRules.push({
+      id: ruleId,
+      name: ruleData.name,
+    });
   }
 }

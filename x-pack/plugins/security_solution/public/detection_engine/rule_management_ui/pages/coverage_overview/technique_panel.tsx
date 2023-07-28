@@ -64,9 +64,9 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
       hasBorder={!techniqueBackgroundColor}
       paddingSize="s"
       onClick={handlePanelOnClick}
-      style={{ width: 160 }}
+      css={{ width: 160 }}
     >
-      <EuiFlexGroup style={{ height: '100%' }} direction="column" justifyContent="spaceBetween">
+      <EuiFlexGroup css={{ height: '100%' }} direction="column" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             <h4>{technique.name}</h4>
