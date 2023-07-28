@@ -16,7 +16,6 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { transformsHttpMocks } from '../../../public/management/pages/endpoint_hosts/mocks';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { createDataStream } from './utils/create_datastream';
 

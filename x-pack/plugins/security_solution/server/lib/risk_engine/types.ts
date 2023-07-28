@@ -62,12 +62,6 @@ export interface GetRiskEngineStatusResponse {
   risk_engine_status: RiskEngineStatus;
 }
 
-export interface InitStep {
-  type: string;
-  success: boolean;
-  error?: string;
-}
-
 export interface InitRiskEngineResponse {
   result: InitRiskEngineResult;
 }
