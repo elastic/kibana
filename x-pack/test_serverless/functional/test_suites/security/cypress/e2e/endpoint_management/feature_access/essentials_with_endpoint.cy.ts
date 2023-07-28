@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
 import { login } from '../../../tasks/login';
 import { getAgentListTable, visitFleetAgentList } from '../../../screens';
 import { getEndpointManagementPageMap } from '../../../screens/endpoint_management';
+import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
 describe(
   'App Features for Essentials PLI with Endpoint Essentials',
@@ -22,10 +24,6 @@ describe(
     },
   },
   () => {
-    beforeEach(() => {
-      login();
-    });
-
     const allPages = getEndpointManagementPageMap();
     const allowedPages = [
       allPages.endpointList,
@@ -35,6 +33,15 @@ describe(
       allPages.eventFilters,
     ];
     const deniedPages = [allPages.responseActionLog, allPages.hostIsolationExceptions];
+    let username: string;
+    let password: string;
+
+    beforeEach(() => {
+      login('endpoint_operations_analyst').then((response) => {
+        username = response.username;
+        password = response.password;
+      });
+    });
 
     for (const { url, title, pageTestSubj } of allowedPages) {
       it(`should allow access to ${title}`, () => {
@@ -47,6 +54,12 @@ describe(
       it(`should NOT allow access to ${title}`, () => {
         cy.visit(url);
         cy.getByTestSubj('noPrivilegesPage').should('exist');
+      });
+    }
+
+    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+      it(`should not allow access to Response Action: ${actionName}`, () => {
+        ensureResponseActionAuthzAccess('none', actionName, username, password);
       });
     }
 
