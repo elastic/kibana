@@ -43,6 +43,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   existingPipeline: undefined,
   existingInferencePipelines: [],
   formErrors: {
+    fieldMappings: 'Field is required.',
     modelID: 'Field is required.',
     pipelineName: 'Field is required.',
   },
@@ -336,8 +337,8 @@ describe('MlInferenceLogic', () => {
       it('returns undefined when configuration is invalid', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           modelID: '',
-          pipelineName: 'unit-test',
-          fieldMappings: [],
+          pipelineName: '', // Invalid
+          fieldMappings: [], // Invalid
           targetField: '',
         });
 
@@ -348,7 +349,12 @@ describe('MlInferenceLogic', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           modelID: nerModel.model_id,
           pipelineName: 'unit-test',
-          fieldMappings: [],
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           targetField: '',
         });
 
@@ -377,7 +383,12 @@ describe('MlInferenceLogic', () => {
           existingPipeline: true,
           modelID: '',
           pipelineName: 'unit-test',
-          fieldMappings: [],
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           targetField: '',
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
@@ -485,8 +496,8 @@ describe('MlInferenceLogic', () => {
       it('has errors when configuration is empty', () => {
         expect(MLInferenceLogic.values.formErrors).toEqual({
           modelID: 'Field is required.',
+          fieldMappings: 'Field is required.',
           pipelineName: 'Field is required.',
-          sourceField: 'Field is required.',
         });
       });
       it('has error for invalid pipeline names', () => {
@@ -494,6 +505,12 @@ describe('MlInferenceLogic', () => {
           ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
           modelID: 'unit-test-model',
           existingPipeline: false,
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
           pipelineName: 'Invalid Pipeline Name',
         });
         const expectedErrors = {
@@ -518,6 +535,12 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'unit-test-pipeline',
           modelID: 'unit-test-model',
           existingPipeline: false,
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
         });
         MLInferenceLogic.actions.fetchPipelineSuccess({
           'mock-pipeline': {},
@@ -548,6 +571,7 @@ describe('MlInferenceLogic', () => {
             configuration: {
               ...mockModelConfiguration.configuration,
               modelID: textExpansionModel.model_id,
+              fieldMappings: [],
             },
           },
         });
