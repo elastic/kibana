@@ -153,7 +153,7 @@ const PreviewRenderer = ({
   );
 };
 
-const SuggestionPreview = ({
+export const SuggestionPreview = ({
   preview,
   ExpressionRenderer: ExpressionRendererComponent,
   selected,
@@ -567,7 +567,7 @@ function getPreviewExpression(
   }
 }
 
-function preparePreviewExpression(
+export function preparePreviewExpression(
   visualizableState: VisualizableState,
   visualization: Visualization,
   datasourceMap: DatasourceMap,

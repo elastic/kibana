@@ -9,7 +9,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type { DatasourceMap, VisualizationMap, FramePublicAPI } from '../../../types';
 
 export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
@@ -36,5 +36,5 @@ export interface LayerConfigurationProps {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   datasourceId: 'formBased' | 'textBased';
-  dataTable?: Datatable;
+  framePublicAPI: FramePublicAPI;
 }

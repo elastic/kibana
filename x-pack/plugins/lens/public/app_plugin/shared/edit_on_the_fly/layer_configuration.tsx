@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
-import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import type { LayerConfigurationProps } from './types';
 
 export function LayerConfiguration({
@@ -20,31 +18,9 @@ export function LayerConfiguration({
   visualizationMap,
   datasourceMap,
   datasourceId,
-  dataTable,
+  framePublicAPI,
 }: LayerConfigurationProps) {
-  const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
-  const activeDatasource = datasourceMap[datasourceId];
-
-  const activeData: Record<string, Datatable> = useMemo(() => {
-    return {};
-  }, []);
-  const layers = activeDatasource.getLayers(datasourceState);
-  layers.forEach((layer) => {
-    if (dataTable) {
-      activeData[layer] = dataTable;
-    }
-  });
-  const framePublicAPI = useLensSelector((state) => {
-    const newState = {
-      ...state,
-      lens: {
-        ...state.lens,
-        activeData,
-      },
-    };
-    return selectFramePublicAPI(newState, datasourceMap);
-  });
 
   const layerPanelsProps = {
     framePublicAPI,
