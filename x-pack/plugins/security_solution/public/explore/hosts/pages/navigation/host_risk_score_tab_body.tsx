@@ -22,7 +22,6 @@ import {
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
-import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -35,7 +34,6 @@ export const HostRiskScoreQueryTabBody = ({
   startDate: from,
   type,
 }: HostsComponentsQueryProps) => {
-  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getHostRiskScoreSelector(state, hostsModel.HostsType.page)
@@ -71,6 +69,7 @@ export const HostRiskScoreQueryTabBody = ({
     isModuleEnabled,
     loading,
     refetch,
+    isAuthorized,
     totalCount,
   } = useRiskScore({
     filterQuery,
@@ -92,8 +91,8 @@ export const HostRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (RiskScoreUpsell) {
-    return <RiskScoreUpsell />;
+  if (!isAuthorized) {
+    return <>{'TODO: Add RiskScore Upsell'}</>;
   }
 
   if (status.isDisabled || status.isDeprecated) {

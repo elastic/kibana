@@ -6,7 +6,7 @@
  */
 import { v1 as uuidv1 } from 'uuid';
 
-import type { Case } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
