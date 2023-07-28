@@ -8,8 +8,8 @@
     "devOnly": true
   },
   "scripts": {
-    "build": "../../node_modules/.bin/webpack",
-    "kbn:watch": "../../node_modules/.bin/webpack --watch",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider ../../node_modules/.bin/webpack",
+    "kbn:watch": "NODE_OPTIONS=--openssl-legacy-provider ../../node_modules/.bin/webpack --watch",
     "prettier": "../../node_modules/.bin/prettier --write './src/**/*.ts'"
   }
 }
