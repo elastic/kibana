@@ -52,6 +52,7 @@ describe('Agent policy advanced options content', () => {
     // remove when feature flag is removed
     ExperimentalFeaturesService.init({
       ...allowedExperimentalValues,
+      // @ts-expect-error ts upgrade v4.7.4
       agentTamperProtectionEnabled: true,
     });
 

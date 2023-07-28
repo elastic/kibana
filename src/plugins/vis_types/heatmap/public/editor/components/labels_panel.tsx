@@ -25,6 +25,7 @@ interface LabelsPanelProps {
 }
 
 function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
+  // @ts-expect-error ts upgrade v4.7.4
   const rotateLabels = valueAxis.labels.rotate === VERTICAL_ROTATION;
 
   const setValueAxisLabels = useCallback(
@@ -43,6 +44,7 @@ function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
 
   const setRotateLabels = useCallback(
     (paramName: 'rotate', value: boolean) =>
+      // @ts-expect-error ts upgrade v4.7.4
       setValueAxisLabels(paramName, value ? VERTICAL_ROTATION : 0),
     [setValueAxisLabels]
   );

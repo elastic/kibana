@@ -34,6 +34,7 @@ function LabelOptions({
 }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
+      // @ts-expect-error ts upgrade v4.7.4
       setAxisLabel(paramName, Number(value));
     },
     [setAxisLabel]
@@ -96,6 +97,7 @@ function LabelOptions({
               options={rotateOptions}
               paramName="rotate"
               value={axisLabels.rotate}
+              // @ts-ignore ts upgrade v4.7.4
               setValue={setAxisLabelRotate}
             />
           </EuiToolTip>
