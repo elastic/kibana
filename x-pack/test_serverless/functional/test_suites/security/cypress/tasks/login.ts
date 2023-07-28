@@ -61,15 +61,15 @@ interface CyLoginTask {
  * Login to Kibana using API (not login page). By default, user will be logged in using
  * the username and password defined via `KIBANA_USERNAME` and `KIBANA_PASSWORD` cypress env
  * variables.
- * @param user
+ * @param user Defaults to `soc_manager`
  */
 export const login: CyLoginTask = (
-  user?: ServerlessRoleName
+  user: ServerlessRoleName | 'elastic' = 'soc_manager'
 ): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
 
-  if (user) {
+  if (user && user !== 'elastic') {
     return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
       username = loadedUser.username;
       password = loadedUser.password;
