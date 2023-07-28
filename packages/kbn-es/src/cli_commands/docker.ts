@@ -54,7 +54,6 @@ export const docker: Command = {
       },
 
       string: ['tag', 'image', 'D'],
-      number: ['port'],
 
       default: defaults,
     });

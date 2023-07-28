@@ -51,7 +51,6 @@ export const serverless: Command = {
 
       string: ['tag', 'image'],
       boolean: ['clean'],
-      number: ['port'],
 
       default: defaults,
     });
