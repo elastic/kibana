@@ -55,6 +55,9 @@ export const ruleTypesRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/rule_types`,
       validate: {},
+      options: {
+        access: 'public',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

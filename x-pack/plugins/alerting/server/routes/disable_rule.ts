@@ -25,6 +25,9 @@ export const disableRuleRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        access: 'public',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

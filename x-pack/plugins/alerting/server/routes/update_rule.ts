@@ -128,6 +128,9 @@ export const updateRuleRoute = (
         body: bodySchema,
         params: paramSchema,
       },
+      options: {
+        access: 'public',
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(

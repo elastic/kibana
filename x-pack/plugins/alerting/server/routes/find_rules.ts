@@ -99,6 +99,9 @@ const buildFindRulesRoute = ({
       validate: {
         query: querySchema,
       },
+      options: {
+        access: 'public',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

@@ -53,6 +53,9 @@ export const updateActionRoute = (
         body: bodySchema,
         params: paramSchema,
       },
+      options: {
+        access: 'public',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

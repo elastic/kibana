@@ -41,6 +41,9 @@ export const getAllActionRoute = (
     {
       path: `${BASE_ACTION_API_PATH}/connectors`,
       validate: {},
+      options: {
+        access: 'public',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

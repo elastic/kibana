@@ -41,6 +41,9 @@ export const healthRoute = (
     {
       path: `${BASE_ALERTING_API_PATH}/_health`,
       validate: false,
+      options: {
+        access: 'public',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
