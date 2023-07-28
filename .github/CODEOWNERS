@@ -50,7 +50,7 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
-examples/bfetch_explorer @elastic/appex-sharedux
+examples/bfetch_explorer @elastic/kibana-data-discovery
 src/plugins/bfetch @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
@@ -304,7 +304,7 @@ src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 test/plugin_functional/plugins/data_search @elastic/kibana-app-services
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
-examples/data_view_field_editor_example @elastic/kibana-app-services
+examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
