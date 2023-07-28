@@ -69,7 +69,7 @@ export function InstallElasticAgent() {
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi(
-      'GET /internal/observability_onboarding/logs/setup/install_shipper_setup'
+      'GET /internal/observability_onboarding/logs/setup/environment'
     );
   }, []);
 
@@ -120,7 +120,7 @@ export function InstallElasticAgent() {
     } = getState();
     if (onboardingId) {
       return callApi(
-        'PUT /internal/observability_onboarding/logs/flow/{onboardingId}/save',
+        'PUT /internal/observability_onboarding/flow/{onboardingId}/save',
         {
           params: {
             path: { onboardingId },
@@ -173,7 +173,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/logs/flow/{onboardingId}/progress',
+          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
           { params: { path: { onboardingId } } }
         );
       }

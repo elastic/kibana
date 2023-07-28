@@ -10,63 +10,13 @@ import * as t from 'io-ts';
 import {
   getObservabilityOnboardingState,
   saveObservabilityOnboardingState,
-} from '../../../lib/state';
-import { ObservabilityOnboardingState } from '../../../saved_objects/observability_onboarding_status';
-import { createObservabilityOnboardingServerRoute } from '../../create_observability_onboarding_server_route';
-import { createShipperApiKey } from './api_key/create_shipper_api_key';
+} from '../../lib/state';
+import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
+import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 
-const createFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'POST /internal/observability_onboarding/logs/flow/create',
-  options: { tags: [] },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        name: t.string,
-      }),
-      t.partial({
-        state: t.record(t.string, t.unknown),
-      }),
-    ]),
-  }),
-  async handler(
-    resources
-  ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
-    const {
-      context,
-      params: {
-        body: { name, state },
-      },
-      core,
-      request,
-    } = resources;
-    const coreStart = await core.start();
-    const {
-      elasticsearch: { client },
-    } = await context.core;
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(
-      client.asCurrentUser,
-      name
-    );
-
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-
-    const { id } = await saveObservabilityOnboardingState({
-      savedObjectsClient,
-      observabilityOnboardingState: {
-        type: 'logFiles',
-        state: state as ObservabilityOnboardingState['state'],
-        progress: {},
-      },
-    });
-
-    return { apiKeyEncoded, onboardingId: id };
-  },
-});
-
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint:
-    'PUT /internal/observability_onboarding/logs/flow/{onboardingId}/save',
+  endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}/save',
   options: { tags: [] },
   params: t.type({
     path: t.type({
@@ -101,8 +51,7 @@ const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
 });
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
-  endpoint:
-    'POST /internal/observability_onboarding/logs/flow/{id}/step/{name}',
+  endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
   options: { tags: [] },
   params: t.type({
     path: t.type({
@@ -163,7 +112,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'GET /internal/observability_onboarding/logs/flow/{onboardingId}/progress',
+    'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
   options: { tags: [] },
   params: t.type({
     path: t.type({
@@ -227,8 +176,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
-export const logsFlowRouteRepository = {
-  ...createFlowRoute,
+export const flowRouteRepository = {
   ...updateOnboardingFlowRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,

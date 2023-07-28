@@ -9,11 +9,13 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { elasticAgentRouteRepository } from './elastic_agent/route';
-import { logsOnboardingRoutes } from './logs';
+import { flowRouteRepository } from './flow/route';
+import { logsOnboardingRouteRepository } from './logs/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
-    ...logsOnboardingRoutes,
+    ...flowRouteRepository,
+    ...logsOnboardingRouteRepository,
     ...elasticAgentRouteRepository,
   };
 

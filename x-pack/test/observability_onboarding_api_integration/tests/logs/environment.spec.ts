@@ -15,7 +15,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApiWithPrivileges() {
     return await observabilityOnboardingApiClient.logMonitoringUser({
-      endpoint: 'GET /internal/observability_onboarding/custom_logs/install_shipper_setup',
+      endpoint: 'GET /internal/observability_onboarding/logs/setup/environment',
     });
   }
 

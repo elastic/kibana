@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     user?: ObservabilityOnboardingApiClientKey;
   }) {
     return await observabilityOnboardingApiClient[user]({
-      endpoint: 'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+      endpoint: 'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
       params: {
         path: {
           onboardingId,
@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       const req = await observabilityOnboardingApiClient.logMonitoringUser({
-        endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
+        endpoint: 'POST /internal/observability_onboarding/logs/flow/create',
         params: {
           body: {
             name: 'name',
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           describe('should not skip logs verification', () => {
             before(async () => {
               await observabilityOnboardingApiClient.logMonitoringUser({
-                endpoint: 'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
+                endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
                 params: {
                   path: {
                     id: onboardingId,

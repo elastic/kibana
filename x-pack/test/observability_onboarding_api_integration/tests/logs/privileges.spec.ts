@@ -15,7 +15,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApiAs(user: ObservabilityOnboardingApiClientKey) {
     return await observabilityOnboardingApiClient[user]({
-      endpoint: 'GET /internal/observability_onboarding/custom_logs/privileges',
+      endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
     });
   }
 
