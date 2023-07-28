@@ -89,7 +89,7 @@ async function start({
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
 
-  await service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
   const chromeStart = await service.start(startDeps);
 
   return {
@@ -113,7 +113,7 @@ describe('setup', () => {
   it('calls registerAnalyticsContextProvider with the correct parameters', async () => {
     const service = new ChromeService(defaultStartTestOptions({}));
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
-    await service.setup({ analytics });
+    service.setup({ analytics });
 
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith(
@@ -202,9 +202,15 @@ describe('start', () => {
     });
 
     it('renders the default project side navigation', async () => {
-      const { chrome } = await start();
+      const startDeps = defaultStartDeps([new FakeApp('DefaultNavApp')]);
+      const { navigateToApp } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
 
       chrome.setChromeStyle('project');
+
+      navigateToApp('DefaultNavApp');
+
+      service.stop();
 
       const component = mount(chrome.getHeaderComponent());
 
