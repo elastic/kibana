@@ -168,7 +168,7 @@ export const TestPipeline: React.FC = () => {
                                   `"${fieldMapping.sourceField}": "${sampleFieldValue}"`
                               )
                               .join(', ')
-                          : 'N/A' // TODO: see if we can make fieldMappings required
+                          : `"my_field": "${sampleFieldValue}"`
                       }}}]`
                     ),
                     null,
