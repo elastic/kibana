@@ -216,14 +216,12 @@ export class RiskEngineDataClient {
     const esClient = await this.options.elasticsearchClientPromise;
     const transforms = await this.getLegacyTransforms({ namespace });
 
-    const stopTransformRequests = transforms
-      .filter((t) => t.state !== 'stopped')
-      .map((t) =>
-        esClient.transform.stopTransform({
-          transform_id: t.id,
-          wait_for_completion: true,
-        })
-      );
+    const stopTransformRequests = transforms.map((t) =>
+      esClient.transform.deleteTransform({
+        transform_id: t.id,
+        force: true,
+      })
+    );
 
     await Promise.allSettled(stopTransformRequests);
 
