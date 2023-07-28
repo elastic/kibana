@@ -14,7 +14,6 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { IContainer } from '../lib';
 import { core } from '../kibana_services';
-import { tracksOverlays } from '..';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
   const module = await import('./add_panel_flyout');
