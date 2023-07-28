@@ -7,23 +7,29 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { decodeCursor } from '../services/utils';
-import { findListRequestQuery, findListResponse } from '../../common/api';
+import type { ListsPluginRouter } from '../../types';
+import { decodeCursor } from '../../services/utils';
+import {
+  FindListItemRequestQueryDecoded,
+  findListItemRequestQuery,
+  findListItemResponse,
+} from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
 
-import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
-
-export const findListRoute = (router: ListsPluginRouter): void => {
+export const findListItemRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {
         tags: ['access:lists-read'],
       },
-      path: `${LIST_URL}/_find`,
+      path: `${LIST_ITEM_URL}/_find`,
       validate: {
-        query: buildRouteValidation(findListRequestQuery),
+        query: buildRouteValidation<
+          typeof findListItemRequestQuery,
+          FindListItemRequestQueryDecoded
+        >(findListItemRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -33,6 +39,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
         const {
           cursor,
           filter: filterOrUndefined,
+          list_id: listId,
           page: pageOrUndefined,
           per_page: perPageOrUndefined,
           sort_field: sortField,
@@ -45,22 +52,24 @@ export const findListRoute = (router: ListsPluginRouter): void => {
         const {
           isValid,
           errorMessage,
-          cursor: [currentIndexPosition, searchAfter],
+          cursor: [currentIndexPosition, searchAfter = []],
         } = decodeCursor({
           cursor,
           page,
           perPage,
           sortField,
         });
+
         if (!isValid) {
           return siemResponse.error({
             body: errorMessage,
             statusCode: 400,
           });
         } else {
-          const exceptionList = await lists.findList({
+          const exceptionList = await lists.findListItem({
             currentIndexPosition,
             filter,
+            listId,
             page,
             perPage,
             runtimeMappings: undefined,
@@ -68,11 +77,18 @@ export const findListRoute = (router: ListsPluginRouter): void => {
             sortField,
             sortOrder,
           });
-          const [validated, errors] = validate(exceptionList, findListResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          if (exceptionList == null) {
+            return siemResponse.error({
+              body: `list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
           } else {
-            return response.ok({ body: validated ?? {} });
+            const [validated, errors] = validate(exceptionList, findListItemResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         }
       } catch (err) {
