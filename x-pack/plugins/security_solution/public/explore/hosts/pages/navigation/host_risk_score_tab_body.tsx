@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { EnableRiskScore } from '../../../components/risk_score/enable_risk_score';
 import type { HostsComponentsQueryProps } from './types';
@@ -22,6 +23,8 @@ import {
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -45,6 +48,8 @@ export const HostRiskScoreQueryTabBody = ({
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
     getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
   );
+
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
 
   const pagination = useMemo(
     () => ({
@@ -95,14 +100,20 @@ export const HostRiskScoreQueryTabBody = ({
     return <>{'TODO: Add RiskScore Upsell'}</>;
   }
 
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return <RiskScoreUpdatePanel />;
+  }
+
   if (status.isDisabled || status.isDeprecated) {
     return (
-      <EnableRiskScore
-        {...status}
-        entityType={RiskScoreEntity.host}
-        refetch={refetch}
-        timerange={timerange}
-      />
+      <EuiPanel hasBorder>
+        <EnableRiskScore
+          {...status}
+          entityType={RiskScoreEntity.host}
+          refetch={refetch}
+          timerange={timerange}
+        />
+      </EuiPanel>
     );
   }
 
@@ -117,21 +128,23 @@ export const HostRiskScoreQueryTabBody = ({
   }
 
   return (
-    <HostRiskScoreTableManage
-      deleteQuery={deleteQuery}
-      data={data ?? []}
-      id={HostRiskScoreQueryId.HOSTS_BY_RISK}
-      inspect={inspect}
-      isInspect={isInspected}
-      loading={loading || isKpiLoading}
-      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
-      refetch={refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-      severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-      totalCount={totalCount}
-      type={type}
-    />
+    <>
+      <HostRiskScoreTableManage
+        deleteQuery={deleteQuery}
+        data={data ?? []}
+        id={HostRiskScoreQueryId.HOSTS_BY_RISK}
+        inspect={inspect}
+        isInspect={isInspected}
+        loading={loading || isKpiLoading}
+        loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
+        refetch={refetch}
+        setQuery={setQuery}
+        setQuerySkip={setQuerySkip}
+        severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
+        totalCount={totalCount}
+        type={type}
+      />
+    </>
   );
 };
 

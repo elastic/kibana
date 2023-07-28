@@ -6,17 +6,15 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText, EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import * as i18n from '../translations';
-import { useRiskEningeStatus } from '../api/hooks/use_risk_engine_status';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { SecuritySolutionLinkButton } from '../../common/components/links';
 import { SecurityPageName } from '../../../common/constants';
 
 export const RiskScoreUpdatePanel = () => {
-  const { data: riskEnginesStatus } = useRiskEningeStatus();
-  const isUpdateAvailable =
-    riskEnginesStatus?.legacy_risk_engine_status === RiskEngineStatus.ENABLED;
+  const { data: riskEnginesStatus } = useRiskEngineStatus();
+  const isUpdateAvailable = riskEnginesStatus?.isUpdateAvailable;
 
   if (!isUpdateAvailable) {
     return null;
@@ -34,7 +32,6 @@ export const RiskScoreUpdatePanel = () => {
         >
           {i18n.UPDATE_PANEL_GO_TO_MANAGE}
         </SecuritySolutionLinkButton>
-        <EuiButton>{i18n.UPDATE_PANEL_GO_TO_DISMISS}</EuiButton>
       </EuiFlexGroup>
     </EuiCallOut>
   );

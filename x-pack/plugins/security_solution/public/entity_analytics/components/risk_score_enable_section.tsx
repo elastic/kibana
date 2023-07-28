@@ -34,7 +34,7 @@ import {
   RISKY_USERS_DOC_LINK,
 } from '../../../common/constants';
 import * as i18n from '../translations';
-import { useRiskEningeStatus } from '../api/hooks/use_risk_engine_status';
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
@@ -79,7 +79,7 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
 
 export const RiskScoreEnableSection = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { data: riskEnginesStatus } = useRiskEningeStatus();
+  const { data: riskEnginesStatus } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSettled: () => {
       setIsModalVisible(false);
@@ -99,8 +99,7 @@ export const RiskScoreEnableSection = () => {
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading;
 
-  const isUpdateAvailable =
-    riskEnginesStatus?.legacy_risk_engine_status === RiskEngineStatus.ENABLED;
+  const isUpdateAvailable = riskEnginesStatus?.isUpdateAvailable;
 
   const onSwitchClick = () => {
     if (!currentRiskEngineStatus || isLoading) {

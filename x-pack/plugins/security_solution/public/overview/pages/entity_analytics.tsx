@@ -25,6 +25,7 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics/anomali
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
+import { RiskScoreUpdatePanel } from '../../entity_analytics/components/risk_score_update_panel';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
@@ -48,6 +49,10 @@ const EntityAnalyticsComponent = () => {
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
+                <EuiFlexItem>
+                  <RiskScoreUpdatePanel />
+                </EuiFlexItem>
+
                 <EuiFlexItem>
                   <EntityAnalyticsHeader />
                 </EuiFlexItem>
