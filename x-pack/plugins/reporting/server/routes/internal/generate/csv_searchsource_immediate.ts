@@ -35,10 +35,6 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
-  // public method to return this array
-  // const registry = reporting.getExportTypesRegistry();
-  // const kibanaAccessControlTags = registry.getAllAccessControlTags();
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if deprecated config is turned off
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:downloadCsv'] : [];
 

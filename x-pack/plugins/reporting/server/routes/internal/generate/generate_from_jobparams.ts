@@ -18,10 +18,6 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
-  // public method to return this array
-  // const registry = reporting.getExportTypesRegistry();
-  // const kibanaAccessControlTags = registry.getAllAccessControlTags();
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
 

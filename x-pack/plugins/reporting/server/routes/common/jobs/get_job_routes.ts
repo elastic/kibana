@@ -69,7 +69,6 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
     });
   };
 
-  // TODO: add route options param
   const handleDeleteReport = ({ path, user, context, req, res }: HandlerOpts) => {
     const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
