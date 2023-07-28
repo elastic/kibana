@@ -73,7 +73,6 @@ export function FieldTypeFilter({
         }}
         fullWidth
         input={buttonContent}
-        // BLOCKED BY: https://github.com/elastic/eui/pull/6955
         focusTrapProps={{
           returnFocus: false, // we will be manually returning the focus to the search
           onDeactivation: setFocusToSearch,
