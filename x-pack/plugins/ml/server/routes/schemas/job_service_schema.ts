@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { runtimeMappingsSchema } from '@kbn/ml-runtime-field-utils';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
-import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const categorizationFieldValidationSchema = {
   indexPatternTitle: schema.string(),

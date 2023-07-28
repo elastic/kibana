@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { isRuntimeField } from '@kbn/ml-runtime-field-utils';
+import { isRuntimeField } from './is_runtime_field';
+
+/**
+ * Schema for validating a runtime field
+ */
 
 export const runtimeMappingsSchema = schema.object(
   {},
@@ -15,7 +19,7 @@ export const runtimeMappingsSchema = schema.object(
     unknowns: 'allow',
     validate: (v: object) => {
       if (Object.values(v).some((o) => !isRuntimeField(o))) {
-        return i18n.translate('xpack.ml.invalidRuntimeFieldMessage', {
+        return i18n.translate('xpack.aiops.invalidRuntimeFieldMessage', {
           defaultMessage: 'Invalid runtime field',
         });
       }

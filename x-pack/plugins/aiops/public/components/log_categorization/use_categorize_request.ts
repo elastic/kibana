@@ -148,7 +148,7 @@ function createCategoryRequest(
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number
 ) {
-  const query = processQuery(queryIn, timeField, from, to);
+  const query = createCategorizeQuery(queryIn, timeField, from, to);
   const aggs = {
     categories: {
       categorize_text: {
@@ -189,7 +189,7 @@ function createCategoryRequest(
   };
 }
 
-export function processQuery(
+export function createCategorizeQuery(
   queryIn: QueryDslQueryContainer,
   timeField: string,
   from: number | undefined,

@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { runtimeMappingsSchema } from '@kbn/ml-runtime-field-utils';
 import { indicesOptionsSchema } from './datafeeds_schema';
-import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const getCardinalityOfFieldsSchema = schema.object({
   /** Index or indexes for which to return the time range. */
