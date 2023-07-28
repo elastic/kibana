@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG } from '../utils';
+import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG, DEFAULT_PORT } from '../utils';
 import { Command } from './types';
 
 export const serverless: Command = {
@@ -25,6 +25,7 @@ export const serverless: Command = {
       --tag               Image tag of ES Serverless to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
       --image             Full path of ES Serverless image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
       --clean             Remove existing file system object store before running
+      --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       -E                  Additional key=value settings to pass to Elasticsearch
 
     Examples:
@@ -50,6 +51,7 @@ export const serverless: Command = {
 
       string: ['tag', 'image'],
       boolean: ['clean'],
+      number: ['port'],
 
       default: defaults,
     });

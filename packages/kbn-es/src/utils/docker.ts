@@ -20,6 +20,7 @@ import { EsClusterExecOptions } from '../cluster_exec_options';
 interface BaseOptions {
   tag?: string;
   image?: string;
+  port?: number;
 }
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -38,6 +39,7 @@ interface ServerlessEsNodeArgs {
   params: string[];
 }
 
+export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
 const DOCKER_BASE_CMD = [
@@ -52,9 +54,6 @@ const DOCKER_BASE_CMD = [
 
   '--name',
   'es01',
-
-  '-p',
-  '127.0.0.1:9200:9200',
 
   '-p',
   '127.0.0.1:9300:9300',
@@ -117,9 +116,6 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es01',
     params: [
-      '-p',
-      '127.0.0.1:9200:9200',
-
       '-p',
       '127.0.0.1:9300:9300',
 
@@ -188,6 +184,15 @@ export function resolveDockerImage({
   }
 
   return defaultImg;
+}
+
+/**
+ * Determine the port to bind the Serverless index node or Docker node to
+ */
+export function resolvePort(options: ServerlessOptions | DockerOptions) {
+  const port = options.port ?? DEFAULT_PORT;
+
+  return ['-p', `127.0.0.1:${port}:${port}`];
 }
 
 /**
@@ -345,12 +350,13 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const image = getServerlessImage(options);
 
   const nodeNames = await Promise.all(
-    SERVERLESS_NODES.map(async (node) => {
+    SERVERLESS_NODES.map(async (node, i) => {
       await runServerlessEsNode(log, {
         ...node,
         image,
         params: node.params.concat(
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+          i === 0 ? resolvePort(options) : [],
           volumeCmd
         ),
       });
@@ -380,6 +386,7 @@ export function resolveDockerCmd(options: DockerOptions) {
 
   return DOCKER_BASE_CMD.concat(
     resolveEsArgs(DEFAULT_DOCKER_ESARGS, options),
+    resolvePort(options),
     getDockerImage(options)
   );
 }

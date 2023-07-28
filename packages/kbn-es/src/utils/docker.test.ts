@@ -16,6 +16,7 @@ import {
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
+  resolvePort,
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
@@ -99,6 +100,30 @@ describe('resolveDockerImage()', () => {
     ).toThrowErrorMatchingInlineSnapshot(`
       "Only verified images from docker.elastic.co are currently allowed.
       If you require this functionality in @kbn/es please contact the Kibana Operations Team."
+    `);
+  });
+});
+
+describe('resolvePort()', () => {
+  test('should return default port when no options', () => {
+    const port = resolvePort({});
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+      ]
+    `);
+  });
+
+  test('should return custom port when passed in options', () => {
+    const port = resolvePort({ port: 9220 });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+      ]
     `);
   });
 });
