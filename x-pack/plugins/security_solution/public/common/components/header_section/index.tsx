@@ -19,8 +19,8 @@ import * as i18n from '../../containers/query_toggle/translations';
 interface HeaderProps {
   border?: boolean;
   height?: number;
-  className?: string;
-  $hideSubtitle?: boolean;
+  className?: string; // eslint-disable-line react/no-unused-prop-types
+  $hideSubtitle?: boolean; // eslint-disable-line react/no-unused-prop-types
 }
 
 const Header = styled.header<HeaderProps>`
