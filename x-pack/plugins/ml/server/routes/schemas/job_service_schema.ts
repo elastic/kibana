@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { runtimeMappingsSchema } from '@kbn/ml-runtime-field-utils';
+import { runtimeMappingsSchema } from './schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
 

@@ -6,7 +6,22 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { runtimeMappingsSchema } from '@kbn/ml-runtime-field-utils';
+import { i18n } from '@kbn/i18n';
+import { isRuntimeField } from '@kbn/ml-runtime-field-utils';
+
+export const runtimeMappingsSchema = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+    validate: (v: object) => {
+      if (Object.values(v).some((o) => !isRuntimeField(o))) {
+        return i18n.translate('xpack.ml.invalidRuntimeFieldMessage', {
+          defaultMessage: 'Invalid runtime field',
+        });
+      }
+    },
+  }
+);
 
 export const indicesOptionsSchema = schema.object({
   expand_wildcards: schema.maybe(

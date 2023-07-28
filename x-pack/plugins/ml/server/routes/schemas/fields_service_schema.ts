@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { runtimeMappingsSchema } from '@kbn/ml-runtime-field-utils';
+import { runtimeMappingsSchema } from './schema';
 import { indicesOptionsSchema } from './datafeeds_schema';
 
 export const getCardinalityOfFieldsSchema = schema.object({
