@@ -33501,7 +33501,6 @@
     "xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle": "技术预览",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton": "威胁情报",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle": "威胁情报",
-    "xpack.securitySolution.flyout.documentDetails.viewRuleText": "查看规则",
     "xpack.securitySolution.flyout.documentDetails.visualizationsTitle": "可视化",
     "xpack.securitySolution.flyout.documentDetails.visualizeOptions": "Visualize 选项",
     "xpack.securitySolution.flyout.documentDetails.visualizeTab": "Visualize",

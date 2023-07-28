@@ -8,11 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { importListItemQuerySchema, listSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
+import { importListItemRequestQuery, importListItemResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
@@ -36,7 +36,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       path: `${LIST_ITEM_URL}/_import`,
       validate: {
         body: schema.buffer(),
-        query: buildRouteValidation(importListItemQuerySchema),
+        query: buildRouteValidation(importListItemRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -70,7 +70,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
             version: 1,
           });
 
-          const [validated, errors] = validate(list, listSchema);
+          const [validated, errors] = validate(list, importListItemResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
@@ -92,7 +92,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               statusCode: 400,
             });
           }
-          const [validated, errors] = validate(importedList, listSchema);
+          const [validated, errors] = validate(importedList, importListItemResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
