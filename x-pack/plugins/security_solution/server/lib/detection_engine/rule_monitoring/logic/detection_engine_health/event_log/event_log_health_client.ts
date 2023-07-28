@@ -14,7 +14,7 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as f from '../../event_log/event_log_fields';
 import {

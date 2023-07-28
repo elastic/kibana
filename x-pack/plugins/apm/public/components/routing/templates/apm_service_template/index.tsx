@@ -401,5 +401,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       prepend,
       append,
       isSelected: key === selectedTab,
+      'data-test-subj': `${key}Tab`,
     }));
 }

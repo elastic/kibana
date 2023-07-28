@@ -84,6 +84,6 @@ describe('ExpressionChart', () => {
       comparator: Comparator.GT_OR_EQ,
     };
     const { wrapper } = await setup(expression);
-    expect(wrapper.find('[data-test-subj~="noChartData"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj~="thresholdRuleNoChartData"]').exists()).toBeTruthy();
   });
 });

@@ -74,7 +74,7 @@ describe('ExpressionRow', () => {
     const [valueMatch] =
       wrapper
         .html()
-        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">50</span>') ??
+        .match('<span class="euiExpression__value css-1lfq7nz-euiExpression__value">50</span>') ??
       [];
     expect(valueMatch).toBeTruthy();
   });
@@ -92,7 +92,7 @@ describe('ExpressionRow', () => {
     const [valueMatch] =
       wrapper
         .html()
-        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">0.5</span>') ??
+        .match('<span class="euiExpression__value css-1lfq7nz-euiExpression__value">0.5</span>') ??
       [];
     expect(valueMatch).toBeTruthy();
   });
@@ -109,7 +109,10 @@ describe('ExpressionRow', () => {
 
     const { wrapper } = await setup(expression as MetricExpression);
 
-    const helpText = wrapper.find('[data-test-subj="ofExpression"]').at(0).prop('helpText');
+    const helpText = wrapper
+      .find('[data-test-subj="thresholdRuleOfExpression"]')
+      .at(0)
+      .prop('helpText');
 
     expect(helpText).toMatchSnapshot();
   });

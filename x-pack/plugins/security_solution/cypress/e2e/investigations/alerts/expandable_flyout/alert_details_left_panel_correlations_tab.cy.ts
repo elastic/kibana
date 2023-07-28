@@ -46,14 +46,13 @@ describe(
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
+      createNewCaseFromExpandableFlyout();
       openInsightsTab();
       openCorrelationsTab();
     });
 
     it('should render correlations details correctly', () => {
       cy.log('link the alert to a new case');
-
-      createNewCaseFromExpandableFlyout();
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();
 

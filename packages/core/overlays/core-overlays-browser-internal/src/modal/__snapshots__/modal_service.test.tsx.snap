@@ -99,7 +99,7 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+      class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -133,22 +133,22 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
       class="euiModalFooter emotion-euiModalFooter"
     >
       <button
-        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
         data-test-subj="confirmModalCancelButton"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonEmpty__content"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text"
           >
             Cancel
           </span>
         </span>
       </button>
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="confirmModalConfirmButton"
         type="button"
       >
@@ -303,7 +303,7 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+      class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -333,22 +333,22 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
       class="euiModalFooter emotion-euiModalFooter"
     >
       <button
-        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
         data-test-subj="confirmModalCancelButton"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonEmpty__content"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text"
           >
             Cancel
           </span>
         </span>
       </button>
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="confirmModalConfirmButton"
         type="button"
       >
@@ -1070,7 +1070,7 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+      class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
       type="button"
     >
       <span

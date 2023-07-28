@@ -47,7 +47,7 @@ export function searchHitToAgent(
         type: component.type,
         status: component.status,
         message: component.message,
-        units: component.units.map((unit) => ({
+        units: component.units?.map((unit) => ({
           id: unit.id,
           type: unit.type,
           status: unit.status,

@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "cases",
-      "description": "Case APIs enable you to open and track issues."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "cases",
+      "description": "Case APIs enable you to open and track issues."
     }
   ],
   "paths": {
@@ -258,6 +266,7 @@
                   "properties": {
                     "cases": {
                       "type": "array",
+                      "maxItems": 10000,
                       "items": {
                         "$ref": "#/components/schemas/case_response_properties"
                       }
@@ -337,6 +346,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -946,6 +956,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -1086,6 +1097,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "string"
                   }
@@ -1711,6 +1723,7 @@
                     },
                     "userActions": {
                       "type": "array",
+                      "maxItems": 10000,
                       "items": {
                         "$ref": "#/components/schemas/user_actions_find_response_properties"
                       }
@@ -1800,7 +1813,8 @@
                         "type": "integer"
                       }
                     }
-                  }
+                  },
+                  "maxItems": 1000
                 },
                 "examples": {
                   "findConnectorResponse": {
@@ -3407,15 +3421,7 @@
             "$ref": "#/components/parameters/page_index"
           },
           {
-            "name": "perPage",
-            "in": "query",
-            "description": "The number of items to return. Limited to 100 items.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 20,
-              "maximum": 100
-            }
+            "$ref": "#/components/parameters/page_size"
           },
           {
             "$ref": "#/components/parameters/sort_order"
@@ -3809,7 +3815,12 @@
         "in": "query",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minItems": 1,
+            "maxItems": 100
+          }
         },
         "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
       },
@@ -3826,7 +3837,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "maxItems": 100
             }
           ]
         }
@@ -3902,11 +3914,12 @@
       "page_size": {
         "in": "query",
         "name": "perPage",
-        "description": "The number of items to return.",
+        "description": "The number of items to return. Limited to 100 items.",
         "required": false,
         "schema": {
           "type": "integer",
-          "default": 20
+          "default": 20,
+          "maximum": 100
         }
       },
       "reporters": {
@@ -3922,7 +3935,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "maxItems": 100
             }
           ]
         },
@@ -3976,7 +3990,12 @@
           "type": "string",
           "enum": [
             "createdAt",
-            "updatedAt"
+            "updatedAt",
+            "closedAt",
+            "title",
+            "category",
+            "status",
+            "severity"
           ],
           "default": "createdAt"
         },
@@ -4023,7 +4042,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "maxItems": 100
             }
           ]
         },
@@ -4142,6 +4162,7 @@
       "assignees": {
         "type": "array",
         "description": "An array containing users that are assigned to the case.",
+        "maxItems": 10,
         "nullable": true,
         "items": {
           "type": "object",
@@ -4601,7 +4622,8 @@
           },
           "description": {
             "description": "The description for the case.",
-            "type": "string"
+            "type": "string",
+            "maxLength": 30000
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -4615,13 +4637,21 @@
           "tags": {
             "description": "The words and phrases that help categorize cases. It can be an empty array.",
             "type": "array",
+            "maxItems": 200,
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 256
             }
+          },
+          "category": {
+            "description": "Category for the case. It could be a word or a phrase to categorize the case.",
+            "type": "string",
+            "maxLength": 50
           },
           "title": {
             "description": "A title for the case.",
-            "type": "string"
+            "type": "string",
+            "maxLength": 160
           }
         }
       },
@@ -5045,6 +5075,7 @@
             "title": "Case response properties for comments",
             "description": "An array of comment objects for the case.",
             "type": "array",
+            "maxItems": 10000,
             "items": {
               "discriminator": {
                 "propertyName": "type"
@@ -5188,6 +5219,8 @@
           "cases": {
             "type": "array",
             "description": "An array containing one or more case objects.",
+            "maxItems": 100,
+            "minItems": 1,
             "items": {
               "type": "object",
               "required": [
@@ -5229,7 +5262,8 @@
                 },
                 "id": {
                   "description": "The identifier for the case.",
-                  "type": "string"
+                  "type": "string",
+                  "maxLength": 30000
                 },
                 "settings": {
                   "$ref": "#/components/schemas/settings"
@@ -5243,13 +5277,21 @@
                 "tags": {
                   "description": "The words and phrases that help categorize cases.",
                   "type": "array",
+                  "maxItems": 200,
                   "items": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 256
                   }
+                },
+                "category": {
+                  "description": "Category for the case. It could be a word or a phrase to categorize the case.",
+                  "type": "string",
+                  "maxLength": 50
                 },
                 "title": {
                   "description": "A title for the case.",
-                  "type": "string"
+                  "type": "string",
+                  "maxLength": 160
                 },
                 "version": {
                   "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
@@ -5264,31 +5306,8 @@
         "type": "string",
         "description": "The fields to perform the `simple_query_string` parsed query against.",
         "enum": [
-          "closed_by.username",
-          "closed_by.full_name",
-          "closed_by.email",
-          "closed_by.profile_uid",
-          "created_by.username",
-          "created_by.full_name",
-          "created_by.email",
-          "created_by.profile_uid",
           "description",
-          "connector.name",
-          "connector.type",
-          "external_service.pushed_by.username",
-          "external_service.pushed_by.full_name",
-          "external_service.pushed_by.email",
-          "external_service.pushed_by.profile_uid",
-          "external_service.connector_name",
-          "external_service.external_id",
-          "external_service.external_title",
-          "external_service.external_url",
-          "title",
-          "title.keyword",
-          "updated_by.username",
-          "updated_by.full_name",
-          "updated_by.email",
-          "updated_by.profile_uid"
+          "title"
         ]
       },
       "closure_types": {
@@ -5534,6 +5553,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "owner": {
@@ -5623,6 +5643,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "id": {
@@ -7127,13 +7148,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }

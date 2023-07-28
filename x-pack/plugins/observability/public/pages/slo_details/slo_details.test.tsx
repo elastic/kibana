@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { useKibana } from '../../utils/kibana_react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -31,6 +31,7 @@ import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
+  useLocation: jest.fn(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -45,6 +46,7 @@ jest.mock('../../hooks/slo/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
+const useLocationMock = useLocation as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
@@ -105,11 +107,12 @@ describe('SLO Details Page', () => {
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: false,
-      sloHistoricalSummaryResponse: historicalSummaryData,
+      data: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
     useCloneSloMock.mockReturnValue({ mutate: mockClone });
     useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
+    useLocationMock.mockReturnValue({ search: '' });
   });
 
   describe('when the incorrect license is found', () => {
@@ -155,7 +158,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: true,
-      sloHistoricalSummaryResponse: {},
+      data: {},
     });
 
     render(<SloDetailsPage />);

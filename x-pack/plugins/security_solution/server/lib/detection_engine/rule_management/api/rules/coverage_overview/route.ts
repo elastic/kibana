@@ -6,11 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import type { IKibanaResponse } from '@kbn/core/server';
+import type { CoverageOverviewResponse } from '../../../../../../../common/api/detection_engine';
+import {
+  CoverageOverviewRequestBody,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+} from '../../../../../../../common/api/detection_engine';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
-import { buildSiemResponse } from '../../../../routes/utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../../routes/utils';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';
 
 export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) => {
@@ -24,7 +28,7 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<CoverageOverviewResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {

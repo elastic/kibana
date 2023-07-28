@@ -16,18 +16,23 @@ import {
   TextBasedLanguagesEditor,
   TextBasedLanguagesEditorProps,
 } from './text_based_languages_editor';
+import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
+  const theme = {
+    theme$: of({ darkMode: false }),
+  };
 
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
+    theme,
   };
 
   function renderTextBasedLanguagesEditorComponent(testProps: TextBasedLanguagesEditorProps) {

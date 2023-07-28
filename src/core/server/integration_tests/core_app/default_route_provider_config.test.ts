@@ -58,7 +58,7 @@ describe('default route provider', () => {
 
     for (const url of invalidRoutes) {
       await request
-        .post(root, '/api/kibana/settings/defaultRoute')
+        .post(root, '/internal/kibana/settings/defaultRoute')
         .send({ value: url })
         .expect(400);
     }
@@ -72,7 +72,7 @@ describe('default route provider', () => {
 
   it('consumes valid values', async function () {
     await request
-      .post(root, '/api/kibana/settings/defaultRoute')
+      .post(root, '/internal/kibana/settings/defaultRoute')
       .send({ value: '/valid' })
       .expect(200);
 

@@ -10,3 +10,4 @@ schema:
     - type: array
       items:
         type: string
+      maxItems: 100

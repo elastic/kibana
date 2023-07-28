@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: cases
-    description: Case APIs enable you to open and track issues.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: cases
+    description: Case APIs enable you to open and track issues.
 paths:
   /api/cases:
     post:
@@ -147,6 +150,7 @@ paths:
                 properties:
                   cases:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/case_response_properties'
                   count_closed_cases:
@@ -193,6 +197,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -607,6 +612,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -693,6 +699,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: string
               examples:
@@ -1051,6 +1058,7 @@ paths:
                     type: integer
                   userActions:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/user_actions_find_response_properties'
               examples:
@@ -1106,6 +1114,7 @@ paths:
                       type: string
                     referencedByCount:
                       type: integer
+                maxItems: 1000
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
@@ -2082,14 +2091,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/page_index'
-        - name: perPage
-          in: query
-          description: The number of items to return. Limited to 100 items.
-          required: false
-          schema:
-            type: integer
-            default: 20
-            maximum: 100
+        - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/space_id'
       responses:
@@ -2310,7 +2312,11 @@ components:
       in: query
       required: true
       schema:
-        type: string
+        type: array
+        items:
+          type: string
+          minItems: 1
+          maxItems: 100
       example: d4e7abb0-b462-11ec-9a8d-698504725a43
     assignees:
       in: query
@@ -2323,6 +2329,7 @@ components:
           - type: array
             items:
               type: string
+            maxItems: 100
     category:
       in: query
       name: category
@@ -2374,11 +2381,12 @@ components:
     page_size:
       in: query
       name: perPage
-      description: The number of items to return.
+      description: The number of items to return. Limited to 100 items.
       required: false
       schema:
         type: integer
         default: 20
+        maximum: 100
     reporters:
       in: query
       name: reporters
@@ -2389,6 +2397,7 @@ components:
           - type: array
             items:
               type: string
+            maxItems: 100
       example: elastic
     search:
       in: query
@@ -2426,6 +2435,11 @@ components:
         enum:
           - createdAt
           - updatedAt
+          - closedAt
+          - title
+          - category
+          - status
+          - severity
         default: createdAt
       example: updatedAt
     sort_order:
@@ -2460,6 +2474,7 @@ components:
           - type: array
             items:
               type: string
+            maxItems: 100
       example: tag-1
     to:
       in: query
@@ -2555,6 +2570,7 @@ components:
     assignees:
       type: array
       description: An array containing users that are assigned to the case.
+      maxItems: 10
       nullable: true
       items:
         type: object
@@ -2900,6 +2916,7 @@ components:
         description:
           description: The description for the case.
           type: string
+          maxLength: 30000
         owner:
           $ref: '#/components/schemas/owners'
         settings:
@@ -2909,11 +2926,18 @@ components:
         tags:
           description: The words and phrases that help categorize cases. It can be an empty array.
           type: array
+          maxItems: 200
           items:
             type: string
+            maxLength: 256
+        category:
+          description: Category for the case. It could be a word or a phrase to categorize the case.
+          type: string
+          maxLength: 50
         title:
           description: A title for the case.
           type: string
+          maxLength: 160
     case_response_closed_by_properties:
       title: Case response properties for closed_by
       type: object
@@ -3236,6 +3260,7 @@ components:
           title: Case response properties for comments
           description: An array of comment objects for the case.
           type: array
+          maxItems: 10000
           items:
             discriminator:
               propertyName: type
@@ -3328,6 +3353,8 @@ components:
         cases:
           type: array
           description: An array containing one or more case objects.
+          maxItems: 100
+          minItems: 1
           items:
             type: object
             required:
@@ -3351,6 +3378,7 @@ components:
               id:
                 description: The identifier for the case.
                 type: string
+                maxLength: 30000
               settings:
                 $ref: '#/components/schemas/settings'
               severity:
@@ -3360,11 +3388,18 @@ components:
               tags:
                 description: The words and phrases that help categorize cases.
                 type: array
+                maxItems: 200
                 items:
                   type: string
+                  maxLength: 256
+              category:
+                description: Category for the case. It could be a word or a phrase to categorize the case.
+                type: string
+                maxLength: 50
               title:
                 description: A title for the case.
                 type: string
+                maxLength: 160
               version:
                 description: The current version of the case. To determine this value, use the get case or find cases APIs.
                 type: string
@@ -3372,31 +3407,8 @@ components:
       type: string
       description: The fields to perform the `simple_query_string` parsed query against.
       enum:
-        - closed_by.username
-        - closed_by.full_name
-        - closed_by.email
-        - closed_by.profile_uid
-        - created_by.username
-        - created_by.full_name
-        - created_by.email
-        - created_by.profile_uid
         - description
-        - connector.name
-        - connector.type
-        - external_service.pushed_by.username
-        - external_service.pushed_by.full_name
-        - external_service.pushed_by.email
-        - external_service.pushed_by.profile_uid
-        - external_service.connector_name
-        - external_service.external_id
-        - external_service.external_title
-        - external_service.external_url
         - title
-        - title.keyword
-        - updated_by.username
-        - updated_by.full_name
-        - updated_by.email
-        - updated_by.profile_uid
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
@@ -3580,6 +3592,7 @@ components:
         comment:
           description: The new comment. It is required only when `type` is `user`.
           type: string
+          maxLength: 30000
           example: A new comment.
         owner:
           $ref: '#/components/schemas/owners'
@@ -3646,6 +3659,7 @@ components:
         comment:
           description: The new comment. It is required only when `type` is `user`.
           type: string
+          maxLength: 30000
           example: A new comment.
         id:
           type: string
@@ -4746,6 +4760,3 @@ components:
           isPreconfigured: false
           isDeprecated: false
           referencedByCount: 0
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

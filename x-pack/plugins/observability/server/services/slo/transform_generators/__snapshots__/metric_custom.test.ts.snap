@@ -4,7 +4,21 @@ exports[`Metric Custom Transform Generator aggregates using the denominator equa
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "A": "_total_A",
+      "A": "_total_A>sum",
+    },
+    "script": Object {
+      "lang": "painless",
+      "source": "params.A / 100",
+    },
+  },
+}
+`;
+
+exports[`Metric Custom Transform Generator aggregates using the denominator equation with filter 1`] = `
+Object {
+  "bucket_script": Object {
+    "buckets_path": Object {
+      "A": "_total_A>sum",
     },
     "script": Object {
       "lang": "painless",
@@ -18,7 +32,21 @@ exports[`Metric Custom Transform Generator aggregates using the numerator equati
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "A": "_good_A",
+      "A": "_good_A>sum",
+    },
+    "script": Object {
+      "lang": "painless",
+      "source": "params.A * 100",
+    },
+  },
+}
+`;
+
+exports[`Metric Custom Transform Generator aggregates using the numerator equation with filter 1`] = `
+Object {
+  "bucket_script": Object {
+    "buckets_path": Object {
+      "A": "_good_A>sum",
     },
     "script": Object {
       "lang": "painless",
@@ -59,24 +87,45 @@ Object {
   "pivot": Object {
     "aggregations": Object {
       "_good_A": Object {
-        "sum": Object {
-          "field": "total",
+        "aggs": Object {
+          "sum": Object {
+            "sum": Object {
+              "field": "total",
+            },
+          },
+        },
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "_good_B": Object {
-        "sum": Object {
-          "field": "processed",
+        "aggs": Object {
+          "sum": Object {
+            "sum": Object {
+              "field": "processed",
+            },
+          },
+        },
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "_total_A": Object {
-        "sum": Object {
-          "field": "total",
+        "aggs": Object {
+          "sum": Object {
+            "sum": Object {
+              "field": "total",
+            },
+          },
+        },
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "slo.denominator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_total_A",
+            "A": "_total_A>sum",
           },
           "script": Object {
             "lang": "painless",
@@ -96,8 +145,8 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_good_A",
-            "B": "_good_B",
+            "A": "_good_A>sum",
+            "B": "_good_B>sum",
           },
           "script": Object {
             "lang": "painless",
@@ -183,24 +232,45 @@ Object {
   "pivot": Object {
     "aggregations": Object {
       "_good_A": Object {
-        "sum": Object {
-          "field": "total",
+        "aggs": Object {
+          "sum": Object {
+            "sum": Object {
+              "field": "total",
+            },
+          },
+        },
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "_good_B": Object {
-        "sum": Object {
-          "field": "processed",
+        "aggs": Object {
+          "sum": Object {
+            "sum": Object {
+              "field": "processed",
+            },
+          },
+        },
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "_total_A": Object {
-        "sum": Object {
-          "field": "total",
+        "aggs": Object {
+          "sum": Object {
+            "sum": Object {
+              "field": "total",
+            },
+          },
+        },
+        "filter": Object {
+          "match_all": Object {},
         },
       },
       "slo.denominator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_total_A",
+            "A": "_total_A>sum",
           },
           "script": Object {
             "lang": "painless",
@@ -211,8 +281,8 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "A": "_good_A",
-            "B": "_good_B",
+            "A": "_good_A>sum",
+            "B": "_good_B>sum",
           },
           "script": Object {
             "lang": "painless",

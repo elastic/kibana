@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
-import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { orderBy } from 'lodash';
-import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
   getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,

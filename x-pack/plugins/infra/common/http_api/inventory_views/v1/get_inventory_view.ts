@@ -6,7 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { inventoryViewRT } from '../../../inventory_views';
 
 export const getInventoryViewRequestParamsRT = rt.type({
   inventoryViewId: rt.string,
 });
+
+export type GetInventoryViewResposePayload = rt.TypeOf<typeof inventoryViewRT>;

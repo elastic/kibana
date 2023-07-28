@@ -24,9 +24,10 @@ import type {
   QueryAlerts,
   AlertSearchResponse,
   AlertsIndex,
-  UpdateAlertStatusProps,
+  UpdateAlertStatusByQueryProps,
   CasesFromAlertsResponse,
   CheckSignalIndex,
+  UpdateAlertStatusByIdsProps,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -84,14 +85,34 @@ export const fetchQueryRuleRegistryAlerts = async <Hit, Aggregations>({
  *
  * @throws An error if response is not OK
  */
-export const updateAlertStatus = async ({
+export const updateAlertStatusByQuery = async ({
   query,
   status,
   signal,
-}: UpdateAlertStatusProps): Promise<estypes.UpdateByQueryResponse> =>
+}: UpdateAlertStatusByQueryProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ conflicts: 'proceed', status, ...query }),
+    body: JSON.stringify({ conflicts: 'proceed', status, query }),
+    signal,
+  });
+
+/**
+ * Update alert status by signalIds
+ *
+ * @param signalIds List of signal ids to update
+ * @param status to update to('open' / 'closed' / 'acknowledged')
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const updateAlertStatusByIds = async ({
+  signalIds,
+  status,
+  signal,
+}: UpdateAlertStatusByIdsProps): Promise<estypes.BulkResponse> =>
+  KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ status, signal_ids: signalIds }),
     signal,
   });
 

@@ -68,6 +68,7 @@ class DocLinks {
   public connectorsContentExtraction: string;
   public connectorsDropbox: string;
   public connectorsGoogleCloudStorage: string;
+  public connectorsGoogleDrive: string;
   public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
   public connectorsMongoDB: string;
@@ -115,7 +116,7 @@ class DocLinks {
   public queryDsl: string;
   public rrf: string;
   public searchApplications: string;
-  public searchApplicationsGettingStarted: string;
+  public searchApplicationsSearch: string;
   public searchApplicationsTemplates: string;
   public searchApplicationsSearchApi: string;
   public searchTemplates: string;
@@ -223,6 +224,7 @@ class DocLinks {
     this.connectorsClients = '';
     this.connectorsDropbox = '';
     this.connectorsGoogleCloudStorage = '';
+    this.connectorsGoogleDrive = '';
     this.connectorsJira = '';
     this.connectorsMicrosoftSQL = '';
     this.connectorsMongoDB = '';
@@ -273,7 +275,7 @@ class DocLinks {
     this.searchUIElasticsearch = '';
     this.searchApplicationsTemplates = '';
     this.searchApplications = '';
-    this.searchApplicationsGettingStarted = '';
+    this.searchApplicationsSearch = '';
     this.searchApplicationsSearchApi = '';
     this.searchTemplates = '';
     this.start = '';
@@ -380,6 +382,7 @@ class DocLinks {
     this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
+    this.connectorsGoogleDrive = docLinks.links.enterpriseSearch.connectorsGoogleDrive;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
@@ -431,8 +434,7 @@ class DocLinks {
     this.searchApplicationsTemplates = docLinks.links.enterpriseSearch.searchApplicationsTemplates;
     this.searchApplicationsSearchApi = docLinks.links.enterpriseSearch.searchApplicationsSearchApi;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
-    this.searchApplicationsGettingStarted =
-      docLinks.links.enterpriseSearch.searchApplicationsGettingStarted;
+    this.searchApplicationsSearch = docLinks.links.enterpriseSearch.searchApplicationsSearch;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;

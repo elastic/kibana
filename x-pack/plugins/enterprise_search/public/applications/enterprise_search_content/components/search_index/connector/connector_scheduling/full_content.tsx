@@ -215,6 +215,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
             <EuiFlexItem>
               <ConnectorCronEditor
                 disabled={isGated}
+                frequencyBlockList={type === SyncJobType.ACCESS_CONTROL ? [] : undefined}
                 scheduling={scheduling[type]}
                 type={type}
                 onReset={() => {

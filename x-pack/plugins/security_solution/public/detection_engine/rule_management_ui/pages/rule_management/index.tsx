@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
@@ -20,25 +21,24 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../../../detections/components/callouts/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { LoadPrePackagedRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules_button';
-import { useUserData } from '../../../../detections/components/user_info';
+import { AddElasticRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
+import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
-import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
 import { AllRules } from '../../components/rules_table';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { SuperHeader } from './super_header';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
-  const { navigateToApp } = useKibana().services.application;
+  const kibanaServices = useKibana().services;
+  const { navigateToApp } = kibanaServices.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateRules = useCallback(() => {
@@ -106,7 +106,7 @@ const RulesPageComponent: React.FC = () => {
           <SuperHeader>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                <LoadPrePackagedRulesButton />
+                <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
@@ -131,21 +131,19 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RulesPageTourComponent>
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                </RulesPageTourComponent>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>
-          <MaintenanceWindowCallout />
+          <MaintenanceWindowCallout kibanaServices={kibanaServices} />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

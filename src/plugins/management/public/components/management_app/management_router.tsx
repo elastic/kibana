@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementSection } from '../../utils';
@@ -20,43 +22,65 @@ interface ManagementRouterProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
+  landingPageRedirect: string | undefined;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
+  basePath: HttpStart['basePath'];
 }
 
 export const ManagementRouter = memo(
-  ({ history, setBreadcrumbs, onAppMounted, sections, theme$ }: ManagementRouterProps) => (
-    <Router history={history}>
-      <Routes>
-        {sections.map((section) =>
-          section
-            .getAppsEnabled()
-            .map((app) => (
-              <Route
-                path={`${app.basePath}`}
-                component={() => (
-                  <ManagementAppWrapper
-                    app={app}
-                    setBreadcrumbs={setBreadcrumbs}
-                    onAppMounted={onAppMounted}
-                    history={history}
-                    theme$={theme$}
-                  />
-                )}
-              />
-            ))
-        )}
-        {sections.map((section) =>
-          section
-            .getAppsEnabled()
-            .filter((app) => app.redirectFrom)
-            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
-        )}
-        <Route
-          path={'/'}
-          component={() => (
-            <ManagementLandingPage setBreadcrumbs={setBreadcrumbs} onAppMounted={onAppMounted} />
+  ({
+    history,
+    setBreadcrumbs,
+    onAppMounted,
+    sections,
+    theme$,
+    landingPageRedirect,
+    navigateToUrl,
+    basePath,
+  }: ManagementRouterProps) => {
+    // Redirect the user to the configured landing page if there is one
+    useEffect(() => {
+      if (landingPageRedirect) {
+        navigateToUrl(basePath.prepend(landingPageRedirect));
+      }
+    }, [landingPageRedirect, navigateToUrl, basePath]);
+
+    return (
+      <Router history={history}>
+        <Routes>
+          {sections.map((section) =>
+            section
+              .getAppsEnabled()
+              .map((app) => (
+                <Route
+                  path={`${app.basePath}`}
+                  component={() => (
+                    <ManagementAppWrapper
+                      app={app}
+                      setBreadcrumbs={setBreadcrumbs}
+                      onAppMounted={onAppMounted}
+                      history={history}
+                      theme$={theme$}
+                    />
+                  )}
+                />
+              ))
           )}
-        />
-      </Routes>
-    </Router>
-  )
+          {sections.map((section) =>
+            section
+              .getAppsEnabled()
+              .filter((app) => app.redirectFrom)
+              .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+          )}
+
+          <Route
+            path={'/'}
+            component={() => (
+              <ManagementLandingPage setBreadcrumbs={setBreadcrumbs} onAppMounted={onAppMounted} />
+            )}
+          />
+        </Routes>
+      </Router>
+    );
+  }
 );

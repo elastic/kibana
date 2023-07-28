@@ -9,7 +9,8 @@ import React, { type FC, useMemo } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
-import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
+
+import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -33,6 +34,7 @@ import { mlUsageCollectionProvider } from './services/usage_collection';
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
+import type { PageDependencies } from './routing/router';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -48,12 +50,6 @@ interface AppProps {
 
 const localStorage = new Storage(window.localStorage);
 
-// temporary function to hardcode the serverless state
-// this will be replaced by the true serverless information from kibana
-export function isServerless() {
-  return false;
-}
-
 /**
  * Provides global services available across the entire ML app.
  */
@@ -65,7 +61,6 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     httpService,
     mlApiServices,
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
-    isServerless,
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),
   };
@@ -78,7 +73,7 @@ export interface MlServicesContext {
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
-  const pageDeps = {
+  const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,

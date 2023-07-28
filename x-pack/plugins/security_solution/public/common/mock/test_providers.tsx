@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -17,13 +16,12 @@ import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { MockAssistantProvider } from './mock_assistant_provider';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -63,31 +61,19 @@ export const TestProvidersComponent: React.FC<Props> = ({
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
-  const queryClient = new QueryClient();
-  const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
-  const mockGetComments = jest.fn(() => []);
-  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              augmentMessageCodeBlocks={jest.fn()}
-              baseAllow={[]}
-              baseAllowReplacement={[]}
-              defaultAllow={[]}
-              defaultAllowReplacement={[]}
-              getComments={mockGetComments}
-              getInitialConversations={mockGetInitialConversations}
-              setConversations={jest.fn()}
-              setDefaultAllow={jest.fn()}
-              setDefaultAllowReplacement={jest.fn()}
-              http={mockHttp}
-            >
+            <MockAssistantProvider>
               <QueryClientProvider client={queryClient}>
                 <ExpandableFlyoutProvider>
                   <ConsoleManager>
@@ -99,7 +85,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
                   </ConsoleManager>
                 </ExpandableFlyoutProvider>
               </QueryClientProvider>
-            </AssistantProvider>
+            </MockAssistantProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>
@@ -117,30 +103,12 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
-  const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
-  const mockGetComments = jest.fn(() => []);
-  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              augmentMessageCodeBlocks={jest.fn()}
-              baseAllow={[]}
-              baseAllowReplacement={[]}
-              defaultAllow={[]}
-              defaultAllowReplacement={[]}
-              getComments={mockGetComments}
-              getInitialConversations={mockGetInitialConversations}
-              setConversations={jest.fn()}
-              setDefaultAllow={jest.fn()}
-              setDefaultAllowReplacement={jest.fn()}
-              http={mockHttp}
-            >
+            <MockAssistantProvider>
               <UserPrivilegesProvider
                 kibanaCapabilities={
                   {
@@ -155,7 +123,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                 </CellActionsProvider>
               </UserPrivilegesProvider>
-            </AssistantProvider>
+            </MockAssistantProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>

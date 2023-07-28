@@ -2058,7 +2058,7 @@
             "tags": [],
             "label": "indexIsAlias",
             "description": [
-              "\nTreat the indices provided as Aliases. If set to true, ES `search()` will be used to\nretrieve the file info and content instead of `get()`. This is needed to ensure the\ncontent can be retrieved in cases where an index may have rolled over (ES `get()`\nneeds a \"real\" index)"
+              "\nTreat the indices provided as Aliases/Datastreams.\nWhen set to `true`:\n- additional ES calls will be made to get the real backing indexes\n- will not check if indexes exists and attempt to create them if not\n- an additional `@timestamp` property will be written to all documents (at root of document)"
             ],
             "signature": [
               "boolean | undefined"

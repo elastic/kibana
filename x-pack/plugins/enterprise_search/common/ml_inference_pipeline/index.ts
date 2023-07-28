@@ -216,24 +216,37 @@ export const parseMlInferenceParametersFromPipeline = (
   name: string,
   pipeline: IngestPipeline
 ): CreateMlInferencePipelineParameters | null => {
-  const processor = pipeline?.processors?.find((proc) => proc.inference !== undefined);
-  if (!processor || processor?.inference === undefined) {
+  const inferenceProcessors = pipeline?.processors
+    ?.filter((p) => p.inference)
+    .map((p) => p.inference) as IngestInferenceProcessor[];
+  if (!inferenceProcessors || inferenceProcessors.length === 0) {
     return null;
   }
-  const { inference: inferenceProcessor } = processor;
-  const sourceFields = Object.keys(inferenceProcessor.field_map ?? {});
-  const sourceField = sourceFields.length === 1 ? sourceFields[0] : null;
-  if (!sourceField) {
-    return null;
-  }
-  return {
-    destination_field: inferenceProcessor.target_field
-      ? stripMlInferencePrefix(inferenceProcessor.target_field)
-      : inferenceProcessor.target_field,
-    model_id: inferenceProcessor.model_id,
-    pipeline_name: name,
-    source_field: sourceField,
-  };
+
+  // Extract source -> target field mappings from all inference processors in pipeline
+  const fieldMappings = inferenceProcessors
+    .map((p) => {
+      const sourceFields = Object.keys(p.field_map ?? {});
+      // We assume that there is only one source field per inference processor
+      const sourceField = sourceFields.length >= 1 ? sourceFields[0] : null;
+      return {
+        sourceField,
+        targetField: p.target_field, // Prefixed target field
+      };
+    })
+    .filter((f) => f.sourceField) as FieldMapping[];
+
+  return fieldMappings.length === 0
+    ? null
+    : {
+        destination_field: fieldMappings[0].targetField // Backward compatibility - TODO: remove after multi-field selector is implemented for all inference types
+          ? stripMlInferencePrefix(fieldMappings[0].targetField)
+          : '',
+        model_id: inferenceProcessors[0].model_id,
+        pipeline_name: name,
+        source_field: fieldMappings[0].sourceField, // Backward compatibility - TODO: remove after multi-field selector is implemented for all inference types
+        field_mappings: fieldMappings,
+      };
 };
 
 export const parseModelStateFromStats = (

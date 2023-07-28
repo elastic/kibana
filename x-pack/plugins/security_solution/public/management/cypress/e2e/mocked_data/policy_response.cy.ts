@@ -15,8 +15,7 @@ import { navigateToFleetAgentDetails } from '../../screens/fleet';
 import { EndpointPolicyResponseGenerator } from '../../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import { descriptions } from '../../../components/policy_response/policy_response_friendly_names';
 
-// FLAKY: https://github.com/elastic/security-team/issues/6518
-describe.skip('Endpoint Policy Response', () => {
+describe('Endpoint Policy Response', () => {
   let loadedEndpoint: CyIndexEndpointHosts;
   let endpointMetadata: HostMetadata;
   let loadedPolicyResponse: IndexedEndpointPolicyResponse;

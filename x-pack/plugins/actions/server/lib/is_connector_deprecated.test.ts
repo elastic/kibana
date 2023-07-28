@@ -14,7 +14,8 @@ describe('isConnectorDeprecated', () => {
     name: 'Test',
     config: { apiUrl: 'http://example.com', usesTableApi: false },
     secrets: { username: 'test', password: 'test' },
-    isPreconfigured: false as const,
+    isPreconfigured: false,
+    isSystemAction: false,
   };
 
   it('returns false if the config is not defined', () => {

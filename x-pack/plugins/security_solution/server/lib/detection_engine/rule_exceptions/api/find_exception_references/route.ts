@@ -16,12 +16,12 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type {
   FindExceptionReferencesOnRuleSchemaDecoded,
   RuleReferencesSchema,
-} from '../../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../../common/api/detection_engine/rule_exceptions';
 import {
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
   findExceptionReferencesOnRuleSchema,
   rulesReferencedByExceptionListsSchema,
-} from '../../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { enrichFilterWithRuleTypeMapping } from '../../../rule_management/logic/search/enrich_filter_with_rule_type_mappings';
 import type { RuleParams } from '../../../rule_schema';

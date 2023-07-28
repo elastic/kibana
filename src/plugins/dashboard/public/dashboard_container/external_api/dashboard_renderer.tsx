@@ -96,8 +96,8 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         });
         return;
       }
-      setLoading(true);
 
+      setLoading(true);
       let canceled = false;
       (async () => {
         const creationOptions = await getCreationOptions?.();
@@ -115,13 +115,13 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
           creationOptions,
           savedObjectId
         );
+        setLoading(false);
 
-        if (canceled) {
-          container.destroy();
+        if (canceled || !container) {
+          setDashboardContainer(undefined);
+          container?.destroy();
           return;
         }
-
-        setLoading(false);
 
         if (isErrorEmbeddable(container)) {
           setFatalError(container);

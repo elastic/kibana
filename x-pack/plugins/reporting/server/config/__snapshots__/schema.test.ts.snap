@@ -10,7 +10,7 @@ Object {
     "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
     "maxSizeBytes": ByteSizeValue {
-      "valueInBytes": 10485760,
+      "valueInBytes": 262144000,
     },
     "scroll": Object {
       "duration": "30s",
@@ -57,7 +57,7 @@ Object {
     "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
     "maxSizeBytes": ByteSizeValue {
-      "valueInBytes": 10485760,
+      "valueInBytes": 262144000,
     },
     "scroll": Object {
       "duration": "30s",

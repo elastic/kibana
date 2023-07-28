@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import * as yaml from 'js-yaml';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
@@ -18,6 +20,7 @@ import { buildNode as buildFunctionNode } from '@kbn/es-query/src/kuery/node_typ
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
 
 import {
+  ASSETS_SAVED_OBJECT_TYPE,
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -28,6 +31,8 @@ import type {
   Installable,
   PackageDataStreamTypes,
   PackageList,
+  InstalledPackage,
+  PackageSpecManifest,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -45,6 +50,7 @@ import {
 } from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
+import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
@@ -189,8 +195,25 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
     };
   });
 
+  const integrationManifests =
+    integrations.length > 0
+      ? await getInstalledPackageManifests(savedObjectsClient, integrations)
+      : new Map<string, PackageSpecManifest>();
+
+  const integrationsWithManifestContent = integrations.map((integration) => {
+    const { name, version } = integration;
+    const integrationAsset = integrationManifests.get(`${name}-${version}/manifest.yml`);
+
+    return {
+      ...integration,
+      title: integrationAsset?.title ?? undefined,
+      description: integrationAsset?.description ?? undefined,
+      icons: integrationAsset?.icons ?? undefined,
+    };
+  });
+
   return {
-    items: integrations,
+    items: integrationsWithManifestContent,
     total: packageSavedObjects.total,
     searchAfter: packageSavedObjects.saved_objects.at(-1)?.sort, // Enable ability to use searchAfter in subsequent queries
   };
@@ -304,6 +327,42 @@ export async function getInstalledPackageSavedObjects(
   }
 
   return result;
+}
+
+export async function getInstalledPackageManifests(
+  savedObjectsClient: SavedObjectsClientContract,
+  installedPackages: InstalledPackage[]
+) {
+  const pathFilters = installedPackages.map((installedPackage) => {
+    const { name, version } = installedPackage;
+    return nodeBuilder.is(
+      `${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path`,
+      `${name}-${version}/manifest.yml`
+    );
+  });
+
+  const result = await savedObjectsClient.find<PackageAsset>({
+    type: ASSETS_SAVED_OBJECT_TYPE,
+    filter: nodeBuilder.or(pathFilters),
+  });
+
+  const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
+    (acc, asset) => {
+      acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+      return acc;
+    },
+    new Map()
+  );
+
+  for (const savedObject of result.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: savedObject.id,
+      savedObjectType: ASSETS_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return parsedManifests;
 }
 
 function getInstalledPackageSavedObjectDataStreams(

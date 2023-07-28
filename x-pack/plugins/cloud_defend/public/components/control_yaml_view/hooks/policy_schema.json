@@ -392,7 +392,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["alert", "log"]
+            "enum": ["alert", "block", "log"]
           }
         }
       }

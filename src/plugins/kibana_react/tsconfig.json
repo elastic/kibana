@@ -12,6 +12,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/core-theme-browser",
+    "@kbn/core-base-common",
   ],
   "exclude": [
     "target/**/*",

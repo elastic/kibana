@@ -26,6 +26,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices, fetchSearchIndices } from '../../lib/indices/fetch_indices';
@@ -201,6 +202,7 @@ export function registerIndexRoutes({
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -407,7 +409,7 @@ export function registerIndexRoutes({
               ),
             })
           ),
-          model_id: schema.maybe(schema.string()),
+          model_id: schema.string(),
           pipeline_definition: schema.maybe(
             schema.object({
               description: schema.maybe(schema.string()),
@@ -435,14 +437,14 @@ export function registerIndexRoutes({
       } = request.body;
 
       // additional validations
-      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField || modelId)) {
+      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField)) {
         return createError({
           errorCode: ErrorCode.PARAMETER_CONFLICT,
           message: i18n.translate(
             'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
             {
               defaultMessage:
-                'pipeline_definition and field_mappings should only be provided if source_field and destination_field and model_id are not provided',
+                'pipeline_definition and field_mappings should only be provided if source_field and destination_field are not provided',
             }
           ),
           response,

@@ -16,7 +16,7 @@ import { useUrlState } from '../../../../utils/use_url_state';
 
 export const DEFAULT_STATE: HostFlyout = {
   itemId: '',
-  tabId: FlyoutTabIds.METADATA,
+  tabId: FlyoutTabIds.OVERVIEW,
   processSearch: undefined,
   metadataSearch: undefined,
 };
@@ -45,9 +45,12 @@ export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => 
 };
 
 const FlyoutTabIdRT = rt.union([
+  rt.literal(FlyoutTabIds.OVERVIEW),
   rt.literal(FlyoutTabIds.METADATA),
   rt.literal(FlyoutTabIds.PROCESSES),
   rt.literal(FlyoutTabIds.LOGS),
+  rt.literal(FlyoutTabIds.ANOMALIES),
+  rt.literal(FlyoutTabIds.OSQUERY),
 ]);
 
 const HostFlyoutStateRT = rt.intersection([

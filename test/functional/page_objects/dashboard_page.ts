@@ -212,24 +212,6 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click('dashboardClone');
   }
 
-  public async getCloneTitle() {
-    return await this.testSubjects.getAttribute('clonedDashboardTitle', 'value');
-  }
-
-  public async confirmClone() {
-    this.log.debug('Confirming clone');
-    await this.testSubjects.click('cloneConfirmButton');
-  }
-
-  public async cancelClone() {
-    this.log.debug('Canceling clone');
-    await this.testSubjects.click('cloneCancelButton');
-  }
-
-  public async setClonedDashboardTitle(title: string) {
-    await this.testSubjects.setValue('clonedDashboardTitle', title);
-  }
-
   /**
    * Asserts that the duplicate title warning is either displayed or not displayed.
    * @param { displayed: boolean }

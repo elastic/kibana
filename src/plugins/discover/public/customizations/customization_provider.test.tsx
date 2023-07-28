@@ -39,15 +39,17 @@ describe('useDiscoverCustomizationService', () => {
         customizationCallbacks: [callback],
       })
     );
-    expect(wrapper.result.current).toBeUndefined();
+    expect(wrapper.result.current.isInitialized).toBe(false);
+    expect(wrapper.result.current.customizationService).toBeUndefined();
     expect(callback).toHaveBeenCalledTimes(1);
     const cleanup = jest.fn();
     await act(async () => {
       resolveCallback(cleanup);
       await promise;
     });
-    expect(wrapper.result.current).toBeDefined();
-    expect(wrapper.result.current).toBe(service);
+    expect(wrapper.result.current.isInitialized).toBe(true);
+    expect(wrapper.result.current.customizationService).toBeDefined();
+    expect(wrapper.result.current.customizationService).toBe(service);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
     wrapper.unmount();

@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
-    const clonedDashboardName = 'Dashboard Listing A11y Copy';
+    const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
     it('dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
@@ -129,11 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Make a clone of the dashboard', async () => {
       await PageObjects.dashboard.clickClone();
-      await a11y.testAppSnapshot();
-    });
-
-    it('Confirm clone with *copy* appended', async () => {
-      await PageObjects.dashboard.confirmClone();
       await a11y.testAppSnapshot();
     });
 

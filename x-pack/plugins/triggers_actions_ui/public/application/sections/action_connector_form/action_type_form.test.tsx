@@ -556,6 +556,7 @@ function getActionTypeForm({
     id: 'test',
     isPreconfigured: false,
     isDeprecated: false,
+    isSystemAction: false as const,
     name: 'test name',
     secrets: {},
   };
@@ -579,6 +580,7 @@ function getActionTypeForm({
       id: 'test',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       name: 'test name',
       secrets: {},
     },
@@ -588,6 +590,7 @@ function getActionTypeForm({
       actionTypeId: '.server-log',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       config: {},
       secrets: {},
     },
@@ -602,6 +605,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
     '.server-log': {
       id: '.server-log',
@@ -611,6 +615,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
