@@ -48,6 +48,9 @@ export const useDashboardMenuItems = ({
    */
   const dashboard = useDashboardAPI();
 
+  const hasRunMigrations = dashboard.select(
+    (state) => state.componentState.hasRunClientsideMigrations
+  );
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
   const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
@@ -170,7 +173,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: !hasUnsavedChanges || isSaveInProgress || hasOverlays,
+        disableButton: !(hasRunMigrations || hasUnsavedChanges) || isSaveInProgress || hasOverlays,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -218,17 +221,18 @@ export const useDashboardMenuItems = ({
       } as TopNavMenuData,
     };
   }, [
-    quickSaveDashboard,
-    hasUnsavedChanges,
     isSaveInProgress,
-    saveDashboardAs,
-    setIsLabsShown,
-    resetChanges,
+    hasRunMigrations,
+    hasUnsavedChanges,
     hasOverlays,
     lastSavedId,
-    isLabsShown,
     showShare,
     dashboard,
+    setIsLabsShown,
+    isLabsShown,
+    quickSaveDashboard,
+    saveDashboardAs,
+    resetChanges,
     clone,
   ]);
 

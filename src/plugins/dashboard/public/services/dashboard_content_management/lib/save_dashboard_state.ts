@@ -170,6 +170,7 @@ export const saveDashboardState = async ({
     },
     { embeddablePersistableStateService: embeddable }
   );
+
   const references = savedObjectsTagging.updateTagsReferences
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;

@@ -38,7 +38,7 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
  */
 export type PersistableControlGroupInput = Pick<
   ControlGroupInput,
-  'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings'
+  'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings' | 'version'
 >;
 
 /**

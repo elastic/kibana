@@ -250,7 +250,9 @@ export const initializeDashboard = async ({
     if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
-      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput);
+      const newControlGroup = await controlsGroupFactory?.createSkipMigrations(
+        fullControlGroupInput
+      );
       if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
         throw new Error('Error in control group startup');
       }

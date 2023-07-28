@@ -63,6 +63,7 @@ export interface LoadDashboardReturn {
   dashboardId?: string;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: DashboardContainerInput;
+  anyMigrationRun?: boolean;
 }
 
 /**

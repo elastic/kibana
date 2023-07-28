@@ -460,15 +460,14 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
-    const embeddableId = panel.explicitInput.id;
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,
-        [embeddableId]: false,
+        [panel.explicitInput.id]: false,
       },
     } as Partial<TContainerOutput>);
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
-    const explicitInputForChild = this.getInput().panels[embeddableId].explicitInput;
+    const inputForChild = this.getInputForChild(panel.explicitInput.id);
     try {
       const factory = this.getFactory(panel.type);
       if (!factory) {
@@ -476,15 +475,11 @@ export abstract class Container<
       }
 
       // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
-      embeddable = isSavedObjectEmbeddableInput(explicitInputForChild)
-        ? await factory.createFromSavedObject(
-            explicitInputForChild.savedObjectId,
-            explicitInputForChild,
-            this
-          )
-        : await factory.create(explicitInputForChild, this);
+      embeddable = isSavedObjectEmbeddableInput(inputForChild)
+        ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
+        : await factory.createSkipMigrations(inputForChild, this); // skipping migrations here because embeddable containers are required to run migrations earlier in the process.
     } catch (e) {
-      embeddable = new ErrorEmbeddable(e, { id: embeddableId }, this);
+      embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
     }
 
     // EmbeddableFactory.create can return undefined without throwing an error, which indicates that an embeddable
@@ -492,42 +487,13 @@ export abstract class Container<
     // visualizations being created from the add panel, which redirects the user to the visualize app. Once we
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
-    if (embeddable === undefined) {
+    if (embeddable) {
+      if (!embeddable.deferEmbeddableLoad) {
+        this.setChildLoaded(embeddable);
+      }
+    } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
       return;
-    }
-
-    /**
-     * If the embeddable's version is different than the version that this container initialized it with, that means
-     * there has been a migration for this embeddable. The container needs to keep track of the migrated input instead
-     * of the input it was created with.
-     */
-    // console.log(
-    //   embeddable.type,
-    //   'is version',
-    //   embeddable.getInput().version,
-    //   'and ours is version',
-    //   explicitInputForChild.version ?? 'NONE'
-    // );
-    if (embeddable.getInput().version !== explicitInputForChild.version) {
-      const currentPanels = this.getInput().panels;
-      this.updateInput({
-        panels: {
-          ...currentPanels,
-          [embeddableId]: {
-            ...currentPanels[embeddableId],
-            explicitInput: embeddable.getInput(),
-          },
-        },
-      } as Partial<TContainerInput>);
-    }
-
-    /**
-     * Set up this Embeddable's connection with its parent.
-     */
-    embeddable.initializeParentSubscription(this);
-    if (!embeddable.deferEmbeddableLoad) {
-      this.setChildLoaded(embeddable);
     }
 
     return embeddable;

@@ -121,12 +121,19 @@ export interface EmbeddableFactory<
   ): Promise<TEmbeddable | ErrorEmbeddable>;
 
   /**
-   * Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected
-   * elsewhere.
-   *
-   * This will likely change in future iterations when we improve in place editing capabilities.
+   * Creates an Embeddable instance, running the inital input through all registered migrations. Resolves to undefined if a new Embeddable
+   * cannot be directly created and the user will instead be redirected elsewhere.
    */
   create(
+    initialInput: TEmbeddableInput,
+    parent?: IContainer
+  ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
+
+  /**
+   * Creates an Embeddable instance, skipping all migrations. This should be used only in cases where the migrations are definitely run beforehand.
+   * Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected elsewhere.
+   */
+  createSkipMigrations(
     initialInput: TEmbeddableInput,
     parent?: IContainer
   ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;

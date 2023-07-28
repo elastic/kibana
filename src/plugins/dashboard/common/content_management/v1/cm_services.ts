@@ -41,6 +41,7 @@ const dashboardAttributesSchema = schema.object(
     // Dashboard Content
     controlGroupInput: schema.maybe(
       schema.object({
+        version: schema.maybe(schema.string()),
         panelsJSON: schema.maybe(schema.string()),
         controlStyle: schema.maybe(schema.string()),
         chainingSystem: schema.maybe(schema.string()),
