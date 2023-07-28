@@ -31,6 +31,7 @@ export async function saveObservabilityOnboardingState({
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
       savedObjectId,
       {
+        type: observabilityOnboardingState.type,
         state: observabilityOnboardingState.state,
         progress: { ...observabilityOnboardingState.progress },
       }

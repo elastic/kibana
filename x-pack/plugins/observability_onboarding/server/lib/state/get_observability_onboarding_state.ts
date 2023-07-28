@@ -7,30 +7,30 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   ObservabilityOnboardingState,
+  OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   SavedObservabilityOnboardingState,
 } from '../../saved_objects/observability_onboarding_status';
 
-export async function findLatestObservabilityOnboardingState({
+export async function getObservabilityOnboardingState({
   savedObjectsClient,
+  savedObjectId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectId: string;
 }): Promise<SavedObservabilityOnboardingState | undefined> {
-  const result = await savedObjectsClient.find<ObservabilityOnboardingState>({
-    type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-    page: 1,
-    perPage: 1,
-    sortField: `updated_at`,
-    sortOrder: 'desc',
-  });
-  if (result.total === 0) {
+  try {
+    const result = await savedObjectsClient.get<ObservabilityOnboardingState>(
+      OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+      savedObjectId
+    );
+    const { id, updated_at: updatedAt, attributes } = result;
+    return {
+      id,
+      updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
+      ...attributes,
+    };
+  } catch (error) {
     return undefined;
   }
-  const { id, updated_at: updatedAt, attributes } = result.saved_objects[0];
-  return {
-    id,
-    updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
-    ...attributes,
-  };
 }

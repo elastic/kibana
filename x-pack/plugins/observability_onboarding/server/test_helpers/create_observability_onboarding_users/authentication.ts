@@ -8,7 +8,7 @@
 import {
   cluster,
   indices,
-} from '../../routes/custom_logs/api_key/monitoring_config';
+} from '../../routes/logs/flow/api_key/monitoring_config';
 
 export enum ObservabilityOnboardingUsername {
   noAccessUser = 'no_access_user',

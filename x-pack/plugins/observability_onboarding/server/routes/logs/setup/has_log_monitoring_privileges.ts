@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { cluster, indices } from './monitoring_config';
+import { cluster, indices } from '../flow/api_key/monitoring_config';
 
 export async function hasLogMonitoringPrivileges(
   esClient: ElasticsearchClient

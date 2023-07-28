@@ -9,15 +9,19 @@ import { SavedObjectsType } from '@kbn/core/server';
 
 export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE =
   'observability-onboarding-state';
+export interface LogFilesState {
+  datasetName: string;
+  serviceName?: string;
+  customConfigurations?: string;
+  logFilePaths: string[];
+  namespace: string;
+}
+
+type ObservabilityOnboardingFlowState = LogFilesState | undefined;
 
 export interface ObservabilityOnboardingState {
-  state: {
-    datasetName: string;
-    serviceName?: string;
-    customConfigurations?: string;
-    logFilePaths: string[];
-    namespace: string;
-  };
+  type: 'logFiles';
+  state: ObservabilityOnboardingFlowState;
   progress: Record<
     string,
     {
@@ -39,6 +43,7 @@ export const observabilityOnboardingState: SavedObjectsType = {
   namespaceType: 'agnostic',
   mappings: {
     properties: {
+      type: { type: 'keyword' },
       state: { type: 'object', dynamic: false },
       progress: { type: 'object', dynamic: false },
     },

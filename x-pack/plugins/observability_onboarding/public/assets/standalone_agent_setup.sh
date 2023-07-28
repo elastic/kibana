@@ -55,7 +55,7 @@ updateStepProgress() {
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
   local MESSAGE=${3:-}
   curl --request POST \
-    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}" \
+    --url "${API_ENDPOINT}/logs/flow/${ONBOARDING_ID}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
