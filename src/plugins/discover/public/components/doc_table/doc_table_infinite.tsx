@@ -11,7 +11,7 @@ import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
+import { SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
 import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';

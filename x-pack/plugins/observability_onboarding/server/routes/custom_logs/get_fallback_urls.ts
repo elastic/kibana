@@ -5,35 +5,22 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { CoreStart } from '@kbn/core/server';
+import { EsLegacyConfigService } from '../../services/es_legacy_config_service';
 
-export function getFallbackUrls(coreStart: CoreStart) {
-  const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
-  const [elasticsearchUrl] = getElasticsearchUrl(esClient);
-  const kibanaUrl = getKibanaUrl(coreStart);
-  return { elasticsearchUrl, kibanaUrl };
-}
-
-function getElasticsearchUrl(esClient: Client): string[] {
-  const aliveConnections = esClient.connectionPool.connections.filter(
-    ({ status }) => status === 'alive'
-  );
-  if (aliveConnections.length) {
-    return aliveConnections.map(({ url }) => {
-      const { protocol, host } = new URL(url);
-      return `${protocol}//${host}`;
-    });
-  }
-
-  return ['http://localhost:9200'];
-}
-
-function getKibanaUrl({ http }: CoreStart) {
+export function getFallbackKibanaUrl({ http }: CoreStart) {
   const basePath = http.basePath;
   const { protocol, hostname, port } = http.getServerInfo();
   return `${protocol}://${hostname}:${port}${basePath
     // Prepending on '' removes the serverBasePath
     .prepend('/')
     .slice(0, -1)}`;
+}
+
+export async function getFallbackESUrl(
+  esLegacyConfigService: EsLegacyConfigService
+) {
+  const config = await esLegacyConfigService.readConfig();
+
+  return config.hosts;
 }
