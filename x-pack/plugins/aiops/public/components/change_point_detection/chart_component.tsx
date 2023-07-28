@@ -29,7 +29,7 @@ export interface ChartComponentPropsAll {
   query?: Query;
 }
 
-export const ChartComponentP: FC<EmbeddableChangePointChartProps> = ({
+export const ChardGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = ({
   timeRange,
   fn,
   metricField,

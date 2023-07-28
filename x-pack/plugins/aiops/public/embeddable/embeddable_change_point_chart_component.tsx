@@ -25,6 +25,7 @@ export interface EmbeddableChangePointChartProps {
   fn: 'avg' | 'sum' | 'min' | 'max' | string;
   metricField: string;
   splitField?: string;
+  partitions?: string[];
   maxSeriesToPlot?: number;
 }
 

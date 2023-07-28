@@ -26,7 +26,7 @@ export function useDataSource() {
 
 export interface DataViewAndSavedSearch {
   savedSearch: SavedSearch | null;
-  dataView: DataView | null;
+  dataView: DataView;
 }
 
 /**
@@ -63,6 +63,7 @@ export const DataSourceContextProvider: FC<{ dataViewId?: string; savedSearchId?
 
     const dataViewAndSavedSearch: DataViewAndSavedSearch = {
       savedSearch: null,
+      // @ts-ignore
       dataView: null,
     };
 

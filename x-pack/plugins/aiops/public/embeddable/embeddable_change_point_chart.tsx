@@ -12,7 +12,6 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
-  type ReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -21,9 +20,10 @@ import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from './embeddable_change_point_chart_factory';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
-import { ChartComponentP } from '../components/change_point_detection/chart_component';
+import { ChardGridEmbeddableWrapper } from '../components/change_point_detection/chart_component';
 
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 
@@ -43,10 +43,16 @@ export interface EmbeddableChangePointChartDeps {
 
 export type IEmbeddableChangePointChart = typeof EmbeddableChangePointChart;
 
-export class EmbeddableChangePointChart
-  extends AbstractEmbeddable<EmbeddableChangePointChartInput, EmbeddableChangePointChartOutput>
-  implements ReferenceOrValueEmbeddable<EmbeddableChangePointChartInput>
-{
+export class EmbeddableChangePointChart extends AbstractEmbeddable<
+  EmbeddableChangePointChartInput,
+  EmbeddableChangePointChartOutput
+> {
+  public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+
+  public reload(): void {
+    throw new Error('Method not implemented.');
+  }
+
   private node?: HTMLElement;
 
   constructor(
@@ -101,12 +107,12 @@ export class EmbeddableChangePointChart
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
                 <DataSourceContextProvider dataViewId={input.dataViewId}>
-                  <ChartComponentP
+                  <ChardGridEmbeddableWrapper
                     fn={input.fn}
                     metricField={input.metricField}
                     splitField={input.splitField}
                     timeRange={input.timeRange}
-                    maxSeriesToPlot={6}
+                    maxSeriesToPlot={input.maxSeriesToPlot}
                     dataViewId={input.dataViewId}
                   />
                 </DataSourceContextProvider>
