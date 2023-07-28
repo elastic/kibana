@@ -275,7 +275,8 @@ export class Authenticator {
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
           urls: {
-            loggedOut: (request: any) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
+            loggedOut: (request: any) =>
+              this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
           },
         })
       );
