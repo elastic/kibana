@@ -30,3 +30,23 @@ export async function waitForVisualizations(page: Page, log: ToolingLog, visCoun
     throw err;
   }
 }
+
+export async function waitForCharts(page: Page, log: ToolingLog, count: number) {
+  try {
+    await page.waitForFunction(function renderDone(cnt) {
+      const charts = Array.from(document.querySelectorAll('.echChartStatus'));
+      const allChartsLoaded = charts.length === cnt;
+
+      return allChartsLoaded
+        ? charts.every((e) => e.getAttribute('data-ech-render-complete') === 'true')
+        : false;
+    }, count);
+  } catch (err) {
+    const loadedCharts = await page.$$('.echChartStatus');
+    const renderedCharts = await page.$$('.echChartStatus[data-ech-render-complete="true"]');
+    log.error(
+      `'waitForVisualizations' failed: loaded - ${loadedCharts.length}, rendered - ${renderedCharts.length}, expected - ${count}`
+    );
+    throw err;
+  }
+}

@@ -7,17 +7,22 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
+import { waitForCharts } from '../utils';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
   esArchives: ['test/functional/fixtures/es_archiver/stress_test'],
 })
   .step('Go to Visualize Library', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`/app/visualize`));
+    await page.goto(
+      kbnUrl.get(
+        `/app/visualize#/?_g=(filters:!(),time:(from:'2022-09-07T10:53:30.262Z',to:'2022-09-07T10:55:09.280Z'))`
+      )
+    );
     await page.waitForSelector('#visualizeListingHeading');
   })
   .step('Open existing Lens', async ({ page, log }) => {
     await page.click(subj('visListingTitleLink-Lens-Stress-Test'));
-    await waitForVisualizations(page, log, 1);
+    await page.waitForTimeout(10000);
+    await waitForCharts(page, log, 6);
   });
