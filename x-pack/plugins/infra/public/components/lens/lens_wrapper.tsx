@@ -98,6 +98,8 @@ export const LensWrapper = ({
     return { from, to };
   }, [state.dateRange]);
 
+  const isLoading = loading || !state.attributes;
+
   return (
     <Container
       ref={ref}
@@ -108,23 +110,20 @@ export const LensWrapper = ({
       `}
     >
       <>
-        {(loading || !state.attributes) && !embeddableLoaded ? (
-          <ChartPlaceholder style={props.style} hidePanelTitles />
+        {isLoading && !embeddableLoaded ? (
+          <ChartPlaceholder style={props.style} />
         ) : (
           <>
-            {(loading || !state.attributes) && (
-              <ChartLoadingProgress hidePanelTitles={props.hidePanelTitles} />
-            )}
-
+            {isLoading && <ChartLoadingProgress hasTopMargin={!props.hidePanelTitles} />}
             <EmbeddableComponentMemo
               {...props}
               attributes={state.attributes}
-              viewMode={ViewMode.VIEW}
-              timeRange={parsedDateRange}
-              query={state.query}
               filters={state.filters}
               lastReloadRequestTime={state.lastReloadRequestTime}
               onLoad={onLoad}
+              query={state.query}
+              timeRange={parsedDateRange}
+              viewMode={ViewMode.VIEW}
             />
           </>
         )}
@@ -145,7 +144,7 @@ const EmbeddableComponentMemo = React.memo(
     const EmbeddableComponent = lens.EmbeddableComponent;
 
     if (!attributes) {
-      throw new Error(`EmbeddableComponent attributes cannot be null`);
+      return <ChartPlaceholder style={props.style} />;
     }
 
     return <EmbeddableComponent {...props} attributes={attributes} />;

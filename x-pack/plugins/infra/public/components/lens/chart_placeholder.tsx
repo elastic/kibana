@@ -10,11 +10,7 @@ import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart } from '@elasti
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const ChartLoadingProgress = ({
-  hidePanelTitles = false,
-}: {
-  hidePanelTitles?: boolean;
-}) => {
+export const ChartLoadingProgress = ({ hasTopMargin = false }: { hasTopMargin?: boolean }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiProgress
@@ -22,30 +18,18 @@ export const ChartLoadingProgress = ({
       color="accent"
       position="absolute"
       css={css`
-        top: ${hidePanelTitles ? 0 : euiTheme.size.l};
+        top: ${hasTopMargin ? euiTheme.size.l : 0};
         z-index: ${Number(euiTheme.levels.header) - 1};
       `}
     />
   );
 };
 
-export const ChartPlaceholder = ({
-  style,
-  hidePanelTitles = false,
-}: {
-  style?: React.CSSProperties;
-  hidePanelTitles?: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
+export const ChartPlaceholder = ({ style }: { style?: React.CSSProperties }) => {
   return (
     <>
-      <ChartLoadingProgress hidePanelTitles />
-      <EuiFlexGroup
-        style={{ ...style, marginTop: hidePanelTitles ? 0 : euiTheme.size.l }}
-        justifyContent="center"
-        alignItems="center"
-        responsive={false}
-      >
+      <ChartLoadingProgress hasTopMargin={false} />
+      <EuiFlexGroup style={style} justifyContent="center" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiLoadingChart mono size="l" />
         </EuiFlexItem>
