@@ -112,12 +112,14 @@ export function ServicesTable() {
               environment,
               kuery,
               indexLifecyclePhase,
+              start,
+              end,
             },
           },
         });
       }
     },
-    [environment, kuery, indexLifecyclePhase, useOptimizedSorting]
+    [useOptimizedSorting, environment, kuery, indexLifecyclePhase, start, end]
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
