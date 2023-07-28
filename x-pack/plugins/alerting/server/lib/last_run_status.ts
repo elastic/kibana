@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
+import { RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
 import {
   RuleLastRunOutcomeValues,
   RuleExecutionStatusWarningReasons,

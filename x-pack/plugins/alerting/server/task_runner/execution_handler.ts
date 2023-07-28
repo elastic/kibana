@@ -11,6 +11,7 @@ import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils'
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -28,7 +29,6 @@ import { transformActionParams, transformSummaryActionParams } from './transform
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  ActionsCompletion,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAction,

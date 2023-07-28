@@ -25,7 +25,6 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
-export { wrappedStateRt, ActionsCompletion, ruleParamsSchema } from '@kbn/alerting-state-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';

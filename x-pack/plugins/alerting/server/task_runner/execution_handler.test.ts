@@ -13,10 +13,10 @@ import {
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  ActionsCompletion,
   ThrottledActions,
   RuleTypeParams,
   RuleTypeState,

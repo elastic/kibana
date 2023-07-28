@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { lastRunFromState } from './last_run_status';
-import { ActionsCompletion } from '../../common';
 import { RuleRunMetrics } from './rule_run_metrics_store';
 import { RuleResultServiceResults, RuleResultService } from '../monitoring/rule_result_service';
 

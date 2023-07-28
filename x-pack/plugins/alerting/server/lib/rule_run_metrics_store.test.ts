@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleRunMetricsStore } from './rule_run_metrics_store';
-import { ActionsCompletion } from '../types';
 
 describe('RuleRunMetricsStore', () => {
   const ruleRunMetricsStore = new RuleRunMetricsStore();
