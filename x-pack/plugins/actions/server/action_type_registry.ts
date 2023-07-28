@@ -79,10 +79,9 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled or it is a preconfigured action type
-   * It is possible for to disable an action type but use a preconfigured action
-   * of action type the disabled one. This does not apply to system actions.
-   * It should be possible to disable a system action type.
+   * Returns true if action type is enabled or preconfigured.
+   * An action type can be disabled but used with a preconfigured action.
+   * This does not apply to system actions as those can be disabled.
    */
   public isActionExecutable(
     actionId: string,
@@ -94,10 +93,7 @@ export class ActionTypeRegistry {
       (connector) => connector.id === actionId
     );
 
-    return (
-      actionTypeEnabled ||
-      (!actionTypeEnabled && inMemoryConnector !== undefined && inMemoryConnector.isPreconfigured)
-    );
+    return actionTypeEnabled || (!actionTypeEnabled && inMemoryConnector?.isPreconfigured === true);
   }
 
   /**

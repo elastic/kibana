@@ -620,15 +620,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   };
 
   private throwIfSystemActionsInConfig = () => {
-    const preConfiguredConnectors = this.inMemoryConnectors.filter(
-      (connector) => connector.isPreconfigured
-    );
+    const hasSystemActionAsPreconfiguredInConfig = this.inMemoryConnectors
+      .filter((connector) => connector.isPreconfigured)
+      .some((connector) => this.actionTypeRegistry!.isSystemActionType(connector.actionTypeId));
 
-    const isSystemActionAsPreconfiguredInConfig = preConfiguredConnectors.some((connector) =>
-      this.actionTypeRegistry!.isSystemActionType(connector.actionTypeId)
-    );
-
-    if (isSystemActionAsPreconfiguredInConfig) {
+    if (hasSystemActionAsPreconfiguredInConfig) {
       throw new Error('Setting system action types in preconfigured connectors are not allowed');
     }
   };
