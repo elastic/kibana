@@ -5,35 +5,4 @@
  * 2.0.
  */
 
-import {
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_TRIAL,
-  PNG_JOB_TYPE as jobType,
-} from '../../../common/constants';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
-import { createJobFnFactory } from './create_job';
-import { runTaskFnFactory } from './execute_job';
-import { metadata } from './metadata';
-import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
-
-export const getExportType = (): ExportTypeDefinition<
-  CreateJobFn<JobParamsPNGDeprecated>,
-  RunTaskFn<TaskPayloadPNG>
-> => ({
-  ...metadata,
-  jobType,
-  jobContentEncoding: 'base64',
-  jobContentExtension: 'PNG',
-  createJobFnFactory,
-  runTaskFnFactory,
-  validLicenses: [
-    LICENSE_TYPE_TRIAL,
-    LICENSE_TYPE_CLOUD_STANDARD,
-    LICENSE_TYPE_GOLD,
-    LICENSE_TYPE_PLATINUM,
-    LICENSE_TYPE_ENTERPRISE,
-  ],
-});
+export { PngV1ExportType } from './png';

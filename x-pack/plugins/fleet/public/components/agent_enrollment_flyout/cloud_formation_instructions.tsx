@@ -10,21 +10,26 @@ import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { PackagePolicy } from '../../../common';
+
 import { useCreateCloudFormationUrl } from '../../hooks';
 import { CloudFormationGuide } from '../cloud_formation_guide';
 
 interface Props {
   enrollmentAPIKey?: string;
   cloudFormationTemplateUrl: string;
+  packagePolicy?: PackagePolicy;
 }
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   cloudFormationTemplateUrl,
+  packagePolicy,
 }) => {
   const { isLoading, cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
     cloudFormationTemplateUrl,
+    packagePolicy,
   });
 
   if (error && isError) {
