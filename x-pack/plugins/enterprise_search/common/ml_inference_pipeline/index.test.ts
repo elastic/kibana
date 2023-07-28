@@ -377,10 +377,9 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toEqual({
-      destination_field: 'test',
       model_id: 'test-model',
       pipeline_name: 'unit-test',
-      source_field: 'body',
+      pipeline_definition: {},
       field_mappings: [
         {
           sourceField: 'body',
@@ -414,10 +413,9 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toEqual({
-      destination_field: 'body',
       model_id: 'test-model',
       pipeline_name: 'unit-test',
-      source_field: 'body',
+      pipeline_definition: {},
       field_mappings: [
         {
           sourceField: 'body',
