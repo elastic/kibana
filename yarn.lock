@@ -4869,6 +4869,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_ai_assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-alert-details@link:x-pack/packages/observability/alert_details":
   version "0.0.0"
   uid ""
@@ -4966,6 +4970,30 @@
   uid ""
 
 "@kbn/react-field@link:packages/kbn-react-field":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-common@link:packages/react/kibana_context/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-render@link:packages/react/kibana_context/render":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-root@link:packages/react/kibana_context/root":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-styled@link:packages/react/kibana_context/styled":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-theme@link:packages/react/kibana_context/theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-mount@link:packages/react/kibana_mount":
   version "0.0.0"
   uid ""
 
@@ -22616,10 +22644,10 @@ open@^8.0.9, open@^8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openai@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-3.2.1.tgz#1fa35bdf979cbde8453b43f2dd3a7d401ee40866"
-  integrity sha512-762C9BNlJPbjjlWZi4WYK9iM2tAVAv0uUp1UmI34vb0CN5T2mjB/qM6RYBmNKMh/dN9fC+bxqPwWJZUTWW052A==
+openai@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-3.3.0.tgz#a6408016ad0945738e1febf43f2fccca83a3f532"
+  integrity sha512-uqxI/Au+aPRnsaQRe8CojU0eCR7I0mBiKjD3sNMzY6DaC1ZVrc85u98mtJW6voDug8fgGN+DIZmTDxTthxb7dQ==
   dependencies:
     axios "^0.26.0"
     form-data "^4.0.0"
