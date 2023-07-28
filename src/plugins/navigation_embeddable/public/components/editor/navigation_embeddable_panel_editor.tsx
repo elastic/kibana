@@ -146,7 +146,7 @@ const NavigationEmbeddablePanelEditor = ({
   }, [onSave, orderedLinks, currentLayout]);
 
   const layoutOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
-    return ([NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
+    return ([NAV_VERTICAL_LAYOUT, NAV_HORIZONTAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
       return {
         id: type,
         label: NavigationLayoutInfo[type].displayName,
