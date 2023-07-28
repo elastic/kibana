@@ -207,14 +207,14 @@ The maximum {byte-units}[byte size] of a CSV file before being truncated. This s
 
 [NOTE]
 ============
-We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in external tools, but is not designed for bulk export or to backup {es} data. Setting `xpack.reporting.csv.maxSizeBytes` larger than the default limit hat the potential to negatively affect the performance of your {es} cluster. 
+We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in external tools, but it's not intended for bulk export or to backup {es} data. Setting `xpack.reporting.csv.maxSizeBytes` to larger than 250 MB can negatively affect the performance of your {es} cluster.
 
 The following deployment configurations may lead to failed report jobs or incomplete reports:
 
 * Any shard needed for search is unavailable.
 * Data is stored on slow storage tiers. 
 * Network latency between nodes is high.
-* Cross-cluster search is used. 
+* * {ccs-cap} is used.
 
 To export large amounts of data we recommend using {es} APIs directly, or Logstash CSV export. See {ref}/scroll-api.html[Scroll API], {ref}/point-in-time-api.html[Point in time API], and {ref}/sql-rest-format.html#_csv[CSV response format].
 ============
@@ -230,7 +230,7 @@ If the default size of 500 covers a large number of shards in {es}, you may need
  Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Defaults to `30s`.
 [NOTE]
 ============
-If search latency in {es} is sufficiently high, such as if you are using cross-cluster search, you may need to increase the setting. 
+If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may need to increase the setting.
 ============
 
 `xpack.reporting.csv.checkForFormulas`::
