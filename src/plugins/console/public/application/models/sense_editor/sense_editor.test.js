@@ -521,7 +521,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
 
   describe('getRequestsAsCURL', () => {
     it('should return empty string if no requests', async () => {
-      input?.getCoreEditor().setValue('', false);
+      input?.getCoreEditor().setValue('', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 1 },
@@ -531,7 +531,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
 
     it('should replace variables in the URL', async () => {
       storage.set('variables', [{ name: 'exampleVariableA', value: 'valueA' }]);
-      input?.getCoreEditor().setValue('GET ${exampleVariableA}', false);
+      input?.getCoreEditor().setValue('GET ${exampleVariableA}', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 1 },
@@ -544,7 +544,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
       console.log(storage.get('variables'));
       input
         ?.getCoreEditor()
-        .setValue('GET _search\n{\t\t"query": {\n\t\t\t"${exampleVariableB}": ""\n\t}\n}', false);
+        .setValue('GET _search\n{\t\t"query": {\n\t\t\t"${exampleVariableB}": ""\n\t}\n}', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 6 },
@@ -553,7 +553,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
     });
 
     it('should strip comments in the URL', async () => {
-      input?.getCoreEditor().setValue('GET _search // comment', false);
+      input?.getCoreEditor().setValue('GET _search // comment', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 6 },
@@ -564,7 +564,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
     it('should strip comments in the body', async () => {
       input
         ?.getCoreEditor()
-        .setValue('{\n\t"query": {\n\t\t"match_all": {} // comment \n\t}\n}', false);
+        .setValue('GET _search\n{\n\t"query": {\n\t\t"match_all": {} // comment \n\t}\n}', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 8 },
@@ -576,7 +576,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
     it('should strip multi-line comments in the body', async () => {
       input
         ?.getCoreEditor()
-        .setValue('{\n\t"query": {\n\t\t"match_all": {} /* comment */\n\t}\n}', false);
+        .setValue('GET _search\n{\n\t"query": {\n\t\t"match_all": {} /* comment */\n\t}\n}', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 8 },
@@ -590,7 +590,7 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
         { name: 'exampleVariableA', value: 'valueA' },
         { name: 'exampleVariableB', value: 'valueB' },
       ]);
-      input?.getCoreEditor().setValue('GET ${exampleVariableA}/${exampleVariableB}', false);
+      input?.getCoreEditor().setValue('GET ${exampleVariableA}/${exampleVariableB}', true);
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 1 },
@@ -608,11 +608,30 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
         ?.getCoreEditor()
         .setValue(
           'GET _search\n{\t\t"query": {\n\t\t\t"${exampleVariableA}": "${exampleVariableB}"\n\t}\n}',
-          false
+          true
         );
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 6 },
+      });
+      expect(curl).toContain('valueA');
+      expect(curl).toContain('valueB');
+    });
+
+    it('should replace variables in bulk request', async () => {
+      storage.set('variables', [
+        { name: 'exampleVariableA', value: 'valueA' },
+        { name: 'exampleVariableB', value: 'valueB' },
+      ]);
+      input
+        ?.getCoreEditor()
+        .setValue(
+          'POST _bulk\n{"index": {"_id": "0"}}\n{"field" : "${exampleVariableA}"}\n{"index": {"_id": "1"}}\n{"field" : "${exampleVariableB}"}\n',
+          true
+        );
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 4 },
       });
       expect(curl).toContain('valueA');
       expect(curl).toContain('valueB');
