@@ -20,6 +20,7 @@ import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
+import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import {
   BulkActionType,
   PerformBulkActionRequestBody,
@@ -246,7 +247,7 @@ export const performBulkActionRoute = (
         },
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -68,6 +68,7 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
+  esClient: ElasticsearchClient;
 }
 
 /**
@@ -104,6 +105,7 @@ export class EndpointAppContextService {
         exceptionListsClient,
         featureUsageService,
         endpointMetadataService,
+        esClient,
       } = dependencies;
 
       registerIngestCallback(
@@ -131,7 +133,8 @@ export class EndpointAppContextService {
           licenseService,
           featureUsageService,
           endpointMetadataService,
-          cloud
+          cloud,
+          esClient
         )
       );
 
