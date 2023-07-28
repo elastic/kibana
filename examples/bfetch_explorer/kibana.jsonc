@@ -1,17 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/bfetch-explorer-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": "@elastic/kibana-data-discovery",
   "plugin": {
     "id": "bfetchExplorer",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "bfetch",
-      "developerExamples"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredPlugins": ["bfetch", "developerExamples"],
+    "requiredBundles": ["kibanaReact"]
   }
 }
