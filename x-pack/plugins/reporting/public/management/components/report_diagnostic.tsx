@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -90,8 +91,17 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   let flyout;
   if (isFlyoutVisible) {
+    let successCallout;
+
+    if (state.success && chromeStatus === 'complete') {
+      successCallout = (
+        <EuiCallOut color="success" title="Everything looks good for reporting to function." />
+      );
+    }
+
     flyout = (
       <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
+        {successCallout}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -110,7 +120,16 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiText>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.reporting.listing.diagnosticBrowserTitle"
+                defaultMessage="Check browser"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued">
             <FormattedMessage
               id="xpack.reporting.listing.diagnosticBrowserMessage"
               defaultMessage="Reporting uses a headless browser to generate PDF and PNGs. Validate that the browser can launch successfully."
