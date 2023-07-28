@@ -29,7 +29,9 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
@@ -289,6 +291,28 @@ export const getPolicyBlocklistsPath = (
     policyId,
   });
   return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
+export const getProtectionUpdatesListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_PROTECTION_UPDATES_PATH, {
+    tabName: AdministrationSubTab.protectionUpdates,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getPolicyProtectionUpdatesPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(
     querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
 };
