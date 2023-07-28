@@ -72,7 +72,10 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
                 setErrors([]);
               },
             },
-            saveButtonProps: { 'data-test-subj': 'editable-title-submit-btn' },
+            saveButtonProps: {
+              'data-test-subj': 'editable-title-submit-btn',
+              isDisabled: hasErrors,
+            },
             cancelButtonProps: {
               onClick: () => onCancel(),
               'data-test-subj': 'editable-title-cancel-btn',
