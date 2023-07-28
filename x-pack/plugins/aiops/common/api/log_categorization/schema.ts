@@ -15,7 +15,7 @@ export const runtimeMappingsSchema = schema.object(
     unknowns: 'allow',
     validate: (v: object) => {
       if (Object.values(v).some((o) => !isRuntimeField(o))) {
-        return i18n.translate('xpack.ml.invalidRuntimeFieldMessage', {
+        return i18n.translate('xpack.aiops.invalidRuntimeFieldMessage', {
           defaultMessage: 'Invalid runtime field',
         });
       }
