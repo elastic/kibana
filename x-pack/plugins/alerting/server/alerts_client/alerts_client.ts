@@ -257,7 +257,7 @@ export class AlertsClient<
 
   public async persistAlerts() {
     if (!this.ruleType.alerts?.shouldWrite) {
-      this.options.logger.error(
+      this.options.logger.debug(
         `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false.`
       );
       return;
@@ -424,7 +424,7 @@ export class AlertsClient<
     start,
     end,
     executionUuid,
-  }: GetSummarizedAlertsParams<AlertData>): Promise<SummarizedAlerts> {
+  }: GetSummarizedAlertsParams): Promise<SummarizedAlerts> {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
     }

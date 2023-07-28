@@ -576,7 +576,7 @@ export class ExecutionHandler<
   }
 
   private canGetSummarizedAlerts() {
-    return this.ruleType.alerts !== undefined;
+    return !!this.ruleType.alerts && !!this.alertsClient.getSummarizedAlerts;
   }
 
   private shouldGetSummarizedAlerts({
@@ -630,7 +630,7 @@ export class ExecutionHandler<
       alertsFilter: action.alertsFilter,
     };
 
-    let options: GetSummarizedAlertsParams<AlertData>;
+    let options: GetSummarizedAlertsParams;
 
     if (isActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);

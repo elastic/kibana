@@ -81,6 +81,7 @@ import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -98,6 +99,7 @@ const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemM
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
+const alertsClient = alertsClientMock.create();
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -1444,28 +1446,15 @@ describe('Task Runner', () => {
         return { state: {} };
       });
 
-      alertsService.createAlertsClient.mockImplementation(() => {
-        return {
-          initializeExecution: jest.fn(),
-          processAndLogAlerts: jest.fn(),
-          getTrackedAlerts: jest.fn(),
-          getProcessedAlerts: jest.fn(),
-          getAlertsToSerialize: jest.fn(),
-          hasReachedAlertLimit: jest.fn(),
-          checkLimitUsage: jest.fn(),
-          persistAlerts: jest.fn(),
-          getSummarizedAlerts: jest.fn().mockResolvedValue({
-            new: {
-              count: 1,
-              data: [mockAAD],
-            },
-            ongoing: { count: 0, data: [] },
-            recovered: { count: 0, data: [] },
-          }),
-          factory: jest.fn(),
-          client: jest.fn(),
-        };
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
+        new: {
+          count: 1,
+          data: [mockAAD],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
       });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
       const taskRunner = new TaskRunner({
         ruleType,
@@ -1519,6 +1508,17 @@ describe('Task Runner', () => {
         return { state: {} };
       });
 
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
+        new: {
+          count: 1,
+          data: [mockAAD],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+      alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
       const taskRunner = new TaskRunner({
         ruleType,
         taskInstance: mockedTaskInstance,
@@ -1548,31 +1548,16 @@ describe('Task Runner', () => {
         ],
       });
 
-      alertsService.createAlertsClient.mockImplementation(() => {
-        return {
-          initializeExecution: jest.fn(),
-          processAndLogAlerts: jest.fn(),
-          getTrackedAlerts: jest.fn(),
-          getProcessedAlerts: jest.fn(),
-          getAlertsToSerialize: jest.fn().mockResolvedValueOnce({ state: {}, meta: {} }),
-          hasReachedAlertLimit: jest.fn(),
-          checkLimitUsage: jest.fn(),
-          persistAlerts: jest.fn(),
-          getSummarizedAlerts: jest.fn().mockResolvedValue({
-            new: {
-              count: 1,
-              data: [mockAAD],
-            },
-            ongoing: { count: 0, data: [] },
-            recovered: { count: 0, data: [] },
-          }),
-          factory: jest.fn(),
-          client: jest.fn(),
-        };
-      });
-
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       const result = await taskRunner.run();
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+        start: new Date('1969-12-31T23:00:00.000Z'),
+        end: new Date(DATE_1970),
+        ruleId: '1',
+        spaceId: 'default',
+        excludedAlertInstanceIds: [],
+      });
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(

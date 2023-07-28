@@ -33,6 +33,7 @@ import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
 import { schema } from '@kbn/config-schema';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -42,18 +43,7 @@ const injectActionParamsMock = injectActionParams as jest.Mock;
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
-const alertsClientMock = {
-  client: jest.fn(),
-  factory: jest.fn(),
-  getProcessedAlerts: jest.fn(),
-  checkLimitUsage: jest.fn(),
-  getAlertsToSerialize: jest.fn(),
-  hasReachedAlertLimit: jest.fn(),
-  initializeExecution: jest.fn(),
-  persistAlerts: jest.fn(),
-  processAndLogAlerts: jest.fn(),
-  getSummarizedAlerts: jest.fn(),
-};
+const alertsClient = alertsClientMock.create();
 const mockActionsPlugin = actionsMock.createStart();
 const apiKey = Buffer.from('123:abc').toString('base64');
 const ruleType: NormalizedRuleType<
@@ -144,7 +134,7 @@ const defaultExecutionParams = {
     params: { spaceId: 'test1', alertId: '1' },
   } as unknown as ConcreteTaskInstance,
   actionsClient,
-  alertsClient: alertsClientMock,
+  alertsClient,
 };
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
@@ -862,7 +852,7 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (per rule run)', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
         data: [mockAAD],
@@ -897,7 +887,7 @@ describe('Execution Handler', () => {
 
     await executionHandler.run(generateAlert({ id: 1 }));
 
-    expect(alertsClientMock.getSummarizedAlerts).toHaveBeenCalledWith({
+    expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
       ruleId: '1',
       spaceId: 'test1',
@@ -943,7 +933,7 @@ describe('Execution Handler', () => {
   });
 
   test('skips summary actions (per rule run) when there is no alerts', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: { count: 0, data: [] },
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
@@ -980,7 +970,7 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (custom interval)', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
         data: [mockAAD],
@@ -1016,7 +1006,7 @@ describe('Execution Handler', () => {
 
     const result = await executionHandler.run({});
 
-    expect(alertsClientMock.getSummarizedAlerts).toHaveBeenCalledWith({
+    expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       start: new Date('1969-12-31T00:01:30.000Z'),
       end: new Date(),
       ruleId: '1',
@@ -1070,7 +1060,7 @@ describe('Execution Handler', () => {
   });
 
   test('does not trigger summary actions if it is still being throttled (custom interval)', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: { count: 0, alerts: [] },
       ongoing: { count: 0, alerts: [] },
       recovered: { count: 0, alerts: [] },
@@ -1112,13 +1102,13 @@ describe('Execution Handler', () => {
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
       "skipping scheduling the action 'testActionTypeId:1', summary action is still being throttled"
     );
-    expect(alertsClientMock.getSummarizedAlerts).not.toHaveBeenCalled();
+    expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
 
   test('removes the obsolete actions from the task state', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: { count: 0, data: [] },
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
@@ -1319,7 +1309,7 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
         data: [],
@@ -1364,7 +1354,7 @@ describe('Execution Handler', () => {
       ...generateAlert({ id: 2 }),
     });
 
-    expect(alertsClientMock.getSummarizedAlerts).toHaveBeenCalledWith({
+    expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
       ruleId: '1',
       spaceId: 'test1',
@@ -1382,7 +1372,7 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (summary of alerts onThrottleInterval)', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
         data: [],
@@ -1427,7 +1417,7 @@ describe('Execution Handler', () => {
       ...generateAlert({ id: 2 }),
     });
 
-    expect(alertsClientMock.getSummarizedAlerts).toHaveBeenCalledWith({
+    expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       ruleId: '1',
       spaceId: 'test1',
       end: new Date('1970-01-01T00:01:30.000Z'),
@@ -1442,7 +1432,7 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
         data: [{ ...mockAAD, kibana: { alert: { uuid: '1' } } }],
@@ -1485,7 +1475,7 @@ describe('Execution Handler', () => {
       ...generateAlert({ id: 3 }),
     });
 
-    expect(alertsClientMock.getSummarizedAlerts).toHaveBeenCalledWith({
+    expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
       ruleId: '1',
       spaceId: 'test1',
@@ -1519,7 +1509,7 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule summary actions when there is an active maintenance window', async () => {
-    alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 2,
         data: [
@@ -1684,7 +1674,7 @@ describe('Execution Handler', () => {
     it('populates the rule.url with start and stop time when available', async () => {
       clock.reset();
       clock.tick(90000);
-      alertsClientMock.getSummarizedAlerts.mockResolvedValue({
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 2,
           data: [

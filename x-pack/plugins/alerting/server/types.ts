@@ -252,6 +252,9 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
    */
   secondaryAlias?: string;
 
+  /**
+   * Optional function to format each alert in summarizedAlerts right after fetching them.
+   */
   formatAlert?: FormatAlert<AlertData>;
 }
 

@@ -62,13 +62,13 @@ const alertTypes = {
   recovered: 'close',
 };
 
-export const getParamsByExecutionUuid: GetSummarizedAlertsParams<{}> = {
+export const getParamsByExecutionUuid: GetSummarizedAlertsParams = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],
   executionUuid: '111',
 };
-export const getParamsByTimeQuery: GetSummarizedAlertsParams<{}> = {
+export const getParamsByTimeQuery: GetSummarizedAlertsParams = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],

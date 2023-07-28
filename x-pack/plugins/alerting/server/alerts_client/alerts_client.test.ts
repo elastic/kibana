@@ -21,7 +21,7 @@ import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
 import { keys, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { expandFlattenedAlert } from './lib/get_persistent_alerts_query';
+import { expandFlattenedAlert } from './lib/get_summarized_alerts_query';
 import {
   alertRuleData,
   getExpectedQueryByExecutionUuid,
@@ -1096,7 +1096,7 @@ describe('Alerts Client', () => {
 
       expect(await alertsClient.persistAlerts()).toBe(void 0);
 
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Resources registered and installed for test context but "shouldWrite" is set to false.`
       );
       expect(clusterClient.bulk).not.toHaveBeenCalled();
@@ -1393,7 +1393,7 @@ describe('Alerts Client', () => {
         const { ruleId, ...paramsWithoutRuleId } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getSummarizedAlerts(paramsWithoutRuleId as GetSummarizedAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutRuleId as GetSummarizedAlertsParams)
         ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
       });
 
@@ -1401,7 +1401,7 @@ describe('Alerts Client', () => {
         const { spaceId, ...paramsWithoutSpaceId } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getSummarizedAlerts(paramsWithoutSpaceId as GetSummarizedAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutSpaceId as GetSummarizedAlertsParams)
         ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
       });
 
@@ -1409,9 +1409,7 @@ describe('Alerts Client', () => {
         const { executionUuid, ...paramsWithoutExecutionUuid } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getSummarizedAlerts(
-            paramsWithoutExecutionUuid as GetSummarizedAlertsParams<{}>
-          )
+          alertsClient.getSummarizedAlerts(paramsWithoutExecutionUuid as GetSummarizedAlertsParams)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );
@@ -1421,7 +1419,7 @@ describe('Alerts Client', () => {
         const { start, ...paramsWithoutStart } = getParamsByTimeQuery;
 
         await expect(
-          alertsClient.getSummarizedAlerts(paramsWithoutStart as GetSummarizedAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutStart as GetSummarizedAlertsParams)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );
@@ -1431,7 +1429,7 @@ describe('Alerts Client', () => {
         const { end, ...paramsWithoutEnd } = getParamsByTimeQuery;
 
         await expect(
-          alertsClient.getSummarizedAlerts(paramsWithoutEnd as GetSummarizedAlertsParams<{}>)
+          alertsClient.getSummarizedAlerts(paramsWithoutEnd as GetSummarizedAlertsParams)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );

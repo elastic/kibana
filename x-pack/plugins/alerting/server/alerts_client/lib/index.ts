@@ -14,4 +14,4 @@ export {
   getHitsWithCount,
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
-} from './get_persistent_alerts_query';
+} from './get_summarized_alerts_query';
