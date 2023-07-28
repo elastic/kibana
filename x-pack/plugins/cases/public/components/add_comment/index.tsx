@@ -44,6 +44,7 @@ export interface AddCommentRefObject {
   editor: EuiMarkdownEditorRef | null;
 }
 
+/* eslint-disable react/no-unused-prop-types */
 export interface AddCommentProps {
   id: string;
   caseId: string;
@@ -54,6 +55,7 @@ export interface AddCommentProps {
   statusActionButton: JSX.Element | null;
   subCaseId?: string;
 }
+/* eslint-enable react/no-unused-prop-types */
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(

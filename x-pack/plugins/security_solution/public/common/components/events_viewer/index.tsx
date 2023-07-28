@@ -48,7 +48,7 @@ export interface OwnProps {
   leadingControlColumns: ControlColumnProps[];
   scopeId: SourcererScopeName;
   start: string;
-  showTotalCount?: boolean;
+  showTotalCount?: boolean; // eslint-disable-line react/no-unused-prop-types
   pageFilters?: Filter[];
   currentFilter?: Status;
   onRuleChange?: () => void;

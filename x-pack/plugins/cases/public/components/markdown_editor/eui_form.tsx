@@ -12,6 +12,7 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_
 import { MarkdownEditor, MarkdownEditorRef } from './editor';
 import { CommentEditorContext } from './context';
 
+/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook<string>;
@@ -22,6 +23,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   caseTitle?: string;
   caseTags?: string[];
 };
+/* eslint-enable react/no-unused-prop-types */
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
