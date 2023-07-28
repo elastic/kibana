@@ -392,51 +392,6 @@ describe('Case View Page activity tab', () => {
   });
 
   describe('Case users', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/152204
-    describe.skip('Participants', () => {
-      it('should render the participants correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const participantsSection = within(
-          await screen.findByTestId('case-view-user-list-participants')
-        );
-
-        expect(await participantsSection.findByText('Participant 1')).toBeInTheDocument();
-        expect(
-          await participantsSection.findByText('participant_2@elastic.co')
-        ).toBeInTheDocument();
-        expect(await participantsSection.findByText('participant_3')).toBeInTheDocument();
-        expect(await participantsSection.findByText('P4')).toBeInTheDocument();
-        expect(await participantsSection.findByText('Participant 5')).toBeInTheDocument();
-      });
-
-      it('should render Unknown users correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const participantsSection = within(
-          await screen.findByTestId('case-view-user-list-participants')
-        );
-
-        expect(await participantsSection.findByText('Unknown')).toBeInTheDocument();
-      });
-
-      it('should render assignees in the participants section', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const participantsSection = within(
-          await screen.findByTestId('case-view-user-list-participants')
-        );
-
-        expect(await participantsSection.findByText('Unknown')).toBeInTheDocument();
-        expect(await participantsSection.findByText('Fuzzy Marten')).toBeInTheDocument();
-        expect(await participantsSection.findByText('elastic')).toBeInTheDocument();
-        expect(await participantsSection.findByText('Misty Mackerel')).toBeInTheDocument();
-      });
-    });
-
     describe('Assignees', () => {
       it('should render assignees in the participants section', async () => {
         appMockRender = createAppMockRenderer({ license: platinumLicense });
