@@ -414,12 +414,7 @@ export class SyntheticsPrivateLocation {
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of monitorPrivateLocations) {
-        try {
-          policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
-        } catch (e) {
-          this.server.logger.error(e);
-          throw new Error(deletePolicyError(config[ConfigKey.NAME], privateLocation.label));
-        }
+        policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
       }
     }
     if (policyIdsToDelete.length > 0) {

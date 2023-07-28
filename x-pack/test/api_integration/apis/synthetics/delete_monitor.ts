@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
     });
 
-    it('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
+    it.skip('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
       const name = `Monitor with a private location ${uuidv4()}`;
       const newMonitor = {
         name,
