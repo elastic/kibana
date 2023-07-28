@@ -148,35 +148,7 @@ function createCategoryRequest(
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number
 ) {
-  const query = cloneDeep(queryIn);
-
-  if (query.bool === undefined) {
-    query.bool = {};
-  }
-  if (query.bool.must === undefined) {
-    query.bool.must = [];
-    if (query.match_all !== undefined) {
-      query.bool.must.push({ match_all: query.match_all });
-      delete query.match_all;
-    }
-  }
-  if (query.multi_match !== undefined) {
-    query.bool.should = {
-      multi_match: query.multi_match,
-    };
-    delete query.multi_match;
-  }
-
-  (query.bool.must as QueryDslQueryContainer[]).push({
-    range: {
-      [timeField]: {
-        gte: from,
-        lte: to,
-        format: 'epoch_millis',
-      },
-    },
-  });
-
+  const query = createCategorizeQuery(queryIn, timeField, from, to);
   const aggs = {
     categories: {
       categorize_text: {
@@ -215,6 +187,44 @@ function createCategoryRequest(
       },
     },
   };
+}
+
+export function createCategorizeQuery(
+  queryIn: QueryDslQueryContainer,
+  timeField: string,
+  from: number | undefined,
+  to: number | undefined
+) {
+  const query = cloneDeep(queryIn);
+
+  if (query.bool === undefined) {
+    query.bool = {};
+  }
+  if (query.bool.must === undefined) {
+    query.bool.must = [];
+    if (query.match_all !== undefined) {
+      query.bool.must.push({ match_all: query.match_all });
+      delete query.match_all;
+    }
+  }
+  if (query.multi_match !== undefined) {
+    query.bool.should = {
+      multi_match: query.multi_match,
+    };
+    delete query.multi_match;
+  }
+
+  (query.bool.must as QueryDslQueryContainer[]).push({
+    range: {
+      [timeField]: {
+        gte: from,
+        lte: to,
+        format: 'epoch_millis',
+      },
+    },
+  });
+
+  return query;
 }
 
 function processCategoryResults(
