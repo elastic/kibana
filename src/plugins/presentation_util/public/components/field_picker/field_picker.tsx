@@ -8,7 +8,6 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import useMount from 'react-use/lib/useMount';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
