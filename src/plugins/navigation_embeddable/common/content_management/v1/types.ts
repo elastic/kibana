@@ -38,13 +38,9 @@ export interface NavigationEmbeddableLink {
   order: number;
 }
 
-export interface NavigationEmbeddableLinkList {
-  [id: string]: NavigationEmbeddableLink;
-}
-
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type NavigationEmbeddableAttributes = {
   title: string;
   description?: string;
-  links?: NavigationEmbeddableLinkList;
+  links?: NavigationEmbeddableLink[];
 };

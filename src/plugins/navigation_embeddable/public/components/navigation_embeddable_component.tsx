@@ -15,11 +15,14 @@ import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
+import { NavigationEmbeddableByValueInput } from '../embeddable/types';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const links = navEmbeddable.select((state) => state.output.attributes?.links);
+  const links = navEmbeddable.select(
+    (state) => (state.explicitInput as NavigationEmbeddableByValueInput).attributes?.links
+  );
 
   const orderedLinks = useMemo(() => {
     if (!links) return [];

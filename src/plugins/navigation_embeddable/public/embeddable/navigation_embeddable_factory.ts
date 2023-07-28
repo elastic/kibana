@@ -82,14 +82,10 @@ export class NavigationEmbeddableFactoryDefinition
     if (!(input as NavigationEmbeddableByReferenceInput).savedObjectId) {
       (input as NavigationEmbeddableByReferenceInput).savedObjectId = savedObjectId;
     }
-    return this.create(input, parent, savedObjectId);
+    return this.create(input, parent);
   }
 
-  public async create(
-    initialInput: NavigationEmbeddableInput,
-    parent: DashboardContainer,
-    savedObjectId?: string
-  ) {
+  public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
     await untilPluginStartServicesReady();
 
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();

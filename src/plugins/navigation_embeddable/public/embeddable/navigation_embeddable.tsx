@@ -7,6 +7,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { Subscription } from 'rxjs';
 
 import {
   AttributeService,
@@ -16,7 +17,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { Subscription } from 'rxjs';
+
 import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
 import {
   NavigationEmbeddableByReferenceInput,
@@ -57,8 +58,7 @@ export class NavigationEmbeddable
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
   deferEmbeddableLoad = true;
 
-  private attributes?: NavigationEmbeddableAttributes;
-  private savedObjectId?: string;
+  private isDestroyed?: boolean;
   private subscriptions: Subscription = new Subscription();
 
   // state management
@@ -101,23 +101,31 @@ export class NavigationEmbeddable
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
-    this.subscriptions.add(
-      this.getInput$().subscribe(async () => {
-        const savedObjectId = (this.getInput() as NavigationEmbeddableByReferenceInput)
-          .savedObjectId;
-        const attributes = (this.getInput() as NavigationEmbeddableByValueInput).attributes;
-        if (this.attributes !== attributes || this.savedObjectId !== savedObjectId) {
-          this.savedObjectId = savedObjectId;
-          this.reload();
-        } else {
-          this.updateOutput({
-            attributes: this.attributes,
-            defaultTitle: this.attributes.title,
-          });
-        }
-      })
-    );
-    this.setInitializationFinished();
+    this.initializeSavedLinks(initialInput)
+      .then(() => this.setInitializationFinished())
+      .catch((e: Error) => this.onFatalError(e));
+  }
+
+  private async initializeSavedLinks(input: NavigationEmbeddableInput) {
+    const { metaInfo, attributes } = await this.attributeService.unwrapAttributes(input);
+    if (this.isDestroyed) return;
+
+    // TODO handle metaInfo
+
+    this.updateInput({ attributes });
+
+    await this.initializeOutput();
+  }
+
+  private async initializeOutput() {
+    const { attributes } = this.getInput() as NavigationEmbeddableByValueInput;
+    const { title, description } = this.getInput();
+    this.updateOutput({
+      defaultTitle: attributes.title,
+      defaultDescription: attributes.description,
+      title: title ?? attributes.title,
+      description: description ?? attributes.description,
+    });
   }
 
   public inputIsRefType(
@@ -137,21 +145,20 @@ export class NavigationEmbeddable
   }
 
   public async reload() {
-    this.attributes = (await this.attributeService.unwrapAttributes(this.input)).attributes;
-
-    this.updateOutput({
-      attributes: this.attributes,
-      defaultTitle: this.attributes.title,
-      defaultDescription: this.attributes.description,
-    });
+    if (this.isDestroyed) return;
+    await this.initializeSavedLinks(this.getInput());
+    this.render();
   }
 
   public destroy() {
+    this.isDestroyed = true;
     super.destroy();
+    this.subscriptions.unsubscribe();
     this.cleanupStateTools();
   }
 
   public render() {
+    if (this.isDestroyed) return;
     return (
       <NavigationEmbeddableContext.Provider value={this}>
         <NavigationEmbeddableComponent />

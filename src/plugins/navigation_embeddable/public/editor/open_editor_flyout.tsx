@@ -53,9 +53,11 @@ export async function openEditorFlyout(
     const onSave = async (newAttributes: NavigationEmbeddableAttributes, useRefType: boolean) => {
       const newInput = await getNavigationEmbeddableAttributeService().wrapAttributes(
         newAttributes,
-        useRefType
+        useRefType,
+        initialInput
       );
       resolve(newInput);
+      parentDashboard?.reload();
       editorFlyout.close();
     };
 

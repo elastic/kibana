@@ -7,19 +7,12 @@
  */
 
 import { memoize } from 'lodash';
-import {
-  NavigationEmbeddableLink,
-  NavigationEmbeddableLinkList,
-} from '../../common/content_management';
+import { NavigationEmbeddableLink } from '../../common/content_management';
 
-const getOrderedLinkList = (links: NavigationEmbeddableLinkList): NavigationEmbeddableLink[] => {
-  return Object.keys(links)
-    .map((linkId) => {
-      return links[linkId];
-    })
-    .sort((linkA, linkB) => {
-      return linkA.order - linkB.order;
-    });
+const getOrderedLinkList = (links: NavigationEmbeddableLink[]): NavigationEmbeddableLink[] => {
+  return [...links].sort((linkA, linkB) => {
+    return linkA.order - linkB.order;
+  });
 };
 
 /**
@@ -28,10 +21,10 @@ const getOrderedLinkList = (links: NavigationEmbeddableLinkList): NavigationEmbe
  * calculated this so, we can get away with using the cached version in the editor
  */
 export const memoizedGetOrderedLinkList = memoize(
-  (links: NavigationEmbeddableLinkList) => {
+  (links: NavigationEmbeddableLink[]) => {
     return getOrderedLinkList(links);
   },
-  (links: NavigationEmbeddableLinkList) => {
+  (links: NavigationEmbeddableLink[]) => {
     return links;
   }
 );

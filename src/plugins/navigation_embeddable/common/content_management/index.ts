@@ -16,7 +16,6 @@ export type {
   NavigationEmbeddableItem,
   NavigationLinkType,
   NavigationEmbeddableLink,
-  NavigationEmbeddableLinkList,
 } from './latest';
 
 export { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from './latest';

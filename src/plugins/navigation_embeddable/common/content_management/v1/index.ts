@@ -11,7 +11,6 @@ export type {
   NavigationEmbeddableCrudTypes,
   NavigationEmbeddableAttributes,
   NavigationEmbeddableLink,
-  NavigationEmbeddableLinkList,
   NavigationLinkType,
 } from './types';
 export type NavigationEmbeddableItem = NavigationEmbeddableCrudTypes['Item'];

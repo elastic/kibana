@@ -8,7 +8,7 @@
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 
-export type NavigationEmbeddableContentType = 'navigationEmbeddable';
+export type NavigationEmbeddableContentType = 'navigation_embeddable';
 
 // TODO does this type need to be versioned?
 export interface SharingSavedObjectProps {

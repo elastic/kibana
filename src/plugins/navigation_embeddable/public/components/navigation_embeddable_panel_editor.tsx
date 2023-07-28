@@ -39,7 +39,6 @@ import { coreServices } from '../services/kibana_services';
 import {
   NavigationEmbeddableAttributes,
   NavigationEmbeddableLink,
-  NavigationEmbeddableLinkList,
 } from '../../common/content_management';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 
@@ -84,7 +83,11 @@ const NavigationEmbeddablePanelEditor = ({
   const onDragEnd = useCallback(
     ({ source, destination }) => {
       if (source && destination) {
-        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index);
+        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
+          (link, i) => {
+            return { ...link, order: i };
+          }
+        );
         setOrderedLinks(newList);
       }
     },
@@ -136,9 +139,7 @@ const NavigationEmbeddablePanelEditor = ({
         isLoading={isSaving}
         onClick={async () => {
           setIsSaving(true);
-          const newLinks = orderedLinks.reduce((prev, link, i) => {
-            return { ...prev, [link.id]: { ...link, order: i } };
-          }, {} as NavigationEmbeddableLinkList);
+          const newLinks = [...orderedLinks];
           const newAttributes: NavigationEmbeddableAttributes = {
             title: libraryTitle,
             links: newLinks,
