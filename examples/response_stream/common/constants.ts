@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-/**
- * Escapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value
- * in a KQL expression. See the QuotedCharacter rule in kuery.peg.)
- */
-export function escapeQuotes(str: string) {
-  return str.replace(/[\\"]/g, '\\$&');
-}
+export const PLUGIN_ID = 'response-stream';
+export const PLUGIN_NAME = 'response stream';
