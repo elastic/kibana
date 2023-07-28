@@ -39,7 +39,10 @@ describe('Editor', () => {
     oldUrl = global.URL;
     olldWindow = { ...global.window };
     global.URL = URL;
-    global.window = Object.create(window);
+    Object.defineProperty(global, 'window', {
+      value: Object.create(window),
+      writable: true,
+    });
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'http://localhost:5620',
