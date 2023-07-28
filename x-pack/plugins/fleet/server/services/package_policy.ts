@@ -413,7 +413,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
 
     packagePoliciesWithIds.forEach((packagePolicy) => {
-      const hasCreatedSO = createdObjects.find((so) => so.id === packagePolicy.id);
+      const hasCreatedSO = newSos.find((so) => so.id === packagePolicy.id);
       const hasFailed = failedPolicies.some(
         ({ packagePolicy: failedPackagePolicy }) => failedPackagePolicy.id === packagePolicy.id
       );
