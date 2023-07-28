@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { MapConfig, mapConfigSchema } from '../config';
+import { MapConfig, mapConfigSchema, overrideMapConfig } from '../config';
 import { EMSSettings, LICENSE_CHECK_ID } from '../common';
 export type { EMSSettings } from '../common';
 
@@ -49,7 +49,14 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
   }
 
   public setup(core: CoreSetup, plugins: MapsEmsSetupServerDependencies) {
-    const mapConfig = this._initializerContext.config.get();
+    const context = this._initializerContext;
+    const defaultConfig = context.config.get<MapConfig>();
+    const { buildFlavor, version } = context.env.packageInfo;
+
+    const mapConfig =
+      buildFlavor === 'serverless' || !version
+        ? defaultConfig
+        : overrideMapConfig(defaultConfig, version);
 
     let isEnterprisePlus = false;
     if (plugins.licensing) {
