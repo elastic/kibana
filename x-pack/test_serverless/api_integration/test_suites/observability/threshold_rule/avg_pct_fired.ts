@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
-
+  // failing
   describe('Threshold rule - AVG - PCT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
@@ -40,8 +40,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
+      await await supertest
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      await supertest
+        .delete(`/api/actions/connector/${actionId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -57,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
       await cleanup({ esClient, logger });
     });
-
+    // failing
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await createIndexConnector({

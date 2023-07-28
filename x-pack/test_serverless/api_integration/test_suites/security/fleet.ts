@@ -14,9 +14,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fleet', function () {
     it('rejects request to create a new fleet server hosts', async () => {
+      // internal API requires 'x-elastic-internal-origin' header
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({
           name: 'test',
           host_urls: ['https://localhost:8220'],
@@ -32,9 +34,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('rejects request to create a new proxy', async () => {
+      // internal API requires 'x-elastic-internal-origin' header
       const { body, status } = await supertest
         .post('/api/fleet/proxies')
         .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({
           name: 'test',
           url: 'https://localhost:8220',
