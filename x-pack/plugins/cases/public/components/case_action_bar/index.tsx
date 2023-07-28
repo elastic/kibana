@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
+import type { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import { CaseMetricsFeature } from '../../../common/api';
 import * as i18n from '../case_view/translations';

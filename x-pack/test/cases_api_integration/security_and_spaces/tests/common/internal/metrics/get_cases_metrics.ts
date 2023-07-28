@@ -17,15 +17,15 @@ import {
   globalRead,
   obsSecRead,
   obsSec,
-} from '../../../../common/lib/authentication/users';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+} from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   deleteAllCaseItems,
   getCasesMetrics,
   updateCase,
-} from '../../../../common/lib/api';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+} from '../../../../../common/lib/api';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

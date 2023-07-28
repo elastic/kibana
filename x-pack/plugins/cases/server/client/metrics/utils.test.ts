@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseMetricsFeatureField } from '../../../common/api/metrics/case';
+import type { CasesMetricsFeatureField } from '../../../common/api/metrics/case';
 import { CaseMetricsFeature } from '../../../common/api/metrics/case';
 import { createMockClient, createMockClientArgs } from './test_utils/client';
 import { buildHandlers } from './utils';
@@ -14,7 +14,7 @@ describe('utils', () => {
   describe('buildHandlers', () => {
     const casesClient = createMockClient();
     const clientArgs = createMockClientArgs();
-    const SINGLE_CASE_FEATURES: CaseMetricsFeatureField[] = [
+    const SINGLE_CASE_FEATURES: CasesMetricsFeatureField[] = [
       CaseMetricsFeature.ALERTS_COUNT,
       CaseMetricsFeature.ALERTS_HOSTS,
       CaseMetricsFeature.ALERTS_USERS,
@@ -23,7 +23,7 @@ describe('utils', () => {
       CaseMetricsFeature.LIFESPAN,
     ];
 
-    const CASES_FEATURES: CaseMetricsFeatureField[] = [CaseMetricsFeature.MTTR];
+    const CASES_FEATURES: CasesMetricsFeatureField[] = [CaseMetricsFeature.MTTR];
 
     it('returns the correct single case handlers', async () => {
       const handlers = buildHandlers(

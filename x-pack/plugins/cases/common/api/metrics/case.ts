@@ -25,13 +25,17 @@ export enum CaseMetricsFeature {
   MTTR = 'mttr',
 }
 
-export const CaseMetricsFeatureFieldRt = rt.union([
+export const SingleCaseMetricsFeatureFieldRt = rt.union([
   rt.literal(CaseMetricsFeature.ALERTS_COUNT),
   rt.literal(CaseMetricsFeature.ALERTS_USERS),
   rt.literal(CaseMetricsFeature.ALERTS_HOSTS),
   rt.literal(CaseMetricsFeature.ACTIONS_ISOLATE_HOST),
   rt.literal(CaseMetricsFeature.CONNECTORS),
   rt.literal(CaseMetricsFeature.LIFESPAN),
+]);
+
+export const CasesMetricsFeatureFieldRt = rt.union([
+  SingleCaseMetricsFeatureFieldRt,
   rt.literal(CaseMetricsFeature.MTTR),
 ]);
 
@@ -96,7 +100,7 @@ export const SingleCaseMetricsRequestRt = rt.strict({
   /**
    * The metrics to retrieve.
    */
-  features: rt.array(CaseMetricsFeatureFieldRt),
+  features: rt.array(SingleCaseMetricsFeatureFieldRt),
 });
 
 export const CasesMetricsRequestRt = rt.intersection([
@@ -104,7 +108,7 @@ export const CasesMetricsRequestRt = rt.intersection([
     /**
      * The metrics to retrieve.
      */
-    features: rt.array(CaseMetricsFeatureFieldRt),
+    features: rt.array(CasesMetricsFeatureFieldRt),
   }),
   rt.exact(
     rt.partial({
@@ -209,4 +213,5 @@ export const CasesMetricsResponseRt = rt.exact(
   })
 );
 
-export type CaseMetricsFeatureField = rt.TypeOf<typeof CaseMetricsFeatureFieldRt>;
+export type CasesMetricsFeatureField = rt.TypeOf<typeof CasesMetricsFeatureFieldRt>;
+export type SingleCaseMetricsFeatureField = rt.TypeOf<typeof SingleCaseMetricsFeatureFieldRt>;

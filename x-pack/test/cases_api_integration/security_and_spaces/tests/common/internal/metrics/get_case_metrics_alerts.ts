@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   createComment,
   deleteAllCaseItems,
   getCaseMetrics,
-} from '../../../../common/lib/api';
-import { arraysToEqual } from '../../../../common/lib/validation';
+} from '../../../../../common/lib/api';
+import { arraysToEqual } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

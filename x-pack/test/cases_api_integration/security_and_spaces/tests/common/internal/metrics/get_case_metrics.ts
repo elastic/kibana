@@ -8,8 +8,8 @@
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { createCase, deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/api';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createCase, deleteAllCaseItems, getCaseMetrics } from '../../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,
@@ -20,8 +20,8 @@ import {
   obsSecRead,
   noKibanaPrivileges,
   obsSec,
-} from '../../../../common/lib/authentication/users';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+} from '../../../../../common/lib/authentication/users';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

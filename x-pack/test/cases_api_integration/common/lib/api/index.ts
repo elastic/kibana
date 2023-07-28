@@ -24,6 +24,7 @@ import {
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
+  INTERNAL_CASE_METRICS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
@@ -546,7 +547,7 @@ export const getCaseMetrics = async ({
   auth?: { user: User; space: string | null };
 }): Promise<SingleCaseMetricsResponse> => {
   const { body: metricsResponse } = await supertest
-    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
+    .get(`${getSpaceUrlPrefix(auth?.space)}${INTERNAL_CASE_METRICS_URL}/${caseId}`)
     .query({ features })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
@@ -783,7 +784,7 @@ export const getCasesMetrics = async ({
   auth?: { user: User; space: string | null };
 }): Promise<CasesMetricsResponse> => {
   const { body: metricsResponse } = await supertest
-    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics`)
+    .get(`${getSpaceUrlPrefix(auth?.space)}${INTERNAL_CASE_METRICS_URL}`)
     .query({ features, ...query })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);

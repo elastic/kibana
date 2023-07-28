@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { CaseMetricsFeatureField } from '../../../common/api/metrics/case';
+import type { CasesMetricsFeatureField } from '../../../common/api/metrics/case';
 import type { BaseHandlerCommonOptions, MetricsHandler } from './types';
 
 export abstract class BaseHandler<R> implements MetricsHandler<R> {
   constructor(
     protected readonly options: BaseHandlerCommonOptions,
-    private readonly features?: CaseMetricsFeatureField[]
+    private readonly features?: CasesMetricsFeatureField[]
   ) {}
 
-  getFeatures(): Set<CaseMetricsFeatureField> {
+  getFeatures(): Set<CasesMetricsFeatureField> {
     return new Set(this.features);
   }
 
