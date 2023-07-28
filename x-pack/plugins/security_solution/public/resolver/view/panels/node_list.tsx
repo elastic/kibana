@@ -8,9 +8,6 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import { useDispatch, useSelector } from 'react-redux';
-
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo, useCallback, useContext } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
@@ -44,6 +41,7 @@ interface ProcessTableView {
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
+// eslint-disable-next-line react/display-name
 export const NodeList = memo(({ id }: { id: string }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
     () => [
@@ -209,6 +207,7 @@ function NodeDetailLink({ id, name, nodeID }: { id: string; name?: string; nodeI
   );
 }
 
+// eslint-disable-next-line react/display-name
 const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
   const formattedDate = useFormattedDate(eventDate);
 
