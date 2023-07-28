@@ -90,7 +90,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
         <CodeEditor
           aria-label="Pipeline editor"
@@ -381,7 +381,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
         <CodeEditor
           aria-label="Pipeline editor"
@@ -672,7 +672,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
         <CodeEditor
           aria-label="Pipeline editor"
@@ -934,7 +934,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
         <CodeEditor
           aria-label="Pipeline editor"
@@ -1236,7 +1236,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
         <CodeEditor
           aria-label="Pipeline editor"
@@ -1498,7 +1498,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
         <CodeEditor
           aria-label="Pipeline editor"
