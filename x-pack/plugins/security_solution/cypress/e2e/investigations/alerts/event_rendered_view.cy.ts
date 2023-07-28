@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import {
   EVENT_SUMMARY_ALERT_RENDERER_CONTENT,
@@ -16,7 +17,7 @@ import {
   DATA_GRID_COLUMN_ORDER_BTN,
   DATA_GRID_FIELD_SORT_BTN,
 } from '../../../screens/common/data_grid';
-import { FIELD_BROWSER, HOVER_ACTIONS } from '../../../screens/timeline';
+import { HOVER_ACTIONS } from '../../../screens/timeline';
 import {
   showHoverActionsEventRenderedView,
   switchAlertTableToEventRenderedView,
@@ -44,6 +45,7 @@ Cypress._.times(10, (k) =>
       visit(ALERTS_URL);
       waitForAlerts();
       switchAlertTableToEventRenderedView();
+      waitForAlerts();
     });
 
     it('Event Summary Column', () => {
@@ -51,7 +53,7 @@ Cypress._.times(10, (k) =>
       cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
     });
 
-    it('Hover Action in event summary column', () => {
+    it('Hover Action TopN in event summary column', () => {
       showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
       cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
       cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
@@ -68,7 +70,7 @@ Cypress._.times(10, (k) =>
      *
      * */
     it('Field Browser is not visible', () => {
-      cy.get(FIELD_BROWSER).should('not.exist');
+      cy.get(FIELDS_BROWSER_BTN).should('not.exist');
     });
 
     it('Sorting control is not visible', () => {

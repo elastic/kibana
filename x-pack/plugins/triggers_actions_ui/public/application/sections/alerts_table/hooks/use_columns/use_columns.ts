@@ -10,7 +10,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -182,10 +182,7 @@ export const useColumns = ({
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
 
-  const didDefaultColumnChange = useMemo(
-    () => !isEqual(defaultColumns, defaultColumnsRef.current),
-    [defaultColumns]
-  );
+  const didDefaultColumnChange = defaultColumns !== defaultColumnsRef.current;
 
   const setColumnsByColumnIds = useCallback(
     (columnIds: string[]) => {
@@ -204,23 +201,29 @@ export const useColumns = ({
   useEffect(() => {
     // if defaultColumns have changed,
     // get the latest columns provided by client and
-    if (didDefaultColumnChange) {
+    if (didDefaultColumnChange && defaultColumnsRef.current) {
       defaultColumnsRef.current = defaultColumns;
       setColumnsPopulated(false);
+      // storageAlertsTable = storageData ?? defaultColumns
       setColumns(storageAlertsTable.current.columns);
+      setVisibleColumns(storageAlertsTable.current.visibleColumns ?? visibleColumns);
       return;
     }
-  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
+  }, [
+    didDefaultColumnChange,
+    storageAlertsTable,
+    defaultColumns,
+    setColumnsByColumnIds,
+    visibleColumns,
+  ]);
 
   useEffect(() => {
-    if (isColumnsPopulated) return;
+    if (isEmpty(browserFields) || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
-    const columnIds = getColumnIds(columns);
 
     setColumnsPopulated(true);
     setColumns(populatedColumns);
-    setColumnsByColumnIds(columnIds);
   }, [
     browserFields,
     defaultColumns,
