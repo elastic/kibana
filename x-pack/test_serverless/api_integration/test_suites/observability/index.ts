@@ -15,7 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./threshold_rule/avg_pct_fired'));
     loadTestFile(require.resolve('./threshold_rule/avg_pct_no_data'));
     loadTestFile(require.resolve('./threshold_rule/documents_count_fired'));
-    // loadTestFile(require.resolve('./threshold_rule/custom_eq_avg_bytes_fired'));
-    // loadTestFile(require.resolve('./threshold_rule/group_by_fired'));
+    loadTestFile(require.resolve('./threshold_rule/custom_eq_avg_bytes_fired'));
+    loadTestFile(require.resolve('./threshold_rule/group_by_fired'));
   });
 }
