@@ -33,11 +33,11 @@ export const riskEngineEnableRoute = (
       const user = security?.authc.getCurrentUser(request);
 
       try {
-        const result = await riskEgineClient.enableRiskEngine({
+         await riskEgineClient.enableRiskEngine({
           savedObjectsClient: soClient,
           user,
         });
-        return response.ok({ body: { result } });
+        return response.ok({ body: { success: true } });
       } catch (e) {
         const error = transformError(e);
 

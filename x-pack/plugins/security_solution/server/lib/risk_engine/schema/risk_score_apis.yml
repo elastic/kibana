@@ -44,7 +44,7 @@ paths:
                 $ref: '#/components/schemas/RiskScoresPreviewResponse'
         '400':
           description: Invalid request
-  /status:
+  /engine/status:
     get:
       summary: Get the status of the Risk Engine
       description: Returns the status of the legacy transforms risk engine as well as the new risk engine
@@ -55,10 +55,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEngineStatusResponse'
-  /init:
-    get:
+                
+  /engine/init:
+    posrt:
       summary: Initialize the Risk Engine
-      description: Initializes the Risk Engine by creating the necessary indices and mappings, stopped old transforms, and starting the new risk engine
+      description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
       responses:
         '200':
           description: Successful response
@@ -66,7 +67,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEngineInitResponse'
-  /enable:
+  /engine/enable:
     post:
       summary: Enable the Risk Engine
       requestBody:
@@ -79,7 +80,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEngineEnableResponse'
-  /disable:
+  /engine/disable:
     post:
       summary: Disable the Risk Engine
       requestBody:
@@ -212,12 +213,24 @@ components:
     RiskEngineInitResponse:
       type: object
       properties:
-        success: 
-          type: boolean
-        steps:
+        errors: 
           type: array
           items:
-            $ref: '#/components/schemas/RiskEngineInitStep'
+            type: string
+        result:
+          type: object
+          properties:
+            riskEngineEnabled:
+              type: boolean
+            riskEngineResourcesInstalled:
+              type: boolean
+            riskEngineConfigurationCreated:
+              type: boolean
+            leggacyRiskEngineDisabled:
+              type: boolean
+
+
+        
     RiskEngineEnableResponse:
       type: object
       properties:
