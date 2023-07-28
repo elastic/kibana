@@ -18,7 +18,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
   // use common route handlers that are shared for public and internal routes
   const jobHandlers = commonJobsRouteHandlerFactory(reporting);
 
-  const registerDownloadReport = () => {
+  const registerPublicDownloadReport = () => {
     // trigger a download of the output from a job
     const path = PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
     router.get(
@@ -33,7 +33,7 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
     );
   };
 
-  const registerDeleteReport = () => {
+  const registerPublicDeleteReport = () => {
     // allow a report to be deleted
     const path = PUBLIC_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
     router.delete(
@@ -48,6 +48,6 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
     );
   };
 
-  registerDownloadReport();
-  registerDeleteReport();
+  registerPublicDownloadReport();
+  registerPublicDeleteReport();
 }

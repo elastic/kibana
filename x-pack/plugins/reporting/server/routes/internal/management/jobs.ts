@@ -17,14 +17,16 @@ import {
   jobsQueryFactory,
 } from '../../common/jobs';
 
+const { JOBS } = INTERNAL_ROUTES;
+
 export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
   const jobsQuery = jobsQueryFactory(reporting);
 
-  const registerGetList = () => {
+  const registerInternalGetList = () => {
     // list jobs in the queue, paginated
-    const path = INTERNAL_ROUTES.JOBS.LIST;
+    const path = JOBS.LIST;
     router.get(
       {
         path,
@@ -65,12 +67,15 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  // return the count of all jobs in the queue
-  const registerGetCount = () => {
+  const registerInternalGetCount = () => {
     // return the count of all jobs in the queue
-    const path = INTERNAL_ROUTES.JOBS.COUNT;
+    const path = JOBS.COUNT;
+
     router.get(
-      { path, validate: false },
+      {
+        path,
+        validate: false,
+      },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
@@ -100,9 +105,10 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   // use common route handlers that are shared for public and internal routes
   const jobHandlers = commonJobsRouteHandlerFactory(reporting);
 
-  const registerGetInfo = () => {
+  const registerInternalGetInfo = () => {
     // return some info about the job
-    const path = INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/{docId}';
+    const path = `${JOBS.INFO_PREFIX}/{docId}`;
+
     router.get(
       {
         path,
@@ -129,9 +135,10 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerDownloadReport = () => {
+  const registerInternalDownloadReport = () => {
     // trigger a download of the output from a job
-    const path = INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
+    const path = `${JOBS.DOWNLOAD_PREFIX}/{docId}`;
+
     router.get(
       {
         path,
@@ -144,9 +151,10 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerDeleteReport = () => {
+  const registerInternalDeleteReport = () => {
     // allow a report to be deleted
-    const path = INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
+    const path = `${JOBS.DELETE_PREFIX}/{docId}`;
+
     router.delete(
       {
         path,
@@ -158,9 +166,9 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  registerGetList();
-  registerGetCount();
-  registerGetInfo();
-  registerDownloadReport();
-  registerDeleteReport();
+  registerInternalGetList();
+  registerInternalGetCount();
+  registerInternalGetInfo();
+  registerInternalDownloadReport();
+  registerInternalDeleteReport();
 }

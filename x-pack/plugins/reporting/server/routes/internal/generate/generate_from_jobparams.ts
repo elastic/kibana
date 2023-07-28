@@ -12,6 +12,8 @@ import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { authorizedUserPreRouting } from '../../common';
 import { RequestHandler } from '../../common/generate';
 
+const { GENERATE_PREFIX } = INTERNAL_ROUTES;
+
 export function registerGenerationRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
@@ -23,24 +25,36 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
 
-  const path = `${INTERNAL_ROUTES.GENERATE_PREFIX}/{exportType}`;
-  router.post(
-    {
-      path,
-      validate: RequestHandler.getValidation(),
-      options: { tags: kibanaAccessControlTags },
-    },
-    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      try {
-        const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
-        const jobParams = requestHandler.getJobParams();
-        return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
-      } catch (err) {
-        if (err instanceof KibanaResponse) {
-          return err;
+  const registerInternalPostGenerationEndpoint = () => {
+    const path = `${GENERATE_PREFIX}/{exportType}`;
+    router.post(
+      {
+        path,
+        validate: RequestHandler.getValidation(),
+        options: { tags: kibanaAccessControlTags },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        try {
+          const requestHandler = new RequestHandler(
+            reporting,
+            user,
+            context,
+            path,
+            req,
+            res,
+            logger
+          );
+          const jobParams = requestHandler.getJobParams();
+          return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
+        } catch (err) {
+          if (err instanceof KibanaResponse) {
+            return err;
+          }
+          throw err;
         }
-        throw err;
-      }
-    })
-  );
+      })
+    );
+  };
+
+  registerInternalPostGenerationEndpoint();
 }

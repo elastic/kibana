@@ -19,38 +19,53 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
 
-  const path = `${PUBLIC_ROUTES.GENERATE_PREFIX}/{exportType}`;
-  router.post(
-    {
-      path,
-      validate: RequestHandler.getValidation(),
-      options: { tags: kibanaAccessControlTags, access: 'public' },
-    },
-    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      try {
-        const requestHandler = new RequestHandler(reporting, user, context, path, req, res, logger);
-        return await requestHandler.handleGenerateRequest(
-          req.params.exportType,
-          requestHandler.getJobParams()
-        );
-      } catch (err) {
-        if (err instanceof KibanaResponse) {
-          return err;
+  const registerPublicPostGenerationEndpoint = () => {
+    const path = `${PUBLIC_ROUTES.GENERATE_PREFIX}/{exportType}`;
+    router.post(
+      {
+        path,
+        validate: RequestHandler.getValidation(),
+        options: { tags: kibanaAccessControlTags, access: 'public' },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        try {
+          const requestHandler = new RequestHandler(
+            reporting,
+            user,
+            context,
+            path,
+            req,
+            res,
+            logger
+          );
+          return await requestHandler.handleGenerateRequest(
+            req.params.exportType,
+            requestHandler.getJobParams()
+          );
+        } catch (err) {
+          if (err instanceof KibanaResponse) {
+            return err;
+          }
+          throw err;
         }
-        throw err;
-      }
-    })
-  );
+      })
+    );
+  };
 
-  // Get route to generation endpoint: show error about GET method to user
-  router.get(
-    {
-      path: `${PUBLIC_ROUTES.GENERATE_PREFIX}/{p*}`,
-      validate: false,
-      options: { access: 'public' },
-    },
-    (_context, _req, res) => {
-      return res.customError({ statusCode: 405, body: 'GET is not allowed' });
-    }
-  );
+  const registerPublicGetGenerationEndpoint = () => {
+    // Get route to generation endpoint: show error about GET method to user
+    router.get(
+      {
+        path: `${PUBLIC_ROUTES.GENERATE_PREFIX}/{p*}`,
+        validate: false,
+        options: { access: 'public' },
+      },
+      (_context, _req, res) => {
+        return res.customError({ statusCode: 405, body: 'GET is not allowed' });
+      }
+    );
+  };
+
+  registerPublicPostGenerationEndpoint();
+  registerPublicGetGenerationEndpoint();
 }
