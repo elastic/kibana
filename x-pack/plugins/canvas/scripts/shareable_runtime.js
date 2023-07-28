@@ -54,6 +54,7 @@ run(
         'yarn',
         [
           'webpack-dev-server',
+          '--openssl-legacy-provider',
           '--config',
           webpackConfig,
           ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
@@ -86,6 +87,7 @@ run(
     execa.sync(
       'yarn',
       [
+        '--openssl-legacy-provider',
         'webpack',
         '--config',
         webpackConfig,

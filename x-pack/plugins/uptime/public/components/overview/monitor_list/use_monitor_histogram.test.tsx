@@ -17,7 +17,7 @@ describe('useMonitorHistogram', () => {
   jest
     .spyOn(reduxHooks, 'useSelector')
     .mockReturnValue({ settings: { heartbeatIndices: dynamicIndexPattern } });
-  jest.spyOn(searchHooks, 'useEsSearch').mockImplementation(useEsSearch);
+  jest.spyOn(searchHooks as any, 'useEsSearch').mockImplementation(useEsSearch);
 
   beforeEach(() => {
     jest.clearAllMocks();

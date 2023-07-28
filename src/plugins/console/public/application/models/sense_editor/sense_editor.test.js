@@ -31,6 +31,23 @@ describe('Editor', () => {
     input = create(document.querySelector('#ConAppEditor'));
     $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
+    oldUrl = global.URL;
+    olldWindow = { ...global.window };
+    global.URL = URL;
+    Object.defineProperty(global, 'window', {
+      value: Object.create(window),
+      writable: true,
+    });
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'http://localhost:5620',
+      },
+    });
+    storage = createStorage({
+      engine: global.window.localStorage,
+      prefix: 'console_test',
+    });
+    setStorage(storage);
   });
   afterEach(function () {
     $(input.getCoreEditor().getContainer()).hide();

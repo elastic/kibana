@@ -99,6 +99,9 @@ webpack(
     "$(@D)",
     "--stats=errors-only"
   ],
+  env = {
+    "NODE_OPTIONS": "--openssl-legacy-provider"
+  }
 )
 
 js_library(
