@@ -34,6 +34,7 @@ const promptRoutes: {
       }),
       options: {
         tags: ['ai_assistant'],
+        access: 'public',
       },
       handler: async (resources): Promise<CreateChatCompletionResponse | Readable> => {
         const client = resources.dependencies.getOpenAIClient();
@@ -88,6 +89,7 @@ const trackRoute = createObservabilityServerRoute({
   }),
   options: {
     tags: ['ai_assistant'],
+    access: 'public',
   },
   handler: async (resources): Promise<void> => {
     const { params, config } = resources;

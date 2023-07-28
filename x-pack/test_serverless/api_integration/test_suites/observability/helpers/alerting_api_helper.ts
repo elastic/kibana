@@ -54,6 +54,7 @@ export async function createRule({
   const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'kibana')
     .send({
       params,
       consumer,

@@ -25,6 +25,7 @@ export interface ObservabilityRouteHandlerResources {
 export interface ObservabilityRouteCreateOptions {
   options: {
     tags: string[];
+    access: string;
   };
 }
 

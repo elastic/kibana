@@ -25,7 +25,10 @@ export async function waitForRuleStatus({
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
-      const response = await supertest.get(`/api/alerting/rule/${id}`);
+      const response = await supertest
+        .get(`/api/alerting/rule/${id}`)
+        .set('kbn-xsrf', 'some-xsrf-token')
+        .set('x-elastic-internal-origin', 'kibana');
       const { execution_status: executionStatus } = response.body || {};
       const { status } = executionStatus || {};
       if (status !== expectedStatus) {
