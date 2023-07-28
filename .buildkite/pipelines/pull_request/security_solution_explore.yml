@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
-    label: 'Explore - Security Solution Tests'
+    label: 'Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build

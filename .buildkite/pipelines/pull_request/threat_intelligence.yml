@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Tests'
+    label: 'Threat Intelligence Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
