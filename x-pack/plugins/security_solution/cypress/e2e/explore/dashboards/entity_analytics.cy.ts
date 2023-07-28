@@ -9,7 +9,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { cleanKibana, deleteAlertsAndRules, waitForPageToBeLoaded } from '../../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 
 import {
   ANOMALIES_TABLE,
@@ -308,7 +308,6 @@ describe('Entity Analytics Dashboard', () => {
       cy.task('esArchiverLoad', 'network');
       login();
       visit(ENTITY_ANALYTICS_URL);
-      waitForPageToBeLoaded();
       cy.get(ANOMALIES_TABLE).should('be.visible');
       waitForAnomaliesToBeLoaded();
     });

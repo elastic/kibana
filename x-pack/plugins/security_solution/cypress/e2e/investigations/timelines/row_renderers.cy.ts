@@ -15,12 +15,7 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP,
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
 } from '../../../screens/timeline';
-import {
-  cleanKibana,
-  deleteTimelines,
-  waitForPageToBeLoaded,
-  waitForWelcomePanelToBeLoaded,
-} from '../../../tasks/common';
+import { cleanKibana, deleteTimelines, waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
 import { login, visit } from '../../../tasks/login';
@@ -40,7 +35,6 @@ describe('Row renderers', () => {
     visit(HOSTS_URL, {
       onLoad: () => {
         waitForWelcomePanelToBeLoaded();
-        waitForPageToBeLoaded();
         waitForAllHostsToBeLoaded();
       },
     });

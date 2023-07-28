@@ -26,7 +26,6 @@ import {
 
 import { getDetails } from '../../../tasks/rule_details';
 import { expandFirstAlert } from '../../../tasks/alerts';
-import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
   goToTheRuleDetailsOf,
   waitForRulesTableToBeLoaded,
@@ -76,7 +75,6 @@ describe('After an upgrade, the threshold rule', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     goToTheRuleDetailsOf(rule.name);
-    waitForPageToBeLoaded();
   });
 
   it('Has the expected alerts number', () => {

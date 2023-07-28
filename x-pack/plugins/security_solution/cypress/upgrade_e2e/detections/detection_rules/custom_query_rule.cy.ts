@@ -36,7 +36,6 @@ import {
 } from '../../../screens/rule_details';
 
 import { getDetails } from '../../../tasks/rule_details';
-import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
   waitForRulesTableToBeLoaded,
   goToTheRuleDetailsOf,
@@ -81,7 +80,6 @@ describe('After an upgrade, the custom query rule', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     goToTheRuleDetailsOf(rule.name);
-    waitForPageToBeLoaded();
     // Possible bug on first attempt sometimes redirects page back to alerts
     // Going to retry the block once
     cy.url().then((url) => {
@@ -92,7 +90,6 @@ describe('After an upgrade, the custom query rule', () => {
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForRulesTableToBeLoaded();
         goToTheRuleDetailsOf(rule.name);
-        waitForPageToBeLoaded();
       }
     });
     cy.url().should('include', DETECTIONS_RULE_MANAGEMENT_URL);

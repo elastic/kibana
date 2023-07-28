@@ -10,15 +10,12 @@ import {
   ALL_CASES_CREATE_NEW_CASE_BTN,
   EDIT_EXTERNAL_CONNECTION,
 } from '../screens/all_cases';
-import { waitForPageToBeLoaded } from './common';
 
 export const goToCreateNewCase = () => {
   cy.get(ALL_CASES_CREATE_NEW_CASE_BTN, { timeout: 60000 }).click({ force: true });
-  waitForPageToBeLoaded();
 };
 
 export const goToCaseDetails = () => {
-  waitForPageToBeLoaded();
   cy.get(ALL_CASES_NAME).click({ force: true });
 };
 

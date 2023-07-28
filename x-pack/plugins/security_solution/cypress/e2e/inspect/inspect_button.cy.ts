@@ -17,11 +17,7 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
-import {
-  postDataView,
-  waitForPageToBeLoaded,
-  waitForWelcomePanelToBeLoaded,
-} from '../../tasks/common';
+import { postDataView, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
@@ -51,7 +47,6 @@ describe('Inspect Explore pages', () => {
       visit(url, {
         onLoad: () => {
           waitForWelcomePanelToBeLoaded();
-          waitForPageToBeLoaded();
           selectDataView(DATA_VIEW);
         },
       });

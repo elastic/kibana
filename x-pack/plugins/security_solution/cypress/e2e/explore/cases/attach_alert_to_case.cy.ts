@@ -55,7 +55,7 @@ describe('Alerts timeline', () => {
   context('Privileges: can crud', () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
-      cy.get(LOADING_INDICATOR).should('not.exist'); // on CI, waitForPageToBeLoaded fails because the loading icon can't be found
+      cy.get(LOADING_INDICATOR).should('not.exist');
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {
