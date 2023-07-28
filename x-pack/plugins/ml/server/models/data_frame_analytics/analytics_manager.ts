@@ -664,7 +664,7 @@ export class AnalyticsManager {
             });
             indicesPermissions = hasPrivilegesResponse.index;
           } catch (e) {
-            // Possible that the user doesn't have permissions to view ingest pipelines
+            // Possible that the user doesn't have permissions to view
             // If so, gracefully exit
             if (e.meta?.statusCode !== 403) {
               // eslint-disable-next-line no-console
