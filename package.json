@@ -830,7 +830,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
-    "elastic-apm-http-client": "^11.0.1",
+    "elastic-apm-http-client": "^12.0.0",
     "elastic-apm-node": "^3.48.0",
     "email-addresses": "^5.0.0",
     "execa": "^4.0.2",

@@ -62,7 +62,7 @@ declare module 'elastic-apm-http-client' {
     /** If the service being instrumented is running a specific framework, use this config option to log its version */
     frameworkVersion?: string;
     /** Custom hostname (default: OS hostname) */
-    hostname?: string;
+    configuredHostname?: string;
     /** Environment name (default: process.env.NODE_ENV || 'development') */
     environment?: string;
     /** Docker container id, if not given will be parsed from /proc/self/cgroup */

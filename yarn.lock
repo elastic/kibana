@@ -14622,22 +14622,7 @@ ejs@^3.1.8:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-http-client@11.2.0, elastic-apm-http-client@^11.0.1:
-  version "11.2.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.2.0.tgz#4da8b975ca326c1e5beb59746ab1124c4feddad3"
-  integrity sha512-XHXK+gQmd34eRN/ffrml7AN4h1VwujB79WEO2C/J59ufvEk+mT1OGBhl6pntHPUWn4Um52C5m84O6jIXzaQwfw==
-  dependencies:
-    agentkeepalive "^4.2.1"
-    breadth-filter "^2.0.0"
-    end-of-stream "^1.4.4"
-    fast-safe-stringify "^2.0.7"
-    fast-stream-to-buffer "^1.0.0"
-    object-filter-sequence "^1.0.0"
-    readable-stream "^3.4.0"
-    semver "^6.3.0"
-    stream-chopper "^3.0.1"
-
-elastic-apm-http-client@12.0.0:
+elastic-apm-http-client@12.0.0, elastic-apm-http-client@^12.0.0:
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-12.0.0.tgz#8e64ccc8bb34625ebdbcada2e6f49a067f200e10"
   integrity sha512-dD067YAenZ7aYBkv+Pb5Z3tV3FmvvWVmV9S2+7BZdFkKwL+gkcT+ivbdmqKAILEfGV8p4V+/KzV+HeA3w+fQ9Q==
@@ -14652,47 +14637,7 @@ elastic-apm-http-client@12.0.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0:
-  version "3.42.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.42.0.tgz#22c11e98708a0df7a7de8c8fb195929b4fc90c00"
-  integrity sha512-Q9sugfpaw6jQ8xDeP09LlyF0MwE5k0hphQmUiap+qQKE2jrLvY00zk4WierDQ2GF/AguE6BtRZmXpUELDbHFyA==
-  dependencies:
-    "@elastic/ecs-pino-format" "^1.2.0"
-    "@opentelemetry/api" "^1.1.0"
-    after-all-results "^2.0.0"
-    async-cache "^1.1.0"
-    async-value-promise "^1.1.1"
-    basic-auth "^2.0.1"
-    cookie "^0.5.0"
-    core-util-is "^1.0.2"
-    debug "^4.1.1"
-    elastic-apm-http-client "11.2.0"
-    end-of-stream "^1.4.4"
-    error-callsites "^2.0.4"
-    error-stack-parser "^2.0.6"
-    escape-string-regexp "^4.0.0"
-    fast-safe-stringify "^2.0.7"
-    http-headers "^3.0.2"
-    is-native "^1.0.1"
-    lru-cache "^6.0.0"
-    measured-reporting "^1.51.1"
-    module-details-from-path "^1.0.3"
-    monitor-event-loop-delay "^1.0.0"
-    object-filter-sequence "^1.0.0"
-    object-identity-map "^1.0.2"
-    original-url "^1.2.3"
-    pino "^6.11.2"
-    relative-microtime "^2.0.0"
-    resolve "^1.22.1"
-    semver "^6.3.0"
-    set-cookie-serde "^1.0.0"
-    shallow-clone-shim "^2.0.0"
-    source-map "^0.8.0-beta.0"
-    sql-summary "^1.0.1"
-    traverse "^0.6.6"
-    unicode-byte-truncate "^1.0.0"
-
-elastic-apm-node@^3.48.0:
+elastic-apm-node@^3.38.0, elastic-apm-node@^3.48.0:
   version "3.48.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.48.0.tgz#5bf2a78b3f8cdf10ae962cf8c05a838ad546d114"
   integrity sha512-bprEraDVQcVnsnjlQbrqv3f6HI0BThDaN6TitjAi+hifvayRxj+URUyXASgLMZRBb7Y/5bMLqFdufIXtwWcbFg==
@@ -26152,11 +26097,6 @@ set-blocking@^2.0.0:
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
   integrity sha1-BF+XgtARrppoA93TgrJDkrPYkPc=
 
-set-cookie-serde@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/set-cookie-serde/-/set-cookie-serde-1.0.0.tgz#bcf9c260ed2212ac4005a53eacbaaa37c07ac452"
-  integrity sha512-Vq8e5GsupfJ7okHIvEPcfs5neCo7MZ1ZuWrO3sllYi3DOWt6bSSCpADzqXjz3k0fXehnoFIrmmhty9IN6U6BXQ==
-
 set-getter@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/set-getter/-/set-getter-0.1.1.tgz#a3110e1b461d31a9cfc8c5c9ee2e9737ad447102"
@@ -27998,7 +27938,7 @@ tr46@~0.0.3:
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.3.9.tgz#717b8f220cc0bb7b44e40514c22b2e8bbc70d8b9"
   integrity sha512-iawgk0hLP3SxGKDfnDJf8wTz4p2qImnyihM5Hh/sGvQ3K37dPi/w8sRhdNIxYA1TwFwc5mDhIJq+O0RsvXBKdQ==
 
-traverse@^0.6.6, traverse@~0.6.6:
+traverse@~0.6.6:
   version "0.6.6"
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
   integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
