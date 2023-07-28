@@ -13,7 +13,7 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { CheckSetup } from './components/check_setup';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
@@ -79,13 +79,11 @@ function App({
     };
   }, [coreStart, coreSetup, pluginsStart, pluginsSetup, profilingFetchServices]);
 
-  const coPilotService = pluginsSetup.observability.getCoPilotService();
-
   return (
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <CoPilotContextProvider value={coPilotService}>
+          <ObservabilityAIAssistantProvider value={pluginsStart.observabilityAIAssistant}>
             <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
               <RouterProvider router={profilingRouter as any} history={history}>
                 <RouterErrorBoundary>
@@ -111,7 +109,7 @@ function App({
                 </RouterErrorBoundary>
               </RouterProvider>
             </RedirectAppLinks>
-          </CoPilotContextProvider>
+          </ObservabilityAIAssistantProvider>
         </i18nCore.Context>
       </KibanaContextProvider>
     </KibanaThemeProvider>
