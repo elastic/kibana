@@ -37,8 +37,19 @@ import {
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
 const ruleType = getRuleType(coreSetup);
+const mockNow = jest.getRealSystemTime();
 
 describe('ruleType', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(mockNow);
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -683,7 +694,7 @@ describe('ruleType', () => {
       await invokeExecutor({
         params,
         ruleServices,
-        state: { latestTimestamp: '01.01.2000', dateStart: '', dateEnd: '' },
+        state: { latestTimestamp: new Date(mockNow).toISOString(), dateStart: '', dateEnd: '' },
       });
 
       expect(ruleServices.alertsClient.report).toHaveBeenCalledTimes(1);
@@ -700,7 +711,7 @@ describe('ruleType', () => {
             [ALERT_TITLE]: "rule 'rule-name' matched query",
             [ALERT_CONDITIONS]: 'Number of matching documents is greater than or equal to 3',
             [ALERT_CONDITIONS_MET_VALUE]: 3,
-            [ALERT_STATE_LAST_TIMESTAMP]: '1999-12-31T22:00:00.000Z',
+            [ALERT_STATE_LAST_TIMESTAMP]: new Date(mockNow).toISOString(),
           }),
         })
       );
