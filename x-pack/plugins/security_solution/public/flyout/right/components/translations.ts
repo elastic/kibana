@@ -120,6 +120,16 @@ export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
   { defaultMessage: 'Highlighted fields' }
 );
 
+export const HIGHLIGHTED_FIELDS_FIELD_COLUMN = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.highlightedFields.fieldColumn',
+  { defaultMessage: 'Field' }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE_COLUMN = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.highlightedFields.valueColumn',
+  { defaultMessage: 'Value' }
+);
+
 /* Insights section */
 
 export const ENTITIES_TITLE = i18n.translate(
