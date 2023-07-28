@@ -21,7 +21,7 @@ export const createDataView = async ({
   const { body } = await supertest
     .post(`/api/content_management/rpc/create`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'kibana')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       contentTypeId: 'index-pattern',
       data: {
@@ -50,7 +50,7 @@ export const deleteDataView = async ({
   const { body } = await supertest
     .post(`/api/content_management/rpc/delete`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'kibana')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       contentTypeId: 'index-pattern',
       id,

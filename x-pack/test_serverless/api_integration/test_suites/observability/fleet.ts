@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fleet', function () {
     it('rejects request to create a new fleet server hosts', async () => {
-      // is `api/fleet/fleet_server_hosts` is public or internal?
+      // `api/fleet/fleet_server_hosts` internal pending override
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getCommonRequestHeader())
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(status).toBe(403);
     });
-
+    // `api/fleet/fleet_server_hosts` internal pending override
     it('rejects request to create a new proxy', async () => {
       const { body, status } = await supertest
         .post('/api/fleet/proxies')

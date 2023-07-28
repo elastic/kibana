@@ -27,8 +27,8 @@ export async function waitForRuleStatus({
     async () => {
       const response = await supertest
         .get(`/api/alerting/rule/${id}`)
-        .set('kbn-xsrf', 'some-xsrf-token')
-        .set('x-elastic-internal-origin', 'kibana');
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
       const { execution_status: executionStatus } = response.body || {};
       const { status } = executionStatus || {};
       if (status !== expectedStatus) {
