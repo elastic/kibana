@@ -93,7 +93,6 @@ export const reportingScreenshotShareProvider = ({
       capabilityHasVisualizeScreenshotReporting = true;
     }
 
-    // do not want screenshot reporting showing for serverless
     if (!licenseHasScreenshotReporting) {
       return [];
     }
