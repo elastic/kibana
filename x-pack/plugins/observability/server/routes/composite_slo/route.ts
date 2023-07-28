@@ -38,7 +38,6 @@ const createCompositeSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/composite_slos 2023-05-24',
   options: {
     tags: ['access:slo_write'],
-    access: 'public',
   },
   params: createCompositeSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -59,7 +58,6 @@ const updateCompositeSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/composite_slos/{id} 2023-05-24',
   options: {
     tags: ['access:slo_write'],
-    access: 'public',
   },
   params: updateCompositeSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -80,7 +78,6 @@ const deleteCompositeSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/composite_slos/{id} 2023-05-24',
   options: {
     tags: ['access:slo_write'],
-    access: 'public',
   },
   params: deleteCompositeSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -98,7 +95,6 @@ const getCompositeSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/composite_slos/{id} 2023-05-24',
   options: {
     tags: ['access:slo_read'],
-    access: 'public',
   },
   params: getCompositeSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -121,7 +117,6 @@ const findCompositeSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/composite_slos 2023-05-24',
   options: {
     tags: ['access:slo_read'],
-    access: 'public',
   },
   params: findCompositeSLOParamsSchema,
   handler: async ({ context, params }) => {
