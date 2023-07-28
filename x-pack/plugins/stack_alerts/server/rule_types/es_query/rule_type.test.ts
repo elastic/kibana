@@ -23,7 +23,7 @@ import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { ALERT_RULE_NAME, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_URL } from '@kbn/rule-data-utils';
 import {
   ALERT_CONDITIONS,
   ALERT_CONDITIONS_MET_VALUE,
@@ -693,7 +693,6 @@ describe('ruleType', () => {
           actionGroup: 'query matched',
           id: 'query matched',
           payload: expect.objectContaining({
-            [ALERT_RULE_NAME]: 'rule-name',
             [ALERT_URL]: expect.any(String),
             [ALERT_HITS_COUNT]: 3,
             [ALERT_HITS_HITS]: [{}, {}, {}],
