@@ -13,14 +13,14 @@ import type {
   InitRiskEngineError,
 } from '../../../../server/lib/risk_engine/types';
 
-export const CREATE_RULE_MUTATION_KEY = ['POST', 'INIT_RISK_ENGINE'];
+export const INIT_RISK_ENGINE_STATUS_KEY = ['POST', 'INIT_RISK_ENGINE'];
 
 export const useInitRiskEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatussQuery();
 
   return useMutation<InitRiskEngineResponse, InitRiskEngineError>(() => initRiskEngine(), {
     ...options,
-    mutationKey: CREATE_RULE_MUTATION_KEY,
+    mutationKey: INIT_RISK_ENGINE_STATUS_KEY,
     onSettled: (...args) => {
       invalidateRiskEngineStatusQuery();
 
