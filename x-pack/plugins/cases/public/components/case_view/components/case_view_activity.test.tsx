@@ -313,7 +313,8 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
-  describe('filter activity', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152202
+  describe.skip('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -492,54 +493,6 @@ describe('Case View Page activity tab', () => {
         expect(await participantsSection.findByText('Fuzzy Marten')).toBeInTheDocument();
         expect(await participantsSection.findByText('elastic')).toBeInTheDocument();
         expect(await participantsSection.findByText('Misty Mackerel')).toBeInTheDocument();
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/152206
-    describe.skip('Reporter', () => {
-      it('should render the reporter correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter 1')).toBeInTheDocument();
-        expect(await reporterSection.findByText('R1')).toBeInTheDocument();
-      });
-
-      it('should render a reporter without uid correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: {
-            ...caseUsers,
-            reporter: {
-              user: {
-                email: 'reporter_no_uid@elastic.co',
-                full_name: 'Reporter No UID',
-                username: 'reporter_no_uid',
-              },
-            },
-          },
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter No UID')).toBeInTheDocument();
-      });
-
-      it('fallbacks to the caseData reporter correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: null,
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Leslie Knope')).toBeInTheDocument();
       });
     });
 

@@ -154,19 +154,12 @@ $reorderItemMargin: $euiSizeS;
   visibility: visible;
 }
 
-.domDragDrop__diamondPath {
-  position: absolute;
-  width: 30%;
-  top: 0;
-  left: -$euiSize;
-  z-index: $domDragDropZLevel0;
-}
-
 .domDragDrop__extraDropWrapper {
   position: relative;
   width: 100%;
   height: 100%;
   background: $euiColorLightestShade;
+  border-radius: $euiSizeXS;
 
   .domDragDrop__extraDrop,
   .domDragDrop__extraDrop:before {

@@ -6,3 +6,5 @@
  */
 
 export const TOOLTIP = '[role="tooltip"]';
+
+export const BASIC_TABLE_LOADING = '.euiBasicTable.euiBasicTable-loading';

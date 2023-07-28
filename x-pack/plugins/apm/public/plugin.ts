@@ -171,12 +171,20 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
+const apmTutorialTitle = i18n.translate(
+  'xpack.apm.navigation.apmTutorialTitle',
+  {
+    defaultMessage: 'Tutorial',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
   }
+
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
@@ -369,6 +377,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/storage-explorer',
           searchable: featureFlags.storageExplorerAvailable,
         },
+        { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -399,6 +408,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       locator,
     };
   }
+
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
     if (fleet) {
