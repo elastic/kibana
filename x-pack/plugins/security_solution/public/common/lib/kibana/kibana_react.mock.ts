@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -34,6 +32,7 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  SERVER_APP_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -178,6 +177,16 @@ export const createStartServicesMock = (
         })),
       },
     },
+    application: {
+      ...core.application,
+      capabilities: {
+        ...core.application.capabilities,
+        [SERVER_APP_ID]: {
+          crud: true,
+          read: true,
+        },
+      },
+    },
     security,
     storage,
     fleet,
@@ -214,6 +223,7 @@ export const createStartServicesMock = (
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return (Component: unknown) => (props: unknown) => {
     return React.createElement(Component as string, { ...(props as object), kibana: { services } });
   };
@@ -222,6 +232,7 @@ export const createWithKibanaMock = () => {
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(
       KibanaContextProvider,

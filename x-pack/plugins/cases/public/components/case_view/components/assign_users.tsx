@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { CaseAssignees } from '../../../../common/types/domain';
 import type { CasesPermissions } from '../../../../common';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
-import type { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
 import { SidebarTitle } from './sidebar_title';
 import { RemovableUser } from '../../user_profiles/removable_user';
