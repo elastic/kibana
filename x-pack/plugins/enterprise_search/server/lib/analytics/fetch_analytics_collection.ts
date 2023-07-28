@@ -14,7 +14,7 @@ import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
 export const fetchAnalyticsCollections = async (
   client: IScopedClusterClient,
-  query: string=''
+  query: string = ''
 ): Promise<AnalyticsCollection[]> => {
   try {
     const collections = await client.asCurrentUser.searchApplication.getBehavioralAnalytics({
