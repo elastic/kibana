@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { mergeWith } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { mergeSourceMonitor } from './helper';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitorAttributes,
@@ -64,7 +64,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
-      const editedMonitor = mergeWith(normalizedPreviousMonitor, monitor, customizer);
+      const editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
@@ -174,7 +174,7 @@ export const syncEditedMonitor = async ({
       formattedMonitor
     );
 
-    const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
+    const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
 
     const editSyncPromise = syntheticsMonitorClient.editMonitors(
       [
@@ -225,12 +225,5 @@ export const syncEditedMonitor = async ({
     });
 
     throw e;
-  }
-};
-
-// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors
-const customizer = (_: any, srcValue: any, key: string) => {
-  if (key !== ConfigKey.METADATA) {
-    return srcValue;
   }
 };

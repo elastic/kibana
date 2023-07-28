@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Message } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
@@ -66,7 +66,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
       getAttachments: () => [
         {
           comment: message.content,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],

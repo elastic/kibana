@@ -12,20 +12,21 @@ import {
   ScheduleUnit,
   SourceType,
   HeartbeatConfig,
-  PrivateLocation,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 describe('SyntheticsPrivateLocation', () => {
-  const mockPrivateLocation: PrivateLocation = {
+  const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
     concurrentMonitors: 1,
     agentPolicyId: 'policyId',
+    isServiceManaged: false,
   };
   const testConfig = {
     id: 'testId',
