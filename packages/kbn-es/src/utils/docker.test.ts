@@ -123,6 +123,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "--env",
+        "http.port=9220",
       ]
     `);
   });
