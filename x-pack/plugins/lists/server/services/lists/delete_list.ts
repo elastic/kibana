@@ -39,10 +39,16 @@ export const deleteList = async ({
       refresh: false,
     });
 
-    await esClient.delete({
-      id,
+    await esClient.deleteByQuery({
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
       index: listIndex,
-      refresh: 'wait_for',
+      refresh: false,
     });
     return list;
   }
