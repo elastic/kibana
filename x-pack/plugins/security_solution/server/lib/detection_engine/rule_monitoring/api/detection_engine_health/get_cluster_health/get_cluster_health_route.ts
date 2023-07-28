@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -65,7 +65,7 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
         access: 'public', // must be public to enable "system" users to collect data
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<GetClusterHealthResponse>> => {
       return handleClusterHealthRequest({
         response,
         resolveParameters: () => validateGetClusterHealthRequest(request.body),
