@@ -46,6 +46,7 @@ import { eventsViewerSelector } from '../../../common/components/events_viewer/s
 import type { State } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
+import { getAlertsDefaultModel } from './default_config';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -151,7 +152,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       sessionViewConfig,
       viewMode: tableView = eventsDefaultModel.viewMode,
       columns,
-    } = eventsDefaultModel,
+    } = getAlertsDefaultModel(license),
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
