@@ -205,14 +205,18 @@ export const createMetricThresholdExecutor = ({
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
     const dataView = initialSearchSource.getField('index')!.getIndexPattern();
+    const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
     if (!dataView) {
       throw new Error('No matched data view');
+    } else if (!timeFieldName) {
+      throw new Error('No timestamp field is specified');
     }
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       dataView,
+      timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
       logger,
