@@ -92,6 +92,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           onChange={onChange}
           mode={mode}
           protection={protection}
+          data-test-subj={getTestId('reputationService')}
         />
 
         <NotifyUserOption

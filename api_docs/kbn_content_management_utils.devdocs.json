@@ -668,6 +668,55 @@
       },
       {
         "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.getMSearch",
+        "type": "Function",
+        "tags": [],
+        "label": "getMSearch",
+        "description": [],
+        "signature": [
+          "<ReturnItem, SOAttributes extends object>({ savedObjectType, cmServicesDefinition, allowedSavedObjectAttributes, }: GetMSearchParams) => { savedObjectType: string; toItemResult: (ctx: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "server",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-server.StorageContext",
+            "text": "StorageContext"
+          },
+          ", savedObject: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindResult",
+            "text": "SavedObjectsFindResult"
+          },
+          "<unknown>) => ReturnItem; }"
+        ],
+        "path": "packages/kbn-content-management-utils/src/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.getMSearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  savedObjectType,\n  cmServicesDefinition,\n  allowedSavedObjectAttributes,\n}",
+            "description": [],
+            "signature": [
+              "GetMSearchParams"
+            ],
+            "path": "packages/kbn-content-management-utils/src/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
         "id": "def-common.objectTypeToGetResultSchema",
         "type": "Function",
         "tags": [],
@@ -1851,6 +1900,117 @@
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.GetMSearchType",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetMSearchType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.GetMSearchType",
+            "text": "GetMSearchType"
+          },
+          "<ReturnItem>"
+        ],
+        "path": "packages/kbn-content-management-utils/src/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.GetMSearchType.savedObjectType",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/src/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.GetMSearchType.toItemResult",
+            "type": "Function",
+            "tags": [],
+            "label": "toItemResult",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", savedObject: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindResult",
+                "text": "SavedObjectsFindResult"
+              },
+              "<unknown>) => ReturnItem"
+            ],
+            "path": "packages/kbn-content-management-utils/src/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.GetMSearchType.toItemResult.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "packages/kbn-content-management-utils/src/msearch.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-utils",
+                "id": "def-common.GetMSearchType.toItemResult.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsFindResult",
+                    "text": "SavedObjectsFindResult"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/kbn-content-management-utils/src/msearch.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

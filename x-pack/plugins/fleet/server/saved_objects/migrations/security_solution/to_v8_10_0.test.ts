@@ -15,7 +15,7 @@ import { migratePackagePolicyToV8100 as migration } from './to_v8_10_0';
 import { migratePackagePolicyEvictionsFromV8100 as eviction } from './to_v8_10_0';
 
 describe('8.10.0 Endpoint Package Policy migration', () => {
-  const policyDoc = ({ behaviorProtection = {} }) => {
+  const policyDoc = ({ behaviorProtection = {}, meta = {} }) => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -42,7 +42,7 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
             config: {
               policy: {
                 value: {
-                  meta: {},
+                  meta: { license: '', cloud: false, ...meta },
                   windows: {
                     behavior_protection: {
                       ...behaviorProtection,
@@ -68,11 +68,12 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds reputation service field to behaviour protection, set to false', () => {
+  it('adds reputation service field to behaviour protection, set to false and adds license_uid and cluster info, defaulted to empty string without overwiting existing meta values', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
       behaviorProtection: { reputation_service: false },
+      meta: { license_uid: '', cluster_uuid: '', cluster_name: '' },
     });
 
     expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
@@ -82,9 +83,10 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
     });
   });
 
-  it('removes reputation service field from behaviour protection', () => {
+  it('removes reputation service from behaviour protection and remove new meta values', () => {
     const initialDoc = policyDoc({
       behaviorProtection: { reputation_service: true },
+      meta: { license_uid: '', cluster_uuid: '', cluster_name: '' },
     });
 
     const migratedDoc = policyDoc({});
