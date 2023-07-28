@@ -26,12 +26,11 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
