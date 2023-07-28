@@ -40,7 +40,6 @@
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-kibana-theme",
-    "@kbn/ml-kibana-theme",
     "@kbn/ml-local-storage",
     "@kbn/ml-number-utils",
     "@kbn/ml-query-utils",

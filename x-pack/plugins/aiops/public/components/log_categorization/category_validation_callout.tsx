@@ -28,21 +28,17 @@ export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
   }
 
   return (
-    <>
-      {validationResults !== null ? (
-        <EuiCallOut
-          color="warning"
-          title={i18n.translate('xpack.aiops.logCategorization.fieldValidationTitle', {
-            defaultMessage: 'The selected field is possibly not suitable for pattern analysis',
-          })}
-        >
-          {validationResults.validationChecks
-            .filter((check) => check.valid !== CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID)
-            .map((check) => (
-              <div key={check.id}>{check.message}</div>
-            ))}
-        </EuiCallOut>
-      ) : null}
-    </>
+    <EuiCallOut
+      color="warning"
+      title={i18n.translate('xpack.aiops.logCategorization.fieldValidationTitle', {
+        defaultMessage: 'The selected field is possibly not suitable for pattern analysis',
+      })}
+    >
+      {validationResults.validationChecks
+        .filter((check) => check.valid !== CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID)
+        .map((check) => (
+          <div key={check.id}>{check.message}</div>
+        ))}
+    </EuiCallOut>
   );
 };
