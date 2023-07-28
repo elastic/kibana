@@ -56,10 +56,11 @@ export const timeRange: MetricsExplorerTimeOptions = {
   interval: '>=10s',
 };
 
-export const timestamps: MetricsExplorerTimestampsRT = {
+export const mockedTimestamps: MetricsExplorerTimestampsRT = {
   fromTimestamp: 1678376367166,
   toTimestamp: 1678379973620,
   interval: '>=10s',
+  timeFieldName: '@timestamp',
 };
 
 export const createSeries = (id: string): MetricsExplorerSeries => ({
