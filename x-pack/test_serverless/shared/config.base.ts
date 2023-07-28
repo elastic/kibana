@@ -22,8 +22,7 @@ export default async () => {
     servers,
 
     esTestCluster: {
-      license: 'trial',
-      from: 'snapshot',
+      from: 'serverless',
     },
 
     kbnTestServer: {

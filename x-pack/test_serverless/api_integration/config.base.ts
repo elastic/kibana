@@ -19,9 +19,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...services,
         ...options.services,
       },
-      esTestCluster: {
-        from: 'serverless',
-      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
