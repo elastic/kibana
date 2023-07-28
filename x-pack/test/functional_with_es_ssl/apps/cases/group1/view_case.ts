@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';

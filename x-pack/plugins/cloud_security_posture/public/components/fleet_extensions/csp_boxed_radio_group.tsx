@@ -9,15 +9,15 @@ import React from 'react';
 import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface Props {
+export interface CspRadioGroupProps {
   disabled?: boolean;
-  options: RadioOption[];
+  options: CspRadioOption[];
   onChange(id: string): void;
   idSelected: string;
   size?: 's' | 'm';
 }
 
-interface RadioOption {
+interface CspRadioOption {
   disabled?: boolean;
   id: string;
   label: string;
@@ -25,7 +25,13 @@ interface RadioOption {
   tooltip?: string;
 }
 
-export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Props) => {
+export const RadioGroup = ({
+  idSelected,
+  size,
+  options,
+  disabled,
+  onChange,
+}: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
