@@ -7,25 +7,27 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { VFC } from 'react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
   DESCRIPTION_DETAILS_TEST_ID,
   DESCRIPTION_EXPAND_BUTTON_TEST_ID,
   DESCRIPTION_TITLE_TEST_ID,
+  RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
 import {
   DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON,
   DOCUMENT_DESCRIPTION_EXPAND_BUTTON,
   DOCUMENT_DESCRIPTION_TITLE,
   RULE_DESCRIPTION_TITLE,
-  VIEW_RULE_TEXT,
+  RULE_SUMMARY_TEXT,
+  PREVIEW_RULE_DETAILS,
 } from './translations';
-import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
-import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import { PreviewPanelKey, type PreviewPanelProps } from '../../preview';
 
 export interface DescriptionProps {
   /**
@@ -43,29 +45,47 @@ export interface DescriptionProps {
 export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
   const [isExpanded, setIsExpanded] = useState(expanded);
 
-  const { dataFormattedForFieldBrowser, scopeId, eventId } = useRightPanelContext();
-  const { isAlert, ruleDescription, ruleId, ruleName } = useBasicDataFromDetailsData(
+  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName } = useRightPanelContext();
+  const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
+  const { openPreviewPanel } = useExpandableFlyoutContext();
+  const openRulePreview = useCallback(() => {
+    const PreviewPanelRulePreview: PreviewPanelProps['path'] = ['rule-preview'];
+    openPreviewPanel({
+      id: PreviewPanelKey,
+      path: PreviewPanelRulePreview,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        banner: {
+          title: PREVIEW_RULE_DETAILS,
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
+        ruleId,
+      },
+    });
+  }, [eventId, openPreviewPanel, indexName, scopeId, ruleId]);
 
   const viewRule = useMemo(
     () =>
-      !isEmpty(ruleName) && (
+      !isEmpty(ruleName) &&
+      !isEmpty(ruleId) && (
         <EuiFlexItem grow={false}>
-          <RenderRuleName
-            contextId={scopeId}
-            eventId={eventId}
-            fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-            fieldType={'string'}
-            isAggregatable={false}
-            isDraggable={false}
-            linkValue={ruleId}
-            value={VIEW_RULE_TEXT}
-            openInNewTab
-          />
+          <EuiButtonEmpty
+            size="s"
+            iconType="arrowRight"
+            onClick={openRulePreview}
+            iconSide="right"
+            data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
+          >
+            {RULE_SUMMARY_TEXT}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       ),
-    [ruleName, ruleId, scopeId, eventId]
+    [ruleName, openRulePreview, ruleId]
   );
 
   if (!dataFormattedForFieldBrowser) {
@@ -82,7 +102,7 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
       <EuiFlexItem data-test-subj={DESCRIPTION_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           {isAlert ? (
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <h5>{RULE_DESCRIPTION_TITLE}</h5>
               </EuiFlexItem>
