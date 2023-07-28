@@ -26,7 +26,7 @@ describe('ConfigureFields', () => {
     addInferencePipelineModal: { configuration: { existingPipeline: false } },
   };
 
-  it('renders multi-field selector components if non-text expansion model is selected', () => {
+  it('renders single field selector component if non-text expansion model is selected', () => {
     setMockValues(mockValues);
     const wrapper = shallow(<ConfigureFields />);
     expect(wrapper.find(SingleFieldMapping)).toHaveLength(1);
