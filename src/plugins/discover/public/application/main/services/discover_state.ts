@@ -129,7 +129,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
+    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -389,7 +389,7 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const onCreateDefaultAdHocDataView = async (dataViewSpec: DataViewSpec) => {
+  const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
     const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
@@ -397,6 +397,7 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.appendAdHocDataViews(newDataView);
 
     await onChangeDataView(newDataView);
+    return newDataView;
   };
   /**
    * Triggered when a user submits a query in the search bar
@@ -457,7 +458,7 @@ export function getDiscoverStateContainer({
       loadDataViewList,
       loadSavedSearch,
       onChangeDataView,
-      onCreateDefaultAdHocDataView,
+      createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
@@ -539,6 +540,6 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
-    dataViewSpec: !dataView?.isPersisted() ? dataView?.toSpec(false) : undefined,
+    dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
   };
 }

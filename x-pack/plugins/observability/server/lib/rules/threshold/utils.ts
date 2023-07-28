@@ -28,7 +28,7 @@ const ALERT_CONTEXT_TAGS = 'tags';
 const HOST_NAME = 'host.name';
 const HOST_HOSTNAME = 'host.hostname';
 const HOST_ID = 'host.id';
-const CONTAINER_ID = 'container.id';
+export const CONTAINER_ID = 'container.id';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -114,7 +114,6 @@ export const getAlertDetailsUrl = (
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
-export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: CONTAINER_ID };
 
 export interface AdditionalContext {
   [x: string]: any;

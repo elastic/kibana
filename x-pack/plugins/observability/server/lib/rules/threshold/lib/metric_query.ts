@@ -11,11 +11,10 @@ import { Aggregators, MetricExpressionParams } from '../../../../../common/thres
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
+  CONTAINER_ID,
   hasAdditionalContext,
-  KUBERNETES_POD_UID,
   NUMBER_OF_DOCUMENTS,
   shouldTermsAggOnContainer,
-  termsAggField,
   validGroupByForContext,
 } from '../utils';
 import { createBucketSelector } from './create_bucket_selector';
@@ -138,14 +137,19 @@ export const getElasticsearchMetricQuery = (
 
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
+  const containerIncludesList = ['container.*'];
+  const containerExcludesList = [
+    'container.cpu',
+    'container.memory',
+    'container.disk',
+    'container.network',
+  ];
   const containerContextAgg =
-    shouldTermsAggOnContainer(groupBy) &&
-    fieldsExisted &&
-    fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
+    shouldTermsAggOnContainer(groupBy) && fieldsExisted && fieldsExisted[CONTAINER_ID]
       ? {
           containerContext: {
             terms: {
-              field: termsAggField[KUBERNETES_POD_UID],
+              field: CONTAINER_ID,
               size: NUMBER_OF_DOCUMENTS,
             },
             aggs: {
@@ -153,7 +157,8 @@ export const getElasticsearchMetricQuery = (
                 top_hits: {
                   size: 1,
                   _source: {
-                    includes: ['container.*'],
+                    includes: containerIncludesList,
+                    excludes: containerExcludesList,
                   },
                 },
               },
@@ -163,8 +168,11 @@ export const getElasticsearchMetricQuery = (
       : void 0;
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
-  const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
-  if (!containerContextAgg) includesList.push('container.*');
+  const excludesList = ['host.cpu', 'host.disk', 'host.network'];
+  if (!containerContextAgg) {
+    includesList.push(...containerIncludesList);
+    excludesList.push(...containerExcludesList);
+  }
 
   const additionalContextAgg = hasAdditionalContext(groupBy, validGroupByForContext)
     ? {

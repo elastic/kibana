@@ -9,7 +9,8 @@ import type { TimelineFilter } from '../objects/timeline';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
-export const ADD_FILTER = '[data-test-subj="timeline"] [data-test-subj="addFilter"]';
+export const ADD_FILTER =
+  '[data-test-subj="timeline-search-or-filter"] [data-test-subj="addFilter"]';
 
 export const ATTACH_TIMELINE_TO_CASE_BUTTON = '[data-test-subj="attach-timeline-case-button"]';
 

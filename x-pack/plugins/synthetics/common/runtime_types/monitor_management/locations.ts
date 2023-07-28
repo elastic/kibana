@@ -38,8 +38,8 @@ export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
 export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
 export const LocationGeoCodec = t.interface({
-  lat: t.union([t.string, t.number]),
-  lon: t.union([t.string, t.number]),
+  lat: t.union([t.string, t.number, t.null]),
+  lon: t.union([t.string, t.number, t.null]),
 });
 
 export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { UrlTemplate } from '../../types';
+import { IconRenderer } from '../icon_renderer';
 
 interface UrlTemplateButtonsProps {
   urlTemplates: UrlTemplate[];
@@ -21,7 +22,7 @@ export const DrillDownIconLinks = ({
   openUrlTemplate,
 }: UrlTemplateButtonsProps) => {
   const drillDownsWithIcons = urlTemplates.filter(
-    ({ icon }: UrlTemplate) => icon && icon.class !== ''
+    ({ icon }: UrlTemplate) => icon && icon.id !== ''
   );
 
   if (drillDownsWithIcons.length === 0) {
@@ -34,14 +35,12 @@ export const DrillDownIconLinks = ({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip content={cur.description}>
-          <button
-            className="kuiButton kuiButton--basic kuiButton--small"
-            type="button"
-            disabled={hasNodes}
+          <EuiButtonIcon
+            iconType={cur.icon ? () => <IconRenderer icon={cur.icon} /> : ''}
+            size="xs"
+            isDisabled={hasNodes}
             onClick={onUrlTemplateClick}
-          >
-            <span className={`kuiIcon ${cur.icon?.class || ''}`} />
-          </button>
+          />
         </EuiToolTip>
       </EuiFlexItem>
     );

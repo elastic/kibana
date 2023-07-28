@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { GLOBAL_KQL_WRAPPER } from './search_bar';
+
 // main links
 export const DASHBOARDS = '[data-test-subj="solutionSideNavItemLink-dashboards"]';
 export const DASHBOARDS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-dashboards"]';
@@ -32,7 +34,7 @@ export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
 
 export const DETECTION_RESPONSE = '[data-test-subj="solutionSideNavPanelLink-detection_response"]';
 
-export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity-analytics"]';
+export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity_analytics"]';
 
 export const KUBERNETES = '[data-test-subj="solutionSideNavPanelLink-kubernetes"]';
 
@@ -68,9 +70,9 @@ export const EXCEPTIONS = '[data-test-subj="solutionSideNavPanelLink-exceptions"
 // other
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
-export const KQL_INPUT = '[data-test-subj="queryInput"]';
+export const KQL_INPUT = `${GLOBAL_KQL_WRAPPER} [data-test-subj="queryInput"]`;
 
-export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
+export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';

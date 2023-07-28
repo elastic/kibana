@@ -383,15 +383,16 @@ describe('editor_frame', () => {
         hasDefaultTimeField: jest.fn(() => true),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+      mockVisualization.getConfiguration.mockClear();
 
       const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
       act(() => {
-        setDatasourceState({});
+        setDatasourceState('newState');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
-      expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
             datasourceLayers: {

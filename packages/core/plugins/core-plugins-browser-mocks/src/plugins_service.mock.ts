@@ -43,6 +43,7 @@ const createPluginInitializerContextMock = (config: unknown = {}) => {
         buildSha: 'buildSha',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
+        buildFlavor: 'serverless',
       },
     },
     logger: loggerMock.create(),
