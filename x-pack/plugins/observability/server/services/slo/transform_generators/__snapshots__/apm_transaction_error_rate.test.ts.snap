@@ -561,7 +561,7 @@ Object {
   "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
     "index": ".slo-observability.sli-v2",
-    "pipeline": ".slo-observability.sli.monthly",
+    "pipeline": ".slo-observability.sli.pipeline",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -827,7 +827,7 @@ Object {
   "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
     "index": ".slo-observability.sli-v2",
-    "pipeline": ".slo-observability.sli.monthly",
+    "pipeline": ".slo-observability.sli.pipeline",
   },
   "frequency": "1m",
   "pivot": Object {

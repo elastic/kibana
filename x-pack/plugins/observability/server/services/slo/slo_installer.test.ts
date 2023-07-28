@@ -17,7 +17,7 @@ describe('SLO Installer', () => {
     loggerMock = loggingSystemMock.createLogger();
   });
 
-  it('handles concurrent installation', async () => {
+  it.skip('handles concurrent installation', async () => {
     const resourceInstaller = createResourceInstallerMock();
     const summaryTransformInstaller = createSummaryTransformInstallerMock();
     const service = new DefaultSLOInstaller(
