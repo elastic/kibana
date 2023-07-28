@@ -91,11 +91,7 @@ export async function getTotalCount(
     });
 
     const aggs = searchResult.aggregations?.byActionTypeId.value?.types ?? {};
-
-    const countByType = Object.keys(aggs).reduce<Record<string, number>>((obj, key) => {
-      obj[replaceFirstAndLastDotSymbols(key)] = aggs[key];
-      return obj;
-    }, {});
+    const { countGenAiProviderTypes, countByType } = getCounts(aggs);
 
     if (inMemoryConnectors && inMemoryConnectors.length) {
       for (const inMemoryConnector of inMemoryConnectors) {
@@ -113,6 +109,7 @@ export async function getTotalCount(
       hasErrors: false,
       countTotal: totals,
       countByType,
+      countGenAiProviderTypes,
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
@@ -124,6 +121,7 @@ export async function getTotalCount(
       errorMessage,
       countTotal: 0,
       countByType: {},
+      countGenAiProviderTypes: {},
     };
   }
 }
@@ -473,6 +471,36 @@ export async function getInUseTotalCount(
     };
   }
 }
+
+export const getCounts = (aggs: Record<string, number>) => {
+  const countGenAiProviderTypes: Record<string, number> = {};
+
+  const countByType = Object.keys(aggs).reduce<Record<string, number>>((obj, key) => {
+    const genAiKey = '.gen-ai';
+    if (key.includes(genAiKey)) {
+      const newKey = replaceFirstAndLastDotSymbols(genAiKey);
+      if (obj[newKey] != null) {
+        obj[newKey] = obj[newKey] + aggs[key];
+      } else {
+        obj[newKey] = aggs[key];
+      }
+      const genAiProvder = key.split(`${genAiKey}__`)[1];
+      if (countGenAiProviderTypes[genAiProvder] != null) {
+        countGenAiProviderTypes[genAiProvder] = obj[genAiProvder] + aggs[key];
+      } else {
+        countGenAiProviderTypes[genAiProvder] = aggs[key];
+      }
+      return obj;
+    }
+    obj[replaceFirstAndLastDotSymbols(key)] = aggs[key];
+    return obj;
+  }, {});
+
+  return {
+    countByType,
+    countGenAiProviderTypes,
+  };
+};
 
 export function replaceFirstAndLastDotSymbols(strToReplace: string) {
   const hasFirstSymbolDot = strToReplace.startsWith('.');

@@ -61,6 +61,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       params: {},
       schedule: SCHEDULE,
     });
+    await taskManager.runSoon(TASK_ID);
   } catch (e) {
     logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
   }
@@ -112,6 +113,7 @@ export function telemetryTaskRunner(
             runs: (state.runs || 0) + 1,
             count_total: totalAggegations.countTotal,
             count_by_type: totalAggegations.countByType,
+            count_gen_ai_provider_types: totalAggegations.countGenAiProviderTypes,
             count_active_total: totalInUse.countTotal,
             count_active_by_type: totalInUse.countByType,
             count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
