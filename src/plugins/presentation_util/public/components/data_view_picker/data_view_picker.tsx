@@ -61,13 +61,16 @@ export function DataViewPicker({
   return (
     <EuiInputPopover
       {...other}
-      input={createTrigger()}
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopoverIsOpen(false)}
-      display="block"
-      panelPaddingSize="s"
       ownFocus
       fullWidth
+      display="block"
+      panelPaddingSize="s"
+      isOpen={isPopoverOpen}
+      input={createTrigger()}
+      closePopover={() => setPopoverIsOpen(false)}
+      panelProps={{
+        'data-test-subj': 'data-view-picker-popover',
+      }}
     >
       <EuiSelectable<{
         key?: string;

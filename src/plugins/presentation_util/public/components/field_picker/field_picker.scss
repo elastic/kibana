@@ -1,9 +1,7 @@
-
-
 .fieldPickerSelectable {
   height: $euiSizeXXL * 9; // 40 * 9 = 360px
 
-  .presFieldPicker__fieldButton[aria-checked="true"] {
+  .presFieldPicker__fieldButton[aria-checked='true'] {
     background-color: transparentize($euiColorPrimary, .9);
   }
 
