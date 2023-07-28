@@ -25,6 +25,9 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/src/plugin')(config);
+      return config;
     },
   },
 });

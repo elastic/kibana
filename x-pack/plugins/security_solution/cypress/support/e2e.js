@@ -23,6 +23,9 @@
 // Import commands.js using ES2015 syntax:
 import './commands';
 import 'cypress-real-events/support';
+import registerCypressGrep from '@cypress/grep';
+
+registerCypressGrep();
 
 Cypress.on('uncaught:exception', () => {
   return false;
