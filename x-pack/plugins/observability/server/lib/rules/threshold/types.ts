@@ -72,4 +72,6 @@ export interface AlertExecutionDetails {
   executionId: string;
 }
 
-interface TEST_CODE_CHANAGES {} // TO DELL
+export interface TEST_CODE_CHANGES {
+  test: string;
+} // TO DELL
