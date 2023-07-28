@@ -61,7 +61,6 @@ export const createCommonUpdateUserActionBuilder = ({
   handleOutlineComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return {
-    // eslint-disable-next-line react/display-name
     build: () => [
       {
         username: (
