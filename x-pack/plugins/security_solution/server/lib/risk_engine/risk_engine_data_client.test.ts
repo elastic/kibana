@@ -173,63 +173,145 @@ describe('RiskEngineDataClient', () => {
         },
       });
 
-      expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith({
-        logger,
-        esClient,
-        template: {
-          name: '.risk-score-mappings',
-          _meta: {
-            managed: true,
-          },
-          template: {
-            settings: {},
-            mappings: {
-              dynamic: 'strict',
-              properties: {
-                '@timestamp': {
-                  type: 'date',
-                },
-                alertsScore: {
-                  type: 'float',
-                },
-                identifierField: {
-                  type: 'keyword',
-                },
-                identifierValue: {
-                  type: 'keyword',
-                },
-                level: {
-                  type: 'keyword',
-                },
-                otherScore: {
-                  type: 'float',
-                },
-                riskiestInputs: {
-                  properties: {
-                    id: {
-                      type: 'keyword',
-                    },
-                    index: {
-                      type: 'keyword',
-                    },
-                    riskScore: {
-                      type: 'float',
-                    },
+      expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger,
+          esClient,
+          template: expect.objectContaining({
+            name: '.risk-score-mappings',
+            _meta: {
+              managed: true,
+            },
+          }),
+          totalFieldsLimit: 1000,
+        })
+      );
+      expect((createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template)
+        .toMatchInlineSnapshot(`
+        Object {
+          "mappings": Object {
+            "dynamic": "strict",
+            "properties": Object {
+              "@timestamp": Object {
+                "type": "date",
+              },
+              "host": Object {
+                "properties": Object {
+                  "name": Object {
+                    "type": "keyword",
                   },
-                  type: 'nested',
+                  "risk": Object {
+                    "properties": Object {
+                      "calculated_level": Object {
+                        "type": "keyword",
+                      },
+                      "calculated_score": Object {
+                        "type": "float",
+                      },
+                      "calculated_score_norm": Object {
+                        "type": "float",
+                      },
+                      "category_1_score": Object {
+                        "type": "float",
+                      },
+                      "id_field": Object {
+                        "type": "keyword",
+                      },
+                      "id_value": Object {
+                        "type": "keyword",
+                      },
+                      "inputs": Object {
+                        "properties": Object {
+                          "category": Object {
+                            "type": "keyword",
+                          },
+                          "description": Object {
+                            "type": "keyword",
+                          },
+                          "id": Object {
+                            "type": "keyword",
+                          },
+                          "index": Object {
+                            "type": "keyword",
+                          },
+                          "risk_score": Object {
+                            "type": "float",
+                          },
+                          "timestamp": Object {
+                            "type": "date",
+                          },
+                        },
+                        "type": "object",
+                      },
+                      "notes": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "object",
+                  },
                 },
-                totalScore: {
-                  type: 'float',
-                },
-                totalScoreNormalized: {
-                  type: 'float',
+              },
+              "user": Object {
+                "properties": Object {
+                  "name": Object {
+                    "type": "keyword",
+                  },
+                  "risk": Object {
+                    "properties": Object {
+                      "calculated_level": Object {
+                        "type": "keyword",
+                      },
+                      "calculated_score": Object {
+                        "type": "float",
+                      },
+                      "calculated_score_norm": Object {
+                        "type": "float",
+                      },
+                      "category_1_score": Object {
+                        "type": "float",
+                      },
+                      "id_field": Object {
+                        "type": "keyword",
+                      },
+                      "id_value": Object {
+                        "type": "keyword",
+                      },
+                      "inputs": Object {
+                        "properties": Object {
+                          "category": Object {
+                            "type": "keyword",
+                          },
+                          "description": Object {
+                            "type": "keyword",
+                          },
+                          "id": Object {
+                            "type": "keyword",
+                          },
+                          "index": Object {
+                            "type": "keyword",
+                          },
+                          "risk_score": Object {
+                            "type": "float",
+                          },
+                          "timestamp": Object {
+                            "type": "date",
+                          },
+                        },
+                        "type": "object",
+                      },
+                      "notes": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "object",
+                  },
                 },
               },
             },
           },
-        },
-        totalFieldsLimit,
-      });
+          "settings": Object {},
+        }
+      `);
 
       expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
         logger,
@@ -285,18 +367,14 @@ describe('RiskEngineDataClient', () => {
 
   describe('initializeResources error', () => {
     it('should handle errors during initialization', async () => {
-      try {
-        const error = new Error('There error');
-        (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValue(error);
+      const error = new Error('There error');
+      (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValue(error);
 
-        await riskEngineDataClient.initializeResources({ namespace: 'default' });
+      await riskEngineDataClient.initializeResources({ namespace: 'default' });
 
-        expect(logger.error).toHaveBeenCalledWith(
-          `Error initializing risk engine resources: ${error.message}`
-        );
-      } catch (e) {
-        //
-      }
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error initializing risk engine resources: ${error.message}`
+      );
     });
   });
 
