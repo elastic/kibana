@@ -99,7 +99,6 @@ export const enhancedEsSearchStrategyProvider = (
     );
   }
 
-  // this
   async function rollupSearch(
     request: IEsSearchRequest,
     options: ISearchOptions,
