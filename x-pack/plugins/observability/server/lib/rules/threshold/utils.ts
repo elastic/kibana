@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, isError } from 'lodash';
+import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
+import { isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -41,21 +42,16 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
 
-export const validateIsStringElasticsearchJSONFilter = (value: string) => {
+export const validateKQLStringFilter = (value: string) => {
   if (value === '') {
     // Allow clearing the filter.
     return;
   }
 
-  const errorMessage = 'filterQuery must be a valid Elasticsearch filter expressed in JSON';
   try {
-    const parsedValue = JSON.parse(value);
-    if (!isEmpty(parsedValue.bool)) {
-      return undefined;
-    }
-    return errorMessage;
+    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], []);
   } catch (e) {
-    return errorMessage;
+    return 'filterQuery must be a valid KQL filter';
   }
 };
 

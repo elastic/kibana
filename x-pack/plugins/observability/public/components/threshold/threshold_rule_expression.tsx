@@ -37,7 +37,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
@@ -45,7 +45,6 @@ import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerKueryBar } from './components/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
-import { convertKueryToElasticSearchQuery } from './helpers/kuery';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -173,16 +172,8 @@ export default function Expressions(props: Props) {
   const onFilterChange = useCallback(
     (filter: any) => {
       setRuleParams('filterQueryText', filter);
-      try {
-        setRuleParams(
-          'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
-        );
-      } catch (e) {
-        setRuleParams('filterQuery', QUERY_INVALID);
-      }
     },
-    [setRuleParams, derivedIndexPattern]
+    [setRuleParams]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -253,22 +244,14 @@ export default function Expressions(props: Props) {
     const md = metadata;
     if (md && md.currentOptions?.filterQuery) {
       setRuleParams('filterQueryText', md.currentOptions.filterQuery);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
-      );
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
       const filter = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
       setRuleParams('filterQueryText', filter);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -481,6 +464,7 @@ export default function Expressions(props: Props) {
         })}
         fullWidth
         display="rowCompressed"
+        isInvalid={!!errors.filterQueryText}
       >
         {(metadata && derivedIndexPattern && (
           <MetricsExplorerKueryBar
@@ -495,6 +479,7 @@ export default function Expressions(props: Props) {
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
+            isInvalid={!!errors.filterQueryText}
           />
         )}
       </EuiFormRow>

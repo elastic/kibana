@@ -46,7 +46,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   timeframe?: { start?: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
-  const { criteria, groupBy, filterQuery } = params;
+  const { criteria, groupBy, filterQueryText } = params;
 
   return Promise.all(
     criteria.map(async (criterion) => {
@@ -65,7 +65,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         criterion,
         dataView,
         groupBy,
-        filterQuery,
+        filterQueryText,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -78,7 +78,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         criterion,
         dataView,
         groupBy,
-        filterQuery,
+        filterQueryText,
         logger,
         calculatedTimerange,
         missingGroups

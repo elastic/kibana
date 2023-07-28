@@ -37,7 +37,7 @@ import {
   timestampActionVariableDescription,
   valueActionVariableDescription,
 } from './messages';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from './utils';
+import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -130,9 +130,9 @@ export function thresholdRuleType(
             schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
           ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          filterQuery: schema.maybe(
+          filterQueryText: schema.maybe(
             schema.string({
-              validate: validateIsStringElasticsearchJSONFilter,
+              validate: validateKQLStringFilter,
             })
           ),
           alertOnNoData: schema.maybe(schema.boolean()),
