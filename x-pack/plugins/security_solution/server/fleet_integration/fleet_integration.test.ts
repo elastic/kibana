@@ -66,8 +66,12 @@ describe('ingest_integration tests ', () => {
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
-  const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
-  const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
+  const Platinum = licenseMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum', uid: 'updated-uid' },
+  });
+  const Gold = licenseMock.createLicense({
+    license: { type: 'gold', mode: 'gold', uid: 'updated-uid' },
+  });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
 
@@ -97,14 +101,21 @@ describe('ingest_integration tests ', () => {
     const createNewEndpointPolicyInput = (
       manifest: ManifestSchema,
       license = 'platinum',
-      cloud = cloudService.isCloudEnabled
+      cloud = cloudService.isCloudEnabled,
+      licenseUuid = 'updated-uid',
+      clusterUuid = '',
+      clusterName = ''
     ) => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
         integration_config: {},
-        policy: { value: disableProtections(policyFactory(license, cloud)) },
+        policy: {
+          value: disableProtections(
+            policyFactory(license, cloud, licenseUuid, clusterUuid, clusterName)
+          ),
+        },
         artifact_manifest: { value: manifest },
       },
     });
@@ -367,7 +378,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -384,7 +396,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -415,7 +428,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -434,6 +448,27 @@ describe('ingest_integration tests ', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
+    const infoResponse = {
+      cluster_name: 'updated-name',
+      cluster_uuid: 'updated-uuid',
+      license_uid: 'updated-uid',
+      name: 'name',
+      tagline: 'tagline',
+      version: {
+        number: '1.2.3',
+        lucene_version: '1.2.3',
+        build_date: 'DateString',
+        build_flavor: 'string',
+        build_hash: 'string',
+        build_snapshot: true,
+        build_type: 'string',
+        minimum_index_compatibility_version: '1.2.3',
+        minimum_wire_compatibility_version: '1.2.3',
+      },
+    };
+
+    esClient.info.mockResolvedValue(infoResponse);
+
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
@@ -441,18 +476,26 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactory();
       mockPolicy.meta.cloud = true; // cloud mock will return true
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+      mockPolicy.meta.cluster_name = 'updated-name';
+      mockPolicy.meta.cluster_uuid = 'updated-uuid';
+      mockPolicy.meta.license_uid = 'updated-uid';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
+
       // values should be updated
       policyConfig.inputs[0]!.config!.policy.value.meta.cloud = false;
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'gold';
+      policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'original-name';
+      policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'original-uid';
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,
@@ -467,18 +510,25 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactory();
       mockPolicy.meta.cloud = true; // cloud mock will return true
       mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+      mockPolicy.meta.cluster_name = 'updated-name';
+      mockPolicy.meta.cluster_uuid = 'updated-uuid';
+      mockPolicy.meta.license_uid = 'updated-uid';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated
       policyConfig.inputs[0]!.config!.policy.value.meta.cloud = true;
       policyConfig.inputs[0]!.config!.policy.value.meta.license = 'platinum';
+      policyConfig.inputs[0]!.config!.policy.value.meta.cluster_name = 'updated-name';
+      policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
+      policyConfig.inputs[0]!.config!.policy.value.meta.license_uid = 'updated-uid';
       const updatedPolicyConfig = await callback(
         policyConfig,
         soClient,
