@@ -530,6 +530,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
         request,
+        rollupsEnabled: true, // TODO actually set this
       };
       return {
         search: <

@@ -56,7 +56,9 @@ export function registerFieldsRoute(
         const { elasticsearch } = await context.core;
 
         const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(
-          elasticsearch.client.asInternalUser
+          elasticsearch.client.asInternalUser,
+          undefined,
+          false // never a rollup data view
         );
         const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
           pattern: indices,

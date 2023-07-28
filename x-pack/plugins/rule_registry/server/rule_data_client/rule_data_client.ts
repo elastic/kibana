@@ -118,7 +118,7 @@ export class RuleDataClient implements IRuleDataClient {
 
       getDynamicIndexPattern: async () => {
         const clusterClient = await waitUntilReady();
-        const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
+        const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient, undefined, false); // never a rollup data view
 
         try {
           const { fields } = await indexPatternsFetcher.getFieldsForWildcard({

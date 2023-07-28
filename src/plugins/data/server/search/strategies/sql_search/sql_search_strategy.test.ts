@@ -45,6 +45,7 @@ describe('SQL search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
+    rollupsEnabled: true,
   } as unknown as SearchStrategyDependencies;
 
   const mockSearchConfig = getMockSearchConfig({});

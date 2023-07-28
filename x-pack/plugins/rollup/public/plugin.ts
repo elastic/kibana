@@ -96,5 +96,7 @@ export class RollupPlugin implements Plugin {
     setHttp(core.http);
     setNotifications(core.notifications);
     initDocumentation(core.docLinks);
+    // So plugins can check whether this plugin is enabled via plugin contract
+    return {};
   }
 }

@@ -21,11 +21,11 @@ describe('Index Pattern Fetcher - server', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    indexPatterns = new IndexPatternsFetcher(esClient);
+    indexPatterns = new IndexPatternsFetcher(esClient, false, true);
   });
   it('calls fieldcaps once', async () => {
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
-    indexPatterns = new IndexPatternsFetcher(esClient, true);
+    indexPatterns = new IndexPatternsFetcher(esClient, true, true);
     await indexPatterns.getFieldsForWildcard({ pattern: patternList });
     expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
   });

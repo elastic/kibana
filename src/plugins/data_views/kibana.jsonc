@@ -13,7 +13,8 @@
       "contentManagement"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "rollup"
     ],
     "requiredBundles": [
       "kibanaUtils"

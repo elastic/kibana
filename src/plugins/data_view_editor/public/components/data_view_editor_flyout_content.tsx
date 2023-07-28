@@ -203,6 +203,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }
 
   const showIndexPatternTypeSelect = () =>
+    // todo add option
     uiSettings.isDeclared('rollups:enableIndexPatterns') &&
     uiSettings.get('rollups:enableIndexPatterns') &&
     getRollupIndices(rollupIndicesCapabilities).length;

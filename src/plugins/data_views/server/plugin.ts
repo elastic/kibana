@@ -65,13 +65,14 @@ export class DataViewsServerPlugin
 
   public start(
     { uiSettings, capabilities }: CoreStart,
-    { fieldFormats }: DataViewsServerPluginStartDependencies
+    { fieldFormats, rollup }: DataViewsServerPluginStartDependencies
   ) {
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
       capabilities,
+      rollupsEnabled: !!rollup,
     });
 
     return {

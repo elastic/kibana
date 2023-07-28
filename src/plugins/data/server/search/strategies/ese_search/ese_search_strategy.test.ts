@@ -64,6 +64,7 @@ describe('ES search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
+    rollupsEnabled: true,
   } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {

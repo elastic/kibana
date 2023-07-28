@@ -35,6 +35,7 @@ export interface SearchStrategyDependencies {
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
+  rollupsEnabled: boolean;
 }
 
 export interface ISearchSetup {

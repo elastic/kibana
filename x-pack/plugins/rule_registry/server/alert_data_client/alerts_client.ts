@@ -1086,7 +1086,11 @@ export class AlertsClient {
     metaFields: string[];
     allowNoIndex: boolean;
   }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
-    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(
+      this.esClient,
+      undefined,
+      false // never a rollup
+    );
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,

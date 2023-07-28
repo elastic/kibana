@@ -47,6 +47,7 @@ describe('ES search strategy', () => {
         get: () => {},
       },
       esClient: { asCurrentUser: esClient },
+      rollupsEnabled: true,
     } as unknown as SearchStrategyDependencies;
   }
 
