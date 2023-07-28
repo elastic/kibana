@@ -116,6 +116,7 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
   taskManager?: TaskManagerStartContract;
+  rollupsEnabled?: boolean;
 }
 
 /** @internal */
@@ -131,6 +132,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private sessionService: SearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
   private searchAsInternalUser!: ISearchStrategy;
+  private rollupsEnabled: boolean = false;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -145,7 +147,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, taskManager, security }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection, security }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -261,12 +263,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
       searchSource: this.searchSourceService.setup(),
+      enableRollups: () => (this.rollupsEnabled = true),
     };
   }
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns, taskManager }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, rollupsEnabled }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
@@ -278,7 +281,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       indexPatterns,
     });
 
-    this.asScoped = this.asScopedProvider(core);
+    this.asScoped = this.asScopedProvider(core, rollupsEnabled);
     return {
       aggs,
       searchAsInternalUser: this.searchAsInternalUser,
@@ -516,7 +519,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
-  private asScopedProvider = (core: CoreStart) => {
+  private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): IScopedSearchClient => {
@@ -530,7 +533,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
         request,
-        rollupsEnabled: true, // TODO actually set this
+        rollupsEnabled,
       };
       return {
         search: <

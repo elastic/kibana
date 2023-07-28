@@ -80,6 +80,7 @@ export class DataServerPlugin
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
+  private rollupsEnabled: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get('data');
@@ -128,6 +129,7 @@ export class DataServerPlugin
       fieldFormats,
       indexPatterns: dataViews,
       taskManager,
+      rollupsEnabled: this.rollupsEnabled,
     });
     const datatableUtilities = new DatatableUtilitiesService(
       search.aggs,

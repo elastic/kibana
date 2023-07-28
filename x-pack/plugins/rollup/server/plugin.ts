@@ -104,8 +104,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
     dataViews.enableRollups();
-    // todo need to implemement in data plugin
-    // data.enableRollups();
+    data.search.enableRollups();
   }
 
   start() {

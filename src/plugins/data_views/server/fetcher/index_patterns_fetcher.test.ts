@@ -29,4 +29,5 @@ describe('Index Pattern Fetcher - server', () => {
     await indexPatterns.getFieldsForWildcard({ pattern: patternList });
     expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
   });
+  // todo
 });
