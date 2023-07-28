@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
+
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 
@@ -24,39 +26,56 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface WatchCreateThresholdTestBed extends TestBed<WatchCreateThresholdTestSubjects> {
   actions: {
-    clickSubmitButton: () => void;
-    clickAddActionButton: () => void;
+    clickSubmitButton: () => Promise<void>;
+    clickAddActionButton: () => Promise<void>;
     clickActionLink: (
       actionType: 'logging' | 'email' | 'webhook' | 'index' | 'slack' | 'jira' | 'pagerduty'
-    ) => void;
-    clickSimulateButton: () => void;
+    ) => Promise<void>;
+    clickSimulateButton: () => Promise<void>;
   };
 }
 
 export const setup = async (httpSetup: HttpSetup): Promise<WatchCreateThresholdTestBed> => {
   const initTestBed = registerTestBed(WithAppDependencies(WatchEditPage, httpSetup), testBedConfig);
   const testBed = await initTestBed();
+  const { find, component } = testBed;
 
   /**
    * User Actions
    */
 
-  const clickSubmitButton = () => {
-    testBed.find('saveWatchButton').simulate('click');
+  const clickSubmitButton = async () => {
+    await act(async () => {
+      find('saveWatchButton').simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickAddActionButton = () => {
-    testBed.find('addWatchActionButton').simulate('click');
+  const clickAddActionButton = async () => {
+    await act(async () => {
+      find('addWatchActionButton').simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickSimulateButton = () => {
-    testBed.find('simulateActionButton').simulate('click');
+  const clickSimulateButton = async () => {
+    await act(async () => {
+      find('simulateActionButton').simulate('click');
+    });
+
+    component.update();
   };
 
-  const clickActionLink = (
+  const clickActionLink = async (
     actionType: 'logging' | 'email' | 'webhook' | 'index' | 'slack' | 'jira' | 'pagerduty'
   ) => {
-    testBed.find(`${actionType}ActionButton`).simulate('click');
+    await act(async () => {
+      find(`${actionType}ActionButton`).simulate('click');
+    });
+
+    component.update();
   };
 
   return {

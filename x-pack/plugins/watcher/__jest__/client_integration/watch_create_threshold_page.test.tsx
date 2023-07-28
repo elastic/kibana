@@ -31,6 +31,10 @@ jest.mock('uuid', () => ({
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require('./helpers/jest_constants').WATCH_ID;
   },
+  v1: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('./helpers/jest_constants').WATCH_ID;
+  },
 }));
 
 const SETTINGS = {
@@ -89,15 +93,20 @@ describe('<ThresholdWatchEditPage /> create route', () => {
     jest.useRealTimers();
   });
 
-  describe('on component mount', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
+  beforeEach(async () => {
+    await act(async () => {
+      httpRequestsMockHelpers.setLoadMatchingIndicesResponse({ indices: MATCH_INDICES });
+      httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
+      httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
+      httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
 
-      testBed.component.update();
+      testBed = await setup(httpSetup);
     });
 
+    testBed.component.update();
+  });
+
+  describe('on component mount', () => {
     test('should set the correct page title', () => {
       const { find } = testBed;
 
@@ -105,13 +114,6 @@ describe('<ThresholdWatchEditPage /> create route', () => {
     });
 
     describe('create', () => {
-      beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadMatchingIndicesResponse({ indices: MATCH_INDICES });
-        httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
-        httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
-        httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
-      });
-
       describe('form validation', () => {
         test('should not allow empty name field', () => {
           const { form } = testBed;
@@ -232,8 +234,8 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
           const LOGGING_MESSAGE = 'test log message';
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('logging');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('logging');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
@@ -246,9 +248,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           // Next, provide valid field and verify
           form.setInputValue('loggingTextInput', LOGGING_MESSAGE);
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -300,17 +300,15 @@ describe('<ThresholdWatchEditPage /> create route', () => {
         test('should simulate an index action', async () => {
           const { form, actions, exists } = testBed;
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('index');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('index');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
           // Verify an empty index is allowed
           form.setInputValue('indexInput', '');
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -363,16 +361,14 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
           const SLACK_MESSAGE = 'test slack message';
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('slack');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('slack');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
           form.setInputValue('slackMessageTextarea', SLACK_MESSAGE);
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -430,8 +426,8 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           const EMAIL_SUBJECT = 'test email subject';
           const EMAIL_BODY = 'this is a test email body';
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('email');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('email');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
@@ -442,9 +438,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           form.setInputValue('emailSubjectInput', EMAIL_SUBJECT);
           form.setInputValue('emailBodyInput', EMAIL_BODY);
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -510,8 +504,8 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           const USERNAME = 'test_user';
           const PASSWORD = 'test_password';
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('webhook');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('webhook');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
@@ -534,9 +528,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           form.setInputValue('webhookUsernameInput', USERNAME);
           form.setInputValue('webhookPasswordInput', PASSWORD);
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -600,14 +592,18 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           const ISSUE_TYPE = 'Bug';
           const SUMMARY = 'test Jira summary';
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('jira');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('jira');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
-          // First, provide invalid fields and verify
-          form.setInputValue('jiraProjectKeyInput', '');
+          // Set issue type value and clear it to trigger required error message
+          form.setInputValue('jiraIssueTypeInput', 'myissue');
           form.setInputValue('jiraIssueTypeInput', '');
+          // Set project type value and clear it to trigger required error message
+          form.setInputValue('jiraProjectKeyInput', 'my key');
+          form.setInputValue('jiraProjectKeyInput', '');
+          // Clear default summary to trigger required error message
           form.setInputValue('jiraSummaryInput', '');
 
           expect(form.getErrorsMessages()).toEqual([
@@ -622,9 +618,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           form.setInputValue('jiraIssueTypeInput', ISSUE_TYPE);
           form.setInputValue('jiraSummaryInput', SUMMARY);
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -688,8 +682,8 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
           const DESCRIPTION = 'test pagerduty description';
 
-          actions.clickAddActionButton();
-          actions.clickActionLink('pagerduty');
+          await actions.clickAddActionButton();
+          await actions.clickActionLink('pagerduty');
 
           expect(exists('watchActionAccordion')).toBe(true);
 
@@ -702,9 +696,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           // Next, provide valid fields and verify
           form.setInputValue('pagerdutyDescriptionInput', DESCRIPTION);
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const thresholdWatch = {
             id: WATCH_ID,
@@ -757,7 +749,6 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       describe('watch visualize data payload', () => {
         test('should send the correct payload', async () => {
           const { form, find, component } = testBed;
-
           // Set up required fields
           await act(async () => {
             form.setInputValue('nameInput', WATCH_NAME);
@@ -807,9 +798,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           });
           component.update();
 
-          await act(async () => {
-            actions.clickSubmitButton();
-          });
+          await actions.clickSubmitButton();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
             `${API_BASE_PATH}/watch/${WATCH_ID}`,
