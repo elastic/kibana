@@ -294,6 +294,7 @@ export class ChromeService {
                 application,
                 globalHelpExtensionMenuLinks$,
               }}
+              isVisible$={this.isVisible$}
               actionMenu$={application.currentActionMenu$}
               breadcrumbs$={currentProjectBreadcrumbs$}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}

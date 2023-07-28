@@ -95,6 +95,7 @@ export interface Props {
   actionMenu$: Observable<MountPoint | undefined>;
   docLinks: DocLinksStart;
   children: React.ReactNode;
+  isVisible$: Observable<boolean>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
@@ -171,10 +172,15 @@ export const ProjectHeader = ({
   docLinks,
   ...observables
 }: Props) => {
+  const isVisible = useObservable(observables.isVisible$, false);
   const [navId] = useState(htmlIdGenerator()());
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
+
+  if (!isVisible) {
+    return <HeaderTopBanner headerBanner$={observables.headerBanner$} />;
+  }
 
   return (
     <>
