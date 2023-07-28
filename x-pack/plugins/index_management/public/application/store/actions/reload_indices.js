@@ -23,7 +23,7 @@ export const reloadIndices = (indexNames, options) => async (dispatch) => {
     if (error.status === 404 || error.status === 403) {
       return dispatch(loadIndices());
     }
-    return notificationService.showDangerToast(error.message);
+    return notificationService.showDangerToast(error.body.message);
   }
   if (indices && indices.length > 0) {
     return dispatch(reloadIndicesSuccess({ indices }));
