@@ -25,10 +25,10 @@ Object {
       "enabled": true,
     },
     "pdf": Object {
-      "enabled": false,
+      "enabled": true,
     },
     "png": Object {
-      "enabled": false,
+      "enabled": true,
     },
   },
   "kibanaServer": Object {},
@@ -82,10 +82,10 @@ Object {
       "enabled": true,
     },
     "pdf": Object {
-      "enabled": false,
+      "enabled": true,
     },
     "png": Object {
-      "enabled": false,
+      "enabled": true,
     },
   },
   "kibanaServer": Object {},

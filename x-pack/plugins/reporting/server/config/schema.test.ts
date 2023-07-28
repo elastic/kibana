@@ -62,6 +62,7 @@ describe('Reporting Config Schema', () => {
       );
     }
   );
+
   it('disables image reporting with serverless', () => {
     expect(() =>
       ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { serverless: true })
@@ -69,12 +70,13 @@ describe('Reporting Config Schema', () => {
     expect(() =>
       ConfigSchema.validate({ export_types: { png: { enabled: true } } }, { serverless: true })
     ).toThrow();
-    // csv should pass in either dev or serverless
+    // csv is permitted in all configs
     expect(() =>
       ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { serverless: true })
     ).not.toThrow();
   });
-  it('allows image reporting in dev', () => {
+
+  it('it should allow image reporting for any non-serverless config', () => {
     expect(() =>
       ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { dev: true })
     ).not.toThrow();

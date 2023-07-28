@@ -111,16 +111,34 @@ const ExportTypeSchema = schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
       true,
-      schema.boolean({ defaultValue: false }),
+      schema.boolean({
+        validate: (rawValue) => {
+          if (rawValue === true) {
+            return 'PNG reports can only be disabled in serverless mode';
+          }
+        },
+        // when running in dev mode default to true
+        defaultValue: schema.contextRef('dev'),
+      }),
+      // schema.boolean({ defaultValue: false }),
       schema.boolean({ defaultValue: true })
     ),
   }),
-  // Pdf reports are disabled in serverelastless
+  // Pdf reports are disabled in serverless
   pdf: schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
       true,
-      schema.boolean({ defaultValue: false }),
+      schema.boolean({
+        validate: (rawValue) => {
+          if (rawValue === true) {
+            return 'PDF reports can only be disabled in serverless mode';
+          }
+        },
+        // when running in dev mode default to true
+        defaultValue: schema.contextRef('dev'),
+      }),
+      // schema.boolean({ defaultValue: false }),
       schema.boolean({ defaultValue: true })
     ),
   }),
