@@ -995,7 +995,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
         await deleteUsersAndRoles(getService, users, roles);
       });
 
@@ -1037,6 +1036,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(participants.length).to.be(3);
 
+        // The assignee
         const casesAllUserText = await participants[0].getVisibleText();
         const elasticUserText = await participants[1].getVisibleText();
         const testUserText = await participants[2].getVisibleText();
