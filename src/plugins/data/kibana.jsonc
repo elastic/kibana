@@ -29,8 +29,7 @@
     "optionalPlugins": [
       "usageCollection",
       "taskManager",
-      "security",
-      "rollup"
+      "security"
     ],
     "requiredBundles": [
       "kibanaUtils",

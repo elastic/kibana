@@ -33,6 +33,7 @@ export class DataViewsServerPlugin
     >
 {
   private readonly logger: Logger;
+  private rollupsEnabled: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
@@ -60,19 +61,21 @@ export class DataViewsServerPlugin
       },
     });
 
-    return {};
+    return {
+      enableRollups: () => (this.rollupsEnabled = true),
+    };
   }
 
   public start(
     { uiSettings, capabilities }: CoreStart,
-    { fieldFormats, rollup }: DataViewsServerPluginStartDependencies
+    { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
       capabilities,
-      rollupsEnabled: !!rollup,
+      rollupsEnabled: this.rollupsEnabled,
     });
 
     return {

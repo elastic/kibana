@@ -53,8 +53,9 @@ export interface DataViewsServerPluginStart {
 /**
  * DataViews server plugin setup api
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewsServerPluginSetup {}
+export interface DataViewsServerPluginSetup {
+  enableRollups: () => void;
+}
 
 /**
  * Data Views server setup dependencies
