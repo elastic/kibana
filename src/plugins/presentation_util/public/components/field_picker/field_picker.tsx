@@ -8,7 +8,8 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -41,8 +42,10 @@ export const FieldPicker = ({
   selectableProps,
   ...other
 }: FieldPickerProps) => {
-  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
+  const initialSelection = useRef(selectedFieldName);
+
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
 
   const availableFields = useMemo(
@@ -52,7 +55,7 @@ export const FieldPicker = ({
           .filter((f) => typesFilter.length === 0 || typesFilter.includes(f.type as string))
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
-      ),
+      ).sort((f) => (f.name === initialSelection.current ? -1 : 1)),
     [dataView, filterPredicate, typesFilter]
   );
 
@@ -62,9 +65,8 @@ export const FieldPicker = ({
       return {
         key: field.name,
         label: field.displayName ?? field.name,
-        className: classNames('presFieldPicker__fieldButton', {
-          presFieldPickerFieldButtonActive: field.name === selectedFieldName,
-        }),
+        className: 'presFieldPicker__fieldButton',
+        checked: field.name === selectedFieldName ? 'on' : undefined,
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
