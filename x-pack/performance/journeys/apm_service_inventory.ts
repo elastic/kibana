@@ -33,7 +33,20 @@ export const journey = new Journey({
       })
     );
   },
-}).step('Go to Service Inventory Page', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`app/apm/services`));
-  await page.waitForSelector(`[data-test-subj="apmUnifiedSearchBar"]`);
-});
+})
+  .step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`app/apm/services`));
+    await page.waitForSelector(`[data-test-subj="serviceLink_nodejs"]`);
+  })
+  .step('Navigate to Service Overview Page', async ({ page, kbnUrl }) => {
+    await page.click(`[data-test-subj="serviceLink_nodejs"]`);
+    await page.waitForSelector(`[data-test-subj="apmMainTemplateHeaderServiceName"]`);
+  })
+  .step('Navigate to Transactions tabs', async ({ page, kbnUrl }) => {
+    await page.click(`[data-test-subj="transactionsTab"]`);
+    await page.waitForSelector(`[data-test-subj="apmTransactionDetailLinkLink"]`);
+  })
+  .step('Wait for Trace Waterfall on the page to load', async ({ page, kbnUrl }) => {
+    await page.click(`[data-test-subj="apmTransactionDetailLinkLink"]`);
+    await page.waitForSelector(`[data-test-subj="apmWaterfallButton"]`);
+  });
