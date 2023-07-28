@@ -24,7 +24,7 @@ import { decodeOrThrow } from '../helpers/runtime_types';
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   derivedIndexPattern: DataViewBase,
-  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestampsRT,
+  { fromTimestamp, toTimestamp, interval, timeFieldName }: MetricsExplorerTimestampsRT,
   enabled = true
 ) {
   const { http } = useKibana().services;
@@ -62,6 +62,7 @@ export function useMetricsExplorerData(
             void 0,
           timerange: {
             interval,
+            timeFieldName,
             from: fromTimestamp,
             to: toTimestamp,
           },
