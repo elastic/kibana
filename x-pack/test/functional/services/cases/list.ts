@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
