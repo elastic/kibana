@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { getPolicySettingsFormTestSubjects } from '../../../pages/policy/view/policy_settings_form/mocks';
-import { ProtectionModes } from '../../../../../common/endpoint/types';
+import { ProtectionModes } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
+import {
+  CyIndexEndpointHosts,
+  indexEndpointHosts,
+} from '@kbn/security-solution-plugin/public/management/cypress/tasks/index_endpoint_hosts';
+import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
+
 import {
   PackagePolicyBackupHelper,
   savePolicyForm,
   visitPolicyDetailsPage,
   yieldPolicyConfig,
-} from '../../screens/policy_details';
-import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { login } from '../../tasks/login';
+} from '@kbn/security-solution-plugin/public/management/cypress/screens/policy_details';
 
 describe('Policy Details', () => {
   const packagePolicyBackupHelper = new PackagePolicyBackupHelper();

@@ -26,6 +26,7 @@ export default defineCypressConfig({
     specPattern: [
       './e2e/**/*.cy.ts',
       '../../../../../test/security_solution_cypress/e2e/**/*.cy.ts',
+      '../../../../../test/security_solution_cypress/e2e_management/mocked_data/**/*.cy.ts',
     ],
   },
 });

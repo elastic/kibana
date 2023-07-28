@@ -40,7 +40,10 @@ export default defineCypressConfig({
     // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
     baseUrl: 'http://localhost:5601',
     supportFile: 'public/management/cypress/support/e2e.ts',
-    specPattern: 'public/management/cypress/e2e/mocked_data/',
+    specPattern: [
+      'public/management/cypress/e2e/mocked_data/**/*.cy.ts',
+      '../../test/security_solution_cypress/e2e_management/mocked_data/**/*.cy.ts',
+    ],
     experimentalRunAllSpecs: true,
     setupNodeEvents: (on, config) => {
       return dataLoaders(on, config);
