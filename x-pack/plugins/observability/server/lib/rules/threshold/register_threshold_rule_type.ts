@@ -121,7 +121,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Threshold (Technical Preview)',
+      defaultMessage: 'Threshold (BETA)',
     }),
     validate: {
       params: schema.object(
