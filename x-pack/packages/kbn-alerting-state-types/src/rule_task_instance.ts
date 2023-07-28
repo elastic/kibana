@@ -6,25 +6,11 @@
  */
 
 import * as t from 'io-ts';
-import { throttledActionSchema, rawAlertInstance } from './alert_instance';
 
 export enum ActionsCompletion {
   COMPLETE = 'complete',
   PARTIAL = 'partial',
 }
-
-export const ruleStateSchema = t.partial({
-  alertTypeState: t.record(t.string, t.unknown),
-  // tracks the active alerts
-  alertInstances: t.record(t.string, rawAlertInstance),
-  // tracks the recovered alerts for flapping purposes
-  alertRecoveredInstances: t.record(t.string, rawAlertInstance),
-  previousStartedAt: t.union([t.null, t.string]),
-  summaryActions: throttledActionSchema,
-});
-
-// This is serialized in the rule task document
-export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
 
 export const ruleParamsSchema = t.intersection([
   t.type({

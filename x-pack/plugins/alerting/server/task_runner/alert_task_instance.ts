@@ -13,7 +13,6 @@ import {
   SanitizedRule,
   RuleTaskState,
   ruleParamsSchema,
-  ruleStateSchema,
   RuleTaskParams,
   RuleTypeParams,
 } from '../../common';
@@ -42,15 +41,6 @@ export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
         );
       }, t.identity)
     ),
-    state: pipe(
-      ruleStateSchema.decode(taskInstance.state),
-      fold((e: t.Errors) => {
-        throw new Error(
-          `Task "${taskInstance.id}" ${
-            alert ? `(underlying Alert "${alert.id}") ` : ''
-          }has invalid state at ${enumerateErrorFields(e)}`
-        );
-      }, t.identity)
-    ),
+    state: taskInstance.state as RuleTaskState,
   };
 }

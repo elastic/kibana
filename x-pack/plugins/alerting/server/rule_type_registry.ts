@@ -13,6 +13,7 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { stateSchemaByVersion } from '@kbn/alerting-state-types';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -276,85 +277,11 @@ export class RuleTypeRegistry {
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
 
-    const rawAlertInstanceSchema = schema.maybe(
-      schema.recordOf(
-        schema.string(),
-        schema.object({
-          meta: schema.maybe(
-            schema.object({
-              lastScheduledActions: schema.maybe(
-                schema.object({
-                  subgroup: schema.maybe(schema.string()),
-                  group: schema.string(),
-                  date: schema.string(),
-                  actions: schema.maybe(
-                    schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
-                  ),
-                })
-              ),
-              flappingHistory: schema.maybe(schema.arrayOf(schema.boolean())),
-              flapping: schema.maybe(schema.boolean()),
-              maintenanceWindowIds: schema.maybe(schema.arrayOf(schema.string())),
-              pendingRecoveredCount: schema.maybe(schema.number()),
-              uuid: schema.maybe(schema.string()),
-            })
-          ),
-          // Places using alert state:
-          // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
-          // x-pack/examples/alerting_example/server/alert_types/astros.ts
-          // x-pack/plugins/alerting/server/lib/get_alerts_for_notification.ts
-          // x-pack/plugins/alerting/server/lib/process_alerts.ts
-          // x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts
-          // x-pack/plugins/monitoring/server/alerts/base_rule.ts
-          // x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts
-          // x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/notifications/schedule_notification_actions.ts
-          // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
-          // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
-          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
-          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
-          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
-          // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
-          // x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts
-          // x-pack/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts
-          state: schema.maybe(schema.any()),
-        })
-      )
-    );
-
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
-        stateSchemaByVersion: {
-          1: {
-            up: (state) => state,
-            schema: schema.object({
-              // Places using rule state:
-              // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
-              // x-pack/examples/alerting_example/server/alert_types/astros.ts
-              // x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts
-              // x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts
-              // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
-              // x-pack/plugins/stack_alerts/server/rule_types/geo_containment/geo_containment.ts
-              // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
-              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
-              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
-              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
-              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
-              // x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
-              // x-pack/test/rule_registry/spaces_only/tests/trial/get_summarized_alerts.ts
-              // x-pack/test/rule_registry/spaces_only/tests/trial/lifecycle_executor.ts
-              alertTypeState: schema.maybe(schema.any()),
-              alertInstances: rawAlertInstanceSchema,
-              alertRecoveredInstances: rawAlertInstanceSchema,
-              previousStartedAt: schema.maybe(schema.nullable(schema.string())),
-              summaryActions: schema.maybe(
-                schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
-              ),
-            }),
-          },
-        },
+        stateSchemaByVersion,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

@@ -7,48 +7,5 @@
 
 import * as t from 'io-ts';
 
-const actionSchema = t.type({
-  date: t.string,
-});
-
-export const throttledActionSchema = t.record(t.string, actionSchema);
-export type ThrottledActions = t.TypeOf<typeof throttledActionSchema>;
-
-const lastScheduledActionsSchema = t.intersection([
-  t.partial({
-    subgroup: t.string,
-  }),
-  t.type({
-    group: t.string,
-    date: t.string,
-  }),
-  t.partial({ actions: throttledActionSchema }),
-]);
-
-export type LastScheduledActions = t.TypeOf<typeof lastScheduledActionsSchema>;
-
-const metaSchema = t.partial({
-  lastScheduledActions: lastScheduledActionsSchema,
-  // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
-  // true - alert has changed from active/recovered
-  // false - the status has remained either active or recovered
-  flappingHistory: t.array(t.boolean),
-  // flapping flag that indicates whether the alert is flapping
-  flapping: t.boolean,
-  maintenanceWindowIds: t.array(t.string),
-  pendingRecoveredCount: t.number,
-  uuid: t.string,
-});
-export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
-
-const stateSchema = t.record(t.string, t.unknown);
-export type AlertInstanceState = t.TypeOf<typeof stateSchema>;
-
 const contextSchema = t.record(t.string, t.unknown);
 export type AlertInstanceContext = t.TypeOf<typeof contextSchema>;
-
-export const rawAlertInstance = t.partial({
-  state: stateSchema,
-  meta: metaSchema,
-});
-export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;

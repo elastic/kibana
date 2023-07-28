@@ -7,12 +7,12 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
 import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
   RawAlertInstance,
-  rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
   LastScheduledActions,
@@ -52,7 +52,7 @@ export class Alert<
   ActionGroupIds extends string = never
 > {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
-  private meta: AlertInstanceMeta;
+  private meta: MutableAlertInstanceMeta;
   private state: State;
   private context: Context;
   private readonly id: string;
@@ -226,7 +226,7 @@ export class Alert<
    * Used to serialize alert instance state
    */
   toJSON() {
-    return rawAlertInstance.encode(this.toRaw());
+    return this.toRaw();
   }
 
   toRaw(recovered: boolean = false): RawAlertInstance {
