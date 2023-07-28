@@ -5,10 +5,10 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 7
+    parallelism: 10
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
