@@ -135,7 +135,7 @@ export const UPDATE_AVAILABLE = i18n.translate('xpack.securitySolution.riskScore
   defaultMessage: 'Update available',
 });
 
-export const START_UPDATE = i18n.translate('xpack.securitySolution.riskScore.updateAvailable', {
+export const START_UPDATE = i18n.translate('xpack.securitySolution.riskScore.startUpdate', {
   defaultMessage: 'Start update',
 });
 
