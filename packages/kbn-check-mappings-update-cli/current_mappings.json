@@ -548,14 +548,6 @@
       },
       "actionTypeId": {
         "type": "keyword"
-      },
-      "config": {
-        "dynamic": false,
-        "properties": {
-          "apiProvider": {
-            "type": "keyword"
-          }
-        }
       }
     }
   },

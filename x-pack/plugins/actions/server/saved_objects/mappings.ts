@@ -21,18 +21,14 @@ export const actionMappings: SavedObjectsTypeMappingDefinition = {
     actionTypeId: {
       type: 'keyword',
     },
-    // used for .gen-ai connector telemetry
-    config: {
-      dynamic: false,
-      properties: {
-        apiProvider: {
-          type: 'keyword',
-        },
-      },
-    },
     // NO NEED TO BE INDEXED
     // isMissingSecrets: {
     //   type: 'boolean',
+    // },
+    // NO NEED TO BE INDEXED
+    // config: {
+    //   enabled: false,
+    //   type: 'object',
     // },
     // NEED TO CHECK WITH KIBANA SECURITY
     // secrets: {

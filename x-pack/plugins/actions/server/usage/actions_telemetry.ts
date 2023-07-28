@@ -27,7 +27,7 @@ export async function getTotalCount(
       map_script: `
         String actionType = doc['action.actionTypeId'].value;
         if (actionType =~ /.gen-ai/) {
-          String genAiActionType = actionType +"__"+ doc['action.config.apiProvider'].value;
+          String genAiActionType = actionType +"__"+ doc['apiProvider'].value;
           state.types.put(genAiActionType, state.types.containsKey(genAiActionType) ? state.types.get(genAiActionType) + 1 : 1);
         } else {
           state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 1);
@@ -57,6 +57,19 @@ export async function getTotalCount(
     const searchResult = await esClient.search({
       index: kibanaIndex,
       size: 0,
+      runtime_mappings: {
+        apiProvider: {
+          type: 'keyword',
+          script: {
+            // add apiProvider to the doc so we can use it in the scripted_metric
+            source: `
+            if (doc['action.actionTypeId'].value =~ /.gen-ai/) {
+              emit(params._source["action"]["config"]["apiProvider"])
+            }
+            `,
+          },
+        },
+      },
       body: {
         query: {
           bool: {
