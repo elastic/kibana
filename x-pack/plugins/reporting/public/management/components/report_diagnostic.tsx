@@ -91,17 +91,21 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   let flyout;
   if (isFlyoutVisible) {
-    let successCallout;
+    let outcomeCallout;
 
     if (state.success && chromeStatus === 'complete') {
-      successCallout = (
+      outcomeCallout = (
         <EuiCallOut color="success" title="Everything looks good for reporting to function." />
+      );
+    } else if (!state.success && chromeStatus === 'complete') {
+      outcomeCallout = (
+        <EuiCallOut iconType="warning" color="danger" title="Something isn't working properly." />
       );
     }
 
     flyout = (
       <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
-        {successCallout}
+        {outcomeCallout}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
