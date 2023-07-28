@@ -139,6 +139,7 @@ export function getMockData(
       startedAt: null,
       retryAt: null,
       runAt: new Date().toISOString(),
+      claimAt: new Date().toISOString(),
       attempts: 0,
       ownerId: null,
       ...cloneDeep(overwrites),
