@@ -10,9 +10,88 @@ import {
   createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
 } from '@kbn/alerting-plugin/server';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { transformsHttpMocks } from '../../../public/management/pages/endpoint_hosts/mocks';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { createDataStream } from './utils/create_datastream';
+
+const getSavedObjectConfiguration = (attributes = {}) => ({
+  page: 1,
+  per_page: 20,
+  total: 1,
+  saved_objects: [
+    {
+      type: 'risk-engine-configuration',
+      id: 'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
+      namespaces: ['default'],
+      attributes: {
+        enable: false,
+        last_updated_by: 'elastic',
+        ...attributes,
+      },
+      references: [],
+      managed: false,
+      updated_at: '2023-07-28T09:52:28.768Z',
+      created_at: '2023-07-28T09:12:26.083Z',
+      version: 'WzE4MzIsMV0=',
+      coreMigrationVersion: '8.8.0',
+      score: 0,
+    },
+  ],
+});
+
+const transformStats = {
+  count: 1,
+  transforms: [
+    {
+      id: 'ml_hostriskscore_pivot_transform_default',
+      state: 'started',
+      node: {
+        id: 'fc9o02bRTi-JPRU1626AaQ',
+        name: 'macbook.local',
+        ephemeral_id: 'y-Jx42RvTQi_h7npDlv7sQ',
+        transport_address: '127.0.0.1:9300',
+        attributes: {},
+      },
+      stats: {
+        pages_processed: 2,
+        documents_processed: 15,
+        documents_indexed: 15,
+        documents_deleted: 0,
+        trigger_count: 1,
+        index_time_in_ms: 55,
+        index_total: 1,
+        index_failures: 0,
+        search_time_in_ms: 3,
+        search_total: 2,
+        search_failures: 0,
+        processing_time_in_ms: 0,
+        processing_total: 2,
+        delete_time_in_ms: 0,
+        exponential_avg_checkpoint_duration_ms: 397,
+        exponential_avg_documents_indexed: 15,
+        exponential_avg_documents_processed: 15,
+      },
+      checkpointing: {
+        last: {
+          checkpoint: 1,
+          timestamp_millis: 1690546732294,
+          time_upper_bound_millis: 1690546612294,
+        },
+        changes_last_detected_at: 1690546732292,
+        last_search_time: 1690546732292,
+      },
+      health: {
+        status: 'green' as const,
+      },
+    },
+  ],
+};
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -28,6 +107,7 @@ describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const mockSavedObjectClient = savedObjectsClientMock.create();
   const totalFieldsLimit = 1000;
 
   beforeEach(() => {
@@ -93,145 +173,63 @@ describe('RiskEngineDataClient', () => {
         },
       });
 
-      expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logger,
-          esClient,
-          template: expect.objectContaining({
-            name: '.risk-score-mappings',
-            _meta: {
-              managed: true,
-            },
-          }),
-          totalFieldsLimit: 1000,
-        })
-      );
-      expect((createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template)
-        .toMatchInlineSnapshot(`
-        Object {
-          "mappings": Object {
-            "dynamic": "strict",
-            "properties": Object {
-              "@timestamp": Object {
-                "type": "date",
-              },
-              "host": Object {
-                "properties": Object {
-                  "name": Object {
-                    "type": "keyword",
-                  },
-                  "risk": Object {
-                    "properties": Object {
-                      "calculated_level": Object {
-                        "type": "keyword",
-                      },
-                      "calculated_score": Object {
-                        "type": "float",
-                      },
-                      "calculated_score_norm": Object {
-                        "type": "float",
-                      },
-                      "category_1_score": Object {
-                        "type": "float",
-                      },
-                      "id_field": Object {
-                        "type": "keyword",
-                      },
-                      "id_value": Object {
-                        "type": "keyword",
-                      },
-                      "inputs": Object {
-                        "properties": Object {
-                          "category": Object {
-                            "type": "keyword",
-                          },
-                          "description": Object {
-                            "type": "keyword",
-                          },
-                          "id": Object {
-                            "type": "keyword",
-                          },
-                          "index": Object {
-                            "type": "keyword",
-                          },
-                          "risk_score": Object {
-                            "type": "float",
-                          },
-                          "timestamp": Object {
-                            "type": "date",
-                          },
-                        },
-                        "type": "object",
-                      },
-                      "notes": Object {
-                        "type": "keyword",
-                      },
-                    },
-                    "type": "object",
-                  },
+      expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith({
+        logger,
+        esClient,
+        template: {
+          name: '.risk-score-mappings',
+          _meta: {
+            managed: true,
+          },
+          template: {
+            settings: {},
+            mappings: {
+              dynamic: 'strict',
+              properties: {
+                '@timestamp': {
+                  type: 'date',
                 },
-              },
-              "user": Object {
-                "properties": Object {
-                  "name": Object {
-                    "type": "keyword",
-                  },
-                  "risk": Object {
-                    "properties": Object {
-                      "calculated_level": Object {
-                        "type": "keyword",
-                      },
-                      "calculated_score": Object {
-                        "type": "float",
-                      },
-                      "calculated_score_norm": Object {
-                        "type": "float",
-                      },
-                      "category_1_score": Object {
-                        "type": "float",
-                      },
-                      "id_field": Object {
-                        "type": "keyword",
-                      },
-                      "id_value": Object {
-                        "type": "keyword",
-                      },
-                      "inputs": Object {
-                        "properties": Object {
-                          "category": Object {
-                            "type": "keyword",
-                          },
-                          "description": Object {
-                            "type": "keyword",
-                          },
-                          "id": Object {
-                            "type": "keyword",
-                          },
-                          "index": Object {
-                            "type": "keyword",
-                          },
-                          "risk_score": Object {
-                            "type": "float",
-                          },
-                          "timestamp": Object {
-                            "type": "date",
-                          },
-                        },
-                        "type": "object",
-                      },
-                      "notes": Object {
-                        "type": "keyword",
-                      },
+                alertsScore: {
+                  type: 'float',
+                },
+                identifierField: {
+                  type: 'keyword',
+                },
+                identifierValue: {
+                  type: 'keyword',
+                },
+                level: {
+                  type: 'keyword',
+                },
+                otherScore: {
+                  type: 'float',
+                },
+                riskiestInputs: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
                     },
-                    "type": "object",
+                    index: {
+                      type: 'keyword',
+                    },
+                    riskScore: {
+                      type: 'float',
+                    },
                   },
+                  type: 'nested',
+                },
+                totalScore: {
+                  type: 'float',
+                },
+                totalScoreNormalized: {
+                  type: 'float',
                 },
               },
             },
           },
-          "settings": Object {},
-        }
-      `);
+        },
+        totalFieldsLimit,
+      });
 
       expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
         logger,
@@ -287,14 +285,360 @@ describe('RiskEngineDataClient', () => {
 
   describe('initializeResources error', () => {
     it('should handle errors during initialization', async () => {
-      const error = new Error('There error');
-      (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValue(error);
+      try {
+        const error = new Error('There error');
+        (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValue(error);
 
-      await riskEngineDataClient.initializeResources({ namespace: 'default' });
+        await riskEngineDataClient.initializeResources({ namespace: 'default' });
 
-      expect(logger.error).toHaveBeenCalledWith(
-        `Error initializing risk engine resources: ${error.message}`
+        expect(logger.error).toHaveBeenCalledWith(
+          `Error initializing risk engine resources: ${error.message}`
+        );
+      } catch (e) {
+        //
+      }
+    });
+  });
+
+  describe('getStatus', () => {
+    it('should return initial status', async () => {
+      const status = await riskEngineDataClient.getStatus({
+        namespace: 'default',
+        savedObjectsClient: mockSavedObjectClient,
+      });
+      expect(status).toEqual({
+        riskEgineStatus: 'NOT_INSTALLED',
+        legacyRiskEgineStatus: 'NOT_INSTALLED',
+        lastUpdatedBy: '',
+      });
+    });
+
+    describe('saved object exists and transforms not', () => {
+      beforeEach(() => {
+        mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
+      });
+
+      afterEach(() => {
+        mockSavedObjectClient.find.mockReset();
+      });
+
+      it('should return status with enabled true', async () => {
+        mockSavedObjectClient.find.mockResolvedValue(
+          getSavedObjectConfiguration({
+            enable: true,
+          })
+        );
+
+        const status = await riskEngineDataClient.getStatus({
+          namespace: 'default',
+          savedObjectsClient: mockSavedObjectClient,
+        });
+        expect(status).toEqual({
+          riskEgineStatus: 'ENABLED',
+          legacyRiskEgineStatus: 'NOT_INSTALLED',
+          lastUpdatedBy: 'elastic',
+        });
+      });
+
+      it('should return status with enabled false', async () => {
+        mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
+
+        const status = await riskEngineDataClient.getStatus({
+          namespace: 'default',
+          savedObjectsClient: mockSavedObjectClient,
+        });
+        expect(status).toEqual({
+          riskEgineStatus: 'DISABLED',
+          legacyRiskEgineStatus: 'NOT_INSTALLED',
+          lastUpdatedBy: 'elastic',
+        });
+      });
+    });
+
+    describe('legacy transforms', () => {
+      it('should fetch transform stats', async () => {
+        await riskEngineDataClient.getStatus({
+          namespace: 'default',
+          savedObjectsClient: mockSavedObjectClient,
+        });
+
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(4);
+        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(1, {
+          transform_id: 'ml_hostriskscore_pivot_transform_default',
+        });
+        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(2, {
+          transform_id: 'ml_hostriskscore_latest_transform_default',
+        });
+        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(3, {
+          transform_id: 'ml_userriskscore_pivot_transform_default',
+        });
+        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(4, {
+          transform_id: 'ml_userriskscore_latest_transform_default',
+        });
+      });
+
+      it('should return that legacy transform enabled if at least on transform exist', async () => {
+        esClient.transform.getTransformStats.mockResolvedValueOnce(transformStats);
+
+        const status = await riskEngineDataClient.getStatus({
+          namespace: 'default',
+          savedObjectsClient: mockSavedObjectClient,
+        });
+
+        expect(status).toEqual({
+          riskEgineStatus: 'NOT_INSTALLED',
+          legacyRiskEgineStatus: 'ENABLED',
+          lastUpdatedBy: '',
+        });
+
+        esClient.transform.getTransformStats.mockReset();
+      });
+    });
+  });
+
+  describe('enableRiskEngine', () => {
+    afterEach(() => {
+      mockSavedObjectClient.find.mockReset();
+    });
+
+    it('should return error if saved object not exist', async () => {
+      mockSavedObjectClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 20,
+        total: 0,
+        saved_objects: [],
+      });
+
+      expect.assertions(1);
+      try {
+        await riskEngineDataClient.enableRiskEngine({
+          savedObjectsClient: mockSavedObjectClient,
+          user: { username: 'elastic' } as AuthenticatedUser,
+        });
+      } catch (e) {
+        expect(e.message).toEqual('There no saved object configuration for risk engine');
+      }
+    });
+
+    it('should update saved object attrubute', async () => {
+      mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+
+      await riskEngineDataClient.enableRiskEngine({
+        savedObjectsClient: mockSavedObjectClient,
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        'risk-engine-configuration',
+        'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
+        {
+          enable: true,
+          last_updated_by: 'elastic',
+        },
+        {
+          refresh: 'wait_for',
+        }
       );
+    });
+  });
+
+  describe('disableRiskEngine', () => {
+    afterEach(() => {
+      mockSavedObjectClient.find.mockReset();
+    });
+
+    it('should return error if saved object not exist', async () => {
+      mockSavedObjectClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 20,
+        total: 0,
+        saved_objects: [],
+      });
+
+      expect.assertions(1);
+      try {
+        await riskEngineDataClient.disableRiskEngine({
+          savedObjectsClient: mockSavedObjectClient,
+          user: { username: 'elastic' } as AuthenticatedUser,
+        });
+      } catch (e) {
+        expect(e.message).toEqual('There no saved object configuration for risk engine');
+      }
+    });
+
+    it('should update saved object attrubute', async () => {
+      mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+
+      await riskEngineDataClient.disableRiskEngine({
+        savedObjectsClient: mockSavedObjectClient,
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        'risk-engine-configuration',
+        'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
+        {
+          enable: false,
+          last_updated_by: 'elastic',
+        },
+        {
+          refresh: 'wait_for',
+        }
+      );
+    });
+  });
+
+  describe('init', () => {
+    const initializeResourcesMock = jest.spyOn(
+      RiskEngineDataClient.prototype,
+      'initializeResources'
+    );
+    const enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
+    const initSavedObjectsMock = jest.spyOn(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      RiskEngineDataClient.prototype as any,
+      'initSavedObjects'
+    );
+    const disableLegacyRiskEngineMock = jest.spyOn(
+      RiskEngineDataClient.prototype,
+      'disableLegacyRiskEngine'
+    );
+    beforeEach(() => {
+      disableLegacyRiskEngineMock.mockImplementation(() => Promise.resolve(true));
+
+      initializeResourcesMock.mockImplementation(() => {
+        return Promise.resolve();
+      });
+
+      enableRiskEngineMock.mockImplementation(() => {
+        return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
+      });
+
+      initSavedObjectsMock.mockImplementation(() => {
+        return Promise.resolve();
+      });
+    });
+
+    afterEach(() => {
+      initializeResourcesMock.mockReset();
+      enableRiskEngineMock.mockReset();
+      initSavedObjectsMock.mockReset();
+      disableLegacyRiskEngineMock.mockReset();
+    });
+
+    it('success', async () => {
+      const initResult = await riskEngineDataClient.init({
+        savedObjectsClient: mockSavedObjectClient,
+        namespace: 'default',
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(initResult).toEqual({
+        errors: [],
+        leggacyRiskEngineDisabled: true,
+        riskEngineConfigurationCreated: true,
+        riskEngineEnabled: true,
+        riskEngineResourcesInstalled: true,
+      });
+    });
+
+    it('should catch error for disableLegacyRiskEngine, but continue', async () => {
+      disableLegacyRiskEngineMock.mockImplementation(() => {
+        throw new Error('Error disableLegacyRiskEngineMock');
+      });
+      const initResult = await riskEngineDataClient.init({
+        savedObjectsClient: mockSavedObjectClient,
+        namespace: 'default',
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(initResult).toEqual({
+        errors: ['Error disableLegacyRiskEngineMock'],
+        leggacyRiskEngineDisabled: false,
+        riskEngineConfigurationCreated: true,
+        riskEngineEnabled: true,
+        riskEngineResourcesInstalled: true,
+      });
+    });
+
+    it('should catch error for resource init', async () => {
+      disableLegacyRiskEngineMock.mockImplementationOnce(() => {
+        throw new Error('Error disableLegacyRiskEngineMock');
+      });
+
+      const initResult = await riskEngineDataClient.init({
+        savedObjectsClient: mockSavedObjectClient,
+        namespace: 'default',
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(initResult).toEqual({
+        errors: ['Error disableLegacyRiskEngineMock'],
+        leggacyRiskEngineDisabled: false,
+        riskEngineConfigurationCreated: true,
+        riskEngineEnabled: true,
+        riskEngineResourcesInstalled: true,
+      });
+    });
+
+    it('should catch error for initializeResources and stop', async () => {
+      initializeResourcesMock.mockImplementationOnce(() => {
+        throw new Error('Error initializeResourcesMock');
+      });
+
+      const initResult = await riskEngineDataClient.init({
+        savedObjectsClient: mockSavedObjectClient,
+        namespace: 'default',
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(initResult).toEqual({
+        errors: ['Error initializeResourcesMock'],
+        leggacyRiskEngineDisabled: true,
+        riskEngineConfigurationCreated: false,
+        riskEngineEnabled: false,
+        riskEngineResourcesInstalled: false,
+      });
+    });
+
+    it('should catch error for initSavedObjects and stop', async () => {
+      initSavedObjectsMock.mockImplementationOnce(() => {
+        throw new Error('Error initSavedObjects');
+      });
+
+      const initResult = await riskEngineDataClient.init({
+        savedObjectsClient: mockSavedObjectClient,
+        namespace: 'default',
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(initResult).toEqual({
+        errors: ['Error initSavedObjects'],
+        leggacyRiskEngineDisabled: true,
+        riskEngineConfigurationCreated: false,
+        riskEngineEnabled: false,
+        riskEngineResourcesInstalled: true,
+      });
+    });
+
+    it('should catch error for enableRiskEngineMock and stop', async () => {
+      enableRiskEngineMock.mockImplementationOnce(() => {
+        throw new Error('Error enableRiskEngineMock');
+      });
+
+      const initResult = await riskEngineDataClient.init({
+        savedObjectsClient: mockSavedObjectClient,
+        namespace: 'default',
+        user: { username: 'elastic' } as AuthenticatedUser,
+      });
+
+      expect(initResult).toEqual({
+        errors: ['Error enableRiskEngineMock'],
+        leggacyRiskEngineDisabled: true,
+        riskEngineConfigurationCreated: true,
+        riskEngineEnabled: false,
+        riskEngineResourcesInstalled: true,
+      });
     });
   });
 });

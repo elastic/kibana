@@ -203,7 +203,7 @@ export class RiskEngineDataClient {
     return result;
   }
 
-  private async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
+  public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
     const legacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
 
     if (
@@ -274,7 +274,10 @@ export class RiskEngineDataClient {
       .map((r) => (r as PromiseFulfilledResult<TransformGetTransformStatsResponse>).value);
 
     const transforms = fulfuletGetTransformStats.reduce((acc, val) => {
-      return [...acc, ...val.transforms];
+      if (val.transforms) {
+        return [...acc, ...val.transforms];
+      }
+      return acc;
     }, [] as TransformGetTransformStatsTransformStats[]);
 
     return transforms;
@@ -409,6 +412,7 @@ export class RiskEngineDataClient {
       await this.initializeWriter(namespace, indexPatterns.alias);
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
+      throw error;
     }
   }
 }
