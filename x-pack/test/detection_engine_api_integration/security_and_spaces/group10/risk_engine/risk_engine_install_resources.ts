@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
-  describe('install risk engine resources', () => {
+  describe('Risk Engine - Install Resources', () => {
     it('should install resources on startup', async () => {
       const ilmPolicyName = '.risk-score-ilm-policy';
       const componentTemplateName = '.risk-score-mappings';
@@ -54,40 +54,117 @@ export default ({ getService }: FtrProviderContext) => {
           '@timestamp': {
             type: 'date',
           },
-          alertsScore: {
-            type: 'float',
-          },
-          identifierField: {
-            type: 'keyword',
-          },
-          identifierValue: {
-            type: 'keyword',
-          },
-          level: {
-            type: 'keyword',
-          },
-          otherScore: {
-            type: 'float',
-          },
-          riskiestInputs: {
+          host: {
             properties: {
-              id: {
+              name: {
                 type: 'keyword',
               },
-              index: {
-                type: 'keyword',
-              },
-              riskScore: {
-                type: 'float',
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+                type: 'object',
               },
             },
-            type: 'nested',
           },
-          totalScore: {
-            type: 'float',
-          },
-          totalScoreNormalized: {
-            type: 'float',
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+                type: 'object',
+              },
+            },
           },
         },
       });
