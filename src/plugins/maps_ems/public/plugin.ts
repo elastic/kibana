@@ -37,10 +37,13 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
 
   public start(code: CoreStart, plugins: MapsEmsStartPublicDependencies) {
     const context = this._initializerContext;
-    const config = context.config.get<MapConfig>();
+    const defaultConfig = context.config.get<MapConfig>();
     const { buildFlavor, version } = context.env.packageInfo;
 
-    const mapConfig = buildFlavor === 'serverless' ? config : overrideMapConfig(config, version);
+    const mapConfig =
+      buildFlavor === 'serverless' || !version
+        ? defaultConfig
+        : overrideMapConfig(defaultConfig, version);
 
     setKibanaVersion(version);
     setMapConfig(mapConfig);
