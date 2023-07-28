@@ -13,8 +13,8 @@ import {
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsServerSetup } from '../../types';
 
-const SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE = 'UPTIME:SyntheticsService:Clean-Up-Package-Policies';
-const SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID = 'UPTIME:SyntheticsService:clean-up-task';
+const SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE = 'Synthetics:Clean-Up-Package-Policies';
+const SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID = 'SyntheticsService:clean-up-package-policies-task-id';
 const SYNTHETICS_SERVICE_CLEAN_UP_INTERVAL_DEFAULT = '60m';
 const DELETE_BROWSER_MINUTES = 15;
 const DELETE_LIGHTWEIGHT_MINUTES = 2;
