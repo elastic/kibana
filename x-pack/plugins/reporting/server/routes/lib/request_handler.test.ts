@@ -205,7 +205,7 @@ describe('Handle request to generate', () => {
     `);
   });
 
-  xtest('generates the download path', async () => {
+  test('generates the download path', async () => {
     const response = (await requestHandler.handleGenerateRequest(
       'csv_searchsource',
       mockJobParams,
