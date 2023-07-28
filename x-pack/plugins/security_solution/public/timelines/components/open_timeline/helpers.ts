@@ -20,13 +20,11 @@ import type {
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
-} from '../../../../common/types/timeline/api';
+  PinnedEvent,
+  Note,
+} from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import {
-  DataProviderType,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../common/types/timeline/api';
+import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -69,8 +67,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event/api';
-import type { Note } from '../../../../common/types/timeline/note/api';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 

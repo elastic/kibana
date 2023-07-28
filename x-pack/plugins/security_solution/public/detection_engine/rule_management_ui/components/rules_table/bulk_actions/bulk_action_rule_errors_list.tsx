@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 

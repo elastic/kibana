@@ -25,6 +25,17 @@ const integrationStatusRT = rt.keyof({
   install_failed: null,
 });
 
+const iconRT = rt.intersection([
+  rt.type({
+    src: rt.string,
+  }),
+  rt.partial({
+    title: rt.string,
+    size: rt.string,
+    type: rt.string,
+  }),
+]);
+
 export const integrationRT = rt.intersection([
   rt.type({
     name: rt.string,
@@ -34,17 +45,7 @@ export const integrationRT = rt.intersection([
   }),
   rt.partial({
     title: rt.union([rt.string, rt.undefined]),
-    icons: rt.union([
-      rt.array(
-        rt.type({
-          src: rt.string,
-          title: rt.string,
-          size: rt.string,
-          type: rt.string,
-        })
-      ),
-      rt.undefined,
-    ]),
+    icons: rt.union([rt.array(iconRT), rt.undefined]),
     description: rt.union([rt.string, rt.undefined]),
   }),
 ]);

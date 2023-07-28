@@ -59,3 +59,18 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless.sh
+    label: 'Serverless Security Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-serverless/**/*"

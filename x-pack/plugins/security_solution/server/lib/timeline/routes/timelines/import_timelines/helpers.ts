@@ -11,11 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline/api';
-import {
-  importTimelineResultSchema,
-  TimelineStatus,
-} from '../../../../../../common/types/timeline/api';
+import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
+import { importTimelineResultSchema, TimelineStatus } from '../../../../../../common/api/timeline';
 
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';

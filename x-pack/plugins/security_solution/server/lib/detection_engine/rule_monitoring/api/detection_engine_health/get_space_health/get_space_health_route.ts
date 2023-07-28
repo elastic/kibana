@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -14,11 +14,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type {
   GetSpaceHealthRequest,
   GetSpaceHealthResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GET_SPACE_HEALTH_URL,
   GetSpaceHealthRequestBody,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { IDetectionEngineHealthClient } from '../../../logic/detection_engine_health';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetSpaceHealthRequest } from './get_space_health_request';
@@ -38,9 +38,10 @@ export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
       validate: {},
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<GetSpaceHealthResponse>> => {
       return handleSpaceHealthRequest({
         response,
         resolveParameters: () => validateGetSpaceHealthRequest({}),
@@ -61,6 +62,7 @@ export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
       },
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
     async (context, request, response) => {

@@ -6,24 +6,28 @@
  */
 
 import * as t from 'io-ts';
-import { DataViewId } from '../../detection_engine/rule_schema';
+import { DataViewId } from '../../api/detection_engine/model/rule_schema';
 import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
 import { riskWeightsSchema } from '../risk_weights/schema';
 
 export const riskScorePreviewRequestSchema = t.exact(
-  t.partial({
-    after_keys: afterKeysSchema,
-    data_view_id: DataViewId,
-    debug: t.boolean,
-    filter: t.unknown,
-    page_size: t.number,
-    identifier_type: identifierTypeSchema,
-    range: t.type({
-      start: t.string,
-      end: t.string,
+  t.intersection([
+    t.type({
+      data_view_id: DataViewId,
     }),
-    weights: riskWeightsSchema,
-  })
+    t.partial({
+      after_keys: afterKeysSchema,
+      debug: t.boolean,
+      filter: t.unknown,
+      page_size: t.number,
+      identifier_type: identifierTypeSchema,
+      range: t.type({
+        start: t.string,
+        end: t.string,
+      }),
+      weights: riskWeightsSchema,
+    }),
+  ])
 );
 export type RiskScorePreviewRequestSchema = t.TypeOf<typeof riskScorePreviewRequestSchema>;

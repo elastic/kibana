@@ -10,7 +10,7 @@ import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usag
 import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
@@ -289,7 +289,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"eql" rule type', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156088
+    describe.skip('"eql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);

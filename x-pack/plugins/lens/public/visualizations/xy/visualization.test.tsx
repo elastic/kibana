@@ -40,7 +40,7 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';

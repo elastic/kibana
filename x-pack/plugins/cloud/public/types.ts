@@ -37,6 +37,14 @@ export interface CloudStart {
    */
   organizationUrl?: string;
   /**
+   * The full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  performanceUrl?: string;
+  /**
+   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  usersAndRolesUrl?: string;
+  /**
    * The full URL to the elasticsearch cluster.
    */
   elasticsearchUrl?: string;
@@ -44,6 +52,21 @@ export interface CloudStart {
    * The full URL to the Kibana deployment.
    */
   kibanaUrl?: string;
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+  };
 }
 
 export interface CloudSetup {
@@ -112,4 +135,19 @@ export interface CloudSetup {
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+  };
 }

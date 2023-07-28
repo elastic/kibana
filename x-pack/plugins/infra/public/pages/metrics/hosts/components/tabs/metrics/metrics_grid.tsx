@@ -214,7 +214,7 @@ export const MetricsGrid = React.memo(() => {
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {CHARTS_IN_ORDER.map((chartProp, index) => (
-          <EuiFlexItem key={index}>
+          <EuiFlexItem key={index} grow={false}>
             <MetricChart {...chartProp} />
           </EuiFlexItem>
         ))}

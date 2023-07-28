@@ -42,6 +42,13 @@ export const QUICK_PROMPT_PROMPT = i18n.translate(
   }
 );
 
+export const QUICK_PROMPT_PROMPT_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPrompts.settings.promptPlaceholder',
+  {
+    defaultMessage: 'Enter a Quick Prompt',
+  }
+);
+
 export const QUICK_PROMPT_BADGE_COLOR = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPrompts.settings.badgeColorLabel',
   {

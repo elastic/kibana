@@ -18,7 +18,7 @@ import { SettingCard } from '../setting_card';
 
 const ATTACK_SURFACE_OS_LIST = [OperatingSystem.WINDOWS];
 
-const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
+export const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.attack_surface_reduction',
   {
     defaultMessage: 'Attack Surface Reduction',
@@ -32,21 +32,21 @@ const CARD_TITLE = i18n.translate(
   }
 );
 
-const SWITCH_ENABLED_LABEL = i18n.translate(
+export const SWITCH_ENABLED_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.credentialHardening.toggleEnabled',
   {
     defaultMessage: 'Credential hardening enabled',
   }
 );
 
-const SWITCH_DISABLED_LABEL = i18n.translate(
+export const SWITCH_DISABLED_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.credentialHardening.toggleDisabled',
   {
     defaultMessage: 'Credential hardening disabled',
   }
 );
 
-type AttackSurfaceReductionCardProps = PolicyFormComponentCommonProps;
+export type AttackSurfaceReductionCardProps = PolicyFormComponentCommonProps;
 
 export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
@@ -69,7 +69,12 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     );
 
     if (!isPlatinumPlus) {
-      return <SettingLockedCard title={LOCKED_CARD_ATTACK_SURFACE_REDUCTION} />;
+      return (
+        <SettingLockedCard
+          title={LOCKED_CARD_ATTACK_SURFACE_REDUCTION}
+          data-test-subj={getTestId('locked')}
+        />
+      );
     }
 
     return (
@@ -86,7 +91,7 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
             data-test-subj={getTestId('enableDisableSwitch')}
           />
         ) : (
-          <>{label}</>
+          <span data-test-subj={getTestId('valueLabel')}>{label}</span>
         )}
       </SettingCard>
     );

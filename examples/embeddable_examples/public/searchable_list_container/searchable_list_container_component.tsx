@@ -25,6 +25,8 @@ import {
   ContainerOutput,
   EmbeddableOutput,
   EmbeddableStart,
+  EmbeddablePanel,
+  openAddPanelFlyout,
 } from '@kbn/embeddable-plugin/public';
 import { SearchableListContainer, SearchableContainerInput } from './searchable_list_container';
 
@@ -120,7 +122,7 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   };
 
   public renderControls() {
-    const { input } = this.props;
+    const { input, embeddable } = this.props;
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -150,6 +152,17 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
             />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton
+              data-test-subj="addPanelToListContainer"
+              disabled={input.search === ''}
+              onClick={() => openAddPanelFlyout({ container: embeddable })}
+            >
+              Add panel
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
         <EuiFlexItem />
       </EuiFlexGroup>
     );
@@ -171,7 +184,7 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   }
 
   private renderList() {
-    const { embeddableServices, input, embeddable } = this.props;
+    const { input, embeddable } = this.props;
     let id = 0;
     const list = Object.values(input.panels).map((panel) => {
       const childEmbeddable = embeddable.getChild(panel.explicitInput.id);
@@ -189,7 +202,7 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <embeddableServices.EmbeddablePanel embeddable={childEmbeddable} />
+              <EmbeddablePanel embeddable={childEmbeddable} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

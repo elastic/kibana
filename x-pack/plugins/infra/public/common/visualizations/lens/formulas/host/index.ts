@@ -13,6 +13,7 @@ export { diskWriteThroughput } from './disk_write_throughput';
 export { diskSpaceAvailable } from './disk_space_available';
 export { diskSpaceUsage } from './disk_space_usage';
 export { hostCount } from './host_count';
+export { logRate } from './log_rate';
 export { normalizedLoad1m } from './normalized_load_1m';
 export { memoryUsage } from './memory_usage';
 export { memoryFree } from './memory_free';

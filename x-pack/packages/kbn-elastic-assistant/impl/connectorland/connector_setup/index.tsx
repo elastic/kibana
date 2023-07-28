@@ -20,7 +20,8 @@ import {
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { BASE_CONVERSATIONS, Conversation, Message } from '../../..';
+import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
+import { Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
@@ -28,7 +29,6 @@ import { useConversation } from '../../assistant/use_conversation';
 import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
-import { WELCOME_CONVERSATION_TITLE } from '../../assistant/use_conversation/translations';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -53,7 +53,7 @@ export interface ConnectorSetupProps {
 
 export const useConnectorSetup = ({
   actionTypeRegistry,
-  conversation = BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE],
+  conversation = WELCOME_CONVERSATION,
   http,
   isConnectorConfigured = false,
   onSetupComplete,
