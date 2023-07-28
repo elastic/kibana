@@ -1,6 +1,11 @@
-# Content management - onboarding
-
-This documentation lays down the steps to migrate away from the saved object public client by using the content management registries (public and server) and its public client.
+---
+id: kibDevTutorialsContentManagementOnboarding
+slug: /kibana-dev-docs/content-management-onboarding
+title: Content Management Onboarding
+description: This documentation lays down the steps to migrate away from the saved object public client by using the content management registries (public and server) and its public client.
+date: 2023-04-13
+tags: ['kibana', 'dev', 'content management', 'saved objects']
+---
 
 ## High level architecture
 

@@ -28,6 +28,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-overlays-browser-mocks",
     "@kbn/core-theme-browser-mocks",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",
