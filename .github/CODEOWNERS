@@ -501,6 +501,7 @@ x-pack/packages/ml/number_utils @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
+x-pack/packages/ml/response_stream @elastic/ml-ui
 x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
@@ -789,6 +790,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/search_sessions_integration/ @elastic/kibana-data-discovery
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
 /examples/demo_search/ @elastic/kibana-data-discovery
+/test/examples/discover_customization_examples @elastic/kibana-data-discovery
 
 # Vis Editors
 /src/plugins/visualize/ @elastic/kibana-visualizations

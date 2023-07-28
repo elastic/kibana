@@ -19,14 +19,13 @@ import {
   transformUpdateResponseToExternalModel,
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
