@@ -651,8 +651,18 @@ export class AnalyticsManager {
           }
           const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
 
+          let indicesPermissions;
           try {
-            indicesSettings = await this._client.asCurrentUser.indices.getSettings();
+            indicesSettings = await this._client.asInternalUser.indices.getSettings();
+            const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
+              index: [
+                {
+                  names: Object.keys(indicesSettings),
+                  privileges: ['read'],
+                },
+              ],
+            });
+            indicesPermissions = hasPrivilegesResponse.index;
           } catch (e) {
             // Possible that the user doesn't have permissions to view ingest pipelines
             // If so, gracefully exit
@@ -666,7 +676,8 @@ export class AnalyticsManager {
           for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
             if (
               settings?.index?.default_pipeline &&
-              pipelineIds.has(settings.index.default_pipeline)
+              pipelineIds.has(settings.index.default_pipeline) &&
+              indicesPermissions[indexName]?.read === true
             ) {
               if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
                 pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
