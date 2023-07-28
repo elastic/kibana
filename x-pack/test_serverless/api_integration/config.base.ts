@@ -15,7 +15,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
     return {
       ...svlSharedConfig.getAll(),
-      services,
+      services: {
+        ...services,
+        ...options.services,
+      },
       esTestCluster: {
         from: 'serverless',
       },

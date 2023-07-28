@@ -40,12 +40,6 @@ const defaultConfig: ConfigSchema = {
     thresholdRule: { enabled: false },
   },
   compositeSlo: { enabled: false },
-  aiAssistant: {
-    enabled: false,
-    feedback: {
-      enabled: false,
-    },
-  },
 };
 
 const queryClient = new QueryClient({
