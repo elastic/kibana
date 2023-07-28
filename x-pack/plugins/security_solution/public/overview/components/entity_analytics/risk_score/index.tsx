@@ -35,6 +35,8 @@ import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use
 import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -125,6 +127,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     includeAlertsCount: true,
   });
 
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
+
   useQueryInspector({
     queryId: entity.tableQueryId,
     loading: isTableLoading,
@@ -148,6 +152,10 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isDisabled: !isModuleEnabled && !isTableLoading,
     isDeprecated: isDeprecated && !isTableLoading,
   };
+
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return null;
+  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
