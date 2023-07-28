@@ -192,7 +192,6 @@ describe('agent policy', () => {
         agentPolicyService.create(soClient, esClient, {
           name: 'test',
           namespace: 'default',
-          is_protected: true,
         })
       ).rejects.toThrowError(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')

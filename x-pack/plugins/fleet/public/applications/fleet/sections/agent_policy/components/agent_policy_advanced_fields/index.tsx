@@ -46,6 +46,8 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
 
+import { isAgentPolicy, policyHasEndpointSecurity } from '../../../../../../../common/services';
+
 import {
   useOutputOptions,
   useDownloadSourcesOptions,
@@ -102,12 +104,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const hasManagedPackagePolicy =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
-
-  const defendIntegrationInstalled =
-    'package_policies' in agentPolicy &&
-    agentPolicy?.package_policies?.some(
-      (packagePolicy) => packagePolicy.package?.name === 'endpoint'
-    );
 
   const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
@@ -329,11 +325,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
                   defaultMessage="Prevent agent tampering"
                 />{' '}
-                {!defendIntegrationInstalled && (
+                {!policyHasEndpointSecurity(agentPolicy) && (
                   <span data-test-subj="tamperMissingIntegrationTooltip">
                     <EuiIconTip
-                      type="warning"
-                      color="warning"
+                      type="iInCircle"
+                      color="subdued"
                       content={i18n.translate(
                         'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
                         { defaultMessage: 'this is why its disabled' }
@@ -343,11 +339,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 )}
               </>
             }
-            checked={agentPolicy.is_protected ?? false}
+            checked={isAgentPolicy(agentPolicy) ? agentPolicy.is_protected : false}
             onChange={(e) => {
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
-            disabled={!defendIntegrationInstalled}
+            disabled={!policyHasEndpointSecurity(agentPolicy)}
             data-test-subj="tamperProtectionSwitch"
           />
           {agentPolicy.id && (
@@ -357,7 +353,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 onClick={() => {
                   setIsUninstallCommandFlyoutOpen(true);
                 }}
-                disabled={agentPolicy.is_protected === false || !defendIntegrationInstalled}
+                disabled={
+                  isAgentPolicy(agentPolicy)
+                    ? agentPolicy.is_protected
+                    : false || !policyHasEndpointSecurity(agentPolicy)
+                }
                 data-test-subj="uninstallCommandLink"
               >
                 {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {

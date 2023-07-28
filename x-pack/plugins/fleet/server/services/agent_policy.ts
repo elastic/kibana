@@ -22,6 +22,8 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { policyHasEndpointSecurity } from '../../common/services';
+
 import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
@@ -113,7 +115,10 @@ class AgentPolicyService {
     id: string,
     agentPolicy: Partial<AgentPolicySOAttributes>,
     user?: AuthenticatedUser,
-    options: { bumpRevision: boolean } = { bumpRevision: true }
+    options: { bumpRevision: boolean; removeProtection: boolean } = {
+      bumpRevision: true,
+      removeProtection: false,
+    }
   ): Promise<AgentPolicy> {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -145,11 +150,14 @@ class AgentPolicyService {
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+      ...(options.removeProtection
+        ? { is_protected: false }
+        : { is_protected: existingAgentPolicy.is_protected }),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
 
-    if (options.bumpRevision) {
+    if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
 
@@ -237,8 +245,6 @@ class AgentPolicyService {
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
-    this.checkTamperProtectionLicense(agentPolicy);
-
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -253,7 +259,6 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-        is_protected: agentPolicy.is_protected ?? false,
       } as AgentPolicy,
       options
     );
@@ -491,6 +496,10 @@ class AgentPolicyService {
 
     this.checkTamperProtectionLicense(agentPolicy);
 
+    if (agentPolicy?.is_protected && !policyHasEndpointSecurity) {
+      throw new Error('Agent policy requires Elastic Defend integration');
+    }
+
     if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
         .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
@@ -586,9 +595,12 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; removeProtection?: boolean }
   ): Promise<AgentPolicy> {
-    const res = await this._update(soClient, esClient, id, {}, options?.user);
+    const res = await this._update(soClient, esClient, id, {}, options?.user, {
+      bumpRevision: true,
+      removeProtection: options?.removeProtection ?? false,
+    });
 
     return res;
   }
