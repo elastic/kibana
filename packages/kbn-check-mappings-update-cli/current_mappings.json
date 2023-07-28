@@ -42,6 +42,25 @@
       }
     }
   },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -63,6 +82,9 @@
         "type": "date"
       },
       "retryAt": {
+        "type": "date"
+      },
+      "claimAt": {
         "type": "date"
       },
       "enabled": {
@@ -127,25 +149,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
