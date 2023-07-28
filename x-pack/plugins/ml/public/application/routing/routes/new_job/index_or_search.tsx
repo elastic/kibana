@@ -188,7 +188,7 @@ export const dataComparisonIndexOrSearchRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'data_view_data_comparison',
-  path: createPath('data_comparison_index_select'),
+  path: createPath(ML_PAGES.DATA_COMPARISON_INDEX_SELECT),
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
