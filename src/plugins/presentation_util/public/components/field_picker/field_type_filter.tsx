@@ -8,7 +8,6 @@
 
 import React, { useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiFilterGroup,
   EuiFlexGroup,
@@ -17,7 +16,6 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFilterButton,
-  EuiPopoverTitle,
   EuiFilterButtonProps,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
@@ -78,11 +76,6 @@ export function FieldTypeFilter({
           onDeactivation: setFocusToSearch,
         }}
       >
-        <EuiPopoverTitle paddingSize="s">
-          {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
-            defaultMessage: 'Filter by type',
-          })}
-        </EuiPopoverTitle>
         <EuiContextMenuPanel
           items={(availableFieldTypes as string[]).map((type) => (
             <EuiContextMenuItem

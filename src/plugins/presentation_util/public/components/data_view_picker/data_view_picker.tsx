@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiSelectable, EuiPopoverTitle, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
@@ -70,11 +69,6 @@ export function DataViewPicker({
       ownFocus
       fullWidth
     >
-      <EuiPopoverTitle data-test-subj="data-view-picker-title">
-        {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
-          defaultMessage: 'Data view',
-        })}
-      </EuiPopoverTitle>
       <EuiSelectable<{
         key?: string;
         label: string;
