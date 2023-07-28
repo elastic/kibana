@@ -44,7 +44,7 @@ class EsTestConfig {
         // have to remove the ":" off protocol
         protocol: testEsUrl.protocol?.slice(0, -1),
         hostname: testEsUrl.hostname,
-        port: parseInt(testEsUrl.port, 10),
+        port: Number(testEsUrl.port),
         username: testEsUrl.auth?.split(':')[0],
         password: testEsUrl.auth?.split(':')[1],
         auth: testEsUrl.auth,
@@ -54,7 +54,7 @@ class EsTestConfig {
     const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
     const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
 
-    const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
+    const port = process.env.TEST_ES_PORT ? Number(process.env.TEST_ES_PORT) : 9220;
 
     if (Number.isNaN(port)) {
       throw new Error(
