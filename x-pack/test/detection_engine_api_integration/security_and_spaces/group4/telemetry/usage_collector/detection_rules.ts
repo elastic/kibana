@@ -14,6 +14,7 @@ import type {
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -289,8 +290,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156088
-    describe.skip('"eql" rule type', () => {
+    // github.com/elastic/kibana/issues/156088
+    describe('"eql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);
@@ -449,26 +450,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          const expected: DetectionMetrics = {
-            ...getInitialDetectionMetrics(),
-            detection_rules: {
-              ...getInitialDetectionMetrics().detection_rules,
-              detection_rule_usage: {
-                ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
-                eql: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-                custom_total: {
-                  ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
-                  disabled: 1,
-                  legacy_notifications_disabled: 1,
-                },
-              },
+          const expected: RulesTypeUsage = {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
+            eql: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            custom_total: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
             },
           };
-          expect(stats).to.eql(expected);
+          expect(stats.detection_rules.detection_rule_usage).to.eql(expected);
         });
       });
 
