@@ -30,6 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         '--serverless=security',
+        '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
       ],
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,
