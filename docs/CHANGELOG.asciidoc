@@ -381,6 +381,23 @@ For the second scenario, refreshing the case fixes the issue.
 ====
 // end::known-issue-158447[]
 
+// tag::known-issue-158936[]
+[discrete]
+.Error when clicking link to Universal Profiling Agent integration
+[%collapsible]
+====
+*Details* +
+Clicking *Manage Universal Profiling agent in Fleet* on the *Add profiling data* page under the *{agent} integration* tab results in an error loading integration details. 
+
+*Impact* +
+You can access the Universal Profiling Agent integration by doing the following:
+
+. Select *Integrations* from the left navigation.
+. Turn on *Display beta integrations* in the bottom-left corner of the Integrations page.
+. Search for *Universal Profiling* and select *Universal Profiling Agent*.
+====
+// end::known-issue-158936[]
+
 [float]
 [[breaking-changes-8.8.0]]
 === Breaking changes
