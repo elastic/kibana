@@ -24,20 +24,44 @@ export const isStepActive = (step: Step, activeProducts: Set<ProductLine>) =>
   step.productLineRequired?.some((condition) => activeProducts.has(condition));
 
 const getfinishedActiveSteps = (
-  finishedStepIds: Set<StepId> | undefined,
-  activeSteps: Step[] | undefined
+  finishedStepIds: StepId[] | undefined,
+  activeStepIds: StepId[] | undefined
 ) => {
-  const finishedStepIdsArray: StepId[] = Array.from(finishedStepIds ?? new Set());
-
-  const finishedActiveSteps = finishedStepIdsArray.reduce((acc, stepId) => {
-    const activeStep = activeSteps?.find(({ id }) => id === stepId);
-    if (activeStep) {
-      acc.push(activeStep.id);
+  const finishedActiveSteps = finishedStepIds?.reduce((acc, finishedStepId) => {
+    const activeFinishedStepId = activeStepIds?.find(
+      (activeStepId) => finishedStepId === activeStepId
+    );
+    if (activeFinishedStepId) {
+      acc.push(activeFinishedStepId);
     }
     return acc;
   }, [] as StepId[]);
 
   return new Set(finishedActiveSteps);
+};
+
+export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {
+  const sections = getSections();
+  const section = sections.find(({ id }) => id === sectionId);
+  const cards = section?.cards;
+  const card = cards?.find(({ id }) => id === cardId);
+
+  return card;
+};
+
+export const getStepsByActiveProduct = ({
+  activeProducts,
+  cardId,
+  sectionId,
+}: {
+  activeProducts: Set<ProductLine>;
+  cardId: CardId;
+  sectionId: SectionId;
+}) => {
+  const card = getCard({ cardId, sectionId });
+  const steps = card?.steps?.filter((step) => isStepActive(step, activeProducts));
+
+  return steps;
 };
 
 export const setupCards = (
@@ -49,9 +73,10 @@ export const setupCards = (
         const activeCards =
           section.cards?.reduce((accCards, card) => {
             const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
+            const activeStepIds = activeSteps?.map(({ id }) => id);
             const stepsDone: Set<StepId> = getfinishedActiveSteps(
-              finishedSteps[card.id],
-              activeSteps
+              finishedSteps[card.id] ? [...finishedSteps[card.id]] : undefined,
+              activeStepIds
             );
             const timeInMins = getCardTimeInMinutes(activeSteps, stepsDone);
             const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
@@ -60,7 +85,7 @@ export const setupCards = (
               id: card.id,
               timeInMins,
               stepsLeft,
-              activeSteps,
+              activeStepIds,
             };
 
             return accCards;
@@ -74,28 +99,35 @@ export const setupCards = (
     : null;
 
 export const updateCard = ({
-  finishedSteps,
+  activeProducts,
   activeSections,
-  sectionId,
   cardId,
+  finishedSteps,
+  sectionId,
 }: {
-  finishedSteps: Record<CardId, Set<StepId>>;
+  activeProducts: Set<ProductLine>;
   activeSections: ActiveSections | null;
-  sectionId: SectionId;
   cardId: CardId;
+  finishedSteps: Record<CardId, Set<StepId>>;
+  sectionId: SectionId;
 }): ActiveSections | null => {
-  const activeCards = activeSections ? activeSections[sectionId] : undefined;
-  const card = activeCards ? activeCards[cardId] : undefined;
+  const activeSection = activeSections ? activeSections[sectionId] : undefined;
+  const activeCard = activeSection ? activeSection[cardId] : undefined;
 
-  if (!card || !activeSections) {
+  if (!activeCard || !activeSections) {
     return activeSections;
   }
 
-  const activeSteps = card.activeSteps;
-  const stepsDone: Set<StepId> = getfinishedActiveSteps(finishedSteps[cardId], activeSteps);
+  const steps = getStepsByActiveProduct({ activeProducts, cardId, sectionId });
 
-  const timeInMins = getCardTimeInMinutes(activeSteps, stepsDone);
-  const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
+  const activeStepIds = activeCard.activeStepIds;
+  const stepsDone: Set<StepId> = getfinishedActiveSteps(
+    finishedSteps[cardId] ? [...finishedSteps[cardId]] : undefined,
+    activeStepIds
+  );
+
+  const timeInMins = getCardTimeInMinutes(steps, stepsDone);
+  const stepsLeft = getCardStepsLeft(steps, stepsDone);
 
   return {
     ...activeSections,
@@ -105,7 +137,7 @@ export const updateCard = ({
         id: cardId,
         timeInMins,
         stepsLeft,
-        activeSteps,
+        activeStepIds,
       },
     },
   };

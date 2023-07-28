@@ -124,7 +124,7 @@ export interface ActiveCard {
   id: CardId;
   timeInMins: number;
   stepsLeft: number;
-  activeSteps: Step[] | undefined;
+  activeStepIds: StepId[] | undefined;
 }
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;

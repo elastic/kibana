@@ -14,6 +14,10 @@ import {
 } from './helpers';
 import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
 import {
+  RespondToThreatsSteps,
+  MasterTheInvestigationsWorkflowSteps,
+  OptimizeYourWorkSpaceSteps,
+  ExploreSteps,
   ConfigureSteps,
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
@@ -117,82 +121,92 @@ describe('isStepActive', () => {
 });
 
 describe('setupCards', () => {
-  const analyticProductActiveCards = {
-    [SectionId.getSetUp]: {
-      [GetSetUpCardId.introduction]: {
-        id: GetSetUpCardId.introduction,
-        timeInMins: 3,
-        stepsLeft: 1,
-      },
-      [GetSetUpCardId.configure]: {
-        id: GetSetUpCardId.configure,
-        timeInMins: 0,
-        stepsLeft: 4,
-      },
-      [GetSetUpCardId.explore]: {
-        id: GetSetUpCardId.explore,
-        timeInMins: 0,
-        stepsLeft: 2,
-      },
-    },
-    [SectionId.getMoreFromElasticSecurity]: {
-      [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        stepsLeft: 5,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-        stepsLeft: 5,
-        timeInMins: 0,
-      },
-    },
+  const getCard = (cardId: CardId, sectionId: SectionId, activeSections: ActiveSections | null) => {
+    const section = activeSections ? activeSections[sectionId] : {};
+    return section ? section[cardId] ?? { activeStepIds: null } : {};
   };
+
   it('should set up active steps based on active products', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
 
     const activeSections = setupCards(finishedSteps, activeProducts);
 
-    expect(activeSections).toEqual(analyticProductActiveCards);
+    expect(
+      getCard(GetSetUpCardId.introduction, SectionId.getSetUp, activeSections).activeStepIds
+    ).toEqual([IntroductionSteps.getToKnowElasticSecurity]);
+
+    expect(
+      getCard(GetSetUpCardId.configure, SectionId.getSetUp, activeSections).activeStepIds
+    ).toEqual([
+      ConfigureSteps.learnAbout,
+      ConfigureSteps.deployElasticAgent,
+      ConfigureSteps.connectToDataSources,
+      ConfigureSteps.enablePrebuiltRules,
+    ]);
+
+    expect(
+      getCard(GetSetUpCardId.explore, SectionId.getSetUp, activeSections).activeStepIds
+    ).toEqual([ExploreSteps.viewAlerts, ExploreSteps.analyzeData]);
+
+    expect(
+      getCard(
+        GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
+        SectionId.getMoreFromElasticSecurity,
+        activeSections
+      ).activeStepIds
+    ).toEqual([
+      MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
+      MasterTheInvestigationsWorkflowSteps.exploreProcess,
+      MasterTheInvestigationsWorkflowSteps.exploreUser,
+      MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
+      MasterTheInvestigationsWorkflowSteps.introductionToCases,
+    ]);
+
+    expect(
+      getCard(
+        GetMoreFromElasticSecurityCardId.respondToThreats,
+        SectionId.getMoreFromElasticSecurity,
+        activeSections
+      ).activeStepIds
+    ).toEqual([]);
+
+    expect(
+      getCard(
+        GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
+        SectionId.getMoreFromElasticSecurity,
+        activeSections
+      ).activeStepIds
+    ).toEqual([
+      OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
+      OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
+      OptimizeYourWorkSpaceSteps.createCustomRules,
+      OptimizeYourWorkSpaceSteps.introductionToExceptions,
+      OptimizeYourWorkSpaceSteps.connectNotification,
+    ]);
   });
 
   it('should set up active cards based on finished steps', () => {
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [GetMoreFromElasticSecurityCardId.respondToThreats]: new Set([
+        RespondToThreatsSteps.automated,
+      ]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
     const activeSections = setupCards(finishedSteps, activeProducts);
 
-    expect(activeSections).toEqual({
-      ...analyticProductActiveCards,
-      [SectionId.getSetUp]: {
-        ...analyticProductActiveCards[SectionId.getSetUp],
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
-          timeInMins: 0,
-          stepsLeft: 0,
-        },
-        [GetSetUpCardId.configure]: {
-          id: GetSetUpCardId.configure,
-          timeInMins: 0,
-          stepsLeft: 2,
-        },
-      },
-      [SectionId.getMoreFromElasticSecurity]: {
-        ...analyticProductActiveCards[SectionId.getMoreFromElasticSecurity],
-        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-          stepsLeft: 3,
-          timeInMins: 0,
-        },
-      },
+    expect(
+      getCard(
+        GetMoreFromElasticSecurityCardId.respondToThreats,
+        SectionId.getMoreFromElasticSecurity,
+        activeSections
+      )
+    ).toEqual({
+      activeStepIds: [],
+      id: GetMoreFromElasticSecurityCardId.respondToThreats,
+      stepsLeft: 0,
+      timeInMins: 0,
     });
   });
 
@@ -269,34 +283,48 @@ describe('updateCard', () => {
   } as ActiveSections;
 
   it('should update the active card based on finished steps and active products', () => {
+    const activeProducts = new Set([ProductLine.cloud]);
     const sectionId = SectionId.getSetUp;
     const cardId = GetSetUpCardId.introduction;
-
+    const testActiveSections = {
+      [SectionId.getSetUp]: {
+        [GetSetUpCardId.introduction]: {
+          id: GetSetUpCardId.introduction,
+          timeInMins: 3,
+          stepsLeft: 1,
+          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+        },
+      },
+    };
     const updatedCards = updateCard({
-      finishedSteps,
-      activeSections,
-      sectionId,
+      activeProducts,
+      activeSections: testActiveSections,
       cardId,
+      finishedSteps,
+      sectionId,
     });
 
     expect(updatedCards).toEqual({
-      ...activeSections,
+      ...testActiveSections,
       [SectionId.getSetUp]: {
-        ...activeSections[SectionId.getSetUp],
+        ...testActiveSections[SectionId.getSetUp],
         [GetSetUpCardId.introduction]: {
           id: GetSetUpCardId.introduction,
           timeInMins: 0,
           stepsLeft: 0,
+          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
         },
       },
     });
   });
 
   it('should return null if the card is inactive based on active products', () => {
+    const activeProducts = new Set([ProductLine.cloud]);
     const sectionId = SectionId.getSetUp;
     const cardId = GetSetUpCardId.introduction;
 
     const updatedCards = updateCard({
+      activeProducts,
       finishedSteps,
       activeSections: null,
       sectionId,
@@ -307,10 +335,12 @@ describe('updateCard', () => {
   });
 
   it('should return null if the card or activeSections is not found', () => {
+    const activeProducts = new Set([ProductLine.cloud]);
     const sectionId = SectionId.getSetUp;
     const cardId = 'test' as CardId;
 
     const updatedCards = updateCard({
+      activeProducts,
       finishedSteps,
       activeSections,
       sectionId,

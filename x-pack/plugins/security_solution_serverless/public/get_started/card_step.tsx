@@ -19,30 +19,41 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, Step, StepId } from './types';
-import step from './images/step.svg';
+import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
+import icon_step from './images/icon_step.svg';
 import icon_cross from './images/icon_cross.svg';
 import { UNDO_MARK_AS_DONE_TITLE, MARK_AS_DONE_TITLE } from './translations';
+import { getStepsByActiveProduct } from './helpers';
+import type { ProductLine } from '../../common/product';
 
 const CardStepComponent: React.FC<{
-  sectionId: SectionId;
+  activeProducts: Set<ProductLine>;
   cardId: CardId;
-  step: Step;
-  onStepClicked: OnStepClicked;
-  onStepButtonClicked: OnStepButtonClicked;
   finishedStepsByCard: Set<StepId>;
+  onStepButtonClicked: OnStepButtonClicked;
+  onStepClicked: OnStepClicked;
+  sectionId: SectionId;
+  stepId: StepId;
 }> = ({
-  sectionId,
+  activeProducts,
   cardId,
-  step: { id: stepId, title, badges, description, splitPanel, button },
-  onStepClicked,
-  onStepButtonClicked,
   finishedStepsByCard = new Set(),
+  onStepButtonClicked,
+  onStepClicked,
+  sectionId,
+  stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [expandStep, setExpandStep] = useState(false);
+  const steps = useMemo(
+    () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
+    [activeProducts, cardId, sectionId]
+  );
+  const { title, badges, description, splitPanel, button } =
+    steps?.find((step) => step.id === stepId) ?? {};
+
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
@@ -75,7 +86,7 @@ const CardStepComponent: React.FC<{
         <EuiFlexItem grow={false} onClick={toggleStep}>
           <EuiIcon
             data-test-subj={`${stepId}-icon`}
-            type={isDone ? 'checkInCircleFilled' : step}
+            type={isDone ? 'checkInCircleFilled' : icon_step}
             size="m"
             color={euiTheme.colors.success}
           />
@@ -89,7 +100,7 @@ const CardStepComponent: React.FC<{
             >
               {title}
             </span>
-            {badges.map((badge) => (
+            {badges?.map((badge) => (
               <EuiBadge key={`${stepId}-badge-${badge.id}`} color="hollow">
                 {badge.name}
               </EuiBadge>
@@ -148,7 +159,11 @@ const CardStepComponent: React.FC<{
               >
                 <EuiText size="s">
                   {description?.map((desc, index) => (
-                    <p key={`${stepId}-description-${index}`} className="eui-displayBlock">
+                    <p
+                      data-test-subj={`${stepId}-description-${index}`}
+                      key={`${stepId}-description-${index}`}
+                      className="eui-displayBlock"
+                    >
                       {desc}
                     </p>
                   ))}
@@ -163,6 +178,7 @@ const CardStepComponent: React.FC<{
             )}
             {splitPanel && (
               <EuiSplitPanel.Inner
+                data-test-subj="split-panel"
                 paddingSize="none"
                 css={css`
                   padding-left: ${euiTheme.size.m};

@@ -17,11 +17,11 @@ import type { ActiveSections, CardId, StepId, OnStepClicked, OnStepButtonClicked
 import type { ProductLine } from '../../common/product';
 
 const TogglePanelComponent: React.FC<{
-  finishedSteps: Record<CardId, Set<StepId>>;
-  activeSections: ActiveSections | null;
   activeProducts: Set<ProductLine>;
-  onStepClicked: OnStepClicked;
+  activeSections: ActiveSections | null;
+  finishedSteps: Record<CardId, Set<StepId>>;
   onStepButtonClicked: OnStepButtonClicked;
+  onStepClicked: OnStepClicked;
 }> = ({ finishedSteps, activeSections, activeProducts, onStepClicked, onStepButtonClicked }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -29,6 +29,7 @@ const TogglePanelComponent: React.FC<{
 
   const { setUpSections } = useSetUpSections({ euiTheme, shadow });
   const sectionNodes = setUpSections({
+    activeProducts,
     onStepClicked,
     onStepButtonClicked,
     finishedSteps,

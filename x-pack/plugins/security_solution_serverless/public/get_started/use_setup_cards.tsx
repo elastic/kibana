@@ -20,6 +20,7 @@ import type {
 
 import { CardItem } from './card_item';
 import { getSections } from './sections';
+import type { ProductLine } from '../../common/product';
 
 export const useSetUpSections = ({
   euiTheme,
@@ -30,16 +31,18 @@ export const useSetUpSections = ({
 }) => {
   const setUpCards = useCallback(
     ({
-      onStepClicked,
-      onStepButtonClicked,
-      finishedSteps,
+      activeProducts,
       activeSections,
+      finishedSteps,
+      onStepButtonClicked,
+      onStepClicked,
       sectionId,
     }: {
-      onStepClicked: OnStepClicked;
-      onStepButtonClicked: OnStepButtonClicked;
-      finishedSteps: Record<CardId, Set<StepId>>;
+      activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
+      finishedSteps: Record<CardId, Set<StepId>>;
+      onStepButtonClicked: OnStepButtonClicked;
+      onStepClicked: OnStepClicked;
       sectionId: SectionId;
     }) => {
       const section = activeSections?.[sectionId];
@@ -47,17 +50,18 @@ export const useSetUpSections = ({
         ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
               <CardItem
+                activeProducts={activeProducts}
+                activeStepIds={cardItem.activeStepIds}
+                cardId={cardItem.id}
                 data-test-subj={cardItem.id}
-                activeSteps={cardItem.activeSteps}
+                euiTheme={euiTheme}
+                finishedSteps={finishedSteps}
+                onStepButtonClicked={onStepButtonClicked}
+                onStepClicked={onStepClicked}
+                sectionId={sectionId}
+                shadow={shadow}
                 stepsLeft={cardItem.stepsLeft}
                 timeInMins={cardItem.timeInMins}
-                sectionId={sectionId}
-                cardId={cardItem.id}
-                shadow={shadow}
-                euiTheme={euiTheme}
-                onStepClicked={onStepClicked}
-                onStepButtonClicked={onStepButtonClicked}
-                finishedSteps={finishedSteps}
               />
             </EuiFlexItem>
           ))
@@ -68,23 +72,26 @@ export const useSetUpSections = ({
 
   const setUpSections = useCallback(
     ({
-      onStepClicked,
-      onStepButtonClicked,
-      finishedSteps,
+      activeProducts,
       activeSections,
+      finishedSteps,
+      onStepButtonClicked,
+      onStepClicked,
     }: {
-      onStepClicked: OnStepClicked;
-      onStepButtonClicked: OnStepButtonClicked;
-      finishedSteps: Record<CardId, Set<StepId>>;
+      activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
+      finishedSteps: Record<CardId, Set<StepId>>;
+      onStepButtonClicked: OnStepButtonClicked;
+      onStepClicked: OnStepClicked;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
-          sectionId: currentSection.id,
-          onStepClicked,
-          onStepButtonClicked,
-          finishedSteps,
+          activeProducts,
           activeSections,
+          finishedSteps,
+          onStepButtonClicked,
+          onStepClicked,
+          sectionId: currentSection.id,
         });
         if (cardNodes && cardNodes.length > 0) {
           acc.push(

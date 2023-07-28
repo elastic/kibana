@@ -7,15 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, Step, StepId } from './types';
+import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
-import { getSections } from './sections';
+import { getCard } from './helpers';
+import type { ProductLine } from '../../common/product';
 
 const CardItemComponent: React.FC<{
-  activeSteps: Step[] | undefined;
+  activeProducts: Set<ProductLine>;
+  activeStepIds: StepId[] | undefined;
   cardId: CardId;
   euiTheme: EuiThemeComputed;
   finishedSteps: Record<CardId, Set<StepId>>;
@@ -26,7 +28,8 @@ const CardItemComponent: React.FC<{
   stepsLeft?: number;
   timeInMins?: number;
 }> = ({
-  activeSteps,
+  activeProducts,
+  activeStepIds,
   stepsLeft,
   timeInMins,
   shadow,
@@ -37,8 +40,7 @@ const CardItemComponent: React.FC<{
   sectionId,
   cardId,
 }) => {
-  const section = getSections().find((s) => s.id === sectionId);
-  const cardItem = section?.cards?.find((c) => c.id === cardId);
+  const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
   const [expandCard, setExpandCard] = useState(false);
   const toggleCard = useCallback(
     (e) => {
@@ -47,7 +49,7 @@ const CardItemComponent: React.FC<{
     },
     [expandCard]
   );
-  const hasActiveSteps = activeSteps != null && activeSteps.length > 0;
+  const hasActiveSteps = activeStepIds != null && activeStepIds.length > 0;
   return cardItem && hasActiveSteps ? (
     <EuiPanel
       hasBorder
@@ -112,16 +114,17 @@ const CardItemComponent: React.FC<{
         </EuiFlexItem>
         {expandCard && hasActiveSteps && (
           <EuiFlexItem>
-            {activeSteps.map((step) => {
+            {[...activeStepIds].map((stepId) => {
               return (
                 <CardStep
-                  key={step.id}
-                  sectionId={sectionId}
+                  activeProducts={activeProducts}
                   cardId={cardItem.id}
-                  step={step}
-                  onStepClicked={onStepClicked}
-                  onStepButtonClicked={onStepButtonClicked}
                   finishedStepsByCard={finishedSteps[cardItem.id]}
+                  key={stepId}
+                  onStepButtonClicked={onStepButtonClicked}
+                  onStepClicked={onStepClicked}
+                  sectionId={sectionId}
+                  stepId={stepId}
                 />
               );
             })}

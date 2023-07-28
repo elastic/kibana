@@ -15,6 +15,7 @@ import {
   IntroductionSteps,
   SectionId,
 } from './types';
+import { ProductLine } from '../../common/product';
 
 const mockEuiTheme: EuiThemeComputed = {
   size: {
@@ -48,6 +49,7 @@ describe('useSetUpSections', () => {
     } as ActiveSections;
 
     const sections = result.current.setUpSections({
+      activeProducts: new Set([ProductLine.security]),
       activeSections,
       onStepClicked,
       onStepButtonClicked,
@@ -64,6 +66,7 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
+      activeProducts: new Set([ProductLine.security]),
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,

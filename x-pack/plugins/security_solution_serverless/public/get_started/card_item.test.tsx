@@ -11,6 +11,7 @@ import type { CardId, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { introductionSteps } from './sections';
+import { ProductLine } from '../../common/product';
 jest.mock('./card_step');
 
 describe('CardItemComponent', () => {
@@ -22,16 +23,17 @@ describe('CardItemComponent', () => {
   it('should render card', () => {
     const { getByText, queryByText } = render(
       <CardItem
-        activeSteps={introductionSteps}
+        activeProducts={new Set([ProductLine.security])}
+        activeStepIds={introductionSteps.map((step) => step.id)}
         cardId={GetSetUpCardId.introduction}
-        sectionId={SectionId.getSetUp}
         euiTheme={mockEuiTheme}
+        finishedSteps={finishedSteps}
+        onStepButtonClicked={onStepButtonClicked}
+        onStepClicked={onStepClicked}
+        sectionId={SectionId.getSetUp}
         shadow=""
         stepsLeft={1}
         timeInMins={30}
-        onStepClicked={onStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
-        finishedSteps={finishedSteps}
       />
     );
 
@@ -51,16 +53,17 @@ describe('CardItemComponent', () => {
   it('should not render card when no active steps', () => {
     const { queryByText } = render(
       <CardItem
-        activeSteps={[]}
+        activeProducts={new Set([])}
+        activeStepIds={[]}
         cardId={GetSetUpCardId.introduction}
-        sectionId={SectionId.getSetUp}
         euiTheme={mockEuiTheme}
+        finishedSteps={finishedSteps}
+        onStepButtonClicked={onStepButtonClicked}
+        onStepClicked={onStepClicked}
+        sectionId={SectionId.getSetUp}
         shadow=""
         stepsLeft={1}
         timeInMins={30}
-        onStepClicked={onStepClicked}
-        onStepButtonClicked={onStepButtonClicked}
-        finishedSteps={finishedSteps}
       />
     );
 
@@ -68,14 +71,15 @@ describe('CardItemComponent', () => {
     expect(cardTitle).not.toBeInTheDocument();
   });
 
-  it('should not render steps left information when all steps done', () => {
+  it('should not render steps left information when all steps are done', () => {
     const mockFinishedSteps = {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as Record<CardId, Set<StepId>>;
 
     const { getByText, queryByText } = render(
       <CardItem
-        activeSteps={introductionSteps}
+        activeProducts={new Set([ProductLine.security])}
+        activeStepIds={introductionSteps.map((step) => step.id)}
         cardId={GetSetUpCardId.introduction}
         sectionId={SectionId.getSetUp}
         euiTheme={mockEuiTheme}

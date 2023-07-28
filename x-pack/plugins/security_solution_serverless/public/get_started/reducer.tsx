@@ -43,9 +43,10 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       ...state,
       finishedSteps,
       activeSections: updateCard({
-        finishedSteps,
+        activeProducts: state.activeProducts,
         activeSections: state.activeSections,
         cardId: action.payload.cardId,
+        finishedSteps,
         sectionId: action.payload.sectionId,
       }),
     };
@@ -67,6 +68,7 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       ...state,
       finishedSteps,
       activeSections: updateCard({
+        activeProducts: state.activeProducts,
         finishedSteps,
         activeSections: state.activeSections,
         cardId: action.payload.cardId,
