@@ -11,7 +11,9 @@ import type { UpsellingSectionId } from '../lib/upsellings';
 import { useKibana } from '../lib/kibana';
 import type { SecurityPageName } from '../../../common';
 
-export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentType | null => {
+export const useUpsellingComponent = (
+  id: UpsellingSectionId
+): React.ComponentType | null | string => {
   const { upselling } = useKibana().services;
   const upsellingSections = useObservable(upselling.sections$);
 

@@ -18,8 +18,8 @@ import React, {
 } from 'react';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import { isString } from 'lodash/fp';
 import { useLicense } from '../../hooks/use_license';
-
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
 import { useUpsellingComponent } from '../../hooks/use_upselling';
 
@@ -74,10 +74,16 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const licenseIsPlatinum = useLicense().isPlatinumPlus();
 
-    const UpsellInvestigationGuide = useUpsellingComponent('investigation_guide');
+    const upsellInvestigationGuide = useUpsellingComponent('investigation_guide');
+
     const uiPluginsWithState = useMemo(() => {
-      return uiPlugins({ licenseIsPlatinum, UpsellInvestigationGuide });
-    }, [licenseIsPlatinum, UpsellInvestigationGuide]);
+      return uiPlugins({
+        licenseIsPlatinum,
+        upsellInvestigationGuide: isString(upsellInvestigationGuide)
+          ? upsellInvestigationGuide
+          : null,
+      });
+    }, [licenseIsPlatinum, upsellInvestigationGuide]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {

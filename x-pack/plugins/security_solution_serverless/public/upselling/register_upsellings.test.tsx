@@ -61,7 +61,7 @@ describe('registerUpsellings', () => {
     expect(registerPages).toHaveBeenCalledWith(expectedPagesObject);
 
     const expectedSectionsObject = Object.fromEntries(
-      upsellingSections.map(({ id }) => [id, expect.any(Function)])
+      upsellingSections.map(({ id }) => [id, expect.anything()])
     );
     expect(registerSections).toHaveBeenCalledTimes(1);
     expect(registerSections).toHaveBeenCalledWith(expectedSectionsObject);

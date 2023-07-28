@@ -11,12 +11,12 @@ import type { SecurityPageName } from '../../../../common';
 import type { SectionUpsellings, PageUpsellings, UpsellingSectionId } from './types';
 
 export class UpsellingService {
-  private sections: Map<UpsellingSectionId, React.ComponentType>;
+  private sections: Map<UpsellingSectionId, React.ComponentType | string>;
   private pages: Map<SecurityPageName, React.ComponentType>;
-  private sectionsSubject$: BehaviorSubject<Map<UpsellingSectionId, React.ComponentType>>;
+  private sectionsSubject$: BehaviorSubject<Map<UpsellingSectionId, React.ComponentType | string>>;
   private pagesSubject$: BehaviorSubject<Map<SecurityPageName, React.ComponentType>>;
 
-  public sections$: Observable<Map<UpsellingSectionId, React.ComponentType>>;
+  public sections$: Observable<Map<UpsellingSectionId, React.ComponentType | string>>;
   public pages$: Observable<Map<SecurityPageName, React.ComponentType>>;
 
   constructor() {

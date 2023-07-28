@@ -12,19 +12,23 @@ import type {
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
-import React, { lazy } from 'react';
+import type React from 'react';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
+import investigationGuideUpselling from './pages/investigation_guide_upselling';
 
-const InvestigationGuideUpsellingLazy = lazy(() => import('./pages/investigation_guide_upselling'));
+interface SectionUpsellingsConfig {
+  pli: AppFeatureKey;
+  component: React.ComponentType | string;
+}
 
-interface UpsellingsConfig {
+interface PageUpsellingsConfig {
   pli: AppFeatureKey;
   component: React.ComponentType;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
-type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
+type UpsellingPages = Array<PageUpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingSections = Array<SectionUpsellingsConfig & { id: UpsellingSectionId }>;
 
 export const registerUpsellings = (
   upselling: UpsellingService,
@@ -80,8 +84,6 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'investigation_guide',
     pli: AppFeatureKey.investigationGuide,
-    component: () => (
-      <InvestigationGuideUpsellingLazy requiredPLI={AppFeatureKey.investigationGuide} />
-    ),
+    component: investigationGuideUpselling(AppFeatureKey.investigationGuide),
   },
 ];

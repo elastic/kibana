@@ -11,7 +11,6 @@ import {
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 
-import type { ComponentType } from 'react';
 import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
@@ -30,15 +29,15 @@ export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
 export const uiPlugins = ({
   licenseIsPlatinum,
-  UpsellInvestigationGuide,
+  upsellInvestigationGuide,
 }: {
   licenseIsPlatinum: boolean;
-  UpsellInvestigationGuide: ComponentType | null;
+  upsellInvestigationGuide: string | null;
 }) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
   const insightPluginWithLicense = insightMarkdownPlugin.plugin({
     licenseIsPlatinum,
-    UpsellInvestigationGuide,
+    upsellInvestigationGuide,
   });
   if (currentPlugins.includes(insightPluginWithLicense.name) === false) {
     nonStatefulUiPlugins.push(timelineMarkdownPlugin.plugin);

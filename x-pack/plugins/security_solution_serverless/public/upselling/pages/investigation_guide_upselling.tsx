@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useProductTypeByPLI } from '../hooks/use_product_type_by_pli';
+import { i18n } from '@kbn/i18n';
 
-export const InvestigationGuideUpselling: React.FC<{ requiredPLI: AppFeatureKey }> = React.memo(
-  function InvestigationGuideUpselling({ requiredPLI }) {
-    const productTypeRequired = useProductTypeByPLI(requiredPLI);
+export const UPGRADE_INVESTIGATION_GUIDE = (productTypeRequired: AppFeatureKey) =>
+  i18n.translate('xpack.securitySolutionServerless.markdown.insight.upsell', {
+    defaultMessage: 'Upgrade to {productTypeRequired} make use of insights in investigation guides',
+    values: {
+      productTypeRequired,
+    },
+  });
 
-    return (
-      <FormattedMessage
-        id="xpack.securitySolutionServerless.markdown.insight.upsell"
-        defaultMessage="Upgrade to {productTypeRequired} make use of insights in investigation guides"
-        values={{
-          productTypeRequired,
-        }}
-      />
-    );
-  }
-);
+export const investigationGuideUpselling = (requiredPLI: AppFeatureKey) =>
+  UPGRADE_INVESTIGATION_GUIDE(requiredPLI);
 
 // eslint-disable-next-line import/no-default-export
-export { InvestigationGuideUpselling as default };
+export { investigationGuideUpselling as default };
