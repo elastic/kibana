@@ -95,7 +95,7 @@
     "@kbn/profiling-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/unified-field-list",
-    "@kbn/discover-plugin",
+    "@kbn/discover-plugin"
   ],
   "exclude": ["target/**/*"]
 }
