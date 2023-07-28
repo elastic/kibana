@@ -35,7 +35,6 @@ export default async () => {
       serverArgs: [
         `--server.restrictInternalApis=true`,
         `--server.port=${kbnTestConfig.getPort()}`,
-        `--server.port=${kbnTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
         // either include `kibanaServerTestUser` credentials, or credentials provided by the test
