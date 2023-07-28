@@ -963,7 +963,7 @@ describe('actions telemetry', () => {
     `);
   });
 
-  it.only('getCounts', () => {
+  it('getCounts', () => {
     const aggs = {
       '.d3security': 2,
       '.gen-ai__Azure OpenAI': 3,
