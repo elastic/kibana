@@ -516,6 +516,7 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
+x-pack/plugins/observability_ai_assistant @elastic/apm-ui
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_onboarding @elastic/apm-ui
@@ -791,6 +792,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/search_sessions_integration/ @elastic/kibana-data-discovery
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
 /examples/demo_search/ @elastic/kibana-data-discovery
+/test/examples/discover_customization_examples @elastic/kibana-data-discovery
 
 # Vis Editors
 /src/plugins/visualize/ @elastic/kibana-visualizations
