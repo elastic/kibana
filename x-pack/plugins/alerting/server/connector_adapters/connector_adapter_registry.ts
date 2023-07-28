@@ -13,6 +13,10 @@ import { ConnectorAdapter } from './types';
 export class ConnectorAdapterRegistry {
   private readonly connectorAdapters: Map<string, ConnectorAdapter> = new Map();
 
+  public has(connectorTypeId: string): boolean {
+    return this.connectorAdapters.has(connectorTypeId);
+  }
+
   public register(connectorAdapter: ConnectorAdapter) {
     if (this.connectorAdapters.has(connectorAdapter.connectorTypeId)) {
       throw new Error(

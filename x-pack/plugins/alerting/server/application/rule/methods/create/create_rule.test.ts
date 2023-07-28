@@ -23,6 +23,8 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter } from '../../../../connector_adapters/types';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -50,6 +52,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -71,6 +74,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry,
 };
 
 beforeEach(() => {
@@ -3566,5 +3570,28 @@ describe('create()', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  describe('connector adapters', () => {
+    const connectorAdapter: ConnectorAdapter = {
+      connectorTypeId: '.test',
+      ruleActionParamsSchema: schema.object({ foo: schema.string() }),
+      buildActionParams: jest.fn(),
+    };
+
+    connectorAdapterRegistry.register(connectorAdapter);
+
+    test('should throw if the actions params are invalid', async () => {
+      const action = {
+        id: '1',
+        params: { 'not-exist': 'test' },
+        actionTypeId: '.test',
+      };
+
+      const data = getMockData({ actions: [action] });
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]]`
+      );
+    });
   });
 });

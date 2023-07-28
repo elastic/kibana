@@ -33,6 +33,14 @@ interface BuildActionParamsArgs<
 
 export interface ConnectorAdapter {
   connectorTypeId: string;
+  /**
+   * The schema of the action persisted
+   * in the rule. The schema will be validated
+   * when a rule is created or updated.
+   * The schema should be backwards compatible
+   * and should never introduce any breaking
+   * changes.
+   */
   ruleActionParamsSchema: ObjectType;
   buildActionParams: <
     RuleParams extends RuleTypeParams = RuleTypeParams,

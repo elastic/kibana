@@ -107,7 +107,12 @@ export interface AlertsFilter extends SavedObjectAttributes {
 
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
-export interface RuleAction {
+export enum RuleActionTypes {
+  DEFAULT = 'default',
+  SYSTEM = 'system',
+}
+
+export interface DefaultRuleAction {
   uuid?: string;
   group: string;
   id: string;
@@ -115,7 +120,18 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
+  type?: RuleActionTypes.DEFAULT;
 }
+
+export interface RuleSystemAction {
+  uuid?: string;
+  id: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+  type: RuleActionTypes.SYSTEM;
+}
+
+export type RuleAction = DefaultRuleAction | RuleSystemAction;
 
 export interface AggregateOptions {
   search?: string;

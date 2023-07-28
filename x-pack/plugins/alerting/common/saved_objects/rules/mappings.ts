@@ -75,6 +75,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         //     },
         //   },
         // },
+        // The type of the action. It can be default or system
+        // type: {
+        //   type: 'keyword',
+        // },
       },
     },
     params: {

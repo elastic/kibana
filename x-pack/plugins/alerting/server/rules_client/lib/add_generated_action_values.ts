@@ -9,12 +9,15 @@ import { v4 } from 'uuid';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { NormalizedAlertAction, NormalizedAlertActionWithGeneratedValues } from '..';
+import { RuleActionTypes } from '../../types';
 
 export function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = []
 ): NormalizedAlertActionWithGeneratedValues[] {
-  return actions.map(({ uuid, alertsFilter, ...action }) => {
-    const generateDSL = (kql: string, filters: Filter[]) => {
+  return actions.map((action) => {
+    const uuid = action.uuid ?? v4();
+
+    const generateDSL = (kql: string, filters: Filter[]): string => {
       try {
         return JSON.stringify(
           buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters)
@@ -24,9 +27,15 @@ export function addGeneratedActionValues(
       }
     };
 
+    if (action.type === RuleActionTypes.SYSTEM) {
+      return Object.assign(action, { uuid });
+    }
+
+    const { alertsFilter } = action;
+
     return {
       ...action,
-      uuid: uuid || v4(),
+      uuid,
       ...(alertsFilter
         ? {
             alertsFilter: {
@@ -40,6 +49,7 @@ export function addGeneratedActionValues(
             },
           }
         : {}),
-    };
+      // TODO: Fix
+    } as NormalizedAlertActionWithGeneratedValues;
   });
 }

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { validateHours } from '../../routes/lib/validate_hours';
-import { RawRule, RuleNotifyWhen } from '../../types';
+import { DefaultRuleAction, RawRule, RuleActionTypes, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
@@ -43,13 +43,23 @@ export async function validateActions(
     );
   }
 
+  /**
+   * All the validation below are not applicable for system actions
+   * as users are not allowed to set fields like the group
+   * or the throttle
+   */
+  const actionsWithoutSystemActions = actions.filter(
+    (action): action is DefaultRuleAction => action.type === RuleActionTypes.SYSTEM
+  );
+
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
-  const actionIds = [...new Set(actions.map((action) => action.id))];
+  const actionIds = [...new Set(actionsWithoutSystemActions.map((action) => action.id))];
   const actionResults = (await actionsClient.getBulk(actionIds)) || [];
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
+
   if (actionsUsingConnectorsWithMissingSecrets.length) {
     if (allowMissingConnectorSecrets) {
       context.logger.error(
@@ -72,7 +82,7 @@ export async function validateActions(
   }
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = ruleType;
-  const usedAlertActionGroups = actions.map((action) => action.group);
+  const usedAlertActionGroups = actionsWithoutSystemActions.map((action) => action.group);
   const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));
   const invalidActionGroups = usedAlertActionGroups.filter(
     (group) => !availableAlertTypeActionGroups.has(group)
@@ -90,7 +100,10 @@ export async function validateActions(
 
   // check for actions using frequency params if the rule has rule-level frequency params defined
   if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
-    const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
+    const actionsWithFrequency = actionsWithoutSystemActions.filter((action) =>
+      Boolean(action.frequency)
+    );
+
     if (actionsWithFrequency.length) {
       errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
@@ -103,7 +116,10 @@ export async function validateActions(
       );
     }
   } else {
-    const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
+    const actionsWithoutFrequency = actionsWithoutSystemActions.filter(
+      (action) => !action.frequency
+    );
+
     if (actionsWithoutFrequency.length) {
       errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
@@ -124,7 +140,7 @@ export async function validateActions(
   const actionsWithInvalidDays = [];
   const actionsWithAlertsFilterWithoutSummaryGetter = [];
 
-  for (const action of actions) {
+  for (const action of actionsWithoutSystemActions) {
     const { alertsFilter } = action;
 
     // check for actions throttled shorter than the rule schedule

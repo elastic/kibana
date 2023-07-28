@@ -408,7 +408,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
 
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;

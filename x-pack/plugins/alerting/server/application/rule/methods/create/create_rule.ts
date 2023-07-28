@@ -8,6 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { parseDuration } from '../../../../../common/parse_duration';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -25,7 +26,7 @@ import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../ru
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
-import { SanitizedRule } from '../../../../types';
+import { RuleActionTypes, RuleSystemAction, SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
@@ -53,8 +54,16 @@ export async function createRule<Params extends RuleParams = never>(
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
+  const actionsClient = await context.getActionsClient();
 
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+  const systemActions = initialData.actions.filter(
+    (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+  );
+
+  const data = {
+    ...initialData,
+    actions: addGeneratedActionValues(initialData.actions),
+  };
 
   const id = options?.id || SavedObjectsUtils.generateId();
 
@@ -63,6 +72,12 @@ export async function createRule<Params extends RuleParams = never>(
   } catch (error) {
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }
+
+  validateSystemActions({
+    actionsClient,
+    connectorAdapterRegistry: context.connectorAdapterRegistry,
+    systemActions,
+  });
 
   try {
     await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>

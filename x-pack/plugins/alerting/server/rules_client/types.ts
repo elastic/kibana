@@ -16,6 +16,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { DistributiveOmit } from '@elastic/eui';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
@@ -27,6 +28,7 @@ import {
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 export type {
   BulkEditOperation,
@@ -67,11 +69,12 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
-export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithGeneratedValues = Omit<
+export type NormalizedAlertActionWithGeneratedValues = DistributiveOmit<
   NormalizedAlertAction,
   'uuid' | 'alertsFilter'
 > & {
