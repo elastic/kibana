@@ -1798,6 +1798,15 @@
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
+"@elastic/apm-rum-core@^5.18.0":
+  version "5.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.18.0.tgz#d1c25594c8e81a929b1f9444ecc081359a97b3d5"
+  integrity sha512-KGU+ZFtdXdD7pR+arDq0JRIC4IKIH0D16p+7SMkq9Lq8wq70Uy6r5SKZgW7X6ahnJP35hStMXT2mjStjD9a+wA==
+  dependencies:
+    error-stack-parser "^1.3.5"
+    opentracing "^0.14.3"
+    promise-polyfill "^8.1.3"
+
 "@elastic/apm-rum-react@^1.3.1":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.3.1.tgz#2b1a5cfe3763538d7e655816a333162696f906c9"
@@ -1805,6 +1814,13 @@
   dependencies:
     "@elastic/apm-rum" "^5.9.1"
     hoist-non-react-statics "^3.3.0"
+
+"@elastic/apm-rum@^5.10.0":
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.13.0.tgz#a79df440a2e80a492b24e9c04b62c408a6863fa4"
+  integrity sha512-b3H9EEwUpDsGhtqY9oiVILR3nFh8jM9rA9LQGZxw155d2x1MEFyqOhI1uXkhgxirnC+RZHRuQKcfWxZtPQnrfA==
+  dependencies:
+    "@elastic/apm-rum-core" "^5.18.0"
 
 "@elastic/apm-rum@^5.9.1":
   version "5.9.1"

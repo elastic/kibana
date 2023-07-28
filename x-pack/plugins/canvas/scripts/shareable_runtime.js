@@ -42,7 +42,9 @@ run(
       clean();
     }
 
-    const env = {};
+    const env = {
+      "NODE_OPTIONS": "--openssl-legacy-provider"
+    };
 
     if (!flags.dev) {
       env.NODE_ENV = 'production';
@@ -54,7 +56,6 @@ run(
         'yarn',
         [
           'webpack-dev-server',
-          '--openssl-legacy-provider',
           '--config',
           webpackConfig,
           ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
@@ -87,7 +88,6 @@ run(
     execa.sync(
       'yarn',
       [
-        '--openssl-legacy-provider',
         'webpack',
         '--config',
         webpackConfig,
