@@ -7,6 +7,7 @@
 import { omit, isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
+import { isSystemAction } from '../../../lib/is_system_action';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
@@ -154,7 +155,13 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     : [];
 
   if (omitGeneratedValues) {
-    actions = actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+    actions = actions.map((ruleAction) => {
+      if (isSystemAction(ruleAction)) {
+        return ruleAction;
+      }
+
+      return omit(ruleAction, 'alertsFilter.query.dsl');
+    });
   }
 
   const params = injectReferencesIntoParams<Params, RuleParams>(

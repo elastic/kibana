@@ -6,7 +6,6 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/server';
-import { RuleActionTypes } from '../../../common';
 import { RawRule } from '../../types';
 import {
   preconfiguredConnectorActionRefPrefix,
@@ -37,7 +36,7 @@ export async function denormalizeActions(
     alertActions.forEach(({ id, ...alertAction }, i) => {
       const actionResultValue = actionResults.find((action) => action.id === id);
       if (actionResultValue) {
-        if (actionsClient.isPreconfigured(id) && alertAction.type !== RuleActionTypes.SYSTEM) {
+        if (actionsClient.isPreconfigured(id)) {
           actions.push({
             ...alertAction,
             actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,

@@ -406,7 +406,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export interface RawRuleAction extends SavedObjectAttributes {
+interface RawDefaultAction {
   uuid: string;
   group?: string;
   actionRef: string;
@@ -420,10 +420,19 @@ export interface RawRuleAction extends SavedObjectAttributes {
   alertsFilter?: RawRuleAlertsFilter;
 }
 
+interface RawSystemAction {
+  uuid: string;
+  actionRef: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+}
+
+export type RawRuleAction = RawDefaultAction | RawSystemAction;
+
 // note that the `error` property is "null-able", as we're doing a partial
 // update on the rule when we update this data, but need to ensure we
 // delete any previous error if the current status has no error
-export interface RawRuleExecutionStatus extends SavedObjectAttributes {
+export interface RawRuleExecutionStatus {
   status: RuleExecutionStatuses;
   lastExecutionDate: string;
   lastDuration?: number;
@@ -437,7 +446,7 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export interface RawRule extends SavedObjectAttributes {
+export interface RawRule {
   enabled: boolean;
   name: string;
   tags: string[];

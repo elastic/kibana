@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { RuleActionTypes } from '../../../../../../common';
+import { updateSystemActionSchema } from '../../../../../../common/system_actions/v1';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
 import { notifyWhenSchema } from '../../../schemas';
 import { validateDuration } from '../../../validation';
@@ -38,6 +40,7 @@ const bulkEditActionSchema = schema.object({
       notifyWhen: notifyWhenSchema,
     })
   ),
+  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
 
 const bulkEditTagSchema = schema.object({
@@ -49,7 +52,7 @@ const bulkEditTagSchema = schema.object({
 const bulkEditActionsSchema = schema.object({
   operation: schema.oneOf([schema.literal('add'), schema.literal('set')]),
   field: schema.literal('actions'),
-  value: schema.arrayOf(bulkEditActionSchema),
+  value: schema.arrayOf(schema.oneOf([bulkEditActionSchema, updateSystemActionSchema])),
 });
 
 const bulkEditScheduleSchema = schema.object({

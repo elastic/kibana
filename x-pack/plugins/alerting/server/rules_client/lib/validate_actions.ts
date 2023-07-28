@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { validateHours } from '../../routes/lib/validate_hours';
-import { DefaultRuleAction, RawRule, RuleActionTypes, RuleNotifyWhen } from '../../types';
+import { RuleDefaultAction, RawRule, RuleActionTypes, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
@@ -49,7 +49,7 @@ export async function validateActions(
    * or the throttle
    */
   const actionsWithoutSystemActions = actions.filter(
-    (action): action is DefaultRuleAction => action.type === RuleActionTypes.SYSTEM
+    (action): action is RuleDefaultAction => action.type === RuleActionTypes.SYSTEM
   );
 
   // check for actions using connectors with missing secrets

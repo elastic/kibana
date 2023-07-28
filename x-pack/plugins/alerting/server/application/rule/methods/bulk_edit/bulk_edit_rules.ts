@@ -16,6 +16,9 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { validateSystemActions } from '../../../../lib/validate_system_actions';
+import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../../../common';
+import { isSystemAction } from '../../../../lib/is_system_action';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
 import {
@@ -569,6 +572,8 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
   ruleActions: RuleDomain['actions'];
   ruleType: RuleType;
 }) {
+  const actionsClient = await context.getActionsClient();
+
   let updatedRule = cloneDeep(rule);
   let updatedRuleActions = ruleActions;
   let hasUpdateApiKeyOperation = false;
@@ -585,6 +590,16 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           ...operation,
           value: addGeneratedActionValues(operation.value),
         };
+
+        const systemActions = operation.value.filter(
+          (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+        );
+
+        validateSystemActions({
+          actionsClient,
+          connectorAdapterRegistry: context.connectorAdapterRegistry,
+          systemActions,
+        });
 
         try {
           await validateActions(context, ruleType, {
@@ -732,8 +747,11 @@ function validateScheduleOperation(
 ): void {
   const scheduleInterval = parseDuration(schedule.interval);
   const actionsWithInvalidThrottles = [];
+  const actionsWithoutSystemActions = actions.filter(
+    (action): action is RuleDefaultAction => !isSystemAction(action)
+  );
 
-  for (const action of actions) {
+  for (const action of actionsWithoutSystemActions) {
     // check for actions throttled shorter than the rule schedule
     if (
       action.frequency?.notifyWhen === ruleNotifyWhen.THROTTLE &&

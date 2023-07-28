@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { systemActionSchema } from '../../../../../../common/system_actions/latest';
 import { RuleActionTypes } from '../../../../../../common';
 import { validateDuration } from '../../../validation';
 import { notifyWhenSchema, actionAlertsFilterSchema } from '../../../schemas';
@@ -27,14 +28,6 @@ const defaultActionSchema = schema.object({
   type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
 
-const systemAction = schema.object({
-  id: schema.string(),
-  actionTypeId: schema.string(),
-  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
-  uuid: schema.maybe(schema.string()),
-  type: schema.literal(RuleActionTypes.SYSTEM),
-});
-
 export const createRuleDataSchema = schema.object({
   name: schema.string(),
   alertTypeId: schema.string(),
@@ -46,6 +39,8 @@ export const createRuleDataSchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDuration }),
   }),
-  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemAction]), { defaultValue: [] }),
+  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchema]), {
+    defaultValue: [],
+  }),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
 });

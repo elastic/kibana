@@ -112,7 +112,7 @@ export enum RuleActionTypes {
   SYSTEM = 'system',
 }
 
-export interface DefaultRuleAction {
+export interface RuleDefaultAction {
   uuid?: string;
   group: string;
   id: string;
@@ -124,14 +124,14 @@ export interface DefaultRuleAction {
 }
 
 export interface RuleSystemAction {
-  uuid?: string;
+  uuid: string;
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
   type: RuleActionTypes.SYSTEM;
 }
 
-export type RuleAction = DefaultRuleAction | RuleSystemAction;
+export type RuleAction = RuleDefaultAction | RuleSystemAction;
 
 export interface AggregateOptions {
   search?: string;

@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { systemActionSchema } from '../../../../common/system_actions/latest';
+import { RuleActionTypes } from '../../../../common';
 import { notifyWhenSchema } from './notify_when_schema';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
@@ -57,7 +59,7 @@ const actionFrequencySchema = schema.object({
 /**
  * Unsanitized (domain) action schema, used by internal rules clients
  */
-export const actionDomainSchema = schema.object({
+export const defaultActionDomainSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
@@ -65,7 +67,10 @@ export const actionDomainSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionDomainAlertsFilterSchema),
+  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
+
+export const actionDomainSchema = schema.oneOf([defaultActionDomainSchema, systemActionSchema]);
 
 /**
  * Sanitized (non-domain) action schema, returned by rules clients for other solutions
@@ -81,7 +86,7 @@ export const actionAlertsFilterSchema = schema.object({
   timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
 });
 
-export const actionSchema = schema.object({
+export const defaultActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
@@ -90,3 +95,5 @@ export const actionSchema = schema.object({
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
 });
+
+export const actionSchema = schema.oneOf([defaultActionSchema, systemActionSchema]);

@@ -14,6 +14,8 @@ import {
   RuleTypeParams,
   RuleNotifyWhenType,
   IntervalSchedule,
+  RuleSystemAction,
+  RuleActionTypes,
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -33,6 +35,7 @@ import {
   createNewAPIKeySet,
   migrateLegacyActions,
 } from '../lib';
+import { validateSystemActions } from '../../lib/validate_system_actions';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -185,9 +188,20 @@ async function updateAlert<Params extends RuleTypeParams>(
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+  const actionsClient = await context.getActionsClient();
+  const systemActions = initialData.actions.filter(
+    (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+  );
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+
+  validateSystemActions({
+    actionsClient,
+    connectorAdapterRegistry: context.connectorAdapterRegistry,
+    systemActions,
+  });
+
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
