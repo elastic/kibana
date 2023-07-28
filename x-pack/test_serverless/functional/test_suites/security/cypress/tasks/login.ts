@@ -16,7 +16,10 @@ import { ServerlessRoleName } from '../../../../../shared/lib';
  *
  * @private
  */
-const sendApiLoginRequest = (username: string, password: string) => {
+const sendApiLoginRequest = (
+  username: string,
+  password: string
+): Cypress.Chainable<{ username: string; password: string }> => {
   const url = new URL(Cypress.config().baseUrl ?? '');
   url.pathname = '/internal/security/login';
 
@@ -35,18 +38,23 @@ const sendApiLoginRequest = (username: string, password: string) => {
         password,
       },
     },
+  }).then(() => {
+    return {
+      username,
+      password,
+    };
   });
 };
 
 interface CyLoginTask {
-  (user?: ServerlessRoleName): Cypress.Chainable<Cypress.Response<unknown>>;
+  (user?: ServerlessRoleName): ReturnType<typeof sendApiLoginRequest>;
 
   /**
    * Login using any username/password
    * @param username
    * @param password
    */
-  with(username: string, password: string): Cypress.Chainable<Cypress.Response<unknown>>;
+  with(username: string, password: string): ReturnType<typeof sendApiLoginRequest>;
 }
 
 /**
@@ -57,7 +65,7 @@ interface CyLoginTask {
  */
 export const login: CyLoginTask = (
   user?: ServerlessRoleName
-): Cypress.Chainable<Cypress.Response<unknown>> => {
+): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
 
@@ -73,6 +81,6 @@ export const login: CyLoginTask = (
   }
 };
 
-login.with = (username: string, password: string): Cypress.Chainable<Cypress.Response<unknown>> => {
+login.with = (username: string, password: string): ReturnType<typeof sendApiLoginRequest> => {
   return sendApiLoginRequest(username, password);
 };
