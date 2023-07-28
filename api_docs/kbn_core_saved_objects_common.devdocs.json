@@ -2503,22 +2503,6 @@
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/common/migrations/references.ts"
           },
