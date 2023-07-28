@@ -64,12 +64,17 @@ const NavigationEmbeddablePanelEditor = ({
   parentDashboard?: DashboardContainer;
 }) => {
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
+  const toasts = coreServices.notifications.toasts;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
-  const [saveToLibrary, setSaveToLibrary] = useState(Boolean(savedObjectId));
+  const [saveToLibrary, setSaveToLibrary] = useState(true);
   const [libraryTitle, setLibraryTitle] = useState<string>(attributes?.title ?? '');
   const [isSaving, setIsSaving] = useState(false);
+
+  const isEditingExisting = Boolean(
+    savedObjectId || (attributes?.links && attributes?.links.length > 0)
+  );
 
   useEffect(() => {
     const initialLinks = attributes?.links;
@@ -121,13 +126,20 @@ const NavigationEmbeddablePanelEditor = ({
 
   const deleteLink = useCallback(
     (linkId: string) => {
+      if (orderedLinks.length <= 1) {
+        toasts.addDanger({
+          title: NavEmbeddableStrings.editor.panelEditor.getUnableToDeleteLinkToastTitle(),
+          text: NavEmbeddableStrings.editor.panelEditor.getMinimumLinksDeleteToastText(),
+        });
+        return;
+      }
       setOrderedLinks(
         orderedLinks.filter((link) => {
           return link.id !== linkId;
         })
       );
     },
-    [orderedLinks]
+    [orderedLinks, toasts]
   );
 
   const saveButtonComponent = useMemo(() => {

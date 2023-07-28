@@ -71,6 +71,14 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
           defaultMessage: 'Link drag handle',
         }),
+      getUnableToDeleteLinkToastTitle: () =>
+        i18n.translate('navigationEmbeddable.editor.unableToDeleteLinkToastTitle', {
+          defaultMessage: 'Unable to delete link',
+        }),
+      getMinimumLinksDeleteToastText: () =>
+        i18n.translate('navigationEmbeddable.editor.minimumLinksReachedError', {
+          defaultMessage: 'Links panels must have at least one link.',
+        }),
     },
     linkEditor: {
       getGoBackAriaLabel: () =>
