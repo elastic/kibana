@@ -902,7 +902,7 @@ during updates, even when the instance performing the operation doesn't know abo
 of the document (e.g an old node during an upgrade).
 
 If this was fine before zero downtime upgrades, there is an edge case in serverless when this API is used
-to update fields that are the "source" of another field's backfill.
+to update fields that are the "source" of another field's backfill that can potentially lead to data becoming inconsistent.
 
 For example, imagine that:
 
