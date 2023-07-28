@@ -42,99 +42,97 @@ import { TIMELINES, ALERTS } from '../../../screens/security_header';
  *
  * */
 
-Cypress._.times(10, (n) =>
-  describe(`Alert Table Controls : ${n}`, () => {
-    before(() => {
-      cleanKibana();
+describe(`Alert Table Controls`, () => {
+  before(() => {
+    cleanKibana();
+  });
+
+  beforeEach(() => {
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+  });
+
+  it('full screen, column sorting', () => {
+    cy.get(DATA_GRID_FULL_SCREEN)
+      .should('have.attr', 'aria-label', 'Enter fullscreen')
+      .trigger('click');
+    cy.get(DATA_GRID_FULL_SCREEN)
+      .should('have.attr', 'aria-label', 'Exit fullscreen')
+      .trigger('click');
+    cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('be.visible');
+  });
+
+  context('Sorting', () => {
+    it('Date Column', () => {
+      const timestampField = DATA_GRID_FIELDS.TIMESTAMP.fieldName;
+      cy.get(GET_DATA_GRID_HEADER(timestampField)).trigger('click');
+      cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(timestampField))
+        .should('be.visible')
+        .should('contain.text', 'Sort Old-New');
     });
 
-    beforeEach(() => {
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
+    it('Number column', () => {
+      const riskScoreField = DATA_GRID_FIELDS.RISK_SCORE.fieldName;
+      cy.get(GET_DATA_GRID_HEADER(riskScoreField)).trigger('click');
+      cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(riskScoreField))
+        .should('be.visible')
+        .should('contain.text', 'Sort Low-High');
     });
 
-    it('full screen, column sorting', () => {
-      cy.get(DATA_GRID_FULL_SCREEN)
-        .should('have.attr', 'aria-label', 'Enter fullscreen')
-        .trigger('click');
-      cy.get(DATA_GRID_FULL_SCREEN)
-        .should('have.attr', 'aria-label', 'Exit fullscreen')
-        .trigger('click');
-      cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('be.visible');
+    it('Text Column', () => {
+      const ruleField = DATA_GRID_FIELDS.RULE.fieldName;
+      cy.get(GET_DATA_GRID_HEADER(ruleField)).trigger('click');
+      cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(ruleField))
+        .should('be.visible')
+        .should('contain.text', 'Sort A-Z');
     });
+  });
 
-    context('Sorting', () => {
-      it('Date Column', () => {
-        const timestampField = DATA_GRID_FIELDS.TIMESTAMP.fieldName;
-        cy.get(GET_DATA_GRID_HEADER(timestampField)).trigger('click');
-        cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(timestampField))
-          .should('be.visible')
-          .should('contain.text', 'Sort Old-New');
-      });
+  context('Columns Configuration', () => {
+    it('should retain column configuration when a column is removed when coming back to alert page', () => {
+      const fieldName = 'kibana.alert.severity';
+      cy.get(FIELDS_BROWSER_BTN).click();
+      cy.get(FIELDS_BROWSER_CONTAINER).should('be.visible');
 
-      it('Number column', () => {
-        const riskScoreField = DATA_GRID_FIELDS.RISK_SCORE.fieldName;
-        cy.get(GET_DATA_GRID_HEADER(riskScoreField)).trigger('click');
-        cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(riskScoreField))
-          .should('be.visible')
-          .should('contain.text', 'Sort Low-High');
-      });
+      filterFieldsBrowser(fieldName);
+      removeField(fieldName);
+      closeFieldsBrowser();
+      cy.get(DATAGRID_HEADER(fieldName)).should('not.exist');
 
-      it('Text Column', () => {
-        const ruleField = DATA_GRID_FIELDS.RULE.fieldName;
-        cy.get(GET_DATA_GRID_HEADER(ruleField)).trigger('click');
-        cy.get(GET_DATA_GRID_HEADER_CELL_ACTION_GROUP(ruleField))
-          .should('be.visible')
-          .should('contain.text', 'Sort A-Z');
-      });
+      navigateFromHeaderTo(TIMELINES);
+      navigateFromHeaderTo(ALERTS);
+      waitForAlerts();
+      cy.get(DATAGRID_HEADER('_id')).should('not.exist');
     });
+    it('should retain column configuration when a column is added when coming back to alert page', () => {
+      cy.get(FIELDS_BROWSER_BTN).click();
+      cy.get(FIELDS_BROWSER_CONTAINER).should('be.visible');
 
-    context('Columns Configuration', () => {
-      it('should retain column configuration when a column is removed when coming back to alert page', () => {
-        const fieldName = 'kibana.alert.severity';
-        cy.get(FIELDS_BROWSER_BTN).click();
-        cy.get(FIELDS_BROWSER_CONTAINER).should('be.visible');
+      addsFields(['_id']);
+      closeFieldsBrowser();
+      cy.get(DATAGRID_HEADER('_id')).should('be.visible');
 
-        filterFieldsBrowser(fieldName);
-        removeField(fieldName);
-        closeFieldsBrowser();
-        cy.get(DATAGRID_HEADER(fieldName)).should('not.exist');
-
-        navigateFromHeaderTo(TIMELINES);
-        navigateFromHeaderTo(ALERTS);
-        waitForAlerts();
-        cy.get(DATAGRID_HEADER('_id')).should('not.exist');
-      });
-      it('should retain column configuration when a column is added when coming back to alert page', () => {
-        cy.get(FIELDS_BROWSER_BTN).click();
-        cy.get(FIELDS_BROWSER_CONTAINER).should('be.visible');
-
-        addsFields(['_id']);
-        closeFieldsBrowser();
-        cy.get(DATAGRID_HEADER('_id')).should('be.visible');
-
-        navigateFromHeaderTo(TIMELINES);
-        navigateFromHeaderTo(ALERTS);
-        waitForAlerts();
-        cy.get(DATAGRID_HEADER('_id')).should('be.visible');
-      });
-      it('should retain columns configuration when switching between eventrenderedView and gridView', () => {
-        const fieldName = '_id';
-        cy.get(FIELDS_BROWSER_BTN).click();
-        cy.get(FIELDS_BROWSER_CONTAINER).should('be.visible');
-
-        addsFields([fieldName]);
-        closeFieldsBrowser();
-        cy.get(DATAGRID_HEADER(fieldName)).should('be.visible');
-
-        switchAlertTableToEventRenderedView();
-        cy.get(DATAGRID_HEADER(fieldName)).should('not.exist');
-
-        switchAlertTableToGridView();
-        cy.get(DATAGRID_HEADER(fieldName)).should('be.visible');
-      });
+      navigateFromHeaderTo(TIMELINES);
+      navigateFromHeaderTo(ALERTS);
+      waitForAlerts();
+      cy.get(DATAGRID_HEADER('_id')).should('be.visible');
     });
-  })
-);
+    it('should retain columns configuration when switching between eventrenderedView and gridView', () => {
+      const fieldName = '_id';
+      cy.get(FIELDS_BROWSER_BTN).click();
+      cy.get(FIELDS_BROWSER_CONTAINER).should('be.visible');
+
+      addsFields([fieldName]);
+      closeFieldsBrowser();
+      cy.get(DATAGRID_HEADER(fieldName)).should('be.visible');
+
+      switchAlertTableToEventRenderedView();
+      cy.get(DATAGRID_HEADER(fieldName)).should('not.exist');
+
+      switchAlertTableToGridView();
+      cy.get(DATAGRID_HEADER(fieldName)).should('be.visible');
+    });
+  });
+});

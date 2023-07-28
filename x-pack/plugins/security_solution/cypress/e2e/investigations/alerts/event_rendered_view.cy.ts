@@ -33,52 +33,50 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-Cypress._.times(10, (k) =>
-  describe(`Event Rendered View : ${k}`, () => {
-    before(() => {
-      cleanKibana();
-    });
+describe(`Event Rendered View`, () => {
+  before(() => {
+    cleanKibana();
+  });
 
-    beforeEach(() => {
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlerts();
-      switchAlertTableToEventRenderedView();
-      waitForAlerts();
-    });
+  beforeEach(() => {
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlerts();
+    switchAlertTableToEventRenderedView();
+    waitForAlerts();
+  });
 
-    it('Event Summary Column', () => {
-      cy.get(EVENT_SUMMARY_COLUMN).should('be.visible');
-      cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
-    });
+  it('Event Summary Column', () => {
+    cy.get(EVENT_SUMMARY_COLUMN).should('be.visible');
+    cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
+  });
 
-    it('Hover Action TopN in event summary column', () => {
-      showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
-      cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
-      cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
-      cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
-      cy.get(XY_CHART).should('be.visible');
-      cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
-      cy.get(XY_CHART).should('not.be.visible');
-    });
+  it('Hover Action TopN in event summary column', () => {
+    showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
+    cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
+    cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
+    cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
+    cy.get(XY_CHART).should('be.visible');
+    cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
+    cy.get(XY_CHART).should('not.be.visible');
+  });
 
-    /*
-     *
-     * Alert table is third party component which cannot be easily tested by jest.
-     * This test main checks if Alert Table controls are rendered properly.
-     *
-     * */
-    it('Field Browser is not visible', () => {
-      cy.get(FIELDS_BROWSER_BTN).should('not.exist');
-    });
+  /*
+   *
+   * Alert table is third party component which cannot be easily tested by jest.
+   * This test main checks if Alert Table controls are rendered properly.
+   *
+   * */
+  it('Field Browser is not visible', () => {
+    cy.get(FIELDS_BROWSER_BTN).should('not.exist');
+  });
 
-    it('Sorting control is not visible', () => {
-      cy.get(DATA_GRID_FIELD_SORT_BTN).should('not.be.visible');
-    });
+  it('Sorting control is not visible', () => {
+    cy.get(DATA_GRID_FIELD_SORT_BTN).should('not.be.visible');
+  });
 
-    it('Column Order button is not visible', () => {
-      cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('not.exist');
-    });
-  })
-);
+  it('Column Order button is not visible', () => {
+    cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('not.exist');
+  });
+});
