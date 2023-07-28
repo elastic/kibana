@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api';
+import { CaseMetricsFeature } from '../../common/api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { bulkGetCases, getCases, getCasesMetrics } from '.';
 import { allCases, allCasesSnake, casesSnake } from '../containers/mock';
