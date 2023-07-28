@@ -10,6 +10,7 @@ import {
   createBootstrapIndex,
   createDataStream,
   deleteAllIndex,
+  deleteDataStream,
   deleteIndexTemplate,
   deletePolicy,
   deleteTemplate,
@@ -502,6 +503,26 @@ export class ListClient {
     const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteAllIndex(esClient, `${listItemIndex}-*`);
+  };
+
+  /**
+   * Deletes the list data stream
+   * @returns True if the list index was deleted, otherwise false
+   */
+  public deleteListDataStream = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    return deleteDataStream(esClient, listIndex);
+  };
+
+  /**
+   * Deletes the list item data stream
+   * @returns True if the list index was deleted, otherwise false
+   */
+  public deleteListItemDataStream = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    return deleteDataStream(esClient, listItemIndex);
   };
 
   /**

@@ -10,30 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import { ListClient } from '../services/lists/list_client';
 import type { ListsPluginRouter } from '../types';
 
-import { buildSiemResponse } from './utils';
+import { buildSiemResponse, removeLegacyTemplatesIfExist } from './utils';
 
 import { getListClient } from '.';
-
-const removeLegacyTemplatesIfExist = async (lists: ListClient): Promise<void> => {
-  const legacyTemplateExists = await lists.getLegacyListTemplateExists();
-  const legacyTemplateListItemsExists = await lists.getLegacyListItemTemplateExists();
-  try {
-    // Check if the old legacy lists and items template exists and remove it
-    if (legacyTemplateExists) {
-      await lists.deleteLegacyListTemplate();
-    }
-    if (legacyTemplateListItemsExists) {
-      await lists.deleteLegacyListItemTemplate();
-    }
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw err;
-    }
-  }
-};
 
 export const createListIndexRoute = (router: ListsPluginRouter): void => {
   router.post(
@@ -52,15 +33,6 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
         const listDataStreamExists = await lists.getListDataStreamExists();
         const listItemDataStreamExists = await lists.getListItemDataStreamExists();
-        // const policyExists = await lists.getListPolicyExists();
-        // const policyListItemExists = await lists.getListItemPolicyExists();
-
-        // if (!policyExists) {
-        //   await lists.setListPolicy();
-        // }
-        // if (!policyListItemExists) {
-        //   await lists.setListItemPolicy();
-        // }
 
         const templateListExists = await lists.getListTemplateExists();
         const templateListItemsExists = await lists.getListItemTemplateExists();

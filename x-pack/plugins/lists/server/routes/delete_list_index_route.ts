@@ -10,9 +10,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
+import { ListClient } from '../services/lists/list_client';
 import type { ListsPluginRouter } from '../types';
 
-import { buildSiemResponse } from './utils';
+import { buildSiemResponse, removeLegacyTemplatesIfExist } from './utils';
 
 import { getListClient } from '.';
 
@@ -43,62 +44,35 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
-
+      console.log('DELETE ME');
       try {
         const lists = await getListClient(context);
         const listIndexExists = await lists.getListIndexExists();
         const listItemIndexExists = await lists.getListItemIndexExists();
 
-        if (!listIndexExists && !listItemIndexExists) {
+        const listDataStreamExists = await lists.getListDataStreamExists();
+        const listItemDataStreamExists = await lists.getListItemDataStreamExists();
+
+        // data streams exists, it means indices were migrated
+        if (listDataStreamExists) {
+          await deleteDataStreams(lists, listDataStreamExists, listItemDataStreamExists);
+        } else if (!listIndexExists && !listItemIndexExists) {
           return siemResponse.error({
-            body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" does not exist`,
+            body: `index and data stream: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" does not exist`,
             statusCode: 404,
           });
         } else {
-          if (listIndexExists) {
-            await lists.deleteListIndex();
-          }
-          if (listItemIndexExists) {
-            await lists.deleteListItemIndex();
-          }
+          await deleteIndices(lists, listIndexExists, listItemIndexExists);
+        }
 
-          const listsPolicyExists = await lists.getListPolicyExists();
-          const listItemPolicyExists = await lists.getListItemPolicyExists();
+        await deleteIndexTemplates(lists);
+        await removeLegacyTemplatesIfExist(lists);
 
-          if (listsPolicyExists) {
-            await lists.deleteListPolicy();
-          }
-          if (listItemPolicyExists) {
-            await lists.deleteListItemPolicy();
-          }
-
-          const listsTemplateExists = await lists.getListTemplateExists();
-          const listItemTemplateExists = await lists.getListItemTemplateExists();
-
-          if (listsTemplateExists) {
-            await lists.deleteListTemplate();
-          }
-          if (listItemTemplateExists) {
-            await lists.deleteListItemTemplate();
-          }
-
-          // check if legacy template exists
-          const legacyTemplateExists = await lists.getLegacyListTemplateExists();
-          const legacyItemTemplateExists = await lists.getLegacyListItemTemplateExists();
-          if (legacyTemplateExists) {
-            await lists.deleteLegacyListTemplate();
-          }
-
-          if (legacyItemTemplateExists) {
-            await lists.deleteLegacyListItemTemplate();
-          }
-
-          const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+        const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+        if (errors != null) {
+          return siemResponse.error({ body: errors, statusCode: 500 });
+        } else {
+          return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
@@ -109,4 +83,59 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
       }
     }
   );
+};
+
+/**
+ * Delete list/item indices
+ */
+const deleteIndices = async (
+  lists: ListClient,
+  listIndexExists: boolean,
+  listItemIndexExists: boolean
+): Promise<void> => {
+  if (listIndexExists) {
+    await lists.deleteListIndex();
+  }
+  if (listItemIndexExists) {
+    await lists.deleteListItemIndex();
+  }
+
+  const listsPolicyExists = await lists.getListPolicyExists();
+  const listItemPolicyExists = await lists.getListItemPolicyExists();
+
+  if (listsPolicyExists) {
+    await lists.deleteListPolicy();
+  }
+  if (listItemPolicyExists) {
+    await lists.deleteListItemPolicy();
+  }
+};
+
+/**
+ * Delete list/item data streams
+ */
+const deleteDataStreams = async (
+  lists: ListClient,
+  listDataStreamExists: boolean,
+  listItemDataStreamExists: boolean
+): Promise<void> => {
+  await lists.deleteListDataStream();
+  if (listItemDataStreamExists) {
+    await lists.deleteListItemDataStream();
+  }
+};
+
+/**
+ * Delete list/item index templates
+ */
+const deleteIndexTemplates = async (lists: ListClient): Promise<void> => {
+  const listsTemplateExists = await lists.getListTemplateExists();
+  const listItemTemplateExists = await lists.getListItemTemplateExists();
+
+  if (listsTemplateExists) {
+    await lists.deleteListTemplate();
+  }
+  if (listItemTemplateExists) {
+    await lists.deleteListItemTemplate();
+  }
 };

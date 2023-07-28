@@ -11,6 +11,7 @@ export * from './src/create_boostrap_index';
 export * from './src/create_data_stream';
 export * from './src/decode_version';
 export * from './src/delete_all_index';
+export * from './src/delete_data_stream';
 export * from './src/delete_index_template';
 export * from './src/delete_policy';
 export * from './src/delete_template';

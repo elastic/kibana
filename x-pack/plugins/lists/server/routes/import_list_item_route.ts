@@ -45,11 +45,10 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = await getListClient(context);
-        // TODO: migrate??
         const listExists = await lists.getListDataStreamExists();
         if (!listExists) {
           return siemResponse.error({
-            body: `To import a list item, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
+            body: `To import a list item, the data steam must exist first. Data stream "${lists.getListIndex()}" does not exist`,
             statusCode: 400,
           });
         }
