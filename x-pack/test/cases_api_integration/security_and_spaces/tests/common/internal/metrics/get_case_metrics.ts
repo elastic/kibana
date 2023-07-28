@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // casting here because we're expecting an error with a message field
         })) as unknown as { message: string };
 
-        expect(errorResponse.message).to.contain('invalid features');
+        expect(errorResponse.message).to.contain('Invalid value "bananas" supplied to "features"');
       });
     });
 
