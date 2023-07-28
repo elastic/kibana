@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import rison from '@kbn/rison';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../../..';
 import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printable_pdf_v2';
@@ -42,6 +43,7 @@ const getMockResponseFactory = () =>
     ...httpServerMock.createResponseFactory(),
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
+    customError: (err: unknown) => err,
   } as unknown as KibanaResponseFactory);
 
 const mockLogger = loggingSystemMock.createLogger();
@@ -155,58 +157,101 @@ describe('Handle request to generate', () => {
     });
   });
 
-  test('disallows invalid export type', async () => {
-    expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
-      .toMatchInlineSnapshot(`
+  describe('getJobParams', () => {
+    test('parse jobParams from query string', () => {
+      // @ts-ignore query is a read-only property
+      mockRequest.query = { jobParams: rison.encode(mockJobParams) };
+      expect(requestHandler.getJobParams()).toEqual(mockJobParams);
+    });
+
+    test('parse jobParams from body', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = { jobParams: rison.encode(mockJobParams) };
+      expect(requestHandler.getJobParams()).toEqual(mockJobParams);
+    });
+
+    test('handles missing job params', () => {
+      try {
+        requestHandler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+      }
+    });
+
+    test('handles null job params', () => {
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = { jobParams: rison.encode(null) };
+        requestHandler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+      }
+    });
+
+    test('handles invalid rison', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = { jobParams: mockJobParams };
+      try {
+        requestHandler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+      }
+    });
+  });
+
+  describe('handleGenerateRequest', () => {
+    test('disallows invalid export type', async () => {
+      expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
+        .toMatchInlineSnapshot(`
       Object {
         "body": "Invalid export-type of neanderthals",
       }
     `);
-  });
+    });
 
-  test('disallows unsupporting license', async () => {
-    (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
-      csv_searchsource: {
-        enableLinks: false,
-        message: `seeing this means the license isn't supported`,
-      },
-    }));
+    test('disallows unsupporting license', async () => {
+      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+        csv_searchsource: {
+          enableLinks: false,
+          message: `seeing this means the license isn't supported`,
+        },
+      }));
 
-    expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
-      .toMatchInlineSnapshot(`
+      expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
+        .toMatchInlineSnapshot(`
       Object {
         "body": "seeing this means the license isn't supported",
       }
     `);
-  });
+    });
 
-  test('disallows invalid browser timezone', async () => {
-    (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
-      csv_searchsource: {
-        enableLinks: false,
-        message: `seeing this means the license isn't supported`,
-      },
-    }));
+    test('disallows invalid browser timezone', async () => {
+      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+        csv_searchsource: {
+          enableLinks: false,
+          message: `seeing this means the license isn't supported`,
+        },
+      }));
 
-    expect(
-      await requestHandler.handleGenerateRequest('csv_searchsource', {
-        ...mockJobParams,
-        browserTimezone: 'America/Amsterdam',
-      })
-    ).toMatchInlineSnapshot(`
+      expect(
+        await requestHandler.handleGenerateRequest('csv_searchsource', {
+          ...mockJobParams,
+          browserTimezone: 'America/Amsterdam',
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "body": "seeing this means the license isn't supported",
         }
     `);
-  });
+    });
 
-  test('generates the download path', async () => {
-    const response = (await requestHandler.handleGenerateRequest(
-      'csv_searchsource',
-      mockJobParams
-    )) as unknown as { body: { job: ReportApiJSON } };
-    const { id, created_at: _created_at, ...snapObj } = response.body.job;
-    expect(snapObj).toMatchInlineSnapshot(`
+    test('generates the download path', async () => {
+      const response = (await requestHandler.handleGenerateRequest(
+        'csv_searchsource',
+        mockJobParams
+      )) as unknown as { body: { job: ReportApiJSON } };
+      const { id, created_at: _created_at, ...snapObj } = response.body.job;
+      expect(snapObj).toMatchInlineSnapshot(`
       Object {
         "attempts": 0,
         "completed_at": undefined,
@@ -242,5 +287,6 @@ describe('Handle request to generate', () => {
         "timeout": undefined,
       }
     `);
+    });
   });
 });
