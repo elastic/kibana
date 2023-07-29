@@ -71,7 +71,7 @@ class EsTestConfig {
           process.env.TEST_ES_PORT
         }# and port #${port}# and inline conversion #${Number(
           String(process.env.TEST_ES_PORT)
-        )}#;
+        )}#;`
       );
     }
 
