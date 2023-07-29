@@ -251,15 +251,10 @@ const GcpInputVarFields = ({
     return fields.find((element) => element.id === id);
   };
   const projectIdFields = getFieldById('project_id');
-  const credentialsTypeFields = getFieldById('credentials_type');
+  const credentialsTypeFields = getFieldById('credentials_type') || credentialOptionsList[0];
   const credentialFilesFields = getFieldById('credentials_file');
   const credentialJSONFields = getFieldById('credentials_json');
-  const credentialsTypeField = {
-    id: 'credentials_type',
-    label: 'Credentials Type',
-    type: 'text',
-    value: credentialsTypeFields || credentialOptionsList[0].value,
-  };
+
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
 
@@ -285,24 +280,23 @@ const GcpInputVarFields = ({
               options={credentialOptionsList}
               value={credentialsTypeFields?.value}
               onChange={(optionElem) => {
-                onChange(credentialsTypeField.id, optionElem.target.value);
+                onChange('credentials_type', optionElem.target.value);
               }}
             />
           </EuiFormRow>
         )}
 
-        {(credentialsTypeFields?.value || credentialsTypeField.value) === credentialFieldValue &&
-          credentialFilesFields && (
-            <EuiFormRow fullWidth label={gcpField.fields.credentials_file.label}>
-              <EuiFieldText
-                data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
-                id={credentialFilesFields.id}
-                fullWidth
-                value={credentialFilesFields.value || ''}
-                onChange={(event) => onChange(credentialFilesFields.id, event.target.value)}
-              />
-            </EuiFormRow>
-          )}
+        {credentialsTypeFields.value === credentialFieldValue && credentialFilesFields && (
+          <EuiFormRow fullWidth label={gcpField.fields.credentials_file.label}>
+            <EuiFieldText
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
+              id={credentialFilesFields.id}
+              fullWidth
+              value={credentialFilesFields.value || ''}
+              onChange={(event) => onChange(credentialFilesFields.id, event.target.value)}
+            />
+          </EuiFormRow>
+        )}
         {credentialsTypeFields?.value === credentialJSONValue && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields.credentials_json.label}>
             <EuiTextArea
@@ -318,6 +312,3 @@ const GcpInputVarFields = ({
     </div>
   );
 };
-/*
-
-*/
