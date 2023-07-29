@@ -17,7 +17,7 @@ import type {
 } from '../../types';
 import {
   DATA_VIEW_SWAP_REFERENCES_PATH,
-  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
   PUBLIC_API_ACCESS,
 } from '../../constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -59,7 +59,7 @@ export const swapReferencesRoute = (
     .post({ path: DATA_VIEW_SWAP_REFERENCES_PATH, access: PUBLIC_API_ACCESS })
     .addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             body: schema.object({

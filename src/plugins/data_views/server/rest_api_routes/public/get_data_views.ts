@@ -18,7 +18,7 @@ import type {
 import {
   SERVICE_KEY,
   SERVICE_PATH,
-  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
   PUBLIC_API_ACCESS,
 } from '../../constants';
 import { DataViewListItemRestResponse } from '../route_types';
@@ -61,7 +61,7 @@ const getDataViewsRouteFactory =
   ) => {
     router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {},
           response: { 200: { body: schema.object({ [serviceKey]: dataViewListSchema }) } },

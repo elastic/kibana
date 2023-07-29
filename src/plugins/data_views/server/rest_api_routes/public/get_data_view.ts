@@ -22,7 +22,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
-  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
   PUBLIC_API_ACCESS,
 } from '../../constants';
 
@@ -55,7 +55,7 @@ const getDataViewRouteFactory =
   ) => {
     router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             params: schema.object(

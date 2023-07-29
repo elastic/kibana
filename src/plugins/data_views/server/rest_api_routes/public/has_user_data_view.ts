@@ -15,7 +15,12 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SERVICE_PATH, SERVICE_PATH_LEGACY, PUBLIC_API_ACCESS } from '../../constants';
+import {
+  SERVICE_PATH,
+  SERVICE_PATH_LEGACY,
+  PUBLIC_API_ACCESS,
+  INITIAL_REST_VERSION_INTERNAL,
+} from '../../constants';
 
 interface HasUserDataViewArgs {
   dataViewsService: DataViewsService;
@@ -44,7 +49,7 @@ const hasUserDataViewRouteFactory =
   ) => {
     router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
-        version: '1',
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {},
           response: {

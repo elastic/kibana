@@ -19,7 +19,7 @@ import type {
 import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
-  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
   PUBLIC_API_ACCESS,
 } from '../../../constants';
 
@@ -63,7 +63,7 @@ const deleteRuntimeFieldRouteFactory =
   ) => {
     router.versioned.delete({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             params: schema.object({

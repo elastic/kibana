@@ -24,7 +24,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
-  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
   PUBLIC_API_ACCESS,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
@@ -79,7 +79,7 @@ const updateRuntimeFieldRouteFactory =
   ) => {
     router.versioned.post({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             params: schema.object({

@@ -14,7 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import { INITIAL_REST_VERSION, PUBLIC_API_ACCESS } from '../../../constants';
+import { INITIAL_REST_VERSION_INTERNAL, PUBLIC_API_ACCESS } from '../../../constants';
 import { indexPatternsRuntimeResponseSchema } from '../../schema';
 import type { IndexPatternsRuntimeResponseType } from '../../route_types';
 
@@ -32,7 +32,7 @@ export const registerPutScriptedFieldRoute = (
     })
     .addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             params: schema.object(

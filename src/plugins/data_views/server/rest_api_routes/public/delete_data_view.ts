@@ -18,7 +18,7 @@ import type {
 import {
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
-  INITIAL_REST_VERSION,
+  INITIAL_REST_VERSION_INTERNAL,
   PUBLIC_API_ACCESS,
 } from '../../constants';
 
@@ -51,7 +51,7 @@ const deleteIndexPatternRouteFactory =
   ) => {
     router.versioned.delete({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             params: schema.object(

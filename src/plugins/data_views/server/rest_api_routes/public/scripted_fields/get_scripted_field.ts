@@ -14,7 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import { INITIAL_REST_VERSION, PUBLIC_API_ACCESS } from '../../../constants';
+import { INITIAL_REST_VERSION_INTERNAL, PUBLIC_API_ACCESS } from '../../../constants';
 import { serializedFieldFormatSchema } from '../../../../common/schemas';
 import { FieldSpecRestResponse } from '../../route_types';
 
@@ -32,7 +32,7 @@ export const registerGetScriptedFieldRoute = (
     })
     .addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: INITIAL_REST_VERSION_INTERNAL,
         validate: {
           request: {
             params: schema.object(
