@@ -188,7 +188,7 @@ export const registerFieldForWildcard = async (
     DataViewsServerPluginStart
   >
 ) => {
-  const [, { rollup }, dataViews] = await getStartServices();
+  const [, , dataViews] = await getStartServices();
   const configuredHandler = handler(dataViews.isRollupsEnabled());
 
   // handler
