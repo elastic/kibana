@@ -49,6 +49,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/share-plugin",
     "@kbn/core-http-server",
+    "@kbn/security-solution-plugin",
   ],
   "exclude": [
     "target/**/*",
