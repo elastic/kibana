@@ -18,6 +18,13 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
   defaultMessage: 'API Key',
 });
 
+export const DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel',
+  {
+    defaultMessage: 'Default model',
+  }
+);
+
 export const API_PROVIDER_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.apiProviderLabel',
   {

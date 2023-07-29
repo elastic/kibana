@@ -9,7 +9,7 @@ import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { OpenAiProviderType } from '../../../common/gen_ai/constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/gen_ai/constants';
 import * as i18n from './translations';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
@@ -53,6 +53,28 @@ export const openAiConfig: ConfigFieldSchema[] = [
         }}
       />
     ),
+  },
+  {
+    id: 'defaultModel',
+    label: i18n.DEFAULT_MODEL_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="The OpenAI default model. For more information on the default model, refer to the {genAiAPIUrlDocs}."
+        id="xpack.stackConnectors.components.genAi.openAiDocumentation"
+        values={{
+          genAiAPIUrlDocs: (
+            <EuiLink
+              data-test-subj="open-ai-api-doc"
+              href="https://platform.openai.com/docs/api-reference"
+              target="_blank"
+            >
+              {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+    defaultValue: DEFAULT_OPENAI_MODEL,
   },
 ];
 
