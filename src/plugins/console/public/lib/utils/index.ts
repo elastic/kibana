@@ -127,7 +127,7 @@ export const replaceVariables = (
   const bodyRegexTripleQuotes = /([\\"]?)"""\${(\w+)}"""(?!")/g;
 
   return requests.map((req) => {
-    // safeguard - caller passes any[] from editor's getRequestsInRange() to requests
+    // safeguard - caller passes any[] from editor's getRequestsInRange() as requests
     if (!req || !req.url || !req.data) {
       return req;
     }
