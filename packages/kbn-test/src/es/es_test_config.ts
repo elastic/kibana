@@ -56,7 +56,9 @@ class EsTestConfig {
 
     const port = process.env.TEST_ES_PORT ? Number(String(process.env.TEST_ES_PORT)) : 9220;
 
+    // eslint-disable-next-line no-console
     console.log(`type of TEST_ES_PORT ${typeof process.env.TEST_ES_PORT}`);
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(process.env.TEST_ES_PORT));
 
     if (Number.isNaN(port)) {
