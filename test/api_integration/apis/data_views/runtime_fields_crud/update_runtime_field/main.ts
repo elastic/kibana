@@ -7,7 +7,7 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../../constants';
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `basic_index`;
           const response1 = await supertest
             .post(config.path)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const response2 = await supertest
             .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
             .send({
               runtimeField: {
                 type: 'keyword',
@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const response3 = await supertest
             .get(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
 
           const field =
             config.serviceKey === 'index_pattern' ? response3.body.field : response3.body.fields[0];
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
           // Partial update
           const response4 = await supertest
             .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
             .send({
               runtimeField: {
                 script: {
