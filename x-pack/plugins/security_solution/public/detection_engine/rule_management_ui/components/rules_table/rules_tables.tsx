@@ -278,7 +278,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
           defaultFocusedButton="confirm"
-          data-test-subj="allRulesDeleteConfirmationModal"
+          data-test-subj="deleteRulesConfirmationModal"
         >
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationModalBody"
