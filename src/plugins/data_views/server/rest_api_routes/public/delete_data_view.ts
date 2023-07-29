@@ -19,6 +19,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
 } from '../../constants';
 
 interface DeleteDataViewArgs {
@@ -48,7 +49,7 @@ const deleteIndexPatternRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public' }).addVersion(
+    router.versioned.delete({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

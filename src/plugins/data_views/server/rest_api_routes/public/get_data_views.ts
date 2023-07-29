@@ -15,7 +15,12 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SERVICE_KEY, SERVICE_PATH, INITIAL_REST_VERSION } from '../../constants';
+import {
+  SERVICE_KEY,
+  SERVICE_PATH,
+  INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
+} from '../../constants';
 import { DataViewListItemRestResponse } from '../route_types';
 
 interface GetDataViewsArgs {
@@ -54,7 +59,7 @@ const getDataViewsRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

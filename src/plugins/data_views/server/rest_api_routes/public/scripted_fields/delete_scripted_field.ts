@@ -14,7 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import { INITIAL_REST_VERSION } from '../../../constants';
+import { INITIAL_REST_VERSION, PUBLIC_API_ACCESS } from '../../../constants';
 
 export const registerDeleteScriptedFieldRoute = (
   router: IRouter,
@@ -26,7 +26,7 @@ export const registerDeleteScriptedFieldRoute = (
   router.versioned
     .delete({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
-      access: 'public',
+      access: PUBLIC_API_ACCESS,
     })
     .addVersion(
       {

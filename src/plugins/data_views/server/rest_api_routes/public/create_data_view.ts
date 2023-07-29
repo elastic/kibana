@@ -23,6 +23,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
 } from '../../constants';
 import { DataViewSpecRestResponse } from '../route_types';
 
@@ -57,7 +58,7 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

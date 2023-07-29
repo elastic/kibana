@@ -15,7 +15,7 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../../constants';
+import { SERVICE_PATH, SERVICE_PATH_LEGACY, PUBLIC_API_ACCESS } from '../../constants';
 
 interface HasUserDataViewArgs {
   dataViewsService: DataViewsService;
@@ -42,7 +42,7 @@ const hasUserDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'internal' }).addVersion(
+    router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: '1',
         validate: {

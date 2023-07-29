@@ -24,6 +24,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
@@ -76,7 +77,7 @@ const runtimeCreateFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

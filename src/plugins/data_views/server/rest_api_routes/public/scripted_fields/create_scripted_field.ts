@@ -14,7 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import { INITIAL_REST_VERSION } from '../../../constants';
+import { INITIAL_REST_VERSION, PUBLIC_API_ACCESS } from '../../../constants';
 import { indexPatternsRuntimeResponseSchema } from '../../schema';
 import type { IndexPatternsRuntimeResponseType } from '../../route_types';
 
@@ -26,7 +26,10 @@ export const registerCreateScriptedFieldRoute = (
   >
 ) => {
   router.versioned
-    .post({ path: '/api/index_patterns/index_pattern/{id}/scripted_field', access: 'public' })
+    .post({
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field',
+      access: PUBLIC_API_ACCESS,
+    })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,

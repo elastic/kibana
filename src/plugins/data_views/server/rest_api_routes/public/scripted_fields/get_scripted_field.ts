@@ -14,7 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import { INITIAL_REST_VERSION } from '../../../constants';
+import { INITIAL_REST_VERSION, PUBLIC_API_ACCESS } from '../../../constants';
 import { serializedFieldFormatSchema } from '../../../../common/schemas';
 import { FieldSpecRestResponse } from '../../route_types';
 
@@ -26,7 +26,10 @@ export const registerGetScriptedFieldRoute = (
   >
 ) => {
   router.versioned
-    .get({ path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}', access: 'public' })
+    .get({
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
+      access: PUBLIC_API_ACCESS,
+    })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,

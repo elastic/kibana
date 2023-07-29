@@ -20,6 +20,7 @@ import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
 } from '../../../constants';
 
 interface DeleteRuntimeFieldArgs {
@@ -60,7 +61,7 @@ const deleteRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public' }).addVersion(
+    router.versioned.delete({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

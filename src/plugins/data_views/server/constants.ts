@@ -93,3 +93,8 @@ export const INITIAL_REST_VERSION = '2023-10-31';
  */
 
 export const INITIAL_REST_VERSION_INTERNAL = '1';
+
+/**
+ * This is only enforced for serverless use cases
+ */
+export const PUBLIC_API_ACCESS = 'internal';

@@ -21,6 +21,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
 } from '../../constants';
 
 interface GetDefaultArgs {
@@ -67,7 +68,7 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -104,7 +105,7 @@ const manageDefaultIndexPatternRoutesFactory =
       })
     );
 
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {

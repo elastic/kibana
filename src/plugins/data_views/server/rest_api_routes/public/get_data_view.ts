@@ -23,6 +23,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  PUBLIC_API_ACCESS,
 } from '../../constants';
 
 interface GetDataViewArgs {
@@ -52,7 +53,7 @@ const getDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: PUBLIC_API_ACCESS }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
