@@ -69,9 +69,7 @@ class EsTestConfig {
           process.env.TEST_ES_PORT
         )}; process.env.TEST_ES_PORT must contain a valid port. given: #${
           process.env.TEST_ES_PORT
-        }# and port #${port}# and inline conversion #${Number(
-          String(process.env.TEST_ES_PORT)
-        )}#;`
+        }# and port #${port}# and inline conversion #${Number(String(process.env.TEST_ES_PORT))}#;`
       );
     }
 
