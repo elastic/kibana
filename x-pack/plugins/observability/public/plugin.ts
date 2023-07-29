@@ -84,6 +84,9 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
+      observability: {
+        enabled: boolean;
+      };
     };
     thresholdRule: {
       enabled: boolean;
