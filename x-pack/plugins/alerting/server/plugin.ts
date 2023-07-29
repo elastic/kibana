@@ -480,6 +480,7 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     rulesSettingsClientFactory.initialize({

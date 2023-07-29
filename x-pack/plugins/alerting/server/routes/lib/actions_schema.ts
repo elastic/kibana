@@ -6,68 +6,73 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { updateSystemActionSchema } from '../../../common/system_actions/latest';
 import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
 import { validateHours } from './validate_hours';
+import { RuleActionTypes } from '../../types';
+
+const defaultActionSchema = schema.object({
+  group: schema.string(),
+  id: schema.string(),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  frequency: schema.maybe(
+    schema.object({
+      summary: schema.boolean(),
+      notify_when: schema.oneOf([
+        schema.literal('onActionGroupChange'),
+        schema.literal('onActiveAlert'),
+        schema.literal('onThrottleInterval'),
+      ]),
+      throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+    })
+  ),
+  uuid: schema.maybe(schema.string()),
+  alerts_filter: schema.maybe(
+    schema.object({
+      query: schema.maybe(
+        schema.object({
+          kql: schema.string(),
+          filters: schema.arrayOf(
+            schema.object({
+              query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+              meta: schema.recordOf(schema.string(), schema.any()),
+              state$: schema.maybe(schema.object({ store: schema.string() })),
+            })
+          ),
+          dsl: schema.maybe(schema.string()),
+        })
+      ),
+      timeframe: schema.maybe(
+        schema.object({
+          days: schema.arrayOf(
+            schema.oneOf([
+              schema.literal(1),
+              schema.literal(2),
+              schema.literal(3),
+              schema.literal(4),
+              schema.literal(5),
+              schema.literal(6),
+              schema.literal(7),
+            ])
+          ),
+          hours: schema.object({
+            start: schema.string({
+              validate: validateHours,
+            }),
+            end: schema.string({
+              validate: validateHours,
+            }),
+          }),
+          timezone: schema.string({ validate: validateTimezone }),
+        })
+      ),
+    })
+  ),
+  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
+});
 
 export const actionsSchema = schema.arrayOf(
-  schema.object({
-    group: schema.string(),
-    id: schema.string(),
-    params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    frequency: schema.maybe(
-      schema.object({
-        summary: schema.boolean(),
-        notify_when: schema.oneOf([
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ]),
-        throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
-      })
-    ),
-    uuid: schema.maybe(schema.string()),
-    alerts_filter: schema.maybe(
-      schema.object({
-        query: schema.maybe(
-          schema.object({
-            kql: schema.string(),
-            filters: schema.arrayOf(
-              schema.object({
-                query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-                meta: schema.recordOf(schema.string(), schema.any()),
-                state$: schema.maybe(schema.object({ store: schema.string() })),
-              })
-            ),
-            dsl: schema.maybe(schema.string()),
-          })
-        ),
-        timeframe: schema.maybe(
-          schema.object({
-            days: schema.arrayOf(
-              schema.oneOf([
-                schema.literal(1),
-                schema.literal(2),
-                schema.literal(3),
-                schema.literal(4),
-                schema.literal(5),
-                schema.literal(6),
-                schema.literal(7),
-              ])
-            ),
-            hours: schema.object({
-              start: schema.string({
-                validate: validateHours,
-              }),
-              end: schema.string({
-                validate: validateHours,
-              }),
-            }),
-            timezone: schema.string({ validate: validateTimezone }),
-          })
-        ),
-      })
-    ),
-  }),
+  schema.oneOf([defaultActionSchema, updateSystemActionSchema]),
   { defaultValue: [] }
 );

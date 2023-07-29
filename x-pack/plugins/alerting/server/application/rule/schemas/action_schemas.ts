@@ -94,6 +94,7 @@ export const defaultActionSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
+  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
 
 export const actionSchema = schema.oneOf([defaultActionSchema, systemActionSchema]);

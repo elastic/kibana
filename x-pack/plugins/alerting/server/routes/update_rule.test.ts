@@ -14,7 +14,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen } from '../../common';
+import { RuleDefaultAction, RuleNotifyWhen } from '../../common';
 import { AsApiContract } from './lib';
 import { PartialRule } from '../types';
 
@@ -61,13 +61,15 @@ describe('updateRuleRoute', () => {
     notifyWhen: RuleNotifyWhen.CHANGE,
   };
 
+  const defaultAction = mockedAlert.actions[0] as RuleDefaultAction;
+
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
     ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params', 'throttle'),
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
         uuid: '1234-5678',
-        group: mockedAlert.actions[0].group,
+        group: defaultAction.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: mockedAlert.actions[0].alertsFilter,

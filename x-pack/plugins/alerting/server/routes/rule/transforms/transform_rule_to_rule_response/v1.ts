@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleActionTypes } from '../../../../../common';
 import { RuleResponseV1, RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule, RuleLastRun, RuleParams } from '../../../../application/rule/types';
 
@@ -18,18 +19,15 @@ const transformRuleLastRun = (lastRun: RuleLastRun): RuleResponseV1['last_run'] 
   };
 };
 
-export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
-  rule: Rule<Params>
-): RuleResponseV1<RuleParamsV1> => ({
-  id: rule.id,
-  enabled: rule.enabled,
-  name: rule.name,
-  tags: rule.tags,
-  rule_type_id: rule.alertTypeId,
-  consumer: rule.consumer,
-  schedule: rule.schedule,
-  actions: rule.actions.map(
-    ({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
+const transformRuleActions = (actions: Rule['actions']): RuleResponseV1['actions'] => {
+  return actions.map((action) => {
+    if (action.type === RuleActionTypes.SYSTEM) {
+      return { ...action, connector_type_id: action.actionTypeId };
+    }
+
+    const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;
+
+    return {
       group,
       id,
       params,
@@ -45,8 +43,21 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
         : {}),
       ...(uuid && { uuid }),
       ...(alertsFilter && { alerts_filter: alertsFilter }),
-    })
-  ),
+    };
+  });
+};
+
+export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
+  rule: Rule<Params>
+): RuleResponseV1<RuleParamsV1> => ({
+  id: rule.id,
+  enabled: rule.enabled,
+  name: rule.name,
+  tags: rule.tags,
+  rule_type_id: rule.alertTypeId,
+  consumer: rule.consumer,
+  schedule: rule.schedule,
+  actions: transformRuleActions(rule.actions),
   params: rule.params,
   created_by: rule.createdBy,
   updated_by: rule.updatedBy,

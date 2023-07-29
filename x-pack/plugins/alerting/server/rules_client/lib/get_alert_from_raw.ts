@@ -25,6 +25,7 @@ import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
 import { RulesClientContext } from '../types';
+import { isSystemAction } from '../../lib/is_system_action';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -158,7 +159,13 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
 
   if (omitGeneratedValues) {
     if (rule.actions) {
-      rule.actions = rule.actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+      rule.actions = rule.actions.map((ruleAction) => {
+        if (isSystemAction(ruleAction)) {
+          return ruleAction;
+        }
+
+        return omit(ruleAction, 'alertsFilter.query.dsl');
+      });
     }
   }
 

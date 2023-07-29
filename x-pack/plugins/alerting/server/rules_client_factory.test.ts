@@ -26,6 +26,7 @@ import { alertingAuthorizationClientFactoryMock } from './alerting_authorization
 import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -52,6 +53,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   kibanaVersion: '7.10.0',
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 const fakeRequest = {

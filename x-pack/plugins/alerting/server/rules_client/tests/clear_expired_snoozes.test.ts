@@ -21,6 +21,7 @@ import { getBeforeSetup, mockedDateString } from './lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RuleSnooze } from '../../types';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -62,6 +63,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   eventLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 describe('clearExpiredSnoozes()', () => {

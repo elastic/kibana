@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { SanitizedRule } from '../types';
+import { RuleDefaultAction, SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -77,6 +77,8 @@ describe('getRuleRoute', () => {
     revision: 0,
   };
 
+  const defaultAction = mockedAlert.actions[0] as RuleDefaultAction;
+
   const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
@@ -96,12 +98,12 @@ describe('getRuleRoute', () => {
     },
     actions: [
       {
-        group: mockedAlert.actions[0].group,
+        group: defaultAction.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         connector_type_id: mockedAlert.actions[0].actionTypeId,
         uuid: mockedAlert.actions[0].uuid,
-        alerts_filter: mockedAlert.actions[0].alertsFilter,
+        alerts_filter: defaultAction.alertsFilter,
       },
     ],
   };

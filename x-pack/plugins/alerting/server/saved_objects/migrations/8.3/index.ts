@@ -61,12 +61,14 @@ function removeInternalTags(
   };
 }
 
+type RawRule83 = RawRule & { snoozeEndTime: string };
+
 function convertSnoozes(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const {
     attributes: { snoozeEndTime },
-  } = doc;
+  } = doc as SavedObjectUnsanitizedDoc<RawRule83>;
 
   return {
     ...doc,
@@ -75,7 +77,7 @@ function convertSnoozes(
       snoozeSchedule: snoozeEndTime
         ? [
             {
-              duration: Date.parse(snoozeEndTime as string) - Date.now(),
+              duration: Date.parse(snoozeEndTime) - Date.now(),
               rRule: {
                 dtstart: new Date().toISOString(),
                 tzid: moment.tz.guess(),

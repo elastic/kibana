@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { rewriteRule } from './rewrite_rule';
-import { RuleTypeParams, SanitizedRule } from '../../types';
+import { RuleDefaultAction, RuleTypeParams, SanitizedRule } from '../../types';
 import { isPlainObject } from 'lodash';
 
 const DATE_2020 = new Date('1/1/2020');
@@ -76,13 +76,17 @@ describe('rewriteRule', () => {
       }
     }
   });
+
   it('should rewrite actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
     for (const action of rewritten.actions) {
+      const defaultAction = action as Omit<RuleDefaultAction, 'actionTypeId'>;
+
       expect(Object.keys(action)).toEqual(
         expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
       );
-      expect(Object.keys(action.frequency!)).toEqual(
+
+      expect(Object.keys(defaultAction.frequency!)).toEqual(
         expect.arrayContaining(['summary', 'notify_when', 'throttle'])
       );
     }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
+import { isSystemAction } from '../../lib/is_system_action';
 
 import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
 
@@ -58,23 +59,30 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    ...(frequency
-      ? {
-          frequency: {
-            summary: frequency.summary,
-            notify_when: frequency.notifyWhen,
-            throttle: frequency.throttle,
-          },
-        }
-      : {}),
-    ...(uuid && { uuid }),
-    ...(alertsFilter && { alerts_filter: alertsFilter }),
-  })),
+  actions: actions.map((action) => {
+    if (isSystemAction(action)) {
+      return { ...action, connector_type_id: action.actionTypeId };
+    }
+
+    return {
+      group: action.group,
+      id: action.id,
+      params: action.params,
+      connector_type_id: action.actionTypeId,
+      type: action.type,
+      ...(action.frequency
+        ? {
+            frequency: {
+              summary: action.frequency.summary,
+              notify_when: action.frequency.notifyWhen,
+              throttle: action.frequency.throttle,
+            },
+          }
+        : {}),
+      ...(action.uuid && { uuid: action.uuid }),
+      ...(action.alertsFilter && { alerts_filter: action.alertsFilter }),
+    };
+  }),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),

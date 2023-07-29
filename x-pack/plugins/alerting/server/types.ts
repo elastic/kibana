@@ -406,7 +406,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-interface RawDefaultAction {
+export interface RawDefaultAction {
   uuid: string;
   group?: string;
   actionRef: string;

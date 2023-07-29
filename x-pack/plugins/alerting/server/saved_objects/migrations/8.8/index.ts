@@ -9,7 +9,7 @@ import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { createEsoMigration, isDetectionEngineAADRuleType, pipeMigrations } from '../utils';
-import { RawRule } from '../../../types';
+import { RawDefaultAction, RawRule } from '../../../types';
 import { transformToAlertThrottle } from '../../../rules_client/lib/siem_legacy_actions/transform_to_alert_throttle';
 import { transformToNotifyWhen } from '../../../rules_client/lib/siem_legacy_actions/transform_to_notify_when';
 
@@ -57,7 +57,7 @@ function addSecuritySolutionActionsFrequency(
       attributes: {
         ...doc.attributes,
         actions: actions
-          ? actions.map((action) => ({
+          ? (actions as RawDefaultAction[]).map<RawDefaultAction>((action) => ({
               ...action,
               // Till now SIEM worked without action level frequencies. Instead rule level `throttle` and `notifyWhen` used
               frequency: action.frequency ?? {

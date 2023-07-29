@@ -15,7 +15,7 @@ import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { AsApiContract } from '../../../lib';
-import { SanitizedRule } from '../../../../types';
+import { RuleDefaultAction, SanitizedRule } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
@@ -83,18 +83,23 @@ describe('createRuleRoute', () => {
     revision: 0,
   };
 
+  const defaultAction = mockedAlert.actions[0] as RuleDefaultAction;
+
   const ruleToCreate: CreateRuleRequestBodyV1<{ bar: boolean }> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
-        group: mockedAlert.actions[0].group,
+        group: defaultAction.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: {
-          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql, filters: [] },
-          timeframe: mockedAlert.actions[0].alertsFilter?.timeframe!,
+          query: {
+            kql: defaultAction.alertsFilter!.query!.kql,
+            filters: [],
+          },
+          timeframe: defaultAction.alertsFilter?.timeframe!,
         },
       },
     ],
@@ -119,8 +124,8 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         alerts_filter: {
-          query: mockedAlert.actions[0].alertsFilter?.query!,
-          timeframe: mockedAlert.actions[0].alertsFilter!.timeframe!,
+          query: defaultAction.alertsFilter?.query!,
+          timeframe: defaultAction.alertsFilter!.timeframe!,
         },
         connector_type_id: 'test',
         uuid: '123-456',

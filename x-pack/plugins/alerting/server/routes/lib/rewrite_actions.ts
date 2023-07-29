@@ -6,6 +6,8 @@
  */
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
+import { RuleActionTypes, RuleDefaultAction } from '../../../common';
+import { isSystemAction } from '../../lib/is_system_action';
 import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
@@ -15,9 +17,15 @@ export const rewriteActionsReq = (
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
+  return actions.map((action) => {
+    if (action.type === RuleActionTypes.SYSTEM) {
+      return action;
+    }
+
+    const { frequency, alerts_filter: alertsFilter, ...restAction } = action;
+
     return {
-      ...action,
+      ...restAction,
       ...(frequency
         ? {
             frequency: {
@@ -32,19 +40,32 @@ export const rewriteActionsReq = (
 };
 
 export const rewriteActionsRes = (actions?: RuleAction[]) => {
-  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
+  const rewriteFrequency = ({
+    notifyWhen,
+    ...rest
+  }: NonNullable<RuleDefaultAction['frequency']>) => ({
     ...rest,
     notify_when: notifyWhen,
   });
+
   if (!actions) return [];
-  return actions.map(({ actionTypeId, frequency, alertsFilter, ...action }) => ({
-    ...action,
-    connector_type_id: actionTypeId,
-    ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
-    ...(alertsFilter
-      ? {
-          alerts_filter: alertsFilter,
-        }
-      : {}),
-  }));
+
+  return actions.map((action) => {
+    if (isSystemAction(action)) {
+      return { ...action, connector_type_id: action.actionTypeId };
+    }
+
+    const { actionTypeId, frequency, alertsFilter, ...restAction } = action;
+
+    return {
+      ...restAction,
+      connector_type_id: actionTypeId,
+      ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+      ...(alertsFilter
+        ? {
+            alerts_filter: alertsFilter,
+          }
+        : {}),
+    };
+  });
 };

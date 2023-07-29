@@ -8,7 +8,7 @@
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
-import { RawRule } from '../../../types';
+import { RawDefaultAction, RawRule } from '../../../types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '../constants';
 import {
   createEsoMigration,
@@ -89,9 +89,9 @@ function fixInventoryThresholdGroupId(
     } = doc;
 
     const updatedActions = actions
-      ? actions.map((action) => {
+      ? actions.map<RawDefaultAction>((action) => {
           // Wrong spelling
-          if (action.group === 'metrics.invenotry_threshold.fired') {
+          if ((action as RawDefaultAction).group === 'metrics.invenotry_threshold.fired') {
             return {
               ...action,
               group: 'metrics.inventory_threshold.fired',

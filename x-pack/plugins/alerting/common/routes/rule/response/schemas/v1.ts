@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { systemActionSchema } from '../../../../system_actions/v1';
+import { RuleActionTypes } from '../../../../rule';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
@@ -69,7 +71,7 @@ const actionAlertsFilterSchema = schema.object({
   ),
 });
 
-const actionSchema = schema.object({
+const defaultActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
@@ -77,6 +79,7 @@ const actionSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
+  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
 
 export const ruleExecutionStatusSchema = schema.object({
@@ -232,7 +235,7 @@ export const ruleResponseSchema = schema.object({
   rule_type_id: schema.string(),
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
-  actions: schema.arrayOf(actionSchema),
+  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchema])),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduled_task_id: schema.maybe(schema.string()),

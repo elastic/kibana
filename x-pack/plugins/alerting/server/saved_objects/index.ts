@@ -61,7 +61,6 @@ export type AlertAttributesExcludedFromAADType =
   | 'updatedAt'
   | 'executionStatus'
   | 'monitoring'
-  | 'snoozeEndTime'
   | 'snoozeSchedule'
   | 'isSnoozedUntil'
   | 'lastRun'

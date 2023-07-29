@@ -8,7 +8,8 @@
 import { chunk } from 'lodash';
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
-import { RuleAction, Rule } from '../../../types';
+import { RuleDefaultAction } from '../../../../common';
+import { Rule } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
 import { transformToNotifyWhen } from './transform_to_notify_when';
@@ -30,7 +31,7 @@ interface LegacyGetBulkRuleActionsSavedObject {
  */
 export interface LegacyActionsObj {
   ruleThrottle: string | null;
-  legacyRuleActions: RuleAction[];
+  legacyRuleActions: RuleDefaultAction[];
 }
 
 /**
@@ -51,7 +52,9 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
     id: alertId,
     type: 'alert',
   }));
+
   const errors: unknown[] = [];
+
   const results = await pMap(
     chunk(references, 1000),
     async (referencesChunk) => {
@@ -73,6 +76,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
     },
     { concurrency: 1 }
   );
+
   const actionSavedObjects = results.flat().flatMap((r) => r.saved_objects);
 
   if (errors.length) {
@@ -91,6 +95,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
         savedObject.attributes,
         savedObject.references
       );
+
       acc[ruleAlertIdKey] = {
         ruleThrottle: savedObject.attributes.ruleThrottle,
         legacyRuleActions: injectReferencesIntoActions(
@@ -98,7 +103,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
           legacyRawActions,
           savedObject.references
         ) // remove uuid from action, as this uuid is not persistent
-          .map(({ uuid, ...action }) => action),
+          .map(({ uuid, ...action }) => action) as RuleDefaultAction[],
       };
     } else {
       logger.error(

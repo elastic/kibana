@@ -81,13 +81,13 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export interface RuleActionFrequency extends SavedObjectAttributes {
+export interface RuleActionFrequency {
   summary: boolean;
   notifyWhen: RuleNotifyWhenType;
   throttle: string | null;
 }
 
-export interface AlertsFilterTimeframe extends SavedObjectAttributes {
+export interface AlertsFilterTimeframe {
   days: IsoWeekday[];
   timezone: string;
   hours: {
@@ -96,7 +96,7 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   };
 }
 
-export interface AlertsFilter extends SavedObjectAttributes {
+export interface AlertsFilter {
   query?: {
     kql: string;
     filters: Filter[];
@@ -218,9 +218,11 @@ export interface SanitizedAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
-  alertsFilter?: SanitizedAlertsFilter;
-};
+export type SanitizedRuleAction =
+  | (Omit<RuleDefaultAction, 'alertsFilter'> & {
+      alertsFilter?: SanitizedAlertsFilter;
+    })
+  | RuleSystemAction;
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,

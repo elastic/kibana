@@ -12,10 +12,16 @@ import {
   RuleLastRun,
   RuleAction,
   RuleType,
+  RuleDefaultAction,
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
-  const { connector_type_id: actionTypeId, frequency, ...rest } = input;
+  const {
+    connector_type_id: actionTypeId,
+    frequency,
+    ...rest
+  } = input as AsApiContract<RuleDefaultAction>;
+
   return {
     actionTypeId,
     ...(frequency

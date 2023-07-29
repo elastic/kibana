@@ -8,7 +8,7 @@
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash/fp';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { RawRuleAction } from '../../../types';
+import { RawDefaultAction } from '../../../types';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import { LegacyIRuleActionsAttributes } from './types';
 import { transformToAlertThrottle } from './transform_to_alert_throttle';
@@ -23,7 +23,7 @@ import { transformToAlertThrottle } from './transform_to_alert_throttle';
 export const transformFromLegacyActions = (
   legacyActionsAttr: LegacyIRuleActionsAttributes,
   references: SavedObjectReference[]
-): RawRuleAction[] => {
+): RawDefaultAction[] => {
   const actionReference = references.reduce<Record<string, SavedObjectReference>>(
     (acc, reference) => {
       acc[reference.name] = reference;
@@ -36,7 +36,7 @@ export const transformFromLegacyActions = (
     throw new Error(`Connector reference id not found.`);
   }
 
-  return legacyActionsAttr.actions.reduce<RawRuleAction[]>((acc, action) => {
+  return legacyActionsAttr.actions.reduce<RawDefaultAction[]>((acc, action) => {
     const { actionRef, action_type_id: actionTypeId, group, params } = action;
     if (!actionReference[actionRef]) {
       return acc;

@@ -6,7 +6,7 @@
  */
 
 import { addGeneratedActionValues } from './add_generated_action_values';
-import { RuleAction } from '../../../common';
+import { RuleAction, RuleDefaultAction } from '../../../common';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
@@ -48,7 +48,9 @@ describe('addGeneratedActionValues()', () => {
 
   test('adds DSL', async () => {
     const actionWithGeneratedValues = addGeneratedActionValues([mockAction]);
-    expect(actionWithGeneratedValues[0].alertsFilter?.query?.dsl).toBe(
+    const defaultAction = actionWithGeneratedValues[0] as RuleDefaultAction;
+
+    expect(defaultAction.alertsFilter?.query?.dsl).toBe(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"testValue"}}],"minimum_should_match":1}},{"match_phrase":{"foo":"bar "}}],"should":[],"must_not":[]}}'
     );
   });

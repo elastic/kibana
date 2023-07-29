@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core-saved-objects-server';
+import { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
-import { RawRule, RawRuleAction } from '../../../types';
+import { RawDefaultAction, RawRule } from '../../../types';
 import { extractRefsFromGeoContainmentAlert } from '../../geo_containment/migrations';
 import { createEsoMigration, isSecuritySolutionLegacyNotification, pipeMigrations } from '../utils';
 
@@ -33,15 +33,15 @@ function getRemovePreconfiguredConnectorsFromReferencesFn(
 }
 
 function getCorrespondingAction(
-  actions: SavedObjectAttribute,
+  actions: RawDefaultAction[],
   connectorRef: string
-): RawRuleAction | null {
+): RawDefaultAction | null {
   if (!Array.isArray(actions)) {
     return null;
   } else {
     return actions.find(
-      (action) => (action as RawRuleAction)?.actionRef === connectorRef
-    ) as RawRuleAction;
+      (action) => (action as RawDefaultAction)?.actionRef === connectorRef
+    ) as RawDefaultAction;
   }
 }
 
@@ -64,7 +64,7 @@ function removePreconfiguredConnectorsFromReferences(
     );
 
     const updatedConnectorReferences: SavedObjectReference[] = [];
-    const updatedActions: RawRule['actions'] = [];
+    const updatedActions: RawDefaultAction[] = [];
 
     // For each connector reference, check if connector is preconfigured
     // If yes, we need to remove from the references array and update

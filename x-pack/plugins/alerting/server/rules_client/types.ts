@@ -25,6 +25,8 @@ import {
   SanitizedRule,
   RuleSnoozeSchedule,
   RawRuleAlertsFilter,
+  RuleSystemAction,
+  RuleDefaultAction,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -74,13 +76,12 @@ export interface RulesClientContext {
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithGeneratedValues = DistributiveOmit<
-  NormalizedAlertAction,
-  'uuid' | 'alertsFilter'
-> & {
-  uuid: string;
-  alertsFilter?: RawRuleAlertsFilter;
-};
+export type NormalizedAlertActionWithGeneratedValues =
+  | (Omit<RuleDefaultAction, 'uuid' | 'alertsFilter' | 'actionTypeId'> & {
+      uuid: string;
+      alertsFilter?: RawRuleAlertsFilter;
+    })
+  | Omit<RuleSystemAction, 'actionTypeId'>;
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

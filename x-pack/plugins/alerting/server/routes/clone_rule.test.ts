@@ -13,7 +13,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
-import { SanitizedRule } from '../types';
+import { RuleDefaultAction, SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -67,13 +67,15 @@ describe('cloneRuleRoute', () => {
     revision: 0,
   };
 
+  const defaultAction = mockedRule.actions[0] as RuleDefaultAction;
+
   const ruleToClone = {
     ...pick(mockedRule, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedRule.alertTypeId,
     notify_when: mockedRule.notifyWhen,
     actions: [
       {
-        group: mockedRule.actions[0].group,
+        group: defaultAction.group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
       },

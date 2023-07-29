@@ -7,8 +7,13 @@
 
 import { validateActions, ValidateActionsData } from './validate_actions';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { AlertsFilter, RecoveredActionGroup, RuleNotifyWhen } from '../../../common';
-import { RulesClientContext } from '..';
+import {
+  AlertsFilter,
+  RecoveredActionGroup,
+  RuleDefaultAction,
+  RuleNotifyWhen,
+} from '../../../common';
+import { NormalizedAlertAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();
@@ -100,7 +105,7 @@ describe('validateActions', () => {
       validateActions(
         context as unknown as RulesClientContext,
         ruleType,
-        { ...data, actions: [{ ...data.actions[0], group: 'invalid' }] },
+        { ...data, actions: [{ ...data.actions[0], group: 'invalid' } as RuleDefaultAction] },
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -139,7 +144,7 @@ describe('validateActions', () => {
       validateActions(
         context as unknown as RulesClientContext,
         ruleType,
-        { ...data, actions: [{ ...data.actions[0], frequency: undefined }] },
+        { ...data, actions: [{ ...data.actions[0], frequency: undefined } as RuleDefaultAction] },
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -158,7 +163,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1s' },
-            },
+            } as RuleDefaultAction,
           ],
         },
         false
@@ -179,7 +184,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               alertsFilter: {} as AlertsFilter,
-            },
+            } as RuleDefaultAction,
           ],
         },
         false
@@ -203,7 +208,7 @@ describe('validateActions', () => {
                 query: { kql: 'test:1', filters: [] },
                 timeframe: { days: [1], hours: { start: '30:00', end: '17:00' }, timezone: 'UTC' },
               },
-            },
+            } as NormalizedAlertAction,
           ],
         },
         false

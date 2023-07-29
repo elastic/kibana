@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { ResolvedSanitizedRule } from '../types';
+import { ResolvedSanitizedRule, RuleDefaultAction } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -67,6 +67,8 @@ describe('resolveRuleRoute', () => {
     revision: 0,
   };
 
+  const defaultAction = mockedRule.actions[0] as RuleDefaultAction;
+
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
     ...pick(
       mockedRule,
@@ -96,7 +98,7 @@ describe('resolveRuleRoute', () => {
     },
     actions: [
       {
-        group: mockedRule.actions[0].group,
+        group: defaultAction.group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
