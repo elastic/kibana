@@ -25,6 +25,28 @@ beforeEach(() => {
 });
 
 describe('getRuleRoute', () => {
+  const action: RuleDefaultAction = {
+    group: 'default',
+    id: '2',
+    actionTypeId: 'test',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    alertsFilter: {
+      query: {
+        kql: 'name:test',
+        dsl: '{"must": {"term": { "name": "test" }}}',
+        filters: [],
+      },
+      timeframe: {
+        days: [1],
+        hours: { start: '08:00', end: '17:00' },
+        timezone: 'UTC',
+      },
+    },
+  };
+
   const mockedAlert: SanitizedRule<{
     bar: boolean;
   }> = {
@@ -36,29 +58,7 @@ describe('getRuleRoute', () => {
     },
     createdAt: new Date(),
     updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        alertsFilter: {
-          query: {
-            kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
-            filters: [],
-          },
-          timeframe: {
-            days: [1],
-            hours: { start: '08:00', end: '17:00' },
-            timezone: 'UTC',
-          },
-        },
-      },
-    ],
+    actions: [action],
     consumer: 'bar',
     name: 'abc',
     tags: ['foo'],
@@ -76,8 +76,6 @@ describe('getRuleRoute', () => {
     },
     revision: 0,
   };
-
-  const defaultAction = mockedAlert.actions[0] as RuleDefaultAction;
 
   const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
@@ -98,12 +96,12 @@ describe('getRuleRoute', () => {
     },
     actions: [
       {
-        group: defaultAction.group,
+        group: action.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         connector_type_id: mockedAlert.actions[0].actionTypeId,
         uuid: mockedAlert.actions[0].uuid,
-        alerts_filter: defaultAction.alertsFilter,
+        alerts_filter: action.alertsFilter,
       },
     ],
   };

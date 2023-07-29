@@ -28,7 +28,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../common';
+import { AlertInstanceState, AlertInstanceContext, RuleActionTypes } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
@@ -1610,6 +1610,8 @@ describe('Execution Handler', () => {
               id: '1',
               actionTypeId: '.test-system-action',
               params: actionsParams,
+              type: RuleActionTypes.SYSTEM,
+              uui: 'test',
             },
           ],
         },

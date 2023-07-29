@@ -28,6 +28,15 @@ beforeEach(() => {
 describe('cloneRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
+  const action: RuleDefaultAction = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
 
   const mockedRule: SanitizedRule<{ bar: boolean }> = {
     alertTypeId: '1',
@@ -39,17 +48,7 @@ describe('cloneRuleRoute', () => {
       bar: true,
     },
     throttle: '30s',
-    actions: [
-      {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-      },
-    ],
+    actions: [action],
     enabled: true,
     muteAll: false,
     createdBy: '',
@@ -67,15 +66,13 @@ describe('cloneRuleRoute', () => {
     revision: 0,
   };
 
-  const defaultAction = mockedRule.actions[0] as RuleDefaultAction;
-
   const ruleToClone = {
     ...pick(mockedRule, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedRule.alertTypeId,
     notify_when: mockedRule.notifyWhen,
     actions: [
       {
-        group: defaultAction.group,
+        group: action.group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
       },

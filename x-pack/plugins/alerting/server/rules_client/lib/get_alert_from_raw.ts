@@ -91,6 +91,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     actions,
     snoozeSchedule,
     lastRun,
+    isSnoozedUntil,
     ...partialRawRule
   }: Partial<RawRule>,
   references: SavedObjectReference[] | undefined,
@@ -107,15 +108,19 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
+
   const includeSnoozeSchedule =
     snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
-  const isSnoozedUntil = includeSnoozeSchedule
+
+  const isSnoozedUntilAsDate = includeSnoozeSchedule
     ? getRuleSnoozeEndTime({
         muteAll: partialRawRule.muteAll ?? false,
         snoozeSchedule,
       })
     : null;
+
   const includeMonitoring = monitoring && !excludeFromPublicApi;
+
   const rule: PartialRule<Params> = {
     id,
     notifyWhen,
@@ -132,7 +137,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
             snoozeSchedule,
             muteAll: partialRawRule.muteAll ?? false,
           })?.map((s) => s.id),
-          isSnoozedUntil,
+          isSnoozedUntil: isSnoozedUntilAsDate,
         }
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),

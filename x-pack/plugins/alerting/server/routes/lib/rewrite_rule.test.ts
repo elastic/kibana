@@ -10,6 +10,19 @@ import { isPlainObject } from 'lodash';
 
 const DATE_2020 = new Date('1/1/2020');
 
+const action: RuleDefaultAction = {
+  group: 'default',
+  id: 'aaa',
+  actionTypeId: 'bbb',
+  params: {},
+  frequency: {
+    summary: false,
+    notifyWhen: 'onThrottleInterval',
+    throttle: '1m',
+  },
+  alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
+};
+
 const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } = {
   id: 'aaaa',
   name: 'Sample Rule',
@@ -32,20 +45,7 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
     lastExecutionDate: DATE_2020,
     lastDuration: 1000,
   },
-  actions: [
-    {
-      group: 'default',
-      id: 'aaa',
-      actionTypeId: 'bbb',
-      params: {},
-      frequency: {
-        summary: false,
-        notifyWhen: 'onThrottleInterval',
-        throttle: '1m',
-      },
-      alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
-    },
-  ],
+  actions: [action],
   scheduledTaskId: 'xyz456',
   snoozeSchedule: [],
   isSnoozedUntil: null,
@@ -79,10 +79,10 @@ describe('rewriteRule', () => {
 
   it('should rewrite actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
-    for (const action of rewritten.actions) {
+    for (const rewrittenAction of rewritten.actions) {
       const defaultAction = action as Omit<RuleDefaultAction, 'actionTypeId'>;
 
-      expect(Object.keys(action)).toEqual(
+      expect(Object.keys(rewrittenAction)).toEqual(
         expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
       );
 

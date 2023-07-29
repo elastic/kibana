@@ -20,7 +20,7 @@ import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { RecoveredActionGroup } from '../../../../../common';
+import { RecoveredActionGroup, RuleActionTypes } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
@@ -3845,12 +3845,31 @@ describe('create()', () => {
         id: '1',
         params: { 'not-exist': 'test' },
         actionTypeId: '.test',
+        type: RuleActionTypes.SYSTEM,
       };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
 
       const data = getMockData({ actions: [action] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
         `[Error: Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]]`
       );
     });
+  });
+
+  test('should throw if the action is not a system action', async () => {
+    const action = {
+      id: '1',
+      params: { 'not-exist': 'test' },
+      actionTypeId: '.test',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    actionsClient.isSystemAction.mockReturnValue(false);
+
+    const data = getMockData({ actions: [action] });
+    await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+      `[Error: Action 1 of type .test is not a system action]`
+    );
   });
 });

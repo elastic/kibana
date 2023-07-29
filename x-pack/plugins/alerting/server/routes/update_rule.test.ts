@@ -28,6 +28,23 @@ beforeEach(() => {
 });
 
 describe('updateRuleRoute', () => {
+  const action: RuleDefaultAction = {
+    uuid: '1234-5678',
+    group: 'default',
+    id: '2',
+    actionTypeId: 'test',
+    params: {
+      baz: true,
+    },
+    alertsFilter: {
+      query: {
+        kql: 'name:test',
+        dsl: '{"must": {"term": { "name": "test" }}}',
+        filters: [],
+      },
+    },
+  };
+
   const mockedAlert = {
     id: '1',
     name: 'abc',
@@ -40,28 +57,9 @@ describe('updateRuleRoute', () => {
     },
     createdAt: new Date(),
     updatedAt: new Date(),
-    actions: [
-      {
-        uuid: '1234-5678',
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          baz: true,
-        },
-        alertsFilter: {
-          query: {
-            kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
-            filters: [],
-          },
-        },
-      },
-    ],
+    actions: [action],
     notifyWhen: RuleNotifyWhen.CHANGE,
   };
-
-  const defaultAction = mockedAlert.actions[0] as RuleDefaultAction;
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
     ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params', 'throttle'),
@@ -69,7 +67,7 @@ describe('updateRuleRoute', () => {
     actions: [
       {
         uuid: '1234-5678',
-        group: defaultAction.group,
+        group: action.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: mockedAlert.actions[0].alertsFilter,
@@ -83,10 +81,18 @@ describe('updateRuleRoute', () => {
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
+    actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, frequency, ...rest }) => ({
       ...rest,
       connector_type_id: actionTypeId,
       alerts_filter: alertsFilter,
+      ...(frequency
+        ? {
+            frequency: {
+              ...frequency,
+              notify_when: frequency?.notifyWhen,
+            },
+          }
+        : {}),
     })),
   };
 

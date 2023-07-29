@@ -126,6 +126,7 @@ test('creates a rules client with proper constructor arguments when security is 
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
   });
 });
 
@@ -166,6 +167,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
   });
 });
 

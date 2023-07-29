@@ -32,6 +32,27 @@ beforeEach(() => {
 describe('createRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
+  const action: RuleDefaultAction = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    alertsFilter: {
+      query: {
+        kql: 'name:test',
+        dsl: '{"must": {"term": { "name": "test" }}}',
+        filters: [],
+      },
+      timeframe: {
+        days: [1],
+        hours: { start: '08:00', end: '17:00' },
+        timezone: 'UTC',
+      },
+    },
+  };
 
   const mockedAlert: SanitizedRule<{ bar: boolean }> = {
     alertTypeId: '1',
@@ -43,29 +64,7 @@ describe('createRuleRoute', () => {
       bar: true,
     },
     throttle: '30s',
-    actions: [
-      {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        alertsFilter: {
-          query: {
-            kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
-            filters: [],
-          },
-          timeframe: {
-            days: [1],
-            hours: { start: '08:00', end: '17:00' },
-            timezone: 'UTC',
-          },
-        },
-      },
-    ],
+    actions: [action],
     enabled: true,
     muteAll: false,
     createdBy: '',
@@ -83,23 +82,21 @@ describe('createRuleRoute', () => {
     revision: 0,
   };
 
-  const defaultAction = mockedAlert.actions[0] as RuleDefaultAction;
-
   const ruleToCreate: CreateRuleRequestBodyV1<{ bar: boolean }> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
-        group: defaultAction.group,
+        group: action.group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: {
           query: {
-            kql: defaultAction.alertsFilter!.query!.kql,
+            kql: action.alertsFilter!.query!.kql,
             filters: [],
           },
-          timeframe: defaultAction.alertsFilter?.timeframe!,
+          timeframe: action.alertsFilter?.timeframe!,
         },
       },
     ],
@@ -124,8 +121,8 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         alerts_filter: {
-          query: defaultAction.alertsFilter?.query!,
-          timeframe: defaultAction.alertsFilter!.timeframe!,
+          query: action.alertsFilter?.query!,
+          timeframe: action.alertsFilter!.timeframe!,
         },
         connector_type_id: 'test',
         uuid: '123-456',

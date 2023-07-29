@@ -49,7 +49,7 @@ export async function validateActions(
    * or the throttle
    */
   const actionsWithoutSystemActions = actions.filter(
-    (action): action is RuleDefaultAction => action.type === RuleActionTypes.SYSTEM
+    (action): action is RuleDefaultAction => action.type !== RuleActionTypes.SYSTEM
   );
 
   // check for actions using connectors with missing secrets

@@ -39,6 +39,8 @@ import {
   RuleTypeState,
   SanitizedRule,
   RuleAlertData,
+  RuleDefaultAction,
+  RuleSystemAction,
 } from '../../common';
 import {
   generateActionHash,
@@ -50,6 +52,7 @@ import {
   isSummaryActionThrottled,
 } from './rule_action_helper';
 import { ConnectorAdapter } from '../connector_adapters/types';
+import { isSystemAction } from '../lib/is_system_action';
 
 enum Reasons {
   MUTED = 'muted',
@@ -62,7 +65,7 @@ export interface RunResult {
 }
 
 interface RunSummarizedActionArgs {
-  action: RuleAction;
+  action: RuleDefaultAction;
   summarizedAlerts: CombinedSummarizedAlerts;
   spaceId: string;
 }
@@ -73,14 +76,14 @@ interface RunActionArgs<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  action: RuleAction;
+  action: RuleDefaultAction;
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
   ruleId: string;
   spaceId: string;
 }
 
 interface RunSystemActionArgs<Params extends RuleTypeParams> {
-  action: RuleAction;
+  action: RuleSystemAction;
   connectorAdapter: ConnectorAdapter;
   summarizedAlerts: CombinedSummarizedAlerts;
   rule: SanitizedRule<Params>;
@@ -207,7 +210,6 @@ export class ExecutionHandler<
 
     for (const { action, alert, summarizedAlerts } of executables) {
       const { actionTypeId } = action;
-      const actionGroup = action.group as ActionGroupIds;
 
       ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
@@ -255,9 +257,7 @@ export class ExecutionHandler<
       ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-      const isSystemAction = this.isSystemAction(action.id);
-
-      if (isSummaryAction(action) && summarizedAlerts && !isSystemAction) {
+      if (isSummaryAction(action) && summarizedAlerts && !isSystemAction(action)) {
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runSummarizedAction({
           action,
           summarizedAlerts,
@@ -270,7 +270,7 @@ export class ExecutionHandler<
         if (isActionOnInterval(action)) {
           throttledSummaryActions[action.uuid!] = { date: new Date() };
         }
-      } else if (isSystemAction && summarizedAlerts) {
+      } else if (isSystemAction(action) && summarizedAlerts) {
         const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
           action.actionTypeId
         );
@@ -298,7 +298,7 @@ export class ExecutionHandler<
           enqueueActions.push(...actionsToEnqueueForExecution);
           logActions.push(...actionsToLog);
         }
-      } else if (!isSystemAction) {
+      } else if (!isSystemAction(action)) {
         const executableAlert = alert!;
 
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runAction({
@@ -311,7 +311,7 @@ export class ExecutionHandler<
         enqueueActions.push(...actionsToEnqueueForExecution);
         logActions.push(...actionsToLog);
 
-        if (!this.isRecoveredAlert(actionGroup)) {
+        if (!this.isRecoveredAlert(action.group)) {
           if (isActionOnInterval(action)) {
             executableAlert.updateLastScheduledActions(
               action.group as ActionGroupIds,
@@ -553,7 +553,7 @@ export class ExecutionHandler<
     action,
   }: {
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
-    action: RuleAction;
+    action: RuleDefaultAction;
   }) {
     const alertId = alert.getId();
     const { rule, ruleLabel, logger } = this;
@@ -672,7 +672,6 @@ export class ExecutionHandler<
 
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
-      const isSystemAction = this.isSystemAction(action.id);
       let summarizedAlerts = null;
 
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
@@ -685,7 +684,7 @@ export class ExecutionHandler<
         /**
          * System actions cannot be throttled
          */
-        if (!isSummaryActionOnInterval(action) || isSystemAction) {
+        if (!isSummaryActionOnInterval(action) || isSystemAction(action)) {
           this.logNumberOfFilteredAlerts({
             numberOfAlerts: alertsArray.length,
             numberOfSummarizedAlerts: summarizedAlerts.all.count,
@@ -704,7 +703,7 @@ export class ExecutionHandler<
         );
 
         continue;
-      } else if (isSummaryAction(action) || isSystemAction) {
+      } else if (isSummaryAction(action) || isSystemAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
@@ -750,9 +749,8 @@ export class ExecutionHandler<
 
   private canFetchSummarizedAlerts(action: RuleAction) {
     const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
-    const isSystemAction = this.isSystemAction(action.id);
 
-    if ((action.frequency?.summary || isSystemAction) && !hasGetSummarizedAlerts) {
+    if ((isSystemAction(action) || action.frequency?.summary) && !hasGetSummarizedAlerts) {
       this.logger.error(
         `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
       );
@@ -771,14 +769,12 @@ export class ExecutionHandler<
       return false;
     }
 
-    const isSystemAction = this.isSystemAction(action.id);
-
     /**
      * System action should always get summarized alerts.
      * The above check ensures that the rule supports
      * alerts-as-data which are needed by system actions.
      */
-    if (isSystemAction) {
+    if (isSystemAction(action)) {
       return true;
     }
 
@@ -814,10 +810,10 @@ export class ExecutionHandler<
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
-      alertsFilter: action.alertsFilter,
+      alertsFilter: isSystemAction(action) ? undefined : action.alertsFilter,
     };
 
-    if (isActionOnInterval(action)) {
+    if (isActionOnInterval(action) && !isSystemAction(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
@@ -866,9 +862,5 @@ export class ExecutionHandler<
     }
 
     return bulkActions;
-  }
-
-  private isSystemAction(connectorId: string): boolean {
-    return this.actionsClient.isSystemAction(connectorId);
   }
 }

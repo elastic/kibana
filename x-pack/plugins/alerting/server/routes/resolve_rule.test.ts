@@ -25,6 +25,16 @@ beforeEach(() => {
 });
 
 describe('resolveRuleRoute', () => {
+  const action: RuleDefaultAction = {
+    group: 'default',
+    id: '2',
+    actionTypeId: 'test',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
   const mockedRule: ResolvedSanitizedRule<{
     bar: boolean;
   }> = {
@@ -36,17 +46,7 @@ describe('resolveRuleRoute', () => {
     },
     createdAt: new Date(),
     updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-      },
-    ],
+    actions: [action],
     consumer: 'bar',
     name: 'abc',
     tags: ['foo'],
@@ -66,8 +66,6 @@ describe('resolveRuleRoute', () => {
     alias_target_id: '2',
     revision: 0,
   };
-
-  const defaultAction = mockedRule.actions[0] as RuleDefaultAction;
 
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
     ...pick(
@@ -98,7 +96,7 @@ describe('resolveRuleRoute', () => {
     },
     actions: [
       {
-        group: defaultAction.group,
+        group: action.group,
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
