@@ -374,6 +374,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
+
+  return nodeNames;
+}
+
+export async function killServerlessCluster(log: ToolingLog, nodes: string[]) {
+  log.info('Stopping Serverless ES cluster.');
+
+  await execa('docker', ['container', 'stop'].concat(nodes));
 }
 
 /**

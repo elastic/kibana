@@ -22,6 +22,7 @@ const {
   NativeRealm,
   parseTimeoutToMs,
   runServerlessCluster,
+  killServerlessCluster,
   runDockerContainer,
 } = require('./utils');
 const { createCliError } = require('./errors');
@@ -294,6 +295,10 @@ exports.Cluster = class Cluster {
     }
 
     this._stopCalled;
+
+    if (this._serverless) {
+      return await killServerlessCluster(this._log, this._serverlessNodes);
+    }
 
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
@@ -573,7 +578,8 @@ exports.Cluster = class Cluster {
       throw new Error('ES has already been started');
     }
 
-    await runServerlessCluster(this._log, options);
+    this._serverlessNodes = await runServerlessCluster(this._log, options);
+    this._serverless = true;
   }
 
   /**
