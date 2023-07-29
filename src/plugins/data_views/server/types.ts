@@ -48,6 +48,11 @@ export interface DataViewsServerPluginStart {
    * Returns a DataViews service instance
    */
   dataViewsServiceFactory: ServiceFactory;
+
+  /**
+   * For internal use
+   */
+  isRollupsEnabled: () => boolean;
 }
 
 /**

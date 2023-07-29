@@ -82,6 +82,7 @@ export class DataViewsServerPlugin
 
     return {
       dataViewsServiceFactory: serviceFactory,
+      isRollupsEnabled: () => this.rollupsEnabled,
     };
   }
 
