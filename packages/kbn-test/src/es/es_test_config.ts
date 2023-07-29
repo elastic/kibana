@@ -44,7 +44,7 @@ class EsTestConfig {
         // have to remove the ":" off protocol
         protocol: testEsUrl.protocol?.slice(0, -1),
         hostname: testEsUrl.hostname,
-        port: Number(testEsUrl.port),
+        port: parseInt(testEsUrl.port, 10),
         username: testEsUrl.auth?.split(':')[0],
         password: testEsUrl.auth?.split(':')[1],
         auth: testEsUrl.auth,
@@ -54,22 +54,11 @@ class EsTestConfig {
     const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
     const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
 
-    const port = process.env.TEST_ES_PORT ? Number(String(process.env.TEST_ES_PORT)) : 9220;
-
-    // eslint-disable-next-line no-console
-    console.log(`type of TEST_ES_PORT ${typeof process.env.TEST_ES_PORT}`);
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(process.env.TEST_ES_PORT));
-    // eslint-disable-next-line no-console
-    console.log(Number(process.env.TEST_ES_PORT));
+    const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
 
     if (Number.isNaN(port)) {
       throw new Error(
-        `typeof env var: ${typeof process.env.TEST_ES_PORT} and stringify: ${JSON.stringify(
-          process.env.TEST_ES_PORT
-        )}; process.env.TEST_ES_PORT must contain a valid port. given: #${
-          process.env.TEST_ES_PORT
-        }# and port #${port}# and inline conversion #${Number(String(process.env.TEST_ES_PORT))}#;`
+        `process.env.TEST_ES_PORT must contain a valid port. given: ${process.env.TEST_ES_PORT}`
       );
     }
 
