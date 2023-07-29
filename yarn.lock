@@ -4973,6 +4973,30 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-kibana-context-common@link:packages/react/kibana_context/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-render@link:packages/react/kibana_context/render":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-root@link:packages/react/kibana_context/root":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-styled@link:packages/react/kibana_context/styled":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-theme@link:packages/react/kibana_context/theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-mount@link:packages/react/kibana_mount":
+  version "0.0.0"
+  uid ""
+
 "@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
   version "0.0.0"
   uid ""
