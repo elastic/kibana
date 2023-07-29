@@ -32,4 +32,7 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
 
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 
-export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vuknerabilities_cvss_score_badge';
+export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
+
+export const TAKE_ACTION_SUBJ = 'csp:take_action';
+export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
