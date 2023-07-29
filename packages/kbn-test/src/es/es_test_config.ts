@@ -64,6 +64,7 @@ class EsTestConfig {
     console.log(Number(process.env.TEST_ES_PORT));
     // eslint-disable-next-line no-console
     console.log(parseInt(process.env.TEST_ES_PORT));
+    // more logs
 
     if (Number.isNaN(port)) {
       throw new Error(
