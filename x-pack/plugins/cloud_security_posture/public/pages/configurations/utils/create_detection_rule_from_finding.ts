@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import type { CspFinding } from '../../../../common/schemas/csp_finding';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
-import { createDetectionRule } from './create_detection_rule';
+import { createDetectionRule } from '../../../common/api/create_detection_rule';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';

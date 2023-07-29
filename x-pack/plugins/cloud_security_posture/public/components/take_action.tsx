@@ -16,12 +16,12 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
+import type { RuleResponse } from '../common/api/create_detection_rule';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
