@@ -54,11 +54,11 @@ class EsTestConfig {
     const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
     const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
 
-    const port = process.env.TEST_ES_PORT ? Number(process.env.TEST_ES_PORT) : 9220;
+    const port = process.env.TEST_ES_PORT ? Number(String(process.env.TEST_ES_PORT)) : 9220;
 
     if (Number.isNaN(port)) {
       throw new Error(
-        `process.env.TEST_ES_PORT must contain a valid port. given: #${process.env.TEST_ES_PORT}# and port #${port}#`
+        `process.env.TEST_ES_PORT must contain a valid port. given: #${process.env.TEST_ES_PORT}# and port #${port}# and inline conversion #${Number(String(process.env.TEST_ES_PORT))}#`
       );
     }
 
