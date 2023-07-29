@@ -60,7 +60,7 @@ class EsTestConfig {
       throw new Error(
         `process.env.TEST_ES_PORT must contain a valid port. given: #${
           process.env.TEST_ES_PORT
-        }# and port #${port}# and inline conversion #${Number(String(process.env.TEST_ES_PORT))}#`
+        }# and port #${port}# and inline conversion #${Number(String(process.env.TEST_ES_PORT))}#; json parse: #${JSON.parse(process.env.TEST_ES_PORT)}#; json parse&number: #${Number(JSON.parse(process.env.TEST_ES_PORT))}#; +sign: #${Number(+process.env.TEST_ES_PORT)}#; number: #${Number(process.env.TEST_ES_PORT)}#`
       );
     }
 
