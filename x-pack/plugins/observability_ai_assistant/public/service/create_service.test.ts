@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { ReadableStream } from 'stream/web';
-import { ObservabilityAIAssistantService } from '../types';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { ObservabilityAIAssistantService } from '../types';
 import { createService } from './create_service';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 describe('createService', () => {
   describe('chat', () => {
@@ -41,10 +43,17 @@ describe('createService', () => {
 
     beforeEach(() => {
       service = createService({
-        http: {
-          post: httpPostSpy,
-        },
-      } as unknown as CoreStart);
+        coreStart: {
+          http: {
+            post: httpPostSpy,
+          },
+        } as unknown as CoreStart,
+        securityStart: {
+          authc: {
+            getCurrentUser: () => Promise.resolve({ username: 'elastic' } as AuthenticatedUser),
+          },
+        } as unknown as SecurityPluginStart,
+      });
     });
 
     afterEach(() => {

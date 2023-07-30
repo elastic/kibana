@@ -8,10 +8,12 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { useKibana } from '../hooks/use_kibana';
 
-const pageSectionClassName = css`
+const pageSectionContentClassName = css`
   width: 100%;
   display: flex;
   flex-grow: 1;
+  padding-top: 0;
+  padding-bottom: 0;
 `;
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {
@@ -31,7 +33,7 @@ export function ObservabilityAIAssistantPageTemplate({ children }: { children: R
         alignment: 'horizontalCenter',
         restrictWidth: true,
         contentProps: {
-          className: pageSectionClassName,
+          className: pageSectionContentClassName,
         },
       }}
     >

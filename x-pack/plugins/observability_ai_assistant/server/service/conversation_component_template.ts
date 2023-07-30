@@ -66,6 +66,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
               type: 'object',
               properties: {
                 content: text,
+                event: text,
                 role: keyword,
                 data: {
                   type: 'object',

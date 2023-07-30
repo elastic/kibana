@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { ComponentStory } from '@storybook/react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-
-import { ChatTimeline as Component, ChatTimelineProps } from './chat_timeline';
+import { ComponentStory } from '@storybook/react';
+import React, { ComponentProps, useState } from 'react';
 import {
-  buildAssistantInnerMessage,
-  buildElasticInnerMessage,
-  buildMessage,
-  buildSystemInnerMessage,
-  buildUserInnerMessage,
+  buildAssistantChatItem,
+  buildChatInitItem,
+  buildSystemChatItem,
+  buildUserChatItem,
 } from '../../utils/builders';
+import { ChatTimeline as Component, ChatTimelineProps } from './chat_timeline';
 
 export default {
   component: Component,
@@ -35,12 +33,12 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
 
   return (
     <>
-      <Component {...props} messages={props.messages.filter((_, index) => index <= count)} />
+      <Component {...props} items={props.items.filter((_, index) => index <= count)} />
 
       <EuiSpacer />
 
       <EuiButton
-        onClick={() => setCount(count >= 0 && count < props.messages.length - 1 ? count + 1 : 0)}
+        onClick={() => setCount(count >= 0 && count < props.items.length - 1 ? count + 1 : 0)}
       >
         Add message
       </EuiButton>
@@ -48,30 +46,15 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
   );
 };
 
-const currentDate = new Date();
-
-const defaultProps = {
-  messages: [
-    buildMessage({
-      '@timestamp': String(new Date(currentDate.getTime())),
-      message: buildSystemInnerMessage(),
-    }),
-    buildMessage({
-      '@timestamp': String(new Date(currentDate.getTime() + 1000)),
-      message: buildUserInnerMessage(),
-    }),
-    buildMessage({
-      '@timestamp': String(new Date(currentDate.getTime() + 2000)),
-      message: buildAssistantInnerMessage(),
-    }),
-    buildMessage({
-      '@timestamp': String(new Date(currentDate.getTime() + 3000)),
-      message: buildUserInnerMessage({ content: 'How does it work?' }),
-    }),
-    buildMessage({
-      '@timestamp': String(new Date(currentDate.getTime() + 4000)),
-      message: buildElasticInnerMessage({
-        content: `The way functions work depends on whether we are talking about mathematical functions or programming functions. Let's explore both:
+const defaultProps: ComponentProps<typeof Component> = {
+  items: [
+    buildChatInitItem(),
+    buildSystemChatItem(),
+    buildUserChatItem(),
+    buildAssistantChatItem(),
+    buildUserChatItem({ content: 'How does it work?' }),
+    buildAssistantChatItem({
+      content: `The way functions work depends on whether we are talking about mathematical functions or programming functions. Let's explore both:
 
         Mathematical Functions:
         In mathematics, a function maps input values to corresponding output values based on a specific rule or expression. The general process of how a mathematical function works can be summarized as follows:
@@ -82,9 +65,12 @@ const defaultProps = {
         Step 3: Output - After processing the input, the function produces an output value, denoted as 'f(x)' or 'y'. This output represents the dependent variable and is the result of applying the function's rule to the input.
         
         Step 4: Uniqueness - A well-defined mathematical function ensures that each input value corresponds to exactly one output value. In other words, the function should yield the same output for the same input whenever it is called.`,
-      }),
     }),
   ],
+  onEdit: () => {},
+  onFeedback: () => {},
+  onRegenerate: () => {},
+  onStopGenerating: () => {},
 };
 
 export const ChatTimeline = Template.bind({});

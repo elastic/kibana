@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { noop } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiComment,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
-import { MessageRole, Message } from '../../../common/types';
-import { ChatItemAvatar } from './chat_item_avatar';
-import { ChatItemTitle } from './chat_item_title';
-import { ChatItemControls } from './chat_item_controls';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { MessageRole } from '../../../common/types';
+import { Feedback, FeedbackButtons } from '../feedback_buttons';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
-import { Feedback } from '../feedback_buttons';
+import { RegenerateResponseButton } from '../regenerate_response_button';
+import { StopGeneratingButton } from '../stop_generating_button';
+import { ChatItemAvatar } from './chat_item_avatar';
+import { ChatItemTitle } from './chat_item_title';
+import { ChatTimelineItem } from './chat_timeline';
 
 export interface ChatItemAction {
   id: string;
@@ -32,126 +33,81 @@ export interface ChatItemAction {
   handler: () => void;
 }
 
-export interface ChatItemProps {
-  currentUser: AuthenticatedUser | undefined;
-  dateFormat: string;
-  index: number;
-  isLoading: boolean;
-  message: Message;
-  onEditMessage?: (id: string) => void;
+export interface ChatItemProps extends ChatTimelineItem {
+  onEditSubmit: (content: string) => void;
   onFeedbackClick: (feedback: Feedback) => void;
-  onRegenerateMessage?: (id: string) => void;
+  onRegenerateClick: () => void;
+  onStopGeneratingClick: () => void;
 }
 
 export function ChatItem({
+  title,
+  content,
+  canEdit,
+  canGiveFeedback,
+  canRegenerate,
+  role,
+  loading,
+  error,
   currentUser,
-  dateFormat,
-  index,
-  isLoading,
-  message,
+  onEditSubmit,
+  onRegenerateClick,
+  onStopGeneratingClick,
   onFeedbackClick,
-  onEditMessage,
-  onRegenerateMessage,
 }: ChatItemProps) {
-  const {
-    notifications: { toasts },
-  } = useKibana().services;
   const [isActionsPopoverOpen, setIsActionsPopover] = useState(false);
 
   const handleClickActions = () => {
     setIsActionsPopover(!isActionsPopoverOpen);
   };
 
-  const actionsMap: Record<MessageRole, ChatItemAction[]> = {
-    [MessageRole.User]: [
-      {
-        id: 'edit',
-        label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.editMessage', {
-          defaultMessage: 'Edit message',
-        }),
-        handler: () => {
-          onEditMessage?.(message['@timestamp']);
-          setIsActionsPopover(false);
-        },
-      },
-    ],
-    [MessageRole.Function]: [
-      {
-        id: 'edit',
-        label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.editFunction', {
-          defaultMessage: 'Edit function',
-        }),
-        handler: () => {
-          onEditMessage?.(message['@timestamp']);
-          setIsActionsPopover(false);
-        },
-      },
-    ],
-    [MessageRole.Assistant]: [
-      {
-        id: 'copy',
-        label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.copyMessage', {
-          defaultMessage: 'Copy message',
-        }),
-        handler: message.message.content
-          ? async () => {
-              try {
-                await navigator.clipboard.writeText(message.message.content || '');
-                toasts.addSuccess(
-                  i18n.translate(
-                    'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageSuccess',
-                    {
-                      defaultMessage: 'Copied to clipboard',
-                    }
-                  )
-                );
-                setIsActionsPopover(false);
-              } catch (error) {
-                toasts.addError(
-                  error,
-                  i18n.translate(
-                    'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageError',
-                    {
-                      defaultMessage: 'Error while copying to clipboard',
-                    }
-                  )
-                );
-                setIsActionsPopover(false);
-              }
-            }
-          : noop,
-      },
-      {
-        id: 'regenerate',
-        label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.regenerate', {
-          defaultMessage: 'Regenerate response',
-        }),
-        handler: () => {
-          onRegenerateMessage?.(message['@timestamp']);
-          setIsActionsPopover(false);
-        },
-      },
-    ],
-    [MessageRole.System]: [],
-    [MessageRole.Event]: [],
-    [MessageRole.Elastic]: [],
-  };
+  const [_, setEditing] = useState(false);
 
-  const canReceiveFeedback = [
-    MessageRole.Assistant,
-    MessageRole.Elastic,
-    MessageRole.Function,
-  ].includes(message.message.role);
+  const actions: ChatItemAction[] = canEdit
+    ? [
+        {
+          id: 'edit',
+          label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.editMessage', {
+            defaultMessage: 'Edit message',
+          }),
+          handler: () => {
+            setEditing(false);
+            setIsActionsPopover(false);
+          },
+        },
+      ]
+    : [];
 
-  const canRegenerateResponse = message.message.role === MessageRole.Assistant;
+  let controls: React.ReactNode;
+
+  const displayFeedback = !error && canGiveFeedback;
+  const displayRegenerate = !loading && canRegenerate;
+
+  if (loading) {
+    controls = <StopGeneratingButton onClick={onStopGeneratingClick} />;
+  } else if (displayFeedback || displayRegenerate) {
+    controls = (
+      <EuiFlexGroup justifyContent="flexEnd">
+        {displayFeedback ? (
+          <EuiFlexItem grow={true}>
+            <FeedbackButtons onClickFeedback={onFeedbackClick} />
+          </EuiFlexItem>
+        ) : null}
+        {displayRegenerate ? (
+          <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
+            <RegenerateResponseButton onClick={onRegenerateClick} />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiComment
-      key={message['@timestamp']}
       event={
         <ChatItemTitle
           actionsTrigger={
-            actionsMap[message.message.role].length ? (
+            actions.length ? (
               <EuiPopover
                 anchorPosition="downLeft"
                 button={
@@ -175,7 +131,7 @@ export function ChatItem({
               >
                 <EuiContextMenuPanel
                   size="s"
-                  items={actionsMap[message.message.role]?.map(({ id, icon, label, handler }) => (
+                  items={actions.map(({ id, icon, label, handler }) => (
                     <EuiContextMenuItem key={id} icon={icon} onClick={handler}>
                       {label}
                     </EuiContextMenuItem>
@@ -184,28 +140,21 @@ export function ChatItem({
               </EuiPopover>
             ) : null
           }
-          message={message}
-          index={index}
-          dateFormat={dateFormat}
+          title={title}
         />
       }
-      timelineAvatar={<ChatItemAvatar currentUser={currentUser} role={message.message.role} />}
-      username={getRoleTranslation(message.message.role)}
+      timelineAvatar={<ChatItemAvatar currentUser={currentUser} role={role} />}
+      username={getRoleTranslation(role)}
     >
-      {message.message.content ? (
+      {content !== undefined || error || loading ? (
         <MessagePanel
-          body={<MessageText content={message.message.content} loading={isLoading} />}
-          controls={
-            canReceiveFeedback || canRegenerateResponse ? (
-              <ChatItemControls
-                role={message.message.role}
-                onFeedbackClick={onFeedbackClick}
-                canReceiveFeedback={canReceiveFeedback}
-                canRegenerateResponse={canRegenerateResponse}
-                onRegenerateClick={() => onRegenerateMessage?.(message['@timestamp'])}
-              />
+          body={
+            content !== undefined || loading ? (
+              <MessageText content={content || ''} loading={loading} />
             ) : null
           }
+          error={error}
+          controls={controls}
         />
       ) : null}
     </EuiComment>

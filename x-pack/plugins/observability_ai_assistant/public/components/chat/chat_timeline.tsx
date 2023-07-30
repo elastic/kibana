@@ -5,37 +5,62 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
-import { useKibana } from '../../hooks/use_kibana';
-import { useCurrentUser } from '../../hooks/use_current_user';
-import { Message } from '../../../common/types';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import React from 'react';
+import { MessageRole } from '../../../common/types';
+import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
 
-export interface ChatTimelineProps {
-  messages: Message[];
-  onEditMessage?: (id: string) => void;
+export interface ChatTimelineItem {
+  id: string;
+  title: string;
+  role: MessageRole;
+  content?: string;
+  function_call?: {
+    name: string;
+    args?: string;
+    trigger?: MessageRole;
+  };
+  loading: boolean;
+  error?: any;
+  canEdit: boolean;
+  canRegenerate: boolean;
+  canGiveFeedback: boolean;
+  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
 }
 
-export function ChatTimeline({ messages = [], onEditMessage }: ChatTimelineProps) {
-  const { uiSettings } = useKibana().services;
-  const currentUser = useCurrentUser();
+export interface ChatTimelineProps {
+  items: ChatTimelineItem[];
+  onEdit: (item: ChatTimelineItem, content: string) => void;
+  onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
+  onRegenerate: (item: ChatTimelineItem) => void;
+  onStopGenerating: () => void;
+}
 
-  const dateFormat = uiSettings?.get('dateFormat');
-
-  const handleFeedback = () => {};
-
+export function ChatTimeline({
+  items = [],
+  onEdit,
+  onFeedback,
+  onRegenerate,
+  onStopGenerating,
+}: ChatTimelineProps) {
   return (
     <EuiCommentList>
-      {messages.map((message, index) => (
+      {items.map((item) => (
         <ChatItem
-          currentUser={currentUser}
-          dateFormat={dateFormat}
-          index={index}
-          isLoading={false}
-          message={message}
-          onFeedbackClick={handleFeedback}
-          onEditMessage={onEditMessage}
+          key={item.id}
+          {...item}
+          onFeedbackClick={(feedback) => {
+            onFeedback(item, feedback);
+          }}
+          onRegenerateClick={() => {
+            onRegenerate(item);
+          }}
+          onEditSubmit={(content) => {
+            onEdit(item, content);
+          }}
+          onStopGeneratingClick={onStopGenerating}
         />
       ))}
     </EuiCommentList>

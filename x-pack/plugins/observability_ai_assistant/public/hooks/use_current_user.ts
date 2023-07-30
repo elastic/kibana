@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
 import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { useKibana } from './use_kibana';
+import { useEffect, useState } from 'react';
+import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 
 export function useCurrentUser() {
-  const { security } = useKibana().services;
+  const service = useObservabilityAIAssistant();
 
   const [user, setUser] = useState<AuthenticatedUser>();
 
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const authenticatedUser = await security?.authc.getCurrentUser();
+        const authenticatedUser = await service.getCurrentUser();
         setUser(authenticatedUser);
       } catch {
         setUser(undefined);
       }
     };
     getCurrentUser();
-  }, [security?.authc]);
+  }, [service]);
 
   return user;
 }

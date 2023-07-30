@@ -23,7 +23,6 @@ export const messageRt: t.Type<Message> = t.type({
       role: t.union([
         t.literal(MessageRole.System),
         t.literal(MessageRole.Assistant),
-        t.literal(MessageRole.Event),
         t.literal(MessageRole.Function),
         t.literal(MessageRole.User),
         t.literal(MessageRole.Elastic),
@@ -32,6 +31,7 @@ export const messageRt: t.Type<Message> = t.type({
     t.partial({
       content: t.string,
       name: t.string,
+      event: t.string,
       function_call: t.intersection([
         t.type({
           name: t.string,

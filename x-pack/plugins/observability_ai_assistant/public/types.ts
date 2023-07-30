@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -39,6 +43,7 @@ export interface ObservabilityAIAssistantService {
     signal: AbortSignal;
   }) => Promise<Observable<CreateChatCompletionResponseChunk>>;
   callApi: ObservabilityAIAssistantAPIClient;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
 }
 
 export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {}

@@ -19,7 +19,6 @@ import { ConversationView } from './conversations/conversation_view';
 const observabilityAIAssistantRoutes = {
   '/': {
     element: <Redirect to="/conversations" />,
-    params: t.type({}),
   },
   '/conversations': {
     element: (
@@ -27,14 +26,19 @@ const observabilityAIAssistantRoutes = {
         <Outlet />
       </ObservabilityAIAssistantPageTemplate>
     ),
-    params: t.type({}),
     children: {
       '/conversations/new': {
-        params: t.type({}),
+        element: <ConversationView />,
+      },
+      '/conversations/:conversationId': {
+        params: t.type({
+          path: t.type({
+            conversationId: t.string,
+          }),
+        }),
         element: <ConversationView />,
       },
       '/conversations': {
-        params: t.type({}),
         element: <></>,
       },
     },

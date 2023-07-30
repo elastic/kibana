@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Message } from '../../../common/types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { type ConversationCreateRequest, type Message, MessageRole } from '../../../common/types';
 import { useChat } from '../../hooks/use_chat';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
@@ -16,30 +17,83 @@ import { InsightBase } from './insight_base';
 import { InsightMissingCredentials } from './insight_missing_credentials';
 import { StopGeneratingButton } from '../stop_generating_button';
 import { RegenerateResponseButton } from '../regenerate_response_button';
+import { StartChatButton } from '../start_chat_button';
+import { ChatFlyout } from '../chat/chat_flyout';
 
 function ChatContent({ messages, connectorId }: { messages: Message[]; connectorId: string }) {
-  const chat = useChat({ messages, connectorId });
+  const chat = useChat();
+
+  const { generate } = chat;
+
+  useEffect(() => {
+    generate({ messages, connectorId }).catch(() => {
+      // error is handled in chat, and we don't do anything with the full response for now.
+    });
+  }, [generate, messages, connectorId]);
+
+  const initialConversation = useMemo<ConversationCreateRequest>(() => {
+    const time = new Date().toISOString();
+    return {
+      '@timestamp': time,
+      messages: chat.content
+        ? messages.concat({
+            '@timestamp': time,
+            message: {
+              role: MessageRole.Assistant,
+              content: chat.content,
+            },
+          })
+        : messages,
+      conversation: {
+        title: '',
+      },
+      labels: {},
+      numeric_labels: {},
+    };
+  }, [messages, chat.content]);
+
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <MessagePanel
-      body={<MessageText content={chat.content ?? ''} loading={chat.loading} />}
-      error={chat.error}
-      controls={
-        chat.loading ? (
-          <StopGeneratingButton
-            onClick={() => {
-              chat.abort();
-            }}
-          />
-        ) : (
-          <RegenerateResponseButton
-            onClick={() => {
-              chat.regenerate();
-            }}
-          />
-        )
-      }
-    />
+    <>
+      <MessagePanel
+        body={<MessageText content={chat.content ?? ''} loading={chat.loading} />}
+        error={chat.error}
+        controls={
+          chat.loading ? (
+            <StopGeneratingButton
+              onClick={() => {
+                chat.abort();
+              }}
+            />
+          ) : (
+            <EuiFlexGroup direction="row">
+              <EuiFlexItem grow={false}>
+                <RegenerateResponseButton
+                  onClick={() => {
+                    generate({ messages, connectorId });
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <StartChatButton
+                  onClick={() => {
+                    setIsOpen(() => true);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        }
+      />
+      <ChatFlyout
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(() => false);
+        }}
+        initialConversation={initialConversation}
+      />
+    </>
   );
 }
 

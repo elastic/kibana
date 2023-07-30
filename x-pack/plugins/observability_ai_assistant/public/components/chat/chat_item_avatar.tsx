@@ -13,7 +13,7 @@ import { AssistantAvatar } from '../assistant_avatar';
 import { MessageRole } from '../../../common/types';
 
 interface ChatAvatarProps {
-  currentUser?: AuthenticatedUser | undefined;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'> | undefined;
   role: MessageRole;
 }
 

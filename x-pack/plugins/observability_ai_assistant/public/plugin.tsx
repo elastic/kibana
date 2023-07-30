@@ -11,6 +11,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   type Plugin,
   type PluginInitializerContext,
+  CoreStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
@@ -45,8 +46,6 @@ export class ObservabilityAIAssistantPlugin
     coreSetup: CoreSetup,
     pluginsSetup: ObservabilityAIAssistantPluginSetupDependencies
   ): ObservabilityAIAssistantPluginSetup {
-    const service = (this.service = createService(coreSetup));
-
     coreSetup.application.register({
       id: 'observabilityAIAssistant',
       title: i18n.translate('xpack.observabilityAiAssistant.appTitle', {
@@ -66,7 +65,7 @@ export class ObservabilityAIAssistantPlugin
         },
       ],
 
-      async mount(appMountParameters: AppMountParameters<unknown>) {
+      mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
@@ -76,7 +75,7 @@ export class ObservabilityAIAssistantPlugin
         ReactDOM.render(
           <Application
             {...appMountParameters}
-            service={service}
+            service={this.service!}
             coreStart={coreStart}
             pluginsStart={pluginsStart as ObservabilityAIAssistantPluginStartDependencies}
           />,
@@ -91,7 +90,10 @@ export class ObservabilityAIAssistantPlugin
     return {};
   }
 
-  start(): ObservabilityAIAssistantPluginStart {
-    return this.service!;
+  start(
+    coreStart: CoreStart,
+    pluginsStart: ObservabilityAIAssistantPluginStartDependencies
+  ): ObservabilityAIAssistantPluginStart {
+    return (this.service = createService({ coreStart, securityStart: pluginsStart.security }));
   }
 }

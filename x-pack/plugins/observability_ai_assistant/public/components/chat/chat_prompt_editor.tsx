@@ -19,10 +19,15 @@ import { i18n } from '@kbn/i18n';
 import { useFunctions, Func } from '../../hooks/use_functions';
 
 export interface ChatPromptEditorProps {
-  onSubmitPrompt: (prompt: string) => void;
+  disabled: boolean;
+  loading: boolean;
+  onSubmit: (message: {
+    content?: string;
+    function_call?: { name: string; args?: string };
+  }) => Promise<void>;
 }
 
-export function ChatPromptEditor({ onSubmitPrompt }: ChatPromptEditorProps) {
+export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEditorProps) {
   const functions = useFunctions();
 
   const [prompt, setPrompt] = useState('');
@@ -33,7 +38,15 @@ export function ChatPromptEditor({ onSubmitPrompt }: ChatPromptEditorProps) {
   };
 
   const handleSubmit = () => {
-    onSubmitPrompt(prompt);
+    const currentPrompt = prompt;
+    setPrompt('');
+    onSubmit({ content: currentPrompt })
+      .then(() => {
+        setPrompt('');
+      })
+      .catch(() => {
+        setPrompt(currentPrompt);
+      });
   };
 
   const handleClickFunctionList = () => {
@@ -79,11 +92,13 @@ export function ChatPromptEditor({ onSubmitPrompt }: ChatPromptEditorProps) {
             defaultMessage: 'Press ‘space’ or ‘$’ for function recommendations',
           })}
           onChange={handleChange}
+          onSubmit={handleSubmit}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          disabled={!prompt}
+          isLoading={loading}
+          disabled={!prompt || loading || disabled}
           display={prompt ? 'fill' : 'base'}
           iconType="kqlFunction"
           size="m"

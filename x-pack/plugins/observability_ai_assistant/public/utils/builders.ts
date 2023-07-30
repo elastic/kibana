@@ -5,69 +5,64 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-import { Conversation, Message, MessageRole } from '../../common/types';
+import { uniqueId } from 'lodash';
+import { MessageRole } from '../../common/types';
+import { ChatTimelineItem } from '../components/chat/chat_timeline';
 
-const currentDate = new Date();
+type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'role'>;
 
-const baseMessage: Message = {
-  '@timestamp': String(new Date(currentDate.getTime())),
-  message: {
-    content: 'foo',
-    name: 'bar',
+export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
+  return {
+    id: uniqueId(),
+    title: 'My title',
+    canEdit: false,
+    canGiveFeedback: false,
+    canRegenerate: params.role === MessageRole.User,
+    currentUser: {
+      username: 'elastic',
+    },
+    loading: false,
+    ...params,
+  };
+}
+
+export function buildSystemChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
+  return buildChatItem({
+    role: MessageRole.System,
+    ...params,
+  });
+}
+
+export function buildChatInitItem() {
+  return buildChatItem({
     role: MessageRole.User,
-  },
-};
-
-export function buildMessage(params: Partial<Message> = {}): Message {
-  return cloneDeep({ ...baseMessage, ...params });
-}
-
-export function buildSystemInnerMessage(
-  params: Partial<Message['message']> = {}
-): Message['message'] {
-  return cloneDeep({
-    ...{ role: MessageRole.System, ...params },
+    title: 'started a conversation',
   });
 }
 
-export function buildUserInnerMessage(
-  params: Partial<Message['message']> = {}
-): Message['message'] {
-  return cloneDeep({
-    ...{ content: "What's a function?", role: MessageRole.User, ...params },
+export function buildUserChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
+  return buildChatItem({
+    role: MessageRole.User,
+    content: "What's a function?",
+    canEdit: true,
+    ...params,
   });
 }
 
-export function buildAssistantInnerMessage(
-  params: Partial<Message['message']> = {}
-): Message['message'] {
-  return cloneDeep({
-    ...{
-      content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
-      A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
-      role: MessageRole.Assistant,
-      data: { key: 'value', nestedData: { foo: 'bar' } },
-      ...params,
-    },
+export function buildAssistantChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
+  return buildChatItem({
+    role: MessageRole.Assistant,
+    content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
+    A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
+    canRegenerate: true,
+    canGiveFeedback: true,
+    ...params,
   });
 }
 
-export function buildElasticInnerMessage(
-  params: Partial<Message['message']> = {}
-): Message['message'] {
-  return cloneDeep({
-    ...{ role: MessageRole.Elastic, data: { key: 'value', nestedData: { foo: 'bar' } }, ...params },
-  });
-}
-
-export function buildFunctionInnerMessage(
-  params: Partial<Message['message']> = {}
-): Message['message'] {
-  return cloneDeep({
-    ...{
-      role: MessageRole.Function,
-    },
+export function buildFunctionInnerMessage(params: Omit<ChatItemBuildProps, 'role'>) {
+  return buildChatItem({
+    role: MessageRole.Function,
     function_call: {
       name: 'leftpad',
       args: '{ foo: "bar" }',
@@ -77,27 +72,8 @@ export function buildFunctionInnerMessage(
   });
 }
 
-const baseConversation: Conversation = {
-  '@timestamp': String(Date.now()),
-  user: {
-    id: 'foo',
-    name: 'bar',
-  },
-  conversation: {
-    id: 'conversation-foo',
-    title: 'Conversation title',
-    last_updated: String(Date.now()),
-  },
-  messages: [
-    buildMessage({ message: buildSystemInnerMessage() }),
-    buildMessage({ message: buildUserInnerMessage() }),
-    buildMessage({ message: buildAssistantInnerMessage() }),
-  ],
-  labels: { foo: 'bar' },
-  numeric_labels: { foo: 1 },
-  namespace: 'baz',
-};
-
-export function buildConversation(params: Partial<Conversation> = {}): Conversation {
-  return cloneDeep({ ...baseConversation, ...params });
+export function buildTimelineItems() {
+  return {
+    items: [buildSystemChatItem(), buildUserChatItem(), buildAssistantChatItem()],
+  };
 }

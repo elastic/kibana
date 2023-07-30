@@ -116,22 +116,21 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     connectorId: string;
   }): Promise<IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
-      messages.map((message) => {
-        if (message.message.role === MessageRole.Event) {
-          return undefined;
-        }
-        const role =
-          message.message.role === MessageRole.Elastic ? MessageRole.User : message.message.role;
+      messages
+        .filter((message) => message.message.content || message.message.function_call?.name)
+        .map((message) => {
+          const role =
+            message.message.role === MessageRole.Elastic ? MessageRole.User : message.message.role;
 
-        return {
-          role,
-          content: message.message.content,
-          function_call: isEmpty(message.message.function_call?.name)
-            ? undefined
-            : omit(message.message.function_call, 'trigger'),
-          name: message.message.name,
-        };
-      })
+          return {
+            role,
+            content: message.message.content,
+            function_call: isEmpty(message.message.function_call?.name)
+              ? undefined
+              : omit(message.message.function_call, 'trigger'),
+            name: message.message.name,
+          };
+        })
     );
 
     const connector = await this.dependencies.actionsClient.get({

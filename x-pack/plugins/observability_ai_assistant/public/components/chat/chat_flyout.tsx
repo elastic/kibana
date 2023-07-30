@@ -4,46 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlyout } from '@elastic/eui';
+import React from 'react';
+import type { ConversationCreateRequest } from '../../../common/types';
+import { useChat } from '../../hooks/use_chat';
+import { useCurrentUser } from '../../hooks/use_current_user';
+import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
+import { ChatBody } from './chat_body';
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useState } from 'react';
-import { ConversationCreateRequest } from '../../../common/types';
-import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import { ChatHeader } from './chat_header';
-import { ChatPromptEditor } from './chat_prompt_editor';
-import { ChatTimeline } from './chat_timeline';
+export function ChatFlyout({
+  initialConversation,
+  isOpen,
+  onClose,
+}: {
+  initialConversation: ConversationCreateRequest;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const chat = useChat();
 
-export interface ChatFlyoutProps {
-  conversation: ConversationCreateRequest;
-  connectors: UseGenAIConnectorsResult;
-}
+  const connectors = useGenAIConnectors();
 
-export function ChatFlyout({ conversation, connectors }: ChatFlyoutProps) {
-  const {
-    conversation: { title },
-    messages,
-  } = conversation;
-
-  const [isOpen, setIsOpen] = useState(true);
-
-  const handleSubmit = (prompt: string) => {};
+  const currentUser = useCurrentUser();
 
   return isOpen ? (
-    <EuiFlyout onClose={() => setIsOpen(false)} size="m">
-      <EuiFlyoutHeader hasBorder>
-        <ChatHeader title={title} connectors={connectors} />
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
-        <ChatTimeline messages={messages} />
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter
-        css={{ borderTop: `solid 1px ${euiThemeVars.euiBorderColor}`, background: '#fff' }}
-      >
-        <ChatPromptEditor onSubmitPrompt={handleSubmit} />
-      </EuiFlyoutFooter>
+    <EuiFlyout onClose={onClose}>
+      <ChatBody
+        chat={chat}
+        connectors={connectors}
+        initialConversation={initialConversation}
+        currentUser={currentUser}
+      />
     </EuiFlyout>
   ) : null;
 }

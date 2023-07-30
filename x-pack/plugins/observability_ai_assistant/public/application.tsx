@@ -37,6 +37,7 @@ export function Application({
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider
           services={{
+            ...coreStart,
             plugins: {
               start: pluginsStart,
             },
