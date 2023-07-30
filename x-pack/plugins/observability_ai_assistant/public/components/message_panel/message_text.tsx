@@ -8,7 +8,7 @@ import { v4 } from 'uuid';
 import React from 'react';
 import type { Node } from 'unist';
 import { css } from '@emotion/css';
-import type { Parent, Text } from 'mdast';
+import type { Parent, Text, InlineCode, Code } from 'mdast';
 import ReactMarkdown from 'react-markdown';
 import { EuiText } from '@elastic/eui';
 
@@ -51,11 +51,11 @@ const loadingCursorPlugin = () => {
       });
     }
 
-    if (node.type !== 'text') {
+    if (node.type !== 'text' && node.type !== 'inlineCode' && node.type !== 'code') {
       return;
     }
 
-    const textNode = node as Text;
+    const textNode = node as Text | InlineCode | Code;
 
     const indexOfCursor = textNode.value.indexOf(CURSOR);
     if (indexOfCursor === -1) {
