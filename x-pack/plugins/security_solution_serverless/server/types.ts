@@ -16,7 +16,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
@@ -62,7 +61,6 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  instance_group_type?: string; // not seems part of step 1 fields https://github.com/elastic/mx-team/blob/main/teams/billing/services/usage_record_schema_v2.md
 }
 
 export interface SecurityUsageReportingTaskSetupContract {
@@ -91,6 +89,7 @@ export interface MeteringCallbackInput {
   logger: Logger;
   taskId: string;
   lastSuccessfulReport: Date;
+  abortController: AbortController;
 }
 
 export interface MetringTaskProperties {
