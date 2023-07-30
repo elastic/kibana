@@ -6,9 +6,9 @@
  */
 
 import type { MeteringCallbackInput, UsageRecord } from '../types';
-import { getKspmUsageRecord } from './kspm_metring_task';
-import { getCnvmUsageRecord } from './cnvm_metring_task';
 import { getCspmUsageRecord } from './cspm_metering_task';
+import { getKspmUsageRecord } from './kspm_metering_task';
+import { getCnvmUsageRecord } from './cnvm_metering_task';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
 export const AGGREGATION_PRECISION_THRESHOLD = 3000;
@@ -31,14 +31,6 @@ export const cloudSecurityMetringCallback = async ({
     const cloudSecurityUsageRecords: UsageRecord[] = [];
 
     const usageRecordFunctions = [getCspmUsageRecord, getKspmUsageRecord, getCnvmUsageRecord];
-    // const cspmUsageRecord = await getCspmUsageRecord({
-    //   esClient,
-    //   projectId,
-    //   logger,
-    //   taskId,
-    //   lastSuccessfulReport,
-    //   abortController,
-    // });
 
     for (const usageRecordFunction of usageRecordFunctions) {
       const usageRecord = await usageRecordFunction({

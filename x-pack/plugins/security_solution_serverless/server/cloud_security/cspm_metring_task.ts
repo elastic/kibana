@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UsageRecord } from '../types';
 import {
   CSPM_POLICY_TEMPLATE,
   LATEST_FINDINGS_INDEX_PATTERN,
@@ -16,7 +17,6 @@ import {
   CLOUD_SECURITY_TASK_TYPE,
 } from './cloud_security_metering';
 import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
-import type { UsageRecord } from '../types';
 import type { CloudSecurityMeteringCallbackInput, ResourceCountAggregation } from './types';
 
 const CSPM_BUCKET_SUB_TYPE_NAME = 'CSPM';
@@ -41,8 +41,8 @@ export const getCspmUsageRecord = async ({
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
       : new Date().toISOString();
 
-    const usageRecord = {
-      id: `${CLOUD_SECURITY_TASK_TYPE}:${CLOUD_SECURITY_TASK_TYPE}`,
+    const usageRecords = {
+      id: `${CLOUD_SECURITY_TASK_TYPE}:${CSPM_BUCKET_SUB_TYPE_NAME}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
       usage: {
@@ -59,7 +59,7 @@ export const getCspmUsageRecord = async ({
 
     logger.debug(`Fetched CSPM metring data`);
 
-    return usageRecord;
+    return usageRecords;
   } catch (err) {
     logger.error(`Failed to fetch CSPM metering data ${err}`);
   }
