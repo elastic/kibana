@@ -191,17 +191,8 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'input',
-          selector: 'fieldAutocompleteComboBox',
-          value: 'agent.type',
-        },
-        {
-          type: 'wait',
-          waitTime: 3000,
-        },
-        {
           type: 'click',
-          customSelector: 'button[title="agent.type"]',
+          customSelector: 'button[title="@timestamp"]',
         },
         {
           type: 'click',
@@ -210,17 +201,17 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           type: 'input',
           selector: 'valuesAutocompleteMatch',
-          value: 'endpoint',
+          value: '1234',
         },
         {
           type: 'click',
-          customSelector: 'button[title="endpoint"]',
+          selector: 'eventFilters-form-description-input',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND @timestampIS 1234',
         },
       ],
     },
