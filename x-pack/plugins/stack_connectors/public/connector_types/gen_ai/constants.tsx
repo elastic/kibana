@@ -59,13 +59,13 @@ export const openAiConfig: ConfigFieldSchema[] = [
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (
       <FormattedMessage
-        defaultMessage="The OpenAI default model. For more information on the default model, refer to the {genAiAPIUrlDocs}."
-        id="xpack.stackConnectors.components.genAi.openAiDocumentation"
+        defaultMessage="The OpenAI default model. For more information on the default model, refer to the {genAiAPIModelDocs}."
+        id="xpack.stackConnectors.components.genAi.openAiDocumentationModel"
         values={{
-          genAiAPIUrlDocs: (
+          genAiAPIModelDocs: (
             <EuiLink
               data-test-subj="open-ai-api-doc"
-              href="https://platform.openai.com/docs/api-reference"
+              href="https://platform.openai.com/docs/api-reference/models"
               target="_blank"
             >
               {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}

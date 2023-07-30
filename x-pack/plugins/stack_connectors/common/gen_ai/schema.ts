@@ -11,11 +11,11 @@ import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 // Connector schema
 export const GenAiConfigSchema = schema.oneOf([
   schema.object({
-    apiProvider: schema.literal(OpenAiProviderType.AzureAi),
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
   }),
   schema.object({
-    apiProvider: schema.literal(OpenAiProviderType.OpenAi),
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
     apiUrl: schema.string(),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
   }),
