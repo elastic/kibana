@@ -74,6 +74,31 @@ export const excessivelyInstallAllPrebuiltRules = () => {
   installAllPrebuiltRulesRequest();
 };
 
+export const waitUntilAllRuleAssetsCreated = (
+  assetsCount: number,
+  index = '.kibana_security_solution'
+) =>
+  cy.waitUntil(
+    () => {
+      return cy
+        .request({
+          method: 'GET',
+          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
+          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          failOnStatusCode: false,
+          body: {
+            query: {
+              match: {
+                type: 'security-rule',
+              },
+            },
+          },
+        })
+        .then((response) => response.body.hits.hits.length === assetsCount);
+    },
+    { interval: 500, timeout: 12000 }
+  );
+
 export const createNewRuleAsset = ({
   index = '.kibana_security_solution',
   rule = SAMPLE_PREBUILT_RULE,
@@ -84,6 +109,7 @@ export const createNewRuleAsset = ({
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;
+  cy.log('URL', url);
   cy.waitUntil(
     () => {
       return cy
@@ -191,13 +217,18 @@ export const createAndInstallMockedPrebuiltRules = ({
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
   installToKibana?: boolean;
 }) => {
-  cy.log('Install prebuilt rules');
+  cy.log('Install prebuilt rules', rules?.length);
   preventPrebuiltRulesPackageInstallation();
   // TODO: use this bulk method once the issue with Cypress is fixed
   // bulkCreateRuleAssets({ rules });
   rules?.forEach((rule) => {
     createNewRuleAsset({ rule });
   });
+
+  if (rules?.length) {
+    waitUntilAllRuleAssetsCreated(rules.length);
+  }
+
   if (installToKibana) {
     return installAllPrebuiltRulesRequest();
   }

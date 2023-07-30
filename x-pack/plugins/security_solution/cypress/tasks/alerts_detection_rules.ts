@@ -131,6 +131,7 @@ export const deleteRuleFromDetailsPage = () => {
   cy.get(ALL_ACTIONS).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.be.visible');
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const exportRule = (name: string) => {

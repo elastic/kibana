@@ -145,14 +145,16 @@ const RuleActionsOverflowComponent = ({
               key={i18nActions.DELETE_RULE}
               icon="trash"
               disabled={!userHasPermissions}
+              data-test-subj="rules-details-delete-rule"
               onClick={async () => {
+                closePopover();
+
                 if ((await confirmDeletion()) === false) {
                   // User has canceled deletion
                   return;
                 }
 
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
-                closePopover();
                 await executeBulkAction({
                   type: BulkActionType.delete,
                   ids: [rule.id],

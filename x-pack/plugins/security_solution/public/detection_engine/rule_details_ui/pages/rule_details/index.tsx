@@ -696,6 +696,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="deleteRulesConfirmationModal"
         >
           {i18n.DELETE_CONFIRMATION_BODY}
         </EuiConfirmModal>
