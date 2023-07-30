@@ -15,10 +15,11 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { RuleDefaultAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
+import { isSystemAction } from '../../../lib/is_system_action';
 
 export interface RuleActionsProps {
   ruleActions: RuleAction[];
@@ -51,7 +52,7 @@ export function RuleActions({
     );
   }
 
-  const getNotifyText = (action: RuleAction) =>
+  const getNotifyText = (action: RuleDefaultAction) =>
     (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
       ?.inputDisplay ||
       action.frequency?.notifyWhen) ??
@@ -69,12 +70,17 @@ export function RuleActions({
     return actionConnector?.name;
   };
 
-  if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
+  if (isLoadingActionConnectors) {
+    return <EuiLoadingSpinner size="s" />;
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {ruleActions.map((action, index) => {
         const { actionTypeId, id } = action;
         const actionName = getActionName(id);
+        const isSystemActionItem = isSystemAction(action);
+
         return (
           <EuiFlexItem key={index}>
             <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
@@ -93,14 +99,18 @@ export function RuleActions({
                   <EuiFlexItem grow={false}>
                     <EuiIcon size="s" type="bell" />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText
-                      data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
-                      size="xs"
-                    >
-                      {String(getNotifyText(action))}
-                    </EuiText>
-                  </EuiFlexItem>
+                  {isSystemActionItem ? null : (
+                    <EuiFlexItem>
+                      <EuiText
+                        data-test-subj={`actionConnectorName-${index}-${
+                          actionName || actionTypeId
+                        }`}
+                        size="xs"
+                      >
+                        {String(getNotifyText(action))}
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

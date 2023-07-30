@@ -7,32 +7,31 @@
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import type { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
+import { isSystemAction } from '../is_system_action';
 
-const transformAction: RewriteRequestCase<RuleAction> = ({
-  uuid,
-  group,
-  id,
-  connector_type_id: actionTypeId,
-  params,
-  frequency,
-  alerts_filter: alertsFilter,
-}) => ({
-  group,
-  id,
-  params,
-  actionTypeId,
-  ...(frequency
-    ? {
-        frequency: {
-          summary: frequency.summary,
-          notifyWhen: frequency.notify_when,
-          throttle: frequency.throttle,
-        },
-      }
-    : {}),
-  ...(alertsFilter ? { alertsFilter } : {}),
-  ...(uuid && { uuid }),
-});
+const transformAction: RewriteRequestCase<RuleAction> = (action) => {
+  if (isSystemAction(action)) {
+    return { ...action, actionTypeId: action.connector_type_id };
+  }
+
+  return {
+    group: action.group,
+    id: action.id,
+    params: action.params,
+    actionTypeId: action.connector_type_id,
+    ...(action.frequency
+      ? {
+          frequency: {
+            summary: action.frequency.summary,
+            notifyWhen: action.frequency.notify_when,
+            throttle: action.frequency.throttle,
+          },
+        }
+      : {}),
+    ...(action.alerts_filter ? { alertsFilter: action.alerts_filter } : {}),
+    ...(action.uuid && { uuid: action.uuid }),
+  };
+};
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   last_execution_date: lastExecutionDate,

@@ -48,10 +48,15 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-  RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { RuleReducerAction, InitialRule } from './rule_reducer';
+import {
+  RuleReducerAction,
+  InitialRule,
+  RuleActionPayload,
+  RuleActionFrequencyPayload,
+  RuleActionAlertsFilterPayload,
+} from './rule_reducer';
 import {
   RuleTypeModel,
   Rule,
@@ -270,9 +275,9 @@ export const RuleForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionProperty = <Key extends keyof RuleAction>(
-    key: Key,
-    value: RuleAction[Key] | null,
+  const setActionProperty = (
+    key: RuleActionPayload['key'],
+    value: RuleActionPayload['value'],
     index: number
   ) => {
     dispatch({ command: { type: 'setRuleActionProperty' }, payload: { key, value, index } });
@@ -286,14 +291,22 @@ export const RuleForm = ({
   );
 
   const setActionFrequencyProperty = useCallback(
-    (key: string, value: RuleActionParam, index: number) => {
+    (
+      key: RuleActionFrequencyPayload['key'],
+      value: RuleActionFrequencyPayload['value'],
+      index: number
+    ) => {
       dispatch({ command: { type: 'setRuleActionFrequency' }, payload: { key, value, index } });
     },
     [dispatch]
   );
 
   const setActionAlertsFilterProperty = useCallback(
-    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+    (
+      key: RuleActionAlertsFilterPayload['key'],
+      value: RuleActionAlertsFilterPayload['value'],
+      index: number
+    ) => {
       dispatch({ command: { type: 'setRuleActionAlertsFilter' }, payload: { key, value, index } });
     },
     [dispatch]

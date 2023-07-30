@@ -218,11 +218,11 @@ export interface SanitizedAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export type SanitizedRuleAction =
-  | (Omit<RuleDefaultAction, 'alertsFilter'> & {
-      alertsFilter?: SanitizedAlertsFilter;
-    })
-  | RuleSystemAction;
+export type SanitizedDefaultRuleAction = Omit<RuleDefaultAction, 'alertsFilter'> & {
+  alertsFilter?: SanitizedAlertsFilter;
+};
+
+export type SanitizedRuleAction = SanitizedDefaultRuleAction | RuleSystemAction;
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,

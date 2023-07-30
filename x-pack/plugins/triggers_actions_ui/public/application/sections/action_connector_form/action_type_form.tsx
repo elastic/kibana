@@ -31,12 +31,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import {
-  ActionVariable,
-  RuleActionAlertsFilterProperty,
-  RuleActionParam,
-  RuleNotifyWhenType,
-} from '@kbn/alerting-plugin/common';
+import { ActionVariable, RuleActionParam, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -64,6 +59,11 @@ import { validateParamsForWarnings } from '../../lib/validate_params_for_warning
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
+import {
+  RuleActionFrequencyPayload,
+  RuleActionAlertsFilterPayload,
+} from '../rule_form/rule_reducer';
+import { isSystemAction } from '../../lib/is_system_action';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -73,10 +73,14 @@ export type ActionTypeFormProps = {
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
-  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (
+    key: RuleActionFrequencyPayload['key'],
+    value: RuleActionFrequencyPayload['value'],
+    index: number
+  ) => void;
   setActionAlertsFilterProperty: (
-    key: string,
-    value: RuleActionAlertsFilterProperty,
+    key: RuleActionAlertsFilterPayload['key'],
+    value: RuleActionAlertsFilterPayload['value'],
     index: number
   ) => void;
   actionTypesIndex: ActionTypeIndex;
@@ -150,38 +154,51 @@ export const ActionTypeForm = ({
     application: { capabilities },
     http: { basePath },
   } = useKibana().services;
+
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
+
+  const isSystemActionItem = isSystemAction(actionItem);
+
   const selectedActionGroup =
-    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+    actionGroups?.find(({ id }) => !isSystemActionItem && id === actionItem.group) ??
+    defaultActionGroup;
+
   const [actionGroup, setActionGroup] = useState<string>();
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+
   const [actionThrottle, setActionThrottle] = useState<number | null>(
-    actionItem.frequency?.throttle
+    !isSystemActionItem && actionItem.frequency?.throttle
       ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
       : null
   );
+
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
-    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+    !isSystemActionItem && actionItem.frequency?.throttle
+      ? getDurationUnitValue(actionItem.frequency?.throttle)
+      : 'h'
   );
+
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
     -1,
     's',
   ];
+
   const [warning, setWarning] = useState<string | null>(null);
 
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
-  const isSummaryAction = actionItem.frequency?.summary;
+  const isSummaryAction = !isSystemActionItem && actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
-    if (actionItem.group === recoveryActionGroup) {
+
+    if (!isSystemActionItem && actionItem.group === recoveryActionGroup) {
       defaultParams = connectorType.defaultRecoveredActionParams;
     }
 
@@ -233,8 +250,9 @@ export const ActionTypeForm = ({
         }
       }
     })();
+    // @ts-expect-error: we cannot distinguish between action types in the dependency array
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem.group, actionItem.frequency?.summary]);
+  }, [actionItem?.group, actionItem?.frequency?.summary]);
 
   useEffect(() => {
     (async () => {
@@ -297,45 +315,31 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
-  const actionNotifyWhen = (
-    <ActionNotifyWhen
-      frequency={actionItem.frequency}
-      throttle={actionThrottle}
-      throttleUnit={actionThrottleUnit}
-      hasSummary={hasSummary}
-      onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
-          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onThrottleChange={useCallback(
-        (throttle: number | null, throttleUnit: string) => {
-          if (throttle) {
-            setActionThrottle(throttle);
-            setActionThrottleUnit(throttleUnit);
-          }
-          setActionFrequencyProperty(
-            'throttle',
-            throttle ? `${throttle}${throttleUnit}` : null,
-            index
-          );
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onSummaryChange={useCallback(
-        (summary: boolean) => {
-          // use the default message when a user toggles between action frequencies
-          setUseDefaultMessage(true);
-          setActionFrequencyProperty('summary', summary, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      showMinimumThrottleWarning={showMinimumThrottleWarning}
-      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
-      notifyWhenSelectOptions={notifyWhenSelectOptions}
-      defaultNotifyWhenValue={defaultNotifyWhenValue}
-    />
+  const onNotifyWhenChange = useCallback(
+    (notifyWhen) => {
+      setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+    },
+    [setActionFrequencyProperty, index]
+  );
+
+  const onThrottleChange = useCallback(
+    (throttle: number | null, throttleUnit: string) => {
+      if (throttle) {
+        setActionThrottle(throttle);
+        setActionThrottleUnit(throttleUnit);
+      }
+      setActionFrequencyProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null, index);
+    },
+    [setActionFrequencyProperty, index]
+  );
+
+  const onSummaryChange = useCallback(
+    (summary: boolean) => {
+      // use the default message when a user toggles between action frequencies
+      setUseDefaultMessage(true);
+      setActionFrequencyProperty('summary', summary, index);
+    },
+    [setActionFrequencyProperty, index]
   );
 
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
@@ -353,6 +357,7 @@ export const ActionTypeForm = ({
   );
 
   const showSelectActionGroup =
+    !isSystemActionItem &&
     actionGroups &&
     selectedActionGroup &&
     setActionGroupIdByIndex &&
@@ -407,8 +412,22 @@ export const ActionTypeForm = ({
           />
         </EuiFormRow>
         <EuiSpacer size="xl" />
-        {!hideNotifyWhen && actionNotifyWhen}
-        {showSelectActionGroup && (
+        {!hideNotifyWhen && !isSystemActionItem && (
+          <ActionNotifyWhen
+            frequency={actionItem.frequency}
+            throttle={actionThrottle}
+            throttleUnit={actionThrottleUnit}
+            hasSummary={hasSummary}
+            onNotifyWhenChange={onNotifyWhenChange}
+            onThrottleChange={onThrottleChange}
+            onSummaryChange={onSummaryChange}
+            showMinimumThrottleWarning={showMinimumThrottleWarning}
+            showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+            notifyWhenSelectOptions={notifyWhenSelectOptions}
+            defaultNotifyWhenValue={defaultNotifyWhenValue}
+          />
+        )}
+        {showSelectActionGroup && !isSystemActionItem && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="s" />}
             <EuiSuperSelect
@@ -439,7 +458,7 @@ export const ActionTypeForm = ({
             />
           </>
         )}
-        {showActionAlertsFilter && (
+        {showActionAlertsFilter && !isSystemActionItem && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
@@ -553,28 +572,30 @@ export const ActionTypeForm = ({
                           }}
                         />
                       </EuiFlexItem>
-                      {(selectedActionGroup || actionItem.frequency?.summary) && !isOpen && (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge iconType="clock">
-                            {actionItem.frequency?.summary
-                              ? i18n.translate(
-                                  'xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle',
-                                  {
-                                    defaultMessage: 'Summary of alerts',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.triggersActionsUI.sections.actionTypeForm.runWhenGroupTitle',
-                                  {
-                                    defaultMessage: 'Run when {groupName}',
-                                    values: {
-                                      groupName: selectedActionGroup!.name.toLocaleLowerCase(),
-                                    },
-                                  }
-                                )}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      )}
+                      {!isSystemActionItem &&
+                        (selectedActionGroup || actionItem.frequency?.summary) &&
+                        !isOpen && (
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge iconType="clock">
+                              {actionItem.frequency?.summary
+                                ? i18n.translate(
+                                    'xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle',
+                                    {
+                                      defaultMessage: 'Summary of alerts',
+                                    }
+                                  )
+                                : i18n.translate(
+                                    'xpack.triggersActionsUI.sections.actionTypeForm.runWhenGroupTitle',
+                                    {
+                                      defaultMessage: 'Run when {groupName}',
+                                      values: {
+                                        groupName: selectedActionGroup!.name.toLocaleLowerCase(),
+                                      },
+                                    }
+                                  )}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        )}
                       {warning && !isOpen && (
                         <EuiFlexItem grow={false}>
                           <EuiBadge

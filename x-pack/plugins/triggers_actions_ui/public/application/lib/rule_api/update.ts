@@ -10,6 +10,7 @@ import { RewriteResponseCase, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { Rule, RuleUpdates } from '../../../types';
 import { transformRule } from './common_transformations';
+import { isSystemAction } from '../is_system_action';
 
 type RuleUpdatesBody = Pick<
   RuleUpdates,
@@ -17,18 +18,26 @@ type RuleUpdatesBody = Pick<
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
-  actions: actions.map(({ group, id, params, frequency, uuid, alertsFilter }) => ({
-    group,
-    id,
-    params,
-    frequency: {
-      notify_when: frequency!.notifyWhen,
-      throttle: frequency!.throttle,
-      summary: frequency!.summary,
-    },
-    alerts_filter: alertsFilter,
-    ...(uuid && { uuid }),
-  })),
+  actions: actions.map((action) => {
+    if (isSystemAction(action)) {
+      return action;
+    }
+
+    const { group, id, params, frequency, uuid, alertsFilter } = action;
+
+    return {
+      group,
+      id,
+      params,
+      frequency: {
+        notify_when: frequency!.notifyWhen,
+        throttle: frequency!.throttle,
+        summary: frequency!.summary,
+      },
+      alerts_filter: alertsFilter,
+      ...(uuid && { uuid }),
+    };
+  }),
 });
 
 export async function updateRule({

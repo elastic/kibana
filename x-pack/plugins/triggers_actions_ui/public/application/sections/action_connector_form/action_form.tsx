@@ -19,12 +19,7 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import {
-  ActionGroup,
-  RuleActionAlertsFilterProperty,
-  RuleActionFrequency,
-  RuleActionParam,
-} from '@kbn/alerting-plugin/common';
+import { ActionGroup, RuleActionFrequency, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
@@ -47,6 +42,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
+import {
+  RuleActionAlertsFilterPayload,
+  RuleActionFrequencyPayload,
+} from '../rule_form/rule_reducer';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitMessageVariables?: OmitMessageVariablesType;
@@ -62,10 +61,14 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
-  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (
+    key: RuleActionFrequencyPayload['key'],
+    value: RuleActionFrequencyPayload['value'],
+    index: number
+  ) => void;
   setActionAlertsFilterProperty: (
-    key: string,
-    value: RuleActionAlertsFilterProperty,
+    key: RuleActionAlertsFilterPayload['key'],
+    value: RuleActionAlertsFilterPayload['value'],
     index: number
   ) => void;
   featureId: string;

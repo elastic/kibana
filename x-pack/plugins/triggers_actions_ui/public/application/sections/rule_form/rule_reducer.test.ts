@@ -7,6 +7,7 @@
 
 import { ruleReducer } from './rule_reducer';
 import { Rule } from '../../../types';
+import { RuleDefaultAction } from '@kbn/alerting-plugin/common';
 
 describe('rule reducer', () => {
   let initialRule: Rule;
@@ -113,6 +114,7 @@ describe('rule reducer', () => {
       params: {},
       uuid: '123-456',
     });
+
     const updatedRule = ruleReducer(
       { rule: initialRule },
       {
@@ -124,6 +126,7 @@ describe('rule reducer', () => {
         },
       }
     );
+
     expect(updatedRule.rule.actions[0].params.testActionParam).toBe(
       'new test action params property'
     );
@@ -176,6 +179,7 @@ describe('rule reducer', () => {
       params: {},
       uuid: '123-456',
     });
+
     const updatedRule = ruleReducer(
       { rule: initialRule },
       {
@@ -187,7 +191,7 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect(updatedRule.rule.actions[0].group).toBe('Warning');
+    expect((updatedRule.rule.actions[0] as RuleDefaultAction).group).toBe('Warning');
   });
 
   test('if rule action frequency was updated', () => {
@@ -209,6 +213,8 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect(updatedRule.rule.actions[0].frequency?.notifyWhen).toBe('onThrottleInterval');
+    expect((updatedRule.rule.actions[0] as RuleDefaultAction).frequency?.notifyWhen).toBe(
+      'onThrottleInterval'
+    );
   });
 });
