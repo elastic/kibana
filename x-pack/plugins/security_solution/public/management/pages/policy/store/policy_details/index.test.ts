@@ -269,7 +269,13 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
-                  meta: { license: '', cloud: false },
+                  meta: {
+                    license: '',
+                    cloud: false,
+                    license_uid: '',
+                    cluster_name: '',
+                    cluster_uuid: '',
+                  },
                   windows: {
                     events: {
                       credential_access: true,

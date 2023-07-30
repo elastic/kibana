@@ -41,17 +41,13 @@ interface Package {
 const packages: Package[] = [
   {
     name: 're2',
-    version: '1.17.4',
+    version: '1.17.7',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
-      'darwin-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-x64-93.gz',
-        sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-      },
       'linux-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-x64-93.gz',
-        sha256: '4d06747b266c75b6f7ced93977692c0586ce6a52924cabb569bd966378941aa1',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/linux-x64-108.gz',
+        sha256: 'e0b62ff7c415c95f57232f2726711c0fd71056c848538f095ba3fa1126ef5e31',
       },
 
       // ARM builds are currently done manually as Github Actions used in upstream project
@@ -67,8 +63,13 @@ const packages: Package[] = [
       // * capture the sha256 with: `shasum -a 256 linux-arm64-*`
       // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'linux-arm64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-arm64-93.gz',
-        sha256: '25409584f76f3d6ed85463d84adf094eb6e256ed1cb0b754b95bcbda6691fc26',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/linux-arm64-108.gz',
+        sha256: 'e2025ead87be9f1ec4a9d892d1cce69c573101762720d56f52b1d52ed7ae0fef',
+      },
+
+      'darwin-x64': {
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/darwin-x64-108.gz',
+        sha256: '4ed378c5a7fe6134b717afe7642254aff1ed7a881cbcaa53a012ac3efab49f99',
       },
 
       // A similar process is necessary for building on ARM macs:
@@ -78,13 +79,13 @@ const packages: Package[] = [
       // * capture the sha256 with: `shasum -a 256 darwin-arm64-*`
       // * upload the `darwin-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'darwin-arm64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-arm64-93.gz',
-        sha256: 'd4b708749ddef1c87019f6b80e051ed0c29ccd1de34f233c47d8dcaddf803872',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/darwin-arm64-108.gz',
+        sha256: '42afc32137ff5c5bebae5d68347a9786906748c2f28e06194d8950707f2ae90e',
       },
 
       'win32-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/win32-x64-93.gz',
-        sha256: '0320d0c0385432944c6fb3c8c8fcd78d440ce5626f7618f9ec71d88e44820674',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/win32-x64-108.gz',
+        sha256: 'ff72fe02de652262659c8e17e44a932f3c873362233756b40d1a97538d05de92',
       },
     },
   },
