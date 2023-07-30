@@ -27,9 +27,6 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
   request<MetadataListResponse>({
-    headers: {
-      'elastic-api-version': '2023-10-31',
-    },
     method: 'GET',
     url: HOST_METADATA_LIST_ROUTE,
   }).then(({ body }) => {

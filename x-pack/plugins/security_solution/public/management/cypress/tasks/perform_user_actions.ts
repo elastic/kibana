@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-export type ActionTypes = 'click' | 'input' | 'clear';
+export type ActionTypes = 'click' | 'input' | 'clear' | 'wait';
 
 export interface FormAction {
   type: ActionTypes;
   selector?: string;
   customSelector?: string;
   value?: string;
+  waitTime?: number;
 }
 
 export const performUserActions = (actions: FormAction[]) => {
@@ -21,6 +22,12 @@ export const performUserActions = (actions: FormAction[]) => {
 };
 
 const performAction = (action: FormAction) => {
+
+  if (action.type === 'wait') {
+    cy.wait(action.waitTime || 1000);
+    return;
+  }
+  
   let element;
   if (action.customSelector) {
     element = cy.get(action.customSelector);
