@@ -197,6 +197,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'wait',
+          waitTime: 3000,
         },
         {
           type: 'click',
