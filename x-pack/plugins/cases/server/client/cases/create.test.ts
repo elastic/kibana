@@ -12,11 +12,10 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseSeverity } from '../../../common/api';
-import { ConnectorTypes } from '../../../common/types/domain';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 
 describe('create', () => {
   const theCase = {

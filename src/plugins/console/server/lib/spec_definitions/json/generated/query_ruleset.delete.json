@@ -1,0 +1,11 @@
+{
+  "query_ruleset.delete": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_query_rules/{ruleset_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-query-ruleset.html"
+  }
+}

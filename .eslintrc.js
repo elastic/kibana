@@ -639,7 +639,7 @@ module.exports = {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -672,7 +672,7 @@ module.exports = {
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -708,7 +708,7 @@ module.exports = {
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
@@ -1160,12 +1160,12 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -1174,6 +1174,7 @@ module.exports = {
       overrides: [
         {
           files: [
+            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
@@ -1255,12 +1256,12 @@ module.exports = {
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
       },
     },
     {
