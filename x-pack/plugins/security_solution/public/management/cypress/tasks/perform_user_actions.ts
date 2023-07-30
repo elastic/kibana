@@ -22,12 +22,11 @@ export const performUserActions = (actions: FormAction[]) => {
 };
 
 const performAction = (action: FormAction) => {
-
   if (action.type === 'wait') {
     cy.wait(action.waitTime || 1000);
     return;
   }
-  
+
   let element;
   if (action.customSelector) {
     element = cy.get(action.customSelector);
