@@ -105,7 +105,6 @@ describe('useTimeline', () => {
   describe('when submitting a new prompt', () => {
     const createChatSimulator = (initialProps?: DeepPartial<HookProps>) => {
       let resolve: (data: { content?: string; aborted?: boolean }) => void;
-      let reject: (error: Error) => void;
 
       const abort = () => {
         resolve({
@@ -130,12 +129,9 @@ describe('useTimeline', () => {
             content: undefined,
             abort,
             generate: () => {
-              const promise = new Promise((innerResolve, innerReject) => {
+              const promise = new Promise((innerResolve) => {
                 resolve = (...args) => {
                   innerResolve(...args);
-                };
-                reject = (...args) => {
-                  innerReject(...args);
                 };
               });
 
