@@ -40,7 +40,7 @@ export const getCnvmUsageRecord = async ({
       : new Date().toISOString();
 
     const usageRecords = {
-      id: CLOUD_SECURITY_TASK_TYPE + ':' + CLOUD_SECURITY_TASK_TYPE,
+      id: `${CLOUD_SECURITY_TASK_TYPE}:${CNVM_BUCKET_SUB_TYPE_NAME}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
       usage: {

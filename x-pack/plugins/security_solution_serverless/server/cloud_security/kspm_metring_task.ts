@@ -7,7 +7,7 @@
 
 import { UsageRecord } from '../types';
 import {
-  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
   LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
@@ -19,9 +19,9 @@ import {
 import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
 import type { CloudSecurityMeteringCallbackInput, ResourceCountAggregation } from './types';
 
-const CSPM_BUCKET_SUB_TYPE_NAME = 'CSPM';
+const KSPM_BUCKET_SUB_TYPE_NAME = 'KSPM';
 
-export const getCspmUsageRecord = async ({
+export const getKspmUsageRecord = async ({
   esClient,
   projectId,
   logger,
@@ -35,20 +35,20 @@ export const getCspmUsageRecord = async ({
     if (!response.aggregations) {
       return;
     }
-    const cspmResourceCount = response.aggregations.unique_resources.value;
+    const kspmResourceCount = response.aggregations.unique_resources.value;
 
     const minTimestamp = response.aggregations
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
       : new Date().toISOString();
 
     const usageRecords = {
-      id: `${CLOUD_SECURITY_TASK_TYPE}:${CSPM_BUCKET_SUB_TYPE_NAME}`,
+      id: `${CLOUD_SECURITY_TASK_TYPE}:${KSPM_BUCKET_SUB_TYPE_NAME}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
       usage: {
         type: CLOUD_SECURITY_TASK_TYPE,
-        sub_type: CSPM_BUCKET_SUB_TYPE_NAME,
-        quantity: cspmResourceCount,
+        sub_type: KSPM_BUCKET_SUB_TYPE_NAME,
+        quantity: kspmResourceCount,
         period_seconds: cloudSecurityMetringTaskProperties.periodSeconds,
       },
       source: {
@@ -57,11 +57,11 @@ export const getCspmUsageRecord = async ({
       },
     };
 
-    logger.debug(`Fetched CSPM metring data`);
+    logger.debug(`Fetched KSPM metring data`);
 
     return usageRecords;
   } catch (err) {
-    logger.error(`Failed to fetch CSPM metering data ${err}`);
+    logger.error(`Failed to fetch KSPM metering data ${err}`);
   }
 };
 
@@ -72,13 +72,13 @@ export const getFindingsByResourceAggQuery = () => ({
       must: [
         {
           term: {
-            'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE,
+            'rule.benchmark.posture_type': KSPM_POLICY_TEMPLATE,
           },
         },
         {
           range: {
             '@timestamp': {
-              gte: 'now-' + LATEST_FINDINGS_RETENTION_POLICY, // the "look back" period should be the same as the scan interval
+              gte: 'now-' + LATEST_FINDINGS_RETENTION_POLICY,
             },
           },
         },

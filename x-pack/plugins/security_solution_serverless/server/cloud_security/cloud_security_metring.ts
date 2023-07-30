@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
-import { getCnvmUsageRecord } from './cnvm_metring_task';
-=======
->>>>>>> upstream/main
 import { getCspmUsageRecord } from './cspm_metring_task';
+import { getKspmUsageRecord } from './kspm_metring_task';
+import { getCnvmUsageRecord } from './cnvm_metring_task';
 import type { MeteringCallbackInput, UsageRecord } from '../types';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
-<<<<<<< HEAD
 export const AGGREGATION_PRECISION_THRESHOLD = 3000;
-=======
->>>>>>> upstream/main
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
@@ -34,30 +29,21 @@ export const cloudSecurityMetringCallback = async ({
   try {
     const cloudSecurityUsageRecords: UsageRecord[] = [];
 
-    const cspmUsageRecord = await getCspmUsageRecord({
-      esClient,
-      projectId,
-      logger,
-      taskId,
-      lastSuccessfulReport,
-    });
+    const usageRecordFunctions = [getCspmUsageRecord, getKspmUsageRecord, getCnvmUsageRecord];
 
-    if (cspmUsageRecord) {
-      cloudSecurityUsageRecords.push(cspmUsageRecord);
+    for (const usageRecordFunction of usageRecordFunctions) {
+      const usageRecord = await usageRecordFunction({
+        esClient,
+        projectId,
+        logger,
+        taskId,
+        lastSuccessfulReport,
+      });
+
+      if (usageRecord) {
+        cloudSecurityUsageRecords.push(usageRecord);
+      }
     }
-
-    const cnvmUsageRecord = await getCnvmUsageRecord({
-      esClient,
-      projectId,
-      logger,
-      taskId,
-      lastSuccessfulReport,
-    });
-
-    if (cnvmUsageRecord) {
-      cloudSecurityUsageRecords.push(cnvmUsageRecord);
-    }
-
 
     return cloudSecurityUsageRecords;
   } catch (err) {
