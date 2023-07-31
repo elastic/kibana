@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
 import {
   createNewCaseFromExpandableFlyout,
@@ -17,9 +18,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_NAVIGATE_TO_RULE_DETAILS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
@@ -42,6 +42,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   clickCorrelationsViewAllButton,
@@ -61,10 +63,10 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
-} from '../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
 
 describe(
   'Alert details expandable flyout right panel overview tab',
@@ -98,9 +100,9 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
           .should('be.visible')
           .within(() => {
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_NAVIGATE_TO_RULE_DETAILS_BUTTON)
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
               .should('be.visible')
-              .and('contain.text', 'View rule');
+              .and('have.text', 'Rule summary');
           });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')
@@ -191,17 +193,29 @@ describe(
           'be.visible'
         );
 
-        cy.log('navigate to table tab when clicking on highlighted fields view button');
-
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK)
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL)
           .should('be.visible')
-          .click();
+          .and('contain.text', 'host.name');
+        const hostNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
+        cy.get(hostNameCell).should('be.visible').and('have.text', 'siem-kibana');
 
-        // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
-        // this next line is a hack that scrolls to a specific element in the table
-        // (in the middle of it vertically) to ensure Cypress finds it
-        cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+        cy.get(hostNameCell).click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('be.visible');
+
+        collapseDocumentDetailsExpandableFlyoutLeftSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL)
+          .should('be.visible')
+          .and('contain.text', 'user.name');
+        const userNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
+        cy.get(userNameCell).should('be.visible').and('have.text', 'test');
+
+        cy.get(userNameCell).click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('be.visible');
       });
     });
 
