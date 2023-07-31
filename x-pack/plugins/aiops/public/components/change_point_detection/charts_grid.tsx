@@ -23,7 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { type RefreshInterval } from '@kbn/data-plugin/common';
-import { type SelectedChangePoint } from './change_point_detection_context';
+import {
+  type SelectedChangePoint,
+  useChangePointDetectionContext,
+} from './change_point_detection_context';
 import { ChartComponent } from './chart_component';
 
 const CHARTS_PER_PAGE = 6;
@@ -32,10 +35,114 @@ interface ChartsGridProps {
   changePoints: Record<number, SelectedChangePoint[]>;
 }
 
-export const ChartsGrid: FC<ChartsGridProps> = ({ changePoints: changePointsDict }) => {
+/**
+ * Shared component for change point charts grid.
+ * Used both in AIOps UI and inside embeddable.
+ *
+ * @param changePoints
+ * @constructor
+ */
+export const ChartsGrid: FC<{ changePoints: SelectedChangePoint[]; interval: string }> = ({
+  changePoints,
+  interval,
+}) => {
+  return (
+    <EuiFlexGrid
+      columns={changePoints.length >= 2 ? 2 : 1}
+      responsive
+      gutterSize={'m'}
+      css={{ width: '100%' }}
+    >
+      {changePoints.map((v, index) => {
+        const key = `${index}_${v.group?.value ?? 'single_metric'}_${v.fn}_${v.metricField}_${
+          v.timestamp
+        }_${v.p_value}`;
+        return (
+          <EuiFlexItem key={key}>
+            <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+              <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
+                <EuiFlexItem grow={false}>
+                  {v.group ? (
+                    <EuiDescriptionList
+                      type="inline"
+                      listItems={[{ title: v.group.name, description: v.group.value }]}
+                    />
+                  ) : null}
+
+                  {v.reason ? (
+                    <EuiToolTip position="top" content={v.reason}>
+                      <EuiIcon
+                        tabIndex={0}
+                        color={'warning'}
+                        type="warning"
+                        title={i18n.translate(
+                          'xpack.aiops.changePointDetection.notResultsWarning',
+                          {
+                            defaultMessage: 'No change point agg results warning',
+                          }
+                        )}
+                      />
+                    </EuiToolTip>
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color={'subdued'} size={'s'}>
+                    {v.fn}({v.metricField})
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiHorizontalRule margin="xs" />
+
+              <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
+                {v.p_value !== undefined ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiDescriptionList
+                      type="inline"
+                      listItems={[
+                        {
+                          title: (
+                            <FormattedMessage
+                              id="xpack.aiops.changePointDetection.pValueLabel"
+                              defaultMessage="p-value"
+                            />
+                          ),
+                          description: v.p_value.toPrecision(3),
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{v.type}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <ChartComponent
+                fieldConfig={{ splitField: v.splitField, fn: v.fn, metricField: v.metricField }}
+                annotation={v}
+                interval={interval}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGrid>
+  );
+};
+
+/**
+ * Wrapper component for change point charts grid.
+ *
+ * @param changePointsDict
+ * @constructor
+ */
+export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changePointsDict }) => {
   const timefilter = useTimefilter();
 
   const initialRefreshSetting = useRef<RefreshInterval>();
+
+  const { bucketInterval } = useChangePointDetectionContext();
 
   useEffect(
     function pauseRefreshOnMount() {
@@ -76,90 +183,7 @@ export const ChartsGrid: FC<ChartsGridProps> = ({ changePoints: changePointsDict
 
   return (
     <>
-      <EuiFlexGrid
-        columns={resultPerPage.length >= 2 ? 2 : 1}
-        responsive
-        gutterSize={'m'}
-        css={{ width: '100%' }}
-      >
-        {resultPerPage.map((v, index) => {
-          const key = `${index}_${v.group?.value ?? 'single_metric'}_${v.fn}_${v.metricField}_${
-            v.timestamp
-          }_${v.p_value}`;
-          return (
-            <EuiFlexItem key={key}>
-              <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-                <EuiFlexGroup
-                  alignItems={'center'}
-                  justifyContent={'spaceBetween'}
-                  gutterSize={'s'}
-                >
-                  <EuiFlexItem grow={false}>
-                    {v.group ? (
-                      <EuiDescriptionList
-                        type="inline"
-                        listItems={[{ title: v.group.name, description: v.group.value }]}
-                      />
-                    ) : null}
-
-                    {v.reason ? (
-                      <EuiToolTip position="top" content={v.reason}>
-                        <EuiIcon
-                          tabIndex={0}
-                          color={'warning'}
-                          type="warning"
-                          title={i18n.translate(
-                            'xpack.aiops.changePointDetection.notResultsWarning',
-                            {
-                              defaultMessage: 'No change point agg results warning',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    ) : null}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color={'subdued'} size={'s'}>
-                      {v.fn}({v.metricField})
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiHorizontalRule margin="xs" />
-
-                <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
-                  {v.p_value !== undefined ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiDescriptionList
-                        type="inline"
-                        listItems={[
-                          {
-                            title: (
-                              <FormattedMessage
-                                id="xpack.aiops.changePointDetection.pValueLabel"
-                                defaultMessage="p-value"
-                              />
-                            ),
-                            description: v.p_value.toPrecision(3),
-                          },
-                        ]}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{v.type}</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <ChartComponent
-                  fieldConfig={{ splitField: v.splitField, fn: v.fn, metricField: v.metricField }}
-                  annotation={v}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGrid>
+      <ChartsGrid changePoints={resultPerPage} interval={bucketInterval.expression} />
 
       {pagination.pageCount > 1 ? (
         <EuiFlexGroup justifyContent="spaceAround">

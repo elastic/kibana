@@ -35,7 +35,7 @@ import {
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../embeddable/embeddable_change_point_chart_factory';
-import { ChartsGrid } from './charts_grid';
+import { ChartsGridContainer } from './charts_grid';
 import { FieldsConfig } from './fields_config';
 import { useDataSource } from '../../hooks/use_data_source';
 import { ChangePointTypeFilter } from './change_point_type_filter';
@@ -295,7 +295,7 @@ export const ChangePointDetectionPage: FC = () => {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ChartsGrid changePoints={selectedChangePoints} />
+            <ChartsGridContainer changePoints={selectedChangePoints} />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}

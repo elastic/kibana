@@ -20,6 +20,7 @@ import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { FilterQueryContextProvider } from '../hooks/use_filters_query';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from './embeddable_change_point_chart_factory';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
@@ -107,14 +108,17 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
                 <DataSourceContextProvider dataViewId={input.dataViewId}>
-                  <ChardGridEmbeddableWrapper
-                    fn={input.fn}
-                    metricField={input.metricField}
-                    splitField={input.splitField}
-                    timeRange={input.timeRange}
-                    maxSeriesToPlot={input.maxSeriesToPlot}
-                    dataViewId={input.dataViewId}
-                  />
+                  <FilterQueryContextProvider timeRange={input.timeRange}>
+                    <ChardGridEmbeddableWrapper
+                      timeRange={input.timeRange}
+                      fn={input.fn}
+                      metricField={input.metricField}
+                      splitField={input.splitField}
+                      maxSeriesToPlot={input.maxSeriesToPlot}
+                      dataViewId={input.dataViewId}
+                      partitions={input.partitions}
+                    />
+                  </FilterQueryContextProvider>
                 </DataSourceContextProvider>
               </Suspense>
             </DatePickerContextProvider>
