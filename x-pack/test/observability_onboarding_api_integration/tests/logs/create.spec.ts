@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           id: request.body.onboardingId,
         });
 
-        expect(savedState.attributes).to.be.eql({ state, progress: {} });
+        expect(savedState.attributes).to.be.eql({ type: 'logFiles', state, progress: {} });
       });
     });
   });
