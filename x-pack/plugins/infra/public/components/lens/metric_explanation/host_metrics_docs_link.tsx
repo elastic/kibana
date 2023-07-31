@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HOST_METRICS_DOC_HREF } from '../constants';
+import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
 
 export const HostMetricsDocsLink = () => {
   return (
