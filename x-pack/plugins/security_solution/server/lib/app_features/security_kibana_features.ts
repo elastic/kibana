@@ -173,6 +173,9 @@ export const getSecurityAppFeaturesConfig = (
       subFeatureIds: [SecuritySubFeatureId.policyManagement],
     },
 
+    // Adds no additional kibana feature controls
+    [AppFeatureSecurityKey.endpointPolicyProtections]: {},
+
     [AppFeatureSecurityKey.endpointArtifactManagement]: {
       subFeatureIds: [
         SecuritySubFeatureId.trustedApplications,
