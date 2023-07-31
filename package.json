@@ -759,7 +759,7 @@
     "json-schema-typed": "^8.0.1",
     "json5": "^2.2.3",
     "jsondiffpatch": "0.4.1",
-    "license-checker": "^16.0.0",
+    "license-checker": "^25.0.1",
     "listr": "^0.14.1",
     "lmdb": "^2.6.9",
     "marge": "^1.0.1",
