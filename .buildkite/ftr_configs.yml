@@ -340,6 +340,7 @@ enabled:
   - x-pack/test/observability_functional/with_rac_write.config.ts
   - x-pack/test/observability_onboarding_api_integration/basic/config.ts
   - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
+  - x-pack/test/observability_ai_assistant_api_integration/enterprise/config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts

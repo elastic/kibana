@@ -8,7 +8,6 @@
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
@@ -18,7 +17,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -432,46 +430,6 @@ export default function Expressions(props: Props) {
           />
         </EuiButtonEmpty>
       </div>
-      <EuiSpacer size={'m'} />
-      <EuiAccordion
-        id="advanced-options-accordion"
-        buttonContent={i18n.translate(
-          'xpack.observability.threshold.rule.alertFlyout.advancedOptions',
-          {
-            defaultMessage: 'Advanced options',
-          }
-        )}
-      >
-        <EuiPanel color="subdued">
-          <EuiCheckbox
-            disabled={disableNoData}
-            id="metrics-alert-no-data-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.observability.threshold.rule.alertFlyout.alertOnNoData', {
-                  defaultMessage: "Alert me if there's no data",
-                })}{' '}
-                <EuiToolTip
-                  content={
-                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                    i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.noDataHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                      }
-                    )
-                  }
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
-              </>
-            }
-            checked={ruleParams.alertOnNoData}
-            onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-        </EuiPanel>
-      </EuiAccordion>
       <EuiSpacer size={'m'} />
       <EuiFormRow
         label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterLabel', {
