@@ -115,10 +115,7 @@ export class NavigationEmbeddableFactoryDefinition
         ...initialInput,
       } as NavigationEmbeddableByValueInput,
       parent
-    ).catch(() => {
-      // swallow the promise rejection that happens when the flyout is closed
-      return {};
-    });
+    );
 
     return input;
   }
