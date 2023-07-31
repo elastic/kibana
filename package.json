@@ -508,6 +508,7 @@
     "@kbn/ml-date-picker": "link:x-pack/packages/ml/date_picker",
     "@kbn/ml-date-utils": "link:x-pack/packages/ml/date_utils",
     "@kbn/ml-error-utils": "link:x-pack/packages/ml/error_utils",
+    "@kbn/ml-in-memory-table": "link:x-pack/packages/ml/in_memory_table",
     "@kbn/ml-is-defined": "link:x-pack/packages/ml/is_defined",
     "@kbn/ml-is-populated-object": "link:x-pack/packages/ml/is_populated_object",
     "@kbn/ml-kibana-theme": "link:x-pack/packages/ml/kibana_theme",
