@@ -93,13 +93,13 @@ describe('<ThresholdWatchEditPage /> create route', () => {
     jest.useRealTimers();
   });
 
+  httpRequestsMockHelpers.setLoadMatchingIndicesResponse({ indices: MATCH_INDICES });
+  httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
+  httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
+  httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
+
   beforeEach(async () => {
     await act(async () => {
-      httpRequestsMockHelpers.setLoadMatchingIndicesResponse({ indices: MATCH_INDICES });
-      httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
-      httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
-      httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
-
       testBed = await setup(httpSetup);
     });
 
@@ -218,7 +218,13 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
       describe('actions', () => {
         beforeEach(async () => {
+          await act(async () => {
+            testBed = await setup(httpSetup);
+          });
+
           const { form, find, component } = testBed;
+
+          component.update();
 
           // Set up valid fields needed for actions component to render
           await act(async () => {
@@ -226,6 +232,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
             find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]);
             form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
           });
+
           component.update();
         });
 
