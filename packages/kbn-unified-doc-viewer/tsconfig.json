@@ -10,10 +10,14 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/discover-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+  ]
 }
