@@ -32,7 +32,7 @@ export const patchListRoute = (router: ListsPluginRouter): void => {
       try {
         const { name, description, id, meta, _version, version } = request.body;
         const lists = await getListClient(context);
-        const list = await lists.updateList({ _version, description, id, meta, name, version });
+        const list = await lists.patchList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({
             body: `list id: "${id}" not found`,

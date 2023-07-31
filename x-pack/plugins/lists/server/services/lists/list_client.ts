@@ -86,6 +86,7 @@ import {
   getList,
   getListIndex,
   getListTemplate,
+  patchList,
   updateList,
 } from '.';
 
@@ -817,6 +818,37 @@ export class ListClient {
     const listIndex = this.getListIndex();
     return updateList({
       _version,
+      description,
+      esClient,
+      id,
+      listIndex,
+      meta,
+      name,
+      user,
+      version,
+    });
+  };
+
+  /**
+   * Patches a list container's value given the id of the list.
+   * @param options
+   * @param options._version This is the version, useful for optimistic concurrency control.
+   * @param options.id id of the list to replace the list container data with.
+   * @param options.name The new name, or "undefined" if this should not be updated.
+   * @param options.description The new description, or "undefined" if this should not be updated.
+   * @param options.meta Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" to not update meta values.
+   * @param options.version Updates the version of the list.
+   */
+  public patchList = async ({
+    id,
+    name,
+    description,
+    meta,
+    version,
+  }: UpdateListOptions): Promise<ListSchema | null> => {
+    const { esClient, user } = this;
+    const listIndex = this.getListIndex();
+    return patchList({
       description,
       esClient,
       id,
