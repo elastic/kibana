@@ -142,36 +142,38 @@ export const createRuleWithoutEnabling = () => {
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
-export const fillAboutRule = (rule: RuleCreateProps) => {
+export const fillAboutRule = (rule: RuleCreateProps, minimal = true) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true });
   cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
 
-  if (rule.severity) {
-    fillSeverity(rule.severity);
-  }
-  if (rule.risk_score) {
-    fillRiskScore(rule.risk_score);
-  }
-  if (rule.tags) {
-    fillRuleTags(rule.tags);
-  }
-  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
+  if (!minimal) {
+    if (rule.severity) {
+      fillSeverity(rule.severity);
+    }
+    if (rule.risk_score) {
+      fillRiskScore(rule.risk_score);
+    }
+    if (rule.tags) {
+      fillRuleTags(rule.tags);
+    }
+    cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
-  if (rule.references) {
-    fillReferenceUrls(rule.references);
-  }
+    if (rule.references) {
+      fillReferenceUrls(rule.references);
+    }
 
-  if (rule.false_positives) {
-    fillFalsePositiveExamples(rule.false_positives);
-  }
+    if (rule.false_positives) {
+      fillFalsePositiveExamples(rule.false_positives);
+    }
 
-  if (rule.threat) {
-    fillMitre(rule.threat);
-  }
-  if (rule.note) {
-    fillNote(rule.note);
+    if (rule.threat) {
+      fillMitre(rule.threat);
+    }
+    if (rule.note) {
+      fillNote(rule.note);
+    }
   }
 };
 
@@ -296,8 +298,8 @@ export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.reference
   return referenceUrls;
 };
 
-export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {
-  fillAboutRule(rule);
+export const fillAboutRuleAndContinue = (rule: RuleCreateProps, minimal = true) => {
+  fillAboutRule(rule, minimal);
   getAboutContinueButton().should('exist').click({ force: true });
 };
 

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
+import { getNewRule } from '../../../objects/rule';
 import {
   clickAlertTag,
   openAlertTaggingBulkActionMenu,
   selectNumberOfAlerts,
   updateAlertTags,
-} from '../../tasks/alerts';
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
-import { ALERTS_URL } from '../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+} from '../../../tasks/alerts';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { login, visit } from '../../../tasks/login';
+import { ALERTS_URL } from '../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
   ALERTS_TABLE_ROW_LOADER,
   MIXED_ALERT_TAG,
   SELECTED_ALERT_TAG,
   UNSELECTED_ALERT_TAG,
-} from '../../screens/alerts';
+} from '../../../screens/alerts';
 
 describe('Alert tagging', () => {
   before(() => {
