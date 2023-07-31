@@ -63,7 +63,9 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/unified-doc-viewer",
+    "@kbn/unified-doc-viewer-plugin"
   ],
   "exclude": [
     "target/**/*"

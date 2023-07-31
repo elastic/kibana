@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './hooks';
-export * from './utils';
-export * from './constants';
+export * from './use_doc_viewer_services';
+export * from './use_es_doc_search';

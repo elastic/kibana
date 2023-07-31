@@ -12,10 +12,9 @@ import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@e
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DocViewer, ElasticRequestState } from '@kbn/unified-doc-viewer';
+import { getDocViewsRegistry, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
-import { ElasticRequestState } from '../types';
-import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export interface DocProps {
@@ -140,7 +139,7 @@ export function Doc(props: DocProps) {
 
         {reqState === ElasticRequestState.Found && hit !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <DocViewer hit={hit} dataView={dataView} />
+            <DocViewer docViewsRegistry={getDocViewsRegistry()} hit={hit} dataView={dataView} />
           </div>
         )}
       </EuiPageBody>

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './hooks';
-export * from './utils';
-export * from './constants';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-unified-doc-viewer'],
+};

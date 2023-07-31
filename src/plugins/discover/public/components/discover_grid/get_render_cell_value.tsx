@@ -27,8 +27,8 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
-import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 

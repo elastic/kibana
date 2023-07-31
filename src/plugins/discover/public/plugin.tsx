@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
@@ -26,7 +25,6 @@ import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { EuiSkeletonText } from '@elastic/eui';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
@@ -43,12 +41,9 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { PLUGIN_ID } from '../common';
-import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
-import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
-  setDocViewsRegistry,
   setHeaderActionMenuMounter,
   setScopedHistory,
   setUiActions,
@@ -58,10 +53,8 @@ import {
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import { SearchEmbeddableFactory } from './embeddable';
-import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
-import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   DiscoverContextAppLocator,
@@ -80,24 +73,10 @@ import {
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import { DiscoverContainerInternal, DiscoverContainerProps } from './components/discover_container';
 
-const DocViewerLegacyTable = React.lazy(
-  () => import('./services/doc_views/components/doc_viewer_table/legacy')
-);
-const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
-
 /**
  * @public
  */
 export interface DiscoverSetup {
-  docViews: {
-    /**
-     * Add new doc view shown along with table view and json view in the details of each document in Discover.
-     * @param docViewRaw
-     */
-    addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
-  };
-
   /**
    * `share` plugin URL locator for Discover app. Use it to generate links into
    * Discover application, for example, navigate:
@@ -218,7 +197,6 @@ export class DiscoverPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
@@ -243,59 +221,6 @@ export class DiscoverPlugin
         new DiscoverSingleDocLocatorDefinition()
       );
     }
-
-    this.docViewsRegistry = new DocViewsRegistry();
-    setDocViewsRegistry(this.docViewsRegistry);
-    this.docViewsRegistry.addDocView({
-      title: i18n.translate('discover.docViews.table.tableTitle', {
-        defaultMessage: 'Table',
-      }),
-      order: 10,
-      component: (props) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const services = useDiscoverServices();
-        const DocView = services.uiSettings.get(DOC_TABLE_LEGACY)
-          ? DocViewerLegacyTable
-          : DocViewerTable;
-
-        return (
-          <React.Suspense
-            fallback={
-              <DeferredSpinner>
-                <EuiSkeletonText />
-              </DeferredSpinner>
-            }
-          >
-            <DocView {...props} />
-          </React.Suspense>
-        );
-      },
-    });
-    this.docViewsRegistry.addDocView({
-      title: i18n.translate('discover.docViews.json.jsonTitle', {
-        defaultMessage: 'JSON',
-      }),
-      order: 20,
-      component: ({ hit, dataView, query, textBasedHits }) => {
-        return (
-          <React.Suspense
-            fallback={
-              <DeferredSpinner>
-                <EuiSkeletonText />
-              </DeferredSpinner>
-            }
-          >
-            <SourceViewer
-              index={hit.raw._index}
-              id={hit.raw._id ?? hit.id}
-              dataView={dataView}
-              textBasedHits={textBasedHits}
-              hasLineNumbers
-            />
-          </React.Suspense>
-        );
-      },
-    });
 
     const {
       setTrackedUrl,
@@ -409,9 +334,6 @@ export class DiscoverPlugin
     this.registerEmbeddable(core, plugins);
 
     return {
-      docViews: {
-        addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
-      },
       locator: this.locator,
     };
   }

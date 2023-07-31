@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './hooks';
-export * from './utils';
-export * from './constants';
+export type {
+  DocView,
+  DocViewFilterFn,
+  DocViewRenderFn,
+  DocViewRenderProps,
+  FieldRecordLegacy,
+} from './services/types';
