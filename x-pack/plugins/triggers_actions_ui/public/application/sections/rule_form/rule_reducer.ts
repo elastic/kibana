@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, omitBy } from 'lodash';
 import { Reducer } from 'react';
 import {
   RuleActionParam,
@@ -16,7 +16,7 @@ import {
   RuleActionFrequency,
 } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash/fp';
-import { Rule } from '../../../types';
+import { Rule, RuleAction } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { isSystemAction } from '../../lib/is_system_action';
 
@@ -53,11 +53,16 @@ interface RulePayload<Key extends keyof Rule> {
   index?: number;
 }
 
-export interface RuleActionPayload {
-  key: keyof RuleDefaultAction | keyof RuleSystemAction;
+export interface RuleActionPayload<
+  Key extends keyof RuleDefaultAction | keyof RuleSystemAction =
+    | keyof RuleDefaultAction
+    | keyof RuleSystemAction
+> {
+  key: Key;
   value:
-    | RuleDefaultAction[keyof RuleDefaultAction]
-    | RuleSystemAction[keyof RuleSystemAction]
+    | (Key extends keyof RuleDefaultAction
+        ? RuleDefaultAction[keyof RuleDefaultAction]
+        : RuleSystemAction[keyof RuleSystemAction])
     | null;
   index?: number;
 }
@@ -276,17 +281,21 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
         }
 
         const { alertsFilter, ...rest } = oldAction;
-        const updatedAlertsFilter = { ...alertsFilter };
-
-        if (value) {
-          updatedAlertsFilter[key] = value;
-        } else {
-          delete updatedAlertsFilter[key];
-        }
+        const updatedAlertsFilter = { ...alertsFilter, [key]: value };
+        /**
+         * If a value is null it means that we need to delete
+         * it from the object.
+         */
+        const updatedAlertsFilterWithoutNullValues = omitBy(
+          updatedAlertsFilter,
+          (filter) => filter == null
+        );
 
         const updatedAction = {
           ...rest,
-          ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
+          ...(!isEmpty(updatedAlertsFilterWithoutNullValues)
+            ? { alertsFilter: updatedAlertsFilterWithoutNullValues }
+            : {}),
         };
         rule.actions.splice(index, 0, updatedAction);
         return {
@@ -302,8 +311,9 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
     case 'setRuleActionProperty': {
       const { key, value, index } = action.payload as RuleActionPayload;
       const ruleAction = index === undefined ? undefined : rule.actions[index];
+      const oldValue = ruleAction?.[key as keyof RuleAction];
 
-      if (index === undefined || ruleAction == null || isEqual(ruleAction[key], value)) {
+      if (index === undefined || ruleAction == null || isEqual(oldValue, value)) {
         return state;
       } else {
         const oldAction = rule.actions.splice(index, 1)[0];

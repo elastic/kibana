@@ -64,23 +64,25 @@ export const rewriteRule = ({
       return { ...action, connector_type_id: action.actionTypeId };
     }
 
+    const { group, id, actionTypeId, params, frequency, uuid, alertsFilter, type } = action;
+
     return {
-      group: action.group,
-      id: action.id,
-      params: action.params,
-      connector_type_id: action.actionTypeId,
-      type: action.type,
-      ...(action.frequency
+      group,
+      id,
+      params,
+      connector_type_id: actionTypeId,
+      ...(type && { type }),
+      ...(frequency
         ? {
             frequency: {
-              summary: action.frequency.summary,
-              notify_when: action.frequency.notifyWhen,
-              throttle: action.frequency.throttle,
+              summary: frequency.summary,
+              notify_when: frequency.notifyWhen,
+              throttle: frequency.throttle,
             },
           }
         : {}),
-      ...(action.uuid && { uuid: action.uuid }),
-      ...(action.alertsFilter && { alerts_filter: action.alertsFilter }),
+      ...(uuid && { uuid }),
+      ...(alertsFilter && { alerts_filter: alertsFilter }),
     };
   }),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),

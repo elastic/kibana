@@ -80,15 +80,13 @@ describe('rewriteRule', () => {
   it('should rewrite actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
     for (const rewrittenAction of rewritten.actions) {
-      const defaultAction = action as Omit<RuleDefaultAction, 'actionTypeId'>;
-
       expect(Object.keys(rewrittenAction)).toEqual(
         expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
       );
 
-      expect(Object.keys(defaultAction.frequency!)).toEqual(
-        expect.arrayContaining(['summary', 'notify_when', 'throttle'])
-      );
+      expect(
+        Object.keys((rewrittenAction as Omit<RuleDefaultAction, 'actionTypeId'>).frequency!)
+      ).toEqual(expect.arrayContaining(['summary', 'notify_when', 'throttle']));
     }
   });
 });
