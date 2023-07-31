@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
 import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
-import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
