@@ -14,7 +14,7 @@ import 'core_styles';
 import { BehaviorSubject } from 'rxjs';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 
 const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 
@@ -34,9 +34,9 @@ const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   }, [colorMode]);
 
   return (
-    <KibanaRenderContextProvider {...{ theme: { theme$ }, i18n }}>
+    <KibanaRootContextProvider {...{ theme: { theme$ }, i18n }}>
       {storyFn()}
-    </KibanaRenderContextProvider>
+    </KibanaRootContextProvider>
   );
 };
 
