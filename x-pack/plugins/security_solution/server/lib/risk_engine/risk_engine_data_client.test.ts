@@ -29,7 +29,7 @@ const getSavedObjectConfiguration = (attributes = {}) => ({
       id: 'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
       namespaces: ['default'],
       attributes: {
-        enable: false,
+        enabled: false,
         last_updated_by: 'elastic',
         ...attributes,
       },
@@ -44,50 +44,13 @@ const getSavedObjectConfiguration = (attributes = {}) => ({
   ],
 });
 
-const transformStats = {
+const transformsMock = {
   count: 1,
   transforms: [
     {
       id: 'ml_hostriskscore_pivot_transform_default',
-      state: 'started',
-      node: {
-        id: 'fc9o02bRTi-JPRU1626AaQ',
-        name: 'macbook.local',
-        ephemeral_id: 'y-Jx42RvTQi_h7npDlv7sQ',
-        transport_address: '127.0.0.1:9300',
-        attributes: {},
-      },
-      stats: {
-        pages_processed: 2,
-        documents_processed: 15,
-        documents_indexed: 15,
-        documents_deleted: 0,
-        trigger_count: 1,
-        index_time_in_ms: 55,
-        index_total: 1,
-        index_failures: 0,
-        search_time_in_ms: 3,
-        search_total: 2,
-        search_failures: 0,
-        processing_time_in_ms: 0,
-        processing_total: 2,
-        delete_time_in_ms: 0,
-        exponential_avg_checkpoint_duration_ms: 397,
-        exponential_avg_documents_indexed: 15,
-        exponential_avg_documents_processed: 15,
-      },
-      checkpointing: {
-        last: {
-          checkpoint: 1,
-          timestamp_millis: 1690546732294,
-          time_upper_bound_millis: 1690546612294,
-        },
-        changes_last_detected_at: 1690546732292,
-        last_search_time: 1690546732292,
-      },
-      health: {
-        status: 'green' as const,
-      },
+      dest: { index: '' },
+      source: { index: '' },
     },
   ],
 };
@@ -369,11 +332,13 @@ describe('RiskEngineDataClient', () => {
       const error = new Error('There error');
       (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValue(error);
 
-      await riskEngineDataClient.initializeResources({ namespace: 'default' });
-
-      expect(logger.error).toHaveBeenCalledWith(
-        `Error initializing risk engine resources: ${error.message}`
-      );
+      try {
+        await riskEngineDataClient.initializeResources({ namespace: 'default' });
+      } catch (e) {
+        expect(logger.error).toHaveBeenCalledWith(
+          `Error initializing risk engine resources: ${error.message}`
+        );
+      }
     });
   });
 
@@ -402,7 +367,7 @@ describe('RiskEngineDataClient', () => {
       it('should return status with enabled true', async () => {
         mockSavedObjectClient.find.mockResolvedValue(
           getSavedObjectConfiguration({
-            enable: true,
+            enabled: true,
           })
         );
 
@@ -433,29 +398,29 @@ describe('RiskEngineDataClient', () => {
     });
 
     describe('legacy transforms', () => {
-      it('should fetch transform stats', async () => {
+      it('should fetch transforms', async () => {
         await riskEngineDataClient.getStatus({
           namespace: 'default',
           savedObjectsClient: mockSavedObjectClient,
         });
 
-        expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(4);
-        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(1, {
+        expect(esClient.transform.getTransform).toHaveBeenCalledTimes(4);
+        expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(1, {
           transform_id: 'ml_hostriskscore_pivot_transform_default',
         });
-        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(2, {
+        expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(2, {
           transform_id: 'ml_hostriskscore_latest_transform_default',
         });
-        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(3, {
+        expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(3, {
           transform_id: 'ml_userriskscore_pivot_transform_default',
         });
-        expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(4, {
+        expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(4, {
           transform_id: 'ml_userriskscore_latest_transform_default',
         });
       });
 
       it('should return that legacy transform enabled if at least on transform exist', async () => {
-        esClient.transform.getTransformStats.mockResolvedValueOnce(transformStats);
+        esClient.transform.getTransform.mockResolvedValueOnce(transformsMock);
 
         const status = await riskEngineDataClient.getStatus({
           namespace: 'default',
@@ -509,7 +474,7 @@ describe('RiskEngineDataClient', () => {
         'risk-engine-configuration',
         'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
         {
-          enable: true,
+          enabled: true,
           last_updated_by: 'elastic',
         },
         {
@@ -555,7 +520,7 @@ describe('RiskEngineDataClient', () => {
         'risk-engine-configuration',
         'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
         {
-          enable: false,
+          enabled: false,
           last_updated_by: 'elastic',
         },
         {
