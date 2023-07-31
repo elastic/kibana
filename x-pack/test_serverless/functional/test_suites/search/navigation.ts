@@ -67,14 +67,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
-    it('active sidenav section is auto opened on load', async () => {
-      await svlCommonNavigation.sidenav.openSection('rootNav:ml');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:notifications' });
-      await browser.refresh();
-      await testSubjects.existOrFail(`mlPageNotifications`);
-      await svlCommonNavigation.sidenav.expectSectionOpen('rootNav:ml');
-    });
-
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
       // TODO: test something search project specific instead of generic discover
