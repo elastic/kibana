@@ -37036,7 +37036,6 @@
     "xpack.synthetics.analyzeDataButtonLabel.message": "“浏览数据”允许您选择和筛选任意维度中的结果数据以及查找性能问题的原因或影响。",
     "xpack.synthetics.app.navigateToAlertingButton.content": "管理规则",
     "xpack.synthetics.app.navigateToAlertingUi": "离开 Synthetics 并前往“Alerting 管理”页面",
-    "xpack.synthetics.app.testNow.available.private": "不能在专用位置上手动启动测试。",
     "xpack.synthetics.badge.readOnly.text": "只读",
     "xpack.synthetics.badge.readOnly.tooltip": "无法保存",
     "xpack.synthetics.blocked": "已阻止",

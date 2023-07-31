@@ -455,8 +455,7 @@ describe('parseIndexAliases', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/156061
-describe.skip('retries', () => {
+describe('retries', () => {
   let esContext = contextMock.create();
   // set up context APIs to return defaults indicating already created
   beforeEach(() => {
@@ -474,7 +473,7 @@ describe.skip('retries', () => {
 
     const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = performance.now() - timeStart;
+    const timeElapsed = Math.ceil(performance.now() - timeStart);
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY);
 
