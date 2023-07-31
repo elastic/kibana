@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import { SimpleSavedObject } from '@kbn/core/public';
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
-import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsSavedMonitor,
+  HTTPFields,
+  MonitorFields,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { omitTimestamps, omitTimestampsAndSecrets } from './helper/monitor';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
@@ -39,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body as SimpleSavedObject<MonitorFields>;
+      return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {
@@ -68,19 +73,18 @@ export default function ({ getService }: FtrProviderContext) {
     it('edits the monitor', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
-        newMonitor as MonitorFields
-      );
+      const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
 
-      expect(savedMonitor).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
-            [ConfigKey.CONFIG_ID]: monitorId,
-          },
-          secretKeys
-        )
+      const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(omitTimestamps(savedMonitor)).eql(
+        omitTimestampsAndSecrets({
+          ...newMonitor,
+          [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+          [ConfigKey.CONFIG_ID]: monitorId,
+        })
       );
 
       const updates: Partial<HTTPFields> = {
@@ -124,27 +128,29 @@ export default function ({ getService }: FtrProviderContext) {
         .send(modifiedMonitor)
         .expect(200);
 
-      expect(editResponse.body.attributes).eql(
-        omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
+      expect(omitTimestamps(editResponse.body)).eql(
+        omitTimestampsAndSecrets({
+          ...modifiedMonitor,
+          revision: 2,
+        })
       );
     });
 
     it('strips unknown keys from monitor edits', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
-        newMonitor as MonitorFields
-      );
+      const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
 
-      expect(savedMonitor).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
-            [ConfigKey.CONFIG_ID]: monitorId,
-          },
-          secretKeys
-        )
+      const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(omitTimestamps(savedMonitor)).eql(
+        omitTimestampsAndSecrets({
+          ...newMonitor,
+          [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+          [ConfigKey.CONFIG_ID]: monitorId,
+        })
       );
 
       const updates: Partial<HTTPFields> = {
@@ -191,17 +197,14 @@ export default function ({ getService }: FtrProviderContext) {
         .send(modifiedMonitor)
         .expect(200);
 
-      expect(editResponse.body.attributes).eql(
-        omit(
-          {
-            ...savedMonitor,
-            ...modifiedMonitor,
-            revision: 2,
-          },
-          secretKeys
-        )
+      expect(omitTimestamps(editResponse.body)).eql(
+        omitTimestampsAndSecrets({
+          ...savedMonitor,
+          ...modifiedMonitor,
+          revision: 2,
+        })
       );
-      expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
+      expect(editResponse.body).not.to.have.keys('unknownkey');
     });
 
     it('returns 404 if monitor id is not present', async () => {
@@ -253,21 +256,21 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = httpMonitorJson;
       const configHash = 'djrhefje';
 
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor({
+      const savedMonitor = await saveMonitor({
         ...(newMonitor as MonitorFields),
         [ConfigKey.CONFIG_HASH]: configHash,
       });
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
+      const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-      expect(savedMonitor).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.CONFIG_ID]: monitorId,
-            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
-            [ConfigKey.CONFIG_HASH]: configHash,
-          },
-          secretKeys
-        )
+      expect(omitTimestamps(savedMonitor)).eql(
+        omitTimestampsAndSecrets({
+          ...newMonitor,
+          [ConfigKey.CONFIG_ID]: monitorId,
+          [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+          [ConfigKey.CONFIG_HASH]: configHash,
+        })
       );
 
       const updates: Partial<HTTPFields> = {
@@ -289,17 +292,14 @@ export default function ({ getService }: FtrProviderContext) {
         .send(modifiedMonitor)
         .expect(200);
 
-      expect(editResponse.body.attributes).eql(
-        omit(
-          {
-            ...modifiedMonitor,
-            [ConfigKey.CONFIG_ID]: monitorId,
-            [ConfigKey.MONITOR_QUERY_ID]: monitorId,
-            [ConfigKey.CONFIG_HASH]: '',
-            revision: 2,
-          },
-          secretKeys
-        )
+      expect(omitTimestamps(editResponse.body)).eql(
+        omitTimestampsAndSecrets({
+          ...modifiedMonitor,
+          [ConfigKey.CONFIG_ID]: monitorId,
+          [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+          [ConfigKey.CONFIG_HASH]: '',
+          revision: 2,
+        })
       );
       expect(editResponse.body).not.to.have.keys('unknownkey');
     });
@@ -346,8 +346,8 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        const { id, attributes: savedMonitor } = await saveMonitor(newMonitor as MonitorFields);
-        monitorId = id;
+        const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
+        monitorId = savedMonitor[ConfigKey.CONFIG_ID];
         const toUpdate = {
           ...savedMonitor,
           name: '!@#$%^&*()_++[\\-\\]- wow',
@@ -393,7 +393,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
-      let monitorId = '';
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
@@ -403,8 +402,8 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor)
         .expect(200);
 
-      const { id, attributes: savedMonitor } = response.body;
-      monitorId = id;
+      const savedMonitor = response.body;
+      const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
       const toUpdate = {
         ...savedMonitor,
         urls: 'https://google.com',
