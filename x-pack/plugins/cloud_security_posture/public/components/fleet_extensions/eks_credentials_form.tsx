@@ -240,7 +240,7 @@ export const EksCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   const fields = getInputVarsFields(input, group.fields);
   const onCredentialTypeChange = useCallback(
     (optionId: string) => {
-      // clear out credentials related to current type
+      // clear out credentials when switching methods to avoid persisting unused values.
       clearInputVarsFields(input, group.fields);
 
       updatePolicy(
