@@ -7,8 +7,10 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { NoParametersRequestSchema } from '../../../../common/api/endpoint/actions/common/base';
-import type { ResponseActionBodySchema } from '../../../../common/api/endpoint';
+import type {
+  ResponseActionBodySchema,
+  NoParametersRequestSchema,
+} from '../../../../common/api/endpoint';
 import {
   ExecuteActionRequestSchema,
   EndpointActionGetFileSchema,

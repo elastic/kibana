@@ -7,19 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { EndpointActionGetFileSchema, ExecuteActionRequestSchema } from '..';
-import {
-  BaseActionRequestSchema,
-  KillOrSuspendProcessRequestSchema,
-  NoParametersRequestSchema,
-} from './common/base';
-
-export const ResponseActionBodySchema = schema.oneOf([
-  NoParametersRequestSchema.body,
-  KillOrSuspendProcessRequestSchema.body,
-  EndpointActionGetFileSchema.body,
-  ExecuteActionRequestSchema.body,
-]);
+import { BaseActionRequestSchema } from './common/base';
 
 export const UploadActionRequestSchema = {
   body: schema.object({
