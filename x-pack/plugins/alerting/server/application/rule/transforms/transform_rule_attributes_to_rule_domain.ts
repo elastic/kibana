@@ -7,7 +7,7 @@
 import { omit, isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
-import { isSystemAction } from '../../../lib/is_system_action';
+import { isSystemAction } from '../../../../common/system_actions/is_system_action';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
@@ -142,6 +142,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
+
   const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
   const isSnoozedUntil = includeSnoozeSchedule
     ? getRuleSnoozeEndTime({

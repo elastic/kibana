@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/server';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../../../common';
-import { isSystemAction } from '../../../../lib/is_system_action';
+import { isSystemAction } from '../../../../../common/system_actions/is_system_action';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
 import {
@@ -629,6 +629,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
 
         break;
       }
+
       case 'snoozeSchedule': {
         // Silently skip adding snooze or snooze schedules on security
         // rules until we implement snoozing of their rules
@@ -639,22 +640,26 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           isAttributesUpdateSkipped = false;
           break;
         }
+
         if (operation.operation === 'set') {
           const snoozeAttributes = getBulkSnooze<Params>(
             updatedRule,
             operation.value as RuleSnoozeSchedule
           );
+
           try {
             verifySnoozeScheduleLimit(snoozeAttributes.snoozeSchedule);
           } catch (error) {
             throw Error(`Error updating rule: could not add snooze - ${error.message}`);
           }
+
           updatedRule = {
             ...updatedRule,
             muteAll: snoozeAttributes.muteAll,
             snoozeSchedule: snoozeAttributes.snoozeSchedule as RuleDomain['snoozeSchedule'],
           };
         }
+
         if (operation.operation === 'delete') {
           const idsToDelete = operation.value && [...operation.value];
           if (idsToDelete?.length === 0) {
@@ -671,18 +676,22 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
             snoozeSchedule: snoozeAttributes.snoozeSchedule as RuleDomain['snoozeSchedule'],
           };
         }
+
         isAttributesUpdateSkipped = false;
         break;
       }
+
       case 'apiKey': {
         hasUpdateApiKeyOperation = true;
         isAttributesUpdateSkipped = false;
         break;
       }
+
       default: {
         if (operation.field === 'schedule') {
           validateScheduleOperation(operation.value, updatedRule.actions, rule.id);
         }
+
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
           operation,
           updatedRule

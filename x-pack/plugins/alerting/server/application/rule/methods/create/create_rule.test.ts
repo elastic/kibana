@@ -20,7 +20,7 @@ import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { RecoveredActionGroup, RuleActionTypes } from '../../../../../common';
+import { RecoveredActionGroup, RuleActionTypes, RuleSystemAction } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
@@ -3831,7 +3831,7 @@ describe('create()', () => {
     );
   });
 
-  describe('connector adapters', () => {
+  describe('system actions', () => {
     const connectorAdapter: ConnectorAdapter = {
       connectorTypeId: '.test',
       ruleActionParamsSchema: schema.object({ foo: schema.string() }),
@@ -3839,10 +3839,27 @@ describe('create()', () => {
     };
 
     connectorAdapterRegistry.register(connectorAdapter);
-
-    test('should throw if the actions params are invalid', async () => {
-      const action = {
+    test('should throw if the action is not a system action', async () => {
+      const action: RuleSystemAction = {
         id: '1',
+        uuid: '123',
+        params: { 'not-exist': 'test' },
+        actionTypeId: '.test',
+        type: RuleActionTypes.SYSTEM,
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(false);
+
+      const data = getMockData({ actions: [action] });
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Action 1 of type .test is not a system action]`
+      );
+    });
+
+    test('should throw if the system actions params are invalid', async () => {
+      const action: RuleSystemAction = {
+        id: '1',
+        uuid: '123',
         params: { 'not-exist': 'test' },
         actionTypeId: '.test',
         type: RuleActionTypes.SYSTEM,
@@ -3855,21 +3872,5 @@ describe('create()', () => {
         `[Error: Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]]`
       );
     });
-  });
-
-  test('should throw if the action is not a system action', async () => {
-    const action = {
-      id: '1',
-      params: { 'not-exist': 'test' },
-      actionTypeId: '.test',
-      type: RuleActionTypes.SYSTEM,
-    };
-
-    actionsClient.isSystemAction.mockReturnValue(false);
-
-    const data = getMockData({ actions: [action] });
-    await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-      `[Error: Action 1 of type .test is not a system action]`
-    );
   });
 });

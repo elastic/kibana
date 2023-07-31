@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { isSystemAction } from '../../lib/is_system_action';
+import { isSystemAction } from '../../../common/system_actions/is_system_action';
 
 import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
 
@@ -61,7 +61,8 @@ export const rewriteRule = ({
   },
   actions: actions.map((action) => {
     if (isSystemAction(action)) {
-      return { ...action, connector_type_id: action.actionTypeId };
+      const { actionTypeId, ...restSystemAction } = action;
+      return { ...restSystemAction, connector_type_id: action.actionTypeId };
     }
 
     const { group, id, actionTypeId, params, frequency, uuid, alertsFilter, type } = action;

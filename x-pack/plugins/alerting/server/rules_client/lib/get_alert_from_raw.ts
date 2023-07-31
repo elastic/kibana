@@ -25,7 +25,7 @@ import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
 import { RulesClientContext } from '../types';
-import { isSystemAction } from '../../lib/is_system_action';
+import { isSystemAction } from '../../../common/system_actions/is_system_action';
 
 export interface GetAlertFromRawParams {
   id: string;

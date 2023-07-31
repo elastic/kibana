@@ -6,7 +6,14 @@
  */
 
 import { ApiRule, transformRule } from './common_transformations';
-import { RuleExecutionStatusErrorReasons, RuleLastRunOutcomeValues } from '../../common';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleExecutionStatusErrorReasons,
+  RuleLastRunOutcomeValues,
+  RuleSystemAction,
+} from '../../common';
+import { AsApiContract } from '@kbn/actions-plugin/common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -16,6 +23,27 @@ const dateUpdated = new Date(dateFixed - 1000);
 const dateExecuted = new Date(dateFixed);
 
 describe('common_transformations', () => {
+  const defaultAction: AsApiContract<RuleDefaultAction> = {
+    group: 'default',
+    id: 'aaa',
+    connector_type_id: 'bbb',
+    params: {},
+    frequency: {
+      summary: false,
+      notify_when: 'onThrottleInterval',
+      throttle: '1m',
+    },
+    alerts_filter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
+  };
+
+  const systemAction: AsApiContract<RuleSystemAction> = {
+    id: 'system-action',
+    uuid: '123',
+    connector_type_id: 'bbb',
+    params: {},
+    type: RuleActionTypes.SYSTEM,
+  };
+
   test('transformRule() with all optional fields', () => {
     const apiRule: ApiRule = {
       id: 'some-id',
@@ -25,15 +53,7 @@ describe('common_transformations', () => {
       rule_type_id: 'some-rule-type',
       consumer: 'some-consumer',
       schedule: { interval: '1s' },
-      actions: [
-        {
-          connector_type_id: 'some-connector-type-id',
-          group: 'some group',
-          id: 'some-connector-id',
-          params: { foo: 'car', bar: [1, 2, 3] },
-          uuid: '123-456',
-        },
-      ],
+      actions: [defaultAction, systemAction],
       params: { bar: 'foo', numbers: { 1: [2, 3] } } as never,
       scheduled_task_id: 'some-task-id',
       created_by: 'created-by-user',
@@ -99,18 +119,29 @@ describe('common_transformations', () => {
       Object {
         "actions": Array [
           Object {
-            "actionTypeId": "some-connector-type-id",
-            "group": "some group",
-            "id": "some-connector-id",
-            "params": Object {
-              "bar": Array [
-                1,
-                2,
-                3,
-              ],
-              "foo": "car",
+            "actionTypeId": "bbb",
+            "alertsFilter": Object {
+              "query": Object {
+                "dsl": "{}",
+                "filters": Array [],
+                "kql": "test:1",
+              },
             },
-            "uuid": "123-456",
+            "frequency": Object {
+              "notifyWhen": "onThrottleInterval",
+              "summary": false,
+              "throttle": "1m",
+            },
+            "group": "default",
+            "id": "aaa",
+            "params": Object {},
+          },
+          Object {
+            "actionTypeId": "bbb",
+            "id": "system-action",
+            "params": Object {},
+            "type": "system",
+            "uuid": "123",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -211,15 +242,7 @@ describe('common_transformations', () => {
       rule_type_id: 'some-rule-type',
       consumer: 'some-consumer',
       schedule: { interval: '1s' },
-      actions: [
-        {
-          connector_type_id: 'some-connector-type-id',
-          group: 'some group',
-          id: 'some-connector-id',
-          params: {},
-          uuid: '123-456',
-        },
-      ],
+      actions: [defaultAction, systemAction],
       params: {} as never,
       created_by: 'created-by-user',
       updated_by: null,
@@ -279,11 +302,29 @@ describe('common_transformations', () => {
       Object {
         "actions": Array [
           Object {
-            "actionTypeId": "some-connector-type-id",
-            "group": "some group",
-            "id": "some-connector-id",
+            "actionTypeId": "bbb",
+            "alertsFilter": Object {
+              "query": Object {
+                "dsl": "{}",
+                "filters": Array [],
+                "kql": "test:1",
+              },
+            },
+            "frequency": Object {
+              "notifyWhen": "onThrottleInterval",
+              "summary": false,
+              "throttle": "1m",
+            },
+            "group": "default",
+            "id": "aaa",
             "params": Object {},
-            "uuid": "123-456",
+          },
+          Object {
+            "actionTypeId": "bbb",
+            "id": "system-action",
+            "params": Object {},
+            "type": "system",
+            "uuid": "123",
           },
         ],
         "alertTypeId": "some-rule-type",

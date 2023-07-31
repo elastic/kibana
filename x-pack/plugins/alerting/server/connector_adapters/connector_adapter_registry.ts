@@ -18,7 +18,7 @@ export class ConnectorAdapterRegistry {
   }
 
   public register(connectorAdapter: ConnectorAdapter) {
-    if (this.connectorAdapters.has(connectorAdapter.connectorTypeId)) {
+    if (this.has(connectorAdapter.connectorTypeId)) {
       throw new Error(
         `${connectorAdapter.connectorTypeId} is already registered to the ConnectorAdapterRegistry`
       );

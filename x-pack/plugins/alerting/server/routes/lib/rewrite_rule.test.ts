@@ -5,12 +5,18 @@
  * 2.0.
  */
 import { rewriteRule } from './rewrite_rule';
-import { RuleDefaultAction, RuleTypeParams, SanitizedRule } from '../../types';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+  RuleTypeParams,
+  SanitizedRule,
+} from '../../types';
 import { isPlainObject } from 'lodash';
 
 const DATE_2020 = new Date('1/1/2020');
 
-const action: RuleDefaultAction = {
+const defaultAction: RuleDefaultAction = {
   group: 'default',
   id: 'aaa',
   actionTypeId: 'bbb',
@@ -21,6 +27,14 @@ const action: RuleDefaultAction = {
     throttle: '1m',
   },
   alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
+};
+
+const systemAction: RuleSystemAction = {
+  id: 'system-action',
+  uuid: '123',
+  actionTypeId: 'bbb',
+  params: {},
+  type: RuleActionTypes.SYSTEM,
 };
 
 const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } = {
@@ -45,7 +59,7 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
     lastExecutionDate: DATE_2020,
     lastDuration: 1000,
   },
-  actions: [action],
+  actions: [defaultAction],
   scheduledTaskId: 'xyz456',
   snoozeSchedule: [],
   isSnoozedUntil: null,
@@ -77,7 +91,7 @@ describe('rewriteRule', () => {
     }
   });
 
-  it('should rewrite actions correctly', () => {
+  it('should rewrite default actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
     for (const rewrittenAction of rewritten.actions) {
       expect(Object.keys(rewrittenAction)).toEqual(
@@ -88,5 +102,16 @@ describe('rewriteRule', () => {
         Object.keys((rewrittenAction as Omit<RuleDefaultAction, 'actionTypeId'>).frequency!)
       ).toEqual(expect.arrayContaining(['summary', 'notify_when', 'throttle']));
     }
+  });
+
+  it('should rewrite system actions correctly', () => {
+    const rewritten = rewriteRule({ ...sampleRule, actions: [systemAction] });
+    expect(Object.keys(rewritten.actions[0])).toEqual(
+      expect.arrayContaining(['id', 'connector_type_id', 'params', 'uuid', 'type'])
+    );
+
+    expect(Object.keys(rewritten.actions[0])).not.toEqual(
+      expect.arrayContaining(['group', 'frequency', 'alertsFilter'])
+    );
   });
 });

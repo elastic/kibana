@@ -7,7 +7,7 @@
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
 import { RuleActionTypes, RuleDefaultAction } from '../../../common';
-import { isSystemAction } from '../../lib/is_system_action';
+import { isSystemAction } from '../../../common/system_actions/is_system_action';
 import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';

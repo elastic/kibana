@@ -52,7 +52,7 @@ import {
   isSummaryActionThrottled,
 } from './rule_action_helper';
 import { ConnectorAdapter } from '../connector_adapters/types';
-import { isSystemAction } from '../lib/is_system_action';
+import { isSystemAction } from '../../common/system_actions/is_system_action';
 
 enum Reasons {
   MUTED = 'muted',

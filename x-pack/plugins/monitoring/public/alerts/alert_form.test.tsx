@@ -21,19 +21,13 @@ import {
   Rule,
   GenericValidationResult,
   RuleTypeModel,
+  RuleAction,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_form/rule_form';
 import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-
-interface AlertAction {
-  group: string;
-  id: string;
-  actionTypeId: string;
-  params: unknown;
-}
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -240,7 +234,7 @@ describe('alert_form', () => {
                 setActionIdByIndex={(id: string, index: number) => {
                   initialAlert.actions[index].id = id;
                 }}
-                setActions={(_updatedActions: AlertAction[]) => {}}
+                setActions={(_updatedActions: RuleAction[]) => {}}
                 setActionParamsProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }

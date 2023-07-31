@@ -13,12 +13,19 @@ import {
   RuleAction,
   RuleType,
   RuleDefaultAction,
+  isSystemAction,
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
+  if (isSystemAction(input)) {
+    const { connector_type_id: actionTypeId, ...rest } = input;
+    return { actionTypeId, ...rest };
+  }
+
   const {
     connector_type_id: actionTypeId,
     frequency,
+    alerts_filter: alertsFilter,
     ...rest
   } = input as AsApiContract<RuleDefaultAction>;
 
@@ -33,6 +40,7 @@ function transformAction(input: AsApiContract<RuleAction>): RuleAction {
           },
         }
       : {}),
+    ...(alertsFilter && { alertsFilter }),
     ...rest,
   };
 }

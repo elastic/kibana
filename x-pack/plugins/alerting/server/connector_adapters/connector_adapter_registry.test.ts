@@ -22,6 +22,17 @@ describe('ConnectorAdapterRegistry', () => {
     registry = new ConnectorAdapterRegistry();
   });
 
+  describe('has', () => {
+    it('returns true if the connector adapter is registered', () => {
+      registry.register(connectorAdapter);
+      expect(registry.has('.test')).toBe(true);
+    });
+
+    it('returns false if the connector adapter is not registered', () => {
+      expect(registry.has('.not-exist')).toBe(false);
+    });
+  });
+
   describe('register', () => {
     it('registers a connector adapter correctly', () => {
       registry.register(connectorAdapter);

@@ -47,6 +47,8 @@ export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';
 
+export { isSystemAction } from './system_actions/is_system_action';
+
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,

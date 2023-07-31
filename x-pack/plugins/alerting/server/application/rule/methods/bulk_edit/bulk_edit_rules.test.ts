@@ -14,7 +14,12 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { RecoveredActionGroup, RuleTypeParams } from '../../../../../common';
+import {
+  RecoveredActionGroup,
+  RuleActionTypes,
+  RuleSystemAction,
+  RuleTypeParams,
+} from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
@@ -32,6 +37,7 @@ import {
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter } from '../../../../connector_adapters/types';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -520,6 +526,14 @@ describe('bulkEdit()', () => {
   });
 
   describe('actions operations', () => {
+    const connectorAdapter: ConnectorAdapter = {
+      connectorTypeId: '.test',
+      ruleActionParamsSchema: schema.object({ foo: schema.string() }),
+      buildActionParams: jest.fn(),
+    };
+
+    rulesClientParams.connectorAdapterRegistry.register(connectorAdapter);
+
     beforeEach(() => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [existingDecryptedRule],
@@ -887,6 +901,77 @@ describe('bulkEdit()', () => {
         ],
         id: existingRule.id,
         snoozeSchedule: [],
+      });
+    });
+
+    it('should throw if the action is not a system action', async () => {
+      const action: RuleSystemAction = {
+        id: '1',
+        uuid: '123',
+        params: { 'not-exist': 'test' },
+        actionTypeId: '.test',
+        type: RuleActionTypes.SYSTEM,
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(false);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(result).toEqual({
+        errors: [
+          {
+            message: 'Action 1 of type .test is not a system action',
+            rule: { id: '1', name: 'my rule name' },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
+    });
+
+    it('should throw if the system actions params are invalid', async () => {
+      const action: RuleSystemAction = {
+        id: '1',
+        uuid: '123',
+        params: { 'not-exist': 'test' },
+        actionTypeId: '.test',
+        type: RuleActionTypes.SYSTEM,
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(result).toEqual({
+        errors: [
+          {
+            message:
+              'Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]',
+            rule: { id: '1', name: 'my rule name' },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
       });
     });
   });
@@ -2492,6 +2577,50 @@ describe('bulkEdit()', () => {
       expect(result.errors[0].message).toBe(
         `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
+    });
+
+    test('should not validate scheduling on system actions', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  params: {},
+                  uuid: '111',
+                  type: RuleActionTypes.SYSTEM,
+                },
+              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ] as any,
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(1);
     });
   });
 
