@@ -237,7 +237,7 @@ describe('Actions Plugin', () => {
          * that got set up on start (step 3).
          */
         // @ts-expect-error: inMemoryConnectors can be accessed
-        expect(actionsContextHandler.getActionsClient().inMemoryConnectors).toEqual([
+        expect(actionsContextHandler.getActionsClient().context.inMemoryConnectors).toEqual([
           {
             id: 'preconfiguredServerLog',
             actionTypeId: '.server-log',

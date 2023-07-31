@@ -24,8 +24,9 @@ export type {
   ActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  FindActionResult,
 } from './types';
+
+export type { FindConnectorResponse as FindActionResult } from '../common/routes/connector/response';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
