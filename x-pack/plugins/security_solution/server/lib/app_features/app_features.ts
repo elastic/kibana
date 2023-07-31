@@ -79,7 +79,7 @@ export class AppFeatures {
       enabledSecurityAppFeaturesConfigs
     );
 
-    this.logger.info(JSON.stringify(completeAppFeatureConfig));
+    this.logger.debug(JSON.stringify(completeAppFeatureConfig));
 
     this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
 
