@@ -81,6 +81,7 @@ export class JobDetailsPane extends Component {
 
   render() {
     const { sections, time } = this.state;
+    /* eslint-disable react/no-unknown-property */
     return (
       <React.Fragment>
         <EuiSpacer size="s" />
@@ -102,6 +103,7 @@ export class JobDetailsPane extends Component {
         </div>
       </React.Fragment>
     );
+    /* eslint-enable react/no-unknown-property */
   }
 }
 JobDetailsPane.propTypes = {

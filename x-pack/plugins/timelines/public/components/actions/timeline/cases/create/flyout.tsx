@@ -18,7 +18,7 @@ export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  useInsertTimeline?: Function;
+  useInsertTimeline?: Function; // eslint-disable-line react/no-unused-prop-types
   appId: string;
   disableAlerts?: boolean;
 }
