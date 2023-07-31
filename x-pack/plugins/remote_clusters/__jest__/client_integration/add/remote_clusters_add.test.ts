@@ -48,6 +48,14 @@ describe('Create Remote cluster', () => {
       expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
     });
 
+    test('show request flyout doesnt contain null values', async () => {
+      await actions.showRequest.click();
+      const requestBody = actions.showRequest.getESRequestBody();
+
+      expect(requestBody).not.toContain('null');
+      expect(requestBody).toMatchSnapshot();
+    });
+
     describe('on prem', () => {
       test('should have a toggle to enable "proxy" mode for a remote cluster', () => {
         expect(actions.connectionModeSwitch.exists()).toBe(true);

@@ -61,7 +61,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
