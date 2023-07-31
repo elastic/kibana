@@ -260,7 +260,6 @@ export const ProjectHeader = ({
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
                 <HeaderNavControls navControls$={observables.navControlsCenter$} />
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
@@ -274,6 +273,10 @@ export const ProjectHeader = ({
                   kibanaVersion={kibanaVersion}
                   navigateToUrl={application.navigateToUrl}
                 />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
