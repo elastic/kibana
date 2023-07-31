@@ -7,9 +7,9 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const containerCss = (theme: EuiThemeComputed) => ({
-  minHeight: `calc(100vh - ${parseFloat(theme.size.xxxl) * 2}px)`,
-  background: theme.colors.emptyShade,
+export const containerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
+  background: euiTheme.colors.emptyShade,
   display: 'flex',
   flexDirection: 'column',
 });
@@ -20,10 +20,10 @@ export const wrapperCss = {
   flex: 1,
 };
 
-export const navCss = (theme: EuiThemeComputed) => ({
-  background: theme.colors.emptyShade,
-  borderBottom: theme.border.thin,
-  padding: `${theme.size.base} ${theme.size.l} ${theme.size.base} ${theme.size.l}`,
+export const navCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  background: euiTheme.colors.emptyShade,
+  borderBottom: euiTheme.border.thin,
+  padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l}`,
   '.euiTabs': {
     paddingLeft: '3px',
     marginLeft: '-3px',

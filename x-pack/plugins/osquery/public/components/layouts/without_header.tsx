@@ -9,8 +9,8 @@ import React, { Fragment } from 'react';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const pageCss = (theme: EuiThemeComputed) => ({
-  background: theme.colors.emptyShade,
+export const pageCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  background: euiTheme.colors.emptyShade,
   width: '100%',
   alignSelf: 'center',
   marginLeft: 0,

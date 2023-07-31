@@ -14,9 +14,9 @@ import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_ite
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-const containerCss = (theme: EuiThemeComputed) => ({
-  borderBottom: theme.border.thin,
-  backgroundColor: theme.colors.body,
+const containerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  borderBottom: euiTheme.border.thin,
+  backgroundColor: euiTheme.colors.body,
 });
 
 const tabsCss = {
@@ -59,13 +59,13 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const wrapperCss = useCallback(
-    (theme: EuiThemeComputed) => css`
+    ({ euiTheme }: { euiTheme: EuiThemeComputed }) => css`
       max-width: ${maxWidth || 1200}px;
       margin-left: auto;
       margin-right: auto;
-      padding-top: ${theme.size.xl};
-      padding-left: ${theme.size.m};
-      padding-right: ${theme.size.m};
+      padding-top: ${euiTheme.size.xl};
+      padding-left: ${euiTheme.size.m};
+      padding-right: ${euiTheme.size.m};
     `,
 
     [maxWidth]
