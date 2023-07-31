@@ -12,7 +12,6 @@ export function createIndexPatternsStartMock() {
   const dataViewsServiceFactory = jest.fn().mockResolvedValue({ get: jest.fn() });
   return {
     dataViewsServiceFactory,
-    isRollupsEnabled: jest.fn().mockReturnValue(true),
   };
 }
 

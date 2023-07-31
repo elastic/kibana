@@ -47,7 +47,7 @@ export class DataViewsServerPlugin
     core.capabilities.registerProvider(capabilitiesProvider);
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
+    registerRoutes(core.http, core.getStartServices, this.rollupsEnabled, dataViewRestCounter);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -78,11 +78,8 @@ export class DataViewsServerPlugin
       rollupsEnabled: this.rollupsEnabled,
     });
 
-    console.log('ROOLLUPS ENABLED data views ##################', this.rollupsEnabled);
-
     return {
       dataViewsServiceFactory: serviceFactory,
-      isRollupsEnabled: () => this.rollupsEnabled,
     };
   }
 

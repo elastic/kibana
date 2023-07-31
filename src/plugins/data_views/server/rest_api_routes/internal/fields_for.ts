@@ -186,10 +186,10 @@ export const registerFieldForWildcard = async (
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >
+  >,
+  isRollupsEnabled: boolean
 ) => {
-  const [, , dataViews] = await getStartServices();
-  const configuredHandler = handler(dataViews.isRollupsEnabled());
+  const configuredHandler = handler(isRollupsEnabled);
 
   // handler
   router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
