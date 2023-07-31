@@ -11,7 +11,6 @@ import { PREVALENCE_ROW_UNCOMMON } from './translations';
 import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
 import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { TimelineId } from '../../../../common/types';
 
 const HOST_FIELD = 'host.name';
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
@@ -21,10 +20,6 @@ export interface PrevalenceOverviewRowProps {
    * The highlighted field name and values
    * */
   highlightedField: { name: string; values: string[] };
-  /**
-   * Maintain backwards compatibility // TODO remove when possible
-   */
-  scopeId: string;
   /**
    * This is a solution to allow the parent component to NOT render if all its row children are null
    */
@@ -42,19 +37,15 @@ export interface PrevalenceOverviewRowProps {
  */
 export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
   highlightedField,
-  scopeId,
   callbackIfNull,
   'data-test-subj': dataTestSubj,
 }) => {
-  const isActiveTimelines = scopeId === TimelineId.active;
-
   const {
     loading: hostsLoading,
     error: hostsError,
     count: hostsCount,
   } = useFetchFieldValuePairWithAggregation({
     highlightedField,
-    isActiveTimelines,
     aggregationField: HOST_FIELD,
   });
 
