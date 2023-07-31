@@ -9,7 +9,6 @@
     "browser": true,
     "configPath": ["xpack", "logs_shared"],
     "requiredPlugins": ["data", "dataViews", "usageCollection", "observabilityShared", "observabilityAIAssistant"],
-    "optionalPlugins": ["observability"],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
