@@ -11,7 +11,7 @@ import {
   type ConnectorTypesRequestQueryV1,
 } from '../../../../../common/routes/connector/apis/connector_types';
 import { ILicenseState } from '../../../../lib';
-import { ActionType, BASE_ACTION_API_PATH, RewriteResponseCase } from '../../../../../common';
+import { BASE_ACTION_API_PATH } from '../../../../../common';
 import { ActionsRequestHandlerContext } from '../../../../types';
 import { verifyAccessAndContext } from '../../../verify_access_and_context';
 
