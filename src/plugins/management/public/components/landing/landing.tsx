@@ -13,16 +13,11 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageBody } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
 
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { useAppContext } from '../management_app/management_context';
 
 interface ManagementLandingPageProps {
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
-  landingPageRedirect: string | undefined;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  basePath: HttpStart['basePath'];
 }
 
 export const ManagementLandingPage = ({
