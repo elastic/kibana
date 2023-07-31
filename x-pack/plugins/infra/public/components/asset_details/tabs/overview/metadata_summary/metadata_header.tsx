@@ -65,23 +65,25 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
             repositionOnScroll
             anchorPosition="upCenter"
           >
-            <FormattedMessage
-              id="xpack.infra.assetDetails.overviewMetadata.tooltip.documentationLabel"
-              defaultMessage="See {documentation} for more details."
-              values={{
-                documentation: metadataValue.tooltipLink ? (
-                  <EuiLink
-                    data-test-subj="assetDetailsTooltipDocumentationLink"
-                    href={metadataValue.tooltipLink}
-                    target="_blank"
-                  >
-                    <code>{metadataValue.tooltipFieldLabel}</code>
-                  </EuiLink>
-                ) : (
-                  <code>{metadataValue.tooltipFieldLabel}</code>
-                ),
-              }}
-            />
+            {metadataValue.tooltipLink ? (
+              <FormattedMessage
+                id="xpack.infra.assetDetails.overviewMetadata.tooltip.documentationLabel"
+                defaultMessage="See {documentation} for more details."
+                values={{
+                  documentation: (
+                    <EuiLink
+                      data-test-subj="assetDetailsTooltipDocumentationLink"
+                      href={metadataValue.tooltipLink}
+                      target="_blank"
+                    >
+                      <code>{metadataValue.tooltipFieldLabel}</code>
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : (
+              <code>{metadataValue.tooltipFieldLabel}</code>
+            )}
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

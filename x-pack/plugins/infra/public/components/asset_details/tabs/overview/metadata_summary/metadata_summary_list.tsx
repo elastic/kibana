@@ -15,11 +15,11 @@ import {
   EuiDescriptionListDescription,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import type { InfraMetadata } from '../../../../../common/http_api';
-import { NOT_AVAILABLE_LABEL } from '../../translations';
-import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { FlyoutTabIds } from '../../types';
-import { ExpandableContent } from '../../components/expandable_content';
+import type { InfraMetadata } from '../../../../../../common/http_api';
+import { NOT_AVAILABLE_LABEL } from '../../../translations';
+import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import { FlyoutTabIds } from '../../../types';
+import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
 
 interface MetadataSummaryProps {
