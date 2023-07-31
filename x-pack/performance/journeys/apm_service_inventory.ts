@@ -9,6 +9,7 @@ import { Journey } from '@kbn/journeys';
 import { SynthtraceClient } from '../services/synthtrace';
 import { generateData } from '../synthtrace_data/apm_data';
 
+// FLAKY: https://github.com/elastic/kibana/issues/162813
 export const journey = new Journey({
   beforeSteps: async ({ kbnUrl, log, auth, es }) => {
     // Install APM Package
@@ -34,6 +35,7 @@ export const journey = new Journey({
     );
   },
   ftrConfigPath: 'x-pack/performance/configs/apm_config.ts',
+  skipped: true
 })
   .step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`app/apm/services`));
