@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint/audit_log/audit_log_route';
+import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
 import { auditLogRequestHandler } from './audit_log_handler';
 

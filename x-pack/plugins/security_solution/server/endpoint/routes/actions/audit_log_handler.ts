@@ -9,7 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
-} from '../../../../common/api/endpoint/audit_log/audit_log_route';
+} from '../../../../common/api/endpoint';
 import { getAuditLogResponse } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';

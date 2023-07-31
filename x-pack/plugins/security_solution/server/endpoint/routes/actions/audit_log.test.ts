@@ -37,8 +37,8 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import type {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
-} from '../../../../common/api/endpoint/audit_log/audit_log_route';
-import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint/audit_log/audit_log_route';
+} from '../../../../common/api/endpoint';
+import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint';
 
 describe('Action Log API', () => {
   describe('schema', () => {

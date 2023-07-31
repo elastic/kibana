@@ -7,13 +7,18 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { NoParametersRequestSchema } from '../../../../common/api/endpoint/actions/common/base';
+import type { ResponseActionBodySchema } from '../../../../common/api/endpoint';
 import {
-  NoParametersRequestSchema,
-  KillOrSuspendProcessRequestSchema,
-  EndpointActionGetFileSchema,
   ExecuteActionRequestSchema,
-  type ResponseActionBodySchema,
-} from '../../../../common/endpoint/schema/actions';
+  EndpointActionGetFileSchema,
+  IsolateRouteRequestSchema,
+  KillProcessRouteRequestSchema,
+  SuspendProcessRouteRequestSchema,
+  UnisolateRouteRequestSchema,
+  GetProcessesRouteRequestSchema,
+} from '../../../../common/api/endpoint';
+
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
@@ -61,7 +66,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: IsolateRouteRequestSchema,
         },
       },
       withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
@@ -80,7 +85,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: UnisolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -100,7 +105,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: IsolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -120,7 +125,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: UnisolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -140,7 +145,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: KillOrSuspendProcessRequestSchema,
+          request: KillProcessRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -163,7 +168,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: KillOrSuspendProcessRequestSchema,
+          request: SuspendProcessRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -186,7 +191,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: GetProcessesRouteRequestSchema,
         },
       },
       withEndpointAuthz(

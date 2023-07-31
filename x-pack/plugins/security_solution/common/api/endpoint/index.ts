@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export * from './actions/audit_log_route';
+export * from './actions/details_route';
+export * from './actions/file_download_route';
+export * from './actions/file_info_route';
+export * from './actions/file_upload_route';
+export * from './actions/list_route';
+export * from './actions/isolate_route';
+export * from './actions/unisolate_route';
+export * from './actions/kill_process_route';
+export * from './actions/suspend_procesS_route';
+export * from './actions/get_processes_route';
+export * from './actions/get_file_route';
+export * from './actions/execute_route';
