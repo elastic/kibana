@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { INTERNAL_CASE_METRICS_URL } from '../../../../common/constants';
-import type { CasesMetricsFeatureField } from '../../../../common/api/metrics/case';
+import type { CasesMetricsFeatureField } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

@@ -39,7 +39,7 @@ import type {
   CaseUserActionsStats,
 } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
-import type { SingleCaseMetricsResponse } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/types/api';
 import { CaseStatuses } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';

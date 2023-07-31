@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './case';
+export * from './v1';

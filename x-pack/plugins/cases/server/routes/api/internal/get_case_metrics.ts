@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SingleCaseMetricsFeatureField } from '../../../../common/api';
+import type { SingleCaseMetricsFeatureField } from '../../../../common/types/api';
 
 import { INTERNAL_CASE_METRICS_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
