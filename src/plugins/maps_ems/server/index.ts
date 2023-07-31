@@ -49,7 +49,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
   }
 
   public setup(core: CoreSetup, plugins: MapsEmsSetupServerDependencies) {
-    const mapConfig = this._initializerContext.config.get<MapConfig>();
+    const mapConfig = this._initializerContext.config.get();
 
     let isEnterprisePlus = false;
     if (plugins.licensing) {
