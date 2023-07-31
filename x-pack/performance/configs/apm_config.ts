@@ -18,16 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
 
-    esTestCluster: {
-      ...xpackFunctionalConfig.get('esTestCluster'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('esTestCluster.serverArgs'),
-        // define custom es server here
-        // API Keys is enabled at the top level
-        'xpack.security.enabled=true',
-      ],
-    },
-
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
@@ -37,10 +27,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        '--http.eluMonitor.enabled=true',
-        '--http.eluMonitor.logging.enabled=true',
-        '--http.eluMonitor.logging.threshold.ela=250',
-        '--http.eluMonitor.logging.threshold.elu=0.15',
+        '--server.eluMonitor.enabled=true',
+        '--server.eluMonitor.logging.enabled=true',
+        '--server.eluMonitor.logging.threshold.ela=250',
+        '--server.eluMonitor.logging.threshold.elu=0.15',
       ],
     },
   };
