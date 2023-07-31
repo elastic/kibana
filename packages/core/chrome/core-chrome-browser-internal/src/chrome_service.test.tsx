@@ -207,10 +207,8 @@ describe('start', () => {
       const { chrome, service } = await start({ startDeps });
 
       chrome.setChromeStyle('project');
-
+      chrome.setIsVisible(true);
       navigateToApp('DefaultNavApp');
-
-      service.stop();
 
       const component = mount(chrome.getHeaderComponent());
 
@@ -219,6 +217,8 @@ describe('start', () => {
 
       const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
       expect(defaultProjectSideNav.length).toBe(1);
+
+      service.stop();
     });
 
     it('renders the custom project side navigation', async () => {
