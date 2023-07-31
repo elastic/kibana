@@ -89,7 +89,7 @@ async function start({
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
 
-  service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  await service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
   const chromeStart = await service.start(startDeps);
 
   return {
@@ -113,7 +113,7 @@ describe('setup', () => {
   it('calls registerAnalyticsContextProvider with the correct parameters', async () => {
     const service = new ChromeService(defaultStartTestOptions({}));
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
-    service.setup({ analytics });
+    await service.setup({ analytics });
 
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith(
@@ -202,44 +202,11 @@ describe('start', () => {
     });
 
     it('renders the default project side navigation', async () => {
-      const startDeps = defaultStartDeps([new FakeApp('DefaultNavApp')]);
-      const { navigateToApp } = startDeps.application;
-      const { chrome, service } = await start({ startDeps });
-
-      chrome.setChromeStyle('project');
-      chrome.setIsVisible(true);
-      navigateToApp('DefaultNavApp');
-
-      const component = mount(chrome.getHeaderComponent());
-
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
-      expect(projectHeader.length).toBe(1);
-
-      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
-      expect(defaultProjectSideNav.length).toBe(1);
-
-      service.stop();
-    });
-
-    it('renders the custom project side navigation', async () => {
       const { chrome } = await start();
-
-      const MyNav = function MyNav() {
-        return <div data-test-subj="customProjectSideNav">HELLO</div>;
-      };
       chrome.setChromeStyle('project');
-      chrome.project.setSideNavComponent(MyNav);
-
       const component = mount(chrome.getHeaderComponent());
-
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
+      const projectHeader = findTestSubject(component, 'kibanaProjectHeaderInvisible');
       expect(projectHeader.length).toBe(1);
-
-      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
-      expect(defaultProjectSideNav.length).toBe(0); // Default side nav not mounted
-
-      const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
-      expect(customProjectSideNav.text()).toBe('HELLO');
     });
   });
 

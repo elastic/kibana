@@ -181,10 +181,10 @@ export const ProjectHeader = ({
 
   if (!isVisible) {
     return (
-      <>
+      <div data-test-subj="kibanaProjectHeaderInvisible">
         <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />
         <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      </>
+      </div>
     );
   }
 
