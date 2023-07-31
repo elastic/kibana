@@ -1038,8 +1038,10 @@ export default ({ getService }: FtrProviderContext) => {
           .post(EXCEPTION_LIST_URL)
           .auth(detectionAdmin, 'changeme')
           .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListMinimalSchemaMock())
+          .send(getCreateExceptionListDetectionSchemaMock())
           .expect(200);
+
+        const { os_types, ...ruleException } = getCreateExceptionListItemMinimalSchemaMock();
 
         // Add comment by the Detection Admin
         await supertestWithoutAuth
@@ -1047,7 +1049,7 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(detectionAdmin, 'changeme')
           .set('kbn-xsrf', 'true')
           .send({
-            ...getCreateExceptionListItemMinimalSchemaMock(),
+            ...ruleException,
             comments: [{ comment: 'Comment by user@detections_admin' }],
           })
           .expect(200);
