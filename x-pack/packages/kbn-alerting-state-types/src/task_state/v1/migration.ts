@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { every } from 'lodash';
 import { type TypeOf } from '@kbn/config-schema';
-import { isJSONObject } from '../lib';
+import { isJSONObject, isString, isBoolean, isNumber, isStringArray, isBooleanArray } from '../lib';
 import {
   versionSchema,
   throttledActionSchema,
@@ -29,7 +28,7 @@ export function migrateThrottledActions(
   }
   return Object.keys(throttledActions).reduce((acc, key) => {
     const val = throttledActions[key];
-    if (isJSONObject(val) && typeof val.date === 'string') {
+    if (isJSONObject(val) && isString(val.date)) {
       acc[key] = {
         date: val.date,
       };
@@ -43,14 +42,13 @@ export function migrateLastScheduledActions(
 ): LastScheduledActionsSchema | undefined {
   if (
     !isJSONObject(lastScheduledActions) ||
-    typeof lastScheduledActions.group !== 'string' ||
-    typeof lastScheduledActions.date !== 'string'
+    !isString(lastScheduledActions.group) ||
+    !isString(lastScheduledActions.date)
   ) {
     return;
   }
   return {
-    subgroup:
-      typeof lastScheduledActions.subgroup === 'string' ? lastScheduledActions.subgroup : undefined,
+    subgroup: isString(lastScheduledActions.subgroup) ? lastScheduledActions.subgroup : undefined,
     group: lastScheduledActions.group,
     date: lastScheduledActions.date,
     actions: migrateThrottledActions(lastScheduledActions.actions),
@@ -63,20 +61,15 @@ export function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefine
   }
   return {
     lastScheduledActions: migrateLastScheduledActions(meta.lastScheduledActions),
-    flappingHistory:
-      Array.isArray(meta.flappingHistory) &&
-      every(meta.flappingHistory, (item) => typeof item === 'boolean')
-        ? meta.flappingHistory
-        : undefined,
-    flapping: typeof meta.flapping === 'boolean' ? meta.flapping : undefined,
-    maintenanceWindowIds:
-      Array.isArray(meta.maintenanceWindowIds) &&
-      every(meta.maintenanceWindowIds, (item) => typeof item === 'string')
-        ? meta.maintenanceWindowIds
-        : undefined,
-    pendingRecoveredCount:
-      typeof meta.pendingRecoveredCount === 'number' ? meta.pendingRecoveredCount : undefined,
-    uuid: typeof meta.uuid === 'string' ? meta.uuid : undefined,
+    flappingHistory: isBooleanArray(meta.flappingHistory) ? meta.flappingHistory : undefined,
+    flapping: isBoolean(meta.flapping) ? meta.flapping : undefined,
+    maintenanceWindowIds: isStringArray(meta.maintenanceWindowIds)
+      ? meta.maintenanceWindowIds
+      : undefined,
+    pendingRecoveredCount: isNumber(meta.pendingRecoveredCount)
+      ? meta.pendingRecoveredCount
+      : undefined,
+    uuid: isString(meta.uuid) ? meta.uuid : undefined,
   };
 }
 
@@ -103,8 +96,7 @@ export const upMigration = (state: Record<string, unknown>): VersionSchema => {
     alertTypeState: isJSONObject(state.alertTypeState) ? state.alertTypeState : undefined,
     alertInstances: migrateAlertInstances(state.alertInstances),
     alertRecoveredInstances: migrateAlertInstances(state.alertRecoveredInstances),
-    previousStartedAt:
-      typeof state.previousStartedAt === 'string' ? state.previousStartedAt : undefined,
+    previousStartedAt: isString(state.previousStartedAt) ? state.previousStartedAt : undefined,
     summaryActions: migrateThrottledActions(state.summaryActions),
   };
 };
