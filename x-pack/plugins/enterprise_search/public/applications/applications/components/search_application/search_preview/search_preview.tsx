@@ -384,7 +384,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
       pageChrome={[
         searchApplicationName,
         i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pageChrome',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pageChrome',
           {
             defaultMessage: 'Docs Explorer',
           }
