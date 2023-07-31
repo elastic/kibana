@@ -69,7 +69,7 @@ export class DataViewsServerPlugin
     });
 
     return {
-      enableRollups: () => this.isRollupsEnabled(),
+      enableRollups: () => (this.rollupsEnabled = true),
     };
   }
 
