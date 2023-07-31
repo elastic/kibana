@@ -416,7 +416,7 @@ export class JourneyFtrHarness {
 
       if (
         url.includes('kbn-ui-shared-deps-npm.dll.js') &&
-        text.includes('moment construction falls')
+        (text.includes('moment construction falls') || text.includes('Found non-numeric'))
       ) {
         // ignore errors from moment about constructing dates with invalid formats
         return;
