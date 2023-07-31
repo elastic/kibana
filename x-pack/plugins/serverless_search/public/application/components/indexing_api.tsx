@@ -23,7 +23,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
+import { OverviewPanel, LanguageClientPanel } from '@kbn/serverless-api-panels';
 
+import { PLUGIN_ID } from '../../../common';
 import { IndexData, FetchIndicesResult } from '../../../common/types';
 import { FETCH_INDICES_PATH } from '../routes';
 import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
@@ -32,9 +34,6 @@ import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
-
-import { OverviewPanel } from './overview_panels/overview_panel';
-import { LanguageClientPanel } from './overview_panels/language_client_panel';
 
 const NoIndicesContent = () => (
   <>
@@ -200,6 +199,8 @@ export const ElasticsearchIndexingApi = () => {
                       language={language}
                       setSelectedLanguage={setSelectedLanguage}
                       isSelectedLanguage={selectedLanguage === language}
+                      http={http}
+                      pluginId={PLUGIN_ID}
                     />
                   </EuiFlexItem>
                 ))}

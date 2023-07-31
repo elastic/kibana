@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { docLinks } from '../../../../common/doc_links';
-import { CodeBox } from '../code_box';
+import { CodeBox } from './code_box';
 import { languageDefinitions } from '../languages/languages';
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from '../languages/types';
 import { OverviewPanel } from './overview_panel';
@@ -19,12 +19,20 @@ interface IngestDataProps {
   codeArguments: LanguageDefinitionSnippetArguments;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
+  docLinks: any;
+  http: any;
+  pluginId: string;
+  useKibanaServicesHook: any;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
   codeArguments,
   selectedLanguage,
   setSelectedLanguage,
+  docLinks,
+  http,
+  pluginId,
+  useKibanaServicesHook,
 }) => {
   const [selectedIngestMethod, setSelectedIngestMethod] = useState<
     'ingestViaApi' | 'ingestViaIntegration'
@@ -43,9 +51,12 @@ export const IngestData: React.FC<IngestDataProps> = ({
             languages={languageDefinitions}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
+            http={http}
+            pluginId={pluginId}
+            useKibanaServicesHook={useKibanaServicesHook}
           />
         ) : (
-          <IntegrationsPanel />
+          <IntegrationsPanel docLinks={docLinks} http={http} pluginId={pluginId} />
         )
       }
       links={[

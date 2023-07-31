@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -18,11 +19,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { docLinks } from '../../../../common/doc_links';
-import { LEARN_MORE_LABEL } from '../../../../common/i18n_string';
-import { GithubLink } from '../shared/github_link';
+import { LEARN_MORE_LABEL } from '../constants';
+import { GithubLink } from './github_link';
 
-export const IntegrationsPanel: React.FC = () => {
+export interface IntegrationsPanelProps {
+  docLinks: any;
+  http: any;
+  pluginId: string;
+}
+
+export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
+  docLinks,
+  http,
+  pluginId,
+}) => {
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
@@ -63,6 +73,8 @@ export const IntegrationsPanel: React.FC = () => {
                   label={i18n.translate('xpack.serverlessSearch.ingestData.logstashLink', {
                     defaultMessage: 'Logstash',
                   })}
+                  http={http}
+                  pluginId={pluginId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -103,6 +115,8 @@ export const IntegrationsPanel: React.FC = () => {
                   label={i18n.translate('xpack.serverlessSearch.ingestData.beatsLink', {
                     defaultMessage: 'beats',
                   })}
+                  http={http}
+                  pluginId={pluginId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -143,6 +157,8 @@ export const IntegrationsPanel: React.FC = () => {
                   label={i18n.translate('xpack.serverlessSearch.ingestData.connectorsPythonLink', {
                     defaultMessage: 'connectors-python',
                   })}
+                  http={http}
+                  pluginId={pluginId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

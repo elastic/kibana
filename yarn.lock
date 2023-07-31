@@ -5301,6 +5301,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-api-panels@link:packages/kbn-serverless-api-panels":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""

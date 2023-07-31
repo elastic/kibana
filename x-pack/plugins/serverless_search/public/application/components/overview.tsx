@@ -19,22 +19,26 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  WelcomeBanner,
+  IngestData,
+  SelectClientPanel,
+  OverviewPanel,
+  CodeBox,
+  LanguageClientPanel,
+  InstallClientPanel,
+} from '@kbn/serverless-api-panels';
+
 import React, { useMemo, useState } from 'react';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
-import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
-import { InstallClientPanel } from './overview_panels/install_client';
-import { OverviewPanel } from './overview_panels/overview_panel';
 import './overview.scss';
-import { IngestData } from './overview_panels/ingest_data';
-import { SelectClientPanel } from './overview_panels/select_client';
 import { ApiKeyPanel } from './api_key/api_key';
-import { LanguageClientPanel } from './overview_panels/language_client_panel';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -59,54 +63,19 @@ export const ElasticsearchOverview = () => {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
         <EuiText color="ghost">
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {/* Reversing column direction here so screenreaders keep h1 as the first element */}
-              <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle className="serverlessSearchHeaderTitle" size="s">
-                    <h1>
-                      {i18n.translate('xpack.serverlessSearch.header.title', {
-                        defaultMessage: 'Get started with Elasticsearch',
-                      })}
-                    </h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xxxs">
-                    <h2>
-                      {i18n.translate('xpack.serverlessSearch.header.greeting.title', {
-                        defaultMessage: 'Hi {name}!',
-                        values: { name: userProfile.user.full_name || userProfile.user.username },
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <EuiText>
-                {i18n.translate('xpack.serverlessSearch.header.description', {
-                  defaultMessage:
-                    "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
-                })}
-              </EuiText>
-              <EuiSpacer size="xxl" />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiImage alt="" src={`${assetBasePath}serverless_header.png`} size="554px" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <WelcomeBanner userProfile={userProfile} assetBasePath={assetBasePath} />
         </EuiText>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
-        <SelectClientPanel>
+        <SelectClientPanel docLinks={docLinks} http={http}>
           {languageDefinitions.map((language, index) => (
             <EuiFlexItem key={`panelItem.${index}`}>
               <LanguageClientPanel
                 language={language}
                 setSelectedLanguage={setSelectedLanguage}
                 isSelectedLanguage={selectedLanguage === language}
+                http={http}
+                pluginId={PLUGIN_ID}
               />
             </EuiFlexItem>
           ))}
@@ -118,6 +87,9 @@ export const ElasticsearchOverview = () => {
           codeArguments={codeSnippetArguments}
           language={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
+          useKibanaServicesHook={useKibanaServices}
+          http={http}
+          pluginId={PLUGIN_ID}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
@@ -152,6 +124,9 @@ export const ElasticsearchOverview = () => {
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
+              http={http}
+              pluginId={PLUGIN_ID}
+              useKibanaServicesHook={useKibanaServices}
             />
           }
           links={[
@@ -200,6 +175,9 @@ export const ElasticsearchOverview = () => {
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
+              http={http}
+              pluginId={PLUGIN_ID}
+              useKibanaServicesHook={useKibanaServices}
             />
           }
           links={[]}
@@ -213,6 +191,10 @@ export const ElasticsearchOverview = () => {
           codeArguments={codeSnippetArguments}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
+          http={http}
+          docLinks={docLinks}
+          pluginId={PLUGIN_ID}
+          useKibanaServicesHook={useKibanaServices}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
@@ -228,6 +210,9 @@ export const ElasticsearchOverview = () => {
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
+              http={http}
+              pluginId={PLUGIN_ID}
+              useKibanaServicesHook={useKibanaServices}
             />
           }
           links={[]}

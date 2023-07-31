@@ -623,6 +623,7 @@
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
     "@kbn/serverless": "link:x-pack/plugins/serverless",
+    "@kbn/serverless-api-panels": "link:packages/kbn-serverless-api-panels",
     "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
     "@kbn/serverless-project-switcher": "link:packages/serverless/project_switcher",
     "@kbn/serverless-search": "link:x-pack/plugins/serverless_search",
