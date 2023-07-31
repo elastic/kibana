@@ -72,7 +72,6 @@ export class SecurityUsageReportingTask {
     if (!taskManager) {
       return;
     }
-    taskManager.bulkUpdateSchedules([this.taskId], { interval: '30s' });
 
     this.wasStarted = true;
 
