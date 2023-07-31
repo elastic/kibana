@@ -12,13 +12,15 @@ import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import type { EndpointAppContext } from '../../types';
-import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
+import type {
+  GetMetadataListRequestQuery,
+  GetMetadataRequestSchema,
+} from '../../../../common/api/endpoint';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
-import type { GetMetadataRequestSchema } from '../../../../common/api/endpoint';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');

@@ -15,7 +15,7 @@ export * from './actions/list_route';
 export * from './actions/isolate_route';
 export * from './actions/unisolate_route';
 export * from './actions/kill_process_route';
-export * from './actions/suspend_procesS_route';
+export * from './actions/suspend_process_route';
 export * from './actions/get_processes_route';
 export * from './actions/get_file_route';
 export * from './actions/execute_route';
