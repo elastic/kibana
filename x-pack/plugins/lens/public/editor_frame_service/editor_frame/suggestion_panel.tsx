@@ -250,6 +250,7 @@ export function SuggestionPanel({
     frame.dataViews.indexPatterns
   );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(() => {
+    const startTime = window.performance.now();
     const newSuggestions = missingIndexPatterns.length
       ? []
       : getSuggestions({
@@ -311,6 +312,8 @@ export function SuggestionPanel({
           )
         : undefined;
 
+    const duration = window.performance.now() - startTime;
+    window.console.log(`suggestion_panel: ${duration}`);
     return {
       suggestions: newSuggestions,
       currentStateExpression: newStateExpression,
