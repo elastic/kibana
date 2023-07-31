@@ -7,6 +7,9 @@
 
 import { UsageRecord } from '../types';
 import {
+  CNVM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
   LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
@@ -18,7 +21,26 @@ import {
   CLOUD_SECURITY_TASK_TYPE,
 } from './cloud_security_metering';
 import { cloudSecurityMetringTaskProperties } from './cloud_security_metering_task_config';
-import type { CloudSecurityMeteringCallbackInput, ResourceCountAggregation } from './types';
+import type {
+  CloudSecurityMeteringCallbackInput,
+  PostureType,
+  ResourceCountAggregation,
+} from './types';
+
+const queryParams = {
+  [CSPM_POLICY_TEMPLATE]: {
+    index: LATEST_FINDINGS_INDEX_PATTERN,
+    range: LATEST_FINDINGS_RETENTION_POLICY,
+  },
+  [KSPM_POLICY_TEMPLATE]: {
+    index: LATEST_FINDINGS_INDEX_PATTERN,
+    timeRange: LATEST_FINDINGS_RETENTION_POLICY,
+  },
+  [CNVM_POLICY_TEMPLATE]: {
+    index: LATEST_VULNERABILITIES_INDEX_PATTERN,
+    timeRange: LATEST_VULNERABILITIES_RETENTION_POLICY,
+  },
+};
 
 export const getCloudSecurityUsageRecord = async ({
   esClient,
@@ -70,75 +92,44 @@ export const getCloudSecurityUsageRecord = async ({
   }
 };
 
-export const getAggQueryByPostureType = (postureType: string) => {
-  return postureType === 'cspm' || postureType === 'kspm'
-    ? getFindingsByResourceAggQuery(postureType)
-    : getVulnerabilitiesByResourceAggQuery();
+export const getAggQueryByPostureType = (postureType: PostureType) => {
+  const mustFilters = [];
+  postureType === CSPM_POLICY_TEMPLATE || postureType === KSPM_POLICY_TEMPLATE
+    ? mustFilters.push({
+        term: {
+          'rule.benchmark.posture_type': postureType,
+        },
+      })
+    : mustFilters.push({
+        range: {
+          '@timestamp': {
+            gte: 'now-' + queryParams[postureType]['timeRange'],
+          },
+        },
+      });
+
+  const query = {
+    index: queryParams[postureType]['index'],
+    query: {
+      bool: {
+        must: mustFilters,
+      },
+    },
+    size: 0,
+    aggs: {
+      unique_resources: {
+        cardinality: {
+          field: 'resource.id',
+          precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
+        },
+      },
+      min_timestamp: {
+        min: {
+          field: '@timestamp',
+        },
+      },
+    },
+  };
+
+  return query;
 };
-
-export const getFindingsByResourceAggQuery = (postureType: string) => ({
-  index: LATEST_FINDINGS_INDEX_PATTERN,
-  query: {
-    bool: {
-      must: [
-        {
-          term: {
-            'rule.benchmark.posture_type': postureType,
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: 'now-' + LATEST_FINDINGS_RETENTION_POLICY,
-            },
-          },
-        },
-      ],
-    },
-  },
-  size: 0,
-  aggs: {
-    unique_resources: {
-      cardinality: {
-        field: 'resource.id',
-        precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
-      },
-    },
-    min_timestamp: {
-      min: {
-        field: '@timestamp',
-      },
-    },
-  },
-});
-
-export const getVulnerabilitiesByResourceAggQuery = () => ({
-  index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: {
-    bool: {
-      must: [
-        {
-          range: {
-            '@timestamp': {
-              gte: 'now-' + LATEST_VULNERABILITIES_RETENTION_POLICY, // the "look back" period should be the same as the scan interval
-            },
-          },
-        },
-      ],
-    },
-  },
-  size: 0,
-  aggs: {
-    unique_resources: {
-      cardinality: {
-        field: 'resource.id',
-        precision_threshold: AGGREGATION_PRECISION_THRESHOLD,
-      },
-    },
-    min_timestamp: {
-      min: {
-        field: '@timestamp',
-      },
-    },
-  },
-});

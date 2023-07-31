@@ -15,7 +15,7 @@ import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import { PostureType } from './types';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
-export const AGGREGATION_PRECISION_THRESHOLD = 3000;
+export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
