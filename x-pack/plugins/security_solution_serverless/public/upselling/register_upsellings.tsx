@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
   PageUpsellings,
@@ -12,13 +13,15 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import React, { lazy } from 'react';
+import type React from 'react';
+import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 
 const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
 interface UpsellingsConfig {
   pli: AppFeatureKey;
-  component: React.ComponentType;
+  component: React.LazyExoticComponent<React.ComponentType>;
 }
 
 type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
@@ -81,4 +84,10 @@ export const upsellingSections: UpsellingSections = [
   //   pli: AppFeatureKey.advancedInsights,
   //   component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   // },
+
+  {
+    id: 'endpointPolicyProtections',
+    pli: AppFeatureKey.endpointPolicyProtections,
+    component: EndpointPolicyProtectionsLazy,
+  },
 ];
