@@ -16,16 +16,10 @@ export interface SetupState {
   data: {
     available: boolean;
   };
-  packages: {
-    installed: boolean;
-  };
   permissions: {
     configured: boolean;
   };
   policies: {
-    apm: {
-      installed: boolean;
-    };
     collector: {
       installed: boolean;
     };
@@ -55,16 +49,10 @@ export function createDefaultSetupState(): SetupState {
     data: {
       available: false,
     },
-    packages: {
-      installed: false,
-    },
     permissions: {
       configured: false,
     },
     policies: {
-      apm: {
-        installed: false,
-      },
       collector: {
         installed: false,
       },
@@ -88,9 +76,7 @@ export function areResourcesSetup(state: SetupState): boolean {
   return (
     state.resource_management.enabled &&
     state.resources.created &&
-    state.packages.installed &&
     state.permissions.configured &&
-    state.policies.apm.installed &&
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
     state.settings.configured
