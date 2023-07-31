@@ -136,6 +136,7 @@
     "@kbn/observability-onboarding-plugin",
     "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin",
-    "@kbn/security-solution-plugin/cypress"
+    "@kbn/security-solution-plugin/cypress",
+    "@kbn/security-solution-plugin/public/management/cypress"
   ]
 }
