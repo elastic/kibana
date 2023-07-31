@@ -6,10 +6,16 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AfterKey, AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AfterKey,
+  AfterKeys,
+  IdentifierType,
+  RiskCategories,
+  RiskWeights,
+} from '../../../common/risk_engine';
 
-export interface GetScoresParams {
+export interface CalculateScoresParams {
   afterKeys: AfterKeys;
   debug?: boolean;
   index: string;
@@ -17,37 +23,72 @@ export interface GetScoresParams {
   identifierType?: IdentifierType;
   pageSize: number;
   range: { start: string; end: string };
+  runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
 }
 
-export interface GetScoresResponse {
+export interface CalculateAndPersistScoresParams {
+  afterKeys: AfterKeys;
+  debug?: boolean;
+  index: string;
+  filter?: unknown;
+  identifierType: IdentifierType;
+  pageSize: number;
+  range: { start: string; end: string };
+  runtimeMappings: MappingRuntimeFields;
+  weights?: RiskWeights;
+}
+
+export interface CalculateAndPersistScoresResponse {
+  after_keys: AfterKeys;
+  errors: string[];
+  scores_written: number;
+}
+
+export interface CalculateScoresResponse {
   debug?: {
     request: unknown;
     response: unknown;
   };
   after_keys: AfterKeys;
-  scores: RiskScore[];
+  scores: {
+    host?: RiskScore[];
+    user?: RiskScore[];
+  };
 }
 
 export interface SimpleRiskInput {
   id: string;
   index: string;
-  riskScore: string | number | undefined;
+  category: RiskCategories;
+  description: string;
+  risk_score: string | number | undefined;
+  timestamp: string | undefined;
 }
 
 export type RiskInput = Ecs;
 
+export interface EcsRiskScore {
+  '@timestamp': string;
+  host?: {
+    risk: Omit<RiskScore, '@timestamp'>;
+  };
+  user?: {
+    risk: Omit<RiskScore, '@timestamp'>;
+  };
+}
+
 export interface RiskScore {
   '@timestamp': string;
-  identifierField: string;
-  identifierValue: string;
-  level: string;
-  totalScore: number;
-  totalScoreNormalized: number;
-  alertsScore: number;
-  otherScore: number;
+  id_field: string;
+  id_value: string;
+  calculated_level: string;
+  calculated_score: number;
+  calculated_score_norm: number;
+  category_1_score: number;
+  category_1_count: number;
   notes: string[];
-  riskiestInputs: SimpleRiskInput[] | RiskInput[];
+  inputs: SimpleRiskInput[] | RiskInput[];
 }
 
 export interface CalculateRiskScoreAggregations {
@@ -62,7 +103,7 @@ export interface CalculateRiskScoreAggregations {
 }
 
 export interface RiskScoreBucket {
-  key: { [identifierField: string]: string; category: string };
+  key: { [identifierField: string]: string };
   doc_count: number;
   risk_details: {
     value: {
@@ -70,10 +111,9 @@ export interface RiskScoreBucket {
       normalized_score: number;
       notes: string[];
       level: string;
-      alerts_score: number;
-      other_score: number;
+      category_1_score: number;
+      category_1_count: number;
     };
   };
-
-  riskiest_inputs: SearchResponse;
+  inputs: SearchResponse;
 }

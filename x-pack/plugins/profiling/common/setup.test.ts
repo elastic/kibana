@@ -28,28 +28,10 @@ function createDataState(available: boolean): PartialSetupState {
   };
 }
 
-function createPackageState(installed: boolean): PartialSetupState {
-  return {
-    packages: {
-      installed,
-    },
-  };
-}
-
 function createPermissionState(configured: boolean): PartialSetupState {
   return {
     permissions: {
       configured,
-    },
-  };
-}
-
-function createApmPolicyState(installed: boolean): PartialSetupState {
-  return {
-    policies: {
-      apm: {
-        installed,
-      },
     },
   };
 }
@@ -115,20 +97,16 @@ describe('Merging partial state operations', () => {
 
   test('deeply nested partial states with overlap', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createApmPolicyState(true),
       createCollectorPolicyState(true),
       createSymbolizerPolicyState(true),
     ]);
 
-    expect(mergedState.policies.apm.installed).toEqual(true);
     expect(mergedState.policies.collector.installed).toEqual(true);
     expect(mergedState.policies.symbolizer.installed).toEqual(true);
   });
 
   test('check resource status with failed partial states', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createPackageState(false),
-      createApmPolicyState(true),
       createCollectorPolicyState(true),
       createSymbolizerPolicyState(true),
       createPermissionState(false),
@@ -141,8 +119,6 @@ describe('Merging partial state operations', () => {
 
   test('check resource status with all successful partial states', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createPackageState(true),
-      createApmPolicyState(true),
       createCollectorPolicyState(true),
       createSymbolizerPolicyState(true),
       createPermissionState(true),
