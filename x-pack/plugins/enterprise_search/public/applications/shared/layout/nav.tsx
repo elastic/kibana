@@ -211,7 +211,7 @@ export const useEnterpriseSearchApplicationNav = (
           }),
           items: [
             {
-              id: 'enterpriseSearchApplicationPreview',
+              id: 'enterpriseSearchApplicationDocsExplorer',
               name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.docsExplorerTitle', {
                 defaultMessage: 'Docs Explorer',
               }),
