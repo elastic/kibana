@@ -23,7 +23,11 @@ export const lastScheduledActionsSchema = schema.object({
 
 export const metaSchema = schema.object({
   lastScheduledActions: schema.maybe(lastScheduledActionsSchema),
+  // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
+  // true - alert has changed from active/recovered
+  // false - the status has remained either active or recovered
   flappingHistory: schema.maybe(schema.arrayOf(schema.boolean())),
+  // flapping flag that indicates whether the alert is flapping
   flapping: schema.maybe(schema.boolean()),
   maintenanceWindowIds: schema.maybe(schema.arrayOf(schema.string())),
   pendingRecoveredCount: schema.maybe(schema.number()),
@@ -37,7 +41,9 @@ export const rawAlertInstanceSchema = schema.object({
 
 export const versionSchema = schema.object({
   alertTypeState: schema.maybe(ruleStateSchema),
+  // tracks the active alerts
   alertInstances: schema.maybe(schema.recordOf(schema.string(), rawAlertInstanceSchema)),
+  // tracks the recovered alerts for flapping purposes
   alertRecoveredInstances: schema.maybe(schema.recordOf(schema.string(), rawAlertInstanceSchema)),
   previousStartedAt: schema.maybe(schema.nullable(schema.string())),
   summaryActions: schema.maybe(throttledActionSchema),
