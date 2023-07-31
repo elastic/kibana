@@ -221,7 +221,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
       service_version: serviceVersion,
       map_file: sourceMapContent,
     } = params.body;
-    const bundleFilePath = 'android';
+    const bundleFilepath = 'android';
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;
@@ -234,7 +234,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
           apmArtifactBody: {
             serviceName,
             serviceVersion,
-            bundleFilePath,
+            bundleFilepath,
             sourceMap: sourceMapContent,
           },
         });
@@ -246,7 +246,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
           fleetId: artifact.id,
           created: artifact.created,
           mapContent: sourceMapContent,
-          bundleFilepath: bundleFilePath,
+          bundleFilepath: bundleFilepath,
           serviceName,
           serviceVersion,
         });
