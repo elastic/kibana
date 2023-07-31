@@ -55,7 +55,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -1788,6 +1788,53 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.validateActionFilterQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "validateActionFilterQuery",
+        "description": [],
+        "signature": [
+          "(actionItem: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleAction",
+            "text": "RuleAction"
+          },
+          ") => string | null"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.validateActionFilterQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "actionItem",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleAction",
+                "text": "RuleAction"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.ValueExpression",
         "type": "Function",
         "tags": [],
@@ -2326,6 +2373,17 @@
             "signature": [
               "string[]"
             ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.isSystemActionType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemActionType",
+            "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5808,9 +5866,9 @@
           "EuiDataGridControlColumn",
           "[]; useFetchAlertsData: () => ",
           "FetchAlertData",
-          "; visibleColumns: string[]; 'data-test-subj': string; updatedAt: number; browserFields: any; onToggleColumn: (columnId: string) => void; onResetColumns: () => void; onColumnsChange: (columns: ",
-          "EuiDataGridColumn",
-          "[], visibleColumns: string[]) => void; onChangeVisibleColumns: (newColumns: string[]) => void; query: Pick<",
+          "; visibleColumns: string[]; 'data-test-subj': string; updatedAt: number; browserFields: any; onToggleColumn: (columnId: string) => void; onResetColumns: () => void; onChangeVisibleColumns: (newColumns: string[]) => void; onColumnResize?: ",
+          "EuiDataGridOnColumnResizeHandler",
+          " | undefined; query: Pick<",
           "QueryDslQueryContainer",
           ", \"ids\" | \"bool\">; controls?: ",
           "EuiDataGridToolBarAdditionalControlsOptions",
@@ -6792,6 +6850,64 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.NOT_BETWEEN]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.text",
+                "type": "Any",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.requiredValues",
                 "type": "number",
                 "tags": [],
                 "label": "requiredValues",
@@ -8829,7 +8945,7 @@
           "\nParses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleUseExecutionStatus: boolean; }>"
+          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleUseExecutionStatus: boolean; ruleKqlBar: boolean; }>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9429,7 +9545,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9493,7 +9609,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9513,6 +9629,119 @@
         "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.NORMALIZED_FIELD_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "NORMALIZED_FIELD_TYPES",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.long",
+            "type": "string",
+            "tags": [],
+            "label": "long",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.integer",
+            "type": "string",
+            "tags": [],
+            "label": "integer",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.short",
+            "type": "string",
+            "tags": [],
+            "label": "short",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.byte",
+            "type": "string",
+            "tags": [],
+            "label": "byte",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.double",
+            "type": "string",
+            "tags": [],
+            "label": "double",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.float",
+            "type": "string",
+            "tags": [],
+            "label": "float",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.half_float",
+            "type": "string",
+            "tags": [],
+            "label": "half_float",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.scaled_float",
+            "type": "string",
+            "tags": [],
+            "label": "scaled_float",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.unsigned_long",
+            "type": "string",
+            "tags": [],
+            "label": "unsigned_long",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

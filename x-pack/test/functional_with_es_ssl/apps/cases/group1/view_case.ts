@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -73,6 +72,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector('[data-test-subj*="title-update-action"]');
       });
 
+      it('shows error message when title is more than 160 characters', async () => {
+        const longTitle = Array(161).fill('x').toString();
+
+        await testSubjects.click('editable-title-edit-icon');
+        await testSubjects.setValue('editable-title-input-field', longTitle);
+        await testSubjects.click('editable-title-submit-btn');
+
+        const error = await find.byCssSelector('.euiFormErrorText');
+        expect(await error.getVisibleText()).equal(
+          'The length of the title is too long. The maximum length is 160 characters.'
+        );
+
+        await testSubjects.click('editable-title-cancel-btn');
+      });
+
       it('adds a comment to a case', async () => {
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -112,6 +126,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
+      it('shows error when category is more than 50 characters', async () => {
+        const longCategory = Array(51).fill('x').toString();
+        await testSubjects.click('category-edit-button');
+        await comboBox.setCustom('comboBoxInput', longCategory);
+        await testSubjects.click('edit-category-submit');
+
+        const error = await find.byCssSelector('.euiFormErrorText');
+        expect(await error.getVisibleText()).equal(
+          'The length of the category is too long. The maximum length is 50 characters.'
+        );
+
+        await testSubjects.click('edit-category-cancel');
+      });
+
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
         await testSubjects.click('tag-list-edit-button');
@@ -125,6 +153,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
       });
 
+      it('shows error when tag is more than 256 characters', async () => {
+        const longTag = Array(257).fill('a').toString();
+
+        await testSubjects.click('tag-list-edit-button');
+        await comboBox.clearInputField('comboBoxInput');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await comboBox.setCustom('comboBoxInput', longTag);
+        await browser.pressKeys(browser.keys.ENTER);
+
+        const error = await find.byCssSelector('.euiFormErrorText');
+        expect(await error.getVisibleText()).equal(
+          'The length of the tag is too long. The maximum length is 256 characters.'
+        );
+
+        await testSubjects.click('edit-tags-cancel');
+      });
+
       it('deletes a tag from a case', async () => {
         await testSubjects.click('tag-list-edit-button');
         // find the tag button and click the close button
@@ -134,6 +181,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
+      });
+
+      it('shows error when more than 200 tags are added to the case', async () => {
+        const tags = Array(200).fill('foo');
+
+        await cases.common.addMultipleTags(tags);
+        await testSubjects.click('edit-tags-submit');
+
+        const error = await find.byCssSelector('.euiFormErrorText');
+        expect(await error.getVisibleText()).equal(
+          'Too many tags. The maximum number of allowed tags is 200'
+        );
+
+        await testSubjects.click('edit-tags-cancel');
       });
 
       describe('status', () => {
@@ -574,12 +635,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('filters by all by default', async () => {
+        const allBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
+        );
+
+        expect(await allBadge.getAttribute('aria-label')).equal('1 active filters');
+      });
+
       it('filters by comment successfully', async () => {
         const commentBadge = await find.byCssSelector(
           '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
         );
 
-        expect(await commentBadge.getVisibleText()).equal('0');
+        expect(await commentBadge.getAttribute('aria-label')).equal('0 available filters');
 
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -590,7 +659,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await commentBadge.getVisibleText()).equal('1');
+        await testSubjects.click('user-actions-filter-activity-button-comments');
+
+        expect(await commentBadge.getAttribute('aria-label')).equal('1 active filters');
       });
 
       it('filters by history successfully', async () => {
@@ -598,7 +669,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
         );
 
-        expect(await historyBadge.getVisibleText()).equal('1');
+        expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
@@ -608,7 +679,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('user-actions-filter-activity-button-history');
 
-        expect(await historyBadge.getVisibleText()).equal('3');
+        expect(await historyBadge.getAttribute('aria-label')).equal('3 active filters');
       });
 
       it('sorts by newest first successfully', async () => {
@@ -908,6 +979,81 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(firstBreadcrumb).to.be('Management');
         expect(middleBreadcrumb).to.be('Cases');
         expect(lastBreadcrumb).to.be(theCase.title);
+      });
+    });
+
+    describe('reporter', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('should render the reporter correctly', async () => {
+        const reporter = await cases.singleCase.getReporter();
+
+        const reporterText = await reporter.getVisibleText();
+
+        expect(reporterText).to.be('elastic');
+      });
+    });
+
+    describe('participants', () => {
+      before(async () => {
+        await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+      });
+
+      afterEach(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      after(async () => {
+        await deleteUsersAndRoles(getService, users, roles);
+      });
+
+      it('should render the participants correctly', async () => {
+        const theCase = await createAndNavigateToCase(getPageObject, getService);
+        await cases.api.createAttachment({
+          caseId: theCase.id,
+          params: {
+            type: AttachmentType.user,
+            comment: 'test',
+            owner: 'cases',
+          },
+          auth: { user: casesAllUser, space: 'default' },
+        });
+
+        await cases.singleCase.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        const participants = await cases.singleCase.getParticipants();
+
+        const casesAllUserText = await participants[0].getVisibleText();
+        const elasticUserText = await participants[1].getVisibleText();
+
+        expect(casesAllUserText).to.be('cases all_user');
+        expect(elasticUserText).to.be('elastic');
+      });
+
+      it('should render assignees in the participants section', async () => {
+        await createAndNavigateToCase(getPageObject, getService);
+
+        await cases.singleCase.openAssigneesPopover();
+        await cases.common.setSearchTextInAssigneesPopover('case');
+        await cases.common.selectFirstRowInAssigneesPopover();
+        await cases.singleCase.closeAssigneesPopover();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+
+        const participants = await cases.singleCase.getParticipants();
+
+        expect(participants.length).to.be(3);
+
+        // The assignee
+        const casesAllUserText = await participants[0].getVisibleText();
+        const elasticUserText = await participants[1].getVisibleText();
+        const testUserText = await participants[2].getVisibleText();
+
+        expect(casesAllUserText).to.be('cases all_user');
+        expect(elasticUserText).to.be('elastic');
+        expect(testUserText).to.be('test user');
       });
     });
   });

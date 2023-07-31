@@ -6,6 +6,7 @@
  */
 
 import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { isEmpty } from 'lodash';
 import { RuleStatus } from '../../../types';
 
 export const mapFiltersToKueryNode = ({
@@ -17,6 +18,7 @@ export const mapFiltersToKueryNode = ({
   ruleStatusesFilter,
   tagsFilter,
   searchText,
+  kueryNode,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
@@ -26,8 +28,13 @@ export const mapFiltersToKueryNode = ({
   ruleParamsFilter?: Record<string, string | number | object>;
   ruleStatusesFilter?: RuleStatus[];
   searchText?: string;
+  kueryNode?: KueryNode;
 }): KueryNode | null => {
   const filterKueryNode = [];
+
+  if (kueryNode && !isEmpty(kueryNode)) {
+    filterKueryNode.push(kueryNode);
+  }
 
   if (typesFilter && typesFilter.length) {
     filterKueryNode.push(

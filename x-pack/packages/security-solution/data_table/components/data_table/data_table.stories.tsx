@@ -84,6 +84,7 @@ export const DataTable = () => {
     <StoryProviders>
       <DataTableComponent
         browserFields={{}}
+        getFieldSpec={() => undefined}
         data={mockTimelineData}
         id={TableId.test}
         renderCellValue={StoryCellRenderer}

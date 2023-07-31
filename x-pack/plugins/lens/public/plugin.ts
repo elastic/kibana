@@ -104,6 +104,7 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -589,6 +590,13 @@ export class LensPlugin {
       visualizeAggBasedVisAction(core.application)
     );
 
+    const editInLensAction = new ConfigureInLensPanelAction(
+      startDependencies,
+      core.overlays,
+      core.theme
+    );
+    startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerAction(
@@ -669,7 +677,13 @@ export class LensPlugin {
           this.editorFrameService!.loadVisualizations(),
           this.editorFrameService!.loadDatasources(),
         ]);
-        return getEditLensConfiguration(core, startDependencies, visualizationMap, datasourceMap);
+        const Component = await getEditLensConfiguration(
+          core,
+          startDependencies,
+          visualizationMap,
+          datasourceMap
+        );
+        return Component;
       },
     };
   }

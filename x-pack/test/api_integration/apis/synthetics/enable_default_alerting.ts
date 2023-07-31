@@ -144,7 +144,7 @@ const defaultAlertRules = {
     mutedInstanceIds: [],
     revision: 0,
     running: false,
-    schedule: { interval: '10m' },
+    schedule: { interval: '1m' },
     actions: [],
     params: {},
     snoozeSchedule: [],

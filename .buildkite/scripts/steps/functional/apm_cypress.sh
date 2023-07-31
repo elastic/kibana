@@ -11,9 +11,16 @@ APM_CYPRESS_RECORD_KEY="$(retry 5 5 vault read -field=CYPRESS_RECORD_KEY secret/
 
 export JOB=kibana-apm-cypress
 IS_FLAKY_TEST_RUNNER=${CLI_COUNT:-0}
+GH_APM_TEAM_LABEL="Team:APM"
 
-#Enabling cypress dashboard recording when PR is labeled with `apm:cypress-record` and we are not using the flaky test runner
-if [[ "$IS_FLAKY_TEST_RUNNER" -ne 1 ]] && is_pr_with_label "apm:cypress-record"; then
+if (! is_pr); then
+  echo "--- Add GH labels to buildkite metadata"
+  ts-node .buildkite/scripts/steps/add_gh_labels_to_bk_metadata.ts BUILDKITE_MESSAGE true
+  GH_ON_MERGE_LABELS="$(buildkite-agent meta-data get gh_labels)"
+fi
+
+# Enabling cypress dashboard recording when PR is labeled with `apm:cypress-record` and we are not using the flaky test runner OR on merge with Team:APM label applied
+if ([[ "$IS_FLAKY_TEST_RUNNER" -ne 1 ]] && is_pr_with_label "apm:cypress-record") || ([[ $GH_ON_MERGE_LABELS == *"$GH_APM_TEAM_LABEL"* ]]); then
   CYPRESS_ARGS="--record --key "$APM_CYPRESS_RECORD_KEY" --parallel --ci-build-id "${BUILDKITE_BUILD_ID}""
 else
   CYPRESS_ARGS=""

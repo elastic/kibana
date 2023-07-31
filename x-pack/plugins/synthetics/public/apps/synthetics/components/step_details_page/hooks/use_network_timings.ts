@@ -17,7 +17,7 @@ import {
   SYNTHETICS_SSL_TIMINGS,
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
-} from '@kbn/observability-plugin/common';
+} from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 

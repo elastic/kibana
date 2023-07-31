@@ -1,7 +1,5 @@
 [[storage-explorer]]
-=== Storage explorer
-
-beta::[]
+=== Storage Explorer
 
 Analyze your APM data and manage costs with **storage explorer**.
 For example, analyze the storage footprint of each of your services to see which are producing
@@ -10,7 +8,7 @@ Or, expand the time filter to visualize data trends over time so that you can be
 and prepare for future storage needs.
 
 [role="screenshot"]
-image::apm/images/storage-explorer-overview.png[APM Storage explorer]
+image::apm/images/storage-explorer-overview.png[APM Storage Explorer]
 
 [float]
 ==== Index lifecycle phases
@@ -50,7 +48,7 @@ the total number of documents.
 * Number of **transactions**, **spans**, **errors**, and **metrics** — doc count and size on disk.
 
 [role="screenshot"]
-image::apm/images/storage-explorer-expanded.png[APM Storage explorer service breakdown]
+image::apm/images/storage-explorer-expanded.png[APM Storage Explorer service breakdown]
 
 As you explore your service statistics, you might want to take action to reduce the number of
 documents and therefore storage size of a particular service.
@@ -84,7 +82,7 @@ work with your developers to change how exceptions are handled in your code.
 [float]
 ==== Privileges
 
-Storage explorer requires expanded privileges to view.
+Storage Explorer requires expanded privileges to view.
 See <<apm-app-storage-explorer-user-create>> for more information.
 
 [float]

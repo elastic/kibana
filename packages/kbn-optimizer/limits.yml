@@ -40,7 +40,6 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
-  essSecurity: 16573
   esUiShared: 326654
   eventAnnotation: 48565
   exploratoryView: 74673
@@ -84,10 +83,11 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 37000
+  lens: 38000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
+  logsShared: 281060
   logstash: 53548
   management: 46112
   maps: 90000
@@ -97,12 +97,13 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   observability: 115443
+  observabilityAIAssistant: 16759
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834
-  profiling: 18628
+  profiling: 36694
   remoteClusters: 51327
   reporting: 57003
   rollup: 97204
@@ -116,12 +117,13 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchprofiler: 67080
-  security: 65433
+  security: 81771
   securitySolution: 66738
+  securitySolutionEss: 16573
+  securitySolutionServerless: 40000
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 71995
-  serverlessSecurity: 40000
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
@@ -160,5 +162,4 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
-  visualizationUiComponents: 76424
   watcher: 43598

@@ -380,12 +380,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         });
       });
 
-    const { input: newInput, searchSessionId } = await initializeDashboard({
+    const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
       controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
+    if (!initializeResult) return;
+    const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
 

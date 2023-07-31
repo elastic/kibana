@@ -548,9 +548,9 @@ describe('engines routes', () => {
       expect(mockRouter.response.customError).toHaveBeenCalledWith({
         body: {
           attributes: {
-            error_code: 'engine_not_found',
+            error_code: 'search_application_not_found',
           },
-          message: 'Could not find engine',
+          message: 'Could not find search application',
         },
         statusCode: 404,
       });
@@ -574,7 +574,7 @@ describe('engines routes', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });

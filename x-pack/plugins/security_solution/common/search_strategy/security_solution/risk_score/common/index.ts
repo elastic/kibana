@@ -7,6 +7,7 @@
 
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
+import { RiskScoreEntity } from '../../../../risk_engine/types';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
@@ -43,7 +44,4 @@ export enum RiskQueries {
   kpiRiskScore = 'kpiRiskScore',
 }
 
-export enum RiskScoreEntity {
-  host = 'host',
-  user = 'user',
-}
+export { RiskScoreEntity };

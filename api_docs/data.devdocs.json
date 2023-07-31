@@ -8816,6 +8816,26 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
               },
@@ -8902,22 +8922,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -10589,7 +10593,9 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>>; setField: <K extends keyof ",
+          ">>>; history: ",
+          "SearchRequest",
+          "[]; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10613,9 +10619,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; history: ",
-          "SearchRequest",
-          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+          "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12789,10 +12793,6 @@
               "path": "src/plugins/dashboard/public/services/data/data_service.ts"
             },
             {
-              "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
-            },
-            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12803,6 +12803,10 @@
             {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -13249,8 +13253,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -13270,7 +13274,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -13294,10 +13298,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -13311,6 +13311,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13371,6 +13375,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -13529,12 +13545,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -13547,14 +13563,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "dataViews",
@@ -13581,8 +13589,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -13621,40 +13629,8 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -13745,8 +13721,40 @@
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -13761,8 +13769,8 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
                 "plugin": "canvas",
@@ -13809,6 +13817,18 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -13827,18 +13847,6 @@
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
                 "plugin": "transform",
@@ -14585,6 +14593,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -16822,7 +16856,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16864,10 +16898,8 @@
                 "id": "def-server.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -16931,7 +16963,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16973,10 +17005,8 @@
                 "id": "def-server.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -20908,8 +20938,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -20929,7 +20959,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -20953,10 +20983,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -20970,6 +20996,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21030,6 +21060,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -21188,12 +21230,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -21206,14 +21248,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "dataViews",
@@ -21240,8 +21274,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -21280,40 +21314,8 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -21404,8 +21406,40 @@
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -21420,8 +21454,8 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
                 "plugin": "canvas",
@@ -21468,6 +21502,18 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -21486,18 +21532,6 @@
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
                 "plugin": "transform",
@@ -22244,6 +22278,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -25352,7 +25412,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25394,10 +25454,8 @@
                 "id": "def-common.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -25461,7 +25519,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25503,10 +25561,8 @@
                 "id": "def-common.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -27642,6 +27698,26 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
               },
@@ -27728,22 +27804,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -28342,7 +28402,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28358,7 +28418,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", override?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28700,6 +28760,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.KQL_TELEMETRY_ROUTE_LATEST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "KQL_TELEMETRY_ROUTE_LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "src/plugins/data/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.META_FIELDS",
         "type": "string",
         "tags": [],
@@ -28726,6 +28801,21 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

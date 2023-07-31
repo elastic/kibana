@@ -6,20 +6,19 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
+import memoizeOne from 'memoize-one';
+import { isEqual } from 'lodash';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -43,11 +42,23 @@ import type {
 import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../../types';
 import { LayerPanel } from './layerpanel';
-import { getUniqueLabelGenerator } from '../../utils';
+import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
 }
+
+const getSelectedFieldsFromColumns = memoizeOne(
+  (columns: TextBasedLayerColumn[]) =>
+    columns
+      .map((c) => {
+        if ('fieldName' in c) {
+          return c.fieldName;
+        }
+      })
+      .filter(nonNullable),
+  isEqual
+);
 
 export function getTextBasedDatasource({
   core,
@@ -214,7 +225,6 @@ export function getTextBasedDatasource({
       const initState = state || { layers: {} };
       return {
         ...initState,
-        fieldList: [],
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -344,40 +354,25 @@ export function getTextBasedDatasource({
       return toExpression(state, layerId);
     },
     getSelectedFields(state) {
-      const fields: string[] = [];
-      Object.values(state?.layers)?.forEach((l) => {
-        const { columns } = l;
-        Object.values(columns).forEach((c) => {
-          if ('fieldName' in c) {
-            fields.push(c.fieldName);
-          }
-        });
-      });
-      return fields;
-    },
-
-    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <TextBasedDataPanel
-              data={data}
-              dataViews={dataViews}
-              expressions={expressions}
-              layerFields={layerFields}
-              {...props}
-            />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return getSelectedFieldsFromColumns(
+        Object.values(state?.layers)?.flatMap((l) => Object.values(l.columns))
       );
     },
 
-    renderDimensionTrigger: (
-      domElement: Element,
-      props: DatasourceDimensionTriggerProps<TextBasedPrivateState>
-    ) => {
+    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
+      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
+      return (
+        <TextBasedDataPanel
+          data={data}
+          dataViews={dataViews}
+          expressions={expressions}
+          layerFields={layerFields}
+          {...props}
+        />
+      );
+    },
+
+    DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const layer = props.state.layers[props.layerId];
       const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
@@ -386,23 +381,18 @@ export function getTextBasedDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <DimensionTrigger
-              id={props.columnId}
-              color={customLabel && selectedField ? 'primary' : 'danger'}
-              dataTestSubj="lns-dimensionTrigger-textBased"
-              label={
-                customLabel ??
-                i18n.translate('xpack.lens.textBasedLanguages.missingField', {
-                  defaultMessage: 'Missing field',
-                })
-              }
-            />{' '}
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <DimensionTrigger
+          id={props.columnId}
+          color={customLabel && selectedField ? 'primary' : 'danger'}
+          dataTestSubj="lns-dimensionTrigger-textBased"
+          label={
+            customLabel ??
+            i18n.translate('xpack.lens.textBasedLanguages.missingField', {
+              defaultMessage: 'Missing field',
+            })
+          }
+        />
       );
     },
 
@@ -410,16 +400,13 @@ export function getTextBasedDatasource({
       return [];
     },
 
-    renderDimensionEditor: (
-      domElement: Element,
-      props: DatasourceDimensionEditorProps<TextBasedPrivateState>
-    ) => {
+    DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
       const fields = props.state.fieldList;
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
         (column) => column.columnId === props.columnId
       );
 
-      const updatedFields = fields.map((f) => {
+      const updatedFields = fields?.map((f) => {
         return {
           ...f,
           compatible: props.isMetricDimension
@@ -431,94 +418,81 @@ export function getTextBasedDatasource({
             : true,
         };
       });
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <EuiFormRow
-              data-test-subj="text-based-languages-field-selection-row"
-              label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-                defaultMessage: 'Field',
-              })}
-              fullWidth
-              className="lnsIndexPatternDimensionEditor--padded"
+      return (
+        <>
+          <EuiFormRow
+            data-test-subj="text-based-languages-field-selection-row"
+            label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+              defaultMessage: 'Field',
+            })}
+            fullWidth
+            className="lnsIndexPatternDimensionEditor--padded"
+          >
+            <FieldSelect
+              existingFields={updatedFields ?? []}
+              selectedField={selectedField}
+              onChoose={(choice) => {
+                const meta = fields?.find((f) => f.name === choice.field)?.meta;
+                const newColumn = {
+                  columnId: props.columnId,
+                  fieldName: choice.field,
+                  meta,
+                };
+                return props.setState(
+                  !selectedField
+                    ? {
+                        ...props.state,
+                        layers: {
+                          ...props.state.layers,
+                          [props.layerId]: {
+                            ...props.state.layers[props.layerId],
+                            columns: [...props.state.layers[props.layerId].columns, newColumn],
+                            allColumns: [
+                              ...props.state.layers[props.layerId].allColumns,
+                              newColumn,
+                            ],
+                          },
+                        },
+                      }
+                    : {
+                        ...props.state,
+                        layers: {
+                          ...props.state.layers,
+                          [props.layerId]: {
+                            ...props.state.layers[props.layerId],
+                            columns: props.state.layers[props.layerId].columns.map((col) =>
+                              col.columnId !== props.columnId
+                                ? col
+                                : { ...col, fieldName: choice.field, meta }
+                            ),
+                            allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
+                              col.columnId !== props.columnId
+                                ? col
+                                : { ...col, fieldName: choice.field, meta }
+                            ),
+                          },
+                        },
+                      }
+                );
+              }}
+            />
+          </EuiFormRow>
+          {props.dataSectionExtra && (
+            <div
+              style={{
+                paddingLeft: euiThemeVars.euiSize,
+                paddingRight: euiThemeVars.euiSize,
+              }}
             >
-              <FieldSelect
-                existingFields={updatedFields}
-                selectedField={selectedField}
-                onChoose={(choice) => {
-                  const meta = fields.find((f) => f.name === choice.field)?.meta;
-                  const newColumn = {
-                    columnId: props.columnId,
-                    fieldName: choice.field,
-                    meta,
-                  };
-                  return props.setState(
-                    !selectedField
-                      ? {
-                          ...props.state,
-                          layers: {
-                            ...props.state.layers,
-                            [props.layerId]: {
-                              ...props.state.layers[props.layerId],
-                              columns: [...props.state.layers[props.layerId].columns, newColumn],
-                              allColumns: [
-                                ...props.state.layers[props.layerId].allColumns,
-                                newColumn,
-                              ],
-                            },
-                          },
-                        }
-                      : {
-                          ...props.state,
-                          layers: {
-                            ...props.state.layers,
-                            [props.layerId]: {
-                              ...props.state.layers[props.layerId],
-                              columns: props.state.layers[props.layerId].columns.map((col) =>
-                                col.columnId !== props.columnId
-                                  ? col
-                                  : { ...col, fieldName: choice.field, meta }
-                              ),
-                              allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
-                                col.columnId !== props.columnId
-                                  ? col
-                                  : { ...col, fieldName: choice.field, meta }
-                              ),
-                            },
-                          },
-                        }
-                  );
-                }}
-              />
-            </EuiFormRow>
-            {props.dataSectionExtra && (
-              <div
-                style={{
-                  paddingLeft: euiThemeVars.euiSize,
-                  paddingRight: euiThemeVars.euiSize,
-                }}
-              >
-                {props.dataSectionExtra}
-              </div>
-            )}
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+              {props.dataSectionExtra}
+            </div>
+          )}
+        </>
       );
     },
 
-    renderLayerPanel: (
-      domElement: Element,
-      props: DatasourceLayerPanelProps<TextBasedPrivateState>
-    ) => {
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <LayerPanel {...props} />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
-      );
+    LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
+      return <LayerPanel {...props} />;
     },
 
     uniqueLabels(state: TextBasedPrivateState) {
@@ -572,7 +546,7 @@ export function getTextBasedDatasource({
           const allColumns = currentLayer.allColumns.filter((c) => c.columnId !== target.columnId);
           allColumns.push(newColumn);
 
-          props.setState({
+          return {
             ...props.state,
             layers: {
               ...props.state.layers,
@@ -582,11 +556,10 @@ export function getTextBasedDatasource({
                 allColumns,
               },
             },
-          });
+          };
         });
-        return true;
       }
-      return false;
+      return undefined;
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
@@ -646,7 +619,7 @@ export function getTextBasedDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const field = state.fieldList.find((f) => f.id === (draggedField as TextBasedField).id);
+      const field = state.fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {
         const newId = generateId();

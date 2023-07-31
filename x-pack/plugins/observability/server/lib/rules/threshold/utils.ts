@@ -13,7 +13,6 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
@@ -28,7 +27,7 @@ const ALERT_CONTEXT_TAGS = 'tags';
 const HOST_NAME = 'host.name';
 const HOST_HOSTNAME = 'host.hostname';
 const HOST_ID = 'host.id';
-const CONTAINER_ID = 'container.id';
+export const CONTAINER_ID = 'container.id';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -111,9 +110,6 @@ export const getAlertDetailsPageEnabledForApp = (
   return config[appName].enabled;
 };
 
-export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
-  addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
-
 export const getAlertDetailsUrl = (
   basePath: IBasePath,
   spaceId: string,
@@ -122,7 +118,6 @@ export const getAlertDetailsUrl = (
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
-export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: CONTAINER_ID };
 
 export interface AdditionalContext {
   [x: string]: any;
@@ -265,14 +260,6 @@ export const isTooManyBucketsPreviewException = (
   value: any
 ): value is TooManyBucketsPreviewExceptionMetadata =>
   Boolean(value && value.TOO_MANY_BUCKETS_PREVIEW_EXCEPTION);
-
-export const LINK_TO_METRICS_EXPLORER = '/app/metrics/explorer';
-
-export const getOriginalActionGroup = (
-  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
-) => {
-  return alertHitSource?.[ALERT_ACTION_GROUP];
-};
 
 const intervalUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + intervalUnits.join('|') + ')$');

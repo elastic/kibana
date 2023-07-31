@@ -39,6 +39,10 @@ export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
           baseAllowReplacement={[]}
           defaultAllow={[]}
           defaultAllowReplacement={[]}
+          docLinks={{
+            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+            DOC_LINK_VERSION: 'current',
+          }}
           getComments={mockGetComments}
           getInitialConversations={mockGetInitialConversations}
           setConversations={jest.fn()}

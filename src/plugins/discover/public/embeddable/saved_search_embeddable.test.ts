@@ -12,17 +12,17 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { SearchInput } from '..';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../build_services';
-import { dataViewMock } from '../__mocks__/data_view';
 import { discoverServiceMock } from '../__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { Observable, of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { SHOW_FIELD_STATISTICS } from '../../common';
+import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { VIEW_MODE } from '../../common/constants';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 
 let discoverComponent: ReactWrapper;
 
@@ -47,6 +47,8 @@ function getSearchResponse(nrOfHits: number) {
     isRunning: false,
   });
 }
+
+const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
 describe('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;

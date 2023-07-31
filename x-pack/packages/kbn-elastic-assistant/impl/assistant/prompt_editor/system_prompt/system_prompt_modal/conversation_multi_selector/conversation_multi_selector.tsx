@@ -8,11 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { TEST_IDS } from '../../../../constants';
 import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
 
 interface Props {
-  onConversationSelectionChange: (conversations: Conversation[]) => void;
+  isDisabled?: boolean;
+  onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
   conversations: Conversation[];
   selectedConversations?: Conversation[];
 }
@@ -21,12 +23,18 @@ interface Props {
  * Selector for choosing multiple Conversations
  */
 export const ConversationMultiSelector: React.FC<Props> = React.memo(
-  ({ onConversationSelectionChange, conversations, selectedConversations = [] }) => {
+  ({
+    conversations,
+    isDisabled = false,
+    onConversationSelectionChange,
+    selectedConversations = [],
+  }) => {
     // ComboBox options
     const options = useMemo<EuiComboBoxOptionOption[]>(
       () =>
         conversations.map((conversation) => ({
           label: conversation.id,
+          'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.id),
         })),
       [conversations]
     );
@@ -63,6 +71,10 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     return (
       <EuiComboBox
         aria-label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
+        compressed
+        data-test-subj={TEST_IDS.CONVERSATIONS_MULTISELECTOR}
+        isDisabled={isDisabled}
+        fullWidth
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChange}

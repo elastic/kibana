@@ -168,6 +168,13 @@ describe('getInputUnitsByPackage', () => {
         },
       ],
     },
+    // test a component with no units
+    {
+      id: 'beat/metrics-monitoring',
+      type: 'beat/metrics',
+      status: 'HEALTHY',
+      message: "Healthy: communicating with pid '2234'",
+    },
   ];
 
   const packageMock = createPackagePolicyMock();

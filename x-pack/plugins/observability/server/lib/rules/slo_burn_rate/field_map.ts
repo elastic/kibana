@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
+import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/slo';
 
 export const sloRuleFieldMap = {
   [SLO_ID_FIELD]: {

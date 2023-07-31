@@ -379,7 +379,7 @@
               "\nProvide it to override the Analytics client's default configuration."
             ],
             "signature": [
-              "\"staging\" | \"production\" | undefined"
+              "\"production\" | \"staging\" | undefined"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,

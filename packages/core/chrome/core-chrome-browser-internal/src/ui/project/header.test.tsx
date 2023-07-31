@@ -23,6 +23,7 @@ describe('Header', () => {
     actionMenu$: Rx.of(undefined),
     docLinks: docLinksServiceMock.createStartContract(),
     globalHelpExtensionMenuLinks$: Rx.of([]),
+    headerBanner$: Rx.of(),
     helpExtension$: Rx.of(undefined),
     helpSupportUrl$: Rx.of('app/help'),
     helpMenuLinks$: Rx.of([]),

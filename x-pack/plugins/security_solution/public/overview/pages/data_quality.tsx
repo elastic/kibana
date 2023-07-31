@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   DataQualityPanel,
   DATA_QUALITY_SUBTITLE,
@@ -29,6 +29,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
 import { useThemes } from '../../common/components/charts/common';
@@ -38,7 +39,6 @@ import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import {
   KibanaServices,
   useGetUserCasesPermissions,
@@ -129,7 +129,7 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
@@ -193,10 +193,10 @@ const DataQualityComponent: React.FC = () => {
     ({ comments, headerContent }: { comments: string[]; headerContent?: React.ReactNode }) => {
       const attachments: Array<{
         comment: string;
-        type: CommentType.user;
+        type: AttachmentType.user;
       }> = comments.map((x) => ({
         comment: x,
-        type: CommentType.user,
+        type: AttachmentType.user,
       }));
 
       createCaseFlyout.open({ attachments, headerContent });
@@ -237,7 +237,7 @@ const DataQualityComponent: React.FC = () => {
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
-            isAssistantEnabled={isAssistantEnabled}
+            isAssistantEnabled={hasAssistantPrivilege}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}

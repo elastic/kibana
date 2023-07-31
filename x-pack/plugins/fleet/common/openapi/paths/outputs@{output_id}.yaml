@@ -8,12 +8,7 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              item:
-                $ref: ../components/schemas/output.yaml
-            required:
-              - item
+            $ref: ../components/schemas/output_create_request.yaml
     '400':
       $ref: ../components/responses/error.yaml
   operationId: get-output
@@ -53,42 +48,14 @@ put:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            name:
-              type: string
-            type:
-              type: string
-              enum: ['elasticsearch']
-            is_default:
-              type: boolean
-            is_default_monitoring:
-              type: boolean
-            hosts:
-              type: array
-              items:
-                type: string
-            ca_sha256:
-              type: string
-            ca_trusted_fingerprint:
-              type: string
-            config_yaml:
-              type: string
-          required:
-            - name
-            - type
+          $ref: ../components/schemas/output_update_request.yaml
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              item:
-                $ref: ../components/schemas/output.yaml
-            required:
-              - item
+            $ref: ../components/schemas/output_update_request.yaml
     '400':
       $ref: ../components/responses/error.yaml
   parameters:

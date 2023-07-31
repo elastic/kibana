@@ -73,4 +73,13 @@ describe('Assignees template', () => {
 
     expect(container.querySelector('.btn')).not.toBeTruthy();
   });
+
+  it('renders current year correctly', async () => {
+    const currentYear = new Date().getUTCFullYear();
+    const footerText = `© ${currentYear} Elasticsearch B.V. All Rights Reserved.`;
+
+    const container = await getHTMLNode(caseSO, mockCaseUrl);
+
+    expect(getByText(container, footerText, { exact: false })).toBeTruthy();
+  });
 });

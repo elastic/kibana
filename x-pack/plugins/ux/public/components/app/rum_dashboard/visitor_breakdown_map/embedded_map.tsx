@@ -36,7 +36,7 @@ const EmbeddedPanel = styled.div`
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
   }
-  &&& .mapboxgl-canvas {
+  &&& .maplibregl-canvas {
     animation: none !important;
   }
 `;

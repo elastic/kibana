@@ -2,9 +2,14 @@ interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
+# Fleet settings
 xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
+xpack.fleet.internal.activeAgentsSoftLimit: 25000
+
+# Cloud links
+xpack.cloud.base_url: "https://cloud.elastic.co"
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
@@ -13,10 +18,10 @@ migrations.algorithm: zdt
 # until the controller is able to spawn the migrator job/pod
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-  runOnRoles: ["ui"]
+  runOnRoles: ['ui']
 
 # Ess plugins
-xpack.ess.security.enabled: false
+xpack.securitySolutionEss.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
@@ -28,12 +33,23 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
+# Disable index management actions from the UI
+xpack.index_management.enableIndexActions: false
+
+# Keep deeplinks visible so that they are shown in the sidenav
+dev_tools.deeplinks.navLinkStatus: visible
+management.deeplinks.navLinkStatus: visible
+
 # Other disabled plugins
 #xpack.canvas.enabled: false #only disabable in dev-mode
-xpack.reporting.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
+
+# Disable UI of security management plugins
+xpack.security.ui.userManagementEnabled: false
+xpack.security.ui.roleManagementEnabled: false
+xpack.security.ui.roleMappingManagementEnabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true
@@ -53,9 +69,12 @@ server.versioned.versionResolution: newest
 # do not enforce client version check
 server.versioned.strictClientVersionCheck: false
 
-# Enforce single "default" space
+# Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
+xpack.spaces.allowFeatureVisibility: false
 
-# Temporarily allow unauthenticated access to task manager utilization & status/stats APIs for autoscaling
-status.allowAnonymous: true
-xpack.task_manager.unsafe.authenticate_background_task_utilization: false
+# Only display console autocomplete suggestions for ES endpoints that are available in serverless
+console.autocompleteDefinitions.endpointsAvailability: serverless
+
+# Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
+elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]

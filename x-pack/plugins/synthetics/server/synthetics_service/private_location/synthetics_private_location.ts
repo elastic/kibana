@@ -16,10 +16,10 @@ import {
   ConfigKey,
   HeartbeatConfig,
   MonitorFields,
-  PrivateLocation,
   SourceType,
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -64,7 +64,7 @@ export class SyntheticsPrivateLocation {
 
   generateNewPolicy(
     config: HeartbeatConfig,
-    privateLocation: PrivateLocation,
+    privateLocation: PrivateLocationAttributes,
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>
@@ -107,7 +107,7 @@ export class SyntheticsPrivateLocation {
   async createPackagePolicies(
     configs: PrivateConfig[],
     request: KibanaRequest,
-    privateLocations: PrivateLocation[],
+    privateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     if (configs.length === 0) {
@@ -176,7 +176,7 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations,
   }: {
     privateConfig?: PrivateConfig;
-    allPrivateLocations: PrivateLocation[];
+    allPrivateLocations: PrivateLocationAttributes[];
     spaceId: string;
   }) {
     if (!privateConfig) {
@@ -216,7 +216,7 @@ export class SyntheticsPrivateLocation {
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     request: KibanaRequest,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     if (configs.length === 0) {
@@ -303,7 +303,7 @@ export class SyntheticsPrivateLocation {
 
   async getExistingPolicies(
     configs: HeartbeatConfig[],
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();

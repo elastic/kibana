@@ -29,10 +29,9 @@ import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
-  Selector,
-  SelectorCondition,
   SelectorConditionsMap,
 } from '../../types';
+import { Selector, SelectorCondition } from '../../../common';
 import {
   getSelectorConditions,
   camelToSentenceCase,

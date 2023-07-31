@@ -73,7 +73,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: webhookConnector.id,
           group: 'default',
           params: {
-            body: `payload {{alertId}} - ${template}`,
+            body: `payload {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(webhookSimulatorURL, rule.id));
@@ -90,7 +90,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
 
@@ -106,7 +106,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -121,7 +121,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
 
@@ -155,7 +155,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: webhookConnector.id,
           group: 'default',
           params: {
-            body: `payload {{alertId}} - ${template}`,
+            body: `payload {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(webhookSimulatorURL, rule.id));
@@ -173,7 +173,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: webhookConnector.id,
           group: 'default',
           params: {
-            body: `payload {{alertId}} - ${template}`,
+            body: `payload {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(webhookSimulatorURL, rule.id));
@@ -192,7 +192,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -209,7 +209,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -227,7 +227,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         id: slackConnector.id,
         group: 'default',
         params: {
-          message: `message {{alertId}} - ${template}`,
+          message: `message {{rule.id}} - ${template}`,
         },
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));

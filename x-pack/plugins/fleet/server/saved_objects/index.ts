@@ -25,6 +25,8 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
+
 import {
   migrateAgentPolicyToV7100,
   migratePackagePolicyToV7100,
@@ -56,7 +58,10 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import {
+  migratePackagePolicyToV8100,
+  migratePackagePolicyToV870,
+} from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
 
@@ -164,6 +169,64 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           properties: {},
         },
         allow_edit: { enabled: false },
+        version: { type: 'keyword' },
+        key: { type: 'keyword' },
+        compression: { type: 'keyword' },
+        compression_level: { type: 'integer' },
+        client_id: { type: 'keyword' },
+        auth_type: { type: 'keyword' },
+        username: { type: 'keyword' },
+        password: { type: 'text', index: false },
+        sasl: {
+          dynamic: false,
+          properties: {
+            mechanism: { type: 'text' },
+          },
+        },
+        partition: { type: 'keyword' },
+        random: {
+          dynamic: false,
+          properties: {
+            group_events: { type: 'integer' },
+          },
+        },
+        round_robin: {
+          dynamic: false,
+          properties: {
+            group_events: { type: 'integer' },
+          },
+        },
+        hash: {
+          dynamic: false,
+          properties: {
+            hash: { type: 'text' },
+            random: { type: 'boolean' },
+          },
+        },
+        topics: {
+          dynamic: false,
+          properties: {
+            topic: { type: 'keyword' },
+            when: {
+              dynamic: false,
+              properties: {
+                type: { type: 'text' },
+                condition: { type: 'text' },
+              },
+            },
+          },
+        },
+        headers: {
+          dynamic: false,
+          properties: {
+            key: { type: 'text' },
+            value: { type: 'text' },
+          },
+        },
+        timeout: { type: 'integer' },
+        broker_timeout: { type: 'integer' },
+        broker_ack_reliability: { type: 'text' },
+        broker_buffer_size: { type: 'integer' },
       },
     },
     migrations: {
@@ -209,6 +272,19 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         updated_by: { type: 'keyword' },
         created_at: { type: 'date' },
         created_by: { type: 'keyword' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8100,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV8100,
+        },
       },
     },
     migrations: {
@@ -429,7 +505,10 @@ export function registerEncryptedSavedObjects(
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToEncrypt: new Set([
+      { key: 'ssl', dangerouslyExposeValue: true },
+      { key: 'password', dangerouslyExposeValue: true },
+    ]),
     attributesToExcludeFromAAD: new Set([
       'output_id',
       'name',
