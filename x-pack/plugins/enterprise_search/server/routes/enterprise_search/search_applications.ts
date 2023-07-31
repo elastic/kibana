@@ -274,8 +274,8 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
           return createError({
             errorCode: ErrorCode.SEARCH_APPLICATION_ALIAS_NOT_FOUND,
             message: i18n.translate(
-              'xpack.enterpriseSearch.server.routes.fetchSearchApplicationFieldCapabilities.missingAliaserror',
-              { defaultMessage: 'Search application has no indices.' }
+              'xpack.enterpriseSearch.server.routes.fetchSearchApplicationFieldCapabilities.missingAliasError',
+              { defaultMessage: 'Search application alias is missing.' }
             ),
             response,
             statusCode: 404,
