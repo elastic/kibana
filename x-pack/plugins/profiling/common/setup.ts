@@ -26,6 +26,9 @@ export interface SetupState {
     symbolizer: {
       installed: boolean;
     };
+    apm: {
+      profilingEnabled: boolean;
+    };
   };
   resource_management: {
     enabled: boolean;
@@ -59,6 +62,9 @@ export function createDefaultSetupState(): SetupState {
       symbolizer: {
         installed: false,
       },
+      apm: {
+        profilingEnabled: false,
+      },
     },
     resource_management: {
       enabled: false,
@@ -79,6 +85,7 @@ export function areResourcesSetup(state: SetupState): boolean {
     state.permissions.configured &&
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
+    !state.policies.apm.profilingEnabled &&
     state.settings.configured
   );
 }

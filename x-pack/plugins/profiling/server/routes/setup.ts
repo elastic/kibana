@@ -7,7 +7,12 @@
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
-import { getClient } from './compat';
+import { getRoutePaths } from '../../common';
+import {
+  areResourcesSetup,
+  createDefaultSetupState,
+  mergePartialSetupStates,
+} from '../../common/setup';
 import {
   enableResourceManagement,
   setMaximumBuckets,
@@ -17,7 +22,9 @@ import {
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
+  removeProfilingFromApmPackagePolicy,
   validateCollectorPackagePolicy,
+  validateProfilingInApmPackagePolicy,
   validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
@@ -25,12 +32,7 @@ import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
 import { ProfilingSetupOptions } from '../lib/setup/types';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { getRoutePaths } from '../../common';
-import {
-  areResourcesSetup,
-  createDefaultSetupState,
-  mergePartialSetupStates,
-} from '../../common/setup';
+import { getClient } from './compat';
 
 export function registerSetupRoute({
   router,
@@ -105,6 +107,7 @@ export function registerSetupRoute({
           validateResourceManagement,
           validateSecurityRole,
           validateSymbolizerPackagePolicy,
+          validateProfilingInApmPackagePolicy,
         ];
         const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
         const mergedState = mergePartialSetupStates(state, partialStates);
@@ -173,6 +176,7 @@ export function registerSetupRoute({
             validateResourceManagement,
             validateSecurityRole,
             validateSymbolizerPackagePolicy,
+            validateProfilingInApmPackagePolicy,
           ].map((fn) => fn(setupOptions))
         );
         const mergedState = mergePartialSetupStates(state, partialStates);
@@ -180,6 +184,9 @@ export function registerSetupRoute({
         const executeFunctions = [
           ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
           ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(mergedState.policies.apm.profilingEnabled
+            ? [removeProfilingFromApmPackagePolicy]
+            : []),
           ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
           ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
           ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
