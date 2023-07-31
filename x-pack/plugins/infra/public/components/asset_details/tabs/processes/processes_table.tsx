@@ -213,7 +213,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
       ));
-      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportCopilot={true} />;
+      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportAIAssistant={true} />;
     })}
   </>
 );

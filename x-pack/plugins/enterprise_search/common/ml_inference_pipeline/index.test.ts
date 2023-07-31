@@ -65,34 +65,34 @@ describe('getMlModelTypesForModelConfig lib function', () => {
 });
 
 describe('getRemoveProcessorForInferenceType lib function', () => {
-  const destinationField = 'dest';
+  const targetField = 'ml.inference.target';
 
   it('should return expected value for TEXT_CLASSIFICATION', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
 
     const expected: IngestRemoveProcessor = {
-      field: destinationField,
+      field: targetField,
       ignore_missing: true,
     };
 
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+    expect(getRemoveProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
   });
 
   it('should return expected value for TEXT_EMBEDDING', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
 
     const expected: IngestRemoveProcessor = {
-      field: destinationField,
+      field: targetField,
       ignore_missing: true,
     };
 
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+    expect(getRemoveProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
   });
 
   it('should return undefined for unknown inferenceType', () => {
     const inferenceType = 'wrongInferenceType';
 
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toBeUndefined();
+    expect(getRemoveProcessorForInferenceType(targetField, inferenceType)).toBeUndefined();
   });
 });
 
@@ -377,10 +377,9 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toEqual({
-      destination_field: 'test',
       model_id: 'test-model',
       pipeline_name: 'unit-test',
-      source_field: 'body',
+      pipeline_definition: {},
       field_mappings: [
         {
           sourceField: 'body',
@@ -414,10 +413,9 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toEqual({
-      destination_field: 'body',
       model_id: 'test-model',
       pipeline_name: 'unit-test',
-      source_field: 'body',
+      pipeline_definition: {},
       field_mappings: [
         {
           sourceField: 'body',
