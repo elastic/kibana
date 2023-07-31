@@ -107,6 +107,7 @@ const cellActionLink = [
 
 export const cellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    // eslint-disable-next-line react/display-name
     ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
       const { timelines, filterManager } = useKibanaServices();
 
@@ -136,6 +137,7 @@ export const cellActions: TGridCellAction[] = [
       );
     },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    // eslint-disable-next-line react/display-name
     ({ rowIndex, columnId, Component }) => {
       const { timelines, filterManager } = useKibanaServices();
 
@@ -165,6 +167,7 @@ export const cellActions: TGridCellAction[] = [
       );
     },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    // eslint-disable-next-line react/display-name
     ({ rowIndex, columnId, Component }) => {
       const { timelines } = useKibanaServices();
 
@@ -210,6 +213,7 @@ export const cellActions: TGridCellAction[] = [
       );
     },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    // eslint-disable-next-line react/display-name
     ({ rowIndex, columnId, Component }) => {
       const { timelines } = useKibanaServices();
 

@@ -63,10 +63,7 @@ export function hierarchicalTooltipFormatter(metricFieldFormatter) {
             {rows.map((row, index) => (
               <tr className="visTooltip__value" key={index}>
                 <td>
-                  <div className="visTooltip__labelContainer">
-                    <span ng-bind-html="row.spacer" />
-                    {row.field}
-                  </div>
+                  <div className="visTooltip__labelContainer">{row.field}</div>
                 </td>
                 <td>
                   <div className="visTooltip__labelContainer">{row.bucket}</div>
