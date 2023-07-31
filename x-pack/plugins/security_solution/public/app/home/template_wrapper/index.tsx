@@ -68,6 +68,7 @@ interface SecuritySolutionPageWrapperProps {
 }
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
+  // eslint-disable-next-line react/display-name
   React.memo(({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();

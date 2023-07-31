@@ -55,6 +55,7 @@ export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
 const getNonDropAreaFilters = (filters: Filter[] = []) =>
   filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
 
+// eslint-disable-next-line react/display-name
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
     dataProviders,

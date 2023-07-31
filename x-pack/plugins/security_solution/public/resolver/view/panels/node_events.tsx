@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
@@ -60,6 +58,7 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
+// eslint-disable-next-line react/display-name
 const EventCategoryLinks = memo(function ({
   nodeID,
   relatedStats,
@@ -115,6 +114,7 @@ const EventCategoryLinks = memo(function ({
   return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsBreadcrumbs = memo(function ({
   nodeID,
   nodeName,
@@ -163,6 +163,7 @@ const NodeEventsBreadcrumbs = memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsLink = memo(
   ({
     nodeID,
