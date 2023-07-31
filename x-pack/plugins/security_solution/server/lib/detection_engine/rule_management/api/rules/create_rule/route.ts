@@ -6,20 +6,19 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { RuleCreateProps } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import { validateCreateRuleProps } from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { readRules } from '../../../logic/crud/read_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
-
 import { createRules } from '../../../logic/crud/create_rules';
+import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
@@ -38,7 +37,7 @@ export const createRuleRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<CreateRuleResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validateCreateRuleProps(request.body);
       if (validationErrors.length) {
@@ -104,7 +103,7 @@ export const createRuleRoute = (
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          return response.ok({ body: validated ?? {} });
+          return response.ok({ body: validated });
         }
       } catch (err) {
         const error = transformError(err as Error);

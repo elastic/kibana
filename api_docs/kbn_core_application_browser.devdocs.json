@@ -1777,7 +1777,15 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; } & ",
+          " | undefined; searchable?: boolean | undefined; category?: ",
+          {
+            "pluginId": "@kbn/core-application-common",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationCommonPluginApi",
+            "section": "def-common.AppCategory",
+            "text": "AppCategory"
+          },
+          " | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
