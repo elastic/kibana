@@ -8,6 +8,15 @@
 import { upMigration } from './migration';
 import { versionSchema } from './schema';
 
+export {
+  versionSchema,
+  throttledActionSchema,
+  rawAlertInstanceSchema,
+  metaSchema,
+  alertStateSchema,
+  lastScheduledActionsSchema,
+} from './schema';
+
 export const versionDefinition = {
   up: upMigration,
   schema: versionSchema,

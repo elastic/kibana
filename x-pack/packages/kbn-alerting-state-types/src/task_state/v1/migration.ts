@@ -21,7 +21,9 @@ type ThrottledActionsSchema = TypeOf<typeof throttledActionSchema>;
 type LastScheduledActionsSchema = TypeOf<typeof lastScheduledActionsSchema>;
 type RawAlertInstanceSchema = TypeOf<typeof rawAlertInstanceSchema>;
 
-function migrateThrottledActions(throttledActions: unknown): ThrottledActionsSchema | undefined {
+export function migrateThrottledActions(
+  throttledActions: unknown
+): ThrottledActionsSchema | undefined {
   if (!isJSONObject(throttledActions)) {
     return;
   }
@@ -36,7 +38,7 @@ function migrateThrottledActions(throttledActions: unknown): ThrottledActionsSch
   }, {} as TypeOf<typeof throttledActionSchema>);
 }
 
-function migrateLastScheduledActions(
+export function migrateLastScheduledActions(
   lastScheduledActions: unknown
 ): LastScheduledActionsSchema | undefined {
   if (
@@ -55,7 +57,7 @@ function migrateLastScheduledActions(
   };
 }
 
-function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefined {
+export function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefined {
   if (!isJSONObject(meta)) {
     return;
   }
@@ -74,11 +76,11 @@ function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefined {
         : undefined,
     pendingRecoveredCount:
       typeof meta.pendingRecoveredCount === 'number' ? meta.pendingRecoveredCount : undefined,
-    uuid: typeof meta.uuid || undefined,
+    uuid: typeof meta.uuid === 'string' ? meta.uuid : undefined,
   };
 }
 
-function migrateAlertInstances(
+export function migrateAlertInstances(
   alertInstances: unknown
 ): Record<string, RawAlertInstanceSchema> | undefined {
   if (!isJSONObject(alertInstances)) {
@@ -96,11 +98,13 @@ function migrateAlertInstances(
   }, {} as Record<string, RawAlertInstanceSchema>);
 }
 
-export const upMigration = (state: Record<string, unknown>): VersionSchema => ({
-  alertTypeState: isJSONObject(state.alertTypeState) ? state.alertTypeState : undefined,
-  alertInstances: migrateAlertInstances(state.alertInstances),
-  alertRecoveredInstances: migrateAlertInstances(state.alertRecoveredInstances),
-  previousStartedAt:
-    typeof state.previousStartedAt === 'string' ? state.previousStartedAt : undefined,
-  summaryActions: migrateThrottledActions(state.summaryActions),
-});
+export const upMigration = (state: Record<string, unknown>): VersionSchema => {
+  return {
+    alertTypeState: isJSONObject(state.alertTypeState) ? state.alertTypeState : undefined,
+    alertInstances: migrateAlertInstances(state.alertInstances),
+    alertRecoveredInstances: migrateAlertInstances(state.alertRecoveredInstances),
+    previousStartedAt:
+      typeof state.previousStartedAt === 'string' ? state.previousStartedAt : undefined,
+    summaryActions: migrateThrottledActions(state.summaryActions),
+  };
+};
