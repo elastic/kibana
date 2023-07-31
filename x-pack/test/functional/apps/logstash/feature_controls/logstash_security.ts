@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const sections = await managementMenu.getSections();
         expect(sections).to.have.length(1);
         expect(sections[0]).to.eql({
-          sectionId: 'c',
+          sectionId: 'ingest',
           sectionLinks: ['pipelines'],
         });
       });
