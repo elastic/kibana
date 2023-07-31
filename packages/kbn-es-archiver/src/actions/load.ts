@@ -61,27 +61,29 @@ export async function loadAction({
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
+  const fnFactory = (filename: string) => () => {
+    // log.info('[%s] Loading %j', name, filename);
+
+    return streamDataAndErrorsFromFirst2LastStreamIgnoreErrorsOfLastStream(
+      createReadStream(resolve(inputDir, filename)),
+      ...createParseArchiveStreams({ gzip: isGzip(filename) })
+    );
+  };
+
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
-  const recordStream = concatStreamProviders(
-    files.map((filename) => () => {
-      log.info('[%s] Loading %j', name, filename);
-
-      return streamDataAndErrorsFromFirst2LastStreamIgnoreErrorsOfLastStream(
-        createReadStream(resolve(inputDir, filename)),
-        ...createParseArchiveStreams({ gzip: isGzip(filename) })
-      );
-    }),
-    { objectMode: true }
-  );
+  const recordStream = (streamFactoryFn: {
+    (filename: string): () => Readable;
+    (value: string, index: number, array: string[]): () => Readable;
+  }) => concatStreamProviders(files.map(streamFactoryFn), { objectMode: true });
 
   const progress = new Progress();
   progress.activate(log);
   await createPromiseFromStreams([
-    recordStream,
+    recordStream(fnFactory),
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate, inputDir),
+    createIndexDocRecordsStream(client, stats, progress, inputDir, useCreate),
   ]);
 
   progress.deactivate();
