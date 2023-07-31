@@ -14,7 +14,7 @@ import type {
   RiskCategories,
   RiskWeights,
 } from '../../../common/risk_engine';
-import type { RiskEngineStatus, InitRiskEngineResult } from '../../../common/risk_engine/types';
+import type { RiskEngineStatus } from '../../../common/risk_engine/types';
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
   debug?: boolean;
@@ -62,16 +62,24 @@ export interface GetRiskEngineStatusResponse {
   risk_engine_status: RiskEngineStatus;
 }
 
+interface InitRiskEngineResultResponse {
+  risk_engine_enabled: boolean;
+  risk_engine_resources_installed: boolean;
+  risk_engine_configuration_created: boolean;
+  legacy_risk_engine_disabled: boolean;
+  errors: string[];
+}
+
 export interface InitRiskEngineResponse {
-  result: InitRiskEngineResult;
+  result: InitRiskEngineResultResponse;
 }
 
 export interface InitRiskEngineError {
   body: {
     message: {
       message: string;
-      full_error: InitRiskEngineResult | string;
-    };
+      full_error: InitRiskEngineResultResponse | undefined;
+    } & string;
   };
 }
 

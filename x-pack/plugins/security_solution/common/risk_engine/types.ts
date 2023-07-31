@@ -17,7 +17,7 @@ export enum RiskEngineStatus {
 }
 
 export interface InitRiskEngineResult {
-  leggacyRiskEngineDisabled: boolean;
+  legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;
   riskEngineConfigurationCreated: boolean;
   riskEngineEnabled: boolean;

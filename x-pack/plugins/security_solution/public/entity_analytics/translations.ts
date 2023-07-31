@@ -205,7 +205,7 @@ export const ERROR_PANEL_TITLE = i18n.translate(
 export const ERROR_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.message',
   {
-    defaultMessage: 'Something wen’t wrong. Try again later.',
+    defaultMessage: 'Something went wrong. Try again later.',
   }
 );
 

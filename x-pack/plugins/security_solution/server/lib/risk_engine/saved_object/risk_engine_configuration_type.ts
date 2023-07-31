@@ -12,7 +12,7 @@ export const riskEngineConfigurationTypeName = 'risk-engine-configuration';
 
 export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] = {
   properties: {
-    enable: {
+    enabled: {
       type: 'boolean',
     },
     last_updated_by: {

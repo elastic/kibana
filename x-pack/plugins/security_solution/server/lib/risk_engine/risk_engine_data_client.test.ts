@@ -384,8 +384,8 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
       });
       expect(status).toEqual({
-        riskEgineStatus: 'NOT_INSTALLED',
-        legacyRiskEgineStatus: 'NOT_INSTALLED',
+        riskEngineStatus: 'NOT_INSTALLED',
+        legacyRiskEngineStatus: 'NOT_INSTALLED',
         lastUpdatedBy: '',
       });
     });
@@ -411,8 +411,8 @@ describe('RiskEngineDataClient', () => {
           savedObjectsClient: mockSavedObjectClient,
         });
         expect(status).toEqual({
-          riskEgineStatus: 'ENABLED',
-          legacyRiskEgineStatus: 'NOT_INSTALLED',
+          riskEngineStatus: 'ENABLED',
+          legacyRiskEngineStatus: 'NOT_INSTALLED',
           lastUpdatedBy: 'elastic',
         });
       });
@@ -425,8 +425,8 @@ describe('RiskEngineDataClient', () => {
           savedObjectsClient: mockSavedObjectClient,
         });
         expect(status).toEqual({
-          riskEgineStatus: 'DISABLED',
-          legacyRiskEgineStatus: 'NOT_INSTALLED',
+          riskEngineStatus: 'DISABLED',
+          legacyRiskEngineStatus: 'NOT_INSTALLED',
           lastUpdatedBy: 'elastic',
         });
       });
@@ -463,8 +463,8 @@ describe('RiskEngineDataClient', () => {
         });
 
         expect(status).toEqual({
-          riskEgineStatus: 'NOT_INSTALLED',
-          legacyRiskEgineStatus: 'ENABLED',
+          riskEngineStatus: 'NOT_INSTALLED',
+          legacyRiskEngineStatus: 'ENABLED',
           lastUpdatedBy: '',
         });
 
@@ -612,7 +612,7 @@ describe('RiskEngineDataClient', () => {
 
       expect(initResult).toEqual({
         errors: [],
-        leggacyRiskEngineDisabled: true,
+        legacyRiskEngineDisabled: true,
         riskEngineConfigurationCreated: true,
         riskEngineEnabled: true,
         riskEngineResourcesInstalled: true,
@@ -631,7 +631,7 @@ describe('RiskEngineDataClient', () => {
 
       expect(initResult).toEqual({
         errors: ['Error disableLegacyRiskEngineMock'],
-        leggacyRiskEngineDisabled: false,
+        legacyRiskEngineDisabled: false,
         riskEngineConfigurationCreated: true,
         riskEngineEnabled: true,
         riskEngineResourcesInstalled: true,
@@ -651,7 +651,7 @@ describe('RiskEngineDataClient', () => {
 
       expect(initResult).toEqual({
         errors: ['Error disableLegacyRiskEngineMock'],
-        leggacyRiskEngineDisabled: false,
+        legacyRiskEngineDisabled: false,
         riskEngineConfigurationCreated: true,
         riskEngineEnabled: true,
         riskEngineResourcesInstalled: true,
@@ -671,7 +671,7 @@ describe('RiskEngineDataClient', () => {
 
       expect(initResult).toEqual({
         errors: ['Error initializeResourcesMock'],
-        leggacyRiskEngineDisabled: true,
+        legacyRiskEngineDisabled: true,
         riskEngineConfigurationCreated: false,
         riskEngineEnabled: false,
         riskEngineResourcesInstalled: false,
@@ -691,7 +691,7 @@ describe('RiskEngineDataClient', () => {
 
       expect(initResult).toEqual({
         errors: ['Error initSavedObjects'],
-        leggacyRiskEngineDisabled: true,
+        legacyRiskEngineDisabled: true,
         riskEngineConfigurationCreated: false,
         riskEngineEnabled: false,
         riskEngineResourcesInstalled: true,
@@ -711,7 +711,7 @@ describe('RiskEngineDataClient', () => {
 
       expect(initResult).toEqual({
         errors: ['Error enableRiskEngineMock'],
-        leggacyRiskEngineDisabled: true,
+        legacyRiskEngineDisabled: true,
         riskEngineConfigurationCreated: true,
         riskEngineEnabled: false,
         riskEngineResourcesInstalled: true,

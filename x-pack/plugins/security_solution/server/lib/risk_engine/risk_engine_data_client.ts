@@ -19,7 +19,12 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  Logger,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObject,
+} from '@kbn/core/server';
 
 import {
   riskScoreFieldMap,
@@ -63,7 +68,7 @@ interface RiskEngineDataClientOpts {
 }
 
 interface Configuration {
-  enable: boolean;
+  enabled: boolean;
   last_updated_by: string;
 }
 
@@ -73,7 +78,7 @@ export class RiskEngineDataClient {
 
   public async init({ namespace, savedObjectsClient, user }: InitOpts) {
     const result: InitRiskEngineResult = {
-      leggacyRiskEngineDisabled: false,
+      legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
       riskEngineConfigurationCreated: false,
       riskEngineEnabled: false,
@@ -81,9 +86,9 @@ export class RiskEngineDataClient {
     };
 
     try {
-      result.leggacyRiskEngineDisabled = await this.disableLegacyRiskEngine({ namespace });
+      result.legacyRiskEngineDisabled = await this.disableLegacyRiskEngine({ namespace });
     } catch (e) {
-      result.leggacyRiskEngineDisabled = false;
+      result.legacyRiskEngineDisabled = false;
       result.errors.push(e.message);
     }
 
@@ -141,20 +146,20 @@ export class RiskEngineDataClient {
   }: SavedObjectsClients & {
     namespace: string;
   }) {
-    const riskEgineStatus = await this.getCurrentStatus({ savedObjectsClient });
-    const legacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
+    const riskEngineStatus = await this.getCurrentStatus({ savedObjectsClient });
+    const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
     const lastUpdatedBy = await this.getLastUpdatedBy({ savedObjectsClient });
-    return { riskEgineStatus, legacyRiskEgineStatus, lastUpdatedBy };
+    return { riskEngineStatus, legacyRiskEngineStatus, lastUpdatedBy };
   }
 
   public async enableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
     // code to run task
 
-    return this.udpateSavedObjectAttribute({
+    return this.updateSavedObjectAttribute({
       savedObjectsClient,
       user,
       attributes: {
-        enable: true,
+        enabled: true,
       },
     });
   }
@@ -162,22 +167,22 @@ export class RiskEngineDataClient {
   public async disableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
     // code to stop task
 
-    return this.udpateSavedObjectAttribute({
+    return this.updateSavedObjectAttribute({
       savedObjectsClient,
       user,
       attributes: {
-        enable: false,
+        enabled: false,
       },
     });
   }
 
-  private async udpateSavedObjectAttribute({
+  private async updateSavedObjectAttribute({
     savedObjectsClient,
     attributes,
     user,
   }: UpdateConfigOpts & {
     attributes: {
-      enable: boolean;
+      enabled: boolean;
     };
   }) {
     const savedObjectConfiguration = await this.getConfigurationSavedObject({
@@ -204,11 +209,11 @@ export class RiskEngineDataClient {
   }
 
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
-    const legacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
+    const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
     if (
-      legacyRiskEgineStatus === RiskEngineStatus.DISABLED ||
-      legacyRiskEgineStatus === RiskEngineStatus.NOT_INSTALLED
+      legacyRiskEngineStatus === RiskEngineStatus.DISABLED ||
+      legacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED
     ) {
       return true;
     }
@@ -225,9 +230,9 @@ export class RiskEngineDataClient {
 
     await Promise.allSettled(stopTransformRequests);
 
-    const newLegacyRiskEgineStatus = await this.getLegacyStatus({ namespace });
+    const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    return newLegacyRiskEgineStatus === RiskEngineStatus.DISABLED;
+    return newlegacyRiskEngineStatus === RiskEngineStatus.DISABLED;
   }
 
   private async getLastUpdatedBy({ savedObjectsClient }: SavedObjectsClients) {
@@ -244,7 +249,7 @@ export class RiskEngineDataClient {
     const configuration = await this.getConfiguration({ savedObjectsClient });
 
     if (configuration) {
-      return configuration.enable ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
+      return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
     }
 
     return RiskEngineStatus.NOT_INSTALLED;
@@ -299,8 +304,10 @@ export class RiskEngineDataClient {
     return RiskEngineStatus.DISABLED;
   }
 
-  private async getConfigurationSavedObject({ savedObjectsClient }: SavedObjectsClients) {
-    const savedObjectsResponse = await savedObjectsClient.find({
+  private async getConfigurationSavedObject({
+    savedObjectsClient,
+  }: SavedObjectsClients): Promise<SavedObject<Configuration> | undefined> {
+    const savedObjectsResponse = await savedObjectsClient.find<Configuration>({
       type: riskEngineConfigurationTypeName,
     });
     return savedObjectsResponse.saved_objects?.[0];
@@ -316,7 +323,7 @@ export class RiskEngineDataClient {
       const configuration = savedObjectConfiguration?.attributes;
 
       if (configuration) {
-        return configuration as Configuration;
+        return configuration;
       }
 
       return null;
@@ -328,7 +335,7 @@ export class RiskEngineDataClient {
 
   private async initSavedObjects({ savedObjectsClient, user }: UpdateConfigOpts) {
     return savedObjectsClient.create(riskEngineConfigurationTypeName, {
-      enable: false,
+      enabled: false,
       last_updated_by: user?.username ?? '',
     });
   }

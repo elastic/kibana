@@ -11,7 +11,7 @@ import { RiskEngineStatus } from '../../../../common/risk_engine/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
 
-export const useInvalidateRiskEngineStatussQuery = () => {
+export const useInvalidateRiskEngineStatusQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {

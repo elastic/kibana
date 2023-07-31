@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { initRiskEngine } from '../api';
-import { useInvalidateRiskEngineStatussQuery } from './use_risk_engine_status';
+import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 import type {
   InitRiskEngineResponse,
   InitRiskEngineError,
@@ -16,7 +16,7 @@ import type {
 export const INIT_RISK_ENGINE_STATUS_KEY = ['POST', 'INIT_RISK_ENGINE'];
 
 export const useInitRiskEngineMutation = (options?: UseMutationOptions<{}>) => {
-  const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatussQuery();
+  const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
 
   return useMutation<InitRiskEngineResponse, InitRiskEngineError>(() => initRiskEngine(), {
     ...options,

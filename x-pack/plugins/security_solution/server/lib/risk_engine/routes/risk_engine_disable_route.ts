@@ -30,11 +30,11 @@ export const riskEngineDisableRoute = (
 
       const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
-      const riskEgineClient = securitySolution.getRiskEngineDataClient();
+      const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const user = security?.authc.getCurrentUser(request);
 
       try {
-        await riskEgineClient.disableRiskEngine({
+        await riskEngineClient.disableRiskEngine({
           savedObjectsClient: soClient,
           user,
         });

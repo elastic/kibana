@@ -26,19 +26,19 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
 
       const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
-      const riskEgineClient = securitySolution.getRiskEngineDataClient();
+      const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
-        const result = await riskEgineClient.getStatus({
+        const result = await riskEngineClient.getStatus({
           savedObjectsClient: soClient,
           namespace: spaceId,
         });
         return response.ok({
           body: {
-            risk_engine_status: result.riskEgineStatus,
-            legacy_risk_engine_status: result.legacyRiskEgineStatus,
-            last_udpated_by: result.lastUpdatedBy,
+            risk_engine_status: result.riskEngineStatus,
+            legacy_risk_engine_status: result.legacyRiskEngineStatus,
+            last_updated_by: result.lastUpdatedBy,
           },
         });
       } catch (e) {

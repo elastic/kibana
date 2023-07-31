@@ -30,16 +30,24 @@ export const riskEngineInitRoute = (
       const siemResponse = buildSiemResponse(response);
       const securitySolution = await context.securitySolution;
       const soClient = (await context.core).savedObjects.client;
-      const riskEgineClient = securitySolution.getRiskEngineDataClient();
+      const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
       const user = security?.authc.getCurrentUser(request);
 
       try {
-        const initResult = await riskEgineClient.init({
+        const initResult = await riskEngineClient.init({
           savedObjectsClient: soClient,
           namespace: spaceId,
           user,
         });
+
+        const initResultSnakeCase = {
+          risk_engine_enabled: initResult.riskEngineEnabled,
+          risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
+          risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
+          legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
+          errors: initResult.errors,
+        };
 
         if (
           !initResult.riskEngineEnabled ||
@@ -49,13 +57,12 @@ export const riskEngineInitRoute = (
           return siemResponse.error({
             statusCode: 400,
             body: {
-              message: initResult.errors.join('\n'),
-              full_error: initResult,
+              message: initResultSnakeCase.errors.join('\n'),
+              full_error: initResultSnakeCase,
             },
           });
         }
-
-        return response.ok({ body: { result: initResult } });
+        return response.ok({ body: { result: initResultSnakeCase } });
       } catch (e) {
         const error = transformError(e);
 

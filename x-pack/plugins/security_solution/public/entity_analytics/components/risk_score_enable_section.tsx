@@ -79,7 +79,7 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
 
 export const RiskScoreEnableSection = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { data: riskEnginesStatus } = useRiskEngineStatus();
+  const { data: riskEngineStatus } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSettled: () => {
       setIsModalVisible(false);
@@ -89,7 +89,7 @@ export const RiskScoreEnableSection = () => {
   const enableRiskEngineMutation = useEnableRiskEngineMutation();
   const disableRiskEngineMutation = useDisableRiskEngineMutation();
 
-  const currentRiskEngineStatus = riskEnginesStatus?.risk_engine_status;
+  const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
@@ -99,7 +99,7 @@ export const RiskScoreEnableSection = () => {
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading;
 
-  const isUpdateAvailable = riskEnginesStatus?.isUpdateAvailable;
+  const isUpdateAvailable = riskEngineStatus?.isUpdateAvailable;
 
   const onSwitchClick = () => {
     if (!currentRiskEngineStatus || isLoading) {
@@ -120,15 +120,14 @@ export const RiskScoreEnableSection = () => {
   if (isModalVisible) {
     modal = (
       <EuiModal onClose={closeModal}>
-        {initRiskEngineMutation.isLoading && (
+        {initRiskEngineMutation.isLoading ? (
           <EuiModalHeader>
             <EuiFlexGroup gutterSize="m" alignItems="center">
               <EuiLoadingSpinner size="m" />
               <EuiModalHeaderTitle>{i18n.UPDATING_RISK_ENGINE}</EuiModalHeaderTitle>
             </EuiFlexGroup>
           </EuiModalHeader>
-        )}
-        {!initRiskEngineMutation.isLoading && (
+        ) : (
           <>
             <EuiModalHeader>
               <EuiModalHeaderTitle>{i18n.UPDATE_RISK_ENGINE_MODAL_TITLE}</EuiModalHeaderTitle>
@@ -167,10 +166,10 @@ export const RiskScoreEnableSection = () => {
 
   if (initRiskEngineMutation.isError) {
     const errorBody = initRiskEngineMutation.error.body.message;
-    if (typeof errorBody.full_error !== 'string') {
+    if (errorBody?.full_error?.errors) {
       initRiskEngineErrors = errorBody.full_error?.errors;
     } else {
-      initRiskEngineErrors = [errorBody.message];
+      initRiskEngineErrors = [errorBody];
     }
   }
   return (

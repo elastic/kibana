@@ -47,7 +47,7 @@ paths:
   /engine/status:
     get:
       summary: Get the status of the Risk Engine
-      description: Returns the status of the legacy transforms risk engine as well as the new risk engine
+      description: Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
       responses:
         '200':
           description: Successful response
@@ -57,7 +57,7 @@ paths:
                 $ref: '#/components/schemas/RiskEngineStatusResponse'
                 
   /engine/init:
-    posrt:
+    post:
       summary: Initialize the Risk Engine
       description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
       responses:
@@ -213,21 +213,21 @@ components:
     RiskEngineInitResponse:
       type: object
       properties:
-        errors: 
-          type: array
-          items:
-            type: string
         result:
           type: object
           properties:
-            riskEngineEnabled:
+            risk_engine_enabled:
               type: boolean
-            riskEngineResourcesInstalled:
+            risk_engine_resources_installed:
               type: boolean
-            riskEngineConfigurationCreated:
+            risk_engine_configuration_created:
               type: boolean
-            leggacyRiskEngineDisabled:
+            legacy_risk_engine_disabled:
               type: boolean
+            errors: 
+              type: array
+              items:
+                type: string
 
 
         
