@@ -10,15 +10,17 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiPanel,
   EuiPopover,
   EuiProgress,
   EuiSpacer,
-  type EuiContextMenuPanelProps,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +31,7 @@ import {
   SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../embeddable/embeddable_change_point_chart_factory';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -106,6 +109,7 @@ export const FieldsConfig: FC = () => {
         return (
           <React.Fragment key={key}>
             <FieldPanel
+              panelIndex={index}
               data-test-subj={`aiopsChangePointPanel_${index}`}
               fieldConfig={fieldConfig}
               onChange={(value) => onChange(value, index)}
@@ -134,6 +138,7 @@ export const FieldsConfig: FC = () => {
 };
 
 export interface FieldPanelProps {
+  panelIndex: number;
   fieldConfig: FieldConfig;
   removeDisabled: boolean;
   onChange: (update: FieldConfig) => void;
@@ -151,6 +156,7 @@ export interface FieldPanelProps {
  * @constructor
  */
 const FieldPanel: FC<FieldPanelProps> = ({
+  panelIndex,
   fieldConfig,
   onChange,
   onRemove,
@@ -162,14 +168,22 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const { dataView } = useDataSource();
 
-  const { combinedQuery, requestParams } = useChangePointDetectionContext();
+  const { combinedQuery, requestParams, selectedChangePoints } = useChangePointDetectionContext();
 
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
 
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
-  const [dashboardAttachment, setDashboardAttachment] = useState<any>();
+
+  const [dashboardAttachment, setDashboardAttachment] = useState<{
+    applyTimeRange: boolean;
+    maxSeriesToPlot: number;
+  }>({
+    applyTimeRange: false,
+    maxSeriesToPlot: 6,
+  });
+  const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState<boolean>(false);
 
   const {
     results: annotations,
@@ -177,19 +191,115 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
-  const panels: EuiContextMenuPanelProps['items'] = [
-    <EuiContextMenuItem
-      key="dashboard"
-      icon="dashboardApp"
-      onClick={() => {
-        setDashboardAttachment({});
-      }}
-    >
-      {i18n.translate('xpack.aiops.changePointDetection.addToDashboardLabel', {
-        defaultMessage: 'Add to dashboard',
-      })}
-    </EuiContextMenuItem>,
+  const panels: EuiContextMenuProps['panels'] = [
+    {
+      id: 'panelActions',
+      size: 's',
+      items: [
+        {
+          name: i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
+            defaultMessage: 'Attach charts',
+          }),
+          icon: 'plusInCircle',
+          panel: 'attachMainPanel',
+        },
+        {
+          name: 'Remove',
+          icon: 'trash',
+          onClick: () => {},
+        },
+      ],
+    },
+    {
+      id: 'attachMainPanel',
+      size: 's',
+      initialFocusedItemIndex: 0,
+      title: i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
+        defaultMessage: 'Attach charts',
+      }),
+      items: [
+        {
+          name: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardLabel', {
+            defaultMessage: 'To dashboard',
+          }),
+          panel: 'attachToDashboardPanel',
+        },
+        {
+          name: i18n.translate('xpack.aiops.changePointDetection.attachToCaseLabel', {
+            defaultMessage: 'To case',
+          }),
+          onClick: () => {},
+        },
+      ],
+    },
+    {
+      id: 'attachToDashboardPanel',
+      title: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardTitle', {
+        defaultMessage: 'Attach to dashboard',
+      }),
+      size: 's',
+      content: (
+        <EuiPanel paddingSize={'s'}>
+          <EuiForm>
+            <EuiFormRow fullWidth>
+              <EuiSwitch
+                label={i18n.translate('xpack.aiops.changePointDetection.applyTimeRangeLabel', {
+                  defaultMessage: 'Apply time range',
+                })}
+                checked={dashboardAttachment.applyTimeRange}
+                onChange={(e) =>
+                  setDashboardAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      applyTimeRange: e.target.checked,
+                    };
+                  })
+                }
+                compressed
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
+                  defaultMessage="Max series"
+                />
+              }
+            >
+              <EuiFieldNumber
+                value={dashboardAttachment.maxSeriesToPlot}
+                onChange={(e) =>
+                  setDashboardAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      maxSeriesToPlot: Number(e.target.value),
+                    };
+                  })
+                }
+              />
+            </EuiFormRow>
+
+            <EuiSpacer />
+
+            <EuiButton
+              fill
+              type={'submit'}
+              fullWidth
+              onClick={setDashboardAttachmentReady.bind(null, true)}
+            >
+              <FormattedMessage
+                id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
+                defaultMessage="Attach"
+              />
+            </EuiButton>
+          </EuiForm>
+        </EuiPanel>
+      ),
+    },
   ];
+
+  const timeRange = useTimeRangeUpdates();
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -202,7 +312,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
         metricField: fieldConfig.metricField,
         splitField: fieldConfig.splitField,
         fn: fieldConfig.fn,
-        // timeRange: '', // Attach custom time range! ask user
+        ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
+        maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+        ...(selectedChangePoints[panelIndex]?.length
+          ? { partitions: selectedChangePoints[panelIndex].map((v) => v.group?.value as string) }
+          : {}),
       };
 
       const state = {
@@ -217,7 +331,17 @@ const FieldPanel: FC<FieldPanelProps> = ({
         path,
       });
     },
-    [dataView.id, embeddable, fieldConfig.fn, fieldConfig.metricField, fieldConfig.splitField]
+    [
+      dataView.id,
+      embeddable,
+      fieldConfig.fn,
+      fieldConfig.metricField,
+      fieldConfig.splitField,
+      dashboardAttachment,
+      timeRange,
+      selectedChangePoints,
+      panelIndex,
+    ]
   );
 
   return (
@@ -293,7 +417,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
               >
-                <EuiContextMenuPanel size={'s'} items={panels} />
+                <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
               </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -310,7 +434,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         />
       ) : null}
 
-      {dashboardAttachment ? (
+      {dashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           canSaveByReference={false}
           objectType={i18n.translate('xpack.aiops.changePointDetection.objectTypeLabel', {
@@ -320,7 +444,9 @@ const FieldPanel: FC<FieldPanelProps> = ({
             title: 'Title',
             description: 'Desc',
           }}
-          onClose={() => {}}
+          onClose={() => {
+            setDashboardAttachmentReady(false);
+          }}
           onSave={onSaveCallback}
         />
       ) : null}
