@@ -61,11 +61,7 @@ describe('validateKQLStringFilter', () => {
   const data = [
     // input, output
     ['', undefined],
-    [
-      'host.name:host-0',
-      undefined,
-      // [{ bool: { should: [{ match: { 'host.name': 'host-0' } }], minimum_should_match: 1 } }],
-    ],
+    ['host.name:host-0', undefined],
     [':*', 'filterQuery must be a valid KQL filter'],
   ];
 

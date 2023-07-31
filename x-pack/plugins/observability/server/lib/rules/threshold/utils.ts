@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
 import { isError } from 'lodash';
+import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -51,7 +52,9 @@ export const validateKQLStringFilter = (value: string) => {
   try {
     kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], []);
   } catch (e) {
-    return 'filterQuery must be a valid KQL filter';
+    return i18n.translate('xpack.observability.threshold.rule.schema.invalidFilterQuery', {
+      defaultMessage: 'filterQuery must be a valid KQL filter',
+    });
   }
 };
 
