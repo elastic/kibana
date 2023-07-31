@@ -16,8 +16,8 @@ import {
 import {
   AGGREGATION_PRECISION_THRESHOLD,
   CLOUD_SECURITY_TASK_TYPE,
-} from './cloud_security_metring';
-import { cloudSecurityMetringTaskProperties } from './metering_tasks_configs';
+} from './cloud_security_metering';
+import { cloudSecurityMetringTaskProperties } from './cloud_security_metering_task_config';
 import type { CloudSecurityMeteringCallbackInput, ResourceCountAggregation } from './types';
 
 export const getCloudSecurityUsageRecord = async ({

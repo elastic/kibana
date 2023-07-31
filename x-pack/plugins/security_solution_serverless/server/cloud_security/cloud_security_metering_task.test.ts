@@ -11,7 +11,7 @@ import {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metring';
+import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import type { PostureType } from './types';
 
