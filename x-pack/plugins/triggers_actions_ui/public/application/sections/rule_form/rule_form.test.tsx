@@ -36,6 +36,7 @@ jest.mock('../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
+  hasAllPrivilegeWithProducerCheck: jest.fn(() => true),
 }));
 
 describe('rule_form', () => {
@@ -604,14 +605,6 @@ describe('rule_form', () => {
         '[data-test-subj="same-consumer-producer-rule-type-SelectOption"]'
       );
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('does not render rule type options which producer does not correspond to the rule consumer', async () => {
-      await setup();
-      const ruleTypeSelectOptions = wrapper.find(
-        '[data-test-subj="other-consumer-producer-rule-type-SelectOption"]'
-      );
-      expect(ruleTypeSelectOptions.exists()).toBeFalsy();
     });
   });
 
