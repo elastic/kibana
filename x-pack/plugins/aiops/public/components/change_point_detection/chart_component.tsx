@@ -38,6 +38,11 @@ export interface ChartComponentPropsAll {
   query?: Query;
 }
 
+const defaultSort = {
+  field: 'p_value' as keyof ChangePointAnnotation,
+  direction: 'asc',
+};
+
 /**
  * Grid component wrapper for embeddable.
  *
@@ -115,14 +120,23 @@ export const ChardGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = (
     return { interval } as ChangePointDetectionRequestParams;
   }, [interval]);
 
-  const { results } = useChangePointResults(
-    fieldConfig,
-    requestParams,
-    combinedQuery,
-    maxSeriesToPlot ?? 10
-  );
+  const { results } = useChangePointResults(fieldConfig, requestParams, combinedQuery, 10000);
 
-  if (!results.length) return null;
+  const changePoints = useMemo<ChangePointAnnotation[]>(() => {
+    let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {
+      if (defaultSort.direction === 'asc') {
+        return (a[defaultSort.field] as number) - (b[defaultSort.field] as number);
+      } else {
+        return (b[defaultSort.field] as number) - (a[defaultSort.field] as number);
+      }
+    });
+
+    if (maxSeriesToPlot) {
+      resultChangePoints = resultChangePoints.slice(0, maxSeriesToPlot);
+    }
+
+    return resultChangePoints;
+  }, [results, maxSeriesToPlot]);
 
   return (
     <div
@@ -132,7 +146,7 @@ export const ChardGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = (
       `}
     >
       <ChartsGrid
-        changePoints={results.map((r) => ({ ...r, ...fieldConfig }))}
+        changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
         interval={requestParams.interval}
       />
     </div>
