@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import sinon from 'sinon';
 import { Subject, Observable } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs/operators';
@@ -65,7 +66,7 @@ const config: TaskManagerConfig = {
 };
 
 describe('createAggregator', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 

@@ -29,7 +29,7 @@ export function createAggregator<T extends JsonValue>({
   taskEventFilter,
   metricsAggregator,
 }: CreateMetricsAggregatorOpts<T>): AggregatedStatProvider<T> {
-  // Resets the claim counters either when the reset interval has passed or
+  // Resets the aggregators either when the reset interval has passed or
   // a resetMetrics$ event is received
   merge(
     interval(config.metrics_reset_interval).pipe(map(() => true)),
