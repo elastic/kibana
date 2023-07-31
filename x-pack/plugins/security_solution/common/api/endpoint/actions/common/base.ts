@@ -7,8 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { ExecuteActionRequestSchema } from '../execute_route';
-import { EndpointActionGetFileSchema } from '../get_file_route';
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
@@ -60,10 +58,3 @@ export const KillOrSuspendProcessRequestSchema = {
     ]),
   }),
 };
-
-export const ResponseActionBodySchema = schema.oneOf([
-  NoParametersRequestSchema.body,
-  KillOrSuspendProcessRequestSchema.body,
-  EndpointActionGetFileSchema.body,
-  ExecuteActionRequestSchema.body,
-]);

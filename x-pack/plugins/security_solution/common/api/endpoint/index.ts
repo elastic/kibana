@@ -20,6 +20,7 @@ export * from './actions/get_processes_route';
 export * from './actions/get_file_route';
 export * from './actions/execute_route';
 export * from './actions/common/base';
+export * from './actions/common/response_actions';
 
 export * from './metadata/list_metadata_route';
 export * from './metadata/get_metadata_route';
