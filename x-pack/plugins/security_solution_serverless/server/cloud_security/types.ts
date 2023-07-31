@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  CNVM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 
 import type { MeteringCallbackInput } from '../types';
 
@@ -19,7 +24,13 @@ export interface MinTimestamp {
   value_as_string: string;
 }
 
+export type PostureType =
+  | typeof CSPM_POLICY_TEMPLATE
+  | typeof KSPM_POLICY_TEMPLATE
+  | typeof CNVM_POLICY_TEMPLATE;
+
 export interface CloudSecurityMeteringCallbackInput
-  extends Omit<MeteringCallbackInput, 'cloudSetup'> {
+  extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController'> {
   projectId: string;
+  postureType: PostureType;
 }

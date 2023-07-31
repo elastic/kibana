@@ -6,11 +6,15 @@
  */
 
 import type { MeteringCallbackInput, UsageRecord } from '../types';
-import { getCspmUsageRecord } from './cspm_metering_task';
-import { getKspmUsageRecord } from './kspm_metering_task';
-import { getCnvmUsageRecord } from './cnvm_metering_task';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  CNVM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
+import { PostureType } from './types';
 
-export const CLOUD_SECURITY_TASK_TYPE = 'Cloud_Security';
+export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 3000;
 
 export const cloudSecurityMetringCallback = async ({
@@ -19,7 +23,6 @@ export const cloudSecurityMetringCallback = async ({
   logger,
   taskId,
   lastSuccessfulReport,
-  abortController,
 }: MeteringCallbackInput): Promise<UsageRecord[]> => {
   const projectId = cloudSetup?.serverless?.projectId || 'missing project id';
 
@@ -30,16 +33,20 @@ export const cloudSecurityMetringCallback = async ({
   try {
     const cloudSecurityUsageRecords: UsageRecord[] = [];
 
-    const usageRecordFunctions = [getCspmUsageRecord, getKspmUsageRecord, getCnvmUsageRecord];
+    const postureTypes: PostureType[] = [
+      CSPM_POLICY_TEMPLATE,
+      KSPM_POLICY_TEMPLATE,
+      CNVM_POLICY_TEMPLATE,
+    ];
 
-    for (const usageRecordFunction of usageRecordFunctions) {
-      const usageRecord = await usageRecordFunction({
+    for (const postureType of postureTypes) {
+      const usageRecord = await getCloudSecurityUsageRecord({
         esClient,
         projectId,
         logger,
         taskId,
         lastSuccessfulReport,
-        abortController,
+        postureType,
       });
 
       if (usageRecord) {
