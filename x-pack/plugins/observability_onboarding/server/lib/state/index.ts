@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './get_observability_onboarding_state';
-export * from './save_observability_onboarding_state';
+export * from './get_observability_onboarding_flow';
+export * from './save_observability_onboarding_flow';

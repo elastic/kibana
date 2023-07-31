@@ -7,20 +7,20 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  ObservabilityOnboardingState,
+  ObservabilityOnboardingFlow,
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-  SavedObservabilityOnboardingState,
+  SavedObservabilityOnboardingFlow,
 } from '../../saved_objects/observability_onboarding_status';
 
-export async function getObservabilityOnboardingState({
+export async function getObservabilityOnboardingFlow({
   savedObjectsClient,
   savedObjectId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectId: string;
-}): Promise<SavedObservabilityOnboardingState | undefined> {
+}): Promise<SavedObservabilityOnboardingFlow | undefined> {
   try {
-    const result = await savedObjectsClient.get<ObservabilityOnboardingState>(
+    const result = await savedObjectsClient.get<ObservabilityOnboardingFlow>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
       savedObjectId
     );

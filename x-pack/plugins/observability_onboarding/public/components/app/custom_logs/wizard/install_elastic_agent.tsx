@@ -87,23 +87,20 @@ export function InstallElasticAgent() {
         logFilePaths,
       } = getState();
       if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
-        return callApi(
-          'POST /internal/observability_onboarding/logs/flow/create',
-          {
-            params: {
-              body: {
-                name: datasetName,
-                state: {
-                  datasetName,
-                  serviceName,
-                  namespace,
-                  customConfigurations,
-                  logFilePaths,
-                },
+        return callApi('POST /internal/observability_onboarding/logs/flow', {
+          params: {
+            body: {
+              name: datasetName,
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
               },
             },
-          }
-        );
+          },
+        });
       }
     },
     [monitoringRole?.hasPrivileges]
@@ -120,7 +117,7 @@ export function InstallElasticAgent() {
     } = getState();
     if (onboardingId) {
       return callApi(
-        'PUT /internal/observability_onboarding/flow/{onboardingId}/save',
+        'PUT /internal/observability_onboarding/flow/{onboardingId}',
         {
           params: {
             path: { onboardingId },

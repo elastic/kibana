@@ -9,9 +9,9 @@ import * as t from 'io-ts';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
 import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
-import { saveObservabilityOnboardingState } from '../../lib/state';
+import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from './api_key/create_shipper_api_key';
-import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
+import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -59,7 +59,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
 });
 
 const createFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'POST /internal/observability_onboarding/logs/flow/create',
+  endpoint: 'POST /internal/observability_onboarding/logs/flow',
   options: { tags: [] },
   params: t.type({
     body: t.intersection([
@@ -93,11 +93,11 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
-    const { id } = await saveObservabilityOnboardingState({
+    const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       observabilityOnboardingState: {
         type: 'logFiles',
-        state: state as ObservabilityOnboardingState['state'],
+        state: state as ObservabilityOnboardingFlow['state'],
         progress: {},
       },
     });

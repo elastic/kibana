@@ -21,7 +21,7 @@ import React from 'react';
 import { APIReturnType } from '../../../../services/rest/create_call_api';
 
 type ApiKeyPayload =
-  APIReturnType<'POST /internal/observability_onboarding/logs/flow/create'>;
+  APIReturnType<'POST /internal/observability_onboarding/logs/flow'>;
 
 export type HasPrivileges = boolean;
 

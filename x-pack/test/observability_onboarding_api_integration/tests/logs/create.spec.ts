@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApiWithoutPrivileges(state = {}) {
     return await observabilityOnboardingApiClient.readUser({
-      endpoint: 'POST /internal/observability_onboarding/logs/flow/create',
+      endpoint: 'POST /internal/observability_onboarding/logs/flow',
       params: {
         body: {
           name: 'name',
@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApiWithPrivileges(state = {}) {
     return await observabilityOnboardingApiClient.logMonitoringUser({
-      endpoint: 'POST /internal/observability_onboarding/logs/flow/create',
+      endpoint: 'POST /internal/observability_onboarding/logs/flow',
       params: {
         body: {
           name: 'name',

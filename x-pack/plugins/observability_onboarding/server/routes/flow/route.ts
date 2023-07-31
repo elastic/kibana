@@ -8,15 +8,15 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import {
-  getObservabilityOnboardingState,
-  saveObservabilityOnboardingState,
+  getObservabilityOnboardingFlow,
+  saveObservabilityOnboardingFlow,
 } from '../../lib/state';
-import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
+import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}/save',
+  endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
   options: { tags: [] },
   params: t.type({
     path: t.type({
@@ -37,14 +37,14 @@ const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
     } = resources;
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-    const { id } = await saveObservabilityOnboardingState({
+    const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       savedObjectId: onboardingId,
       observabilityOnboardingState: {
         type: 'logFiles',
         state,
         progress: {},
-      } as ObservabilityOnboardingState,
+      } as ObservabilityOnboardingFlow,
     });
     return { onboardingId: id };
   },
@@ -78,7 +78,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       coreStart.savedObjects.createInternalRepository();
 
     const savedObservabilityOnboardingState =
-      await getObservabilityOnboardingState({
+      await getObservabilityOnboardingFlow({
         savedObjectsClient,
         savedObjectId: id,
       });
@@ -95,7 +95,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       ...observabilityOnboardingState
     } = savedObservabilityOnboardingState;
 
-    await saveObservabilityOnboardingState({
+    await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       savedObjectId,
       observabilityOnboardingState: {
@@ -132,7 +132,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const savedObservabilityOnboardingState =
-      await getObservabilityOnboardingState({
+      await getObservabilityOnboardingFlow({
         savedObjectsClient,
         savedObjectId: onboardingId,
       });

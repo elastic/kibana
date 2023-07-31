@@ -19,7 +19,7 @@ export interface LogFilesState {
 
 type ObservabilityOnboardingFlowState = LogFilesState | undefined;
 
-export interface ObservabilityOnboardingState {
+export interface ObservabilityOnboardingFlow {
   type: 'logFiles';
   state: ObservabilityOnboardingFlowState;
   progress: Record<
@@ -31,13 +31,13 @@ export interface ObservabilityOnboardingState {
   >;
 }
 
-export interface SavedObservabilityOnboardingState
-  extends ObservabilityOnboardingState {
+export interface SavedObservabilityOnboardingFlow
+  extends ObservabilityOnboardingFlow {
   id: string;
   updatedAt: number;
 }
 
-export const observabilityOnboardingState: SavedObjectsType = {
+export const observabilityOnboardingFlow: SavedObjectsType = {
   name: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'agnostic',

@@ -10,7 +10,7 @@ import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { generateYml } from './generate_yml';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
-import { getObservabilityOnboardingState } from '../../lib/state';
+import { getObservabilityOnboardingFlow } from '../../lib/state';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',
@@ -38,7 +38,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
 
-    const savedState = await getObservabilityOnboardingState({
+    const savedState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
       savedObjectId: onboardingId,
     });
