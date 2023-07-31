@@ -43,8 +43,7 @@ disabled:
   - x-pack/test/threat_intelligence_cypress/config.ts
   - x-pack/test/functional_enterprise_search/visual_config.ts
   - x-pack/test/functional_enterprise_search/cli_config.ts
-  - x-pack/test_serverless/functional/test_suites/security/cypress/config_headless.ts
-  - x-pack/test_serverless/functional/test_suites/security/cypress/config_visual.ts
+  - x-pack/test_serverless/functional/test_suites/security/cypress/security_config.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
@@ -341,6 +340,7 @@ enabled:
   - x-pack/test/observability_functional/with_rac_write.config.ts
   - x-pack/test/observability_onboarding_api_integration/basic/config.ts
   - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
+  - x-pack/test/observability_ai_assistant_api_integration/enterprise/config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
@@ -413,5 +413,6 @@ enabled:
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys/dashboard_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
+  - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts

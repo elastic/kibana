@@ -26,7 +26,6 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   selectSavedObjectFormat,
   updateIndexPatterns,
   updateDatasourceState,
@@ -99,7 +98,7 @@ export function App({
   const saveAndExit = useRef<() => void>();
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = useCallback(
+  const dispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );

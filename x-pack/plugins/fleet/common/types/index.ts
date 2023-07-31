@@ -50,6 +50,7 @@ export interface FleetConfigType {
     disableProxies: boolean;
     fleetServerStandalone: boolean;
     activeAgentsSoftLimit?: number;
+    capabilities: string[];
   };
   createArtifactsBulkBatchSize?: number;
 }

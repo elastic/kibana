@@ -13,12 +13,12 @@ import {
   USER_RISK_PREVIEW_TABLE_ROWS,
   RISK_PREVIEW_ERROR,
   RISK_PREVIEW_ERROR_BUTTON,
+  LOCAL_QUERY_BAR_SELECTOR,
 } from '../../screens/entity_analytics_management';
 
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
@@ -27,7 +27,7 @@ import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 describe('Entity analytics management page', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('all_users');
+    cy.task('esArchiverLoad', 'all_users');
   });
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('Entity analytics management page', () => {
   });
 
   after(() => {
-    esArchiverUnload('all_users');
+    cy.task('esArchiverUnload', 'all_users');
   });
 
   it('renders page as expected', () => {
@@ -53,7 +53,7 @@ describe('Entity analytics management page', () => {
       cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
       cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
 
-      updateDateRangeInLocalDatePickers(START_DATE, END_DATE);
+      updateDateRangeInLocalDatePickers(LOCAL_QUERY_BAR_SELECTOR, START_DATE, END_DATE);
 
       cy.get(HOST_RISK_PREVIEW_TABLE).contains('No items found');
       cy.get(USER_RISK_PREVIEW_TABLE).contains('No items found');
@@ -64,7 +64,7 @@ describe('Entity analytics management page', () => {
       cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
 
       fillLocalSearchBar('host.name: "test-host1"');
-      submitLocalSearch();
+      submitLocalSearch(LOCAL_QUERY_BAR_SELECTOR);
 
       cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
       cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).contains('test-host1');
@@ -82,7 +82,7 @@ describe('Entity analytics management page', () => {
       cy.intercept('POST', '/internal/risk_score/preview', {
         statusCode: 200,
         body: {
-          scores: [],
+          scores: { host: [], user: [] },
         },
       });
 

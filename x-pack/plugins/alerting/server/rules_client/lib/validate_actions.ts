@@ -46,10 +46,14 @@ export async function validateActions(
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
   const actionIds = [...new Set(actions.map((action) => action.id))];
-  const actionResults = (await actionsClient.getBulk(actionIds)) || [];
+
+  const actionResults =
+    (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) || [];
+
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
+
   if (actionsUsingConnectorsWithMissingSecrets.length) {
     if (allowMissingConnectorSecrets) {
       context.logger.error(
