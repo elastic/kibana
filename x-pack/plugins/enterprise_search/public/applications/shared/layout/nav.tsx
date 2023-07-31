@@ -217,7 +217,7 @@ export const useEnterpriseSearchApplicationNav = (
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${searchApplicationPath}/${SearchApplicationViewTabs.PREVIEW}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.DOCS_EXPLORER}`,
               }),
             },
             {

@@ -73,7 +73,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'field',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.nameColumn',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.nameColumn',
         { defaultMessage: 'Field' }
       ),
       render: (field: string) => {
@@ -91,7 +91,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.valueColumn',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.valueColumn',
         { defaultMessage: 'Value' }
       ),
       render: (value: FieldValue) => (
@@ -111,7 +111,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
           <EuiFlexGroup justifyContent="spaceBetween">
             <code>
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.id"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.id"
                 defaultMessage="ID: {id}"
                 values={{ id }}
               />
@@ -120,7 +120,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <code>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.fromIndex"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fromIndex"
                     defaultMessage="from"
                   />
                 </code>
@@ -135,7 +135,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               <EuiTextColor color="subdued">
                 <code>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.moreFieldsButton"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.moreFieldsButton"
                     defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"
                     values={{ count: hiddenFields }}
                   />
@@ -153,7 +153,7 @@ export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
     <EuiFieldSearch fullWidth {...additionalInputProps} />
     <EuiButton type="submit" color="primary" fill>
       {i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.searchLabel',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.searchLabel',
         {
           defaultMessage: 'Search',
         }
@@ -165,7 +165,7 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
   <EuiText size="s">
     <FormattedHTMLMessage
       tagName="p"
-      id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pagingInfo.text"
+      id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pagingInfo.text"
       defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
       values={{ end, start, totalResults }}
     />
@@ -184,7 +184,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
       <EuiTitle size="xxxs">
         <label htmlFor="results-per-page">
           <FormattedMessage
-            id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.resultsPerPage.label"
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.label"
             defaultMessage="Show"
           />
         </label>
@@ -194,7 +194,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         options={
           options?.map((option) => ({
             text: i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.resultsPerPage.option.label',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.option.label',
               {
                 defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
                 values: { value: option },
@@ -216,7 +216,7 @@ export const Sorting = withSearch<
 >(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
   const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
   const relevance = i18n.translate(
-    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.relevanceLabel',
+    'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.relevanceLabel',
     { defaultMessage: 'Relevance' }
   );
 
@@ -226,7 +226,7 @@ export const Sorting = withSearch<
         <EuiTitle size="xxxs">
           <label htmlFor="sorting-field">
             <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.fieldLabel"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.fieldLabel"
               defaultMessage="Sort By"
             />
           </label>
@@ -252,7 +252,7 @@ export const Sorting = withSearch<
             <EuiTitle size="xxxs">
               <label htmlFor="sorting-direction">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.directionLabel"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.directionLabel"
                   defaultMessage="Order By"
                 />
               </label>
@@ -271,14 +271,14 @@ export const Sorting = withSearch<
               options={[
                 {
                   text: i18n.translate(
-                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.ascLabel',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.ascLabel',
                     { defaultMessage: 'Ascending' }
                   ),
                   value: 'asc',
                 },
                 {
                   text: i18n.translate(
-                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.descLabel',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.sortingView.descLabel',
                     { defaultMessage: 'Descending' }
                   ),
                   value: 'desc',

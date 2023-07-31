@@ -307,7 +307,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
         "id": "searchApplicationId",
         "items": Array [
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/preview",
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/docs_explorer",
             "id": "enterpriseSearchApplicationDocsExplorer",
             "items": undefined,
             "name": "Docs Explorer",
