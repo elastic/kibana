@@ -16,8 +16,6 @@ import { getHasLogs } from './get_has_logs';
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
 
-const ELASTIC_AGENT_VERSION = '8.8.0'; // This should be defined from a source with the latest public release
-
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/custom_logs/privileges',
   options: { tags: [] },
@@ -46,7 +44,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     scriptDownloadUrl: string;
     elasticAgentVersion: string;
   }> {
-    const { core, plugins } = resources;
+    const { core, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
 
     const kibanaUrl =
@@ -59,7 +57,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     return {
       apiEndpoint,
       scriptDownloadUrl,
-      elasticAgentVersion: ELASTIC_AGENT_VERSION,
+      elasticAgentVersion: kibanaVersion,
     };
   },
 });
