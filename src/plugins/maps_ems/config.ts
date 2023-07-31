@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SemVer } from 'semver';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import {
@@ -56,16 +54,3 @@ export const mapConfigSchema = schema.object({
 
 export type MapConfig = TypeOf<typeof mapConfigSchema>;
 export type TileMapConfig = TypeOf<typeof tilemapConfigSchema>;
-
-export const overrideMapConfig = (mapConfig: MapConfig, version: string) => {
-  const kbnSemVer = new SemVer(version);
-  const kbnVersionSemVer = kbnSemVer.major + '.' + kbnSemVer.minor;
-  const emsLandingPageUrl = mapConfig.emsLandingPageUrl + '/v' + kbnVersionSemVer;
-
-  return {
-    ...mapConfig,
-    ...{
-      emsLandingPageUrl,
-    },
-  };
-};

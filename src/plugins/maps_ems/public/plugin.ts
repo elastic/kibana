@@ -16,7 +16,6 @@ import {
 } from './kibana_services';
 import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from '.';
 import type { MapConfig } from '../config';
-import { overrideMapConfig } from '../config';
 import { createEMSSettings } from '../common/ems_settings';
 import { createEMSClientLazy } from './lazy_load_bundle';
 
@@ -37,13 +36,8 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
 
   public start(code: CoreStart, plugins: MapsEmsStartPublicDependencies) {
     const context = this._initializerContext;
-    const defaultConfig = context.config.get<MapConfig>();
+    const mapConfig = context.config.get<MapConfig>();
     const { buildFlavor, version } = context.env.packageInfo;
-
-    const mapConfig =
-      buildFlavor === 'serverless' || !version
-        ? defaultConfig
-        : overrideMapConfig(defaultConfig, version);
 
     setKibanaVersion(version);
     setMapConfig(mapConfig);
@@ -58,7 +52,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       },
       createEMSClient: async () => {
         const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-        return createEMSClientLazy(emsSettings, version);
+        return createEMSClientLazy(emsSettings, version, buildFlavor);
       },
     };
   }
