@@ -139,6 +139,36 @@ describe('Alerts Client', () => {
       spy.mockRestore();
     });
 
+    test('should skip track alerts ruleType shouldWrite is false', async () => {
+      const spy = jest
+        .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+        .mockImplementation(() => mockLegacyAlertsClient);
+
+      const alertsClient = new AlertsClient({
+        ...alertsClientParams,
+        ruleType: {
+          ...alertsClientParams.ruleType,
+          alerts: {
+            context: 'test',
+            mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+            shouldWrite: false,
+          },
+        },
+      });
+
+      const opts = {
+        maxAlerts,
+        ruleLabel: `test: rule-name`,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+      };
+      await alertsClient.initializeExecution(opts);
+      expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(opts);
+      expect(mockLegacyAlertsClient.getTrackedAlerts).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
     test('should query for alert UUIDs if they exist', async () => {
       mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
         active: {

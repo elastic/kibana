@@ -108,6 +108,9 @@ export class AlertsClient<
   public async initializeExecution(opts: InitializeExecutionOpts) {
     await this.legacyAlertsClient.initializeExecution(opts);
 
+    if (!this.ruleType.alerts?.shouldWrite) {
+      return;
+    }
     // Get tracked alert UUIDs to query for
     // TODO - we can consider refactoring to store the previous execution UUID and query
     // for active and recovered alerts from the previous execution using that UUID
