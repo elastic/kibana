@@ -17,7 +17,7 @@ import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Policy Details', () => {
+describe('Policy Details', { tags: '@serverless' }, () => {
   const packagePolicyBackupHelper = new PackagePolicyBackupHelper();
   let indexedHostsData: CyIndexEndpointHosts;
 

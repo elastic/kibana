@@ -29,6 +29,10 @@ export {};
 
 import 'cypress-react-selector';
 
+// @ts-ignore
+import registerCypressGrep from '@cypress/grep';
+registerCypressGrep();
+
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',
   function getByTestSubj(selector, options) {
