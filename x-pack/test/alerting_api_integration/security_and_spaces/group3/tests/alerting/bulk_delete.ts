@@ -8,7 +8,12 @@
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getUnauthorizedErrorMessage,
+} from '../../../../common/lib';
 
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,
@@ -130,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkDelete a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -195,8 +200,11 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message:
-                  'Unauthorized to bulkDelete a "test.restricted-noop" rule for "alertsRestrictedFixture"',
+                message: getUnauthorizedErrorMessage(
+                  'bulkDelete',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -342,7 +350,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkDelete a "test.noop" rule by "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -409,7 +417,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkDelete a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -481,7 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkDelete a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -550,7 +558,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to bulkDelete a "test.noop" rule for "alertsFixture"',
+                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
