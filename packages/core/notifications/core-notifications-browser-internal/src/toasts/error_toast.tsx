@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface ErrorToastProps {
   title: string;
@@ -71,7 +71,7 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      <CoreContextProvider i18n={i18n} theme={theme}>
+      <KibanaRenderContextProvider i18n={i18n} theme={theme}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -94,7 +94,7 @@ export function showErrorDialog({
             />
           </EuiButton>
         </EuiModalFooter>
-      </CoreContextProvider>
+      </KibanaRenderContextProvider>
     )
   );
 }
