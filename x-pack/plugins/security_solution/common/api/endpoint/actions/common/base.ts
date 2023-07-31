@@ -7,7 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { EndpointActionGetFileSchema, ExecuteActionRequestSchema } from '../..';
+import { ExecuteActionRequestSchema } from '../execute_route';
+import { EndpointActionGetFileSchema } from '../get_file_route';
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
