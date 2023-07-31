@@ -43,6 +43,7 @@ const STORYBOOKS = [
   'kibana_react',
   'lists',
   'observability',
+  'observability_ai_assistant',
   'presentation',
   // 'security_solution', => This build is error out and failing CI. SEE: https://github.com/elastic/kibana/issues/162290
   'security_solution_packages',
