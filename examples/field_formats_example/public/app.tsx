@@ -170,21 +170,21 @@ export const App: React.FC<{ deps: Deps }> = (props) => {
   return (
     <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Header pageTitle="Field formats examples" />
-      <EuiPageTemplate.Section>
+      <EuiPageTemplate.Section grow={false}>
         <EuiTitle size="m">
           <h2>Using an existing field format</h2>
         </EuiTitle>
         <EuiSpacer />
         <UsingAnExistingFieldFormatExample deps={props.deps} />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section>
+      <EuiPageTemplate.Section grow={false}>
         <EuiTitle size="m">
           <h2>Creating a custom field format</h2>
         </EuiTitle>
         <EuiSpacer />
         <CreatingCustomFieldFormat deps={props.deps} />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section>
+      <EuiPageTemplate.Section grow={false}>
         <EuiTitle size="m">
           <h2>Creating a custom field format editor</h2>
         </EuiTitle>
