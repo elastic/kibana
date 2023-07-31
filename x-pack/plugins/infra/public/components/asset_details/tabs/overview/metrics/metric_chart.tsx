@@ -12,8 +12,8 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LensWrapper } from '../../../../lens/lens_wrapper';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
 import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';
 import type { FormulaConfig, XYLayerOptions } from '../../../../../common/visualizations';
 
@@ -109,7 +109,6 @@ export const MetricChart = ({
           overrides={overrides}
           loading={loading}
           disableTriggers
-          hasTitle
         />
       )}
     </EuiPanel>
