@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { DocumentCountChart } from './document_count_chart';
-export type { DocumentCountChartPoint } from './document_count_chart';
+export { useTableState } from './hooks/use_table_state';
+export type { UseTableState } from './hooks/use_table_state';
