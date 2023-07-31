@@ -91,8 +91,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   let flyout;
   if (isFlyoutVisible) {
-    const outcomeCallout =
-      state.success && chromeStatus === 'complete' ? (
+    let outcomeCallout;
+
+    if (state.success && chromeStatus === 'complete') {
+      outcomeCallout = (
         <EuiCallOut
           id="xpack.reporting.listing.diagnosticSuccessMessage"
           color="success"
@@ -100,7 +102,9 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
             defaultMessage: 'Everything looks good for reporting to function.',
           })}
         />
-      ) : (
+      );
+    } else if (!state.success && chromeStatus === 'complete') {
+      outcomeCallout = (
         <EuiCallOut
           id="xpack.reporting.listing.diagnosticFailureTitle"
           iconType="warning"
@@ -110,6 +114,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           })}
         />
       );
+    }
 
     flyout = (
       <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
