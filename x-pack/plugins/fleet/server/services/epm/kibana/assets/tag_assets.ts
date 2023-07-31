@@ -19,9 +19,26 @@ import { appContextService } from '../../../app_context';
 import type { ArchiveAsset } from './install';
 import { KibanaSavedObjectTypeMapping } from './install';
 
-const TAG_COLOR = '#FFFFFF';
+const MANAGED_TAG_COLOR = '#0077cc';
+const PACKAGE_TAG_COLOR = '#4dd2ca';
 const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
+const TAG_COLORS = [
+  '#fec514',
+  '#f583b7',
+  '#07C',
+  '#F04E98',
+  '#00BFB3',
+  '#FEC514',
+  '#BD271E',
+  '#BADA55',
+  '#FFA500',
+  '#FCF7BC',
+  '#0000FF',
+  '#AAA',
+  '#333',
+  '#DDD',
+];
 
 const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
 const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
@@ -32,6 +49,11 @@ const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) 
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
   const uniqueId = uuidv5(`${tagName.toLowerCase()}`, uuidv5.DNS);
   return `fleet-shared-tag-${pkgName}-${uniqueId}-${spaceId}`;
+};
+
+const getRandomColor = () => {
+  const randomizedIndex = Math.floor(Math.random() * TAG_COLORS.length);
+  return TAG_COLORS[randomizedIndex];
 };
 
 interface TagAssetsParams {
@@ -111,7 +133,7 @@ async function ensureManagedTag(
     {
       name: MANAGED_TAG_NAME,
       description: '',
-      color: TAG_COLOR,
+      color: MANAGED_TAG_COLOR,
     },
     { id: managedTagId, overwrite: true, refresh: false }
   );
@@ -138,7 +160,7 @@ async function ensurePackageTag(
     {
       name: pkgTitle,
       description: '',
-      color: TAG_COLOR,
+      color: PACKAGE_TAG_COLOR,
     },
     { id: packageTagId, overwrite: true, refresh: false }
   );
@@ -166,7 +188,7 @@ export async function createPackageSpecTags(
           {
             name: tag.text,
             description: 'Tag defined in package-spec',
-            color: TAG_COLOR,
+            color: getRandomColor(),
           },
           { id: uniqueTagId, overwrite: true, refresh: false }
         );

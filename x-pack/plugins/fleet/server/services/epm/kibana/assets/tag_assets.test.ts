@@ -43,7 +43,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'Managed',
         description: '',
-        color: '#FFFFFF',
+        color: '#0077cc',
       },
       { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
@@ -51,7 +51,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'System',
         description: '',
-        color: '#FFFFFF',
+        color: '#4dd2ca',
       },
       { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
     );
@@ -189,7 +189,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'Managed',
         description: '',
-        color: '#FFFFFF',
+        color: '#0077cc',
       },
       { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
@@ -198,7 +198,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'System',
         description: '',
-        color: '#FFFFFF',
+        color: '#4dd2ca',
       },
       { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
     );
@@ -236,7 +236,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'Managed',
         description: '',
-        color: '#FFFFFF',
+        color: '#0077cc',
       },
       { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
@@ -245,7 +245,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'System',
         description: '',
-        color: '#FFFFFF',
+        color: '#4dd2ca',
       },
       { id: 'system', overwrite: true, refresh: false }
     );
@@ -344,7 +344,7 @@ describe('createPackageSpecTags', () => {
       {
         name: 'Foo',
         description: 'Tag defined in package-spec',
-        color: '#FFFFFF',
+        color: expect.any(String),
       },
       {
         id: 'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
@@ -356,7 +356,7 @@ describe('createPackageSpecTags', () => {
       {
         name: 'Bar',
         description: 'Tag defined in package-spec',
-        color: '#FFFFFF',
+        color: expect.any(String),
       },
       {
         id: 'fleet-shared-tag-test-pkg-e8d5cf6d-de0f-5e77-9aa3-91093cdfbf62-default',
@@ -368,7 +368,7 @@ describe('createPackageSpecTags', () => {
       {
         name: 'myCustomTag',
         description: 'Tag defined in package-spec',
-        color: '#FFFFFF',
+        color: expect.any(String),
       },
       {
         id: 'fleet-shared-tag-test-pkg-cdc93456-cbdd-5560-a16c-117190be14ca-default',
