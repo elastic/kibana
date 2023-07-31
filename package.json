@@ -82,6 +82,7 @@
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-fetch/node-fetch": "^2.6.7",
+    "**/playwright": "^1.36.2",
     "**/remark-parse/trim": "1.0.1",
     "**/typescript": "4.6.3",
     "globby/fast-glob": "^3.2.11"
@@ -1506,7 +1507,7 @@
     "pirates": "^4.0.1",
     "piscina": "^3.2.0",
     "pixelmatch": "^5.3.0",
-    "playwright": "^1.35.0",
+    "playwright": "^1.36.2",
     "pngjs": "^3.4.0",
     "postcss": "^8.4.14",
     "postcss-loader": "^4.2.0",
