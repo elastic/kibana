@@ -234,7 +234,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
           apmArtifactBody: {
             serviceName,
             serviceVersion,
-            bundleFilepath,
+            bundleFilePath,
             sourceMap: sourceMapContent,
           },
         });
