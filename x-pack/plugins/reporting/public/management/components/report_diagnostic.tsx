@@ -95,11 +95,24 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
     if (state.success && chromeStatus === 'complete') {
       outcomeCallout = (
-        <EuiCallOut color="success" title="Everything looks good for reporting to function." />
+        <EuiCallOut
+          id="xpack.reporting.listing.diagnosticSuccessMessage"
+          color="success"
+          title={i18n.translate('xpack.reporting.listing.diagnosticSuccessMessage', {
+            defaultMessage: 'Everything looks good for reporting to function.',
+          })}
+        />
       );
     } else if (!state.success && chromeStatus === 'complete') {
       outcomeCallout = (
-        <EuiCallOut iconType="warning" color="danger" title="Something isn't working properly." />
+        <EuiCallOut
+          id="xpack.reporting.listing.diagnosticFailureTitle"
+          iconType="warning"
+          color="danger"
+          title={i18n.translate('xpack.reporting.listing.diagnosticFailureTitle', {
+            defaultMessage: "Something isn't working properly.",
+          })}
+        />
       );
     }
 
