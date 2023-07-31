@@ -247,8 +247,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.list.searchBar.description',
                 {
-                  defaultMessage:
-                    'Locate a search application via name.',
+                  defaultMessage: 'Locate a search application via name.',
                 }
               )}
             </EuiText>
