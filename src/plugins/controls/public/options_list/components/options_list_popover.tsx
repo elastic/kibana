@@ -48,7 +48,7 @@ export const OptionsListPopover = ({
       id={`control-popover-${id}`}
       data-test-subj={`optionsList-control-popover`}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
-      className={classNames('optionsList__popover', { smallPopover: width < 300 })}
+      className={classNames('optionsList__popover', { 'optionsList--smallPopover': width < 300 })}
     >
       {field?.type !== 'boolean' && !hideActionBar && (
         <OptionsListPopoverActionBar

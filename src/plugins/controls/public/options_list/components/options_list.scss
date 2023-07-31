@@ -51,7 +51,7 @@
 }
 
 .optionsList__popover {
-  &.smallPopover {
+  &.optionsList--smallPopover {
     .optionsList__searchSortRow {
       flex-direction: column;
       align-items: stretch;
