@@ -14,7 +14,7 @@ import {
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetUseCasesAddToExistingCaseModal = jest.fn();
@@ -139,7 +139,7 @@ describe('useAddToExistingCase', () => {
           timeRange,
         },
         persistableStateAttachmentTypeId: '.lens',
-        type: CommentType.persistableState as const,
+        type: AttachmentType.persistableState as const,
       },
     ]);
     expect(mockClick).toHaveBeenCalled();

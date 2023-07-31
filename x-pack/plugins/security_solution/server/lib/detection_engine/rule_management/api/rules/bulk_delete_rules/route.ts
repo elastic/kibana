@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
+import type { RouteConfig, RequestHandler, Logger, IKibanaResponse } from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
@@ -54,7 +54,11 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       tags: ['access:securitySolution'],
     },
   };
-  const handler: Handler = async (context, request, response) => {
+  const handler: Handler = async (
+    context,
+    request,
+    response
+  ): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);

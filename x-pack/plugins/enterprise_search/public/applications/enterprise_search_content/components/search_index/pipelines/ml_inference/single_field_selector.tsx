@@ -68,7 +68,7 @@ export const SingleFieldMapping: React.FC = () => {
             label={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel',
               {
-                defaultMessage: 'Source field',
+                defaultMessage: 'Source text field',
               }
             )}
             error={isEmptySourceFields && <NoSourceFieldsError />}
