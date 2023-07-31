@@ -21,3 +21,12 @@ export function taskLifecycleEventToSuccessMetric(
     total: currentMetric.total + 1,
   };
 }
+
+export function taskLifecycleEventToDurationBucket(
+  taskEvent: TaskLifecycleEvent,
+  currentDuration: number[]
+) {
+  if (taskEvent.timing) {
+    const durationInMs = taskEvent.timing.stop - taskEvent.timing.start;
+  }
+}

@@ -5,20 +5,23 @@
  * 2.0.
  */
 import sinon from 'sinon';
-import * as uuid from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs/operators';
-import { asTaskRunEvent, TaskPersistence } from '../task_events';
-import { asErr, asOk } from '../lib/result_type';
+import { isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
-import { createTaskRunMetricsAggregator, TaskRunMetric } from './task_run_metrics';
 import { TaskManagerConfig } from '../config';
-import { TaskStatus } from '../task';
-import { TaskRunResult } from '../task_running';
+import { createAggregator } from './create_aggregator';
+import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
+import { taskClaimFailureEvent, taskClaimSuccessEvent } from './task_claim_metrics_aggregator.test';
+import { getTaskRunFailedEvent, getTaskRunSuccessEvent } from './task_run_metrics_aggregator.test';
+import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+import * as TaskClaimMetricsAggregatorModule from './task_claim_metrics_aggregator';
+import { metricsAggregatorMock } from './metrics_aggregator.mock';
 
-const configuration: TaskManagerConfig = {
+const mockMetricsAggregator = metricsAggregatorMock.create();
+const config: TaskManagerConfig = {
   allow_reading_invalid_state: false,
   ephemeral_tasks: {
     enabled: true,
@@ -30,7 +33,7 @@ const configuration: TaskManagerConfig = {
   },
   max_attempts: 9,
   max_workers: 10,
-  metrics_reset_interval: 3000,
+  metrics_reset_interval: 30000,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
     enabled: false,
@@ -61,67 +64,311 @@ const configuration: TaskManagerConfig = {
   worker_utilization_running_average_window: 5,
 };
 
-const getTaskRunSuccessEvent = (type: string) => {
-  const id = uuid.v4();
-  return asTaskRunEvent(
-    id,
-    asOk({
-      task: {
-        id,
-        attempts: 0,
-        status: TaskStatus.Running,
-        version: '123',
-        runAt: new Date(),
-        scheduledAt: new Date(),
-        startedAt: new Date(),
-        retryAt: new Date(Date.now() + 5 * 60 * 1000),
-        state: {},
-        taskType: type,
-        params: {},
-        ownerId: null,
-      },
-      persistence: TaskPersistence.Recurring,
-      result: TaskRunResult.Success,
-    }),
-    {
-      start: 1689698780490,
-      stop: 1689698780500,
-    }
-  );
-};
-
-const getTaskRunFailedEvent = (type: string) => {
-  const id = uuid.v4();
-  return asTaskRunEvent(
-    id,
-    asErr({
-      error: new Error('task failed to run'),
-      task: {
-        id,
-        attempts: 0,
-        status: TaskStatus.Running,
-        version: '123',
-        runAt: new Date(),
-        scheduledAt: new Date(),
-        startedAt: new Date(),
-        retryAt: new Date(Date.now() + 5 * 60 * 1000),
-        state: {},
-        taskType: type,
-        params: {},
-        ownerId: null,
-      },
-      persistence: TaskPersistence.Recurring,
-      result: TaskRunResult.Failed,
-    })
-  );
-};
-
-describe('Task Run Metrics', () => {
+describe('createAggregator', () => {
   beforeAll(() => {
     jest.resetAllMocks();
   });
 
-  describe('createTaskRunMetricsAggregator', () => {
+  describe('with TaskClaimMetricsAggregator', () => {
+    test('returns a cumulative count of successful polling cycles and total polling cycles', async () => {
+      const pollingCycleEvents = [
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+      ];
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const taskPollingLifecycle = taskPollingLifecycleMock.create({
+        events$: events$ as Observable<TaskLifecycleEvent>,
+      });
+
+      const taskClaimAggregator = createAggregator({
+        key: 'task_claim',
+        taskPollingLifecycle,
+        config,
+        resetMetrics$: new Subject<boolean>(),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        metricsAggregator: new TaskClaimMetricsAggregator(),
+      });
+
+      return new Promise<void>((resolve) => {
+        taskClaimAggregator
+          .pipe(
+            // skip initial metric which is just initialized data which
+            // ensures we don't stall on combineLatest
+            skip(1),
+            take(pollingCycleEvents.length),
+            bufferCount(pollingCycleEvents.length)
+          )
+          .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
+            expect(metrics[0]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 1 },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_claim',
+              value: { success: 2, total: 2 },
+            });
+            expect(metrics[2]).toEqual({
+              key: 'task_claim',
+              value: { success: 3, total: 3 },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_claim',
+              value: { success: 4, total: 4 },
+            });
+            expect(metrics[4]).toEqual({
+              key: 'task_claim',
+              value: { success: 4, total: 5 },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_claim',
+              value: { success: 5, total: 6 },
+            });
+            expect(metrics[6]).toEqual({
+              key: 'task_claim',
+              value: { success: 6, total: 7 },
+            });
+            expect(metrics[7]).toEqual({
+              key: 'task_claim',
+              value: { success: 7, total: 8 },
+            });
+            expect(metrics[8]).toEqual({
+              key: 'task_claim',
+              value: { success: 8, total: 9 },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_claim',
+              value: { success: 8, total: 10 },
+            });
+            expect(metrics[10]).toEqual({
+              key: 'task_claim',
+              value: { success: 9, total: 11 },
+            });
+            resolve();
+          });
+
+        for (const event of pollingCycleEvents) {
+          events$.next(event);
+        }
+      });
+    });
+
+    test('resets count when resetMetric$ event is received', async () => {
+      const resetMetrics$ = new Subject<boolean>();
+      const pollingCycleEvents1 = [
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+      ];
+
+      const pollingCycleEvents2 = [
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+      ];
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const taskPollingLifecycle = taskPollingLifecycleMock.create({
+        events$: events$ as Observable<TaskLifecycleEvent>,
+      });
+
+      const taskClaimAggregator = createAggregator({
+        key: 'task_claim',
+        taskPollingLifecycle,
+        config,
+        resetMetrics$,
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        metricsAggregator: new TaskClaimMetricsAggregator(),
+      });
+
+      return new Promise<void>((resolve) => {
+        taskClaimAggregator
+          .pipe(
+            // skip initial metric which is just initialized data which
+            // ensures we don't stall on combineLatest
+            skip(1),
+            take(pollingCycleEvents1.length + pollingCycleEvents2.length),
+            bufferCount(pollingCycleEvents1.length + pollingCycleEvents2.length)
+          )
+          .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
+            expect(metrics[0]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 1 },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_claim',
+              value: { success: 2, total: 2 },
+            });
+            expect(metrics[2]).toEqual({
+              key: 'task_claim',
+              value: { success: 3, total: 3 },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_claim',
+              value: { success: 4, total: 4 },
+            });
+            expect(metrics[4]).toEqual({
+              key: 'task_claim',
+              value: { success: 4, total: 5 },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_claim',
+              value: { success: 5, total: 6 },
+            });
+            // reset event should have been received here
+            expect(metrics[6]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 1 },
+            });
+            expect(metrics[7]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 2 },
+            });
+            expect(metrics[8]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 3 },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_claim',
+              value: { success: 2, total: 4 },
+            });
+            expect(metrics[10]).toEqual({
+              key: 'task_claim',
+              value: { success: 3, total: 5 },
+            });
+            resolve();
+          });
+
+        for (const event of pollingCycleEvents1) {
+          events$.next(event);
+        }
+        resetMetrics$.next(true);
+        for (const event of pollingCycleEvents2) {
+          events$.next(event);
+        }
+      });
+    });
+
+    test('resets count when configured metrics reset interval expires', async () => {
+      const clock = sinon.useFakeTimers();
+      clock.tick(0);
+      const pollingCycleEvents1 = [
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+      ];
+
+      const pollingCycleEvents2 = [
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+      ];
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const taskPollingLifecycle = taskPollingLifecycleMock.create({
+        events$: events$ as Observable<TaskLifecycleEvent>,
+      });
+
+      const taskClaimAggregator = createAggregator({
+        key: 'task_claim',
+        taskPollingLifecycle,
+        config: {
+          ...config,
+          metrics_reset_interval: 10,
+        },
+        resetMetrics$: new Subject<boolean>(),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        metricsAggregator: new TaskClaimMetricsAggregator(),
+      });
+
+      return new Promise<void>((resolve) => {
+        taskClaimAggregator
+          .pipe(
+            // skip initial metric which is just initialized data which
+            // ensures we don't stall on combineLatest
+            skip(1),
+            take(pollingCycleEvents1.length + pollingCycleEvents2.length),
+            bufferCount(pollingCycleEvents1.length + pollingCycleEvents2.length)
+          )
+          .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
+            expect(metrics[0]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 1 },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_claim',
+              value: { success: 2, total: 2 },
+            });
+            expect(metrics[2]).toEqual({
+              key: 'task_claim',
+              value: { success: 3, total: 3 },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_claim',
+              value: { success: 4, total: 4 },
+            });
+            expect(metrics[4]).toEqual({
+              key: 'task_claim',
+              value: { success: 4, total: 5 },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_claim',
+              value: { success: 5, total: 6 },
+            });
+            // reset interval should have fired here
+            expect(metrics[6]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 1 },
+            });
+            expect(metrics[7]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 2 },
+            });
+            expect(metrics[8]).toEqual({
+              key: 'task_claim',
+              value: { success: 1, total: 3 },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_claim',
+              value: { success: 2, total: 4 },
+            });
+            expect(metrics[10]).toEqual({
+              key: 'task_claim',
+              value: { success: 3, total: 5 },
+            });
+            resolve();
+          });
+
+        for (const event of pollingCycleEvents1) {
+          events$.next(event);
+        }
+        clock.tick(20);
+        for (const event of pollingCycleEvents2) {
+          events$.next(event);
+        }
+
+        clock.restore();
+      });
+    });
+  });
+
+  describe('with TaskRunMetricsAggregator', () => {
     test('returns a cumulative count of successful task runs and total task runs, broken down by type', async () => {
       const taskRunEvents = [
         getTaskRunSuccessEvent('alerting:example'),
@@ -140,11 +387,14 @@ describe('Task Run Metrics', () => {
         events$: events$ as Observable<TaskLifecycleEvent>,
       });
 
-      const taskRunAggregator = createTaskRunMetricsAggregator(
+      const taskRunAggregator = createAggregator({
+        key: 'task_run',
         taskPollingLifecycle,
-        configuration,
-        new Subject<boolean>()
-      );
+        config,
+        resetMetrics$: new Subject<boolean>(),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        metricsAggregator: new TaskRunMetricsAggregator(),
+      });
 
       return new Promise<void>((resolve) => {
         taskRunAggregator
@@ -289,7 +539,7 @@ describe('Task Run Metrics', () => {
     });
 
     test('resets count when resetMetric$ event is received', async () => {
-      const resetMetric$ = new Subject<boolean>();
+      const resetMetrics$ = new Subject<boolean>();
       const taskRunEvents1 = [
         getTaskRunSuccessEvent('alerting:example'),
         getTaskRunSuccessEvent('telemetry'),
@@ -310,11 +560,14 @@ describe('Task Run Metrics', () => {
         events$: events$ as Observable<TaskLifecycleEvent>,
       });
 
-      const taskRunAggregator = createTaskRunMetricsAggregator(
+      const taskRunAggregator = createAggregator({
+        key: 'task_run',
         taskPollingLifecycle,
-        configuration,
-        resetMetric$
-      );
+        config,
+        resetMetrics$,
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        metricsAggregator: new TaskRunMetricsAggregator(),
+      });
 
       return new Promise<void>((resolve) => {
         taskRunAggregator
@@ -451,7 +704,7 @@ describe('Task Run Metrics', () => {
         for (const event of taskRunEvents1) {
           events$.next(event);
         }
-        resetMetric$.next(true);
+        resetMetrics$.next(true);
         for (const event of taskRunEvents2) {
           events$.next(event);
         }
@@ -481,14 +734,17 @@ describe('Task Run Metrics', () => {
         events$: events$ as Observable<TaskLifecycleEvent>,
       });
 
-      const taskRunAggregator = createTaskRunMetricsAggregator(
+      const taskRunAggregator = createAggregator({
+        key: 'task_run',
         taskPollingLifecycle,
-        {
-          ...configuration,
+        config: {
+          ...config,
           metrics_reset_interval: 10,
         },
-        new Subject<boolean>()
-      );
+        resetMetrics$: new Subject<boolean>(),
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        metricsAggregator: new TaskRunMetricsAggregator(),
+      });
 
       return new Promise<void>((resolve) => {
         taskRunAggregator
@@ -632,6 +888,182 @@ describe('Task Run Metrics', () => {
 
         clock.restore();
       });
+    });
+  });
+
+  test('should filter task lifecycle events using specified taskEventFilter', () => {
+    const pollingCycleEvents = [
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimFailureEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimFailureEvent,
+      taskClaimSuccessEvent,
+    ];
+    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const events$ = new Subject<TaskLifecycleEvent>();
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+    const aggregator = createAggregator({
+      key: 'test',
+      taskPollingLifecycle,
+      config,
+      resetMetrics$: new Subject<boolean>(),
+      taskEventFilter,
+      metricsAggregator: new TaskClaimMetricsAggregator(),
+    });
+
+    return new Promise<void>((resolve) => {
+      aggregator
+        .pipe(
+          // skip initial metric which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          take(pollingCycleEvents.length),
+          bufferCount(pollingCycleEvents.length)
+        )
+        .subscribe(() => {
+          resolve();
+        });
+
+      for (const event of pollingCycleEvents) {
+        events$.next(event);
+      }
+
+      expect(taskEventFilter).toHaveBeenCalledTimes(pollingCycleEvents.length);
+    });
+  });
+
+  test('should call metricAggregator to process task lifecycle events', () => {
+    const spy = jest
+      .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
+      .mockImplementation(() => mockMetricsAggregator);
+
+    const pollingCycleEvents = [
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimFailureEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimFailureEvent,
+      taskClaimSuccessEvent,
+    ];
+    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const events$ = new Subject<TaskLifecycleEvent>();
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+    const aggregator = createAggregator({
+      key: 'test',
+      taskPollingLifecycle,
+      config,
+      resetMetrics$: new Subject<boolean>(),
+      taskEventFilter,
+      metricsAggregator: mockMetricsAggregator,
+    });
+
+    return new Promise<void>((resolve) => {
+      aggregator
+        .pipe(
+          // skip initial metric which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          take(pollingCycleEvents.length),
+          bufferCount(pollingCycleEvents.length)
+        )
+        .subscribe(() => {
+          resolve();
+        });
+
+      for (const event of pollingCycleEvents) {
+        events$.next(event);
+      }
+
+      expect(mockMetricsAggregator.initialMetric).toHaveBeenCalledTimes(1);
+      expect(mockMetricsAggregator.processTaskLifecycleEvent).toHaveBeenCalledTimes(
+        pollingCycleEvents.length
+      );
+      expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(pollingCycleEvents.length);
+      expect(mockMetricsAggregator.reset).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+  });
+
+  test('should call metricAggregator reset when resetMetric$ event is received', () => {
+    const spy = jest
+      .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
+      .mockImplementation(() => mockMetricsAggregator);
+
+    const resetMetrics$ = new Subject<boolean>();
+    const pollingCycleEvents = [
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimFailureEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimSuccessEvent,
+      taskClaimFailureEvent,
+      taskClaimSuccessEvent,
+    ];
+    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const events$ = new Subject<TaskLifecycleEvent>();
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+    const aggregator = createAggregator({
+      key: 'test',
+      taskPollingLifecycle,
+      config,
+      resetMetrics$,
+      taskEventFilter,
+      metricsAggregator: mockMetricsAggregator,
+    });
+
+    return new Promise<void>((resolve) => {
+      aggregator
+        .pipe(
+          // skip initial metric which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          take(pollingCycleEvents.length),
+          bufferCount(pollingCycleEvents.length)
+        )
+        .subscribe(() => {
+          resolve();
+        });
+
+      for (const event of pollingCycleEvents) {
+        events$.next(event);
+      }
+
+      for (let i = 0; i < 5; i++) {
+        events$.next(pollingCycleEvents[i]);
+      }
+      resetMetrics$.next(true);
+      for (let i = 0; i < pollingCycleEvents.length; i++) {
+        events$.next(pollingCycleEvents[i]);
+      }
+
+      expect(mockMetricsAggregator.initialMetric).toHaveBeenCalledTimes(1);
+      expect(mockMetricsAggregator.processTaskLifecycleEvent).toHaveBeenCalledTimes(
+        pollingCycleEvents.length
+      );
+      expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(pollingCycleEvents.length);
+      expect(mockMetricsAggregator.reset).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
     });
   });
 });

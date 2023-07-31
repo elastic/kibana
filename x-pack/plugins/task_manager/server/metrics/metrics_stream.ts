@@ -8,13 +8,13 @@
 import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
 import { set } from '@kbn/safer-lodash-set';
-import { JsonObject } from '@kbn/utility-types';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { createTaskClaimMetricsAggregator, TaskClaimMetric } from './task_claim_metrics';
-import { createTaskRunMetricsAggregator, TaskRunMetric } from './task_run_metrics';
-
+import { isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
+import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
+import { createAggregator } from './create_aggregator';
+import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 export interface Metrics {
   last_update: string;
   metrics: {
@@ -28,10 +28,6 @@ export interface Metric<T> {
   value: T;
 }
 
-export interface SuccessRate extends JsonObject {
-  success: number;
-  total: number;
-}
 interface CreateMetricsAggregatorsOpts {
   config: TaskManagerConfig;
   resetMetrics$: Observable<boolean>;
@@ -45,8 +41,22 @@ export function createMetricsAggregators({
   const aggregators: AggregatedStatProvider[] = [];
   if (taskPollingLifecycle) {
     aggregators.push(
-      createTaskClaimMetricsAggregator(taskPollingLifecycle, config, resetMetrics$),
-      createTaskRunMetricsAggregator(taskPollingLifecycle, config, resetMetrics$)
+      createAggregator({
+        key: 'task_claim',
+        taskPollingLifecycle,
+        config,
+        resetMetrics$,
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        metricsAggregator: new TaskClaimMetricsAggregator(),
+      }),
+      createAggregator({
+        key: 'task_run',
+        taskPollingLifecycle,
+        config,
+        resetMetrics$,
+        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent),
+        metricsAggregator: new TaskRunMetricsAggregator(),
+      })
     );
   }
   return merge(...aggregators);
