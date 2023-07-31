@@ -9,9 +9,9 @@
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, useResizeObserver } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -29,6 +29,8 @@ export const OptionsListControl = ({
   loadMoreSubject: Subject<number>;
 }) => {
   const optionsList = useOptionsList();
+  const widthRef = useRef<HTMLDivElement | null>(null);
+  const dimensions = useResizeObserver(widthRef.current);
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
@@ -121,25 +123,27 @@ export const OptionsListControl = ({
   }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
-    <EuiFilterGroup className={'optionsList--filterGroup'}>
-      <EuiFilterButton
-        badgeColor="success"
-        iconType="arrowDown"
-        isLoading={debouncedLoading}
-        className={classNames('optionsList--filterBtn', {
-          'optionsList--filterBtnPlaceholder': !hasSelections,
-        })}
-        data-test-subj={`optionsList-control-${id}`}
-        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
-        isSelected={isPopoverOpen}
-        numActiveFilters={validSelectionsCount}
-        hasActiveFilters={Boolean(validSelectionsCount)}
-      >
-        {hasSelections || existsSelected
-          ? selectionDisplayNode
-          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
-      </EuiFilterButton>
-    </EuiFilterGroup>
+    <div ref={widthRef}>
+      <EuiFilterGroup className={'optionsList--filterGroup'}>
+        <EuiFilterButton
+          badgeColor="success"
+          iconType="arrowDown"
+          isLoading={debouncedLoading}
+          className={classNames('optionsList--filterBtn', {
+            'optionsList--filterBtnPlaceholder': !hasSelections,
+          })}
+          data-test-subj={`optionsList-control-${id}`}
+          onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
+          isSelected={isPopoverOpen}
+          numActiveFilters={validSelectionsCount}
+          hasActiveFilters={Boolean(validSelectionsCount)}
+        >
+          {hasSelections || existsSelected
+            ? selectionDisplayNode
+            : placeholder ?? OptionsListStrings.control.getPlaceholder()}
+        </EuiFilterButton>
+      </EuiFilterGroup>
+    </div>
   );
 
   return error ? (
@@ -152,12 +156,13 @@ export const OptionsListControl = ({
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
       anchorPosition="downCenter"
-      className="optionsList__popoverOverride"
+      className="optionsList__popoverAnchorOverride"
       closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       initialFocus={'[data-test-subj=optionsList-control-search-input]'}
     >
       <OptionsListPopover
+        width={dimensions.width}
         isLoading={debouncedLoading}
         updateSearchString={updateSearchString}
         loadMoreSuggestions={loadMoreSuggestions}

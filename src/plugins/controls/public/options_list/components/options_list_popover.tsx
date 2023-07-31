@@ -6,23 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import { isEmpty } from 'lodash';
+import classNames from 'classnames';
+import React, { useState } from 'react';
 
 import { OptionsListStrings } from './options_list_strings';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 export interface OptionsListPopoverProps {
+  width: number;
   isLoading: boolean;
   loadMoreSuggestions: (cardinality: number) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopover = ({
+  width,
   isLoading,
   updateSearchString,
   loadMoreSuggestions,
@@ -45,6 +48,7 @@ export const OptionsListPopover = ({
       id={`control-popover-${id}`}
       data-test-subj={`optionsList-control-popover`}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+      className={classNames('optionsList__popover', { smallPopover: width < 300 })}
     >
       {field?.type !== 'boolean' && !hideActionBar && (
         <OptionsListPopoverActionBar

@@ -62,12 +62,12 @@ export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) 
 
         <EuiFlexGroup
           gutterSize="xs"
+          responsive={false}
           alignItems="center"
           css={css`
             padding: ${useEuiPaddingSize('s')};
           `}
           justifyContent={'spaceBetween'}
-          responsive={true}
         >
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
