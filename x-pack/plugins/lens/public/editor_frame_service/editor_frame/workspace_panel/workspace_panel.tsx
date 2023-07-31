@@ -193,6 +193,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const onRender$ = useCallback(() => {
+    const startTime = window.performance.now();
     if (renderDeps.current) {
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
@@ -224,6 +225,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
       trackUiCounterEvents(events);
     }
+    const duration = window.performance.now() - startTime;
+    window.console.log(`onRender$: ${duration}`);
   }, []);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
@@ -231,6 +234,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onData$ = useCallback(
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      const startTime = window.performance.now();
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
@@ -272,6 +276,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           );
         }
       }
+      const duration = window.performance.now() - startTime;
+      window.console.log(`onData$: ${duration}`);
     },
     [addUserMessages, dispatchLens, plugins.data.search]
   );
