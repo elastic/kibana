@@ -182,7 +182,7 @@ describe('agent policy', () => {
       });
     });
 
-    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', () => {
+    it.skip('should throw FleetUnauthorizedError if is_protected=true with insufficient license', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();

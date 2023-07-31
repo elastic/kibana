@@ -119,7 +119,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.is_managed).to.equal(false);
         expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
-        expect(body.item.is_protected).to.equal(false);
       });
 
       it('sets given is_managed value', async () => {

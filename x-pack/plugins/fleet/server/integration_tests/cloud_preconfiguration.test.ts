@@ -177,7 +177,6 @@ describe('Fleet preconfiguration reset', () => {
                 metrics: false,
               },
               protection: {
-                enabled: false,
                 signing_key: '',
                 uninstall_token_hash: '',
               },
