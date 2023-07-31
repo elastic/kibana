@@ -10,14 +10,29 @@ export enum AppFeatureSecurityKey {
    * Enables Advanced Insights (Entity Risk, GenAI)
    */
   advancedInsights = 'advanced_insights',
+
   /**
-   * Enables Endpoint essential add-on features
+   * Enables access to the Endpoint List and associated views that allows management of hosts
+   * running endpoint security
    */
-  endpointEssentials = 'endpoint_essentials',
+  endpointHostManagement = 'endpoint_host_management',
+
   /**
-   * Enables Endpoint Complete add-on features
+   * Enables endpoint policy views that enables user to manage endpoint security policies
    */
-  endpointComplete = 'endpoint_complete',
+  endpointPolicyManagement = 'endpoint_policy_management',
+
+  /**
+   * Enables management of all endpoint related artifacts (ex. Trusted Applications, Event Filters,
+   * Host Isolation Exceptions, Blocklist.
+   */
+  endpointArtifactManagement = 'endpoint_artifact_management',
+
+  /**
+   * Enables all of endpoint's supported response actions - like host isolation, file operations,
+   * process operations, command execution, etc.
+   */
+  endpointResponseActions = 'endpoint_response_actions',
 }
 
 export enum AppFeatureCasesKey {

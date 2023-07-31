@@ -138,15 +138,6 @@ export const getSecurityBaseKibanaSubFeatureIds = (
 export const getSecurityAppFeaturesConfig = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
 ): AppFeaturesSecurityConfig => {
-  // Feature IDs that are available in both Endpoint Essentials and Endpoint Complete
-  const endpointBaseFeatureIds: string[] = [
-    SecuritySubFeatureId.endpointList,
-    SecuritySubFeatureId.policyManagement,
-    SecuritySubFeatureId.trustedApplications,
-    SecuritySubFeatureId.blocklist,
-    SecuritySubFeatureId.eventFilters,
-  ];
-
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -161,28 +152,19 @@ export const getSecurityAppFeaturesConfig = (
       },
     },
 
-    [AppFeatureSecurityKey.endpointEssentials]: {
-      subFeatureIds: [...endpointBaseFeatureIds],
-      subFeaturesPrivileges: [
-        {
-          id: 'host_isolation_all',
-          api: [`${APP_ID}-writeHostIsolation`],
-          ui: ['writeHostIsolation'],
-        },
-      ],
+    [AppFeatureSecurityKey.endpointHostManagement]: {
+      subFeatureIds: [SecuritySubFeatureId.endpointList],
     },
 
-    [AppFeatureSecurityKey.endpointComplete]: {
+    [AppFeatureSecurityKey.endpointPolicyManagement]: {
+      subFeatureIds: [SecuritySubFeatureId.policyManagement],
+    },
+
+    [AppFeatureSecurityKey.endpointArtifactManagement]: {
       subFeatureIds: [
-        ...endpointBaseFeatureIds,
-
-        SecuritySubFeatureId.hostIsolationExceptions,
-
-        SecuritySubFeatureId.responseActionsHistory,
-        SecuritySubFeatureId.hostIsolation,
-        SecuritySubFeatureId.processOperations,
-        SecuritySubFeatureId.fileOperations,
-        SecuritySubFeatureId.executeAction,
+        SecuritySubFeatureId.trustedApplications,
+        SecuritySubFeatureId.blocklist,
+        SecuritySubFeatureId.eventFilters,
       ],
       subFeaturesPrivileges: [
         {
@@ -197,6 +179,25 @@ export const getSecurityAppFeaturesConfig = (
           id: 'host_isolation_exceptions_read',
           api: [`${APP_ID}-accessHostIsolationExceptions`],
           ui: ['accessHostIsolationExceptions'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.endpointResponseActions]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.hostIsolationExceptions,
+
+        SecuritySubFeatureId.responseActionsHistory,
+        SecuritySubFeatureId.hostIsolation,
+        SecuritySubFeatureId.processOperations,
+        SecuritySubFeatureId.fileOperations,
+        SecuritySubFeatureId.executeAction,
+      ],
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_all',
+          api: [`${APP_ID}-writeHostIsolation`],
+          ui: ['writeHostIsolation'],
         },
       ],
     },
