@@ -11,6 +11,8 @@ import type { CoverageOverviewMitreTechnique } from '../../../rule_management/mo
 
 export const coverageOverviewPalatteColors = euiPalettePositive(5);
 
+export const coverageOverviewPanelWidth = 160;
+
 export const getCoveredTechniques = (tactic: CoverageOverviewMitreTactic) =>
   tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;
 

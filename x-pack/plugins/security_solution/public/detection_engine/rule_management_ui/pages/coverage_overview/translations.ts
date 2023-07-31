@@ -28,13 +28,6 @@ export const EXPAND_CELLS_FILTER_BUTTON = i18n.translate(
   }
 );
 
-export const AVAILABLE_RULES_METADATA_LABEL = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.availableRulesMetadataLabel',
-  {
-    defaultMessage: 'Available Rules:',
-  }
-);
-
 export const DISABLED_RULES_METADATA_LABEL = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.disabledRulesMetadataLabel',
   {
@@ -84,13 +77,6 @@ export const COVERED_MITRE_SUBTECHNIQUES = (
     values: { enabledSubtechniques, totalSubtechniques },
     defaultMessage: 'Sub-techniques {enabledSubtechniques}/{totalSubtechniques}',
   });
-
-export const AVAILABLE_RULES_LIST_LABEL = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.availableRulesListLabel',
-  {
-    defaultMessage: 'Available rules',
-  }
-);
 
 export const DISABLED_RULES_LIST_LABEL = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.disabledRulesListLabel',

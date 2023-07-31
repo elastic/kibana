@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { getTechniqueBackgroundColor } from './helpers';
+import { coverageOverviewPanelWidth, getTechniqueBackgroundColor } from './helpers';
 import { CoverageOverviewPanelMetadata } from './shared_components';
 import * as i18n from './translations';
 
@@ -23,6 +23,11 @@ export interface CoverageOverviewMitreTechniquePanelProps {
 
 const TechniquePanel = styled(EuiPanel)<{ $techniqueBackgroundColor?: string }>`
   background: ${({ $techniqueBackgroundColor }) => `${$techniqueBackgroundColor}`};
+  width: ${coverageOverviewPanelWidth}px;
+`;
+
+const SubtechniqueHeader = styled(EuiFlexItem)`
+  white-space: nowrap;
 `;
 
 const CoverageOverviewMitreTechniquePanelComponent = ({
@@ -45,9 +50,9 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   const SubtechniqueInfo = useMemo(
     () => (
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <SubtechniqueHeader grow={false}>
           <EuiText size="xs">{i18n.SUBTECHNIQUES}</EuiText>
-        </EuiFlexItem>
+        </SubtechniqueHeader>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">{`${coveredSubtechniques}/${technique.subtechniques.length}`}</EuiText>
         </EuiFlexItem>
@@ -64,10 +69,10 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
       hasBorder={!techniqueBackgroundColor}
       paddingSize="s"
       onClick={handlePanelOnClick}
-      css={{ width: 160 }}
+      element="div"
     >
       <EuiFlexGroup css={{ height: '100%' }} direction="column" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiText size="xs">
             <h4>{technique.name}</h4>
           </EuiText>
@@ -78,7 +83,6 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
             <CoverageOverviewPanelMetadata
               enabledRules={technique.enabledRules.length}
               disabledRules={technique.disabledRules.length}
-              availableRules={technique.availableRules.length}
             />
           </EuiFlexItem>
         )}

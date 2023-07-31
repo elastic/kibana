@@ -9,7 +9,7 @@ import { EuiPanel, EuiProgress, EuiSpacer, EuiText, EuiToolTip } from '@elastic/
 import React, { memo, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
-import { getCoveredTechniques } from './helpers';
+import { coverageOverviewPanelWidth, getCoveredTechniques } from './helpers';
 import { CoverageOverviewPanelMetadata } from './shared_components';
 import * as i18n from './translations';
 
@@ -21,6 +21,7 @@ const TacticPanel = styled(EuiPanel)`
   ${({ theme }) => css`
     background: ${theme.eui.euiColorLightestShade};
     border-color: ${theme.eui.euiColorMediumShade};
+    width: ${coverageOverviewPanelWidth}px;
   `}
 `;
 
@@ -67,7 +68,6 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
       <CoverageOverviewPanelMetadata
         enabledRules={tactic.enabledRules.length}
         disabledRules={tactic.disabledRules.length}
-        availableRules={tactic.availableRules.length}
       />
     </TacticPanel>
   );

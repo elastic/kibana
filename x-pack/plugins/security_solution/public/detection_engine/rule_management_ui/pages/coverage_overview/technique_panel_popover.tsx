@@ -85,17 +85,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     [technique.disabledRules]
   );
 
-  const availableRuleListItems: EuiListGroupItemProps[] = useMemo(
-    () =>
-      technique.availableRules.map((rule) => ({
-        label: rule.name,
-        color: 'primary',
-        showToolTip: true,
-        onClick: () => {},
-      })),
-    [technique.availableRules]
-  );
-
   const EnabledRulesAccordionButton = useMemo(
     () => (
       <CoverageOverviewRuleListHeader
@@ -116,16 +105,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     [technique.disabledRules.length]
   );
 
-  const AvailableRulesAccordionButton = useMemo(
-    () => (
-      <CoverageOverviewRuleListHeader
-        listTitle={i18n.AVAILABLE_RULES_LIST_LABEL}
-        listLength={technique.availableRules.length}
-      />
-    ),
-    [technique.availableRules.length]
-  );
-
   return (
     <EuiPopover
       button={TechniquePanel}
@@ -133,6 +112,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       closePopover={closePopover}
       anchorPosition="rightCenter"
       data-test-subj="coverageOverviewPopover"
+      ownFocus={false}
     >
       <EuiPopoverTitle>
         <EuiFlexGroup gutterSize="xs" alignItems="flexStart" direction="column">
@@ -179,18 +159,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           />
         </EuiAccordion>
         <EuiSpacer size="s" />
-        <EuiAccordion
-          id="availableRulesListAccordion"
-          initialIsOpen={technique.availableRules.length > 0}
-          buttonContent={AvailableRulesAccordionButton}
-        >
-          <EuiListGroup
-            data-test-subj="coverageOverviewAvailableRulesList"
-            flush
-            listItems={availableRuleListItems}
-            size="s"
-          />
-        </EuiAccordion>
       </div>
       <EuiPopoverFooter>
         <EuiFlexGroup>

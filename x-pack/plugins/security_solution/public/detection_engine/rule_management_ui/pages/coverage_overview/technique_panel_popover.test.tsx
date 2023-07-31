@@ -43,10 +43,5 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
         getMockCoverageOverviewMitreTechnique().disabledRules[0].name
       )
     ).toBeInTheDocument();
-    expect(
-      within(wrapper.getByTestId('coverageOverviewAvailableRulesList')).getByText(
-        getMockCoverageOverviewMitreTechnique().availableRules[0].name
-      )
-    ).toBeInTheDocument();
   });
 });

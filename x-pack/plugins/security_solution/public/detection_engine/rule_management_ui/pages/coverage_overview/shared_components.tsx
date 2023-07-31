@@ -21,7 +21,6 @@ import { coverageOverviewPalatteColors } from './helpers';
 import * as i18n from './translations';
 
 export interface CoverageOverviewPanelMetadataProps {
-  availableRules: number;
   disabledRules: number;
   enabledRules: number;
 }
@@ -33,21 +32,11 @@ const MetadataLabel = styled(EuiText)`
 `;
 
 export const CoverageOverviewPanelMetadata = ({
-  availableRules,
   disabledRules,
   enabledRules,
 }: CoverageOverviewPanelMetadataProps) => {
   return (
     <EuiFlexGroup data-test-subj="coverageOverviewPanelMetadata" direction="column" gutterSize="xs">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <MetadataLabel size="xs">{i18n.AVAILABLE_RULES_METADATA_LABEL}</MetadataLabel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiNotificationBadge color="subdued">{availableRules}</EuiNotificationBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <MetadataLabel size="xs">{i18n.DISABLED_RULES_METADATA_LABEL}</MetadataLabel>
