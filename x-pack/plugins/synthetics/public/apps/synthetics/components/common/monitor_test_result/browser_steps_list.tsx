@@ -13,6 +13,7 @@ import React, {
   useCallback,
   useEffect,
   useState,
+  useMemo,
 } from 'react';
 import {
   EuiBasicTable,
@@ -87,21 +88,32 @@ export const BrowserStepsList = ({
   showExpand = true,
   testNowMode = false,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-  const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>({});
+  const failedStep = stepEnds.find((step) => step.synthetics.step?.status === 'failed');
+  /**
+   * This component is used in cases where the steps list is not pre-fetched at render time. In that case, we handle the auto-expand
+   * in the `useEffect` call below, which will update the expanded map after the data loads. At times, the component is also rendered
+   * with the complete list of steps pre-loaded. In that case, we must set the default state value to pre-expand for the error step.
+   */
+  const defaultExpanded = useMemo(
+    () =>
+      !!failedStep && showExpand
+        ? { [failedStep._id]: toExpandedMapItem(failedStep, steps, testNowMode) }
+        : {},
+    [failedStep, showExpand, steps, testNowMode]
+  );
+  const { euiTheme } = useEuiTheme();
+  const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>(defaultExpanded);
   const [stepIds, setStepIds] = useState<string>(mapStepIds(stepEnds));
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   useEffect(() => {
     /**
-     * This effect will only take action when the set of steps changes. We create a "default" state,
-     * where we can pre-expand the failed step the first time we render a new set of steps.
+     * This effect will only take action when the set of steps changes.
      */
     const latestIds = mapStepIds(stepEnds);
     if (latestIds !== stepIds) {
       setStepIds(latestIds);
-      const failedStep = stepEnds.find((step) => step.synthetics.step?.status === 'failed');
       if (failedStep && showExpand && !expandedMap[failedStep._id]) {
         setExpandedMap(
           Object.assign(expandedMap, {
@@ -110,7 +122,7 @@ export const BrowserStepsList = ({
         );
       }
     }
-  }, [expandedMap, showExpand, stepEnds, stepIds, steps, testNowMode]);
+  }, [expandedMap, failedStep, showExpand, stepEnds, stepIds, steps, testNowMode]);
 
   const toggleDetails = useCallback(
     (item: JourneyStep) => {
