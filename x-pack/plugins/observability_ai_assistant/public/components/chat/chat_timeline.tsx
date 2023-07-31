@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
 import { MessageRole } from '../../../common/types';
 import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';

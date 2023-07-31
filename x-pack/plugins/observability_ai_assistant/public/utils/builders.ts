@@ -6,7 +6,7 @@
  */
 
 import { uniqueId } from 'lodash';
-import { MessageRole } from '../../common/types';
+import { MessageRole, Conversation } from '../../common/types';
 import { ChatTimelineItem } from '../components/chat/chat_timeline';
 
 type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'role'>;
@@ -75,5 +75,24 @@ export function buildFunctionInnerMessage(params: Omit<ChatItemBuildProps, 'role
 export function buildTimelineItems() {
   return {
     items: [buildSystemChatItem(), buildUserChatItem(), buildAssistantChatItem()],
+  };
+}
+
+export function buildConversation(params?: Partial<Conversation>) {
+  return {
+    '@timestamp': '',
+    user: {
+      name: 'foo',
+    },
+    conversation: {
+      id: uniqueId(),
+      title: '',
+      last_updated: '',
+    },
+    messages: [],
+    labels: {},
+    numeric_labels: {},
+    namespace: '',
+    ...params,
   };
 }
