@@ -48,14 +48,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // navigate to a different section
-      await svlCommonNavigation.sidenav.openSection('rootNav:ml');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:notifications' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:notifications' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Machine Learning` });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'ml:notifications',
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
       });
-      await testSubjects.existOrFail(`mlPageNotifications`);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Index Management` });
+      await testSubjects.existOrFail(`indicesTab`);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.breadcrumbs.clickHome();
