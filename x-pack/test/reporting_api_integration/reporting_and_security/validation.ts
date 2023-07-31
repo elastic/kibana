@@ -101,4 +101,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
   });
+  describe('export type registry and config', () => {
+    it('export type registry does not register png or pdf if config shows not enabled' () => {
+      
+    })
+  });
 }

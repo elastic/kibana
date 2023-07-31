@@ -126,11 +126,10 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.exportTypes = this.validConfigExportTypes();
+    this.exportTypes = this.validateExportTypesWithConfig();
     this.exportTypes.forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -226,18 +225,16 @@ export class ReportingCore {
   }
 
   /**
-   * Helper function to validate export types with config settings
-   * only CSV export types should be registered for serverless
+   * Validate export types with config settings
+   * only CSV export types should be registered in the export types registry for serverless
    */
-  validConfigExportTypes(): ExportType[] {
+  private validateExportTypesWithConfig(): ExportType[] {
     if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
-      // Export Type declarations
       this.exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
       this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
     } else {
-      // Export Type declarations
       this.exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
