@@ -43,7 +43,7 @@ run(
     }
 
     const env = {
-      "NODE_OPTIONS": "--openssl-legacy-provider"
+      NODE_OPTIONS: '--openssl-legacy-provider',
     };
 
     if (!flags.dev) {
