@@ -12,11 +12,10 @@ import styled from 'styled-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LensWrapper, TooltipContent } from '../../../../lens';
 import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
-import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 
 const MIN_HEIGHT = 150;
 
@@ -72,7 +71,6 @@ export const Tile = ({
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT }}
       data-test-subj={`assetDetailsKPI-${id}`}
     >
       {error ? (
@@ -109,6 +107,7 @@ export const Tile = ({
             dateRange={timeRange}
             filters={filters}
             loading={loading}
+            hidePanelTitles
           />
         </EuiToolTip>
       )}
@@ -117,6 +116,7 @@ export const Tile = ({
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
+  min-height: ${MIN_HEIGHT}px;
   .echMetric {
     border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;
