@@ -86,6 +86,7 @@ export function buildExpression({
     return null;
   }
 
+  const dataSourceExpressionsStartTime = window.performance.now();
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
     datasourceStates,
@@ -94,7 +95,10 @@ export function buildExpression({
     nowInstant,
     searchSessionId
   );
+  const dataSourceExpressionsDuration = window.performance.now() - dataSourceExpressionsStartTime;
+  window.console.log(`datasourceExpressionsByLayers: ${dataSourceExpressionsDuration}`);
 
+  const visualizationExpressionStartTime = window.performance.now();
   const visualizationExpression = visualization.toExpression(
     visualizationState,
     datasourceLayers,
@@ -104,6 +108,9 @@ export function buildExpression({
     },
     datasourceExpressionsByLayers ?? undefined
   );
+  const visualizationExpressionDuration =
+    window.performance.now() - visualizationExpressionStartTime;
+  window.console.log(`visualizationExpression: ${visualizationExpressionDuration}`);
 
   if (datasourceExpressionsByLayers === null || visualizationExpression === null) {
     return null;
