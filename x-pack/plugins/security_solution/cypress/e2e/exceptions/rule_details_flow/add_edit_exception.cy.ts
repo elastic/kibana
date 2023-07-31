@@ -65,7 +65,6 @@ describe('Add/edit exception from rule details', () => {
   const ITEM_FIELD = 'unique_value.test';
 
   before(() => {
-    cy.task('esArchiverUnload', 'exceptions');
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', 'exceptions');
     login();

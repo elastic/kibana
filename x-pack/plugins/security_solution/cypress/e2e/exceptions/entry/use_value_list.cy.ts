@@ -18,7 +18,7 @@ import {
 } from '../../../tasks/rule_details';
 import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../../../screens/lists';
 import { getNewRule } from '../../../objects/rule';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
@@ -51,13 +51,9 @@ const goToRulesAndOpenValueListModal = () => {
 
 describe('Use Value list in exception entry', () => {
   before(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-    cy.task('esArchiverResetKibana');
-
-    deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'exceptions');
-
+    cleanKibana();
     login();
+    cy.task('esArchiverLoad', 'exceptions');
     createRule({
       ...getNewRule(),
       query: 'user.name:*',

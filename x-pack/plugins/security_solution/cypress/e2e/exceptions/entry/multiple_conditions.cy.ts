@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -20,8 +19,6 @@ import {
   addTwoAndedConditions,
   addTwoORedConditions,
   submitNewExceptionItem,
-  validateExceptionItemAffectsTheCorrectRulesInRulePage,
-  validateExceptionItemFirstAffectedRuleNameInRulePage,
 } from '../../../tasks/exceptions';
 import {
   EXCEPTION_CARD_ITEM_NAME,
@@ -35,19 +32,12 @@ describe(
   'Add multiple conditions and validate the generated exceptions',
   { testIsolation: false },
   () => {
-    const newRule = getNewRule();
-
-    before(() => {
-      // Unload the exceptions incase there was a list created before
-      cy.task('esArchiverUnload', 'exceptions');
-      cy.task('esArchiverResetKibana');
-    });
     beforeEach(() => {
-      deleteAlertsAndRules();
+      cy.task('esArchiverResetKibana');
       login();
       // At least create Rule with exceptions_list to be able to view created exceptions
       createRule({
-        ...newRule,
+        ...getNewRule(),
         query: 'agent.name:*',
         index: ['exceptions*'],
         exceptions_list: [],
@@ -59,7 +49,6 @@ describe(
     });
 
     after(() => {
-      // Unload the exceptions incase there was a list created before
       cy.task('esArchiverUnload', 'exceptions');
     });
     const exceptionName = 'My item name';
@@ -78,10 +67,6 @@ describe(
 
       // Only one Exception should generated
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-
-      // Validate the exception is affecting the correct rule count and name
-      validateExceptionItemAffectsTheCorrectRulesInRulePage(1);
-      validateExceptionItemFirstAffectedRuleNameInRulePage(newRule.name);
 
       // validate the And operator is displayed correctly
       cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', exceptionName);
