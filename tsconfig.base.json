@@ -1496,6 +1496,8 @@
       "@kbn/usage-collection-plugin/*": ["src/plugins/usage_collection/*"],
       "@kbn/usage-collection-test-plugin": ["test/plugin_functional/plugins/usage_collection"],
       "@kbn/usage-collection-test-plugin/*": ["test/plugin_functional/plugins/usage_collection/*"],
+      "@kbn/use-tracked-promise": ["packages/kbn-use-tracked-promise"],
+      "@kbn/use-tracked-promise/*": ["packages/kbn-use-tracked-promise/*"],
       "@kbn/user-profile-components": ["packages/kbn-user-profile-components"],
       "@kbn/user-profile-components/*": ["packages/kbn-user-profile-components/*"],
       "@kbn/user-profile-examples-plugin": ["examples/user_profile_examples"],
