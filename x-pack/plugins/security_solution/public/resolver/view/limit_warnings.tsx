@@ -27,6 +27,7 @@ const LineageTitleMessage = React.memo(function ({ numberOfEntries }: { numberOf
   );
 });
 
+// eslint-disable-next-line react/display-name
 const RelatedEventsLimitMessage = React.memo(function ({
   category,
   numberOfEventsMissing,
@@ -43,6 +44,7 @@ const RelatedEventsLimitMessage = React.memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const RelatedLimitTitleMessage = React.memo(function ({
   category,
   numberOfEventsDisplayed,
@@ -62,6 +64,7 @@ const RelatedLimitTitleMessage = React.memo(function ({
 /**
  * Limit warning for hitting the /events API limit
  */
+// eslint-disable-next-line react/display-name
 export const RelatedEventLimitWarning = React.memo(function ({
   eventCategory,
   numberActuallyDisplayed,
