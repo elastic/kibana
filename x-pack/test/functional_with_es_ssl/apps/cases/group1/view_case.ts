@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -635,12 +635,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('filters by all by default', async () => {
+        const allBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
+        );
+
+        expect(await allBadge.getAttribute('aria-label')).equal('1 active filters');
+      });
+
       it('filters by comment successfully', async () => {
         const commentBadge = await find.byCssSelector(
           '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
         );
 
-        expect(await commentBadge.getVisibleText()).equal('0');
+        expect(await commentBadge.getAttribute('aria-label')).equal('0 available filters');
 
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -651,7 +659,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await commentBadge.getVisibleText()).equal('1');
+        await testSubjects.click('user-actions-filter-activity-button-comments');
+
+        expect(await commentBadge.getAttribute('aria-label')).equal('1 active filters');
       });
 
       it('filters by history successfully', async () => {
@@ -659,7 +669,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
         );
 
-        expect(await historyBadge.getVisibleText()).equal('1');
+        expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
@@ -669,7 +679,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('user-actions-filter-activity-button-history');
 
-        expect(await historyBadge.getVisibleText()).equal('3');
+        expect(await historyBadge.getAttribute('aria-label')).equal('3 active filters');
       });
 
       it('sorts by newest first successfully', async () => {
@@ -969,6 +979,81 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(firstBreadcrumb).to.be('Management');
         expect(middleBreadcrumb).to.be('Cases');
         expect(lastBreadcrumb).to.be(theCase.title);
+      });
+    });
+
+    describe('reporter', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('should render the reporter correctly', async () => {
+        const reporter = await cases.singleCase.getReporter();
+
+        const reporterText = await reporter.getVisibleText();
+
+        expect(reporterText).to.be('elastic');
+      });
+    });
+
+    describe('participants', () => {
+      before(async () => {
+        await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+      });
+
+      afterEach(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      after(async () => {
+        await deleteUsersAndRoles(getService, users, roles);
+      });
+
+      it('should render the participants correctly', async () => {
+        const theCase = await createAndNavigateToCase(getPageObject, getService);
+        await cases.api.createAttachment({
+          caseId: theCase.id,
+          params: {
+            type: AttachmentType.user,
+            comment: 'test',
+            owner: 'cases',
+          },
+          auth: { user: casesAllUser, space: 'default' },
+        });
+
+        await cases.singleCase.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        const participants = await cases.singleCase.getParticipants();
+
+        const casesAllUserText = await participants[0].getVisibleText();
+        const elasticUserText = await participants[1].getVisibleText();
+
+        expect(casesAllUserText).to.be('cases all_user');
+        expect(elasticUserText).to.be('elastic');
+      });
+
+      it('should render assignees in the participants section', async () => {
+        await createAndNavigateToCase(getPageObject, getService);
+
+        await cases.singleCase.openAssigneesPopover();
+        await cases.common.setSearchTextInAssigneesPopover('case');
+        await cases.common.selectFirstRowInAssigneesPopover();
+        await cases.singleCase.closeAssigneesPopover();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+
+        const participants = await cases.singleCase.getParticipants();
+
+        expect(participants.length).to.be(3);
+
+        // The assignee
+        const casesAllUserText = await participants[0].getVisibleText();
+        const elasticUserText = await participants[1].getVisibleText();
+        const testUserText = await participants[2].getVisibleText();
+
+        expect(casesAllUserText).to.be('cases all_user');
+        expect(elasticUserText).to.be('elastic');
+        expect(testUserText).to.be('test user');
       });
     });
   });

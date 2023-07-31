@@ -6,10 +6,10 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { exportExceptionListQuerySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { exportExceptionListRequestQuery } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -21,7 +21,7 @@ export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
       },
       path: `${EXCEPTION_LIST_URL}/_export`,
       validate: {
-        query: buildRouteValidation(exportExceptionListQuerySchema),
+        query: buildRouteValidation(exportExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {

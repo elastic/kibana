@@ -143,5 +143,31 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         await testSubjects.missingOrFail('euiSelectableList');
       });
     },
+
+    async refresh() {
+      await testSubjects.click('case-refresh');
+    },
+
+    async getReporter() {
+      await testSubjects.existOrFail('case-view-user-list-reporter');
+
+      const reporter = await testSubjects.findAllDescendant(
+        'user-profile-username',
+        await testSubjects.find('case-view-user-list-reporter')
+      );
+
+      return reporter[0];
+    },
+
+    async getParticipants() {
+      await testSubjects.existOrFail('case-view-user-list-participants');
+
+      const participants = await testSubjects.findAllDescendant(
+        'user-profile-username',
+        await testSubjects.find('case-view-user-list-participants')
+      );
+
+      return participants;
+    },
   };
 }
