@@ -10,6 +10,8 @@ import * as t from 'io-ts';
 
 export const meta = t.object;
 export type Meta = t.TypeOf<typeof meta>;
-// TODO: add null in name?
-export const metaOrUndefined = t.union([meta, t.undefined, t.null]);
+export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
+
+export const nullableMetaOrUndefined = t.union([metaOrUndefined, t.null]);
+export type NullableMetaOrUndefined = t.TypeOf<typeof nullableMetaOrUndefined>;
