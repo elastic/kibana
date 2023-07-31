@@ -118,13 +118,12 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
     flyout = (
       <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
-        {outcomeCallout}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
                 id="xpack.reporting.listing.diagnosticTitle"
-                defaultMessage="Reporting Diagnostics"
+                defaultMessage="Screenshotting Diagnostics"
               />
             </h2>
           </EuiTitle>
@@ -136,7 +135,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
             />
           </EuiText>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody banner={outcomeCallout}>
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
