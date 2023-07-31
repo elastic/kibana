@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseConnector, ConnectorTypeFields } from '../../common/api';
+import type { CaseConnector, ConnectorTypeFields } from '../../common/types/domain';
 import { getNoneCaseConnector } from '../common/utils';
 import type { ConnectorPersistedFields, ConnectorPersisted } from '../common/types/connectors';
 

@@ -18,7 +18,13 @@ export interface ObservabilityOnboardingState {
     logFilePaths: string[];
     namespace: string;
   };
-  progress: Record<string, string>;
+  progress: Record<
+    string,
+    {
+      status: string;
+      message?: string;
+    }
+  >;
 }
 
 export interface SavedObservabilityOnboardingState

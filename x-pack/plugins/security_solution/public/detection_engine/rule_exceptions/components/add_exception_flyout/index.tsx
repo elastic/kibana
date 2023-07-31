@@ -34,7 +34,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 
 import type { Moment } from 'moment';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import {

@@ -11,7 +11,7 @@ import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { getStatus } from './overview_status';
 import times from 'lodash/times';
 import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { RouteContext } from '../types';
 import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 
@@ -624,7 +624,7 @@ describe('current status route', () => {
           namespaces: ['default'],
           score: null,
           sort: ['a', 3013],
-        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
@@ -790,7 +790,7 @@ describe('current status route', () => {
           namespaces: ['default'],
           score: null,
           sort: ['a', 3013],
-        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(getEsResponse([]));

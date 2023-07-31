@@ -1394,7 +1394,7 @@ describe.skip('The metric threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertDetailsUrl: '',
         alertState: 'NO DATA',
         group: '*',
         groupByKeys: undefined,
@@ -1888,6 +1888,11 @@ const mockLibs: any = {
     prepend: (path: string) => path,
   },
   logger,
+  config: {
+    thresholdRule: {
+      groupByPageSize: 10_000,
+    },
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
@@ -1932,10 +1937,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     alertInstance.state = newState;
     return alertInstance.instance;
   });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
   return alertInstance.instance;
 });
 

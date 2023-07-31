@@ -12,6 +12,7 @@ import type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
   XYDataLayerConfig,
+  SeriesType,
 } from '@kbn/lens-plugin/public';
 import type { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
 import { getDefaultReferences, getHistogramColumn, getTopValuesColumn } from '../../utils';
@@ -25,6 +26,7 @@ export interface XYLayerOptions {
     size: number;
     sourceField: string;
   };
+  seriesType?: SeriesType;
 }
 
 interface XYLayerConfig {
@@ -43,7 +45,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     return this.column[0].getFormulaConfig().label;
   }
 
-  getBaseColumnColumn(dataView: DataView, options?: XYLayerOptions) {
+  getBaseLayer(dataView: DataView, options?: XYLayerOptions) {
     return {
       ...getHistogramColumn({
         columnName: HISTOGRAM_COLUMN_NAME,
@@ -73,7 +75,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
       columns: {
-        ...this.getBaseColumnColumn(dataView, this.layerConfig.options),
+        ...this.getBaseLayer(dataView, this.layerConfig.options),
       },
     };
 
@@ -95,12 +97,12 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
   getLayerConfig(layerId: string, accessorId: string): XYDataLayerConfig {
     return {
       layerId,
-      seriesType: 'line',
+      seriesType: this.layerConfig.options?.seriesType ?? 'line',
       accessors: this.column.map((_, index) => `${accessorId}_${index}`),
       yConfig: [],
       layerType: 'data',
       xAccessor: HISTOGRAM_COLUMN_NAME,
-      splitAccessor: BREAKDOWN_COLUMN_NAME,
+      splitAccessor: this.layerConfig.options?.breakdown ? BREAKDOWN_COLUMN_NAME : undefined,
     };
   }
 }

@@ -353,9 +353,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     addUserMessages,
   ]);
 
+  const isSaveable = Boolean(unappliedExpression);
+
   useEffect(() => {
-    dispatchLens(setSaveable(Boolean(unappliedExpression)));
-  }, [unappliedExpression, dispatchLens]);
+    dispatchLens(setSaveable(isSaveable));
+  }, [isSaveable, dispatchLens]);
 
   useEffect(() => {
     if (!autoApplyEnabled) {
@@ -788,9 +790,9 @@ export const VisualizationWrapper = ({
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null, core.docLinks);
           const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest
+            ? errorsFromRequest.map((e) => e.longMessage || e.shortMessage)
             : errorMessage
             ? [errorMessage]
             : [];
@@ -829,11 +831,15 @@ export const VisualizationWrapper = ({
                       </p>
 
                       {localState.expandError
-                        ? visibleErrorMessages.map((visibleErrorMessage) => (
-                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
-                              {visibleErrorMessage}
-                            </p>
-                          ))
+                        ? visibleErrorMessages.map((visibleErrorMessage) =>
+                            typeof visibleErrorMessage === 'string' ? (
+                              <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                                {visibleErrorMessage}
+                              </p>
+                            ) : (
+                              visibleErrorMessage
+                            )
+                          )
                         : null}
                     </>
                   }

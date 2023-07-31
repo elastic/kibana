@@ -97,6 +97,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   observability: 115443
+  observabilityAIAssistant: 16759
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
@@ -161,5 +162,4 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
-  visualizationUiComponents: 76424
   watcher: 43598
