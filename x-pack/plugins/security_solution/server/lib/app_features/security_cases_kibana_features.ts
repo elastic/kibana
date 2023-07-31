@@ -14,7 +14,7 @@ import {
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
 import {
-  CASES_CONNECTOR_CAPABILITY,
+  CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
 import type { AppFeaturesCasesConfig, BaseKibanaFeatureConfig } from './types';
@@ -28,11 +28,11 @@ const casesApiTags = getCasesApiTags(APP_ID);
 export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
   // On SecuritySolution essentials cases does not have the connector feature
   const casesAllUICapabilities = casesCapabilities.all.filter(
-    (capability) => capability !== CASES_CONNECTOR_CAPABILITY
+    (capability) => capability !== CASES_CONNECTORS_CAPABILITY
   );
 
   const casesReadUICapabilities = casesCapabilities.read.filter(
-    (capability) => capability !== CASES_CONNECTOR_CAPABILITY
+    (capability) => capability !== CASES_CONNECTORS_CAPABILITY
   );
 
   const casesAllAPICapabilities = casesApiTags.all.filter(
@@ -104,14 +104,14 @@ export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
     privileges: {
       all: {
         api: [GET_CONNECTORS_CONFIGURE_API_TAG], // Add cases connector get connectors API privileges
-        ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
+        ui: [CASES_CONNECTORS_CAPABILITY], // Add cases connector UI privileges
         cases: {
           push: [APP_ID], // Add cases connector push privileges
         },
       },
       read: {
         api: [GET_CONNECTORS_CONFIGURE_API_TAG], // Add cases connector get connectors API privileges
-        ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
+        ui: [CASES_CONNECTORS_CAPABILITY], // Add cases connector UI privileges
       },
     },
   },
