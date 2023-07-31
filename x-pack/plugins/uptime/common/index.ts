@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface SyntheticsHasIntegrationMonitorsResponse {
-  hasIntegrationMonitors: boolean;
-}
+export { UPTIME_RULE_TYPES } from './constants/uptime_alerts';
