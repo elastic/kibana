@@ -5,13 +5,13 @@
     width: 100%;
     height: $euiSizeXXL;
     background-color: transparent;
-  
+
     box-shadow: none;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border-top-right-radius: $euiBorderRadius - 1px;
     border-bottom-right-radius: $euiBorderRadius - 1px;
-  
+
     .optionsList--filterBtn {
       border-radius: 0;
 
@@ -19,28 +19,28 @@
         color: $euiTextSubduedColor;
         font-weight: $euiFontWeightRegular;
       }
-  
+
       .optionsList__filterInvalid {
         color: $euiTextSubduedColor;
         text-decoration: line-through;
         margin-left: $euiSizeS;
         font-weight: $euiFontWeightRegular;
       }
-      
+
       .optionsList__existsFilter {
         font-style: italic;
       }
-    
+
       .optionsList__negateLabel {
         font-weight: bold;
         font-size: $euiSizeM;
         color: $euiColorDanger;
       }
-      
+
       .euiFilterButton__notification {
         background-color: $euiColorMediumShade;
       }
-  
+
       .euiFilterButton__text-hasNotification {
         flex-grow: 1;
         justify-content: space-between;
@@ -75,13 +75,13 @@
     padding-bottom: 0;
     border-bottom: $euiBorderThin;
     border-color: darken($euiColorLightestShade, 2%);
-  
+
     .optionsList__sortButton {
       box-shadow: inset 0 0 0 $euiBorderWidthThin $euiBorderColor;
     }
     .optionsList__actionsRow {
       margin: ($euiSizeS / 2) 0 !important;
-  
+
       .optionsList__actionBarDivider {
         height: $euiSize;
         border-right: $euiBorderThin;
@@ -104,14 +104,14 @@
     font-style: italic;
     height:  $euiSizeXXL !important;
   }
-  
+
   .optionslist--endOfOptionsGroupLabel {
     text-align: center;
     font-size: $euiSizeM;
     height:  auto !important;
     color: $euiTextSubduedColor;
     padding: $euiSizeM;
-  }  
+  }
 }
 
 .optionsList--sortPopover {
