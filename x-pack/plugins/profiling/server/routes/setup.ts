@@ -8,7 +8,6 @@
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getClient } from './compat';
-import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
 import {
   enableResourceManagement,
   setMaximumBuckets,
@@ -18,8 +17,6 @@ import {
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
-  updateApmPolicy,
-  validateApmPolicy,
   validateCollectorPackagePolicy,
   validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
@@ -103,8 +100,6 @@ export function registerSetupRoute({
         }
 
         const verifyFunctions = [
-          isApmPackageInstalled,
-          validateApmPolicy,
           validateCollectorPackagePolicy,
           validateMaximumBuckets,
           validateResourceManagement,
@@ -173,8 +168,6 @@ export function registerSetupRoute({
 
         const partialStates = await Promise.all(
           [
-            isApmPackageInstalled,
-            validateApmPolicy,
             validateCollectorPackagePolicy,
             validateMaximumBuckets,
             validateResourceManagement,
@@ -185,8 +178,6 @@ export function registerSetupRoute({
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         const executeFunctions = [
-          ...(mergedState.packages.installed ? [] : [installLatestApmPackage]),
-          ...(mergedState.policies.apm.installed ? [] : [updateApmPolicy]),
           ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
           ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
           ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),

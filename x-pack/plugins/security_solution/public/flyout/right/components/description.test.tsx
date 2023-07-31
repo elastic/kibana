@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import {
   DESCRIPTION_EXPAND_BUTTON_TEST_ID,
   DESCRIPTION_TITLE_TEST_ID,
-  DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID,
+  RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
 import {
   DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON,
@@ -19,6 +19,7 @@ import {
   RULE_DESCRIPTION_TITLE,
 } from './translations';
 import { Description } from './description';
+import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
@@ -59,16 +60,18 @@ describe('<Description />', () => {
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <Description />
-        </ThemeProvider>
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(getByTestId(DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
       DOCUMENT_DESCRIPTION_EXPAND_BUTTON
@@ -81,16 +84,18 @@ describe('<Description />', () => {
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <Description expanded={true} />
-        </ThemeProvider>
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description expanded={true} />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(getByTestId(DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
       DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON
@@ -103,11 +108,13 @@ describe('<Description />', () => {
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <Description />
-        </ThemeProvider>
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
@@ -119,22 +126,24 @@ describe('<Description />', () => {
     );
   });
 
-  it('should not render view rule button if rule name is not available', () => {
+  it('should not render rule preview button if rule name is not available', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
     } as unknown as RightPanelContext;
 
     const { getByTestId, queryByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <Description />
-        </ThemeProvider>
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(queryByTestId(DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
   it('should render document title if document is not an alert', () => {
     const panelContextValue = {
@@ -142,11 +151,13 @@ describe('<Description />', () => {
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ThemeProvider theme={mockTheme}>
-          <Description />
-        </ThemeProvider>
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
