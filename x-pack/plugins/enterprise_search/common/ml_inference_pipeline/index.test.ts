@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  MlTrainedModelConfig,
-  MlTrainedModelStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
