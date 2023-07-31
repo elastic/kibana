@@ -3331,7 +3331,7 @@
             "section": "def-server.FindActionResult",
             "text": "FindActionResult"
           },
-          "[]>; getBulk: (ids: string[], throwIfSystemAction?: boolean) => Promise<",
+          "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",

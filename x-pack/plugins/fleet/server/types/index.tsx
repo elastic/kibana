@@ -70,6 +70,7 @@ export type {
   InstallSource,
   InstallResult,
   GetCategoriesRequest,
+  GetPackagesRequest,
   DataType,
   FleetServerEnrollmentAPIKey,
   FleetServerAgent,
