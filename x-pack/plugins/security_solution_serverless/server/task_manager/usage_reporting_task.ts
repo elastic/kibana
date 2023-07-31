@@ -100,7 +100,7 @@ export class SecurityUsageReportingTask {
   ) => {
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
-      this.logger.warn('[runTask()] Aborted. Task not started yet');
+      this.logger.debug('[runTask()] Aborted. Task not started yet');
       return;
     }
     // Check that this task is current
@@ -123,7 +123,7 @@ export class SecurityUsageReportingTask {
       abortController: this.abortController,
     });
 
-    this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
+    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
