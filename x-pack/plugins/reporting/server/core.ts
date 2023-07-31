@@ -126,17 +126,7 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    // Export Type declarations
-    this.exportTypes.push(
-      new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
-    );
-    this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
-    // deprecated export types for tests
-    this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
-
+    this.exportTypes = this.validConfigExportTypes();
     this.exportTypes.forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
@@ -233,6 +223,32 @@ export class ReportingCore {
   public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Helper function to validate export types with config settings
+   * only CSV export types should be registered for serverless
+   */
+  validConfigExportTypes(): ExportType[] {
+    if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+      // Export Type declarations
+      this.exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+    } else {
+      // Export Type declarations
+      this.exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+      this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+      this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+      // deprecated export types for tests
+      this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
+    }
+    return this.exportTypes;
   }
 
   /**
