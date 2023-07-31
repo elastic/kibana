@@ -5218,6 +5218,8 @@
     "visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel": "凡例を切り替える",
     "visTypeVislib.vislib.legend.toggleLegendButtonTitle": "凡例を切り替える",
     "visTypeVislib.vislib.legend.toggleOptionsButtonAriaLabel": "{legendDataLabel}、トグルオプション",
+    "visTypeVislib.vislib.tooltip.fieldLabel": "フィールド",
+    "visTypeVislib.vislib.tooltip.valueLabel": "値",
     "visTypeXy.aggResponse.allDocsTitle": "すべてのドキュメント",
     "visTypeXy.area.areaDescription": "軸と線の間のデータを強調します。",
     "visTypeXy.area.areaTitle": "エリア",

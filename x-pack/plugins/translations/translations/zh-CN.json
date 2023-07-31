@@ -5252,6 +5252,8 @@
     "visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel": "切换图例",
     "visTypeVislib.vislib.legend.toggleLegendButtonTitle": "切换图例",
     "visTypeVislib.vislib.legend.toggleOptionsButtonAriaLabel": "{legendDataLabel}, 切换选项",
+    "visTypeVislib.vislib.tooltip.fieldLabel": "字段",
+    "visTypeVislib.vislib.tooltip.valueLabel": "值",
     "visTypeXy.aggResponse.allDocsTitle": "所有文档",
     "visTypeXy.area.areaDescription": "突出轴与线之间的数据。",
     "visTypeXy.area.areaTitle": "面积图",
