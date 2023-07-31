@@ -85,7 +85,12 @@ const EncryptionKeySchema = schema.conditional(
 
 const RolesSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
-  allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+  allow: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+    schema.boolean({ defaultValue: false })
+  ),
 });
 
 // Browser side polling: job completion notifier, management table auto-refresh
