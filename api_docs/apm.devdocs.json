@@ -651,9 +651,7 @@
               "GetResponse",
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "WriteResponseBase",
-              ">; } | undefined>; getOpenAIClient(): ",
-              "IOpenAIClient",
-              " | undefined; alertsLocator: ",
+              ">; } | undefined>; alertsLocator: ",
               {
                 "pluginId": "share",
                 "scope": "common",
