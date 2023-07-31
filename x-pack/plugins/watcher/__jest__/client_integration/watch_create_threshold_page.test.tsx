@@ -85,11 +85,6 @@ describe('<ThresholdWatchEditPage /> create route', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateThresholdTestBed;
 
-  httpRequestsMockHelpers.setLoadMatchingIndicesResponse({ indices: MATCH_INDICES });
-  httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
-  httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
-  httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
-
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
@@ -100,15 +95,24 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
   beforeEach(async () => {
     await act(async () => {
+      httpRequestsMockHelpers.setLoadMatchingIndicesResponse({ indices: MATCH_INDICES });
+      httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
+      httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
+      httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
+
       testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
-
-    expect(testBed.find('pageTitle').text()).toBe('Create threshold alert');
   });
 
   describe('on component mount', () => {
+    test('should set the correct page title', () => {
+      const { find } = testBed;
+
+      expect(find('pageTitle').text()).toBe('Create threshold alert');
+    });
+
     describe('create', () => {
       describe('form validation', () => {
         test('should not allow empty name field', () => {
