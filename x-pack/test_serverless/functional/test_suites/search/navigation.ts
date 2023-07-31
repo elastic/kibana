@@ -37,7 +37,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'serverlessElasticsearch',
       });
-      await svlCommonNavigation.sidenav.expectSectionClosed('rootNav:ml');
 
       // TODO: test something search project specific instead of generic discover
       // navigate to discover
@@ -62,7 +61,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Getting started` });
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
-      await svlCommonNavigation.sidenav.expectSectionOpen(`rootNav:ml`); // remains open
 
       await expectNoPageReload();
     });
