@@ -7,6 +7,7 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { validateMaxUserActions } from '../../../common/utils';
 import type { AttachmentRequest } from '../../../common/types/api';
 import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
@@ -33,10 +34,16 @@ export const bulkCreate = async (
     authorization,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    services: { userActionService },
   } = clientArgs;
 
   try {
     decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRt)(attachments);
+    await validateMaxUserActions({
+      caseId,
+      userActionService,
+      userActionsToAdd: attachments.length,
+    });
 
     attachments.forEach((attachment) => {
       decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);

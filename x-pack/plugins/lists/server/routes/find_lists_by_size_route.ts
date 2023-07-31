@@ -7,7 +7,6 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { findListSchema, foundListsBySizeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   FIND_LISTS_BY_SIZE,
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
@@ -17,6 +16,7 @@ import { chunk } from 'lodash';
 
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
+import { findListsBySizeRequestQuery, findListsBySizeResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
@@ -28,7 +28,7 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
       },
       path: `${FIND_LISTS_BY_SIZE}`,
       validate: {
-        query: buildRouteValidation(findListSchema),
+        query: buildRouteValidation(findListsBySizeRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -142,7 +142,7 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
           const smallLists = valueLists.data.filter((valueList, index) => listBooleans[index]);
           const largeLists = valueLists.data.filter((valueList, index) => !listBooleans[index]);
 
-          const [validated, errors] = validate({ largeLists, smallLists }, foundListsBySizeSchema);
+          const [validated, errors] = validate({ largeLists, smallLists }, findListsBySizeResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
