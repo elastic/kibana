@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { upMigration } from './migration';
-import { versionSchema } from './schema';
+import { isPlainObject } from 'lodash';
 
-export const versionDefinition = {
-  up: upMigration,
-  schema: versionSchema,
-};
+export function isJSONObject(obj: unknown): obj is Record<string, unknown> {
+  return isPlainObject(obj);
+}
