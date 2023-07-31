@@ -9,8 +9,8 @@ import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import type {
   ClusterPutComponentTemplateRequest,
-  TransformGetTransformStatsResponse,
-  TransformGetTransformStatsTransformStats,
+  TransformGetTransformResponse,
+  TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
@@ -211,10 +211,7 @@ export class RiskEngineDataClient {
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    if (
-      legacyRiskEngineStatus === RiskEngineStatus.DISABLED ||
-      legacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED
-    ) {
+    if (legacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED) {
       return true;
     }
 
@@ -232,7 +229,7 @@ export class RiskEngineDataClient {
 
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    return newlegacyRiskEngineStatus === RiskEngineStatus.DISABLED;
+    return newlegacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED;
   }
 
   private async getLastUpdatedBy({ savedObjectsClient }: SavedObjectsClients) {
@@ -258,15 +255,15 @@ export class RiskEngineDataClient {
   private async getLegacyTransforms({ namespace }: { namespace: string }) {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const getTransformStatsRequests: Array<Promise<TransformGetTransformStatsResponse>> = [];
+    const getTransformStatsRequests: Array<Promise<TransformGetTransformResponse>> = [];
     [RiskScoreEntity.host, RiskScoreEntity.user].forEach((entity) => {
       getTransformStatsRequests.push(
-        esClient.transform.getTransformStats({
+        esClient.transform.getTransform({
           transform_id: getRiskScorePivotTransformId(entity, namespace),
         })
       );
       getTransformStatsRequests.push(
-        esClient.transform.getTransformStats({
+        esClient.transform.getTransform({
           transform_id: getRiskScoreLatestTransformId(entity, namespace),
         })
       );
@@ -276,14 +273,14 @@ export class RiskEngineDataClient {
 
     const fulfuletGetTransformStats = result
       .filter((r) => r.status === 'fulfilled')
-      .map((r) => (r as PromiseFulfilledResult<TransformGetTransformStatsResponse>).value);
+      .map((r) => (r as PromiseFulfilledResult<TransformGetTransformResponse>).value);
 
     const transforms = fulfuletGetTransformStats.reduce((acc, val) => {
       if (val.transforms) {
         return [...acc, ...val.transforms];
       }
       return acc;
-    }, [] as TransformGetTransformStatsTransformStats[]);
+    }, [] as TransformGetTransformTransformSummary[]);
 
     return transforms;
   }
@@ -295,13 +292,7 @@ export class RiskEngineDataClient {
       return RiskEngineStatus.NOT_INSTALLED;
     }
 
-    const notStoppedTransformsExisted = transforms.some((t) => t.state !== 'stopped');
-
-    if (notStoppedTransformsExisted) {
-      return RiskEngineStatus.ENABLED;
-    }
-
-    return RiskEngineStatus.DISABLED;
+    return RiskEngineStatus.ENABLED;
   }
 
   private async getConfigurationSavedObject({
@@ -334,10 +325,15 @@ export class RiskEngineDataClient {
   }
 
   private async initSavedObjects({ savedObjectsClient, user }: UpdateConfigOpts) {
-    return savedObjectsClient.create(riskEngineConfigurationTypeName, {
+    const configuration = await this.getConfiguration({ savedObjectsClient });
+    if (configuration) {
+      return configuration;
+    }
+    const result = await savedObjectsClient.create(riskEngineConfigurationTypeName, {
       enabled: false,
       last_updated_by: user?.username ?? '',
     });
+    return result;
   }
 
   public async initializeResources({

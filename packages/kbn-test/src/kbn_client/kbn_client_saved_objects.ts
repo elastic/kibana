@@ -30,6 +30,18 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
   version?: string;
 }
 
+interface SavedObjectsFindResponse<Attributes extends Record<string, any>> {
+  page: number;
+  per_page: number;
+  total: number;
+  saved_objects: Array<SavedObjectResponse<Attributes>>;
+}
+
+interface GetFindOptions {
+  type: string;
+  space?: string;
+}
+
 interface GetOptions {
   type: string;
   id: string;
@@ -147,6 +159,22 @@ export class KbnClientSavedObjects {
       path: options.space
         ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
         : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
+      method: 'GET',
+    });
+    return data;
+  }
+
+  /**
+   * Find saved objects
+   */
+  public async find<Attributes extends Record<string, any>>(options: GetFindOptions) {
+    this.log.debug('Find saved objects: %j', options);
+
+    const { data } = await this.requester.request<SavedObjectsFindResponse<Attributes>>({
+      description: 'find saved objects',
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_find?type=${options.type}`
+        : uriencode`/internal/ftr/kbn_client_so/_find?type=${options.type}`,
       method: 'GET',
     });
     return data;
