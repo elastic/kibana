@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { css } from '@emotion/react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
@@ -101,14 +100,7 @@ export const LensWrapper = ({
   const isLoading = loading || !state.attributes;
 
   return (
-    <Container
-      ref={ref}
-      css={css`
-        .echLegend .echLegendList {
-          display: flex;
-        }
-      `}
-    >
+    <Container ref={ref}>
       <>
         {isLoading && !embeddableLoaded ? (
           <ChartPlaceholder style={props.style} />
@@ -156,4 +148,7 @@ const Container = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiSizeS};
   overflow: hidden;
   height: 100%;
+  .echLegend .echLegendList {
+    display: flex;
+  }
 `;
