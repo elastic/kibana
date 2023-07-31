@@ -62,4 +62,54 @@ describe('Reporting Config Schema', () => {
       );
     }
   );
+
+  it('permits csv with serverless', () => {
+    expect(() =>
+      ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+  });
+
+  it('enables all export types by default', () => {
+    expect(ConfigSchema.validate({}, { serverless: false }).export_types).toMatchInlineSnapshot(`
+        Object {
+          "csv": Object {
+            "enabled": true,
+          },
+          "pdf": Object {
+            "enabled": true,
+          },
+          "png": Object {
+            "enabled": true,
+          },
+        }
+      `);
+  });
+
+  it('disables screenshot type exports in serverless', () => {
+    expect(ConfigSchema.validate({}, { serverless: true }).export_types).toMatchInlineSnapshot(`
+        Object {
+          "csv": Object {
+            "enabled": true,
+          },
+          "pdf": Object {
+            "enabled": false,
+          },
+          "png": Object {
+            "enabled": false,
+          },
+        }
+      `);
+  });
+
+  it('it should allow image reporting for any non-serverless config', () => {
+    expect(() =>
+      ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+    expect(() =>
+      ConfigSchema.validate({ export_types: { png: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+    expect(() =>
+      ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { dev: true })
+    ).not.toThrow();
+  });
 });
