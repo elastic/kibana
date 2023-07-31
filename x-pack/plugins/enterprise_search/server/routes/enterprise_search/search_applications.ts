@@ -25,6 +25,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isInvalidSearchApplicationNameException,
+  isMissingAliasException,
   isNotFoundException,
   isVersionConflictEngineException,
 } from '../../utils/identify_exceptions';
@@ -49,8 +50,15 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
 
       await Promise.all(
         engines.results.map(async (searchApp) => {
-          const getAliasResponse = await fetchAliasIndices(client, searchApp.name);
-          searchApp.indices = Object.keys(getAliasResponse);
+          try {
+            searchApp.indices = await fetchAliasIndices(client, searchApp.name);
+          } catch (error) {
+            if (isMissingAliasException(error)) {
+              searchApp.indices = [];
+            } else {
+              throw error;
+            }
+          }
         })
       );
       return response.ok({ body: engines });
@@ -72,7 +80,16 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
         name: request.params.engine_name,
       })) as EnterpriseSearchApplication;
 
-      const indices = await fetchAliasIndices(client, engine.name);
+      let indices: string[];
+      try {
+        indices = await fetchAliasIndices(client, engine.name);
+      } catch (error) {
+        if (isMissingAliasException(error)) {
+          indices = [];
+        } else {
+          throw error;
+        }
+      }
       const indicesStats = await fetchIndicesStats(client, indices);
 
       return response.ok({ body: { ...engine, indices: indicesStats } });
@@ -224,20 +241,15 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      try {
-        const { client } = (await context.core).elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
-        const engine = (await client.asCurrentUser.searchApplication.get({
+      let engine;
+      try {
+        engine = (await client.asCurrentUser.searchApplication.get({
           name: request.params.engine_name,
         })) as EnterpriseSearchApplication;
-
-        const data = await fetchSearchApplicationFieldCapabilities(client, engine);
-        return response.ok({
-          body: data,
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (e) {
-        if (isNotFoundException(e)) {
+      } catch (error) {
+        if (isNotFoundException(error)) {
           return createError({
             errorCode: ErrorCode.SEARCH_APPLICATION_NOT_FOUND,
             message: i18n.translate(
@@ -248,7 +260,28 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
             statusCode: 404,
           });
         }
-        throw e;
+        throw error;
+      }
+
+      try {
+        const data = await fetchSearchApplicationFieldCapabilities(client, engine);
+        return response.ok({
+          body: data,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isMissingAliasException(error)) {
+          return createError({
+            errorCode: ErrorCode.SEARCH_APPLICATION_ALIAS_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.fetchSearchApplicationFieldCapabilities.missingAliaserror',
+              { defaultMessage: 'Search application has no indices.' }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
       }
     })
   );
