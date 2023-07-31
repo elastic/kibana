@@ -796,7 +796,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/api_integration/apis/kql_telemetry @elastic/kibana-data-discovery
 /test/api_integration/apis/scripts @elastic/kibana-data-discovery
 /test/api_integration/apis/search @elastic/kibana-data-discovery
-/test/api_integration/apis/unified_field_list @elastic/kibana-data-discovery
 /test/examples/data_view_field_editor_example @elastic/kibana-data-discovery
 /test/examples/discover_customization_examples @elastic/kibana-data-discovery
 /test/examples/field_formats @elastic/kibana-data-discovery
