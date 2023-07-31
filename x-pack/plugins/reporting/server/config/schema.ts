@@ -101,6 +101,31 @@ const PollSchema = schema.object({
   }),
 });
 
+const ExportTypeSchema = schema.object({
+  // Csv reports are enabled in all offerings
+  csv: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // Png reports are disabled in serverless
+  png: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.boolean({ defaultValue: true })
+    ),
+  }),
+  // Pdf reports are disabled in serverless
+  pdf: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.boolean({ defaultValue: true })
+    ),
+  }),
+});
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
@@ -110,6 +135,7 @@ export const ConfigSchema = schema.object({
   encryptionKey: EncryptionKeySchema,
   roles: RolesSchema,
   poll: PollSchema,
+  export_types: ExportTypeSchema,
 });
 
 export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

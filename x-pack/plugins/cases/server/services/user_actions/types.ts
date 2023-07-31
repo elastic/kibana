@@ -11,7 +11,6 @@ import type {
   Logger,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
-  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
@@ -22,7 +21,6 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-  CaseAttributes,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
@@ -35,7 +33,7 @@ import type {
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { PatchCasesArgs } from '../cases/types';
 import type {
   AttachmentRequest,
   CasePostRequest,
@@ -237,6 +235,17 @@ export interface UserActionsStatsAggsResult {
   };
 }
 
+export interface MultipleCasesUserActionsTotalAggsResult {
+  references: {
+    caseUserActions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
 export interface ParticipantsAggsResult {
   participants: {
     buckets: Array<{
@@ -282,10 +291,15 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 
-export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObjectTransformed[];
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
+export interface BuildUserActionsDictParams {
+  updatedCases: PatchCasesArgs;
   user: User;
+}
+
+export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
+  builtUserActions: UserActionEvent[];
 }
 
 export interface BulkCreateAttachmentUserAction
