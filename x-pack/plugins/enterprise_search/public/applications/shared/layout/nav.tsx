@@ -213,7 +213,7 @@ export const useEnterpriseSearchApplicationNav = (
             {
               id: 'enterpriseSearchApplicationPreview',
               name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.previewTitle', {
-                defaultMessage: 'Search Preview',
+                defaultMessage: 'Docs Explorer',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,

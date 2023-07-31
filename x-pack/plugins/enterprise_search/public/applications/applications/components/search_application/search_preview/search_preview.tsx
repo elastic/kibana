@@ -386,7 +386,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         i18n.translate(
           'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pageChrome',
           {
-            defaultMessage: 'Search Preview',
+            defaultMessage: 'Docs Explorer',
           }
         ),
       ]}
