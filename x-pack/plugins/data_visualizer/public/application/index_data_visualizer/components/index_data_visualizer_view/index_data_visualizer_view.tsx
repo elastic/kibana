@@ -24,7 +24,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -37,6 +36,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
@@ -59,7 +59,6 @@ import {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -173,8 +172,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data } = services;
-  const { toasts } = notifications;
+  const { uiSettings, data } = services;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
@@ -188,26 +186,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
-
-  useEffect(() => {
-    if (!currentDataView.isTimeBased()) {
-      toasts.addWarning({
-        title: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
-          {
-            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
-            values: { dataViewTitle: currentDataView.title },
-          }
-        ),
-        text: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
-          {
-            defaultMessage: 'Anomaly detection only runs over time-based indices',
-          }
-        ),
-      });
-    }
-  }, [currentDataView, toasts]);
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
 

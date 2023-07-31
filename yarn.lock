@@ -4789,6 +4789,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
   version "0.0.0"
   uid ""
