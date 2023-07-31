@@ -34,8 +34,8 @@ paths:
 #    $ref: 'paths/api@saved_objects@_find.yaml'
   '/api/saved_objects/_import':
     $ref: 'paths/api@saved_objects@_import.yaml'
-#  '/api/saved_objects/_resolve_import_errors':
-#    $ref: 'paths/api@saved_objects@_resolve_import_errors.yaml'
+  '/api/saved_objects/_resolve_import_errors':
+    $ref: 'paths/api@saved_objects@_resolve_import_errors.yaml'
 #  '/api/saved_objects/{type}':
 #    $ref: 'paths/api@saved_objects@{type}.yaml'
 #  '/api/saved_objects/{type}/{id}':
