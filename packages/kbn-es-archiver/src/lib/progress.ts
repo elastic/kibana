@@ -47,11 +47,11 @@ export class Progress {
       }
 
       if (this.total === undefined) {
-        log.info('progress: %d', this.getComplete());
+        // log.info('progress: %d', this.getComplete());
         return;
       }
 
-      log.info('progress: %d/%d (%d%)', this.getComplete(), this.getTotal(), this.getPercent());
+      // log.info('progress: %d/%d (%d%)', this.getComplete(), this.getTotal(), this.getPercent());
     }, 10 * SECOND);
   }
 

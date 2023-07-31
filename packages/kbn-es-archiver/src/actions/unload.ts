@@ -41,7 +41,7 @@ export async function unloadAction({
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
-    log.info('[%s] Unloading indices from %j', name, filename);
+    // log.info('[%s] Unloading indices from %j', name, filename);
 
     await createPromiseFromStreams([
       createReadStream(resolve(inputDir, filename)) as Readable,

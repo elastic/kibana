@@ -62,7 +62,7 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public skippedIndex(index: string) {
       getOrCreate(index).skipped = true;
-      info('Skipped restore for existing index %j', index);
+      // info('Skipped restore for existing index %j', index);
     }
 
     /**
@@ -71,7 +71,7 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public waitingForInProgressSnapshot(index: string) {
       getOrCreate(index).waitForSnapshot += 1;
-      info('Waiting for snapshot of %j to complete', index);
+      // info('Waiting for snapshot of %j to complete', index);
     }
 
     /**
@@ -80,7 +80,7 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public deletedIndex(index: string) {
       getOrCreate(index).deleted = true;
-      info('Deleted existing index %j', index);
+      // info('Deleted existing index %j', index);
     }
 
     /**
@@ -89,7 +89,7 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public deletedDataStream(stream: string, template: string) {
       getOrCreate(stream).deleted = true;
-      info('Deleted existing data stream %j with index template %j', stream, template);
+      // info('Deleted existing data stream %j with index template %j', stream, template);
     }
 
     /**
@@ -98,10 +98,10 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public createdIndex(index: string, metadata: Record<string, any> = {}) {
       getOrCreate(index).created = true;
-      info('Created index %j', index);
-      Object.keys(metadata).forEach((key) => {
-        debug('%j %s %j', index, key, metadata[key]);
-      });
+      // info('Created index %j', index);
+      // Object.keys(metadata).forEach((key) => {
+      //   debug('%j %s %j', index, key, metadata[key]);
+      // });
     }
 
     /**
@@ -111,9 +111,9 @@ export function createStats(name: string, log: ToolingLog) {
     public createdDataStream(stream: string, template: string, metadata: Record<string, any> = {}) {
       getOrCreate(stream).created = true;
       info('Created data stream %j with index template %j', stream, template);
-      Object.keys(metadata).forEach((key) => {
-        debug('%j %s %j', stream, key, metadata[key]);
-      });
+      // Object.keys(metadata).forEach((key) => {
+      //   debug('%j %s %j', stream, key, metadata[key]);
+      // });
     }
 
     /**
@@ -122,10 +122,10 @@ export function createStats(name: string, log: ToolingLog) {
      */
     public archivedIndex(index: string, metadata: Record<string, any> = {}) {
       getOrCreate(index).archived = true;
-      info('Archived %j', index);
-      Object.keys(metadata).forEach((key) => {
-        debug('%j %s %j', index, key, metadata[key]);
-      });
+      // info('Archived %j', index);
+      // Object.keys(metadata).forEach((key) => {
+      //   debug('%j %s %j', index, key, metadata[key]);
+      // });
     }
 
     /**
