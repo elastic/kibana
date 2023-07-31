@@ -40,8 +40,8 @@ interface IRiskScorePreviewPanel {
 
 const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
   scores
-    ?.filter((item) => item?.identifierField === field)
-    ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
+    ?.filter((item) => item?.id_field === field)
+    ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 
 const RiskScorePreviewPanel = ({
@@ -95,7 +95,10 @@ export const RiskScorePreviewSection = () => {
 
   const { addError } = useAppToasts();
 
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
+    data_view_id: indexPattern.title, // TODO @nkhristinin verify this is correct
     filter: filters,
     range: {
       start: dateRange.from,
@@ -103,10 +106,8 @@ export const RiskScorePreviewSection = () => {
     },
   });
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-
-  const hosts = getRiskiestScores(data?.scores, 'host.name');
-  const users = getRiskiestScores(data?.scores, 'user.name');
+  const hosts = getRiskiestScores(data?.scores.host, 'host.name');
+  const users = getRiskiestScores(data?.scores.user, 'user.name');
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -156,7 +157,7 @@ export const RiskScorePreviewSection = () => {
       <EuiSpacer size={'s'} />
       <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
       <EuiSpacer />
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth data-test-subj="risk-score-preview-search-bar">
         {indexPattern && (
           <SearchBar
             appName="siem"

@@ -40,8 +40,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     createGroupedEsDocumentsInGroups,
   } = getRuleServices(getService);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/154073
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -773,11 +772,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       it(`runs correctly and populates recovery context for ${searchType} search type`, async () => {
         await initData();
 
-        // delay to let rule run once before adding data
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        await createEsDocumentsInGroups(1, endDate);
-
-        const docs = await waitForDocs(2);
+        let docs = await waitForDocs(1);
         const activeDoc = docs[0];
         const {
           name: activeName,
@@ -793,6 +788,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is less than 1 over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
         );
 
+        await createEsDocumentsInGroups(1, endDate);
+        docs = await waitForDocs(2);
         const recoveredDoc = docs[1];
         const {
           name: recoveredName,
