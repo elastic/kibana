@@ -130,7 +130,7 @@ export const DataComparisonPage: FC = () => {
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
-  const [dataComparisonListState, setAiopsListState] = usePageUrlState<{
+  const [dataComparisonListState, setDataComparisonListState] = usePageUrlState<{
     pageKey: 'DV_DATA_COMP';
     pageUrlState: DataComparisonFullAppState;
   }>('DV_DATA_COMP', getDefaultDataComparisonState());
@@ -183,7 +183,7 @@ export const DataComparisonPage: FC = () => {
         setSelectedSavedSearch(null);
       }
 
-      setAiopsListState({
+      setDataComparisonListState({
         ...dataComparisonListState,
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
@@ -191,7 +191,7 @@ export const DataComparisonPage: FC = () => {
         filters: searchParams.filters,
       });
     },
-    [selectedSavedSearch, dataComparisonListState, setAiopsListState]
+    [selectedSavedSearch, dataComparisonListState, setDataComparisonListState]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(

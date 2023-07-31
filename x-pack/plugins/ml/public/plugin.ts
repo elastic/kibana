@@ -46,6 +46,7 @@ import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/publi
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -55,6 +56,7 @@ import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 
 export interface MlStartDependencies {
+  dataViewEditor: DataViewEditorStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
@@ -122,6 +124,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dataViewEditor: pluginsStart.dataViewEditor,
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,

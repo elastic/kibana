@@ -24,6 +24,10 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
+import {
+  DataViewEditorService,
+  DataViewEditorServiceConstructorArgs,
+} from './data_view_editor_service';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -80,6 +84,10 @@ export interface PluginStart {
   userPermissions: {
     editDataView: () => boolean;
   };
+  dataViewEditorServiceFactory: ({
+    requireTimestampField,
+    initialValues,
+  }: Omit<DataViewEditorServiceConstructorArgs, 'services'>) => DataViewEditorService;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

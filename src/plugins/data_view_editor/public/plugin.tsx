@@ -12,6 +12,10 @@ import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';
 import { DataViewEditor } from './components/data_view_editor';
+import {
+  DataViewEditorService,
+  DataViewEditorServiceConstructorArgs,
+} from './data_view_editor_service';
 
 export class DataViewEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
@@ -63,6 +67,15 @@ export class DataViewEditorPlugin
       userPermissions: {
         editDataView: () => dataViews.getCanSaveSync(),
       },
+      dataViewEditorServiceFactory: ({
+        requireTimestampField,
+        initialValues,
+      }: Omit<DataViewEditorServiceConstructorArgs, 'services'>) =>
+        new DataViewEditorService({
+          services: { http, dataViews },
+          requireTimestampField,
+          initialValues,
+        }),
     };
   }
 
