@@ -58,6 +58,7 @@ interface Props {
   groupBy?: string | string[];
   hideTitle?: boolean;
   timeRange?: TimeRange;
+  timeFieldName?: string;
 }
 
 export function ExpressionChart({
@@ -69,6 +70,7 @@ export function ExpressionChart({
   groupBy,
   hideTitle = false,
   timeRange,
+  timeFieldName,
 }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { isLoading, data } = useMetricsExplorerChartData(
@@ -76,7 +78,8 @@ export function ExpressionChart({
     derivedIndexPattern,
     filterQuery,
     groupBy,
-    timeRange
+    timeRange,
+    timeFieldName
   );
 
   const chartRef = useRef(null);
