@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
   SingleCaseMetricsRequestRt,
   CasesMetricsRequestRt,
@@ -37,6 +38,18 @@ describe('Metrics case', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    describe('errors', () => {
+      it('has invalid feature in request', () => {
+        expect(
+          PathReporter.report(
+            SingleCaseMetricsRequestRt.decode({
+              features: [CaseMetricsFeature.MTTR],
+            })
+          )[0]
+        ).toContain('Invalid value "mttr" supplied');
       });
     });
   });
@@ -83,6 +96,17 @@ describe('Metrics case', () => {
           features: [CaseMetricsFeature.MTTR],
           to: 'now-1d',
         },
+      });
+    });
+    describe('errors', () => {
+      it('has invalid feature in request', () => {
+        expect(
+          PathReporter.report(
+            CasesMetricsRequestRt.decode({
+              features: ['foobar'],
+            })
+          )[0]
+        ).toContain('Invalid value "foobar" supplied');
       });
     });
   });
