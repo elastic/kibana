@@ -111,10 +111,10 @@ const validate: FullValidationConfig<any, any, any> = {
   },
 };
 
-const handler: (rollupsEnabled: boolean) => RequestHandler<{}, IQuery, IBody> =
-  (rollupsEnabled) => async (context, request, response) => {
+const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled) => async (context, request, response) => {
     const { asCurrentUser } = (await context.core).elasticsearch.client;
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, rollupsEnabled);
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
     const {
       pattern,
       meta_fields: metaFields,
@@ -187,7 +187,7 @@ export const registerFieldForWildcard = async (
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
-  isRollupsEnabled: boolean
+  isRollupsEnabled: () => boolean
 ) => {
   const configuredHandler = handler(isRollupsEnabled);
 

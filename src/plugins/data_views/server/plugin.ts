@@ -35,6 +35,8 @@ export class DataViewsServerPlugin
   private readonly logger: Logger;
   private rollupsEnabled: boolean = false;
 
+  private isRollupsEnabled = () => this.rollupsEnabled;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
   }
@@ -47,7 +49,12 @@ export class DataViewsServerPlugin
     core.capabilities.registerProvider(capabilitiesProvider);
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(core.http, core.getStartServices, this.rollupsEnabled, dataViewRestCounter);
+    registerRoutes(
+      core.http,
+      core.getStartServices,
+      () => this.isRollupsEnabled(),
+      dataViewRestCounter
+    );
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -62,7 +69,7 @@ export class DataViewsServerPlugin
     });
 
     return {
-      enableRollups: () => (this.rollupsEnabled = true),
+      enableRollups: () => this.isRollupsEnabled(),
     };
   }
 
