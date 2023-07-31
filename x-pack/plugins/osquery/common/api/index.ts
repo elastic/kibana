@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './common/utils';
 export * from './asset/get_assets_status_route';
 export * from './asset/update_assets_status_route';
 export * from './fleet_wrapper/get_agent_policies_route';
