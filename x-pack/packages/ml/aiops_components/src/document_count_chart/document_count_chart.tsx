@@ -23,14 +23,20 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
 import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { BrushBadge } from './brush_badge';
+import { DualBrush, DualBrushAnnotation } from '../..';
 
 declare global {
   interface Window {
@@ -46,27 +52,79 @@ interface TimeFilterRange {
   to: number;
 }
 
+/**
+ * Datum for the bar chart
+ */
 export interface DocumentCountChartPoint {
+  /**
+   * Time of bucket
+   */
   time: number | string;
+  /**
+   * Number of doc count for that time bucket
+   */
   value: number;
 }
 
-interface DocumentCountChartProps {
-  brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
+/**
+ * Brush settings
+ */
+export interface BrushSettings {
+  /**
+   * Optional label name for brush
+   */
+  label?: string;
+  /**
+   * Optional style for brush
+   */
+  annotationStyle?: RectAnnotationSpec['style'];
+  /**
+   * Optional width for brush
+   */
+  badgeWidth?: number;
+}
+
+/**
+ * Props for document count chart
+ */
+export interface DocumentCountChartProps {
+  /** List of Kibana services that are required as dependencies */
+  dependencies: {
+    data: DataPublicPluginStart;
+    charts: ChartsPluginStart;
+    fieldFormats: FieldFormatsStart;
+    uiSettings: IUiSettingsClient;
+  };
+  /** Optional callback function which gets called the brush selection has changed */
+  brushSelectionUpdateHandler?: (windowParameters: WindowParameters, force: boolean) => void;
+  /** Optional width */
   width?: number;
+  /** Data chart points */
   chartPoints: DocumentCountChartPoint[];
+  /** Data chart points split */
   chartPointsSplit?: DocumentCountChartPoint[];
+  /** Start time range for the chart */
   timeRangeEarliest: number;
+  /** Ending time range for the chart */
   timeRangeLatest: number;
+  /** Time interval for the document count buckets */
   interval: number;
+  /** Label to name the adjustedChartPointsSplit histogram */
   chartPointsSplitLabel: string;
+  /** Whether or not brush has been reset */
   isBrushCleared: boolean;
-  /* Timestamp for start of initial analysis */
+  /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
+  /** Optional style to override bar chart  */
+  barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional settings override for the 'deviation' brush */
+  deviationBrush?: BrushSettings;
+  /** Optional settings override for the 'baseline' brush */
+  baselineBrush?: BrushSettings;
 }
 
 const SPEC_ID = 'document_count';
@@ -102,7 +160,29 @@ function getBaselineBadgeOverflow(
     : 0;
 }
 
+/**
+ * Document count chart with draggable brushes to select time ranges
+ * by default use `Baseline` and `Deviation` for the badge names
+ * @param dependencies - List of Kibana services that are required as dependencies
+ * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
+ * @param width - Optional width
+ * @param chartPoints - Data chart points
+ * @param chartPointsSplit - Data chart points split
+ * @param timeRangeEarliest - Start time range for the chart
+ * @param timeRangeLatest - Ending time range for the chart
+ * @param interval - Time interval for the document count buckets
+ * @param chartPointsSplitLabel - Label to name the adjustedChartPointsSplit histogram
+ * @param isBrushCleared - Whether or not brush has been reset
+ * @param autoAnalysisStart - Timestamp for start of initial analysis
+ * @param barColorOverride - Optional color override for the default bar color for charts
+ * @param barStyleAccessor - Optional style to override bar chart
+ * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
+ * @param deviationBrush - Optional settings override for the 'deviation' brush
+ * @param baselineBrush - Optional settings override for the 'baseline' brush
+ * @constructor
+ */
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
+  dependencies,
   brushSelectionUpdateHandler,
   width,
   chartPoints,
@@ -114,9 +194,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   isBrushCleared,
   autoAnalysisStart,
   barColorOverride,
+  barStyleAccessor,
   barHighlightColorOverride,
+  deviationBrush = {},
+  baselineBrush = {},
 }) => {
-  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts } = dependencies;
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
@@ -339,22 +422,28 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
-                defaultMessage: 'Baseline',
-              })}
+              label={
+                baselineBrush.label ??
+                i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+                  defaultMessage: 'Baseline',
+                })
+              }
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
-              width={BADGE_WIDTH}
+              width={baselineBrush.badgeWidth ?? BADGE_WIDTH}
             />
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
-                defaultMessage: 'Deviation',
-              })}
+              label={
+                deviationBrush.label ??
+                i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+                  defaultMessage: 'Deviation',
+                })
+              }
               marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
               timestampFrom={windowParameters.deviationMin}
               timestampTo={windowParameters.deviationMax}
-              width={BADGE_WIDTH}
+              width={deviationBrush.badgeWidth ?? BADGE_WIDTH}
             />
           </div>
           <div
@@ -416,6 +505,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               timeZone={timeZone}
               color={barColor}
               yNice
+              styleAccessor={barStyleAccessor}
             />
           )}
           {adjustedChartPointsSplit?.length && (
@@ -438,11 +528,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                 id="aiopsBaseline"
                 min={windowParameters.baselineMin}
                 max={windowParameters.baselineMax}
+                style={baselineBrush.annotationStyle}
               />
               <DualBrushAnnotation
                 id="aiopsDeviation"
                 min={windowParameters.deviationMin}
                 max={windowParameters.deviationMax}
+                style={deviationBrush.annotationStyle}
               />
             </>
           )}
