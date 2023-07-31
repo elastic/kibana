@@ -1517,12 +1517,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.8.0-canary.2":
-  version "8.8.0-canary.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.8.0-canary.2.tgz#10b5699541d644797b33c7e24058d2e55367d88d"
-  integrity sha512-UxH8YUxcsqHXGh4t2PjuL0q03XunF9vCLHPAs9r+fQcaPXpNbEuv9jbNGXv/9TLyeAKYEgcq9Xm0p0Nk/Mh0lQ==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch@8.9.0":
+  version "8.9.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.9.0.tgz#d132021c6c12e4171fe14371609a5c69b535edd4"
+  integrity sha512-UyolnzjOYTRL2966TYS3IoJP4tQbvak/pmYmbP3JdphD53RjkyVDdxMpTBv+2LcNBRrvYPTzxQbpRW/nGSXA9g==
   dependencies:
-    "@elastic/transport" "^8.3.1"
+    "@elastic/transport" "^8.3.2"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.4.0":
@@ -1714,6 +1714,18 @@
     secure-json-parse "^2.4.0"
     tslib "^2.4.0"
     undici "^5.5.1"
+
+"@elastic/transport@^8.3.2":
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.3.2.tgz#295e91f43e3a60a839f998ac3090a83ddb441592"
+  integrity sha512-ZiBYRVPj6pwYW99fueyNU4notDf7ZPs7Ix+4T1btIJsKJmeaORIItIfs+0O7KV4vV+DcvyMhkY1FXQx7kQOODw==
+  dependencies:
+    debug "^4.3.4"
+    hpagent "^1.0.0"
+    ms "^2.1.3"
+    secure-json-parse "^2.4.0"
+    tslib "^2.4.0"
+    undici "^5.22.1"
 
 "@emotion/babel-plugin-jsx-pragmatic@^0.2.1":
   version "0.2.1"
@@ -4774,6 +4786,10 @@
   uid ""
 
 "@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
   version "0.0.0"
   uid ""
 
@@ -28382,6 +28398,13 @@ undici@^5.5.1:
   version "5.20.0"
   resolved "https://registry.yarnpkg.com/undici/-/undici-5.20.0.tgz#6327462f5ce1d3646bcdac99da7317f455bcc263"
   integrity sha512-J3j60dYzuo6Eevbawwp1sdg16k5Tf768bxYK4TUJRH7cBM4kFCbf3mOnM/0E3vQYXvpxITbbWmBafaDbxLDz3g==
+  dependencies:
+    busboy "^1.6.0"
+
+undici@^5.22.1:
+  version "5.22.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.22.1.tgz#877d512effef2ac8be65e695f3586922e1a57d7b"
+  integrity sha512-Ji2IJhFXZY0x/0tVBXeQwgPlLWw13GVzpsWPQ3rV50IFMMof2I55PZZxtm4P6iNq+L5znYN9nSTAq0ZyE6lSJw==
   dependencies:
     busboy "^1.6.0"
 
