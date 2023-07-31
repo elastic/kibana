@@ -7,8 +7,7 @@
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -40,7 +39,7 @@ export class SyntheticsMonitorTestService {
       .send(monitor)
       .expect(200);
 
-    return res.body as SavedObject<MonitorFields>;
+    return res.body as EncryptedSyntheticsSavedMonitor;
   }
 
   async inspectMonitor(monitor: any, hideParams: boolean = true) {

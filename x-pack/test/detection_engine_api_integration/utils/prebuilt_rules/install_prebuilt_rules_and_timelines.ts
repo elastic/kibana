@@ -12,8 +12,11 @@ import {
 import type SuperTest from 'supertest';
 
 /**
+ * (LEGACY)
  * Installs all prebuilt rules and timelines available in Kibana. Rules are
  * installed from the security-rule saved objects.
+ * This is a legacy endpoint and has been replaced by:
+ * POST /internal/detection_engine/prebuilt_rules/installation/_perform
  *
  * - No rules will be installed if there are no security-rule assets (e.g., the
  *   package is not installed or mocks are not created).

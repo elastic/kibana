@@ -11,10 +11,19 @@ import { ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (license = '', cloud = false): PolicyConfig => {
+export const policyFactory = (
+  license = '',
+  cloud = false,
+  licenseUid = '',
+  clusterUuid = '',
+  clusterName = ''
+): PolicyConfig => {
   return {
     meta: {
       license,
+      license_uid: licenseUid,
+      cluster_uuid: clusterUuid,
+      cluster_name: clusterName,
       cloud,
     },
     windows: {
@@ -42,6 +51,7 @@ export const policyFactory = (license = '', cloud = false): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: false,
         supported: true,
       },
       popup: {
@@ -86,6 +96,7 @@ export const policyFactory = (license = '', cloud = false): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: false,
         supported: true,
       },
       memory_protection: {
@@ -127,6 +138,7 @@ export const policyFactory = (license = '', cloud = false): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: false,
         supported: true,
       },
       memory_protection: {
@@ -200,6 +212,7 @@ export const policyFactoryWithoutPaidFeatures = (
       },
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       attack_surface_reduction: {
@@ -231,6 +244,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.mac,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {
@@ -257,6 +271,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.linux,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {

@@ -10,8 +10,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import type { UIPolicyConfig } from '../../../../../../../../common/endpoint/types';
-import type { EventFormOption, SupplementalEventFormOption } from './event_collection_card';
-import { EventCollectionCard } from './event_collection_card';
+import type { EventFormOption, SupplementalEventFormOption } from '../event_collection_card';
+import { EventCollectionCard } from '../event_collection_card';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   {
@@ -102,7 +102,7 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
   },
 ];
 
-type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
+export type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>((props) => {
   const supplementalOptions = useMemo(() => {

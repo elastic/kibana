@@ -18,6 +18,7 @@ export interface CreateMlInferencePipelineApiLogicArgs {
   fieldMappings: FieldMapping[];
   indexName: string;
   inferenceConfig?: InferencePipelineInferenceConfig;
+  modelId: string;
   pipelineDefinition: MlInferencePipeline;
   pipelineName: string;
 }
@@ -33,6 +34,7 @@ export const createMlInferencePipeline = async (
   const params: CreateMLInferencePipelineDefinition = {
     field_mappings: args.fieldMappings,
     inference_config: args.inferenceConfig,
+    model_id: args.modelId,
     pipeline_definition: args.pipelineDefinition,
     pipeline_name: args.pipelineName,
   };
