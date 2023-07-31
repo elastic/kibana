@@ -18,11 +18,11 @@ const StyledEuiCard = styled(EuiCard)`
     theme,
     selectable,
   }: {
-    theme: EuiThemeComputed;
+    theme: { euiTheme: EuiThemeComputed };
     selectable: { isSelected: boolean };
   }) => {
     if (selectable?.isSelected) {
-      return `1px solid ${theme.colors.success}`;
+      return `1px solid ${theme.euiTheme.colors.success}`;
     }
   }};
 
@@ -37,7 +37,7 @@ const StyledEuiCard = styled(EuiCard)`
   .euiText {
     margin-top: 0;
     margin-left: 25px;
-    color: ${({ theme }) => theme.colors.subduedText};
+    color: ${({ theme }) => theme.euiTheme.colors.subduedText};
   }
 
   > button[role='switch'] {

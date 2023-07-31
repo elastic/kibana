@@ -29,10 +29,10 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 import { AgentPoliciesPopover } from '../../../packs/packs_table';
 
-const dividerCss = (theme: EuiThemeComputed) => ({
+const dividerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
   width: 0,
   height: '100%',
-  borderLeft: theme.border.thin,
+  borderLeft: euiTheme.border.thin,
 });
 
 const PackDetailsPageComponent = () => {

@@ -40,9 +40,9 @@ import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
-const euiAccordionCss = (theme: EuiThemeComputed) => ({
+const euiAccordionCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
   '.euiAccordion__button': {
-    color: theme.colors.primary,
+    color: euiTheme.colors.primary,
   },
 });
 

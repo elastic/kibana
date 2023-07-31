@@ -23,9 +23,9 @@ const euiCodeBlockCss = {
   minHeight: '100px',
 };
 
-const euiAccordionCss = (theme: EuiThemeComputed) => ({
+const euiAccordionCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
   '.euiAccordion__button': {
-    color: theme.colors.primary,
+    color: euiTheme.colors.primary,
   },
   '.euiAccordion__childWrapper': {
     '-webkit-transition': 'none',

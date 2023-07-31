@@ -19,8 +19,8 @@ import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
-const euiLoadingSpinnerCss = (theme: EuiThemeComputed) => ({
-  marginRight: theme.size.s,
+const euiLoadingSpinnerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  marginRight: euiTheme.size.s,
 });
 
 interface ActiveStateSwitchProps {
