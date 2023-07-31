@@ -75,7 +75,7 @@ export const excessivelyInstallAllPrebuiltRules = () => {
 };
 
 export const waitUntilAllRuleAssetsCreated = (
-  assetsCount: number,
+  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
   index = '.kibana_security_solution'
 ) =>
   cy.waitUntil(
@@ -94,7 +94,17 @@ export const waitUntilAllRuleAssetsCreated = (
             },
           },
         })
-        .then((response) => response.body.hits.hits.length === assetsCount);
+        .then((response) => {
+          const areAllRulesCreated = rules.every((rule) =>
+            // Checking that all the expected rules are stored in ES
+            response.body.hits.hits.some(
+              (storedRule: { _source: typeof SAMPLE_PREBUILT_RULE }) =>
+                storedRule._source['security-rule'].rule_id === rule['security-rule'].rule_id
+            )
+          );
+
+          return areAllRulesCreated;
+        });
     },
     { interval: 500, timeout: 12000 }
   );
@@ -226,7 +236,7 @@ export const createAndInstallMockedPrebuiltRules = ({
   });
 
   if (rules?.length) {
-    waitUntilAllRuleAssetsCreated(rules.length);
+    waitUntilAllRuleAssetsCreated(rules);
   }
 
   if (installToKibana) {
