@@ -24,6 +24,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   const groupBy = 'host.doggoname';
+  const timeFieldName = 'mockedTimeFieldName';
   const timeframe = {
     start: moment().subtract(5, 'minutes').valueOf(),
     end: moment().valueOf(),
@@ -33,6 +34,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      timeFieldName,
       100,
       true,
       void 0,
@@ -60,6 +62,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      timeFieldName,
       100,
       true,
       void 0,
@@ -74,7 +77,10 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
 
     test('includes a metric field filter', () => {
       expect(searchBody.query.bool.filter).toMatchObject(
-        expect.arrayContaining([{ exists: { field: 'system.is.a.good.puppy.dog' } }])
+        expect.arrayContaining([
+          { range: { mockedTimeFieldName: expect.any(Object) } },
+          { exists: { field: 'system.is.a.good.puppy.dog' } },
+        ])
       );
     });
   });
