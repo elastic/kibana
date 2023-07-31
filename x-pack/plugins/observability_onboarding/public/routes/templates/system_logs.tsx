@@ -8,14 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import React, { ComponentType, useRef, useState } from 'react';
+import React from 'react';
 import { breadcrumbsApp } from '../../application/app';
 import { Provider as WizardProvider } from '../../components/app/system_logs';
-import {
-  FilmstripFrame,
-  FilmstripTransition,
-  TransitionState,
-} from '../../components/shared/filmstrip_transition';
 
 interface Props {
   children: React.ReactNode;
@@ -33,38 +28,8 @@ export function SystemLogs({ children }: Props) {
     ],
     breadcrumbsApp
   );
-  return <AnimatedTransitionsWizard>{children}</AnimatedTransitionsWizard>;
-}
-
-const TRANSITION_DURATION = 180;
-
-function AnimatedTransitionsWizard({ children }: Props) {
-  const [transition, setTransition] = useState<TransitionState>('ready');
-  const [title, setTitle] = useState<string>();
-  const TransitionComponent = useRef<ComponentType>(() => null);
-
-  function onChangeStep({
-    direction,
-    stepTitle,
-    StepComponent,
-  }: {
-    direction: 'back' | 'next';
-    stepTitle?: string;
-    StepComponent: ComponentType;
-  }) {
-    setTransition(direction);
-    setTitle(stepTitle);
-    TransitionComponent.current = StepComponent;
-    setTimeout(() => {
-      setTransition('ready');
-    }, TRANSITION_DURATION + 10);
-  }
-
   return (
-    <WizardProvider
-      transitionDuration={TRANSITION_DURATION}
-      onChangeStep={onChangeStep}
-    >
+    <WizardProvider>
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="l" />
@@ -73,36 +38,15 @@ function AnimatedTransitionsWizard({ children }: Props) {
             data-test-subj="obltOnboardingSystemLogsFilePageHeader"
           >
             <h1>
-              {title
-                ? title
-                : i18n.translate(
-                    'xpack.observability_onboarding.title.collectSystemLogs',
-                    {
-                      defaultMessage: 'Install shipper to collect system logs',
-                    }
-                  )}
+              {i18n.translate(
+                'xpack.observability_onboarding.title.collectSystemLogs',
+                { defaultMessage: 'Install shipper to collect system logs' }
+              )}
             </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ width: '50%' }}>
-          <FilmstripTransition
-            duration={TRANSITION_DURATION}
-            transition={transition}
-          >
-            <FilmstripFrame position="left">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'back' ? <TransitionComponent.current /> : null
-              }
-            </FilmstripFrame>
-            <FilmstripFrame position="center">{children}</FilmstripFrame>
-            <FilmstripFrame position="right">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'next' ? <TransitionComponent.current /> : null
-              }
-            </FilmstripFrame>
-          </FilmstripTransition>
+          {children}
         </EuiFlexItem>
       </EuiFlexGroup>
     </WizardProvider>
