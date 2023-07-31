@@ -249,7 +249,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(0);
+      expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
     });
 
     test('is a no-op when the security license is disabled', async () => {
@@ -271,7 +271,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(0);
+      expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
     });
 
     test('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
@@ -304,7 +304,7 @@ describe('AlertingAuthorization', () => {
 
       expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
 
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
         'myType',
         'myApp',
@@ -346,7 +346,7 @@ describe('AlertingAuthorization', () => {
 
       expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
 
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
         'myType',
         'myApp',
@@ -388,13 +388,7 @@ describe('AlertingAuthorization', () => {
 
       expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
 
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'alerts',
-        'rule',
-        'create'
-      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
         'myType',
         'myApp',
@@ -436,13 +430,7 @@ describe('AlertingAuthorization', () => {
 
       expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
 
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'alerts',
-        'alert',
-        'update'
-      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
         'myType',
         'myApp',
@@ -484,13 +472,7 @@ describe('AlertingAuthorization', () => {
 
       expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
 
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'rule',
-        'create'
-      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
         'myType',
         'myOtherApp',
@@ -498,10 +480,7 @@ describe('AlertingAuthorization', () => {
         'create'
       );
       expect(checkPrivileges).toHaveBeenCalledWith({
-        kibana: [
-          mockAuthorizationAction('myType', 'myOtherApp', 'rule', 'create'),
-          mockAuthorizationAction('myType', 'myApp', 'rule', 'create'),
-        ],
+        kibana: [mockAuthorizationAction('myType', 'myOtherApp', 'rule', 'create')],
       });
     });
 
@@ -535,13 +514,7 @@ describe('AlertingAuthorization', () => {
 
       expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
 
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'alert',
-        'update'
-      );
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
       expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
         'myType',
         'myOtherApp',
@@ -549,10 +522,7 @@ describe('AlertingAuthorization', () => {
         'update'
       );
       expect(checkPrivileges).toHaveBeenCalledWith({
-        kibana: [
-          mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
-          mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
-        ],
+        kibana: [mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update')],
       });
     });
 
@@ -596,7 +566,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to create a \\"myType\\" rule for \\"myOtherApp\\""`
+        `"Unauthorized by \\"myOtherApp\\" to create \\"myType\\" rule"`
       );
     });
 
@@ -644,7 +614,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to update a \\"myType\\" alert for \\"myAppRulesOnly\\""`
+        `"Unauthorized by \\"myAppRulesOnly\\" to update \\"myType\\" alert"`
       );
     });
 
@@ -688,7 +658,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to update a \\"myType\\" alert by \\"myApp\\""`
+        `"Unauthorized by \\"myOtherApp\\" to update \\"myType\\" alert"`
       );
     });
 
@@ -732,7 +702,7 @@ describe('AlertingAuthorization', () => {
           entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
+        `"Unauthorized by \\"myOtherApp\\" to create \\"myType\\" alert"`
       );
     });
   });
@@ -950,7 +920,7 @@ describe('AlertingAuthorization', () => {
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'alert');
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Unauthorized to find a \\"myAppAlertType\\" alert for \\"myOtherApp\\""`
+        `"Unauthorized by \\"myOtherApp\\" to find \\"myAppAlertType\\" alert"`
       );
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {

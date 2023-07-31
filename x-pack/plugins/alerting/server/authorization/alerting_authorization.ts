@@ -197,16 +197,13 @@ export class AlertingAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        console.log('error1');
         throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, legacyConsumer, operation, entity));
       }
 
       if (!hasAllRequested) {
-        console.log('error2');
         throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
       }
     } else if (!isAvailableConsumer) {
-      console.log('error3');
       throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
     }
   }

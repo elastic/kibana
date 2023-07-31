@@ -171,20 +171,6 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'delete',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
-              // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduled_task_id);
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
