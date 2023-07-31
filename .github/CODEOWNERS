@@ -515,6 +515,7 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
+x-pack/plugins/observability_ai_assistant @elastic/apm-ui
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_onboarding @elastic/apm-ui
@@ -540,6 +541,12 @@ src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
+packages/react/kibana_context/common @elastic/appex-sharedux
+packages/react/kibana_context/render @elastic/appex-sharedux
+packages/react/kibana_context/root @elastic/appex-sharedux
+packages/react/kibana_context/styled @elastic/appex-sharedux
+packages/react/kibana_context/theme @elastic/appex-sharedux
+packages/react/kibana_mount @elastic/appex-sharedux
 x-pack/plugins/remote_clusters @elastic/platform-deployment-management
 test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
@@ -1064,6 +1071,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_info @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/flyout @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/timelines @elastic/security-threat-hunting-investigations
 
@@ -1297,6 +1305,9 @@ x-pack/plugins/translations/translations
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/profiling-ui
+
+# Shared UX
+packages/react @elastic/appex-sharedux
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
