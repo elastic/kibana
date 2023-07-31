@@ -40,6 +40,7 @@ import type {
   RegistryPackage,
   EpmPackageAdditions,
   GetCategoriesRequest,
+  GetPackagesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
@@ -62,7 +63,6 @@ import { getFilteredSearchPackages } from '../filtered_packages';
 
 import { createInstallableFrom } from '.';
 
-export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
 
 function nameAsTitle(name: string) {
@@ -77,7 +77,7 @@ export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
     excludeInstallStatus?: boolean;
-  } & Registry.SearchParams
+  } & GetPackagesRequest['query']
 ) {
   const logger = appContextService.getLogger();
   const {
