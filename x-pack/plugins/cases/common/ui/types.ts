@@ -13,7 +13,7 @@ import type {
   UPDATE_CASES_CAPABILITY,
 } from '..';
 import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '../api';
-import type { CASES_CONNECTOR_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
+import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseSeverity,
@@ -298,5 +298,5 @@ export interface CasesCapabilities {
   [UPDATE_CASES_CAPABILITY]: boolean;
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
-  [CASES_CONNECTOR_CAPABILITY]: boolean;
+  [CASES_CONNECTORS_CAPABILITY]: boolean;
 }

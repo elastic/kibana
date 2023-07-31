@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -20,11 +20,12 @@ import {
   getCaseConnectors,
   getCasesWebhookConnector,
 } from '../../../../common/lib/api';
-import { noConnector } from '../../../../common/lib/authentication/users';
+import { noCasesConnectors } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const actionsRemover = new ActionsRemover(supertest);
 
   describe('get_connectors', () => {
@@ -186,18 +187,12 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
     });
 
-    it('should return unauthorized error when API tag not present', async () => {
-      const sir = await createConnector({ supertest, req: getServiceNowSIRConnector() });
-
-      actionsRemover.add('default', sir.id, 'action', 'actions');
-
-      const connectors = await getCaseConnectors({
-        supertest,
-        auth: { user: noConnector, space: null },
-        expectedHttpCode: 401,
+    it('should return 403 when the user does not have access to the case connectors', async () => {
+      await getCaseConnectors({
+        supertest: supertestWithoutAuth,
+        auth: { user: noCasesConnectors, space: null },
+        expectedHttpCode: 403,
       });
-
-      expect(connectors).to.eql([]);
     });
   });
 };

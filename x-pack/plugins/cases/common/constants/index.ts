@@ -159,7 +159,7 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
-export const CASES_CONNECTOR_CAPABILITY = 'cases_connector' as const;
+export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 
 /**
  * Cases API Tags
@@ -176,10 +176,9 @@ export const SUGGEST_USER_PROFILES_API_TAG = 'casesSuggestUserProfiles';
 export const BULK_GET_USER_PROFILES_API_TAG = 'bulkGetUserProfiles';
 
 /**
- * This tag is registered for ALL cases connector write/update/push capabilities
+ * This tag is registered for the connectors (configure) get API
  */
-export const READ_CASES_CONNECTOR_API_TAG = 'readCasesConnector';
-export const WRITE_CASES_CONNECTOR_API_TAG = 'writeCasesConnector';
+export const GET_CONNECTORS_CONFIGURE_API_TAG = 'casesGetConnectorsConfigure';
 
 /**
  * User profiles
