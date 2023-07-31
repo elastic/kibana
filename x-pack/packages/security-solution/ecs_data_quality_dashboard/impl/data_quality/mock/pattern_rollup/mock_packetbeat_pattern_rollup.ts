@@ -129,6 +129,7 @@ export const packetbeatWithSomeErrors: PatternRollup = {
       indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'packetbeat-*',
+      sameFamily: undefined,
     },
     '.ds-packetbeat-8.6.1-2023.02.04-000001': {
       docsCount: 1628343,
@@ -138,6 +139,7 @@ export const packetbeatWithSomeErrors: PatternRollup = {
       indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'packetbeat-*',
+      sameFamily: 0,
     },
   },
   sizeInBytes: 1096520898,
