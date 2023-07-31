@@ -724,7 +724,7 @@ describe('<CspPolicyTemplateForm />', () => {
         'aws.setup.format': { value: 'manual' },
         shared_credential_file: { value: 'a' },
       });
-      const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
+      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
       userEvent.click(getByLabelText('Assume role'));
 
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
