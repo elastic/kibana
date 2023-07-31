@@ -7,7 +7,7 @@
 
 import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import { HostStatus } from '../types';
-import { GetMetadataListRequestSchema } from './metadata';
+import { GetMetadataListRequestSchema } from '../../api/endpoint';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('endpoint metadata schema', () => {
