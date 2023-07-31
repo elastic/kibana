@@ -70,6 +70,7 @@ import {
   DiscoverStart,
   DiscoverSetup,
 } from '@kbn/discover-plugin/public/plugin';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -130,6 +131,7 @@ export interface ApmPluginStartDeps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
