@@ -148,7 +148,7 @@ async function ensurePackageTag(
 
 // Ensure that asset tags coming from the kibana/tags.yml file are correctly parsed
 // Then create the corresponding object tags and assign them to the taggable requested assets
-async function createPackageSpecTags(
+export async function createPackageSpecTags(
   savedObjectTagAssignmentService: IAssignmentService,
   taggableAssets: ArchiveAsset[],
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'assetTags'>
@@ -170,8 +170,6 @@ async function createPackageSpecTags(
           },
           { id: uniqueTagId, overwrite: true, refresh: false }
         );
-
-        appContextService.getLogger().debug(`Created tag with id ${uniqueTagId}`);
       }
 
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);
@@ -199,7 +197,7 @@ async function createPackageSpecTags(
   );
 }
 
-// Get all the assets of types defined in tag.asset_types from kibanaAssets
+// Get all the assets of types defined in tag.asset_types from taggable kibanaAssets
 const getAssetTypesObjectReferences = (
   assetTypes: string[] | undefined,
   taggableAssets: ArchiveAsset[]
@@ -213,7 +211,7 @@ const getAssetTypesObjectReferences = (
     });
 };
 
-// Get the references to ids defined in tag.asset_ids from kibanaAssets
+// Get the references to ids defined in tag.asset_ids from taggable kibanaAssets
 const getAssetIdsObjectReferences = (
   assetIds: string[] | undefined,
   taggableAssets: ArchiveAsset[]
