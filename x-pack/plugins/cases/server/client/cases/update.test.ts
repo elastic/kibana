@@ -12,6 +12,7 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
   MAX_CASES_TO_UPDATE,
+  MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -736,6 +737,117 @@ describe('update', () => {
       ).rejects.toThrow(
         'Error: The length of the field cases is too short. Array must be of length >= 1.'
       );
+    });
+
+    describe('Validate max user actions per page', () => {
+      const casesClient = createCasesClientMockArgs();
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        casesClient.services.caseService.getCases.mockResolvedValue({
+          saved_objects: [{ ...mockCases[0] }, { ...mockCases[1] }],
+        });
+        casesClient.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          per_page: 10,
+          page: 1,
+        });
+      });
+
+      it('passes validation if max user actions per case is not reached', async () => {
+        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE - 1,
+        });
+
+        // @ts-ignore: only the array length matters here
+        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [1],
+        });
+
+        casesClient.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...mockCases[0] }],
+        });
+
+        await expect(
+          update(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  title: 'This is a test case!!',
+                },
+              ],
+            },
+            casesClient
+          )
+        ).resolves.not.toThrow();
+      });
+
+      it(`throws an error when the user actions to be created will reach ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
+        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
+        });
+
+        // @ts-ignore: only the array length matters here
+        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [1, 2, 3],
+        });
+
+        await expect(
+          update(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  title: 'This is a test case!!',
+                },
+              ],
+            },
+            casesClient
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+
+      it('throws an error when trying to update multiple cases and one of them is expected to fail', async () => {
+        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
+          [mockCases[1].id]: 0,
+        });
+
+        // @ts-ignore: only the array length matters here
+        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [1, 2, 3],
+          [mockCases[1].id]: [1],
+        });
+
+        await expect(
+          update(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  title: 'This is supposed to fail',
+                },
+
+                {
+                  id: mockCases[1].id,
+                  version: mockCases[1].version ?? '',
+                  title: 'This is supposed to pass',
+                },
+              ],
+            },
+            casesClient
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
     });
   });
 });

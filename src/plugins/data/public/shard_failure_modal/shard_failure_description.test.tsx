@@ -7,16 +7,22 @@
  */
 
 import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ShardFailureDescription } from './shard_failure_description';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
-import { ShardFailure } from './shard_failure_types';
 
 describe('ShardFailureDescription', () => {
   it('renders matching snapshot given valid properties', () => {
-    // TODO: remove cast once https://github.com/elastic/elasticsearch-js/issues/1286 is resolved
-    const failure = (shardFailureResponse._shards as any).failures[0] as ShardFailure;
+    const failure = (shardFailureResponse._shards as any).failures[0];
     const component = shallowWithIntl(<ShardFailureDescription {...failure} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show more details when button is pressed', async () => {
+    const failure = (shardFailureResponse._shards as any).failures[0];
+    const component = shallowWithIntl(<ShardFailureDescription {...failure} />);
+    await component.find(EuiButtonEmpty).simulate('click');
     expect(component).toMatchSnapshot();
   });
 });
