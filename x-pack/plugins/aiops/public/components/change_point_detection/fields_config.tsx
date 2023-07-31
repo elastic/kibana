@@ -204,9 +204,12 @@ const FieldPanel: FC<FieldPanelProps> = ({
           panel: 'attachMainPanel',
         },
         {
-          name: 'Remove',
+          name: i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
+            defaultMessage: 'Remove configuration',
+          }),
           icon: 'trash',
-          onClick: () => {},
+          onClick: onRemove,
+          disabled: removeDisabled,
         },
       ],
     },
@@ -385,17 +388,6 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                disabled={removeDisabled}
-                aria-label={i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
-                  defaultMessage: 'Remove configuration',
-                })}
-                iconType="trash"
-                color="danger"
-                onClick={onRemove}
-              />
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id={''}
