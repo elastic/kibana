@@ -7,6 +7,9 @@
 
 import React, { memo } from 'react';
 
+/**
+ * Component displayed when a given product tier is not allowed to use endpoint policy protections.
+ */
 export const EndpointPolicyProtections = memo(() => {
   return <div>{'EndpointPolicyProtections placeholder'}</div>;
 });
