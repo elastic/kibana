@@ -42,7 +42,8 @@ function createdPolicyToUpdatePolicy(policy: any) {
 }
 
 export default function (providerContext: FtrProviderContext) {
-  describe('fleet policy secrets', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162732
+  describe.skip('fleet policy secrets', () => {
     const { getService } = providerContext;
 
     const es: Client = getService('es');

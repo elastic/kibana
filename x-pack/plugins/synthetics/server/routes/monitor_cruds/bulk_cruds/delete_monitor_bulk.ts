@@ -47,7 +47,6 @@ export const deleteMonitorBulk = async ({
         ...normalizedMonitor.attributes,
         id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       })) as SyntheticsMonitorWithId[],
-      request,
       savedObjectsClient,
       spaceId
     );

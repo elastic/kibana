@@ -541,6 +541,12 @@ src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
+packages/react/kibana_context/common @elastic/appex-sharedux
+packages/react/kibana_context/render @elastic/appex-sharedux
+packages/react/kibana_context/root @elastic/appex-sharedux
+packages/react/kibana_context/styled @elastic/appex-sharedux
+packages/react/kibana_context/theme @elastic/appex-sharedux
+packages/react/kibana_mount @elastic/appex-sharedux
 x-pack/plugins/remote_clusters @elastic/platform-deployment-management
 test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
@@ -1298,6 +1304,9 @@ x-pack/plugins/translations/translations
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/profiling-ui
+
+# Shared UX
+packages/react @elastic/appex-sharedux
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
