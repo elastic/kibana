@@ -65,7 +65,7 @@ const ConnectorsComponent: React.FC<Props> = ({
     [connectors, selectedConnector.id]
   );
   const { permissions } = useCasesContext();
-  const hasReadPermissions = permissions.connectors && actions.read;
+  const canUseConnectors = permissions.connectors && actions.read;
 
   const connectorsName = connector?.name ?? 'none';
 
@@ -108,7 +108,7 @@ const ConnectorsComponent: React.FC<Props> = ({
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              {hasReadPermissions ? (
+              {canUseConnectors ? (
                 <ConnectorsDropdown
                   connectors={connectors}
                   disabled={disabled}
