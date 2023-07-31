@@ -31,7 +31,7 @@ describe('Exceptions viewer read only', () => {
   const exceptionList = getExceptionList();
 
   before(() => {
-    cy.task('esArchiverResetKibana');
+    // cy.task('esArchiverResetKibana');
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
