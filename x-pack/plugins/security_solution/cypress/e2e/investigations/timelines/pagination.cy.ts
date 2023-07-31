@@ -48,7 +48,7 @@ describe('Pagination', () => {
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
   });
 
-  it('should be able to go to next / previous page', () => {
+  it('should be able to go to next / previous page', { tags: '@brokenInServerless' }, () => {
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
   });

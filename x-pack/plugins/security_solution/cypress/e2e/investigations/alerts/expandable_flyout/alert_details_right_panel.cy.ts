@@ -79,7 +79,7 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should display header and footer basics', () => {
+    it('should display header and footer basics', { tags: '@brokenInServerless' }, () => {
       expandFirstAlertExpandableFlyout();
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);

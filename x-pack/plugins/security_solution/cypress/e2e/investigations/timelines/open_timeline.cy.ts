@@ -35,41 +35,36 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', () => {
-  before(() => {
-    cleanKibana();
-    login();
-    visitWithoutDateRange(TIMELINES_URL);
-
-    createTimeline(getTimeline())
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-      .then((timelineId: string) => {
-        refreshTimelinesUntilTimeLinePresent(timelineId)
-          // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
-          // request responses and indeterminism since on clicks to activates URL's.
-          .then(() => cy.wrap(timelineId).as('timelineId'))
-          // eslint-disable-next-line cypress/no-unnecessary-waiting
-          .then(() => cy.wait(1000))
-          .then(() =>
-            addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
-              expect(response.status).to.equal(200)
-            )
-          )
-          .then(() => openTimelineById(timelineId))
-          .then(() => pinFirstEvent())
-          .then(() => markAsFavorite());
-      });
-  });
-
-  describe('Open timeline modal', () => {
+describe('Open timeline', { tags: '@brokenInServerless' }, () => {
+  describe('Open timeline modal', { tags: '@brokenInServerless' }, () => {
     beforeEach(function () {
+      cleanKibana();
       login();
       visitWithoutDateRange(TIMELINES_URL);
+
+      createTimeline(getTimeline())
+        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+        .then((timelineId: string) => {
+          refreshTimelinesUntilTimeLinePresent(timelineId)
+            // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+            // request responses and indeterminism since on clicks to activates URL's.
+            .then(() => cy.wrap(timelineId).as('timelineId'))
+            // eslint-disable-next-line cypress/no-unnecessary-waiting
+            .then(() => cy.wait(1000))
+            .then(() =>
+              addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
+                expect(response.status).to.equal(200)
+              )
+            )
+            .then(() => openTimelineById(timelineId))
+            .then(() => pinFirstEvent())
+            .then(() => markAsFavorite());
+        });
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
     });
 
-    it('should open a modal', () => {
+    it('should open a modal', { tags: '@brokenInServerless' }, () => {
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
     });
 

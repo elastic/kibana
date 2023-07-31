@@ -36,7 +36,7 @@ describe(
       expandDocumentDetailsExpandableFlyoutLeftSection();
     });
 
-    it('should display session view under visualize', () => {
+    it('should display session view under visualize', { tags: '@brokenInServerless' }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
         .should('be.visible')
         .and('have.text', 'Visualize');

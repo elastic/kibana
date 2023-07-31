@@ -43,14 +43,14 @@ describe('Guided onboarding tour', () => {
   after(() => {
     quitGlobalTour();
   });
-  it('Completes the tour with next button clicks', () => {
+  it('Completes the tour with next button clicks', { tags: '@brokenInServerless' }, () => {
     startTour();
     completeTourWithNextButton();
     finishTour();
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('Completes the tour with action clicks', () => {
+  it('Completes the tour with action clicks', { tags: '@brokenInServerless' }, () => {
     startTour();
     completeTourWithActions();
     finishTour();
@@ -58,7 +58,7 @@ describe('Guided onboarding tour', () => {
   });
 
   // unhappy paths
-  it('Resets the tour to step 1 when we navigate away', () => {
+  it('Resets the tour to step 1 when we navigate away', { tags: '@brokenInServerless' }, () => {
     startTour();
     goToStep(AlertsCasesTourSteps.expandEvent);
     assertTourStepExist(AlertsCasesTourSteps.expandEvent);
@@ -69,37 +69,41 @@ describe('Guided onboarding tour', () => {
     assertTourStepExist(AlertsCasesTourSteps.pointToAlertName);
   });
 
-  describe('persists tour steps in flyout on flyout toggle', () => {
-    const stepsInAlertsFlyout = [
-      AlertsCasesTourSteps.reviewAlertDetailsFlyout,
-      AlertsCasesTourSteps.addAlertToCase,
-      AlertsCasesTourSteps.viewCase,
-    ];
+  describe(
+    'persists tour steps in flyout on flyout toggle',
+    { tags: '@brokenInServerless' },
+    () => {
+      const stepsInAlertsFlyout = [
+        AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+        AlertsCasesTourSteps.addAlertToCase,
+        AlertsCasesTourSteps.viewCase,
+      ];
 
-    const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
+      const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
-    stepsInAlertsFlyout.forEach((step) => {
-      it(`step: ${step}, resets to ${step}`, () => {
-        startTour();
-        goToStep(step);
-        assertTourStepExist(step);
-        closeAlertFlyout();
-        assertTourStepNotExist(step);
-        expandFirstAlert();
-        assertTourStepExist(step);
+      stepsInAlertsFlyout.forEach((step) => {
+        it(`step: ${step}, resets to ${step}`, () => {
+          startTour();
+          goToStep(step);
+          assertTourStepExist(step);
+          closeAlertFlyout();
+          assertTourStepNotExist(step);
+          expandFirstAlert();
+          assertTourStepExist(step);
+        });
       });
-    });
 
-    stepsInCasesFlyout.forEach((step) => {
-      it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
-        startTour();
-        goToStep(step);
-        assertTourStepExist(step);
-        closeCreateCaseFlyout();
-        assertTourStepNotExist(step);
-        addToCase();
-        assertTourStepExist(AlertsCasesTourSteps.createCase);
+      stepsInCasesFlyout.forEach((step) => {
+        it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
+          startTour();
+          goToStep(step);
+          assertTourStepExist(step);
+          closeCreateCaseFlyout();
+          assertTourStepNotExist(step);
+          addToCase();
+          assertTourStepExist(AlertsCasesTourSteps.createCase);
+        });
       });
-    });
-  });
+    }
+  );
 });

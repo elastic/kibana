@@ -29,7 +29,7 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should test flyout url sync', () => {
+    it('should test flyout url sync', { tags: '@brokenInServerless' }, () => {
       cy.url().should('not.include', 'eventFlyout');
 
       expandFirstAlertExpandableFlyout();

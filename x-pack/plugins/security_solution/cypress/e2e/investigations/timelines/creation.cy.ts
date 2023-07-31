@@ -54,16 +54,20 @@ describe('Create a timeline from a template', () => {
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
 
-  it('Should have the same query and open the timeline modal', () => {
-    selectCustomTemplates();
-    expandEventAction();
-    clickingOnCreateTimelineFormTemplateBtn();
+  it(
+    'Should have the same query and open the timeline modal',
+    { tags: '@brokenInServerless' },
+    () => {
+      selectCustomTemplates();
+      expandEventAction();
+      clickingOnCreateTimelineFormTemplateBtn();
 
-    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
-    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
-    closeTimeline();
-  });
+      cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+      cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+      closeTimeline();
+    }
+  );
 });
 
 describe('Timelines', (): void => {
@@ -72,7 +76,7 @@ describe('Timelines', (): void => {
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    context('Privileges: CRUD', () => {
+    context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
         visit(OVERVIEW_URL);
@@ -85,7 +89,7 @@ describe('Timelines', (): void => {
       });
     });
 
-    context('Privileges: READ', () => {
+    context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
@@ -105,37 +109,41 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
-    beforeEach(() => {
-      login();
-      visit(OVERVIEW_URL);
-      openTimelineUsingToggle();
-      addNameAndDescriptionToTimeline(getTimeline());
-      populateTimeline();
-      goToQueryTab();
-    });
+  describe(
+    'Creates a timeline by clicking untitled timeline from bottom bar',
+    { tags: '@brokenInServerless' },
+    () => {
+      beforeEach(() => {
+        login();
+        visit(OVERVIEW_URL);
+        openTimelineUsingToggle();
+        addNameAndDescriptionToTimeline(getTimeline());
+        populateTimeline();
+        goToQueryTab();
+      });
 
-    it('can be added filter', () => {
-      addFilter(getTimeline().filter);
-      cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
-    });
+      it('can be added filter', () => {
+        addFilter(getTimeline().filter);
+        cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
+      });
 
-    it('pins an event', () => {
-      pinFirstEvent();
-      cy.get(PIN_EVENT)
-        .should('have.attr', 'aria-label')
-        .and('match', /Unpin the event in row 2/);
-    });
+      it('pins an event', () => {
+        pinFirstEvent();
+        cy.get(PIN_EVENT)
+          .should('have.attr', 'aria-label')
+          .and('match', /Unpin the event in row 2/);
+      });
 
-    it('has a lock icon', () => {
-      cy.get(LOCKED_ICON).should('be.visible');
-    });
+      it('has a lock icon', () => {
+        cy.get(LOCKED_ICON).should('be.visible');
+      });
 
-    it('can be added notes', () => {
-      addNotesToTimeline(getTimeline().notes);
-      cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
-        .find(NOTES_TEXT)
-        .should('have.text', getTimeline().notes);
-    });
-  });
+      it('can be added notes', () => {
+        addNotesToTimeline(getTimeline().notes);
+        cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
+          .find(NOTES_TEXT)
+          .should('have.text', getTimeline().notes);
+      });
+    }
+  );
 });

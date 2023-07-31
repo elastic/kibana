@@ -45,7 +45,7 @@ describe(
       openTableTab();
     });
 
-    it('should display and filter the table', () => {
+    it('should display and filter the table', { tags: '@brokenInServerless' }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW).should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW).should('be.visible');
       filterTableTabTable('timestamp');
@@ -53,7 +53,7 @@ describe(
       clearFilterTableTabTable();
     });
 
-    it('should test cell actions', () => {
+    it('should test cell actions', { tags: '@brokenInServerless' }, () => {
       cy.log('cell actions filter in');
 
       filterInTableTabTable();

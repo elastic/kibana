@@ -48,43 +48,49 @@ describe(
     });
 
     describe('rule preview', () => {
-      it('should display rule preview and its sub sections', () => {
-        cy.log('rule preview panel');
+      it(
+        'should display rule preview and its sub sections',
+        { tags: '@brokenInServerless' },
+        () => {
+          cy.log('rule preview panel');
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).scrollIntoView();
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).should('be.visible');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER).should('be.visible');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY).should('be.visible');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
 
-        cy.log('about');
+          cy.log('about');
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER)
-          .should('be.visible')
-          .and('contain.text', 'About');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT).should('be.visible');
-        toggleRulePreviewAboutSection();
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER)
+            .should('be.visible')
+            .and('contain.text', 'About');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT).should('be.visible');
+          toggleRulePreviewAboutSection();
 
-        cy.log('definition');
+          cy.log('definition');
 
-        toggleRulePreviewDefinitionSection();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER)
-          .should('be.visible')
-          .and('contain.text', 'Definition');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT).should(
-          'be.visible'
-        );
-        toggleRulePreviewDefinitionSection();
+          toggleRulePreviewDefinitionSection();
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER)
+            .should('be.visible')
+            .and('contain.text', 'Definition');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT).should(
+            'be.visible'
+          );
+          toggleRulePreviewDefinitionSection();
 
-        cy.log('schedule');
+          cy.log('schedule');
 
-        toggleRulePreviewScheduleSection();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER)
-          .should('be.visible')
-          .and('contain.text', 'Schedule');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT).should('be.visible');
-        toggleRulePreviewScheduleSection();
-      });
+          toggleRulePreviewScheduleSection();
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER)
+            .should('be.visible')
+            .and('contain.text', 'Schedule');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT).should(
+            'be.visible'
+          );
+          toggleRulePreviewScheduleSection();
+        }
+      );
     });
   }
 );

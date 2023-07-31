@@ -27,7 +27,7 @@ describe('persistent timeline', () => {
     );
   });
 
-  it('persist the deletion of a column', function () {
+  it('persist the deletion of a column', { tags: '@brokenInServerless' }, function () {
     /* For testing purposes we are going to use the message column */
     const COLUMN = 'message';
 

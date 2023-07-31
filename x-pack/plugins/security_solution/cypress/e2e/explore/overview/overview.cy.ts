@@ -64,7 +64,7 @@ describe('Overview Page', () => {
   });
 });
 
-describe('Overview page with no data', () => {
+describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'auditbeat');
   });

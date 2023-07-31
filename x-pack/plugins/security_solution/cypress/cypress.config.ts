@@ -20,6 +20,10 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
+  env: {
+    grepUntagged: true,
+    grepFilterTests: true,
+  },
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,

@@ -84,7 +84,7 @@ describe(
     });
 
     describe('about section', () => {
-      it('should display about section', () => {
+      it('should display about section', { tags: '@brokenInServerless' }, () => {
         cy.log('header and content');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER)
@@ -141,7 +141,7 @@ describe(
       });
     });
 
-    describe('visualizations section', () => {
+    describe('visualizations section', { tags: '@brokenInServerless' }, () => {
       it('should display analyzer and session previews', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabVisualizationsSection();
@@ -158,7 +158,7 @@ describe(
       });
     });
 
-    describe('investigation section', () => {
+    describe('investigation section', { tags: '@brokenInServerless' }, () => {
       it('should display investigation section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
@@ -219,7 +219,7 @@ describe(
       });
     });
 
-    describe('insights section', () => {
+    describe('insights section', { tags: '@brokenInServerless' }, () => {
       it('should display entities section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();

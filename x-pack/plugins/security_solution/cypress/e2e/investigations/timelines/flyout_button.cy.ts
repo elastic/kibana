@@ -47,12 +47,16 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
   });
 
-  it('re-focuses the toggle button when timeline is closed by clicking the [X] close button', () => {
-    openTimelineUsingToggle();
-    closeTimelineUsingCloseButton();
+  it(
+    're-focuses the toggle button when timeline is closed by clicking the [X] close button',
+    { tags: '@brokenInServerless' },
+    () => {
+      openTimelineUsingToggle();
+      closeTimelineUsingCloseButton();
 
-    cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
-  });
+      cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
+    }
+  );
 
   it('re-focuses the toggle button when timeline is closed by pressing the Esc key', () => {
     openTimelineUsingToggle();

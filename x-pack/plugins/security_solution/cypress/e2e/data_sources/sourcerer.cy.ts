@@ -46,7 +46,7 @@ describe('Sourcerer', () => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
-  describe('permissions', () => {
+  describe('permissions', { tags: '@ess' }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
@@ -117,20 +117,24 @@ describe('Sourcerer', () => {
       cy.get(SOURCERER.saveButton).should('be.disabled');
     });
 
-    it('adds a pattern to the default index and correctly filters out auditbeat-*', () => {
-      openSourcerer();
-      isSourcererSelection(`auditbeat-*`);
-      isNotSourcererSelection('*beat*');
-      addIndexToDefault('*beat*');
-      isHostsStatValue('1');
-      openSourcerer();
-      openAdvancedSettings();
-      isSourcererSelection(`auditbeat-*`);
-      isSourcererSelection('*beat*');
-    });
+    it(
+      'adds a pattern to the default index and correctly filters out auditbeat-*',
+      { tags: '@brokenInServerless' },
+      () => {
+        openSourcerer();
+        isSourcererSelection(`auditbeat-*`);
+        isNotSourcererSelection('*beat*');
+        addIndexToDefault('*beat*');
+        isHostsStatValue('1');
+        openSourcerer();
+        openAdvancedSettings();
+        isSourcererSelection(`auditbeat-*`);
+        isSourcererSelection('*beat*');
+      }
+    );
   });
 });
-describe('Timeline scope', () => {
+describe('Timeline scope', { tags: '@brokenInServerless' }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();

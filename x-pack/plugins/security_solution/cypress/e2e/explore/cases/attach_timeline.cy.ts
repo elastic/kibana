@@ -33,7 +33,7 @@ describe('attach timeline to case', () => {
       });
     });
 
-    it('attach timeline to a new case', function () {
+    it('attach timeline to a new case', { tags: '@brokenInServerless' }, function () {
       visitTimeline(this.myTimeline.savedObjectId);
       attachTimelineToNewCase();
 
@@ -45,21 +45,25 @@ describe('attach timeline to case', () => {
       });
     });
 
-    it('attach timeline to an existing case with no case', function () {
-      visitTimeline(this.myTimeline.savedObjectId);
-      attachTimelineToExistingCase();
-      addNewCase();
+    it(
+      'attach timeline to an existing case with no case',
+      { tags: '@brokenInServerless' },
+      function () {
+        visitTimeline(this.myTimeline.savedObjectId);
+        attachTimelineToExistingCase();
+        addNewCase();
 
-      cy.location('origin').then((origin) => {
-        cy.get(DESCRIPTION_INPUT).should(
-          'have.text',
-          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
-        );
-      });
-    });
+        cy.location('origin').then((origin) => {
+          cy.get(DESCRIPTION_INPUT).should(
+            'have.text',
+            `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
+          );
+        });
+      }
+    );
   });
 
-  context('with cases created', () => {
+  context('with cases created', { tags: '@brokenInServerless' }, () => {
     before(() => {
       login();
       deleteTimelines();

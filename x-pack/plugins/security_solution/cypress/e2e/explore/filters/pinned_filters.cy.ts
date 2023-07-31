@@ -31,7 +31,7 @@ describe('pinned filters', () => {
     login();
   });
 
-  it('show pinned filters on security', () => {
+  it('show pinned filters on security', { tags: '@brokenInServerless' }, () => {
     visitWithoutDateRange(DISCOVER_WITH_PINNED_FILTER_URL);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
@@ -41,7 +41,7 @@ describe('pinned filters', () => {
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: test-host');
   });
 
-  it('does not show discover filters on security', () => {
+  it('does not show discover filters on security', { tags: '@brokenInServerless' }, () => {
     visitWithoutDateRange(DISCOVER_WITH_FILTER_URL);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
 

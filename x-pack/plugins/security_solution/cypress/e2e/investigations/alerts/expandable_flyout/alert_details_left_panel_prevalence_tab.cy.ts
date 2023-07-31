@@ -46,7 +46,7 @@ describe(
       openPrevalenceTab();
     });
 
-    it('should display prevalence tab', () => {
+    it('should display prevalence tab', { tags: '@brokenInServerless' }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');

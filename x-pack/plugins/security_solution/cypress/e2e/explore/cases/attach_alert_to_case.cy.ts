@@ -34,7 +34,7 @@ describe('Alerts timeline', () => {
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', () => {
+  context('Privileges: read only', { tags: '@ess' }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.reader);
     });
@@ -52,7 +52,7 @@ describe('Alerts timeline', () => {
     });
   });
 
-  context('Privileges: can crud', () => {
+  context('Privileges: can crud', { tags: '@ess' }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist');

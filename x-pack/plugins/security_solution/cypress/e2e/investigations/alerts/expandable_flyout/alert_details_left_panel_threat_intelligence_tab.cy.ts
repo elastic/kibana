@@ -38,7 +38,7 @@ describe(
       openThreatIntelligenceTab();
     });
 
-    it('should serialize its state to url', () => {
+    it('should serialize its state to url', { tags: '@brokenInServerless' }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');

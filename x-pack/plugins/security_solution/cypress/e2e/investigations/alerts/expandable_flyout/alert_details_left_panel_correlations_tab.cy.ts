@@ -51,7 +51,7 @@ describe(
       openCorrelationsTab();
     });
 
-    it('should render correlations details correctly', () => {
+    it('should render correlations details correctly', { tags: '@brokenInServerless' }, () => {
       cy.log('link the alert to a new case');
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();

@@ -39,19 +39,23 @@ describe(
       openGraphAnalyzerTab();
     });
 
-    it('should display analyzer graph and node list under visualize', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
-        .should('be.visible')
-        .and('have.text', 'Visualize');
+    it(
+      'should display analyzer graph and node list under visualize',
+      { tags: '@brokenInServerless' },
+      () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
+          .should('be.visible')
+          .and('have.text', 'Visualize');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Analyzer Graph');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Analyzer Graph');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
-      cy.get(ANALYZER_NODE).first().should('be.visible');
-    });
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
+        cy.get(ANALYZER_NODE).first().should('be.visible');
+      }
+    );
   }
 );

@@ -41,22 +41,26 @@ describe(
       openEntitiesTab();
     });
 
-    it('should display analyzer graph and node list under Insights Entities', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Insights');
+    it(
+      'should display analyzer graph and node list under Insights Entities',
+      { tags: '@brokenInServerless' },
+      () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
+          .should('be.visible')
+          .and('have.text', 'Insights');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Entities');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Entities');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('be.visible');
-    });
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('be.visible');
+      }
+    );
   }
 );
