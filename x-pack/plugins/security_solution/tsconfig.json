@@ -161,6 +161,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/cloud-chat-plugin",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/cypress-config"
   ]
 }
