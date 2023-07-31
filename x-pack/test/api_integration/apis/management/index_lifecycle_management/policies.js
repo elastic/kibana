@@ -9,12 +9,14 @@ import expect from '@kbn/expect';
 
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
+import { registerSnapshotPoliciesHelpers } from './snapshot_policies.helpers';
+import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.helpers';
+
 import { getPolicyPayload, getPolicyPayloadWithSearchableSnapshots } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   const {
     createIndex,
@@ -28,13 +30,14 @@ export default function ({ getService }) {
     createPolicy,
     deletePolicy,
     cleanUp: cleanUpPolicies,
-    createRepository,
-    createSLMPolicy,
-    deleteSLMPolicy,
-    deleteRepository,
-  } = registerPoliciesHelpers({ supertest, es });
+  } = registerPoliciesHelpers({ supertest });
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
+
+  const { createSnapshotPolicy, cleanupPolicies: cleanupSnapshotPolicies } =
+    registerSnapshotPoliciesHelpers(getService);
+  const { createSnapshotRepository, cleanupRepositories } =
+    registerSnapshotRepositoriesHelpers(getService);
 
   describe('policies', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
@@ -110,7 +113,7 @@ export default function ({ getService }) {
 
       before(async () => {
         try {
-          await createRepository('backing_repo'); // This corresponds to the name set in the ILM policy
+          await createSnapshotRepository('backing_repo'); // This corresponds to the name set in the ILM policy
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log('[Setup error] Error creating repository');
@@ -118,16 +121,7 @@ export default function ({ getService }) {
         }
 
         try {
-          await createSLMPolicy({
-            schedule: '0 30 1 * * ?',
-            policyName: 'policy', // Name corresponds to the policy name specified in the ILM policy
-            repository: 'backing_repo',
-            name: 'default_snapshot',
-            config: {
-              indices: ['data-*', 'important'],
-              ignoreUnavailable: true,
-            },
-          });
+          await createSnapshotPolicy('policy', 'backing_repo'); // Policy name corresponds to the policy name specified in the ILM policy
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log('[Setup error] Error creating SLM policy');
@@ -135,16 +129,7 @@ export default function ({ getService }) {
         }
       });
 
-      after(async () => {
-        try {
-          await deleteSLMPolicy('policy');
-          await deleteRepository('backing_repo');
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Cleanup error] Error cleaning up test setup');
-          throw err;
-        }
-      });
+      after(async () => Promise.all([cleanupRepositories(), cleanupSnapshotPolicies()]));
 
       it('should create a lifecycle policy with searchable snapshot action', async () => {
         const policy = getPolicyPayloadWithSearchableSnapshots('create-searchable-snapshot-policy');

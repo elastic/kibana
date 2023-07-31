@@ -8,7 +8,7 @@
 import { API_BASE_PATH, DEFAULT_POLICY_NAME } from './constants';
 import { getPolicyNames } from './lib';
 
-export const registerHelpers = ({ es, supertest }) => {
+export const registerHelpers = ({ supertest }) => {
   const loadPolicies = (withIndices = false) =>
     withIndices
       ? supertest.get(`${API_BASE_PATH}/policies?withIndices=true`)
@@ -30,40 +30,10 @@ export const registerHelpers = ({ es, supertest }) => {
       .then(deleteAllPolicies);
   };
 
-  const createRepository = (repoName, repoPath) => {
-    return es.snapshot.createRepository({
-      name: repoName,
-      body: {
-        type: 'fs',
-        settings: {
-          location: repoPath ?? '/tmp/repo',
-        },
-      },
-      verify: false,
-    });
-  };
-
-  const deleteRepository = (repository) => {
-    return es.snapshot.deleteRepository({ name: [repository] });
-  };
-
-  const createSLMPolicy = (policy) => {
-    return es.slm.putLifecycle({
-      policy_id: policy.policyName,
-      body: policy,
-    });
-  };
-
-  const deleteSLMPolicy = (policyName) => es.slm.deleteLifecycle({ policy_id: policyName });
-
   return {
     cleanUp,
     loadPolicies,
     createPolicy,
     deletePolicy,
-    createRepository,
-    deleteRepository,
-    createSLMPolicy,
-    deleteSLMPolicy,
   };
 };
