@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFieldText,
   EuiFieldPassword,
@@ -219,6 +219,16 @@ const getInputVarsFields = (
       } as const;
     });
 
+const clearInputVarsFields = (
+  input: NewPackagePolicyInput,
+  fields: AwsOptions[keyof AwsOptions]['fields']
+) =>
+  Object.keys(fields).forEach((field) => {
+    if (input.streams?.[0]?.vars?.[field]?.value) {
+      input.streams[0].vars[field].value = undefined;
+    }
+  });
+
 const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
   input.streams[0].vars?.['aws.credentials.type'].value;
 
@@ -228,21 +238,25 @@ export const EksCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
+  const onCredentialTypeChange = useCallback(
+    (optionId: string) => {
+      // clear out credentials related to current type
+      clearInputVarsFields(input, group.fields);
+
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'aws.credentials.type': { value: optionId },
+        })
+      );
+    },
+    [group.fields, input, newPolicy, updatePolicy]
+  );
 
   return (
     <>
       <AWSSetupInfoContent />
       <EuiSpacer size="l" />
-      <AwsCredentialTypeSelector
-        type={awsCredentialsType}
-        onChange={(optionId) =>
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
-              'aws.credentials.type': { value: optionId },
-            })
-          )
-        }
-      />
+      <AwsCredentialTypeSelector type={awsCredentialsType} onChange={onCredentialTypeChange} />
       <EuiSpacer size="m" />
       {group.info}
       <EuiSpacer size="s" />
