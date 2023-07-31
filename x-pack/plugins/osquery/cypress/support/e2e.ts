@@ -33,6 +33,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+      findBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
@@ -48,6 +49,10 @@ Cypress.Commands.add('getBySel', (selector, ...args) =>
 // finds elements that start with the given selector
 Cypress.Commands.add('getBySelContains', (selector, ...args) =>
   cy.get(`[data-test-subj^="${selector}"]`, ...args)
+);
+
+Cypress.Commands.add('findBySel', (selector, ...args) =>
+  cy.find(`[data-test-subj="${selector}"]`, ...args)
 );
 
 Cypress.Commands.add(
