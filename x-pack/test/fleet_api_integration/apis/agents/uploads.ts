@@ -42,7 +42,8 @@ export default function (providerContext: FtrProviderContext) {
     });
   };
 
-  describe('fleet_uploads', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162730
+  describe.skip('fleet_uploads', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
