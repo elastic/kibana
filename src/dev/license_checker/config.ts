@@ -21,6 +21,7 @@ export const LICENSE_ALLOWED = [
   '(MIT AND Zlib)',
   '(MIT OR Apache-2.0)',
   '(MIT OR GPL-3.0)',
+  '(MIT OR GPL-3.0-or-later)',
   '(WTFPL OR MIT)',
   '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
