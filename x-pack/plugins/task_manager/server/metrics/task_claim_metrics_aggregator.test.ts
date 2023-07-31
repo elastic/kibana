@@ -43,23 +43,39 @@ describe('TaskClaimMetricsAggregator', () => {
   });
 
   test('should correctly initialize', () => {
-    expect(taskClaimMetricsAggregator.collect()).toEqual({ success: 0, total: 0 });
+    expect(taskClaimMetricsAggregator.collect()).toEqual({
+      success: 0,
+      total: 0,
+      duration: { counts: [], values: [] },
+    });
   });
 
   test('should correctly return initialMetrics', () => {
-    expect(taskClaimMetricsAggregator.initialMetric()).toEqual({ success: 0, total: 0 });
+    expect(taskClaimMetricsAggregator.initialMetric()).toEqual({
+      success: 0,
+      total: 0,
+      duration: { counts: [], values: [] },
+    });
   });
 
   test('should correctly process task lifecycle success event', () => {
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
-    expect(taskClaimMetricsAggregator.collect()).toEqual({ success: 2, total: 2 });
+    expect(taskClaimMetricsAggregator.collect()).toEqual({
+      success: 2,
+      total: 2,
+      duration: { counts: [2], values: [10] },
+    });
   });
 
   test('should correctly process task lifecycle failure event', () => {
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
-    expect(taskClaimMetricsAggregator.collect()).toEqual({ success: 0, total: 2 });
+    expect(taskClaimMetricsAggregator.collect()).toEqual({
+      success: 0,
+      total: 2,
+      duration: { counts: [], values: [] },
+    });
   });
 
   test('should correctly reset counter', () => {
@@ -70,9 +86,17 @@ describe('TaskClaimMetricsAggregator', () => {
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
     taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
-    expect(taskClaimMetricsAggregator.collect()).toEqual({ success: 4, total: 7 });
+    expect(taskClaimMetricsAggregator.collect()).toEqual({
+      success: 4,
+      total: 7,
+      duration: { counts: [4], values: [10] },
+    });
 
     taskClaimMetricsAggregator.reset();
-    expect(taskClaimMetricsAggregator.collect()).toEqual({ success: 0, total: 0 });
+    expect(taskClaimMetricsAggregator.collect()).toEqual({
+      success: 0,
+      total: 0,
+      duration: { counts: [], values: [] },
+    });
   });
 });
