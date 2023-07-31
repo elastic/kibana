@@ -39,11 +39,15 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
+import { ReportingServerInfo } from '@kbn/reporting-common';
+import {
+  CsvV2ExportType,
+  CsvSearchSourceImmediateExportType,
+  CsvSearchSourceExportType,
+} from '@kbn/reporting-export-types-csv';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
-import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { PngV1ExportType } from './export_types/png';
@@ -53,7 +57,6 @@ import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
-import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate';
 import { ExportType } from './export_types/common';
 
 export interface ReportingInternalSetup {
@@ -82,18 +85,6 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
-}
-
-/**
- * @internal
- */
-export interface ReportingServerInfo {
-  port: number;
-  name: string;
-  uuid: string;
-  basePath: string;
-  protocol: string;
-  hostname: string;
 }
 
 /**

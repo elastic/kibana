@@ -9,5 +9,23 @@
 export { CancellationToken } from './cancellation_token';
 export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
 export * from './errors';
+export * from 'crypto';
 export * from './constants';
 export * from './schema_utils';
+export * from './schema';
+export type {
+  BaseParams,
+  BasePayload,
+  BaseParamsV2,
+  BasePayloadV2,
+  ReportingServerInfo,
+  CreateJobFn,
+  RunTaskFn,
+  JobParamsDownloadCSV,
+  ReportingRequestHandlerContext,
+} from './types';
+export type { LocatorParams } from './url';
+export { ExportType } from './export_type';
+export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
+export { getFieldFormats, setFieldFormats } from './services';
+export { decryptJobHeaders } from './decrypt_job_headers';

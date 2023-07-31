@@ -15,5 +15,4 @@ export type {
   BasePayloadV2,
   JobAppParamsPDF,
   JobAppParamsPDFV2,
-  LocatorParams,
 } from './types';

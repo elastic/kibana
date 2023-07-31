@@ -26,11 +26,11 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DeepPartial } from 'utility-types';
+import { setFieldFormats } from '@kbn/reporting-common';
 import { ReportingCore } from '..';
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
-import { setFieldFormats } from '../services';
 
 export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>

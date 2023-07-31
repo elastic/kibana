@@ -1,31 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from '@kbn/core/server';
-import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { CsvGenerator } from '@kbn/generate-csv';
 import { Writable } from 'stream';
-import { CancellationToken } from '@kbn/reporting-common';
-import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import {
   CSV_REPORT_TYPE_V2,
+  LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-} from '../../../common/constants';
-import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
-import { ReportingRequestHandlerContext } from '../../types';
-import { getFieldFormats } from '../../services';
-import { decryptJobHeaders } from '../common/decrypt_job_headers';
+  LICENSE_TYPE_ENTERPRISE,
+  CancellationToken,
+  BaseExportTypeSetupDeps,
+  BaseExportTypeStartDeps,
+  ExportType,
+  decryptJobHeaders,
+  ReportingRequestHandlerContext,
+  getFieldFormats,
+} from '@kbn/reporting-common';
+import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from './types';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -52,11 +55,11 @@ export class CsvV2ExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
+  declare startDeps: CsvV2ExportTypeStartDeps;
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('csv-export-v2');
+    this.logger = this.logger.get('csv-export-v2');
   }
 
   public createJob = async (

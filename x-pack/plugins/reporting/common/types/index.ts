@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
+import {
+  BaseParams,
+  BaseParamsV2,
+  BasePayload,
+  BasePayloadV2,
+  TaskRunMetrics,
+  TaskRunResult,
+} from '@kbn/reporting-common';
+import { JobId } from '@kbn/reporting-common/types';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type {
   JobParamsCsvFromSavedObject,
@@ -21,7 +28,6 @@ export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
   IlmPolicyStatusResponse,
-  LocatorParams,
   ManagementLinkFn,
   UrlOrUrlLocatorTuple,
 } from './url';

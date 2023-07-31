@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../../../packages/kbn-reporting/common/create_config.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",

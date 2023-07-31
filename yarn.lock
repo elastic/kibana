@@ -5041,7 +5041,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-plugin@link:x-pack/plugins/reporting_export_types":
+"@kbn/reporting-export-types-csv@link:packages/kbn-reporting/export_types/csv":
   version "0.0.0"
   uid ""
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import { LocatorParams } from '@kbn/reporting-common';
 import type { JobId } from './base';
 
 type DownloadLink = string;
@@ -13,20 +13,6 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
-
-export interface LocatorParams<P extends SerializableRecord = SerializableRecord> {
-  id: string;
-
-  /**
-   * Kibana version used to create the params
-   */
-  version: string;
-
-  /**
-   * Data to recreate the user's state in the application
-   */
-  params: P;
-}
 
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 

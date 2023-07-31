@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-
 export interface FakeRequest {
   headers: Record<string, string>;
-}
-
-export interface JobParamsDownloadCSV {
-  browserTimezone: string;
-  title: string;
-  searchSource: SerializedSearchSourceFields;
-  columns?: string[];
 }
 
 export interface SavedObjectServiceError {

@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -21,12 +22,10 @@ import {
   IClusterClient,
 } from '@kbn/core/server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { ReportingConfigType } from '../../config';
-import { ReportingServerInfo } from '../../core';
-import { CreateJobFn, ReportingStart, RunTaskFn } from '../../types';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { CreateJobFn, ReportingConfigType, ReportingServerInfo, RunTaskFn } from './types';
 
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
@@ -38,7 +37,6 @@ export interface BaseExportTypeStartDeps {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   screenshotting: ScreenshottingStart;
-  reporting: ReportingStart;
 }
 
 export abstract class ExportType<
@@ -84,6 +82,20 @@ export abstract class ExportType<
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
+  private getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.setupDeps.spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
+  }
+
   // needed to be protected vs private for the csv search source immediate export type
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
@@ -93,7 +105,7 @@ export abstract class ExportType<
 
   protected async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = this.startDeps.reporting.getSpaceId(request, logger);
+    const spaceId = this.getSpaceId(request, logger);
 
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);

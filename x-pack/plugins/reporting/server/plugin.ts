@@ -12,13 +12,13 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { setFieldFormats } from '@kbn/reporting-common';
 import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
-import { setFieldFormats } from './services';
 import type {
   ReportingRequestHandlerContext,
   ReportingSetup,

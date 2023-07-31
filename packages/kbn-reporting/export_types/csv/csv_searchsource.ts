@@ -1,33 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { CsvGenerator } from '@kbn/generate-csv';
-import { CancellationToken } from '@kbn/reporting-common';
-import { Writable } from 'stream';
 import {
   CSV_JOB_TYPE,
+  LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-} from '../../../common/constants';
-import { getFieldFormats } from '../../services';
-import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
-import { decryptJobHeaders } from '../common/decrypt_job_headers';
-import { JobParamsCSV, TaskPayloadCSV } from './types';
+  LICENSE_TYPE_ENTERPRISE,
+  BaseExportTypeSetupDeps,
+  BaseExportTypeStartDeps,
+  ExportType,
+  decryptJobHeaders,
+  getFieldFormats,
+  CancellationToken,
+} from '@kbn/reporting-common';
+import { Writable } from 'stream';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { JobParamsCSV, TaskPayloadCSV } from './types';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
-  discover: DiscoverServerPluginStart;
   data: DataPluginStart;
+  discover: DiscoverServerPluginStart;
 }
 
 export class CsvSearchSourceExportType extends ExportType<
@@ -49,6 +52,7 @@ export class CsvSearchSourceExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
+  declare startDeps: CsvSearchSourceExportTypeStartDeps;
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
@@ -56,7 +60,7 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams };
+    return { ...jobParams, isDeprecated: false };
   };
 
   public runTask = async (

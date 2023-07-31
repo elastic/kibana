@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -28,8 +28,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Writable } from 'stream';
-import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ExportTypesRegistry } from './lib';
@@ -55,24 +53,6 @@ export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
-
-/**
- * Internal Types
- */
-// standard type for create job function of any ExportType implementation
-export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
-  jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  req: KibanaRequest
-) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
-
-// standard type for run task function of any ExportType implementation
-export type RunTaskFn<TaskPayloadType = BasePayload> = (
-  jobId: string,
-  payload: TaskPayloadType,
-  cancellationToken: CancellationToken,
-  stream: Writable
-) => Promise<TaskRunResult>;
 
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
