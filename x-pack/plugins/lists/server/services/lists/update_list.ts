@@ -15,7 +15,7 @@ import type {
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { UpdateEsListSchema } from '../../schemas/elastic_query';
 
@@ -35,7 +35,6 @@ export interface UpdateListOptions {
 }
 
 export const updateList = async ({
-  _version,
   id,
   name,
   description,
@@ -52,19 +51,37 @@ export const updateList = async ({
     return null;
   } else {
     const calculatedVersion = version == null ? list.version + 1 : version;
-    const doc: UpdateEsListSchema = {
+
+    const params: UpdateEsListSchema = {
       description,
       meta,
       name,
       updated_at: updatedAt,
       updated_by: user,
+      version: calculatedVersion,
     };
-    const response = await esClient.update({
-      ...decodeVersion(_version),
-      body: { doc },
-      id,
+
+    const response = await esClient.updateByQuery({
+      conflicts: 'proceed',
       index: listIndex,
-      refresh: 'wait_for',
+      query: {
+        ids: {
+          values: [id],
+        },
+      },
+      refresh: false,
+      script: {
+        lang: 'painless',
+        params,
+        source: `
+            ctx._source.description = params.description;
+            ctx._source.meta = params.meta;
+            ctx._source.name = params.name;
+            ctx._source.updated_at = params.updated_at;
+            ctx._source.updated_by = params.updated_by;
+            ctx._source.version = params.version;
+        `,
+      },
     });
     return {
       '@timestamp': list['@timestamp'],
@@ -73,7 +90,7 @@ export const updateList = async ({
       created_by: list.created_by,
       description: description ?? list.description,
       deserializer: list.deserializer,
-      id: response._id,
+      id,
       immutable: list.immutable,
       meta,
       name: name ?? list.name,

@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(404);
 
       expect(fetchedIndices).to.eql({
-        message: 'index .lists-default and index .items-default does not exist',
+        message: 'data stream .lists-default and data stream .items-default does not exist',
         status_code: 404,
       });
 

@@ -24,6 +24,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('update_lists', () => {
     describe('update lists', () => {
@@ -92,6 +93,79 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const bodyToCompare = removeListServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputList);
+
+        await retry.waitFor('updates should be persistent', async () => {
+          const { body: list } = await supertest
+            .get(LIST_URL)
+            .query({ id: createListBody.id })
+            .set('kbn-xsrf', 'true');
+
+          expect(list.version).to.be(2);
+          expect(list.name).to.be('some other name');
+          return true;
+        });
+      });
+
+      it('should remove unspecified meta field', async () => {
+        const { id, ...listNoId } = getCreateMinimalListSchemaMock();
+        // create a simple list with no id which will use an auto-generated id
+        const { body: createListBody } = await supertest
+          .post(LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ...listNoId, meta: { test: true } });
+
+        const updatedList: UpdateListSchema = {
+          ...getUpdateMinimalListSchemaMock(),
+          id: createListBody.id,
+          name: 'some other name',
+        };
+        const { body: updatedListBody } = await supertest
+          .put(LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedList);
+
+        expect(updatedListBody.meta).to.eql(undefined);
+
+        await retry.waitFor('updates should be persistent', async () => {
+          const { body: list } = await supertest
+            .get(LIST_URL)
+            .query({ id: createListBody.id })
+            .set('kbn-xsrf', 'true');
+
+          expect(list.meta).to.eql(undefined);
+          return true;
+        });
+      });
+
+      it('should update meta field', async () => {
+        const { id, ...listNoId } = getCreateMinimalListSchemaMock();
+        // create a simple list with no id which will use an auto-generated id
+        const { body: createListBody } = await supertest
+          .post(LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ...listNoId, meta: { test: true } });
+
+        const updatedList: UpdateListSchema = {
+          ...getUpdateMinimalListSchemaMock(),
+          id: createListBody.id,
+          meta: { foo: 'some random value' },
+        };
+        const { body: updatedListBody } = await supertest
+          .put(LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedList);
+
+        expect(updatedListBody.meta).to.eql({ foo: 'some random value' });
+
+        await retry.waitFor('updates should be persistent', async () => {
+          const { body: list } = await supertest
+            .get(LIST_URL)
+            .query({ id: createListBody.id })
+            .set('kbn-xsrf', 'true');
+
+          expect(list.meta).to.eql({ foo: 'some random value' });
+          return true;
+        });
       });
 
       it('should change the version of a list when it updates a property', async () => {

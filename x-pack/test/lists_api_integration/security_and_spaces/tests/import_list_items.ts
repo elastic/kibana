@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           status_code: 400,
           message:
-            'To import a list item, the index must exist first. Index ".lists-default" does not exist',
+            'To import a list item, the data steam must exist first. Data stream ".lists-default" does not exist',
         });
       });
     });
