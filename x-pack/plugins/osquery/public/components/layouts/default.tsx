@@ -11,12 +11,12 @@ export const containerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
   minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
   background: euiTheme.colors.emptyShade,
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'column' as const,
 });
 
 export const wrapperCss = {
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'column' as const,
   flex: 1,
 };
 

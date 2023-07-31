@@ -72,11 +72,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
     <div css={containerCss} data-test-subj={dataTestSubj}>
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
       <div css={wrapperCss}>
         <HeaderColumns
           leftColumn={leftColumn}

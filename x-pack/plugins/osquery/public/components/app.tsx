@@ -48,11 +48,7 @@ const OsqueryAppComponent = () => {
   }
 
   return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
     <div css={containerCss} id="osquery-app">
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
       <div css={wrapperCss}>
         <MainNavigation />
         <OsqueryAppRoutes />

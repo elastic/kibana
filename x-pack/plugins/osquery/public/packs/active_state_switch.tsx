@@ -91,8 +91,6 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   return (
     <>
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
       {isLoading && <EuiLoadingSpinner css={euiLoadingSpinnerCss} />}
       <EuiSwitch
         checked={!!item.enabled}

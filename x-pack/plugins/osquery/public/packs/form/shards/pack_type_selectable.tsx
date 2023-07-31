@@ -10,17 +10,10 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import styled from '@emotion/styled';
-import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
-  border: ${({
-    theme,
-    selectable,
-  }: {
-    theme: { euiTheme: EuiThemeComputed };
-    selectable: { isSelected: boolean };
-  }) => {
+  border: ${({ theme, selectable }) => {
     if (selectable?.isSelected) {
       return `1px solid ${theme.euiTheme.colors.success}`;
     }
@@ -86,8 +79,6 @@ const PackTypeSelectableComponent = ({
       <EuiFormRow label="Type" fullWidth>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
             <StyledEuiCard
               layout="horizontal"
               title={
@@ -111,8 +102,6 @@ const PackTypeSelectableComponent = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
             <StyledEuiCard
               layout="horizontal"
               title={

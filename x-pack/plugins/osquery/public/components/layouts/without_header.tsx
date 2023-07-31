@@ -29,8 +29,6 @@ interface Props {
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Fragment>
-    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-    {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
     <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>
         <div css={contentCss}>

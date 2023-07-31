@@ -112,8 +112,6 @@ const PackDetailsPageComponent = () => {
           </EuiDescriptionList>
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="agents_failed_count_divider">
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
           <div css={dividerCss} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">

@@ -24,8 +24,6 @@ export const MainNavigation = () => {
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
 
   return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
     <div css={navCss}>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>

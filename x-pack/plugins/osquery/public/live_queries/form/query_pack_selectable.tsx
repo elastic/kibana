@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -16,13 +15,7 @@ const StyledEuiCard = styled(EuiCard)`
   padding: 0;
   display: flex;
   flex-direction: row;
-  border: ${({
-    theme,
-    selectable,
-  }: {
-    theme: { euiTheme: EuiThemeComputed };
-    selectable: { isSelected: boolean };
-  }) => {
+  border: ${({ theme, selectable }) => {
     if (selectable?.isSelected) {
       return `1px solid ${theme.euiTheme.colors.success}`;
     }
@@ -58,6 +51,7 @@ const StyledEuiCard = styled(EuiCard)`
     }
   }
 `;
+
 interface QueryPackSelectableProps {
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
@@ -108,8 +102,6 @@ export const QueryPackSelectable = ({
       <EuiFormRow label="Query type" fullWidth>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
             <StyledEuiCard
               layout="horizontal"
               title={i18n.translate('xpack.osquery.liveQuery.queryForm.singleQueryTypeLabel', {
@@ -128,8 +120,6 @@ export const QueryPackSelectable = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
             <StyledEuiCard
               layout="horizontal"
               title={i18n.translate('xpack.osquery.liveQuery.queryForm.packQueryTypeLabel', {

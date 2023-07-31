@@ -148,8 +148,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
       {!isAdvancedToggleHidden && (
         <EuiAccordion
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
           css={euiAccordionCss}
           id="advanced"
           forceState={advancedContentState}

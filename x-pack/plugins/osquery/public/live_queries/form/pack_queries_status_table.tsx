@@ -39,7 +39,7 @@ const truncateTooltipTextCss = {
   '> span': {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+    whiteSpace: 'nowrap' as const,
   },
 };
 
@@ -169,8 +169,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   >({});
   const renderIDColumn = useCallback(
     (id: string) => (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
       <div css={truncateTooltipTextCss}>
         <EuiToolTip content={id} display="block">
           <>{id}</>

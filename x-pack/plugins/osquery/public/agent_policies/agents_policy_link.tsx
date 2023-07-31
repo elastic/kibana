@@ -14,7 +14,7 @@ import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kiba
 import { useAgentPolicy } from './use_agent_policy';
 
 const euiLinkCss = {
-  whiteSpace: 'nowrap',
+  whiteSpace: 'nowrap' as const,
   textOverflow: 'ellipsis',
   overflow: 'hidden',
 };
@@ -51,8 +51,6 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
       {data?.name ?? policyId}

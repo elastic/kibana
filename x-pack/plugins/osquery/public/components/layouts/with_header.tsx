@@ -38,8 +38,6 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
       {headerChildren}
     </Header>
     <EuiPage
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
       css={pageCss}
       restrictWidth={restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
