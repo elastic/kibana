@@ -75,30 +75,32 @@ export class CasesUiPlugin
       });
     }
 
-    plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: APP_ID,
-      title: APP_TITLE,
-      order: 1,
-      async mount(params: ManagementAppMountParams) {
-        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-          CoreStart,
-          CasesPluginStart,
-          unknown
-        ];
-
-        const { renderApp } = await import('./application');
-
-        return renderApp({
-          mountParams: params,
-          coreStart,
-          pluginsStart,
-          storage,
-          kibanaVersion,
-          externalReferenceAttachmentTypeRegistry,
-          persistableStateAttachmentTypeRegistry,
-        });
-      },
-    });
+    if(config.stack.enabled) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: APP_ID,
+        title: APP_TITLE,
+        order: 1,
+        async mount(params: ManagementAppMountParams) {
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            CasesPluginStart,
+            unknown
+          ];
+  
+          const { renderApp } = await import('./application');
+  
+          return renderApp({
+            mountParams: params,
+            coreStart,
+            pluginsStart,
+            storage,
+            kibanaVersion,
+            externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry,
+          });
+        },
+      });
+    }
 
     return {
       attachmentFramework: {

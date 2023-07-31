@@ -79,3 +79,6 @@ console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+
+# Disable cases in stack management
+xpack.cases.stack.enabled: false
