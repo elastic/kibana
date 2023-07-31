@@ -72,13 +72,7 @@ export function telemetryTaskRunner(
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
-  /**
-   * Filter out system actions from the
-   * inMemoryConnectors list.
-   */
-  const inMemoryConnectors = getInMemoryConnectors().filter(
-    (inMemoryConnector) => inMemoryConnector.isPreconfigured
-  );
+  const inMemoryConnectors = getInMemoryConnectors();
 
   return ({ taskInstance }: RunContext) => {
     const state = taskInstance.state as LatestTaskStateSchema;

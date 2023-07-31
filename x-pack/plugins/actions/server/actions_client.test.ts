@@ -1659,7 +1659,7 @@ describe('getBulk()', () => {
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
-      return actionsClient.getBulk(['1', 'testPreconfigured']);
+      return actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
     }
 
     test('ensures user is authorised to get the type of action', async () => {
@@ -1709,7 +1709,7 @@ describe('getBulk()', () => {
         }
       );
 
-      await actionsClient.getBulk(['1']);
+      await actionsClient.getBulk({ ids: ['1'] });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1725,7 +1725,7 @@ describe('getBulk()', () => {
     test('logs audit event when not authorised to bulk get connectors', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(actionsClient.getBulk(['1'])).rejects.toThrow();
+      await expect(actionsClient.getBulk({ ids: ['1'] })).rejects.toThrow();
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1810,7 +1810,7 @@ describe('getBulk()', () => {
       getEventLogClient,
     });
 
-    const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
+    const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
 
     expect(result).toEqual([
       {
@@ -1907,7 +1907,7 @@ describe('getBulk()', () => {
     });
 
     await expect(
-      actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'])
+      actionsClient.getBulk({ ids: ['1', 'testPreconfigured', 'system-connector-.cases'] })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
   });
 
@@ -1982,7 +1982,10 @@ describe('getBulk()', () => {
     });
 
     expect(
-      await actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'], false)
+      await actionsClient.getBulk({
+        ids: ['1', 'testPreconfigured', 'system-connector-.cases'],
+        throwIfSystemAction: false,
+      })
     ).toEqual([
       {
         actionTypeId: '.slack',
