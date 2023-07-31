@@ -92,6 +92,7 @@ export const useExistingFieldsFetcher = (
       dataViewId: string | undefined;
       fetchId: string;
     }): Promise<void> => {
+      const startTime = window.performance.now();
       if (!dataViewId || !query || !fromDate || !toDate) {
         return;
       }
@@ -178,6 +179,7 @@ export const useExistingFieldsFetcher = (
   const dataViewsHash = getDataViewsHash(params.dataViews);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
+      const startTime = window.performance.now();
       const fetchId = generateId();
       lastFetchId = fetchId;
 
@@ -192,6 +194,8 @@ export const useExistingFieldsFetcher = (
           ...options,
           dataViewId,
         });
+        const duration = window.performance.now() - startTime;
+        window.console.log(`fetchFieldsExistenceInfo, dataViewId: ${dataViewId}: ${duration}`);
         return;
       }
       // refetch for all mentioned data views
@@ -202,6 +206,10 @@ export const useExistingFieldsFetcher = (
             dataViewId: dataView.id,
           })
         )
+      );
+      const duration = window.performance.now() - startTime;
+      window.console.log(
+        `refetchFieldsExistenceInfo, dataViews: ${params.dataViews.map((v) => v.name)}: ${duration}`
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
