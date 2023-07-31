@@ -6,6 +6,7 @@
  */
 
 export * from './actions/audit_log_route';
+export * from './actions/action_status_route';
 export * from './actions/details_route';
 export * from './actions/file_download_route';
 export * from './actions/file_info_route';
@@ -18,3 +19,11 @@ export * from './actions/suspend_procesS_route';
 export * from './actions/get_processes_route';
 export * from './actions/get_file_route';
 export * from './actions/execute_route';
+
+export * from './metadata/list_metadata_route';
+export * from './metadata/get_metadata_route';
+
+export * from './policy/get_policy_response_route';
+export * from './policy/get_agent_policy_summary_route';
+
+export * from './suggestions/get_suggestions_route';
