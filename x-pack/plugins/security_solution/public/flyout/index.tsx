@@ -21,6 +21,9 @@ import {
   SecuritySolutionFlyoutUrlSyncProvider,
   useSecurityFlyoutUrlSync,
 } from './shared/context/url_sync';
+import type { PreviewPanelProps } from './preview';
+import { PreviewPanel, PreviewPanelKey } from './preview';
+import { PreviewPanelProvider } from './preview/context';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -41,6 +44,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <LeftPanelProvider {...(props as LeftPanelProps).params}>
         <LeftPanel path={props.path as LeftPanelProps['path']} />
       </LeftPanelProvider>
+    ),
+  },
+  {
+    key: PreviewPanelKey,
+    component: (props) => (
+      <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
+        <PreviewPanel path={props.path as PreviewPanelProps['path']} />
+      </PreviewPanelProvider>
     ),
   },
 ];
