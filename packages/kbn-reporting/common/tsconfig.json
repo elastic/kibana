@@ -19,5 +19,12 @@
     "@kbn/i18n",
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/data-plugin",
   ]
 }
