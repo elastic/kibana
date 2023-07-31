@@ -2937,7 +2937,7 @@
   },
   "risk-engine-configuration": {
     "properties": {
-      "enable": {
+      "enabled": {
         "type": "boolean"
       },
       "last_updated_by": {
