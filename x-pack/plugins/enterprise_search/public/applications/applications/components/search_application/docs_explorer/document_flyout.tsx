@@ -31,9 +31,9 @@ import {
   convertResultToFieldsAndIndex,
   FieldValue,
 } from './convert_results';
+import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
-import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 
 export const DocumentFlyout: React.FC = () => {
   const { fieldTypesByIndex } = useValues(SearchApplicationDocsExplorerLogic);

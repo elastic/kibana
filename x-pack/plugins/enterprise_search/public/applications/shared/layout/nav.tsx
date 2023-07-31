@@ -212,9 +212,12 @@ export const useEnterpriseSearchApplicationNav = (
           items: [
             {
               id: 'enterpriseSearchApplicationDocsExplorer',
-              name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.docsExplorerTitle', {
-                defaultMessage: 'Docs Explorer',
-              }),
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.searchApplication.docsExplorerTitle',
+                {
+                  defaultMessage: 'Docs Explorer',
+                }
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 to: `${searchApplicationPath}/${SearchApplicationViewTabs.DOCS_EXPLORER}`,

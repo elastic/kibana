@@ -65,9 +65,9 @@ import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { APICallData, APICallFlyout } from './api_call_flyout';
 
+import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
-import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 
 import {
   PagingInfoView,

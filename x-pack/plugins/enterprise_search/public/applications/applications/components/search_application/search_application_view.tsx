@@ -28,11 +28,11 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_templat
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { SearchApplicationConnect } from './connect/search_application_connect';
+import { SearchApplicationDocsExplorer } from './docs_explorer/docs_explorer';
 import { SearchApplicationHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
-import { SearchApplicationDocsExplorer } from './docs_explorer/docs_explorer';
 
 export const SearchApplicationView: React.FC = () => {
   const { fetchSearchApplication, closeDeleteSearchApplicationModal } = useActions(
