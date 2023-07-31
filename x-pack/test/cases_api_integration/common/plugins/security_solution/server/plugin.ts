@@ -130,40 +130,5 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
     });
-
-    features.registerKibanaFeature({
-      id: 'testNoCasesConnectorFixture',
-      name: 'TestNoCasesConnectorFixture',
-      app: ['kibana'],
-      category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      cases: ['testNoCasesConnectorFixture'],
-      privileges: {
-        all: {
-          api: [],
-          app: ['kibana'],
-          cases: {
-            create: ['testNoCasesConnectorFixture'],
-            read: ['testNoCasesConnectorFixture'],
-            update: ['testNoCasesConnectorFixture'],
-          },
-          savedObject: {
-            all: [...filesSavedObjectTypes],
-            read: [...filesSavedObjectTypes],
-          },
-          ui: [],
-        },
-        read: {
-          app: ['kibana'],
-          cases: {
-            read: [],
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-      },
-    });
   }
 }

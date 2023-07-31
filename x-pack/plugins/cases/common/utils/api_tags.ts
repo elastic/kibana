@@ -7,9 +7,8 @@
 
 import {
   BULK_GET_USER_PROFILES_API_TAG,
-  READ_CASES_CONNECTOR_API_TAG,
+  GET_CONNECTORS_CONFIGURE_API_TAG,
   SUGGEST_USER_PROFILES_API_TAG,
-  WRITE_CASES_CONNECTOR_API_TAG,
 } from '../constants';
 import { HttpApiTagOperation } from '../constants/types';
 import type { Owner } from '../constants/types';
@@ -24,15 +23,14 @@ export const getApiTags = (owner: Owner) => {
     all: [
       SUGGEST_USER_PROFILES_API_TAG,
       BULK_GET_USER_PROFILES_API_TAG,
-      WRITE_CASES_CONNECTOR_API_TAG,
-      READ_CASES_CONNECTOR_API_TAG,
+      GET_CONNECTORS_CONFIGURE_API_TAG,
       create,
       read,
     ] as const,
     read: [
       SUGGEST_USER_PROFILES_API_TAG,
       BULK_GET_USER_PROFILES_API_TAG,
-      READ_CASES_CONNECTOR_API_TAG,
+      GET_CONNECTORS_CONFIGURE_API_TAG,
       read,
     ] as const,
     delete: [deleteTag] as const,

@@ -6,7 +6,7 @@
  */
 
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
@@ -21,7 +21,6 @@ import {
   createConnector,
   getServiceNowConnector,
 } from '../../../../common/lib/api';
-import { noConnector } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -71,41 +70,6 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         connectorId: 'not-exist',
         expectedHttpCode: 404,
-      });
-    });
-
-    it('should get 401 when trying to push to a case without API tag', async () => {
-      await createConfiguration(
-        supertest,
-        getConfigurationRequest({
-          id: 'servicenow-1',
-          name: 'servicenow',
-          type: ConnectorTypes.serviceNowITSM,
-        })
-      );
-
-      const postedCase = await createCase(supertest, {
-        ...postCaseReq,
-        connector: {
-          id: 'servicenow-1',
-          name: 'servicenow',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: {
-            urgency: '2',
-            impact: '2',
-            severity: '2',
-            category: 'software',
-            subcategory: 'os',
-          },
-        },
-      });
-
-      await pushCase({
-        supertest,
-        caseId: postedCase.id,
-        connectorId: postedCase.connector.id,
-        expectedHttpCode: 401,
-        auth: { user: noConnector, space: null },
       });
     });
   });

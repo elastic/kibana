@@ -58,7 +58,7 @@ describe('getUICapabilities', () => {
         update_cases: false,
         delete_cases: false,
         push_cases: false,
-        cases_connector: false,
+        cases_connectors: false,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -95,7 +95,7 @@ describe('getUICapabilities', () => {
         update_cases: true,
         delete_cases: true,
         push_cases: true,
-        cases_connector: true,
+        cases_connectors: true,
       })
     ).toMatchInlineSnapshot(`
       Object {

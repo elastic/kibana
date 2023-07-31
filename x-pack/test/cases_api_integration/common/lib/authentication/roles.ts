@@ -44,7 +44,7 @@ export const noCasesPrivilegesSpace1: Role = {
   },
 };
 
-export const noCasesConnector: Role = {
+export const noCasesConnectors: Role = {
   name: 'no_kibana_privileges',
   privileges: {
     elasticsearch: {
@@ -377,7 +377,7 @@ export const securitySolutionOnlyAllSpacesRole: Role = {
 export const roles = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
-  noCasesConnector,
+  noCasesConnectors,
   globalRead,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,

@@ -15,8 +15,7 @@ import {
 } from '@kbn/cases-plugin/common';
 import {
   CASES_CONNECTOR_CAPABILITY,
-  READ_CASES_CONNECTOR_API_TAG,
-  WRITE_CASES_CONNECTOR_API_TAG,
+  GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
 import type { AppFeaturesCasesConfig, BaseKibanaFeatureConfig } from './types';
 import { APP_ID, CASES_FEATURE_ID } from '../../../common/constants';
@@ -31,15 +30,17 @@ export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => {
   const casesAllUICapabilities = casesCapabilities.all.filter(
     (capability) => capability !== CASES_CONNECTOR_CAPABILITY
   );
+
   const casesReadUICapabilities = casesCapabilities.read.filter(
     (capability) => capability !== CASES_CONNECTOR_CAPABILITY
   );
+
   const casesAllAPICapabilities = casesApiTags.all.filter(
-    (capability) =>
-      capability !== WRITE_CASES_CONNECTOR_API_TAG && capability !== READ_CASES_CONNECTOR_API_TAG
+    (capability) => capability !== GET_CONNECTORS_CONFIGURE_API_TAG
   );
+
   const casesReadAPICapabilities = casesApiTags.read.filter(
-    (capability) => capability !== READ_CASES_CONNECTOR_API_TAG
+    (capability) => capability !== GET_CONNECTORS_CONFIGURE_API_TAG
   );
 
   return {
@@ -102,14 +103,14 @@ export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
   [AppFeatureCasesKey.casesConnectors]: {
     privileges: {
       all: {
-        api: [READ_CASES_CONNECTOR_API_TAG, WRITE_CASES_CONNECTOR_API_TAG], // Add cases connector read/write/update/push API privileges
+        api: [GET_CONNECTORS_CONFIGURE_API_TAG], // Add cases connector get connectors API privileges
         ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
         cases: {
           push: [APP_ID], // Add cases connector push privileges
         },
       },
       read: {
-        api: [READ_CASES_CONNECTOR_API_TAG], // Add cases connector write/update/push API privileges
+        api: [GET_CONNECTORS_CONFIGURE_API_TAG], // Add cases connector get connectors API privileges
         ui: [CASES_CONNECTOR_CAPABILITY], // Add cases connector UI privileges
       },
     },
