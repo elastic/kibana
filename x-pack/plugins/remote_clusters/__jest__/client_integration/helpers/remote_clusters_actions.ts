@@ -53,10 +53,6 @@ export interface RemoteClustersActions {
     click: () => void;
     isDisabled: () => boolean;
   };
-  showRequest: {
-    click: () => void;
-    getESRequestBody: () => string;
-  };
   getErrorMessages: () => string[];
   globalErrorExists: () => boolean;
 }
@@ -174,23 +170,6 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const createShowRequestActions = () => {
-    const click = () => {
-      act(() => {
-        find('remoteClustersRequestButton').simulate('click');
-      });
-
-      component.update();
-    };
-
-    return {
-      showRequest: {
-        click,
-        getESRequestBody: () => find('esRequestBody').text(),
-      },
-    };
-  };
-
   const globalErrorExists = () => exists('remoteClusterFormGlobalError');
 
   const createCloudUrlInputActions = () => {
@@ -214,7 +193,6 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createProxyAddressActions(),
     ...createServerNameActions(),
     ...createSaveButtonActions(),
-    ...createShowRequestActions(),
     getErrorMessages: form.getErrorsMessages,
     globalErrorExists,
   };
