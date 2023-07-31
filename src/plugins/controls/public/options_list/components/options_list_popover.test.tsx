@@ -22,7 +22,6 @@ import { pluginServices } from '../../services';
 
 describe('Options list popover', () => {
   const defaultProps = {
-    width: 500,
     isLoading: false,
     updateSearchString: jest.fn(),
     loadMoreSuggestions: jest.fn(),
@@ -57,17 +56,6 @@ describe('Options list popover', () => {
     );
     showOnlySelectedButton.simulate('click');
   };
-
-  test('available options list width responds to container size', async () => {
-    let popover = await mountComponent({ popoverProps: { width: 301 } });
-    let popoverDiv = findTestSubject(popover, 'optionsList-control-popover');
-    expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 301px; min-width: 300px;');
-
-    // the div cannot be smaller than 301 pixels wide
-    popover = await mountComponent({ popoverProps: { width: 300 } });
-    popoverDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 100%; height: 100%;');
-  });
 
   test('no available options', async () => {
     const popover = await mountComponent({ componentState: { availableOptions: [] } });
