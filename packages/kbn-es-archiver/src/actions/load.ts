@@ -59,7 +59,6 @@ export async function loadAction({
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   const fnFactory = (filename: string) => () => {
     // log.info('[%s] Loading %j', name, filename);
@@ -91,8 +90,9 @@ export async function loadAction({
 
   const indicesWithDocs: string[] = [];
 
-  for (const [index, { docs }] of Object.entries(result))
-    if (indexingOccurred(docs)) indicesWithDocs.push(index);
+  const push = docIndicesPushFactory(indicesWithDocs);
+  // TODO-TRE: Clean up the following line. Kinda ugly
+  for (const [index, { docs }] of Object.entries(result)) if (indexingOccurred(docs)) push(index);
 
   // If we affected saved objects indices, we need to ensure they are migrated...
   if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
@@ -100,10 +100,15 @@ export async function loadAction({
     await migrateSavedObjectIndices(kbnClient);
 
     // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
-    if (kibanaPluginIds.includes('spaces'))
+    if ((await kbnClient.plugins.getEnabledIds()).includes('spaces'))
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
   }
   return result;
+}
+function docIndicesPushFactory(xs: string[]) {
+  return function (idx: string) {
+    xs.push(idx);
+  };
 }
 function atLeastOne(predicate: {
   (x: string): boolean;
