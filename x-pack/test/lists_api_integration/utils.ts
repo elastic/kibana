@@ -98,8 +98,8 @@ export const removeListServerGeneratedProperties = (
   list: Partial<ListSchema>
 ): Partial<ListSchema> => {
   /* eslint-disable-next-line @typescript-eslint/naming-convention */
-  const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
-  return removedProperties;
+  const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
+  return props;
 };
 
 /**
