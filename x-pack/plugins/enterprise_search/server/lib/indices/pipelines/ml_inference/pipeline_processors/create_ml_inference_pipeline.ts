@@ -38,7 +38,7 @@ export const preparePipelineAndIndexForMlInference = async (
   indexName: string,
   pipelineName: string,
   pipelineDefinition: IngestPipeline | undefined,
-  modelId: string | undefined,
+  modelId: string,
   sourceField: string | undefined,
   destinationField: string | null | undefined,
   fieldMappings: FieldMapping[] | undefined,
@@ -62,7 +62,7 @@ export const preparePipelineAndIndexForMlInference = async (
   );
 
   const mappingResponse = fieldMappings
-    ? (await updateMlInferenceMappings(indexName, fieldMappings, esClient)).acknowledged
+    ? (await updateMlInferenceMappings(indexName, modelId, fieldMappings, esClient)).acknowledged
     : false;
 
   return {

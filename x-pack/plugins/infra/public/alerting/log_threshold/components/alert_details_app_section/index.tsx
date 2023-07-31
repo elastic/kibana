@@ -20,7 +20,7 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
 import { get, identity } from 'lodash';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
@@ -44,7 +44,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, logsShared } = useKibanaContextForPlugin().services;
+  const { logsShared, observabilityAIAssistant } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -242,14 +242,14 @@ const AlertDetailsAppSection = ({
   };
 
   return (
-    <CoPilotContextProvider value={observability.getCoPilotService()}>
+    <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
       <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
         {getLogRatioChart()}
         {getLogCountChart()}
         {getLogRateAnalysisSection()}
         {getLogsHistoryChart()}
       </EuiFlexGroup>
-    </CoPilotContextProvider>
+    </ObservabilityAIAssistantProvider>
   );
 };
 
