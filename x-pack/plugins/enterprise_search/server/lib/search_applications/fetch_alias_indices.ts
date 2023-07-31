@@ -12,5 +12,5 @@ export const fetchAliasIndices = async (client: IScopedClusterClient, aliasName:
     name: aliasName,
   });
 
-  return Object.keys(aliasIndices);
+  return Object.keys(aliasIndices).sort();
 };
