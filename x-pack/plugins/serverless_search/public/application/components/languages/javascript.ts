@@ -85,7 +85,7 @@ console.log(result);
 `,
   installClient: 'npm install @elastic/elasticsearch@8',
   name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
-    defaultMessage: 'JavaScript / Node.js',
+    defaultMessage: 'JavaScript',
   }),
   testConnection: `const resp = await client.info();
 

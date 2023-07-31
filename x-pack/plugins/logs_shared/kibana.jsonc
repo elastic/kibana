@@ -8,10 +8,9 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "logs_shared"],
-    "requiredPlugins": ["data", "dataViews", "usageCollection", "observabilityShared"],
+    "requiredPlugins": ["data", "dataViews", "usageCollection", "observabilityShared", "observabilityAIAssistant"],
     "optionalPlugins": ["observability"],
     "requiredBundles": [
-      "observability",
       "kibanaUtils",
       "kibanaReact",
     ],
