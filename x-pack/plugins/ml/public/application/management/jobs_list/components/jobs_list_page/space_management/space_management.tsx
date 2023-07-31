@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { useTableState } from '@kbn/ml-in-memory-table';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   ManagementListResponse,
@@ -29,7 +30,6 @@ import { useManagementApiService } from '../../../../../services/ml_api_service/
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
-import { useTableState } from './use_table_state';
 
 interface Props {
   spacesApi?: SpacesPluginStart;
