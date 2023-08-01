@@ -65,7 +65,7 @@ export function buildFunctionInnerMessage(params: Omit<ChatItemBuildProps, 'role
     role: MessageRole.Function,
     function_call: {
       name: 'leftpad',
-      args: '{ foo: "bar" }',
+      arguments: '{ foo: "bar" }',
       trigger: MessageRole.User,
     },
     ...params,

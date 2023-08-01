@@ -42,7 +42,7 @@ export const messageRt: t.Type<Message> = t.type({
           ]),
         }),
         t.partial({
-          args: serializeableRt,
+          arguments: serializeableRt,
           data: serializeableRt,
         }),
       ]),

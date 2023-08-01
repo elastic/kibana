@@ -10,14 +10,13 @@ import {
   type Renderer,
   type RenderHookResult,
 } from '@testing-library/react-hooks';
-import { merge } from 'lodash';
-import { DeepPartial } from 'utility-types';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { MessageRole } from '../../common';
-import { createNewConversation, useTimeline, UseTimelineResult } from './use_timeline';
+import { PendingMessage } from '../types';
+import { useTimeline, UseTimelineResult } from './use_timeline';
 
 type HookProps = Parameters<typeof useTimeline>[0];
-
-const WAIT_OPTIONS = { timeout: 5000 };
 
 describe('useTimeline', () => {
   let hookResult: RenderHookResult<HookProps, UseTimelineResult, Renderer<HookProps>>;
@@ -27,7 +26,7 @@ describe('useTimeline', () => {
       hookResult = renderHook((props) => useTimeline(props), {
         initialProps: {
           connectors: {},
-          chat: {},
+          service: {},
         } as HookProps,
       });
     });
@@ -71,8 +70,10 @@ describe('useTimeline', () => {
           connectors: {
             selectedConnector: 'foo',
           },
-          chat: {},
-        } as HookProps,
+          service: {
+            chat: () => {},
+          },
+        } as unknown as HookProps,
       });
     });
     it('renders the correct timeline items', () => {
@@ -103,92 +104,39 @@ describe('useTimeline', () => {
   });
 
   describe('when submitting a new prompt', () => {
-    const createChatSimulator = (initialProps?: DeepPartial<HookProps>) => {
-      let resolve: (data: { content?: string; aborted?: boolean }) => void;
+    let subject: Subject<PendingMessage>;
 
-      const abort = () => {
-        resolve({
-          content: props.chat.content,
-          aborted: true,
-        });
-        rerender({
-          chat: {
-            loading: false,
+    beforeEach(() => {
+      hookResult = renderHook((nextProps) => useTimeline(nextProps), {
+        initialProps: {
+          initialConversation: {
+            messages: [],
           },
-        });
-      };
-
-      let props = merge(
-        {
-          initialConversation: createNewConversation(),
           connectors: {
-            selectedConnector: 'myConnector',
+            selectedConnector: 'foo',
           },
-          chat: {
-            loading: true,
-            content: undefined,
-            abort,
-            generate: () => {
-              const promise = new Promise((innerResolve) => {
-                resolve = (...args) => {
-                  innerResolve(...args);
-                };
-              });
-
-              rerender({
-                chat: {
+          service: {
+            chat: jest.fn().mockImplementation(() => {
+              subject = new BehaviorSubject<PendingMessage>({
+                message: {
+                  role: MessageRole.Assistant,
                   content: '',
-                  loading: true,
-                  error: undefined,
-                  function_call: undefined,
                 },
               });
-              return promise;
-            },
+              return subject;
+            }),
           },
         } as unknown as HookProps,
-        {
-          ...initialProps,
-        }
-      );
-
-      hookResult = renderHook((nextProps) => useTimeline(nextProps), {
-        initialProps: props,
       });
-
-      function rerender(nextProps: DeepPartial<HookProps>) {
-        props = merge({}, props, nextProps) as HookProps;
-        hookResult.rerender(props);
-      }
-
-      return {
-        next: (nextValue: { content?: string }) => {
-          rerender({
-            chat: {
-              content: nextValue.content,
-            },
-          });
-        },
-        complete: () => {
-          resolve({
-            content: props.chat.content,
-          });
-          rerender({
-            chat: {
-              loading: false,
-            },
-          });
-        },
-        abort,
-      };
-    };
+    });
 
     describe("and it's loading", () => {
       it('adds two items of which the last one is loading', async () => {
-        const simulator = createChatSimulator();
-
         act(() => {
-          hookResult.result.current.onSubmit({ content: 'Hello' });
+          hookResult.result.current.onSubmit({
+            '@timestamp': new Date().toISOString(),
+            message: { role: MessageRole.User, content: 'Hello' },
+          });
         });
 
         expect(hookResult.result.current.items[0].role).toEqual(MessageRole.User);
@@ -221,7 +169,7 @@ describe('useTimeline', () => {
         });
 
         act(() => {
-          simulator.next({ content: 'Goodbye' });
+          subject.next({ message: { role: MessageRole.Assistant, content: 'Goodbye' } });
         });
 
         expect(hookResult.result.current.items[2]).toMatchObject({
@@ -233,10 +181,8 @@ describe('useTimeline', () => {
         });
 
         act(() => {
-          simulator.complete();
+          subject.complete();
         });
-
-        await hookResult.waitForNextUpdate(WAIT_OPTIONS);
 
         expect(hookResult.result.current.items[2]).toMatchObject({
           role: MessageRole.Assistant,
@@ -248,18 +194,23 @@ describe('useTimeline', () => {
       });
 
       describe('and it being aborted', () => {
-        let simulator: ReturnType<typeof createChatSimulator>;
-
         beforeEach(async () => {
-          simulator = createChatSimulator();
-
           act(() => {
-            hookResult.result.current.onSubmit({ content: 'Hello' });
-            simulator.next({ content: 'My partial' });
-            simulator.abort();
+            hookResult.result.current.onSubmit({
+              '@timestamp': new Date().toISOString(),
+              message: { role: MessageRole.User, content: 'Hello' },
+            });
+            subject.next({ message: { role: MessageRole.Assistant, content: 'My partial' } });
+            subject.next({
+              message: {
+                role: MessageRole.Assistant,
+                content: 'My partial',
+              },
+              aborted: true,
+              error: new AbortError(),
+            });
+            subject.complete();
           });
-
-          await hookResult.waitForNextUpdate(WAIT_OPTIONS);
         });
 
         it('adds the partial response', async () => {
@@ -268,12 +219,13 @@ describe('useTimeline', () => {
           expect(hookResult.result.current.items[2]).toEqual({
             canEdit: false,
             canRegenerate: true,
-            canGiveFeedback: true,
+            canGiveFeedback: false,
             content: 'My partial',
             id: expect.any(String),
             loading: false,
             title: '',
             role: MessageRole.Assistant,
+            error: expect.any(AbortError),
           });
         });
 
@@ -281,6 +233,7 @@ describe('useTimeline', () => {
           beforeEach(() => {
             act(() => {
               hookResult.result.current.onRegenerate(hookResult.result.current.items[2]);
+              subject.next({ message: { role: MessageRole.Assistant, content: '' } });
             });
           });
 
@@ -303,8 +256,6 @@ describe('useTimeline', () => {
                 hookResult.result.current.onStopGenerating();
               });
 
-              await hookResult.waitForNextUpdate(WAIT_OPTIONS);
-
               act(() => {
                 hookResult.result.current.onRegenerate(hookResult.result.current.items[2]);
               });
@@ -325,11 +276,9 @@ describe('useTimeline', () => {
               });
 
               act(() => {
-                simulator.next({ content: 'Regenerated' });
-                simulator.complete();
+                subject.next({ message: { role: MessageRole.Assistant, content: 'Regenerated' } });
+                subject.complete();
               });
-
-              await hookResult.waitForNextUpdate(WAIT_OPTIONS);
 
               expect(hookResult.result.current.items.length).toBe(3);
 

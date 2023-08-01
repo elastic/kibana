@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { Serializable } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
+import type { FromSchema } from 'json-schema-to-ts';
+import type { JSONSchema } from 'json-schema-to-ts';
+import React from 'react';
 
 export enum MessageRole {
   System = 'system',
@@ -24,10 +27,10 @@ export interface Message {
     role: MessageRole;
     function_call?: {
       name: string;
-      args?: Serializable;
+      arguments?: string;
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
-    data?: Serializable;
+    data?: string;
   };
 }
 
@@ -54,3 +57,51 @@ export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation'
 
 export type ConversationCreateRequest = ConversationRequestBase;
 export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
+
+type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+
+export interface ContextDefinition {
+  name: string;
+  description: string;
+}
+
+interface FunctionResponse {
+  content?: Serializable;
+  data?: Serializable;
+}
+
+interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
+  name: string;
+  description: string;
+  parameters: TParameters;
+  contexts: string[];
+}
+
+type RespondFunction<
+  TParameters extends CompatibleJSONSchema,
+  TResponse extends FunctionResponse
+> = (options: { arguments: FromSchema<TParameters> }, signal: AbortSignal) => Promise<TResponse>;
+
+type RenderFunction<TResponse extends FunctionResponse> = (options: {
+  response: TResponse;
+}) => React.ReactNode;
+
+export interface FunctionDefinition {
+  options: FunctionOptions;
+  respond: (options: { arguments: any }, signal: AbortSignal) => Promise<FunctionResponse>;
+  render?: RenderFunction<any>;
+}
+
+export type RegisterContextDefinition = (options: ContextDefinition) => void;
+
+export type RegisterFunctionDefinition = <
+  TParameters extends CompatibleJSONSchema,
+  TResponse extends FunctionResponse
+>(
+  options: FunctionOptions<TParameters>,
+  respond: RespondFunction<TParameters, TResponse>,
+  render?: RenderFunction<TResponse>
+) => void;
+
+export type ContextRegistry = Map<string, ContextDefinition>;
+export type FunctionRegistry = Map<string, FunctionDefinition>;

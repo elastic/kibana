@@ -15,16 +15,19 @@ import { MessageRole } from '../../../common/types';
 interface ChatAvatarProps {
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'> | undefined;
   role: MessageRole;
+  loading: boolean;
 }
 
-export function ChatItemAvatar({ currentUser, role }: ChatAvatarProps) {
+export function ChatItemAvatar({ currentUser, role, loading }: ChatAvatarProps) {
+  const isLoading = loading || !currentUser;
+
+  if (isLoading) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+
   switch (role) {
     case MessageRole.User:
-      return currentUser ? (
-        <UserAvatar user={currentUser} size="m" data-test-subj="userMenuAvatar" />
-      ) : (
-        <EuiLoadingSpinner size="xl" />
-      );
+      return <UserAvatar user={currentUser} size="m" data-test-subj="userMenuAvatar" />;
 
     case MessageRole.Assistant:
     case MessageRole.Elastic:

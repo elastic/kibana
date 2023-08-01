@@ -19850,6 +19850,15 @@ json-parse-even-better-errors@^2.3.0, json-parse-even-better-errors@^2.3.1:
   resolved "https://registry.yarnpkg.com/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz#7c47805a94319928e05777405dc12e1f7a4ee02d"
   integrity sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==
 
+json-schema-to-ts@^2.9.1:
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/json-schema-to-ts/-/json-schema-to-ts-2.9.1.tgz#0e055b787587477abdb7e880c874efad3dba7779"
+  integrity sha512-8MNpRGERlCUWYeJwsWkMrJ0MWzBz49dfqpG+n9viiIlP4othaahbiaNQZuBzmPxRLUhOv1QJMCzW5WE8nHFGIQ==
+  dependencies:
+    "@babel/runtime" "^7.18.3"
+    "@types/json-schema" "^7.0.9"
+    ts-algebra "^1.2.0"
+
 json-schema-traverse@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
@@ -28130,6 +28139,11 @@ trough@^1.0.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/true-case-path/-/true-case-path-2.2.1.tgz#c5bf04a5bbec3fd118be4084461b3a27c4d796bf"
   integrity sha512-0z3j8R7MCjy10kc/g+qg7Ln3alJTodw9aDuVWZa3uiWqfuBMKeAeP2ocWcxoyM3D73yz3Jt/Pu4qPr4wHSdB/Q==
+
+ts-algebra@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ts-algebra/-/ts-algebra-1.2.0.tgz#f91c481207a770f0d14d055c376cbee040afdfc9"
+  integrity sha512-kMuJJd8B2N/swCvIvn1hIFcIOrLGbWl9m/J6O3kHx9VRaevh00nvgjPiEGaRee7DRaAczMYR2uwWvXU22VFltw==
 
 ts-debounce@^4.0.0:
   version "4.0.0"

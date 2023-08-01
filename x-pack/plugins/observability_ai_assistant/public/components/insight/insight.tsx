@@ -4,43 +4,63 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { type ConversationCreateRequest, type Message, MessageRole } from '../../../common/types';
-import { useChat } from '../../hooks/use_chat';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Subscription } from 'rxjs';
+import { MessageRole, type Message } from '../../../common/types';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import type { PendingMessage } from '../../types';
+import { ChatFlyout } from '../chat/chat_flyout';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
-import { InsightBase } from './insight_base';
-import { InsightMissingCredentials } from './insight_missing_credentials';
-import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
-import { ChatFlyout } from '../chat/chat_flyout';
+import { StopGeneratingButton } from '../buttons/stop_generating_button';
+import { InsightBase } from './insight_base';
+import { InsightMissingCredentials } from './insight_missing_credentials';
 
 function ChatContent({ messages, connectorId }: { messages: Message[]; connectorId: string }) {
-  const chat = useChat();
+  const service = useObservabilityAIAssistant();
 
-  const { generate } = chat;
+  const [pendingMessage, setPendingMessage] = useState<PendingMessage | undefined>();
+  const [loading, setLoading] = useState(false);
+  const [subscription, setSubscription] = useState<Subscription | undefined>();
+
+  const reloadReply = useCallback(() => {
+    setLoading(true);
+
+    const nextSubscription = service.chat({ messages, connectorId }).subscribe({
+      next: (msg) => {
+        setPendingMessage(() => msg);
+      },
+      complete: () => {
+        setLoading(false);
+      },
+    });
+
+    setSubscription(nextSubscription);
+  }, [messages, connectorId, service]);
 
   useEffect(() => {
-    generate({ messages, connectorId }).catch(() => {
-      // error is handled in chat, and we don't do anything with the full response for now.
-    });
-  }, [generate, messages, connectorId]);
+    reloadReply();
+  }, [reloadReply]);
 
-  const initialConversation = useMemo<ConversationCreateRequest>(() => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const initialConversation = useMemo(() => {
     const time = new Date().toISOString();
     return {
       '@timestamp': time,
-      messages: chat.content
+      messages: pendingMessage?.message.content
         ? messages.concat({
             '@timestamp': time,
             message: {
               role: MessageRole.Assistant,
-              content: chat.content,
+              content: pendingMessage.message.content,
             },
           })
         : messages,
@@ -50,20 +70,27 @@ function ChatContent({ messages, connectorId }: { messages: Message[]; connector
       labels: {},
       numeric_labels: {},
     };
-  }, [messages, chat.content]);
-
-  const [isOpen, setIsOpen] = useState(false);
+  }, [pendingMessage, messages]);
 
   return (
     <>
       <MessagePanel
-        body={<MessageText content={chat.content ?? ''} loading={chat.loading} />}
-        error={chat.error}
+        body={<MessageText content={pendingMessage?.message.content ?? ''} loading={loading} />}
+        error={pendingMessage?.error}
         controls={
-          chat.loading ? (
+          loading ? (
             <StopGeneratingButton
               onClick={() => {
-                chat.abort();
+                subscription?.unsubscribe();
+                setLoading(false);
+                setPendingMessage((prev) => ({
+                  message: {
+                    role: MessageRole.Assistant,
+                    ...prev?.message,
+                  },
+                  aborted: true,
+                  error: new AbortError(),
+                }));
               }}
             />
           ) : (
@@ -71,7 +98,7 @@ function ChatContent({ messages, connectorId }: { messages: Message[]; connector
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {
-                    generate({ messages, connectorId });
+                    reloadReply();
                   }}
                 />
               </EuiFlexItem>

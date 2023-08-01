@@ -7,9 +7,9 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, useEuiTheme } from '@elastic/eui';
 import type { ConversationCreateRequest } from '../../../common/types';
-import { useChat } from '../../hooks/use_chat';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { ChatBody } from './chat_body';
 import { ConversationList } from './conversation_list';
 
@@ -22,17 +22,19 @@ export function ChatFlyout({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const currentUser = useCurrentUser();
   const connectors = useGenAIConnectors();
-  const { euiTheme } = useEuiTheme();
 
-  const chat = useChat();
+  const currentUser = useCurrentUser();
+
+  const { euiTheme } = useEuiTheme();
 
   const [isConversationListExpanded, setIsConversationListExpanded] = useState(false);
 
   const handleClickConversation = (id: string) => {};
   const handleClickNewChat = () => {};
   const handleClickSettings = () => {};
+
+  const service = useObservabilityAIAssistant();
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -51,7 +53,7 @@ export function ChatFlyout({
         ) : null}
         <EuiFlexItem>
           <ChatBody
-            chat={chat}
+            service={service}
             connectors={connectors}
             initialConversation={initialConversation}
             currentUser={currentUser}

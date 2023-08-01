@@ -17,6 +17,10 @@ interface Props {
   loading: boolean;
 }
 
+const containerClassName = css`
+  overflow-wrap: break-word;
+`;
+
 const cursorCss = css`
   @keyframes blink {
     0% {
@@ -81,7 +85,7 @@ const loadingCursorPlugin = () => {
 
 export function MessageText(props: Props) {
   return (
-    <EuiText size="s">
+    <EuiText size="s" className={containerClassName}>
       <ReactMarkdown
         plugins={[loadingCursorPlugin]}
         components={

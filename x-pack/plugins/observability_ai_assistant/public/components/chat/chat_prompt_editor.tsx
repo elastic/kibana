@@ -16,15 +16,13 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFunctions, Func } from '../../hooks/use_functions';
+import { useFunctions, type Func } from '../../hooks/use_functions';
+import { type Message, MessageRole } from '../../../common';
 
 export interface ChatPromptEditorProps {
   disabled: boolean;
   loading: boolean;
-  onSubmit: (message: {
-    content?: string;
-    function_call?: { name: string; args?: string };
-  }) => Promise<void>;
+  onSubmit: (message: Message) => Promise<void>;
 }
 
 export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEditorProps) {
@@ -40,7 +38,10 @@ export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEdit
   const handleSubmit = () => {
     const currentPrompt = prompt;
     setPrompt('');
-    onSubmit({ content: currentPrompt })
+    onSubmit({
+      '@timestamp': new Date().toISOString(),
+      message: { role: MessageRole.User, content: currentPrompt },
+    })
       .then(() => {
         setPrompt('');
       })

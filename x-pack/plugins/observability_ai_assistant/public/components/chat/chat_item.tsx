@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { MessageRole } from '../../../common/types';
@@ -39,6 +40,16 @@ export interface ChatItemProps extends ChatTimelineItem {
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
 }
+
+const euiCommentClassName = css`
+  .euiCommentEvent__headerEvent {
+    flex-grow: 1;
+  }
+
+  > div:last-child {
+    overflow: hidden;
+  }
+`;
 
 export function ChatItem({
   title,
@@ -143,15 +154,16 @@ export function ChatItem({
           title={title}
         />
       }
-      timelineAvatar={<ChatItemAvatar currentUser={currentUser} role={role} />}
+      className={euiCommentClassName}
+      timelineAvatar={
+        <ChatItemAvatar loading={loading && !content} currentUser={currentUser} role={role} />
+      }
       username={getRoleTranslation(role)}
     >
-      {content !== undefined || error || loading ? (
+      {content || error || loading || controls ? (
         <MessagePanel
           body={
-            content !== undefined || loading ? (
-              <MessageText content={content || ''} loading={loading} />
-            ) : null
+            content || loading ? <MessageText content={content || ''} loading={loading} /> : null
           }
           error={error}
           controls={controls}

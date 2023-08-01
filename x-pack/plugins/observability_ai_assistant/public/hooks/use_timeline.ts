@@ -6,13 +6,14 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { omit } from 'lodash';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Subscription } from 'rxjs';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { MessageRole, type ConversationCreateRequest, type Message } from '../../common/types';
 import type { ChatPromptEditorProps } from '../components/chat/chat_prompt_editor';
 import type { ChatTimelineProps } from '../components/chat/chat_timeline';
+import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
-import type { UseChatResult } from './use_chat';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
 
 export function createNewConversation(): ConversationCreateRequest {
@@ -37,12 +38,12 @@ export function useTimeline({
   initialConversation,
   connectors,
   currentUser,
-  chat,
+  service,
 }: {
   initialConversation?: ConversationCreateRequest;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  chat: UseChatResult;
+  service: ObservabilityAIAssistantService;
 }): UseTimelineResult {
   const connectorId = connectors.selectedConnector;
 
@@ -58,50 +59,115 @@ export function useTimeline({
     });
   }, [conversation, currentUser, hasConnector]);
 
+  const [subscription, setSubscription] = useState<Subscription | undefined>();
+
+  const [pendingMessage, setPendingMessage] = useState<PendingMessage | undefined>();
+
+  const controllerRef = useRef(new AbortController());
+
+  function chat(messages: Message[]): Promise<void> {
+    const controller = new AbortController();
+    return new Promise<PendingMessage>((resolve, reject) => {
+      if (!connectorId) {
+        reject(new Error('Can not add a message without a connector'));
+        return;
+      }
+
+      setConversation((conv) => ({
+        ...conv,
+        messages,
+      }));
+
+      const response$ = service.chat({ messages, connectorId });
+
+      let pendingMessageLocal = pendingMessage;
+
+      const nextSubscription = response$.subscribe({
+        next: (nextPendingMessage) => {
+          pendingMessageLocal = nextPendingMessage;
+          setPendingMessage(() => nextPendingMessage);
+        },
+        error: reject,
+        complete: () => {
+          resolve(pendingMessageLocal!);
+        },
+      });
+
+      setSubscription(() => {
+        controllerRef.current = controller;
+        return nextSubscription;
+      });
+    })
+      .then(async (nextMessage) => {
+        if (nextMessage.error) {
+          return;
+        }
+        if (nextMessage.aborted) {
+          return;
+        }
+
+        setPendingMessage(undefined);
+
+        const nextMessages = messages.concat({
+          '@timestamp': new Date().toISOString(),
+          message: {
+            ...nextMessage.message,
+          },
+        });
+
+        setConversation((conv) => ({ ...conv, messages: nextMessages }));
+
+        if (nextMessage?.message.function_call?.name) {
+          const name = nextMessage.message.function_call.name;
+
+          const message = await service.executeFunction(
+            name,
+            nextMessage.message.function_call.arguments,
+            controller.signal
+          );
+
+          await chat(
+            nextMessages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                name,
+                content: JSON.stringify(message.content),
+                data: JSON.stringify(message.data),
+              },
+            })
+          );
+        }
+      })
+      .catch((err) => {});
+  }
+
   const items = useMemo(() => {
-    if (chat.loading) {
+    if (pendingMessage) {
       return conversationItems.concat({
         id: '',
         canEdit: false,
-        canRegenerate: !chat.loading,
-        canGiveFeedback: !chat.loading,
-        role: MessageRole.Assistant,
+        canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
+        canGiveFeedback: false,
         title: '',
-        content: chat.content ?? '',
-        loading: chat.loading,
+        role: pendingMessage.message.role,
+        content: pendingMessage.message.content,
+        loading: !pendingMessage.aborted && !pendingMessage.error,
+        function_call: pendingMessage.message.function_call,
         currentUser,
+        error: pendingMessage.error,
       });
     }
 
     return conversationItems;
-  }, [conversationItems, chat.content, chat.loading, currentUser]);
+  }, [conversationItems, pendingMessage, currentUser]);
 
-  function getNextMessage(
-    role: MessageRole,
-    response: Awaited<ReturnType<UseChatResult['generate']>>
-  ) {
-    const nextMessage: Message = {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role,
-        content: response.content,
-        ...omit(response, 'function_call'),
-        ...(response.function_call && response.function_call.name
-          ? {
-              function_call: {
-                ...response.function_call,
-                args: response.function_call.args
-                  ? JSON.parse(response.function_call.args)
-                  : undefined,
-                trigger: MessageRole.Assistant,
-              },
-            }
-          : {}),
-      },
+  useEffect(() => {
+    return () => {
+      // controllerRef.current.abort();
+      subscription?.unsubscribe();
     };
-
-    return nextMessage;
-  }
+  }, [subscription]);
 
   return {
     items,
@@ -111,40 +177,22 @@ export function useTimeline({
       const indexOf = items.indexOf(item);
 
       const messages = conversation.messages.slice(0, indexOf - 1);
-
-      setConversation((conv) => ({ ...conv, messages }));
-
-      chat
-        .generate({
-          messages,
-          connectorId: connectors.selectedConnector!,
-        })
-        .then((response) => {
-          setConversation((conv) => ({
-            ...conv,
-            messages: conv.messages.concat(getNextMessage(MessageRole.Assistant, response)),
-          }));
-        });
+      chat(messages);
     },
     onStopGenerating: () => {
-      chat.abort();
+      subscription?.unsubscribe();
+      setPendingMessage((prevPendingMessage) => ({
+        message: {
+          role: MessageRole.Assistant,
+          ...prevPendingMessage?.message,
+        },
+        aborted: true,
+        error: new AbortError(),
+      }));
+      setSubscription(undefined);
     },
-    onSubmit: async ({ content }) => {
-      if (connectorId) {
-        const nextMessage = getNextMessage(MessageRole.User, { content });
-
-        setConversation((conv) => ({ ...conv, messages: conv.messages.concat(nextMessage) }));
-
-        const response = await chat.generate({
-          messages: conversation.messages.concat(nextMessage),
-          connectorId,
-        });
-
-        setConversation((conv) => ({
-          ...conv,
-          messages: conv.messages.concat(getNextMessage(MessageRole.Assistant, response)),
-        }));
-      }
+    onSubmit: async (message) => {
+      await chat(conversation.messages.concat(message));
     },
   };
 }

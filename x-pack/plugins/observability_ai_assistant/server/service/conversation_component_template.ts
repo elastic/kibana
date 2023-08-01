@@ -76,7 +76,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                   type: 'object',
                   properties: {
                     name: keyword,
-                    args: {
+                    arguments: {
                       type: 'object',
                       enabled: false,
                     },

@@ -5,6 +5,10 @@
  * 2.0.
  */
 import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import type {
   AuthenticatedUser,
   SecurityPluginSetup,
   SecurityPluginStart,
@@ -14,15 +18,18 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
-  ObservabilitySharedPluginSetup,
-  ObservabilitySharedPluginStart,
-} from '@kbn/observability-shared-plugin/public';
-import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
 import type { Observable } from 'rxjs';
-import type { Message } from '../common/types';
+import { Serializable } from '@kbn/utility-types';
+import type {
+  ContextDefinition,
+  FunctionDefinition,
+  Message,
+  RegisterContextDefinition,
+  RegisterFunctionDefinition,
+} from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -30,33 +37,49 @@ import type { ObservabilityAIAssistantAPIClient } from './api';
 export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionResponse, 'choices'> & {
   choices: Array<
     Omit<CreateChatCompletionResponseChoicesInner, 'message'> & {
-      delta: { content?: string; function_call?: { name?: string; args?: string } };
+      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
     }
   >;
 };
 
-export interface ObservabilityAIAssistantService {
-  isEnabled: () => boolean;
-  chat: (options: {
-    messages: Message[];
-    connectorId: string;
-    signal: AbortSignal;
-  }) => Promise<Observable<CreateChatCompletionResponseChunk>>;
-  callApi: ObservabilityAIAssistantAPIClient;
-  getCurrentUser: () => Promise<AuthenticatedUser>;
+export interface PendingMessage {
+  message: Message['message'];
+  aborted?: boolean;
+  error?: any;
 }
 
-export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {}
+export interface ObservabilityAIAssistantService {
+  isEnabled: () => boolean;
+  chat: (options: { messages: Message[]; connectorId: string }) => Observable<PendingMessage>;
+  callApi: ObservabilityAIAssistantAPIClient;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+  getContexts: () => ContextDefinition[];
+  getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  executeFunction: (
+    name: string,
+    args: string | undefined,
+    signal: AbortSignal
+  ) => Promise<{ content?: Serializable; data?: Serializable }>;
+  renderFunction: (
+    name: string,
+    response: { data?: Serializable; content?: Serializable }
+  ) => React.ReactNode;
+}
+
+export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
+  registerContext: RegisterContextDefinition;
+  registerFunction: RegisterFunctionDefinition;
+}
 
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
-  triggersActions: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   security: SecurityPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
-  triggersActions: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
 }
 

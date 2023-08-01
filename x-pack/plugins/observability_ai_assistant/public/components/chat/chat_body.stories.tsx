@@ -7,6 +7,8 @@
 
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { Observable } from 'rxjs';
+import { ObservabilityAIAssistantService } from '../../types';
 import { ChatBody as Component } from './chat_body';
 
 export default {
@@ -54,13 +56,11 @@ const defaultProps: ChatBodyProps = {
   currentUser: {
     username: 'elastic',
   },
-  chat: {
-    loading: false,
-    abort: () => {},
-    generate: async () => {
-      return {} as any;
+  service: {
+    chat: () => {
+      return new Observable();
     },
-  },
+  } as unknown as ObservabilityAIAssistantService,
 };
 
 export const ChatBody = Template.bind({});

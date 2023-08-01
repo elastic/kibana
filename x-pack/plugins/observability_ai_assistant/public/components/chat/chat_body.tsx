@@ -10,9 +10,9 @@ import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React from 'react';
 import { type ConversationCreateRequest } from '../../../common/types';
-import type { UseChatResult } from '../../hooks/use_chat';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useTimeline } from '../../hooks/use_timeline';
+import { ObservabilityAIAssistantService } from '../../types';
 import { HideExpandConversationListButton } from '../buttons/hide_expand_conversation_list_button';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
@@ -30,14 +30,14 @@ export function ChatBody({
   initialConversation,
   connectors,
   currentUser,
-  chat,
+  service,
   isConversationListExpanded,
   onToggleExpandConversationList,
 }: {
   initialConversation?: ConversationCreateRequest;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  chat: UseChatResult;
+  service: ObservabilityAIAssistantService;
   isConversationListExpanded?: boolean;
   onToggleExpandConversationList?: () => void;
 }) {
@@ -47,7 +47,7 @@ export function ChatBody({
     initialConversation,
     connectors,
     currentUser,
-    chat,
+    service,
   });
 
   return (
@@ -93,7 +93,7 @@ export function ChatBody({
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
           <ChatPromptEditor
-            loading={chat.loading}
+            loading={false}
             disabled={!connectors.selectedConnector}
             onSubmit={timeline.onSubmit}
           />

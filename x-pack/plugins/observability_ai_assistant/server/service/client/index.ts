@@ -4,24 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 } from 'uuid';
-
-import type { ChatCompletionRequestMessage, CreateChatCompletionRequest } from 'openai';
-import type { IncomingMessage } from 'http';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { internal, notFound } from '@hapi/boom';
+import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { internal, notFound } from '@hapi/boom';
-import { compact, isEmpty, merge, omit } from 'lodash';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IncomingMessage } from 'http';
+import { compact, isEmpty, merge, omit } from 'lodash';
+import type {
+  ChatCompletionFunctions,
+  ChatCompletionRequestMessage,
+  CreateChatCompletionRequest,
+} from 'openai';
+import { v4 } from 'uuid';
 import {
+  type FunctionDefinition,
+  MessageRole,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type Message,
-  MessageRole,
 } from '../../../common/types';
 import type {
   IObservabilityAIAssistantClient,
@@ -111,9 +115,11 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
   chat = async ({
     messages,
     connectorId,
+    functions,
   }: {
     messages: Message[];
     connectorId: string;
+    functions: Array<FunctionDefinition['options']>;
   }): Promise<IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
@@ -133,6 +139,10 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         })
     );
 
+    const functionsForOpenAI: ChatCompletionFunctions[] = functions.map((fn) =>
+      omit(fn, 'contexts')
+    );
+
     const connector = await this.dependencies.actionsClient.get({
       id: connectorId,
     });
@@ -141,6 +151,8 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       ...(connector.config?.apiProvider === OpenAiProviderType.OpenAi ? { model: 'gpt-4' } : {}),
       messages: messagesForOpenAI,
       stream: true,
+      functions: functionsForOpenAI,
+      temperature: 0.1,
     };
 
     const executeResult = await this.dependencies.actionsClient.execute({

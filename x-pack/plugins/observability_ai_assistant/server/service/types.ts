@@ -7,15 +7,20 @@
 
 import { IncomingMessage } from 'http';
 import { KibanaRequest } from '@kbn/core/server';
-import {
+import type {
   Conversation,
   ConversationCreateRequest,
   ConversationUpdateRequest,
+  FunctionDefinition,
   Message,
 } from '../../common/types';
 
 export interface IObservabilityAIAssistantClient {
-  chat: (options: { messages: Message[]; connectorId: string }) => Promise<IncomingMessage>;
+  chat: (options: {
+    messages: Message[];
+    connectorId: string;
+    functions: Array<FunctionDefinition['options']>;
+  }) => Promise<IncomingMessage>;
   get: (conversationId: string) => void;
   find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
   create: (conversation: ConversationCreateRequest) => Promise<Conversation>;
