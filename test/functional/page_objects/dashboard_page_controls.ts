@@ -673,7 +673,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
     await this.testSubjects.click(`range-slider-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`rangeSlider__popover`);
+      await this.testSubjects.existOrFail(`rangeSlider__slider`);
     });
   }
 
@@ -681,12 +681,12 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
     const controlLabel = await this.find.byXPath(`//div[@data-control-id='${controlId}']//label`);
     await controlLabel.click();
-    await this.testSubjects.waitForDeleted(`rangeSlider__popover`);
+    await this.testSubjects.waitForDeleted(`rangeSlider__slider`);
   }
 
   public async rangeSliderPopoverAssertOpen() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(`rangeSlider__popover`))) {
+      if (!(await this.testSubjects.exists(`rangeSlider__slider`))) {
         throw new Error('range slider popover must be open before calling selectOption');
       }
     });

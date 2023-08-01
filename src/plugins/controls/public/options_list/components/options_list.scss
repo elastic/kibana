@@ -1,53 +1,57 @@
 .optionsList__popoverAnchorOverride {
   max-inline-size: none;
+}
 
-  .optionsList--filterGroup {
-    width: 100%;
-    height: $euiSizeXXL;
-    background-color: transparent;
+.optionsList--filterGroup {
+  width: 100%;
+  height: $euiSizeXXL;
+  background-color: transparent;
 
-    box-shadow: none;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-top-right-radius: $euiBorderRadius - 1px;
-    border-bottom-right-radius: $euiBorderRadius - 1px;
+  box-shadow: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: $euiBorderRadius - 1px;
+  border-bottom-right-radius: $euiBorderRadius - 1px;
 
-    .optionsList--filterBtn {
-      border-radius: 0;
+  .optionsList--filterBtn {
+    border-radius: 0;
 
-      &.optionsList--filterBtnPlaceholder {
-        color: $euiTextSubduedColor;
-        font-weight: $euiFontWeightRegular;
-      }
+    &.optionsList--filterBtnPlaceholder {
+      color: $euiTextSubduedColor;
+      font-weight: $euiFontWeightRegular;
+    }
 
-      .optionsList__filterInvalid {
-        color: $euiTextSubduedColor;
-        text-decoration: line-through;
-        margin-left: $euiSizeS;
-        font-weight: $euiFontWeightRegular;
-      }
+    .optionsList__filterInvalid {
+      color: $euiTextSubduedColor;
+      text-decoration: line-through;
+      margin-left: $euiSizeS;
+      font-weight: $euiFontWeightRegular;
+    }
 
-      .optionsList__existsFilter {
-        font-style: italic;
-      }
+    .optionsList__existsFilter {
+      font-style: italic;
+    }
 
-      .optionsList__negateLabel {
-        font-weight: bold;
-        font-size: $euiSizeM;
-        color: $euiColorDanger;
-      }
+    .optionsList__negateLabel {
+      font-weight: bold;
+      font-size: $euiSizeM;
+      color: $euiColorDanger;
+    }
 
-      .euiFilterButton__notification {
-        background-color: $euiColorMediumShade;
-      }
+    .euiFilterButton__notification {
+      background-color: $euiColorMediumShade;
+    }
 
-      .euiFilterButton__text-hasNotification {
-        flex-grow: 1;
-        justify-content: space-between;
-        width: 0;
-      }
+    .euiFilterButton__text-hasNotification {
+      flex-grow: 1;
+      justify-content: space-between;
+      width: 0;
     }
   }
+}
+
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
 }
 
 .optionsList__popover {
@@ -112,8 +116,4 @@
     color: $euiTextSubduedColor;
     padding: $euiSizeM;
   }
-}
-
-.optionsList--sortPopover {
-  width: $euiSizeXL * 7;
 }
