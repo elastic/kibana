@@ -28,6 +28,7 @@ export {
   prioritizeMappings,
   createParseArchiveStreams,
   createFormatArchiveStreams,
+  streamXformations,
 } from './archives';
 
 export { readDirectory } from './directory';
