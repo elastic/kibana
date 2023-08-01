@@ -43,7 +43,6 @@ import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
-import { LoadingIndicator } from '../loading_indicator';
 import { ProjectNavigation } from './navigation';
 
 const headerCss = {
@@ -96,7 +95,6 @@ export interface Props {
   actionMenu$: Observable<MountPoint | undefined>;
   docLinks: DocLinksStart;
   children: React.ReactNode;
-  isVisible$: Observable<boolean>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
@@ -173,20 +171,10 @@ export const ProjectHeader = ({
   docLinks,
   ...observables
 }: Props) => {
-  const isVisible = useObservable(observables.isVisible$, false);
   const [navId] = useState(htmlIdGenerator()());
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
-
-  if (!isVisible) {
-    return (
-      <div data-test-subj="kibanaProjectHeaderInvisible">
-        <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />
-        <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      </div>
-    );
-  }
 
   return (
     <>
