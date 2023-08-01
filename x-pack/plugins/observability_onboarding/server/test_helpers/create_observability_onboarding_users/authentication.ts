@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  cluster,
-  indices,
-} from '../../routes/custom_logs/api_key/monitoring_config';
+import { cluster, indices } from '../../routes/logs/api_key/monitoring_config';
 
 export enum ObservabilityOnboardingUsername {
   noAccessUser = 'no_access_user',

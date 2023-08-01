@@ -12,31 +12,31 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type {
-  CasePatchRequest,
-  CaseStatuses,
-  User,
-  SingleCaseMetricsResponse,
-  Comment,
-  Case as CaseSnakeCase,
-  CommentResponseAlertsType,
-  CasesFindResponse,
-  CasesStatusResponse,
-  CasesMetricsResponse,
-  CaseSeverity,
-  CommentResponseExternalReferenceType,
-  CommentResponseTypePersistableState,
-  GetCaseUsersResponse,
-} from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
-import type { ActionConnector, UserAction } from '../types/domain';
 import type {
+  CaseSeverity,
+  CaseStatuses,
+  UserAction,
+  Case as CaseSnakeCase,
+  User,
+  ActionConnector,
+  AlertAttachment,
+  Attachment,
+  ExternalReferenceAttachment,
+  PersistableStateAttachment,
+} from '../types/domain';
+import type {
+  CasePatchRequest,
+  CasesFindResponse,
+  CasesStatusResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
   UserActionFindRequestTypes,
   UserActionFindResponse,
 } from '../types/api';
+import type { CaseMetricsFeature, CasesMetricsResponse, SingleCaseMetricsResponse } from '../api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -84,16 +84,18 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type CommentUI = SnakeToCamelCase<Comment>;
-export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
-export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
-export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
+export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
+export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
+export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
 export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
+  comments: AttachmentUI[];
+};
 export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;
@@ -151,13 +153,7 @@ export interface FilterOptions {
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
-export type SingleCaseMetricsFeature =
-  | 'alerts.count'
-  | 'alerts.users'
-  | 'alerts.hosts'
-  | 'actions.isolateHost'
-  | 'connectors'
-  | 'lifespan';
+export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
 export enum SortFieldCase {
   closedAt = 'closedAt',
