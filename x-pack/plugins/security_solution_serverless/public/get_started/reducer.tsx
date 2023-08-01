@@ -6,7 +6,7 @@
  */
 
 import type { ProductLine } from '../../common/product';
-import { setupCards, updateCard } from './helpers';
+import { setupActiveSections, updateActiveSections } from './helpers';
 import type { ReducerActions } from './types';
 import { type CardId, type StepId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
@@ -20,10 +20,17 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       activeProducts.add(action.payload.section);
     }
 
+    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
+      state.finishedSteps,
+      activeProducts
+    );
+
     return {
       ...state,
       activeProducts,
-      activeSections: setupCards(state.finishedSteps, activeProducts),
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
     };
   }
 
@@ -39,16 +46,20 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       finishedSteps[action.payload.cardId].add(action.payload.stepId);
     }
 
+    const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
+      activeProducts: state.activeProducts,
+      activeSections: state.activeSections,
+      cardId: action.payload.cardId,
+      finishedSteps,
+      sectionId: action.payload.sectionId,
+    });
+
     return {
       ...state,
       finishedSteps,
-      activeSections: updateCard({
-        activeProducts: state.activeProducts,
-        activeSections: state.activeSections,
-        cardId: action.payload.cardId,
-        finishedSteps,
-        sectionId: action.payload.sectionId,
-      }),
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
     };
   }
 
@@ -64,16 +75,20 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       finishedSteps[action.payload.cardId].delete(action.payload.stepId);
     }
 
+    const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
+      activeProducts: state.activeProducts,
+      activeSections: state.activeSections,
+      cardId: action.payload.cardId,
+      finishedSteps,
+      sectionId: action.payload.sectionId,
+    });
+
     return {
       ...state,
       finishedSteps,
-      activeSections: updateCard({
-        activeProducts: state.activeProducts,
-        finishedSteps,
-        activeSections: state.activeSections,
-        cardId: action.payload.cardId,
-        sectionId: action.payload.sectionId,
-      }),
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
     };
   }
 
@@ -95,16 +110,16 @@ export const getFinishedStepsInitialStates = ({
   return initialStates;
 };
 
-export const getActiveSectionsInitialStates = ({
+export const getActiveProductsInitialStates = ({
   activeProducts,
 }: {
   activeProducts: ProductLine[];
 }) => new Set(activeProducts);
 
-export const getActiveCardsInitialStates = ({
+export const getActiveSectionsInitialStates = ({
   activeProducts,
   finishedSteps,
 }: {
   activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
-}) => setupCards(finishedSteps, activeProducts);
+}) => setupActiveSections(finishedSteps, activeProducts);

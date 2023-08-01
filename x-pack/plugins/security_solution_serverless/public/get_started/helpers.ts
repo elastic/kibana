@@ -64,41 +64,46 @@ export const getStepsByActiveProduct = ({
   return steps;
 };
 
-export const setupCards = (
+export const setupActiveSections = (
   finishedSteps: Record<CardId, Set<StepId>>,
   activeProducts: Set<ProductLine>
 ) =>
   activeProducts.size > 0
-    ? getSections().reduce((acc, section) => {
-        const activeCards =
-          section.cards?.reduce((accCards, card) => {
-            const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
-            const activeStepIds = activeSteps?.map(({ id }) => id);
-            const stepsDone: Set<StepId> = getfinishedActiveSteps(
-              finishedSteps[card.id] ? [...finishedSteps[card.id]] : undefined,
-              activeStepIds
-            );
-            const timeInMins = getCardTimeInMinutes(activeSteps, stepsDone);
-            const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
+    ? getSections().reduce(
+        (acc, section) => {
+          const activeCards =
+            section.cards?.reduce((accCards, card) => {
+              const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
+              const activeStepIds = activeSteps?.map(({ id }) => id);
+              const stepsDone: Set<StepId> = getfinishedActiveSteps(
+                finishedSteps[card.id] ? [...finishedSteps[card.id]] : undefined,
+                activeStepIds
+              );
+              const timeInMins = getCardTimeInMinutes(activeSteps, stepsDone);
+              const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
+              acc.totalStepsLeft += stepsLeft;
+              acc.totalActiveSteps += activeStepIds?.length ?? 0;
 
-            accCards[card.id] = {
-              id: card.id,
-              timeInMins,
-              stepsLeft,
-              activeStepIds,
-            };
+              accCards[card.id] = {
+                id: card.id,
+                timeInMins,
+                stepsLeft,
+                activeStepIds,
+              };
 
-            return accCards;
-          }, {} as Record<CardId, ActiveCard>) ?? {};
+              return accCards;
+            }, {} as Record<CardId, ActiveCard>) ?? {};
 
-        if (Object.keys(activeCards).length > 0) {
-          acc[section.id] = activeCards;
-        }
-        return acc;
-      }, {} as ActiveSections)
-    : null;
+          if (Object.keys(activeCards).length > 0) {
+            acc.activeSections[section.id] = activeCards;
+          }
+          return acc;
+        },
+        { activeSections: {} as ActiveSections, totalStepsLeft: 0, totalActiveSteps: 0 }
+      )
+    : { activeSections: {} as ActiveSections, totalStepsLeft: null, totalActiveSteps: null };
 
-export const updateCard = ({
+export const updateActiveSections = ({
   activeProducts,
   activeSections,
   cardId,
@@ -110,12 +115,16 @@ export const updateCard = ({
   cardId: CardId;
   finishedSteps: Record<CardId, Set<StepId>>;
   sectionId: SectionId;
-}): ActiveSections | null => {
+}): {
+  activeSections: ActiveSections | null;
+  totalStepsLeft: number | null;
+  totalActiveSteps: number | null;
+} => {
   const activeSection = activeSections ? activeSections[sectionId] : undefined;
   const activeCard = activeSection ? activeSection[cardId] : undefined;
 
   if (!activeCard || !activeSections) {
-    return activeSections;
+    return { activeSections, totalActiveSteps: null, totalStepsLeft: null };
   }
 
   const steps = getStepsByActiveProduct({ activeProducts, cardId, sectionId });
@@ -129,7 +138,7 @@ export const updateCard = ({
   const timeInMins = getCardTimeInMinutes(steps, stepsDone);
   const stepsLeft = getCardStepsLeft(steps, stepsDone);
 
-  return {
+  const newActiveSections = {
     ...activeSections,
     [sectionId]: {
       ...activeSections[sectionId],
@@ -141,4 +150,41 @@ export const updateCard = ({
       },
     },
   };
+
+  const { totalStepsLeft, totalActiveSteps } = Object.values(newActiveSections).reduce(
+    (acc, newActiveSection) => {
+      Object.values(newActiveSection).forEach(
+        (newActiveCard) => {
+          acc.totalStepsLeft += newActiveCard.stepsLeft;
+          acc.totalActiveSteps += newActiveCard?.activeStepIds?.length ?? 0;
+        },
+        { totalStepsLeft: 0, totalActiveSteps: 0 }
+      );
+
+      return acc;
+    },
+    { totalStepsLeft: 0, totalActiveSteps: 0 }
+  );
+
+  return {
+    activeSections: newActiveSections,
+    totalStepsLeft,
+    totalActiveSteps,
+  };
 };
+
+export const getTotalStepsLeftAndActiveSteps = (activeSections: ActiveSections | null) =>
+  Object.values(activeSections ?? {}).reduce(
+    (acc, activeSection) => {
+      Object.values(activeSection).forEach(
+        (newActiveCard) => {
+          acc.totalStepsLeft += newActiveCard.stepsLeft;
+          acc.totalActiveSteps += newActiveCard?.activeStepIds?.length ?? 0;
+        },
+        { totalStepsLeft: 0, totalActiveSteps: 0 }
+      );
+
+      return acc;
+    },
+    { totalStepsLeft: 0, totalActiveSteps: 0 }
+  );

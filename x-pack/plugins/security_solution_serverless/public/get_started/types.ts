@@ -11,7 +11,10 @@ import type React from 'react';
 import type { ProductLine } from '../../common/product';
 
 export interface HeaderSection {
-  description?: string;
+  description?: (params?: {
+    totalActiveSteps: number | null;
+    totalStepsLeft: number | null;
+  }) => string | null;
   icon: EuiIconProps;
   id: string;
   title: string;
@@ -38,7 +41,6 @@ export type StepId =
   | OptimizeYourWorkSpaceSteps;
 
 export interface Step {
-  badges: Badge[];
   description?: string[];
   id: StepId;
   productLineRequired?: ProductLine[];
@@ -129,6 +131,8 @@ export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
   activeSections: ActiveSections | null;
+  totalStepsLeft: number | null;
+  totalActiveSteps: number | null;
 }
 
 export interface ToggleProductAction {

@@ -10,8 +10,8 @@ import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { getStartedStorage } from './storage';
 import {
-  getActiveCardsInitialStates,
   getActiveSectionsInitialStates,
+  getActiveProductsInitialStates,
   getFinishedStepsInitialStates,
   reducer,
 } from './reducer';
@@ -32,8 +32,8 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [getAllFinishedStepsFromStorage]
   );
 
-  const activeSectionsInitialStates = useMemo(() => {
-    const activeProductsFromStorage = getActiveSectionsInitialStates({
+  const activeProductssInitialStates = useMemo(() => {
+    const activeProductsFromStorage = getActiveProductsInitialStates({
       activeProducts: getActiveProductsFromStorage(),
     });
     return activeProductsFromStorage.size > 0
@@ -42,19 +42,25 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
           new Set([ProductLine.security, ProductLine.endpoint, ProductLine.cloud]);
   }, [getActiveProductsFromStorage, productTypes]);
 
-  const activeCardsInitialStates = useMemo(
+  const {
+    activeSections: activeSectionsInitialStates,
+    totalActiveSteps: totalActiveStepsInitialSstates,
+    totalStepsLeft: totalStepsLeftInitialStates,
+  } = useMemo(
     () =>
-      getActiveCardsInitialStates({
-        activeProducts: activeSectionsInitialStates,
+      getActiveSectionsInitialStates({
+        activeProducts: activeProductssInitialStates,
         finishedSteps: finishedStepsInitialStates,
       }),
-    [activeSectionsInitialStates, finishedStepsInitialStates]
+    [activeProductssInitialStates, finishedStepsInitialStates]
   );
 
   const [state, dispatch] = useReducer(reducer, {
-    activeProducts: activeSectionsInitialStates,
+    activeProducts: activeProductssInitialStates,
     finishedSteps: finishedStepsInitialStates,
-    activeSections: activeCardsInitialStates,
+    activeSections: activeSectionsInitialStates,
+    totalStepsLeft: totalStepsLeftInitialStates,
+    totalActiveSteps: totalActiveStepsInitialSstates,
   });
 
   const onStepClicked: OnStepClicked = useCallback(

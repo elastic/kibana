@@ -6,11 +6,12 @@
  */
 
 import { ProductLine } from '../../common/product';
+import { setupActiveSections } from './helpers';
 import {
   reducer,
   getFinishedStepsInitialStates,
+  getActiveProductsInitialStates,
   getActiveSectionsInitialStates,
-  getActiveCardsInitialStates,
 } from './reducer';
 import {
   GetSetUpCardId,
@@ -18,7 +19,6 @@ import {
   IntroductionSteps,
   SectionId,
   GetMoreFromElasticSecurityCardId,
-  type ActiveSections,
   type CardId,
   type StepId,
   type ToggleProductAction,
@@ -31,10 +31,18 @@ import {
 
 describe('reducer', () => {
   it('should toggle section correctly', () => {
+    const activeProducts = new Set([ProductLine.security]);
+    const finishedSteps = {} as Record<CardId, Set<StepId>>;
+    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
+      finishedSteps,
+      activeProducts
+    );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
-      finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeSections: {} as ActiveSections | null,
+      finishedSteps,
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
     };
 
     const action: ToggleProductAction = {
@@ -49,18 +57,18 @@ describe('reducer', () => {
   });
 
   it('should add a finished step correctly', () => {
+    const activeProducts = new Set([ProductLine.security]);
+    const finishedSteps = {} as Record<CardId, Set<StepId>>;
+    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
+      finishedSteps,
+      activeProducts
+    );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
-      finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeSections: {
-        getSetUp: {
-          [GetSetUpCardId.introduction]: {
-            id: GetSetUpCardId.introduction,
-            stepsLeft: 1,
-            timeInMins: 3,
-          },
-        },
-      } as unknown as ActiveSections | null,
+      finishedSteps,
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
     };
 
     const action: AddFinishedStepAction = {
@@ -105,24 +113,24 @@ describe('getFinishedStepsInitialStates', () => {
   });
 });
 
-describe('getActiveSectionsInitialStates', () => {
+describe('getActiveProductsInitialStates', () => {
   it('should return the initial states of active sections correctly', () => {
     const activeProducts = [ProductLine.security];
 
-    const initialStates = getActiveSectionsInitialStates({ activeProducts });
+    const initialStates = getActiveProductsInitialStates({ activeProducts });
 
     expect(initialStates.has(ProductLine.security)).toBe(true);
   });
 });
 
-describe('getActiveCardsInitialStates', () => {
+describe('getActiveSectionsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
     const finishedSteps = {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as unknown as Record<CardId, Set<StepId>>;
 
-    const initialStates = getActiveCardsInitialStates({ activeProducts, finishedSteps });
+    const initialStates = getActiveSectionsInitialStates({ activeProducts, finishedSteps });
 
     expect(initialStates).toEqual({
       [SectionId.getSetUp]: {

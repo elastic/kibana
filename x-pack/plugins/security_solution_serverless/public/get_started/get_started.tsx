@@ -36,7 +36,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
     onProductSwitchChanged,
     onStepClicked,
     onStepButtonClicked,
-    state: { activeProducts, activeSections, finishedSteps },
+    state: { activeProducts, activeSections, finishedSteps, totalActiveSteps, totalStepsLeft },
   } = useTogglePanel({ productTypes });
   const services = useKibana().services;
   return (
@@ -77,7 +77,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           </>
         }
       >
-        <WelcomePanel />
+        <WelcomePanel totalActiveSteps={totalActiveSteps} totalStepsLeft={totalStepsLeft} />
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
         bottomBorder={false}

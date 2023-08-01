@@ -8,8 +8,8 @@
 import {
   getCardTimeInMinutes,
   getCardStepsLeft,
-  setupCards,
-  updateCard,
+  setupActiveSections,
+  updateActiveSections,
   isStepActive,
 } from './helpers';
 import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
@@ -120,7 +120,7 @@ describe('isStepActive', () => {
   });
 });
 
-describe('setupCards', () => {
+describe('setupActiveSections', () => {
   const getCard = (cardId: CardId, sectionId: SectionId, activeSections: ActiveSections | null) => {
     const section = activeSections ? activeSections[sectionId] : {};
     return section ? section[cardId] ?? { activeStepIds: null } : {};
@@ -130,7 +130,7 @@ describe('setupCards', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
 
-    const activeSections = setupCards(finishedSteps, activeProducts);
+    const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
 
     expect(
       getCard(GetSetUpCardId.introduction, SectionId.getSetUp, activeSections).activeStepIds
@@ -193,7 +193,7 @@ describe('setupCards', () => {
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const activeSections = setupCards(finishedSteps, activeProducts);
+    const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
 
     expect(
       getCard(
@@ -214,7 +214,7 @@ describe('setupCards', () => {
 
     const activeProducts: Set<ProductLine> = new Set();
 
-    const activeSections = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupActiveSections(finishedSteps, activeProducts);
 
     expect(activeSections).toBeNull();
   });
@@ -231,7 +231,7 @@ describe('setupCards', () => {
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const activeSections = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupActiveSections(finishedSteps, activeProducts);
 
     expect(activeSections).toEqual({});
 
@@ -239,7 +239,7 @@ describe('setupCards', () => {
   });
 });
 
-describe('updateCard', () => {
+describe('updateActiveSections', () => {
   const finishedSteps = {
     [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
   } as unknown as Record<CardId, Set<StepId>>;
@@ -295,7 +295,7 @@ describe('updateCard', () => {
         },
       },
     };
-    const updatedCards = updateCard({
+    const updatedSections = updateActiveSections({
       activeProducts,
       activeSections: testActiveSections,
       cardId,
@@ -303,7 +303,7 @@ describe('updateCard', () => {
       sectionId,
     });
 
-    expect(updatedCards).toEqual({
+    expect(updatedSections).toEqual({
       ...testActiveSections,
       [SectionId.getSetUp]: {
         ...testActiveSections[SectionId.getSetUp],
@@ -322,7 +322,7 @@ describe('updateCard', () => {
     const sectionId = SectionId.getSetUp;
     const cardId = GetSetUpCardId.introduction;
 
-    const updatedCards = updateCard({
+    const updatedSections = updateActiveSections({
       activeProducts,
       finishedSteps,
       activeSections: null,
@@ -330,7 +330,7 @@ describe('updateCard', () => {
       cardId,
     });
 
-    expect(updatedCards).toBeNull();
+    expect(updatedSections).toBeNull();
   });
 
   it('should return null if the card or activeSections is not found', () => {
@@ -338,7 +338,7 @@ describe('updateCard', () => {
     const sectionId = SectionId.getSetUp;
     const cardId = 'test' as CardId;
 
-    const updatedCards = updateCard({
+    const updatedSections = updateActiveSections({
       activeProducts,
       finishedSteps,
       activeSections,
@@ -346,6 +346,6 @@ describe('updateCard', () => {
       cardId,
     });
 
-    expect(updatedCards).toEqual(activeSections);
+    expect(updatedSections).toEqual(activeSections);
   });
 });
