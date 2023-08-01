@@ -14,12 +14,11 @@ import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 describe('maybeAddCloudLinks', () => {
   it('should skip if cloud is disabled', async () => {
     const security = securityMock.createStart();
+    const core = coreMock.createStart();
     maybeAddCloudLinks({
+      core,
       security,
-      chrome: coreMock.createStart().chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
-      docLinks: coreMock.createStart().docLinks,
-      uiSettingsClient: coreMock.createStart().uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -31,13 +30,12 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
     );
-    const { chrome, docLinks, uiSettings } = coreMock.createStart();
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
-      docLinks,
-      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -176,13 +174,12 @@ describe('maybeAddCloudLinks', () => {
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
-    const { chrome, docLinks, uiSettings } = coreMock.createStart();
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
-      docLinks,
-      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -322,13 +319,12 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: false })
     );
-    const { chrome, docLinks, uiSettings } = coreMock.createStart();
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
-      docLinks,
-      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
