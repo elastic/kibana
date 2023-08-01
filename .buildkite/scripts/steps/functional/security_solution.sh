@@ -10,8 +10,9 @@ echo "--- Security Solution tests (Chrome)"
 
 cd "$XPACK_DIR"
 
+export NODE_OPTIONS="$NODE_OPTIONS --openssl-legacy-provider"
 checks-reporter-with-killswitch "Security Solution Cypress Tests (Chrome)" \
- node --openssl-legacy-provider scripts/functional_tests \
+ node scripts/functional_tests \
    --debug --bail \
    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
    --config test/security_solution_cypress/cli_config.ts
