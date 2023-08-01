@@ -31,7 +31,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
     const { body } = await supertest
       .post('/api/telemetry/v2/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
-      .set('x-elastic-internal-origin', 'kibana')
+      .set('x-elastic-internal-origin', 'xxx')
       .send({ refreshCache: true, ...payload })
       .expect(200);
     return body;
