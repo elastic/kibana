@@ -372,7 +372,8 @@ describe(`UserActions`, () => {
     });
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156750
+  describe.skip('pagination', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
