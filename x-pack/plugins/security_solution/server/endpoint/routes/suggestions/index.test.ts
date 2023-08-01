@@ -31,7 +31,7 @@ import {
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
-import type { EndpointSuggestionsSchema } from '../../../../common/endpoint/schema/suggestions';
+import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
 import {
   getEndpointSuggestionsRequestHandler,
   registerEndpointSuggestionsRoutes,

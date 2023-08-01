@@ -8,9 +8,9 @@
 import * as t from 'io-ts';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { getObservabilityOnboardingState } from '../custom_logs/get_observability_onboarding_state';
 import { generateYml } from './generate_yml';
-import { getFallbackESUrl } from '../custom_logs/get_fallback_urls';
+import { getFallbackESUrl } from '../../lib/get_fallback_urls';
+import { getObservabilityOnboardingFlow } from '../../lib/state';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',
@@ -38,22 +38,22 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
 
-    const savedState = await getObservabilityOnboardingState({
+    const savedState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
       savedObjectId: onboardingId,
     });
 
     const yaml = generateYml({
-      datasetName: savedState?.state.datasetName,
-      customConfigurations: savedState?.state.customConfigurations,
-      logFilePaths: savedState?.state.logFilePaths,
-      namespace: savedState?.state.namespace,
+      datasetName: savedState?.state?.datasetName,
+      customConfigurations: savedState?.state?.customConfigurations,
+      logFilePaths: savedState?.state?.logFilePaths,
+      namespace: savedState?.state?.namespace,
       apiKey: authApiKey
         ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}`
         : '$API_KEY',
       esHost: elasticsearchUrl,
       logfileId: `custom-logs-${Date.now()}`,
-      serviceName: savedState?.state.serviceName,
+      serviceName: savedState?.state?.serviceName,
     });
 
     return yaml;

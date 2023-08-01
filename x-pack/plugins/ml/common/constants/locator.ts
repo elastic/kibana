@@ -66,7 +66,13 @@ export const ML_PAGES = {
   OVERVIEW: 'overview',
   NOTIFICATIONS: 'notifications',
   AIOPS: 'aiops',
+  /**
+   * @deprecated since 8.10, kept here to redirect old bookmarks.
+   */
   AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
+  /**
+   * @deprecated since 8.10, kept here to redirect old bookmarks.
+   */
   AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: 'aiops/explain_log_rate_spikes_index_select',
   AIOPS_LOG_RATE_ANALYSIS: 'aiops/log_rate_analysis',
   AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: 'aiops/log_rate_analysis_index_select',

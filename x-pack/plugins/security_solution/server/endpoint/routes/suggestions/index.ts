@@ -15,7 +15,7 @@ import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomp
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
-} from '../../../../common/endpoint/schema/suggestions';
+} from '../../../../common/api/endpoint';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
