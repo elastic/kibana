@@ -45,7 +45,7 @@ const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgNa
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
 
 // TODO: this function must be exported to be used by other plugins
-const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
+export const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
   const uniqueId = uuidv5(`${tagName.toLowerCase()}`, uuidv5.DNS);
   return `fleet-shared-tag-${pkgName}-${uniqueId}-${spaceId}`;
