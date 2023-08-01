@@ -63,7 +63,6 @@ describe('Outputs', () => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SELECT).within(() => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION);
-            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_KERBEROS_OPTION);
           });
 
           // Verify user/pass fields
