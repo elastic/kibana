@@ -9,6 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
+  EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiPanel,
@@ -52,11 +53,6 @@ const kafkaAuthenticationsOptions = [
     id: kafkaAuthType.Ssl,
     label: 'SSL',
     'data-test-subj': 'kafkaAuthenticationSSLRadioButton',
-  },
-  {
-    id: kafkaAuthType.Kerberos,
-    label: 'Kerberos',
-    'data-test-subj': 'kafkaAuthenticationKerberosRadioButton',
   },
 ];
 
@@ -133,8 +129,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             </EuiFormRow>
           </>
         );
-      case kafkaAuthType.Kerberos:
-        return null;
       default:
       case kafkaAuthType.Userpass:
         return (
@@ -165,7 +159,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
               }
               {...inputs.kafkaAuthPasswordInput.formRowProps}
             >
-              <EuiFieldText
+              <EuiFieldPassword
+                type={'dual'}
                 data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
                 fullWidth
                 {...inputs.kafkaAuthPasswordInput.props}
