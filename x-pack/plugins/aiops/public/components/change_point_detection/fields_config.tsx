@@ -32,6 +32,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../embeddable/embeddable_change_point_chart_factory';
@@ -194,6 +195,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const openCasesModalCallback = useCasesModal(EMBEDDABLE_CHANGE_POINT_CHART_TYPE);
 
+  const selectedPartitions = useMemo(() => {
+    return (selectedChangePoints[panelIndex] ?? []).map((v) => v.group?.value as string);
+  }, [selectedChangePoints, panelIndex]);
+
+  const caseAttachmentButtonDisabled =
+    isDefined(fieldConfig.splitField) && selectedPartitions.length === 0;
+
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 'panelActions',
@@ -234,14 +242,30 @@ const FieldPanel: FC<FieldPanelProps> = ({
           name: i18n.translate('xpack.aiops.changePointDetection.attachToCaseLabel', {
             defaultMessage: 'To case',
           }),
+          disabled: caseAttachmentButtonDisabled,
+          ...(caseAttachmentButtonDisabled
+            ? {
+                toolTipPosition: 'left',
+                toolTipContent: i18n.translate(
+                  'xpack.aiops.changePointDetection.attachToCaseTooltipContent',
+                  {
+                    defaultMessage: 'Select change points to attach',
+                  }
+                ),
+              }
+            : {}),
           onClick: () => {
             openCasesModalCallback({
               timeRange,
-              splitField: fieldConfig.splitField,
               fn: fieldConfig.fn,
               metricField: fieldConfig.metricField,
               dataViewId: dataView.id,
-              partitions: selectedChangePoints[panelIndex].map((v) => v.group?.value as string),
+              ...(fieldConfig.splitField
+                ? {
+                    splitField: fieldConfig.splitField,
+                    partitions: selectedPartitions,
+                  }
+                : {}),
             });
           },
         },
@@ -329,9 +353,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         fn: fieldConfig.fn,
         ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
         maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
-        ...(selectedChangePoints[panelIndex]?.length
-          ? { partitions: selectedChangePoints[panelIndex].map((v) => v.group?.value as string) }
-          : {}),
+        ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
       };
 
       const state = {
@@ -347,15 +369,17 @@ const FieldPanel: FC<FieldPanelProps> = ({
       });
     },
     [
-      dataView.id,
       embeddable,
-      fieldConfig.fn,
+      dataView.id,
       fieldConfig.metricField,
       fieldConfig.splitField,
-      dashboardAttachment,
+      fieldConfig.fn,
+      dashboardAttachment.applyTimeRange,
+      dashboardAttachment.maxSeriesToPlot,
       timeRange,
       selectedChangePoints,
       panelIndex,
+      selectedPartitions,
     ]
   );
 
