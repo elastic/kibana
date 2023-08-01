@@ -26,7 +26,7 @@ export async function getDataViewByTextBasedQueryLang(
     indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   }
   // we should find a better way to work with ESQL queries which dont need a dataview
-  if (!indexPatternFromQuery) return currentDataView;
+  if (!indexPatternFromQuery && currentDataView) return currentDataView;
 
   if (
     currentDataView?.isPersisted() ||
