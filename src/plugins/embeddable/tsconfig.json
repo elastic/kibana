@@ -28,7 +28,8 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }
