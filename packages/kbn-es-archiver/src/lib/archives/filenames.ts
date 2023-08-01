@@ -15,7 +15,7 @@ export const isGzip = (path: string): boolean => extname(path) === '.gz';
  *  @param  {String} path
  *  @return {Boolean}
  */
-export function isMappingFile(path: string) {
+export function isMappingFile(path: string): boolean {
   return basename(path, '.gz') === 'mappings.json';
 }
 

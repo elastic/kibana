@@ -8,7 +8,7 @@
 
 import { Transform } from 'stream';
 
-export function createFilterStream<T>(fn: (obj: T) => boolean) {
+export function createFilterStream<T>(fn: (obj: T) => boolean): Transform {
   return new Transform({
     objectMode: true,
     async transform(obj, enc, done) {

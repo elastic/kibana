@@ -8,7 +8,7 @@
 
 import { Transform } from 'stream';
 
-export function createMapStream<T>(fn: (value: T, i: number) => void) {
+export function createMapStream<T>(fn: (value: T, i: number) => void): Transform {
   let i = 0;
 
   return new Transform({
