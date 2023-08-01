@@ -136,6 +136,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
           onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
           iconSide="right"
           iconType="arrowDown"
+          size="s"
         >
           {buttonText}
         </EuiButtonEmpty>
