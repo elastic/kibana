@@ -5,8 +5,7 @@ Object {
   "all": Array [
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
-    "writeCasesConnector",
-    "readCasesConnector",
+    "casesGetConnectorsConfigure",
     "casesFilesCasesCreate",
     "casesFilesCasesRead",
   ],
@@ -16,7 +15,7 @@ Object {
   "read": Array [
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
-    "readCasesConnector",
+    "casesGetConnectorsConfigure",
     "casesFilesCasesRead",
   ],
 }
@@ -27,8 +26,7 @@ Object {
   "all": Array [
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
-    "writeCasesConnector",
-    "readCasesConnector",
+    "casesGetConnectorsConfigure",
     "observabilityFilesCasesCreate",
     "observabilityFilesCasesRead",
   ],
@@ -38,7 +36,7 @@ Object {
   "read": Array [
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
-    "readCasesConnector",
+    "casesGetConnectorsConfigure",
     "observabilityFilesCasesRead",
   ],
 }
@@ -49,8 +47,7 @@ Object {
   "all": Array [
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
-    "writeCasesConnector",
-    "readCasesConnector",
+    "casesGetConnectorsConfigure",
     "securitySolutionFilesCasesCreate",
     "securitySolutionFilesCasesRead",
   ],
@@ -60,7 +57,7 @@ Object {
   "read": Array [
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
-    "readCasesConnector",
+    "casesGetConnectorsConfigure",
     "securitySolutionFilesCasesRead",
   ],
 }
