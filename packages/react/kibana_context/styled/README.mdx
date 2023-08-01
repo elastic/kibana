@@ -13,3 +13,5 @@ Before `emotion` was introduced, some components used `styled-components` to eas
 
 It should _not_ be used in new code.
 
+**NOTE:** plugins cannot use `styled-components` and `emotion` at the same time, their Babel plugins conflict.  The EUI team has fielded many questions about this.  The best solution is to migrate to `emotion` and not use `styled-components`.
+
