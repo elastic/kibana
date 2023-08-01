@@ -75,14 +75,16 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     });
   }
 
-  protected getResponseErrorMessage(error: AxiosError): string {
+  protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
     if (!error.response?.status) {
       return 'Unknown API Error';
     }
     if (error.response.status === 401) {
       return 'Unauthorized API Error';
     }
-    return `API Error: ${error.response?.status} - ${error.response?.statusText}`;
+    return `API Error: ${error.response?.status} - ${error.response?.statusText}${
+      error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
+    }`;
   }
 
   public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {

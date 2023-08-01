@@ -82,7 +82,7 @@ describe('Entity analytics management page', { tags: ['@brokenInServerless', '@e
       cy.intercept('POST', '/internal/risk_score/preview', {
         statusCode: 200,
         body: {
-          scores: [],
+          scores: { host: [], user: [] },
         },
       });
 
