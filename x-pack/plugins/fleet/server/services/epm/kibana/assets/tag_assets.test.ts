@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tagKibanaAssets, createPackageSpecTags } from './tag_assets';
-import type { ArchiveAsset } from './install';
+import { tagKibanaAssets } from './tag_assets';
 
 describe('tagKibanaAssets', () => {
   const savedObjectTagAssignmentService = {
@@ -43,7 +42,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'Managed',
         description: '',
-        color: '#0077cc',
+        color: '#0077CC',
       },
       { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
@@ -51,7 +50,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'System',
         description: '',
-        color: '#4dd2ca',
+        color: '#4DD2CA',
       },
       { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
     );
@@ -189,7 +188,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'Managed',
         description: '',
-        color: '#0077cc',
+        color: '#0077CC',
       },
       { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
@@ -198,7 +197,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'System',
         description: '',
-        color: '#4dd2ca',
+        color: '#4DD2CA',
       },
       { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
     );
@@ -236,7 +235,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'Managed',
         description: '',
-        color: '#0077cc',
+        color: '#0077CC',
       },
       { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
@@ -245,7 +244,7 @@ describe('tagKibanaAssets', () => {
       {
         name: 'System',
         description: '',
-        color: '#4dd2ca',
+        color: '#4DD2CA',
       },
       { id: 'system', overwrite: true, refresh: false }
     );
@@ -288,38 +287,20 @@ describe('tagKibanaAssets', () => {
       refresh: false,
     });
   });
-});
-
-describe('createPackageSpecTags', () => {
-  const savedObjectTagAssignmentService = {
-    updateTagAssignments: jest.fn(),
-  } as any;
-  const savedObjectTagClient = {
-    get: jest.fn(),
-    create: jest.fn(),
-  } as any;
-  const taggableAssets = [
-    { id: 'dashboard1', type: 'dashboard' },
-    { id: 'dashboard2', type: 'dashboard' },
-    { id: 'dashboard3', type: 'dashboard' },
-    { id: 'dashboard4', type: 'dashboard' },
-    { id: 'search_id1', type: 'search' },
-    { id: 'search_id2', type: 'search' },
-    { id: 'search_id3', type: 'search' },
-  ] as ArchiveAsset[];
-
-  beforeEach(() => {
-    savedObjectTagAssignmentService.updateTagAssignments.mockReset();
-    savedObjectTagClient.get.mockReset();
-    savedObjectTagClient.create.mockReset();
-  });
 
   it('should create tags based on assetTags obtained from packageInfo', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ],
+    } as any;
     const assetTags = [
       {
         text: 'Foo',
@@ -332,19 +313,38 @@ describe('createPackageSpecTags', () => {
         asset_ids: ['dashboard2'],
       },
     ];
-
-    await createPackageSpecTags(savedObjectTagAssignmentService, taggableAssets, {
-      spaceId: 'default',
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
       savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
       assetTags,
     });
-    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(5);
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
-        name: 'Foo',
-        description: 'Tag defined in package-spec',
+        color: '#0077CC',
+        description: '',
+        name: 'Managed',
+      },
+      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: '#4DD2CA',
+        description: '',
+        name: 'TestPackage',
+      },
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
         color: expect.any(String),
+        description: 'Tag defined in package-spec',
+        name: 'Foo',
       },
       {
         id: 'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
@@ -352,33 +352,9 @@ describe('createPackageSpecTags', () => {
         refresh: false,
       }
     );
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      {
-        name: 'Bar',
-        description: 'Tag defined in package-spec',
-        color: expect.any(String),
-      },
-      {
-        id: 'fleet-shared-tag-test-pkg-e8d5cf6d-de0f-5e77-9aa3-91093cdfbf62-default',
-        overwrite: true,
-        refresh: false,
-      }
-    );
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      {
-        name: 'myCustomTag',
-        description: 'Tag defined in package-spec',
-        color: expect.any(String),
-      },
-      {
-        id: 'fleet-shared-tag-test-pkg-cdc93456-cbdd-5560-a16c-117190be14ca-default',
-        overwrite: true,
-        refresh: false,
-      }
-    );
-    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(5);
+
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
-      tags: ['fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default'],
       assign: [
         {
           id: 'dashboard1',
@@ -386,73 +362,49 @@ describe('createPackageSpecTags', () => {
         },
         {
           id: 'dashboard2',
-          type: 'dashboard',
-        },
-        {
-          id: 'dashboard3',
-          type: 'dashboard',
-        },
-        {
-          id: 'dashboard4',
-          type: 'dashboard',
-        },
-      ],
-      unassign: [],
-      refresh: false,
-    });
-    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
-      tags: ['fleet-shared-tag-test-pkg-e8d5cf6d-de0f-5e77-9aa3-91093cdfbf62-default'],
-      assign: [
-        {
-          id: 'dashboard1',
           type: 'dashboard',
         },
         {
           id: 'search_id1',
           type: 'search',
         },
+        {
+          id: 'search_id2',
+          type: 'search',
+        },
       ],
-      unassign: [],
       refresh: false,
+      tags: ['fleet-managed-default', 'fleet-pkg-test-pkg-default'],
+      unassign: [],
     });
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
-      tags: ['fleet-shared-tag-test-pkg-cdc93456-cbdd-5560-a16c-117190be14ca-default'],
       assign: [
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-        { id: 'search_id3', type: 'search' },
+        {
+          id: 'dashboard1',
+          type: 'dashboard',
+        },
+      ],
+      refresh: false,
+      tags: [
+        'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
+        'fleet-shared-tag-test-pkg-e8d5cf6d-de0f-5e77-9aa3-91093cdfbf62-default',
+      ],
+      unassign: [],
+    });
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
         {
           id: 'dashboard2',
           type: 'dashboard',
         },
       ],
-      unassign: [],
       refresh: false,
+      tags: [
+        'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
+        'fleet-shared-tag-test-pkg-cdc93456-cbdd-5560-a16c-117190be14ca-default',
+      ],
+      unassign: [],
     });
-  });
-
-  it('should not call updateTagAssignments if there are no assets to assign', async () => {
-    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
-    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
-      Promise.resolve({ id: name.toLowerCase(), name })
-    );
-
-    const assetTags = [
-      {
-        text: 'Foo',
-        asset_types: ['visualization'],
-      },
-      { text: 'Bar', asset_ids: ['id3'] },
-    ];
-
-    await createPackageSpecTags(savedObjectTagAssignmentService, taggableAssets, {
-      spaceId: 'default',
-      savedObjectTagClient,
-      pkgName: 'test-pkg',
-      assetTags,
-    });
-    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
-    expect(savedObjectTagAssignmentService.updateTagAssignments).not.toHaveBeenCalled();
   });
 
   it('should not call savedObjectTagClient.create if the tag id already exists', async () => {
@@ -460,6 +412,14 @@ describe('createPackageSpecTags', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ],
+    } as any;
     const assetTags = [
       {
         text: 'Foo',
@@ -472,12 +432,78 @@ describe('createPackageSpecTags', () => {
         asset_ids: ['dashboard2'],
       },
     ];
-    await createPackageSpecTags(savedObjectTagAssignmentService, taggableAssets, {
-      spaceId: 'default',
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
       savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
       assetTags,
     });
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
+  });
+
+  it('should only call savedObjectTagClient.create for basic tgs if there are no assetTags to assign', async () => {
+    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ],
+    } as any;
+
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
+      pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
+      assetTags: [],
+    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(1);
+  });
+
+  it('should only call savedObjectTagClient.create for basic tgs if there are no taggable assetTags', async () => {
+    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ],
+    } as any;
+    const assetTags = [
+      {
+        text: 'Foo',
+        asset_types: ['security_rule', 'index_pattern'],
+      },
+    ];
+
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
+      pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
+      assetTags,
+    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(1);
   });
 });

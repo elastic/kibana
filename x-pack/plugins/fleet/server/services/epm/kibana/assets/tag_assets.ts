@@ -19,13 +19,26 @@ import { appContextService } from '../../../app_context';
 import type { ArchiveAsset } from './install';
 import { KibanaSavedObjectTypeMapping } from './install';
 
-const MANAGED_TAG_COLOR = '#0077cc';
-const PACKAGE_TAG_COLOR = '#4dd2ca';
+interface ObjectReference {
+  type: string;
+  id: string;
+}
+interface PackageSpecTagsAssets {
+  tagId: string;
+  assets: ObjectReference[];
+}
+
+interface GroupedAssets {
+  [assetId: string]: { type: string; tags: string[] };
+}
+
+const MANAGED_TAG_COLOR = '#0077CC';
+const PACKAGE_TAG_COLOR = '#4DD2CA';
 const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
 const TAG_COLORS = [
-  '#fec514',
-  '#f583b7',
+  '#FEC514',
+  '#F583B7',
   '#07C',
   '#F04E98',
   '#00BFB3',
@@ -44,7 +57,6 @@ const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
 const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
 
-// TODO: this function must be exported to be used by other plugins
 export const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
   const uniqueId = uuidv5(`${tagName.toLowerCase()}`, uuidv5.DNS);
@@ -76,7 +88,6 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
     ...asset,
     id: getNewId(asset.id),
   }));
-
   if (taggableAssets.length > 0) {
     const [managedTagId, packageTagId] = await Promise.all([
       ensureManagedTag(opts),
@@ -96,9 +107,31 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
       }
       throw error;
     }
-  }
 
-  createPackageSpecTags(savedObjectTagAssignmentService, taggableAssets, opts);
+    const packageSpecAssets = await getPackageSpecTags(taggableAssets, opts);
+    const groupedAssets = groupByAssetId(packageSpecAssets);
+
+    if (Object.entries(groupedAssets).length > 0) {
+      await Promise.all(
+        Object.entries(groupedAssets).map(async ([assetId, asset]) => {
+          try {
+            await savedObjectTagAssignmentService.updateTagAssignments({
+              tags: asset.tags,
+              assign: [{ id: assetId, type: asset.type }],
+              unassign: [],
+              refresh: false,
+            });
+          } catch (error) {
+            if (error.status === 404) {
+              appContextService.getLogger().warn(error.message);
+              return;
+            }
+            throw error;
+          }
+        })
+      );
+    }
+  }
 }
 
 function getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {
@@ -168,23 +201,21 @@ async function ensurePackageTag(
   return packageTagId;
 }
 
-// Ensure that asset tags coming from the kibana/tags.yml file are correctly parsed
-// Then create the corresponding object tags and assign them to the taggable requested assets
-export async function createPackageSpecTags(
-  savedObjectTagAssignmentService: IAssignmentService,
+// Ensure that asset tags coming from the kibana/tags.yml file are correctly parsed and created
+export async function getPackageSpecTags(
   taggableAssets: ArchiveAsset[],
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'assetTags'>
-) {
+): Promise<PackageSpecTagsAssets[]> {
   const { spaceId, savedObjectTagClient, pkgName, assetTags } = opts;
-  if (!assetTags || assetTags?.length === 0) return;
+  if (!assetTags || assetTags?.length === 0) return [];
 
-  await Promise.all(
+  const assetsWithTags = await Promise.all(
     assetTags.map(async (tag) => {
       const uniqueTagId = getPackageSpecTagId(spaceId, pkgName, tag.text);
       const existingPackageSpecTag = await savedObjectTagClient.get(uniqueTagId).catch(() => {});
 
       if (!existingPackageSpecTag) {
-        savedObjectTagClient.create(
+        await savedObjectTagClient.create(
           {
             name: tag.text,
             description: 'Tag defined in package-spec',
@@ -193,30 +224,15 @@ export async function createPackageSpecTags(
           { id: uniqueTagId, overwrite: true, refresh: false }
         );
       }
-
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);
       const assetIds = getAssetIdsObjectReferences(tag?.asset_ids, taggableAssets);
       const totAssetsToAssign = assetTypes.concat(assetIds);
       const assetsToAssign = totAssetsToAssign.length > 0 ? uniqBy(totAssetsToAssign, 'id') : [];
 
-      if (!assetsToAssign?.length) return;
-
-      try {
-        await savedObjectTagAssignmentService.updateTagAssignments({
-          tags: [uniqueTagId],
-          assign: assetsToAssign,
-          unassign: [],
-          refresh: false,
-        });
-      } catch (error) {
-        if (error.status === 404) {
-          appContextService.getLogger().warn(error.message);
-          return;
-        }
-        throw error;
-      }
+      return { tagId: uniqueTagId, assets: assetsToAssign };
     })
   );
+  return assetsWithTags;
 }
 
 // Get all the assets of types defined in tag.asset_types from taggable kibanaAssets
@@ -245,4 +261,24 @@ const getAssetIdsObjectReferences = (
     .map((assetType) => {
       return { type: assetType.type, id: assetType.id };
     });
+};
+
+// Utility function that groups the assets by asset id
+// It makes easier to update the tags in batches
+const groupByAssetId = (packageSpecsAssets: PackageSpecTagsAssets[]): GroupedAssets => {
+  if (packageSpecsAssets.length === 0) return {};
+
+  const groupedAssets: GroupedAssets = {};
+
+  packageSpecsAssets.forEach(({ tagId, assets }) => {
+    assets.forEach((asset) => {
+      const { id } = asset;
+
+      if (!groupedAssets[id]) {
+        groupedAssets[id] = { type: asset.type, tags: [] };
+      }
+      groupedAssets[id].tags.push(tagId);
+    });
+  });
+  return groupedAssets;
 };
