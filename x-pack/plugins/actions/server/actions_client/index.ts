@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export type { ConnectorWithOptionalDeprecation } from './is_connector_deprecated';
-export { isConnectorDeprecated } from './is_connector_deprecated';
-export { connectorFromSavedObject } from './connector_from_save_object';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+export { actionsClientMock } from './actions_client.mock';
+export type { ActionsClientMock } from './actions_client.mock';
+export * from './actions_client';

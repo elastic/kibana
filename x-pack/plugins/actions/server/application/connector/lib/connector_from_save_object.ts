@@ -7,12 +7,12 @@
 
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { RawAction } from '../../../types';
-import { ConnectorResult } from '../get_all/types';
+import { Connector } from '../types';
 
-export function actionFromSavedObject(
+export function connectorFromSavedObject(
   savedObject: SavedObject<RawAction>,
   isDeprecated: boolean
-): ConnectorResult {
+): Connector {
   return {
     id: savedObject.id,
     ...savedObject.attributes,

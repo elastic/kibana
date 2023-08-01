@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindConnectorResult } from '../../../../../application/connector/get_all/types';
+import { FindConnectorResult } from '../../../../../application/connector/types';
 import { ConnectorResponse } from '../../../../../../common/routes/connector/response';
 import { RewriteResponseCase } from '../../../../../../common/rewrite_request_case';
 

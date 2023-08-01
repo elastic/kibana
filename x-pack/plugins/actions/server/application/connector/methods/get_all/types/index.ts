@@ -6,4 +6,3 @@
  */
 
 export type { GetAllParams, InjectExtraFindDataParams } from './params';
-export type { ConnectorResult, FindConnectorResult } from './result';

@@ -10,7 +10,7 @@ import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { ActionType } from '../../../common';
-import { ActionsClientMock, actionsClientMock } from '../../actions_client.mock';
+import { ActionsClientMock, actionsClientMock } from '../../actions_client';
 import { ActionsRequestHandlerContext } from '../../types';
 
 export function mockHandlerArguments(

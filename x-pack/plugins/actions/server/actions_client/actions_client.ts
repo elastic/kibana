@@ -24,14 +24,15 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { getAll } from './application/connector/get_all';
+import { FindConnectorResult } from '../application/connector/types';
+import { getAll } from '../application/connector/methods/get_all';
 import {
   ActionType,
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
-} from '../common';
-import { ActionTypeRegistry } from './action_type_registry';
+} from '../../common';
+import { ActionTypeRegistry } from '../action_type_registry';
 import {
   validateConfig,
   validateSecrets,
@@ -39,55 +40,54 @@ import {
   validateConnector,
   ActionExecutionSource,
   parseDate,
-} from './lib';
+} from '../lib';
 import {
   ActionResult,
   RawAction,
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
-} from './types';
+} from '../types';
 
-import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
-import { ExecuteOptions } from './lib/action_executor';
+import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
+import { ExecuteOptions } from '../lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
-} from './create_execute_function';
-import { ActionsAuthorization } from './authorization/actions_authorization';
+} from '../create_execute_function';
+import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   getBulkAuthorizationModeBySource,
   AuthorizationMode,
-} from './authorization/get_authorization_mode_by_source';
-import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
-import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { ActionsConfigurationUtilities } from './actions_config';
+} from '../authorization/get_authorization_mode_by_source';
+import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
+import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   OAuthClientCredentialsParams,
   OAuthJwtParams,
   OAuthParams,
-} from './routes/get_oauth_access_token';
+} from '../routes/get_oauth_access_token';
 import {
   getOAuthJwtAccessToken,
   GetOAuthJwtConfig,
   GetOAuthJwtSecrets,
-} from './lib/get_oauth_jwt_access_token';
+} from '../lib/get_oauth_jwt_access_token';
 import {
   getOAuthClientCredentialsAccessToken,
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
-} from './lib/get_oauth_client_credentials_access_token';
+} from '../lib/get_oauth_client_credentials_access_token';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,
   formatExecutionLogResult,
   getExecutionKPIAggregation,
   getExecutionLogAggregation,
-} from './lib/get_execution_log_aggregation';
-import { actionFromSavedObject, isConnectorDeprecated } from './application/connector/lib';
-import { FindConnectorResult } from './application/connector/get_all/types';
+} from '../lib/get_execution_log_aggregation';
+import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 
 interface ActionUpdate {
   name: string;
@@ -566,7 +566,9 @@ export class ActionsClient {
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
       }
-      actionResults.push(actionFromSavedObject(action, isConnectorDeprecated(action.attributes)));
+      actionResults.push(
+        connectorFromSavedObject(action, isConnectorDeprecated(action.attributes))
+      );
     }
 
     return actionResults;

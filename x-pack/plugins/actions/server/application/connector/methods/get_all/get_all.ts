@@ -9,10 +9,12 @@
  * Get all actions with in-memory connectors
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { findConnectorsSo, searchConnectorsSo } from '../../../data/connector';
-import { FindConnectorResult, GetAllParams, InjectExtraFindDataParams } from './types';
-import { ConnectorAuditAction, connectorAuditEvent } from '../../../lib/audit_events';
-import { actionFromSavedObject, isConnectorDeprecated } from '../lib';
+import { connectorSchema } from '../../schemas';
+import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
+import { GetAllParams, InjectExtraFindDataParams } from './types';
+import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import { FindConnectorResult } from '../../types';
 
 export async function getAll({
   context,
@@ -33,7 +35,7 @@ export async function getAll({
   const savedObjectsActions = (
     await findConnectorsSo({ unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient })
   ).saved_objects.map((rawAction) =>
-    actionFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
+    connectorFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
   );
 
   savedObjectsActions.forEach(({ id }) =>
@@ -60,21 +62,31 @@ export async function getAll({
       isSystemAction: inMemoryConnector.isSystemAction,
     })),
   ].sort((a, b) => a.name.localeCompare(b.name));
+
+  mergedResult.forEach((connector) => {
+    // Try to validate created rule, but don't throw.
+    try {
+      connectorSchema.validate(connector);
+    } catch (e) {
+      context.logger.warn(`Error validating connector: ${connector.id}, ${e}`);
+    }
+  });
+
   return await injectExtraFindData({
     kibanaIndices: context.kibanaIndices,
     scopedClusterClient: context.scopedClusterClient,
-    connectorResults: mergedResult,
+    connectors: mergedResult,
   });
 }
 
 async function injectExtraFindData({
   kibanaIndices,
   scopedClusterClient,
-  connectorResults,
+  connectors,
 }: InjectExtraFindDataParams): Promise<FindConnectorResult[]> {
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
-  for (const connectorResult of connectorResults) {
-    aggs[connectorResult.id] = {
+  for (const connector of connectors) {
+    aggs[connector.id] = {
       filter: {
         bool: {
           must: {
@@ -87,7 +99,7 @@ async function injectExtraFindData({
                       must: [
                         {
                           term: {
-                            'references.id': connectorResult.id,
+                            'references.id': connector.id,
                           },
                         },
                         {
@@ -109,9 +121,9 @@ async function injectExtraFindData({
 
   const aggregationResult = await searchConnectorsSo({ scopedClusterClient, kibanaIndices, aggs });
 
-  return connectorResults.map((actionResult) => ({
-    ...actionResult,
+  return connectors.map((connector) => ({
+    ...connector,
     // @ts-expect-error aggegation type is not specified
-    referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
+    referencedByCount: aggregationResult.aggregations[connector.id].doc_count,
   }));
 }

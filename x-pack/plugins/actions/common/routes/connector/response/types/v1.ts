@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import { TypeOf } from '@kbn/config-schema';
+import { connectorResponseSchemaV1 } from '..';
+
 export type ActionTypeConfig = Record<string, unknown>;
+type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;
 
 export interface ConnectorResponse<Config extends ActionTypeConfig = ActionTypeConfig> {
-  id: string;
-  name: string;
+  id: ConnectorResponseSchemaType['id'];
+  name: ConnectorResponseSchemaType['name'];
   config?: Config;
-  connector_type_id: string;
-  is_missing_secrets?: boolean;
-  is_preconfigured: boolean;
-  is_deprecated: boolean;
-  is_system_action: boolean;
-  referenced_by_count: number;
+  connector_type_id: ConnectorResponseSchemaType['connector_type_id'];
+  is_missing_secrets?: ConnectorResponseSchemaType['is_missing_secrets'];
+  is_preconfigured: ConnectorResponseSchemaType['is_preconfigured'];
+  is_deprecated: ConnectorResponseSchemaType['is_deprecated'];
+  is_system_action: ConnectorResponseSchemaType['is_system_action'];
+  referenced_by_count: ConnectorResponseSchemaType['referenced_by_count'];
 }

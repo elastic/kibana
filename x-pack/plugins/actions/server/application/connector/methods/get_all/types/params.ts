@@ -6,8 +6,8 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { ConnectorResult } from '.';
-import { ActionsClientContext } from '../../../../actions_client';
+import { ActionsClientContext } from '../../../../../actions_client/actions_client';
+import { Connector } from '../../../types';
 
 export interface GetAllParams {
   includeSystemActions?: boolean;
@@ -17,5 +17,5 @@ export interface GetAllParams {
 export interface InjectExtraFindDataParams {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
-  connectorResults: ConnectorResult[];
+  connectors: Connector[];
 }

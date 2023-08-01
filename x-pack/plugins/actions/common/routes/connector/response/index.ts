@@ -5,4 +5,13 @@
  * 2.0.
  */
 
-export * from './types/latest';
+// Latest
+export type { ConnectorResponse, ActionTypeConfig } from './types/latest';
+export { connectorResponseSchema } from './schemas/latest';
+
+// v1
+export type {
+  ConnectorResponse as ConnectorResponseV1,
+  ActionTypeConfig as ActionTypeConfigV1,
+} from './types/v1';
+export { connectorResponseSchema as connectorResponseSchemaV1 } from './schemas/v1';

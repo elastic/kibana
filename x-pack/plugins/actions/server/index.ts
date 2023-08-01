@@ -26,7 +26,7 @@ export type {
   ActionsApiRequestHandlerContext,
 } from './types';
 
-export type { FindConnectorResponse as FindActionResult } from '../common/routes/connector/response';
+export type { FindConnectorResult as FindActionResult } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
