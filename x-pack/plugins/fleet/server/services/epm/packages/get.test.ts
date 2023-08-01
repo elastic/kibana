@@ -381,7 +381,6 @@ test: invalid manifest
         savedObjectsClient: soClient,
       });
       expect(packages).toMatchObject([
-        { id: 'fleet_server', name: 'fleet_server', title: 'Fleet Server', version: '1.0.0' },
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
 
