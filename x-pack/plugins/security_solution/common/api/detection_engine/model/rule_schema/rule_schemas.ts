@@ -181,8 +181,8 @@ export const BaseCreateProps = baseSchema.create;
 // with some variations for each route. These intersect with type specific schemas below
 // to create the full schema for each route.
 
-type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
-const SharedCreateProps = t.intersection([
+export type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
+export const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
 ]);
@@ -545,28 +545,3 @@ export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatc
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
 export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
-
-// -------------------------------------------------------------------------------------------------
-// Rule preview schemas
-
-// TODO: Move to the rule_preview subdomain
-
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
-export const previewRulesSchema = t.intersection([
-  SharedCreateProps,
-  TypeSpecificCreateProps,
-  t.type({ invocationCount: t.number, timeframeEnd: t.string }),
-]);
-
-export interface RulePreviewLogs {
-  errors: string[];
-  warnings: string[];
-  startedAt?: string;
-  duration: number;
-}
-
-export interface PreviewResponse {
-  previewId: string | undefined;
-  logs: RulePreviewLogs[] | undefined;
-  isAborted: boolean | undefined;
-}
