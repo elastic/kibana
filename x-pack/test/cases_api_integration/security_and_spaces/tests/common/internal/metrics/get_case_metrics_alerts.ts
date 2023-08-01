@@ -6,16 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   createComment,
   deleteAllCaseItems,
   getCaseMetrics,
-} from '../../../../common/lib/api';
-import { arraysToEqual } from '../../../../common/lib/validation';
+} from '../../../../../common/lib/api';
+import { arraysToEqual } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -41,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['alerts.hosts'],
+          features: [CaseMetricsFeature.ALERTS_HOSTS],
         });
 
         expect(metrics.alerts?.hosts?.total).to.be(3);
@@ -58,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['alerts.users'],
+          features: [CaseMetricsFeature.ALERTS_USERS],
         });
 
         expect(metrics.alerts?.users?.total).to.be(4);
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['alerts.users', 'alerts.hosts'],
+          features: [CaseMetricsFeature.ALERTS_USERS, CaseMetricsFeature.ALERTS_HOSTS],
         });
 
         expect(metrics.alerts?.hosts?.total).to.be(3);
@@ -122,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['alerts.users', 'alerts.hosts'],
+          features: [CaseMetricsFeature.ALERTS_USERS, CaseMetricsFeature.ALERTS_HOSTS],
         });
 
         expect(metrics.alerts?.hosts).to.eql({
@@ -141,7 +142,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['alerts.users', 'alerts.hosts', 'alerts.count'],
+          features: [
+            CaseMetricsFeature.ALERTS_USERS,
+            CaseMetricsFeature.ALERTS_HOSTS,
+            CaseMetricsFeature.ALERTS_COUNT,
+          ],
         });
 
         expect(metrics.alerts?.hosts?.total).to.be(3);
@@ -172,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['alerts.count'],
+          features: [CaseMetricsFeature.ALERTS_COUNT],
         });
 
         expect(metrics).to.eql({
@@ -199,7 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['alerts.count'],
+          features: [CaseMetricsFeature.ALERTS_COUNT],
         });
 
         expect(metrics).to.eql({
