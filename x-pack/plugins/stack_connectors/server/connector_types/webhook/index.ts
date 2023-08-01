@@ -199,6 +199,8 @@ export async function executor(
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
+  // For backwards compatibility with connectors created before authType was added, interpret a
+  // hasAuth: true and undefined authType as basic auth
   const basicAuth =
     (hasAuth || authType === WebhookAuthType.Basic) &&
     isString(secrets.user) &&
