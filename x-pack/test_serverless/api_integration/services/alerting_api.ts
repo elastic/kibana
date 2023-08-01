@@ -33,6 +33,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
           .get(`/api/alerting/rule/${ruleId}`)
+          .set('kbn-xsrf', 'foo')
+          .set('x-elastic-internal-origin', 'foo')
           .timeout(requestTimeout);
         const { execution_status: executionStatus } = response.body || {};
         const { status } = executionStatus || {};
