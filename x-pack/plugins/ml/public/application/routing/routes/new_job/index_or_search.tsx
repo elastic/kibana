@@ -135,7 +135,9 @@ export const logRateAnalysisIndexOrSearchRouteFactory = (
   breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
 });
 
-// Deprecated since 8.10, kept here to redirect old bookmarks.
+/**
+ * @deprecated since 8.10, kept here to redirect old bookmarks.
+ */
 export const explainLogRateSpikesIndexOrSearchRouteFactory = (): MlRoute => ({
   path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
   render: () => <Redirect to={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT)} />,
