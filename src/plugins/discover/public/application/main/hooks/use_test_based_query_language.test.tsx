@@ -270,7 +270,7 @@ describe('useTextBasedQueryLanguage', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(3));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      columns: ['field1', 'field2'],
+      columns: ['field1'],
     });
   });
 

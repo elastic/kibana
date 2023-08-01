@@ -74,7 +74,7 @@ export function useTextBasedQueryLanguage({
           fetchStatus: FetchStatus.COMPLETE,
         });
       };
-      const { index, viewMode } = stateContainer.appState.getState();
+      const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' &&
@@ -91,18 +91,24 @@ export function useTextBasedQueryLanguage({
           }
         });
       }
+
       if (isTextBasedQueryLang) {
         const language = getAggregateQueryMode(query);
         if (next.fetchStatus !== FetchStatus.PARTIAL) {
           return;
         }
+        const dataViewObj = stateContainer.internalState.getState().dataView!;
+
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (!queryHasTransformationalCommands) {
-            prev.current = { columns: [], query };
-            nextColumns = [];
+            const cols = dataViewObj.timeFieldName ? [dataViewObj.timeFieldName] : [];
+            // prev.current = { columns: stateColumns?.length ? stateColumns : cols, query };
+            // nextColumns = stateColumns?.length ? stateColumns : cols;
+            prev.current = { columns: cols, query };
+            nextColumns = cols;
           } else {
             if (
               !isEqual(firstRowColumns, prev.current.columns) &&
@@ -118,13 +124,13 @@ export function useTextBasedQueryLanguage({
           }
         }
 
-        const dataViewObj = stateContainer.internalState.getState().dataView!;
-
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
-          (nextColumns.length && queryHasTransformationalCommands) ||
-            (!queryHasTransformationalCommands && isPrevTransformationalMode.current)
+          ((nextColumns.length && queryHasTransformationalCommands) ||
+            !queryHasTransformationalCommands) &&
+            (!stateColumns?.length || !initialFetch || !isPrevTransformationalMode.current)
         );
+
         const queryChanged = query[language] !== queryString.current;
         // no need to reset index to state if it hasn't changed
         const addDataViewToState = Boolean(dataViewObj?.id !== index);
