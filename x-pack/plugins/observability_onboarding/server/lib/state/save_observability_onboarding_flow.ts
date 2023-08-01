@@ -8,35 +8,36 @@
 import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-  ObservabilityOnboardingState,
-  SavedObservabilityOnboardingState,
+  ObservabilityOnboardingFlow,
+  SavedObservabilityOnboardingFlow,
 } from '../../saved_objects/observability_onboarding_status';
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
-  observabilityOnboardingState: ObservabilityOnboardingState;
+  observabilityOnboardingState: ObservabilityOnboardingFlow;
   savedObjectId?: string;
 }
-export async function saveObservabilityOnboardingState({
+export async function saveObservabilityOnboardingFlow({
   savedObjectsClient,
   observabilityOnboardingState,
   savedObjectId,
-}: Options): Promise<SavedObservabilityOnboardingState> {
+}: Options): Promise<SavedObservabilityOnboardingFlow> {
   let savedObject: Omit<
-    SavedObject<ObservabilityOnboardingState>,
+    SavedObject<ObservabilityOnboardingFlow>,
     'attributes' | 'references'
   >;
   if (savedObjectId) {
-    savedObject = await savedObjectsClient.update<ObservabilityOnboardingState>(
+    savedObject = await savedObjectsClient.update<ObservabilityOnboardingFlow>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
       savedObjectId,
       {
+        type: observabilityOnboardingState.type,
         state: observabilityOnboardingState.state,
         progress: { ...observabilityOnboardingState.progress },
       }
     );
   } else {
-    savedObject = await savedObjectsClient.create<ObservabilityOnboardingState>(
+    savedObject = await savedObjectsClient.create<ObservabilityOnboardingFlow>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
       observabilityOnboardingState
     );

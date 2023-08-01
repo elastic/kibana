@@ -2254,6 +2254,9 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "type": {
+        "type": "keyword"
+      },
       "state": {
         "type": "object",
         "dynamic": false

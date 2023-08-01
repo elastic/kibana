@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/server';
-import { EsLegacyConfigService } from '../../services/es_legacy_config_service';
+import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 
 export function getFallbackKibanaUrl({ http }: CoreStart) {
   const basePath = http.basePath;
