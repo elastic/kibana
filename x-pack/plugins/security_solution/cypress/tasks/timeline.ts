@@ -336,9 +336,9 @@ export const deleteTimeline = () => {
 };
 
 export const markAsFavorite = () => {
-  cy.get(STAR_ICON).should('be.visible').click();
-  cy.get(LOADING_INDICATOR).should('exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
+  cy.get(STAR_ICON).click({ force: true });
+  cy.wait('@markedAsFavourite');
 };
 
 export const openTimelineFieldsBrowser = () => {

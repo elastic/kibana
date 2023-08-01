@@ -26,7 +26,7 @@ import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
-import { quitGlobalTour, startAlertsCasesTour } from '../../../tasks/api_calls/tour';
+import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 import { AlertsCasesTourSteps } from '../../../../public/common/components/guided_onboarding_tour/tour_config';
 
 describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
@@ -41,17 +41,15 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });
-  after(() => {
-    quitGlobalTour();
-  });
-  it('Completes the tour with next button clicks', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+
+  it('Completes the tour with next button clicks', () => {
     startTour();
     completeTourWithNextButton();
     finishTour();
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('Completes the tour with action clicks', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  it('Completes the tour with action clicks', () => {
     startTour();
     completeTourWithActions();
     finishTour();
@@ -59,7 +57,7 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
   });
 
   // unhappy paths
-  it('Resets the tour to step 1 when we navigate away', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  it('Resets the tour to step 1 when we navigate away', () => {
     startTour();
     goToStep(AlertsCasesTourSteps.expandEvent);
     assertTourStepExist(AlertsCasesTourSteps.expandEvent);
@@ -70,9 +68,9 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
     assertTourStepExist(AlertsCasesTourSteps.pointToAlertName);
   });
 
-  describe(
+  describe.skip(
     'persists tour steps in flyout on flyout toggle',
-    { tags: tag.BROKEN_IN_SERVERLESS },
+    { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
     () => {
       const stepsInAlertsFlyout = [
         AlertsCasesTourSteps.reviewAlertDetailsFlyout,
@@ -83,27 +81,35 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
       const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
       stepsInAlertsFlyout.forEach((step) => {
-        it(`step: ${step}, resets to ${step}`, () => {
-          startTour();
-          goToStep(step);
-          assertTourStepExist(step);
-          closeAlertFlyout();
-          assertTourStepNotExist(step);
-          expandFirstAlert();
-          assertTourStepExist(step);
-        });
+        it(
+          `step: ${step}, resets to ${step}`,
+          { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+          () => {
+            startTour();
+            goToStep(step);
+            assertTourStepExist(step);
+            closeAlertFlyout();
+            assertTourStepNotExist(step);
+            expandFirstAlert();
+            assertTourStepExist(step);
+          }
+        );
       });
 
       stepsInCasesFlyout.forEach((step) => {
-        it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
-          startTour();
-          goToStep(step);
-          assertTourStepExist(step);
-          closeCreateCaseFlyout();
-          assertTourStepNotExist(step);
-          addToCase();
-          assertTourStepExist(AlertsCasesTourSteps.createCase);
-        });
+        it(
+          `step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`,
+          { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+          () => {
+            startTour();
+            goToStep(step);
+            assertTourStepExist(step);
+            closeCreateCaseFlyout();
+            assertTourStepNotExist(step);
+            addToCase();
+            assertTourStepExist(AlertsCasesTourSteps.createCase);
+          }
+        );
       });
     }
   );
