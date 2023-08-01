@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+jest.mock(
+  'puid',
+  () =>
+    class MockPuid {
+      generate() {
+        return 'mock-report-id';
+      }
+    }
+);
+
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import rison from '@kbn/rison';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../../..';
@@ -13,9 +23,12 @@ import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printabl
 import { JobParamsPDFDeprecated } from '../../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../../lib/store';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import {
+  ReportingJobResponse,
+  ReportingRequestHandlerContext,
+  ReportingSetup,
+} from '../../../types';
 import { RequestHandler } from './request_handler';
-
 jest.mock('../../../lib/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
@@ -245,13 +258,12 @@ describe('Handle request to generate', () => {
     });
 
     test('generates the download path', async () => {
-      const { body }: IKibanaResponse['payload'] = await requestHandler.handleGenerateRequest(
+      const { body } = (await requestHandler.handleGenerateRequest(
         'csv_searchsource',
         mockJobParams
-      );
+      )) as unknown as { body: ReportingJobResponse };
 
-      const testPath = new RegExp('/mock-server-basepath/api/reporting/jobs/download/');
-      expect(body.path).toMatch(testPath);
+      expect(body.path).toMatch('/mock-server-basepath/api/reporting/jobs/download/mock-report-id');
     });
   });
 });
