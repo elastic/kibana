@@ -12,10 +12,3 @@ export const GetPolicyResponseSchema = {
     agentId: schema.string(),
   }),
 };
-
-export const GetAgentPolicySummaryRequestSchema = {
-  query: schema.object({
-    package_name: schema.string(),
-    policy_id: schema.nullable(schema.string()),
-  }),
-};
