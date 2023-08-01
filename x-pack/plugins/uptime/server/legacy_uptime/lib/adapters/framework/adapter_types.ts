@@ -13,7 +13,6 @@ import type {
   IBasePath,
   CoreStart,
 } from '@kbn/core/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -33,7 +32,6 @@ import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UptimeEsClient } from '../../lib';
-import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
 
@@ -64,7 +62,6 @@ export interface UptimeServerSetup {
   share: SharePluginSetup;
   stackVersion: string;
   logger: Logger;
-  telemetry: TelemetryEventsSender;
   uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
   isDev?: boolean;
@@ -81,7 +78,6 @@ export interface UptimeCorePluginsSetup {
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
-  telemetry: TelemetryPluginSetup;
   bfetch: BfetchServerSetup;
   share: SharePluginSetup;
 }
@@ -91,6 +87,5 @@ export interface UptimeCorePluginsStart {
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
-  telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
 }
