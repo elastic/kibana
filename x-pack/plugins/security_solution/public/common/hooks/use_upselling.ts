@@ -7,19 +7,19 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useUpsellingService } from '../components/upselling_provider';
 import type { UpsellingSectionId } from '../lib/upsellings';
-import { useKibana } from '../lib/kibana';
 import type { SecurityPageName } from '../../../common';
 
 export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentType | null => {
-  const { upselling } = useKibana().services;
+  const upselling = useUpsellingService();
   const upsellingSections = useObservable(upselling.sections$);
 
   return useMemo(() => upsellingSections?.get(id) ?? null, [id, upsellingSections]);
 };
 
 export const useUpsellingPage = (pageName: SecurityPageName): React.ComponentType | null => {
-  const { upselling } = useKibana().services;
+  const upselling = useUpsellingService();
   const UpsellingPage = useMemo(() => upselling.getPageUpselling(pageName), [pageName, upselling]);
 
   return UpsellingPage ?? null;
