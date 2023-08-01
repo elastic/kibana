@@ -9,8 +9,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../../../state';
-import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 const HISTORY_LENGTH = 5;
 
@@ -27,7 +27,7 @@ export const useRecentlyViewedMonitors = () => {
     string[]
   >('xpack.synthetics.recentlyViewedMonitors', []);
   const fetchedMonitorsRef = useRef<RecentMonitorSelectableOption[]>([]);
-  const { monitorQueryId } = useMonitorQueryFilters();
+  const monitorQueryId = useMonitorQueryId();
 
   const fetchedMonitorQueryIdsSnap = JSON.stringify(
     [...fetchedMonitorsRef.current.map(({ key }) => key)].sort()

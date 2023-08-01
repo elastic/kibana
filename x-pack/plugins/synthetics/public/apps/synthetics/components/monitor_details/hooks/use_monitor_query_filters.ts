@@ -7,25 +7,22 @@
 
 import { useMemo } from 'react';
 import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
+import { useMonitorQueryId } from './use_monitor_query_id';
 import { useSelectedLocation } from './use_selected_location';
-import { ConfigKey } from '../../../../../../common/runtime_types';
-import { useSelectedMonitor } from './use_selected_monitor';
 
 export const useMonitorQueryFilters = (): {
-  monitorQueryId?: string;
   queryIdFilter?: Record<string, string[]>;
   locationFilter?: UrlFilter[];
 } => {
-  const { monitor } = useSelectedMonitor();
-  const monitorQueryId = monitor?.[ConfigKey.MONITOR_QUERY_ID];
   const selectedLocation = useSelectedLocation();
+
+  const monitorQueryId = useMonitorQueryId();
 
   return useMemo(() => {
     if (!monitorQueryId || !selectedLocation) {
       return {};
     }
     return {
-      monitorQueryId,
       queryIdFilter: {
         'monitor.id': [monitorQueryId],
       },

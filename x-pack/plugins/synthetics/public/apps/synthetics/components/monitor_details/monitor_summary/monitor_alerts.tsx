@@ -42,10 +42,10 @@ export const MonitorAlerts = ({
 
   const theme = useTheme();
 
-  const { queryIdFilter, monitorQueryId, locationFilter } = useMonitorQueryFilters();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
 
-  if (!monitorQueryId || !selectedLocation || !queryIdFilter) {
+  if (!selectedLocation || !queryIdFilter) {
     return <EuiSkeletonText />;
   }
 
@@ -92,7 +92,7 @@ export const MonitorAlerts = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AlertActions monitorId={monitorQueryId} from={from} to={to} />
+          <AlertActions from={from} to={to} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs" wrap={true}>
