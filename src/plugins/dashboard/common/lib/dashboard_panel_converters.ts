@@ -25,11 +25,19 @@ export function convertSavedDashboardPanelToPanelState<
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
     } as TEmbeddableInput,
+
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved
+     * to live inside the explicit Embeddable Input. If version information is given here, we'd like to keep it.
+     * It will be removed on Dashboard save
+     */
+    version: savedDashboardPanel.version,
   };
 }
 
 export function convertPanelStateToSavedDashboardPanel(
-  panelState: DashboardPanelState
+  panelState: DashboardPanelState,
+  removeLegacyVersion?: boolean
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
@@ -40,6 +48,13 @@ export function convertPanelStateToSavedDashboardPanel(
     ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
+
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
+     * explicit Embeddable Input. If version information is given here, we'd like to keep it.
+     * It will be removed on Dashboard save
+     */
+    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
   };
 }
 
@@ -51,6 +66,11 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
   return panelsMap;
 };
 
-export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap) => {
-  return Object.values(panels).map((panel) => convertPanelStateToSavedDashboardPanel(panel));
+export const convertPanelMapToSavedPanels = (
+  panels: DashboardPanelMap,
+  removeLegacyVersion?: boolean
+) => {
+  return Object.values(panels).map((panel) =>
+    convertPanelStateToSavedDashboardPanel(panel, removeLegacyVersion)
+  );
 };

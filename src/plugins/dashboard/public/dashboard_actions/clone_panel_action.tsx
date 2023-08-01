@@ -186,7 +186,6 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           title: newTitle,
           hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
         },
-        version: panelToClone.version,
       };
     } else {
       panelState = {
@@ -195,7 +194,6 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           ...panelToClone.explicitInput,
           id: uuidv4(),
         },
-        version: panelToClone.version,
       };
 
       // TODO Remove the entire `addCloneToLibrary` section from here.

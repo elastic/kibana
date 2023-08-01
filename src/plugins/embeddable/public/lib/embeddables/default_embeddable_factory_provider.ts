@@ -38,8 +38,8 @@ export const defaultEmbeddableFactoryProvider = <
         },
     create: (...args) => {
       const [initialInput, ...otherArgs] = args;
-      const input = runEmbeddableFactoryMigrations(initialInput, def);
-      const createdEmbeddable = def.create.bind(def)(input as unknown as I, ...otherArgs);
+      const { input } = runEmbeddableFactoryMigrations(initialInput, def);
+      const createdEmbeddable = def.create.bind(def)(input as I, ...otherArgs);
       return createdEmbeddable;
     },
     createSkipMigrations: def.create.bind(def),
