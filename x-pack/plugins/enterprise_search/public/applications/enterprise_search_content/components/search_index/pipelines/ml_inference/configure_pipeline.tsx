@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -70,6 +70,14 @@ export const ConfigurePipeline: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   const { existingPipeline, modelID, pipelineName } = configuration;
+
+  useEffect(() => {
+    setInferencePipelineConfiguration({
+      ...configuration,
+      pipelineName: pipelineName ? pipelineName : indexName,
+    })
+  }, [])
+
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
   const modelOptions: Array<EuiSuperSelectOption<string>> = [
@@ -235,7 +243,7 @@ export const ConfigurePipeline: React.FC = () => {
                     disabled={inputsDisabled}
                     fullWidth
                     prepend="ml-inference-"
-                    value={pipelineName || indexName}
+                    value={pipelineName}
                     onChange={(e) =>
                       setInferencePipelineConfiguration({
                         ...configuration,
