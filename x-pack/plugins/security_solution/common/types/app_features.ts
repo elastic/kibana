@@ -24,6 +24,11 @@ export enum AppFeatureSecurityKey {
    * Enables Endpoint Exceptions like isolate host, trusted apps, blocklist, etc.
    */
   endpointExceptions = 'endpoint_exceptions',
+
+  /**
+   * Enables Threat Intelligence
+   */
+  threatIntelligence = 'threat-intelligence',
 }
 
 export enum AppFeatureCasesKey {

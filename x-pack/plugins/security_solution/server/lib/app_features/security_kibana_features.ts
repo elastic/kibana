@@ -165,6 +165,19 @@ export const getSecurityAppFeaturesConfig = (
       },
     },
 
+    [AppFeatureSecurityKey.threatIntelligence]: {
+      privileges: {
+        all: {
+          ui: ['threat-intelligence'],
+          api: [`${APP_ID}-threat-intelligence`],
+        },
+        read: {
+          ui: ['threat-intelligence'],
+          api: [`${APP_ID}-threat-intelligence`],
+        },
+      },
+    },
+
     [AppFeatureSecurityKey.endpointResponseActions]: {
       subFeatureIds: [
         SecuritySubFeatureId.processOperations,

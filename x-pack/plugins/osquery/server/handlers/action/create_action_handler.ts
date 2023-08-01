@@ -11,12 +11,12 @@ import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash'
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';

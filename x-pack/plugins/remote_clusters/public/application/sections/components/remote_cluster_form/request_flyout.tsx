@@ -7,7 +7,6 @@
 
 import React, { PureComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { transform, isObject, isEmpty, isNull } from 'lodash';
 
 import {
   EuiButtonEmpty,
@@ -23,20 +22,6 @@ import {
 
 import { Cluster, serializeCluster } from '../../../../../common/lib';
 
-// Remove all null properties from an object
-export function removeNullProperties(obj: any) {
-  return transform(obj, (result: any, value, key) => {
-    if (isObject(value)) {
-      result[key] = removeNullProperties(value);
-      if (isEmpty(result[key])) {
-        delete result[key];
-      }
-    } else if (!isNull(value)) {
-      result[key] = value;
-    }
-  });
-}
-
 interface Props {
   close: () => void;
   cluster: Cluster;
@@ -47,11 +32,7 @@ export class RequestFlyout extends PureComponent<Props> {
     const { close, cluster } = this.props;
     const { name } = cluster;
     const endpoint = 'PUT _cluster/settings';
-    // Given that the request still requires that we send all properties, regardless of whether they
-    // are null, we need to remove all null properties from the serialized cluster object that we
-    // render in the flyout.
-    const serializedCluster = removeNullProperties(serializeCluster(cluster));
-    const payload = JSON.stringify(serializedCluster, null, 2);
+    const payload = JSON.stringify(serializeCluster(cluster), null, 2);
     const request = `${endpoint}\n${payload}`;
 
     return (
@@ -87,7 +68,7 @@ export class RequestFlyout extends PureComponent<Props> {
 
           <EuiSpacer />
 
-          <EuiCodeBlock language="json" isCopyable data-test-subj="esRequestBody">
+          <EuiCodeBlock language="json" isCopyable>
             {request}
           </EuiCodeBlock>
         </EuiFlyoutBody>

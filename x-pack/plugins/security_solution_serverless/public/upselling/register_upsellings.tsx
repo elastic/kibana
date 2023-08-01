@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
   PageUpsellings,
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
-import type React from 'react';
+import React, { lazy } from 'react';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import investigationGuideUpselling from './pages/investigation_guide_upselling';
+const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
 
 interface SectionUpsellingsConfig {
   pli: AppFeatureKey;
@@ -69,6 +69,13 @@ export const upsellingPages: UpsellingPages = [
   //   pli: AppFeatureKey.advancedInsights,
   //   component: () => <GenericUpsellingPageLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   // },
+  {
+    pageName: SecurityPageName.threatIntelligence,
+    pli: AppFeatureKey.threatIntelligence,
+    component: () => (
+      <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
+    ),
+  },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
