@@ -177,6 +177,7 @@ describe('useTogglePanel', () => {
         stepId: IntroductionSteps.getToKnowElasticSecurity,
         cardId: GetSetUpCardId.introduction,
         sectionId: SectionId.getSetUp,
+        expandStep: true,
       });
     });
 
@@ -185,6 +186,23 @@ describe('useTogglePanel', () => {
       GetSetUpCardId.introduction,
       IntroductionSteps.getToKnowElasticSecurity
     );
+  });
+
+  test('should not call addFinishedStepToStorage when the step is going to be collapsed', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepClicked } = result.current;
+
+    act(() => {
+      onStepClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+        expandStep: false,
+      });
+    });
+
+    expect(getStartedStorage.addFinishedStepToStorage).not.toHaveBeenCalledTimes(1);
   });
 
   test('should call addFinishedStepToStorage when onStepButtonClicked is executed', () => {

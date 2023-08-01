@@ -60,8 +60,9 @@ const CardStepComponent: React.FC<{
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
-      setExpandStep(!expandStep);
-      onStepClicked({ stepId, cardId, sectionId });
+      const newState = !expandStep;
+      setExpandStep(newState);
+      onStepClicked({ stepId, cardId, sectionId, expandStep: newState });
     },
     [cardId, expandStep, onStepClicked, sectionId, stepId]
   );

@@ -134,10 +134,12 @@ export type OnStepClicked = ({
   stepId,
   cardId,
   sectionId,
+  expandStep,
 }: {
   stepId: StepId;
   cardId: CardId;
   sectionId: SectionId;
+  expandStep: boolean;
 }) => void;
 
 export type OnStepButtonClicked = ({

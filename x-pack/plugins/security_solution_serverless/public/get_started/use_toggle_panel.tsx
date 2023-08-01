@@ -64,7 +64,10 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
   });
 
   const onStepClicked: OnStepClicked = useCallback(
-    ({ stepId, cardId, sectionId }) => {
+    ({ stepId, cardId, sectionId, expandStep }) => {
+      if (!expandStep) {
+        return;
+      }
       dispatch({
         type: GetStartedPageActions.AddFinishedStep,
         payload: { stepId, cardId, sectionId },
