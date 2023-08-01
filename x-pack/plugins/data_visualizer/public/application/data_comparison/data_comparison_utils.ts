@@ -5,30 +5,8 @@
  * 2.0.
  */
 
-import { CRITICAL_VALUES_TABLE, SIGNIFICANCE_LEVELS } from './constants';
+import chi2test from '@stdlib/stats-chi2test';
 import { Histogram } from './types';
-
-const criticalTableLookup = (chi2Statistic: number, df: number) => {
-  if (df < 1) return 1;
-  if (!Number.isInteger(df)) throw Error('Degrees of freedom must be a valid integer');
-
-  // Get the row index
-  const rowIndex: number = df - 1;
-
-  // Get the column index
-  let minDiff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][0] - chi2Statistic);
-  let columnIndex: number = 0;
-  for (let j = 1; j < CRITICAL_VALUES_TABLE[rowIndex].length; j++) {
-    const diff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][j] - chi2Statistic);
-    if (diff < minDiff) {
-      minDiff = diff;
-      columnIndex = j;
-    }
-  }
-
-  const significanceLevel: number = SIGNIFICANCE_LEVELS[columnIndex];
-  return significanceLevel;
-};
 
 /**
  * Compute the p-value for how similar the datasets are.
@@ -40,30 +18,34 @@ export const computeChi2PValue = (
   normalizedBaselineTerms: Histogram[],
   normalizedDriftedTerms: Histogram[]
 ) => {
-  // Get all unique keys from both arrays
+  // Need to make sure the terms are sorted by keys so that the values match
   const allKeys: string[] = Array.from(
     new Set([
       ...normalizedBaselineTerms.map((term) => term.key.toString()),
       ...normalizedDriftedTerms.map((term) => term.key.toString()),
     ])
-  ).slice(0, 100);
+  ).slice(0, 100); // Only get 100 terms
 
-  // Calculate the chi-squared statistic and degrees of freedom
-  let chiSquared: number = 0;
-  const degreesOfFreedom: number = allKeys.length - 1;
+  if (allKeys.length <= 1) return 1;
 
-  if (degreesOfFreedom === 0) return 1;
+  const orderedBaselineDocCount: number[] = [];
+  const orderedDriftedDocCount: number[] = [];
 
   allKeys.forEach((key) => {
     const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
     const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
 
-    const observed: number = driftedTerm?.percentage ?? 0;
-    const expected: number = baselineTerm?.percentage ?? 0;
-    chiSquared += Math.pow(observed - expected, 2) / (expected > 0 ? expected : 1e-6); // Prevent divide by zero
+    orderedBaselineDocCount.push(baselineTerm?.doc_count ?? 0);
+    orderedDriftedDocCount.push(driftedTerm?.doc_count ?? 0);
   });
 
-  return criticalTableLookup(chiSquared, degreesOfFreedom);
+  const table = [
+    /* A B C D */
+    orderedBaselineDocCount, // expected_terms
+    orderedDriftedDocCount, // observed_terms
+  ];
+  const result = chi2test(table);
+  return result.pValue;
 };
 
 /**

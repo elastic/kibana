@@ -782,6 +782,7 @@
     "@opentelemetry/semantic-conventions": "^1.4.0",
     "@reduxjs/toolkit": "1.7.2",
     "@slack/webhook": "^5.0.4",
+    "@stdlib/stats-chi2test": "^0.0.9",
     "@tanstack/react-query": "^4.29.12",
     "@tanstack/react-query-devtools": "^4.29.12",
     "@turf/along": "6.0.1",
