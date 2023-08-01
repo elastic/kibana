@@ -6,35 +6,21 @@
  */
 
 import { EuiPanel, EuiProgress, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/css';
 import React, { memo, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
-import { coverageOverviewPanelWidth, getCoveredTechniques } from './helpers';
-import { CoverageOverviewPanelMetadata } from './shared_components';
+import { coverageOverviewPanelWidth } from './constants';
+import { getNumOfCoveredTechniques } from './helpers';
 import * as i18n from './translations';
+import { CoverageOverviewPanelMetadata } from './shared_components/panel_metadata';
 
 export interface CoverageOverviewTacticPanelProps {
   tactic: CoverageOverviewMitreTactic;
 }
 
-const TacticPanel = styled(EuiPanel)`
-  ${({ theme }) => css`
-    background: ${theme.eui.euiColorLightestShade};
-    border-color: ${theme.eui.euiColorMediumShade};
-    width: ${coverageOverviewPanelWidth}px;
-  `}
-`;
-
-const TacticTitle = styled(EuiText)`
-  h4 {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-`;
-
 const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTacticPanelProps) => {
-  const coveredTechniques = useMemo(() => getCoveredTechniques(tactic), [tactic]);
+  const coveredTechniques = useMemo(() => getNumOfCoveredTechniques(tactic), [tactic]);
 
   const ProgressLabel = useMemo(
     () => (
@@ -46,16 +32,33 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
   );
 
   return (
-    <TacticPanel
+    <EuiPanel
       data-test-subj="coverageOverviewTacticPanel"
       hasShadow={false}
-      hasBorder={true}
+      hasBorder
       paddingSize="s"
+      className={css`
+        background: ${euiThemeVars.euiColorLightestShade};
+        border-color: ${euiThemeVars.euiColorMediumShade};
+        width: ${coverageOverviewPanelWidth}px;
+      `}
     >
       <EuiToolTip content={tactic.name}>
-        <TacticTitle aria-label={tactic.name} title={tactic.name} grow={false} size="xs">
+        <EuiText
+          className={css`
+            h4 {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          `}
+          aria-label={tactic.name}
+          title={tactic.name}
+          grow={false}
+          size="xs"
+        >
           <h4>{tactic.name}</h4>
-        </TacticTitle>
+        </EuiText>
       </EuiToolTip>
 
       <EuiProgress
@@ -69,7 +72,7 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
         enabledRules={tactic.enabledRules.length}
         disabledRules={tactic.disabledRules.length}
       />
-    </TacticPanel>
+    </EuiPanel>
   );
 };
 

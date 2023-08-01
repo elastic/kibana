@@ -49,13 +49,6 @@ export const SUBTECHNIQUES = i18n.translate(
   }
 );
 
-export const INSTALL_ALL_AVAILABLE = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.installAllAvailableButtonLabel',
-  {
-    defaultMessage: 'Install all available',
-  }
-);
-
 export const ENABLE_ALL_DISABLED = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.enableAllDisabledButtonLabel',
   {

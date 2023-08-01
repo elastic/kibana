@@ -19,10 +19,13 @@ import {
   EuiSpacer,
   EuiAccordion,
 } from '@elastic/eui';
+import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import { BulkActionType } from '../../../../../common/api/detection_engine';
+import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { getCoveredSubtechniques } from './helpers';
-import { CoverageOverviewRuleListHeader } from './shared_components';
+import { getNumOfCoveredSubtechniques } from './helpers';
+import { CoverageOverviewRuleListHeader } from './shared_components/popover_list_header';
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
 import * as i18n from './translations';
 
@@ -36,22 +39,32 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   isExpanded,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isEnableButtonLoading, setIsDisableButtonLoading] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const coveredSubtechniques = useMemo(() => getCoveredSubtechniques(technique), [technique]);
-
-  const TechniquePanel = useMemo(
-    () => (
-      <CoverageOverviewMitreTechniquePanel
-        setIsPopoverOpen={setIsPopoverOpen}
-        isPopoverOpen={isPopoverOpen}
-        technique={technique}
-        isExpanded={isExpanded}
-        coveredSubtechniques={coveredSubtechniques}
-      />
-    ),
-    [technique, isPopoverOpen, isExpanded, coveredSubtechniques]
+  const coveredSubtechniques = useMemo(() => getNumOfCoveredSubtechniques(technique), [technique]);
+  const { executeBulkAction } = useExecuteBulkAction();
+  const isEnableButtonDisabled = useMemo(
+    () => technique.disabledRules.length === 0,
+    [technique.disabledRules.length]
   );
 
+  const handleEnableAllDisabled = useCallback(async () => {
+    setIsDisableButtonLoading(true);
+    const ruleIds = technique.disabledRules.map((rule) => rule.id);
+    await executeBulkAction({ type: BulkActionType.enable, ids: ruleIds });
+    setIsDisableButtonLoading(false);
+    closePopover();
+  }, [closePopover, executeBulkAction, technique.disabledRules]);
+
+  const TechniquePanel = (
+    <CoverageOverviewMitreTechniquePanel
+      setIsPopoverOpen={setIsPopoverOpen}
+      isPopoverOpen={isPopoverOpen}
+      technique={technique}
+      isExpanded={isExpanded}
+      coveredSubtechniques={coveredSubtechniques}
+    />
+  );
   const CoveredSubtechniquesLabel = useMemo(
     () => (
       <EuiText color="success" size="s">
@@ -69,7 +82,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         label: rule.name,
         color: 'primary',
         showToolTip: true,
-        onClick: () => {},
       })),
     [technique.enabledRules]
   );
@@ -80,7 +92,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         label: rule.name,
         color: 'primary',
         showToolTip: true,
-        onClick: () => {},
       })),
     [technique.disabledRules]
   );
@@ -132,7 +143,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           <EuiFlexItem>{CoveredSubtechniquesLabel}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      <div className="eui-yScrollWithShadows" css={{ maxHeight: '700px', padding: '5px 0px' }}>
+      <div className={cx(css({ maxHeight: '40em', padding: '5px 0px' }), 'eui-yScrollWithShadows')}>
         <EuiAccordion
           id="enabledRulesListAccordion"
           initialIsOpen={technique.enabledRules.length > 0}
@@ -163,12 +174,13 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       <EuiPopoverFooter>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButton size="s" fill iconType="plusInCircle">
-              {i18n.INSTALL_ALL_AVAILABLE}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton size="s" iconType="checkInCircleFilled">
+            <EuiButton
+              isLoading={isEnableButtonLoading}
+              disabled={isEnableButtonDisabled}
+              onClick={handleEnableAllDisabled}
+              size="s"
+              iconType="checkInCircleFilled"
+            >
               {i18n.ENABLE_ALL_DISABLED}
             </EuiButton>
           </EuiFlexItem>

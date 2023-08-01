@@ -10,13 +10,13 @@ import {
   getMockCoverageOverviewMitreTactic,
   getMockCoverageOverviewMitreTechnique,
 } from '../../../rule_management/model/coverage_overview/__mocks__';
-import { getCoveredSubtechniques, getCoveredTechniques } from './helpers';
+import { getNumOfCoveredSubtechniques, getNumOfCoveredTechniques } from './helpers';
 
 describe('helpers', () => {
   describe('getCoveredTechniques', () => {
     it('returns 0 when no techniques are present', () => {
       const payload = getMockCoverageOverviewMitreTactic();
-      expect(getCoveredTechniques(payload)).toEqual(0);
+      expect(getNumOfCoveredTechniques(payload)).toEqual(0);
     });
 
     it('returns number of techniques when present', () => {
@@ -27,14 +27,14 @@ describe('helpers', () => {
           getMockCoverageOverviewMitreTechnique(),
         ],
       };
-      expect(getCoveredTechniques(payload)).toEqual(2);
+      expect(getNumOfCoveredTechniques(payload)).toEqual(2);
     });
   });
 
   describe('getCoveredSubtechniques', () => {
     it('returns 0 when no subtechniques are present', () => {
       const payload = getMockCoverageOverviewMitreTechnique();
-      expect(getCoveredSubtechniques(payload)).toEqual(0);
+      expect(getNumOfCoveredSubtechniques(payload)).toEqual(0);
     });
 
     it('returns number of subtechniques when present', () => {
@@ -45,7 +45,7 @@ describe('helpers', () => {
           getMockCoverageOverviewMitreSubTechnique(),
         ],
       };
-      expect(getCoveredSubtechniques(payload)).toEqual(2);
+      expect(getNumOfCoveredSubtechniques(payload)).toEqual(2);
     });
   });
 });

@@ -6,8 +6,8 @@
  */
 
 import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
-import { CoverageOverviewLegend } from './shared_components';
+import React, { memo } from 'react';
+import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
 import * as i18n from './translations';
 
 export interface CoverageOverviewFiltersPanelProps {
@@ -19,14 +19,8 @@ const CoverageOverviewFiltersPanelComponent = ({
   setShowExpandedCells,
   showExpandedCells,
 }: CoverageOverviewFiltersPanelProps) => {
-  const handleExpandCellsFilterClick = useCallback(
-    () => setShowExpandedCells(true),
-    [setShowExpandedCells]
-  );
-  const handleCollapseCellsFilterClick = useCallback(
-    () => setShowExpandedCells(false),
-    [setShowExpandedCells]
-  );
+  const handleExpandCellsFilterClick = () => setShowExpandedCells(true);
+  const handleCollapseCellsFilterClick = () => setShowExpandedCells(false);
 
   return (
     <EuiPanel>

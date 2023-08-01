@@ -6,11 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
 import React, { memo, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { coverageOverviewPanelWidth, getTechniqueBackgroundColor } from './helpers';
-import { CoverageOverviewPanelMetadata } from './shared_components';
+import { coverageOverviewPanelWidth } from './constants';
+import { getTechniqueBackgroundColor } from './helpers';
+import { CoverageOverviewPanelMetadata } from './shared_components/panel_metadata';
 import * as i18n from './translations';
 
 export interface CoverageOverviewMitreTechniquePanelProps {
@@ -20,15 +21,6 @@ export interface CoverageOverviewMitreTechniquePanelProps {
   isPopoverOpen: boolean;
   isExpanded: boolean;
 }
-
-const TechniquePanel = styled(EuiPanel)<{ $techniqueBackgroundColor?: string }>`
-  background: ${({ $techniqueBackgroundColor }) => `${$techniqueBackgroundColor}`};
-  width: ${coverageOverviewPanelWidth}px;
-`;
-
-const SubtechniqueHeader = styled(EuiFlexItem)`
-  white-space: nowrap;
-`;
 
 const CoverageOverviewMitreTechniquePanelComponent = ({
   technique,
@@ -50,9 +42,14 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   const SubtechniqueInfo = useMemo(
     () => (
       <EuiFlexGroup justifyContent="spaceBetween">
-        <SubtechniqueHeader grow={false}>
+        <EuiFlexItem
+          className={css`
+            white-space: nowrap;
+          `}
+          grow={false}
+        >
           <EuiText size="xs">{i18n.SUBTECHNIQUES}</EuiText>
-        </SubtechniqueHeader>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">{`${coveredSubtechniques}/${technique.subtechniques.length}`}</EuiText>
         </EuiFlexItem>
@@ -62,9 +59,12 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   );
 
   return (
-    <TechniquePanel
+    <EuiPanel
       data-test-subj="coverageOverviewTechniquePanel"
-      $techniqueBackgroundColor={techniqueBackgroundColor}
+      className={css`
+        background: ${techniqueBackgroundColor};
+        width: ${coverageOverviewPanelWidth}px;
+      `}
       hasShadow={false}
       hasBorder={!techniqueBackgroundColor}
       paddingSize="s"
@@ -87,7 +87,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </TechniquePanel>
+    </EuiPanel>
   );
 };
 
