@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -48,7 +48,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       // validate title
-      const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
       expect(await title.getVisibleText()).equal(caseTitle);
 
       // validate description

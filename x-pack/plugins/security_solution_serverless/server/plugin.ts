@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import type { ServerlessSecurityConfig } from './config';
+import type {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+} from '@kbn/core/server';
 import { getProductAppFeatures } from '../common/pli/pli_features';
+import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
+import { endpointMeteringService } from './endpoint/services';
 
+import type { ServerlessSecurityConfig } from './config';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -29,9 +37,12 @@ export class SecuritySolutionServerlessPlugin
 {
   private config: ServerlessSecurityConfig;
   private cspmUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+    this.logger = this.initializerContext.logger.get();
   }
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
@@ -40,6 +51,14 @@ export class SecuritySolutionServerlessPlugin
     // `plugins.forceEnableAllPlugins` flag is enabled).
 
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
+
+    this.logger.info(
+      `Security Solution running with product tiers:\n${JSON.stringify(
+        this.config.productTypes,
+        null,
+        2
+      )}`
+    );
 
     if (shouldRegister) {
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
@@ -57,6 +76,16 @@ export class SecuritySolutionServerlessPlugin
       meteringCallback: cloudSecurityMetringTaskProperties.meteringCallback,
     });
 
+    this.endpointUsageReportingTask = new SecurityUsageReportingTask({
+      core: _coreSetup,
+      logFactory: this.initializerContext.logger,
+      taskType: ENDPOINT_METERING_TASK.TYPE,
+      taskTitle: ENDPOINT_METERING_TASK.TITLE,
+      version: ENDPOINT_METERING_TASK.VERSION,
+      meteringCallback: endpointMeteringService.getUsageRecords,
+      taskManager: pluginsSetup.taskManager,
+      cloudSetup: pluginsSetup.cloudSetup,
+    });
     return {};
   }
 
@@ -64,6 +93,11 @@ export class SecuritySolutionServerlessPlugin
     this.cspmUsageReportingTask?.start({
       taskManager: pluginsSetup.taskManager,
       interval: cloudSecurityMetringTaskProperties.interval,
+    });
+
+    this.endpointUsageReportingTask?.start({
+      taskManager: pluginsSetup.taskManager,
+      interval: ENDPOINT_METERING_TASK.INTERVAL,
     });
     return {};
   }

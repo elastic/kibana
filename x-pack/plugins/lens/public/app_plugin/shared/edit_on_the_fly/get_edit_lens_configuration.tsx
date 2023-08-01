@@ -14,8 +14,15 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import { makeConfigureStore, LensRootStore, loadInitial } from '../../../state_management';
+import {
+  makeConfigureStore,
+  LensRootStore,
+  loadInitial,
+  initExisting,
+  initEmpty,
+} from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
@@ -38,7 +45,8 @@ function LoadingSpinnerWithOverlay() {
 
 type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => void;
 
-const updatingMiddleware =
+// exported for testing
+export const updatingMiddleware =
   (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
     const {
       datasourceStates: prevDatasourceStates,
@@ -48,10 +56,17 @@ const updatingMiddleware =
     next(action);
     const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
     if (
-      !isEqual(prevDatasourceStates, datasourceStates) ||
-      !isEqual(prevVisualization, visualization) ||
-      prevActiveDatasourceId !== activeDatasourceId
+      prevActiveDatasourceId !== activeDatasourceId ||
+      !isEqual(
+        prevDatasourceStates[prevActiveDatasourceId].state,
+        datasourceStates[activeDatasourceId].state
+      ) ||
+      !isEqual(prevVisualization, visualization)
     ) {
+      // ignore the actions that initialize the store with the state from the attributes
+      if (initExisting.match(action) || initEmpty.match(action)) {
+        return;
+      }
       updater(datasourceStates[activeDatasourceId].state, visualization.state);
     }
   };
@@ -122,6 +137,7 @@ export async function getEditLensConfiguration(
             hideCloseButton
             css={css`
               background: none;
+              clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
             `}
           >
             {children}
@@ -148,7 +164,9 @@ export async function getEditLensConfiguration(
     return getWrapper(
       <Provider store={lensStore}>
         <KibanaContextProvider services={lensServices}>
-          <LensEditConfigurationFlyout {...configPanelProps} />
+          <RootDragDropProvider>
+            <LensEditConfigurationFlyout {...configPanelProps} />
+          </RootDragDropProvider>
         </KibanaContextProvider>
       </Provider>
     );

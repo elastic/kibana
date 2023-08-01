@@ -71,8 +71,6 @@ import {
   RULES_PATH,
   SLOS_PATH,
 } from './routes/paths';
-import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
-import { type CoPilotService } from './typings/co_pilot';
 
 export interface ConfigSchema {
   unsafe: {
@@ -86,19 +84,17 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
+      observability: {
+        enabled: boolean;
+      };
     };
     thresholdRule: {
       enabled: boolean;
     };
   };
   compositeSlo: { enabled: boolean };
-  aiAssistant?: {
-    enabled: boolean;
-    feedback: {
-      enabled: boolean;
-    };
-  };
 }
+
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
@@ -149,8 +145,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -343,12 +337,6 @@ export class Plugin
       )
     );
 
-    this.coPilotService = createCoPilotService({
-      enabled: !!config.aiAssistant?.enabled,
-      http: coreSetup.http,
-      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
-    });
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -357,7 +345,6 @@ export class Plugin
       ruleDetailsLocator,
       sloDetailsLocator,
       sloEditLocator,
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 
@@ -387,7 +374,6 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

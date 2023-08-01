@@ -34,7 +34,7 @@ export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
 
 export const DETECTION_RESPONSE = '[data-test-subj="solutionSideNavPanelLink-detection_response"]';
 
-export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity-analytics"]';
+export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity_analytics"]';
 
 export const KUBERNETES = '[data-test-subj="solutionSideNavPanelLink-kubernetes"]';
 
@@ -60,8 +60,7 @@ export const NETWORK = '[data-test-subj="solutionSideNavPanelLink-network"]';
 
 export const USERS = '[data-test-subj="solutionSideNavPanelLink-users"]';
 
-export const INDICATORS =
-  '[data-test-subj="solutionSideNavItemLink-threat_intelligence-indicators"]';
+export const INDICATORS = '[data-test-subj="solutionSideNavItemLink-threat_intelligence"]';
 
 export const RULES = '[data-test-subj="solutionSideNavPanelLink-rules"]';
 
