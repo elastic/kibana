@@ -5,6 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+import type { SyntheticEvent } from 'react';
+
+import type { IBasePath, NavigateToUrlOptions } from '@kbn/core/public';
+
 import {
   SectionId,
   GetMoreFromElasticSecurityCardId,
@@ -22,6 +26,13 @@ import * as i18n from './translations';
 import respond from './images/respond.svg';
 import explore from './images/explore.svg';
 import { ProductLine } from '../../common/product';
+import { FleetOverviewLink } from './step_links/fleet_overview_link';
+import { EndpointManagementLink } from './step_links/endpoint_management_link';
+import { IntegrationsLink } from './step_links/integrations_link';
+import { RulesManagementLink } from './step_links/rules_management_link';
+import { OverviewLink } from './step_links/overview_link';
+import { AlertsLink } from './step_links/alerts_link';
+import { ExploreLink } from './step_links/explore_link';
 
 const analyticsBadge = {
   id: BadgeId.analytics,
@@ -66,36 +77,27 @@ const configureSteps = [
   {
     id: ConfigureSteps.learnAbout,
     title: i18n.CONFIGURE_STEP1,
-    description: [i18n.CONFIGURE_STEP1_DESCRIPTION1, i18n.CONFIGURE_STEP1_DESCRIPTION2],
-    badges: [cloudBadge, edrBadge],
-    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+    description: [<FleetOverviewLink />],
+    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: ConfigureSteps.deployElasticAgent,
     title: i18n.CONFIGURE_STEP2,
-    badges: [cloudBadge, edrBadge],
-    description: [i18n.CONFIGURE_STEP2_DESCRIPTION1],
-    button: {
-      children: i18n.CONFIGURE_STEP2_BUTTON,
-    },
-    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+    badges: [analyticsBadge, cloudBadge, edrBadge],
+    description: [i18n.CONFIGURE_STEP2_DESCRIPTION1, <EndpointManagementLink />],
   },
   {
     id: ConfigureSteps.connectToDataSources,
     title: i18n.CONFIGURE_STEP3,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
-    button: {
-      children: i18n.CONFIGURE_STEP3_BUTTON,
-    },
+    badges: [analyticsBadge],
+    description: [i18n.CONFIGURE_STEP3_DESCRIPTION1, <IntegrationsLink />],
+    productLineRequired: [ProductLine.security],
   },
   {
     id: ConfigureSteps.enablePrebuiltRules,
     title: i18n.CONFIGURE_STEP4,
     badges: [analyticsBadge, cloudBadge, edrBadge],
-    description: [i18n.CONFIGURE_STEP4_DESCRIPTION1],
-    button: {
-      children: i18n.CONFIGURE_STEP4_BUTTON,
-    },
+    description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <RulesManagementLink />],
   },
 ];
 
@@ -104,17 +106,13 @@ const exploreSteps = [
     id: ExploreSteps.viewAlerts,
     title: i18n.EXPLORE_STEP1,
     badges: [analyticsBadge, cloudBadge, edrBadge],
-    button: {
-      children: i18n.EXPLORE_STEP1_BUTTON,
-    },
+    description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsLink />],
   },
   {
     id: ExploreSteps.analyzeData,
     title: i18n.EXPLORE_STEP2,
     badges: [analyticsBadge, cloudBadge, edrBadge],
-    button: {
-      children: i18n.EXPLORE_STEP2_BUTTON,
-    },
+    description: [<OverviewLink />, <ExploreLink />],
   },
 ];
 
@@ -201,10 +199,6 @@ export const sections: Section[] = [
         icon: { type: 'securityApp', size: 'xl' },
         id: GetSetUpCardId.introduction,
         steps: introductionSteps,
-        timeInMins: introductionSteps.reduce(
-          (totalMin, { timeInMinutes }) => totalMin + timeInMinutes,
-          0
-        ),
       },
       {
         icon: { type: 'agentApp', size: 'xl' },

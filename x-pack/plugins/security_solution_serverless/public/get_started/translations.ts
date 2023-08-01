@@ -155,7 +155,7 @@ export const CONFIGURE_TITLE = i18n.translate(
 export const CONFIGURE_STEP1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1',
   {
-    defaultMessage: 'Learn about agent + policy',
+    defaultMessage: 'Learn about Elastic Agent and Fleet',
   }
 );
 
@@ -163,21 +163,14 @@ export const CONFIGURE_STEP1_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1',
   {
     defaultMessage:
-      'Deploy the Elastic Agent to each endpoint you want to protect. This allows it to monitor and protect them by collecting data and enforcing your security policies. It sends that data to the Elastic Stack for analysis and storage.',
-  }
-);
-
-export const CONFIGURE_STEP1_DESCRIPTION2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description2',
-  {
-    defaultMessage: 'In the next step, you will deploy the Elastic Agent to your endpoints.',
+      'Elastic Agent is a single, unified way to add monitoring for logs, metrics, and other types of data to a host. It can also protect hosts from security threats, query data from operating systems, forward data from remote services or hardware, and more.',
   }
 );
 
 export const CONFIGURE_STEP2 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2',
   {
-    defaultMessage: 'Deploy Elastic Agent to protect your endpoints',
+    defaultMessage: 'Deploy Elastic Defend to protect your endpoints',
   }
 );
 
@@ -185,14 +178,7 @@ export const CONFIGURE_STEP2_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description1',
   {
     defaultMessage:
-      'In order to begin detecting security misconfigurations, you’ll need to deploy Elastic Agent to the cloud account or Kubernetes cluster you want to monitor.',
-  }
-);
-
-export const CONFIGURE_STEP2_BUTTON = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.button.title',
-  {
-    defaultMessage: 'Install Agent',
+      'Elastic Defend provides organizations with prevention, detection, and response capabilities with deep visibility for EPP, EDR, SIEM, and Security Analytics use cases across Windows, macOS, and Linux operating systems running on both traditional endpoints and public cloud environments.',
   }
 );
 
@@ -203,17 +189,25 @@ export const CONFIGURE_STEP3 = i18n.translate(
   }
 );
 
+export const CONFIGURE_STEP3_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description1',
+  {
+    defaultMessage:
+      'Elastic integrations provide an easy way to connect Elastic to external services and systems, and quickly get insights or take action. They can collect new sources of data, and they often ship with out-of-the-box assets like dashboards, visualizations, and pipelines to extract structured fields out of logs and events.',
+  }
+);
+
 export const CONFIGURE_STEP3_BUTTON = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.button.title',
   {
-    defaultMessage: 'Add integrations',
+    defaultMessage: 'Go to integrations',
   }
 );
 
 export const CONFIGURE_STEP4 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4',
   {
-    defaultMessage: 'Enable pre-built rules',
+    defaultMessage: 'Enable prebuilt rules or create your own',
   }
 );
 
@@ -221,7 +215,7 @@ export const CONFIGURE_STEP4_DESCRIPTION1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description1',
   {
     defaultMessage:
-      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are  met.',
+      'Rules run periodically and search for suspicious events, sequences, machine learning anomalies, and more! When a rule’s criteria are met, a detection alert is created.',
   }
 );
 
@@ -246,10 +240,11 @@ export const EXPLORE_STEP1 = i18n.translate(
   }
 );
 
-export const EXPLORE_STEP1_BUTTON = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.button.title',
+export const EXPLORE_STEP1_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description1',
   {
-    defaultMessage: 'View alerts',
+    defaultMessage:
+      'The Alerts page displays all detection alerts following rule configuration from above. From the Alerts page, you can prioritize, triage, investigate alerts, and escalate alerts to a Case. Rules must be enabled for any alerts to be created.',
   }
 );
 
@@ -260,10 +255,11 @@ export const EXPLORE_STEP2 = i18n.translate(
   }
 );
 
-export const EXPLORE_STEP2_BUTTON = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.button.title',
+export const EXPLORE_STEP2_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description1',
   {
-    defaultMessage: 'Go to dashboards',
+    defaultMessage:
+      'The Overview dashboard provides a high-level snapshot of alerts and events. It helps you assess overall system health and find anomalies that may require further investigation.',
   }
 );
 

@@ -16,7 +16,6 @@ import {
   EuiText,
   useEuiTheme,
   EuiButtonEmpty,
-  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -46,12 +45,13 @@ const CardStepComponent: React.FC<{
   stepId,
 }) => {
   const { euiTheme } = useEuiTheme();
+
   const [expandStep, setExpandStep] = useState(false);
   const steps = useMemo(
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
   );
-  const { title, badges, description, splitPanel, button } =
+  const { title, badges, description, splitPanel } =
     steps?.find((step) => step.id === stepId) ?? {};
 
   const toggleStep = useCallback(
@@ -65,7 +65,7 @@ const CardStepComponent: React.FC<{
 
   const isDone = finishedStepsByCard.has(stepId);
 
-  const hasStepContent = description || splitPanel || button;
+  const hasStepContent = description || splitPanel;
 
   const handleStepButtonClicked = useCallback(
     (e) => {
@@ -150,7 +150,7 @@ const CardStepComponent: React.FC<{
             hasShadow={false}
             borderRadius="none"
           >
-            {(description || button) && (
+            {description && (
               <EuiSplitPanel.Inner
                 paddingSize="none"
                 css={css`
@@ -168,12 +168,6 @@ const CardStepComponent: React.FC<{
                     </p>
                   ))}
                 </EuiText>
-                {button && (
-                  <>
-                    <EuiSpacer size="xl" />
-                    <EuiButton {...button} fill={button.fill ?? true} />
-                  </>
-                )}
               </EuiSplitPanel.Inner>
             )}
             {splitPanel && (

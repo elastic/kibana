@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EuiButtonProps, EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
+
 import type { ProductLine } from '../../common/product';
 
 export interface HeaderSection {
@@ -38,7 +39,6 @@ export type StepId =
 
 export interface Step {
   badges: Badge[];
-  button?: EuiButtonProps;
   description?: string[];
   id: StepId;
   productLineRequired?: ProductLine[];
@@ -55,7 +55,6 @@ export interface Card {
   id: CardId;
   steps?: Step[];
   title: string;
-  timeInMins?: number;
 }
 
 export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;

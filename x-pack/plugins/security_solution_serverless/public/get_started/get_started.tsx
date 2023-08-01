@@ -10,6 +10,7 @@ import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { WelcomePanel } from './welcome_panel';
 import { TogglePanel } from './toggle_panel';
 import {
@@ -20,6 +21,7 @@ import {
 import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
+import { useKibana } from '../common/services';
 
 const CONTENT_WIDTH = 1150;
 
@@ -36,6 +38,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
     onStepButtonClicked,
     state: { activeProducts, activeSections, finishedSteps },
   } = useTogglePanel({ productTypes });
+  const services = useKibana().services;
   return (
     <KibanaPageTemplate
       restrictWidth={false}
@@ -103,13 +106,15 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           padding: 0 ${euiTheme.base * 2.25}px;
         `}
       >
-        <TogglePanel
-          finishedSteps={finishedSteps}
-          activeSections={activeSections}
-          activeProducts={activeProducts}
-          onStepClicked={onStepClicked}
-          onStepButtonClicked={onStepButtonClicked}
-        />
+        <NavigationProvider core={services}>
+          <TogglePanel
+            finishedSteps={finishedSteps}
+            activeSections={activeSections}
+            activeProducts={activeProducts}
+            onStepClicked={onStepClicked}
+            onStepButtonClicked={onStepButtonClicked}
+          />
+        </NavigationProvider>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
