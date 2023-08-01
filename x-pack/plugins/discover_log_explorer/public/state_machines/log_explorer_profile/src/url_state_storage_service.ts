@@ -75,7 +75,6 @@ export const updateStateContainer =
     const shouldSetDefaultColumns =
       stateContainer.appState.isEmptyURL() || !columns || columns.length === 0;
 
-    // Update
     if (shouldSetDefaultColumns) {
       stateContainer.appState.update({ columns: [MESSAGE_FIELD] }, true);
     }
