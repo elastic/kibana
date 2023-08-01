@@ -14,7 +14,6 @@ import type {
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { EmbeddableChangePointChartFactory } from './embeddable';
 import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
 export class AiopsPlugin
@@ -27,8 +26,8 @@ export class AiopsPlugin
     firstValueFrom(licensing.license$).then(async (license) => {
       if (license.hasAtLeast('platinum')) {
         if (embeddable) {
-          const factory = new EmbeddableChangePointChartFactory(core.getStartServices);
-          embeddable.registerEmbeddableFactory(factory.type, factory);
+          const { registerEmbeddable } = await import('./embeddable/register_embeddable');
+          registerEmbeddable(core, embeddable);
         }
 
         if (cases) {
