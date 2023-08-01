@@ -16,14 +16,12 @@ import {
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
 
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DocumentCountStats } from '../../../get_document_stats';
 
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
-  analysisType: LogRateAnalysisType;
   brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
@@ -46,7 +44,6 @@ export interface DocumentCountContentProps {
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   brushSelectionUpdateHandler,
   documentCountStats,
   documentCountStatsSplit,
