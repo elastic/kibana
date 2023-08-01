@@ -570,6 +570,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
       maintenanceWindowIds,
+      alertsClient,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };

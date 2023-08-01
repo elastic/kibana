@@ -243,11 +243,11 @@ export const addLayer = createAction<{
   extraArg: unknown;
   ignoreInitialValues?: boolean;
 }>('lens/addLayer');
-export const onDimensionDrop = createAction<{
+export const onDropToDimension = createAction<{
   source: DragDropIdentifier;
   target: DragDropOperation;
   dropType: DropType;
-}>('lens/onDimensionDrop');
+}>('lens/onDropToDimension');
 
 export const setLayerDefaultDimension = createAction<{
   layerId: string;
@@ -305,7 +305,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
-  onDimensionDrop,
+  onDropToDimension,
   cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
@@ -1105,7 +1105,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
       state.visualization.state = syncedVisualizationState;
     },
-    [onDimensionDrop.type]: (
+    [onDropToDimension.type]: (
       state,
       {
         payload: { source, target, dropType },
@@ -1162,7 +1162,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
 
       activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
-
       const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
         {
           prevState: state.visualization.state,
@@ -1185,6 +1184,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         state.datasourceStates[layerDatasourceId].state = syncedDatasourceState;
         state.visualization.state = syncedVisualizationState;
       }
+      state.stagedPreview = undefined;
     },
     [setLayerDefaultDimension.type]: (
       state,
