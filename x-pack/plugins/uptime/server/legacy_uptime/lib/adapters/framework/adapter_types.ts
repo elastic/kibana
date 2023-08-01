@@ -6,13 +6,7 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type {
-  SavedObjectsClientContract,
-  IScopedClusterClient,
-  Logger,
-  IBasePath,
-  CoreStart,
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, IScopedClusterClient, IBasePath } from '@kbn/core/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -52,20 +46,20 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 export interface UptimeServerSetup {
   router: UptimeRouter;
   config: UptimeConfig;
-  cloud?: CloudSetup;
-  spaces?: SpacesPluginStart;
-  fleet: FleetStartContract;
-  security: SecurityPluginStart;
-  savedObjectsClient?: SavedObjectsClientContract;
-  authSavedObjectsClient?: SavedObjectsClientContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  // cloud?: CloudSetup;
+  // spaces?: SpacesPluginStart;
+  // fleet: FleetStartContract;
+  // security: SecurityPluginStart;
+  // savedObjectsClient?: SavedObjectsClientContract;
+  // authSavedObjectsClient?: SavedObjectsClientContract;
+  // encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   share: SharePluginSetup;
-  stackVersion: string;
-  logger: Logger;
-  uptimeEsClient: UptimeEsClient;
+  // stackVersion: string;
+  // logger: Logger;
+  // uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
-  isDev?: boolean;
-  coreStart: CoreStart;
+  // isDev?: boolean;
+  // coreStart: CoreStart;
 }
 
 export interface UptimeCorePluginsSetup {
