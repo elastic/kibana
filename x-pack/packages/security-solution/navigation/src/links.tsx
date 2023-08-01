@@ -9,34 +9,29 @@ import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'rea
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import { useGetAppUrl, useNavigateTo } from './navigation';
 
-export interface WrappedLinkProps {
+export interface BaseLinkProps {
   id: string;
   path?: string;
   urlState?: string;
 }
 
+export type GetLinkUrlProps = BaseLinkProps & { absolute?: boolean };
+export type GetLinkUrl = (params: GetLinkUrlProps) => string;
+
+export type WrappedLinkProps = BaseLinkProps & {
+  /**
+   * Optional `onClick` callback prop.
+   * It is composed within the returned `onClick` function to perform extra actions when the link is clicked.
+   * It does not override the navigation action.
+   **/
+  onClick?: MouseEventHandler;
+};
+export type GetLinkProps = (params: WrappedLinkProps) => LinkProps;
+
 export interface LinkProps {
   onClick: MouseEventHandler;
   href: string;
 }
-
-export type GetLinkUrl = (
-  params: WrappedLinkProps & {
-    absolute?: boolean;
-    urlState?: string;
-  }
-) => string;
-
-export type GetLinkProps = (
-  params: WrappedLinkProps & {
-    /**
-     * Optional `onClick` callback prop.
-     * It is composed within the returned `onClick` function to perform extra actions when the link is clicked.
-     * It does not override the navigation operation.
-     **/
-    onClick?: MouseEventHandler;
-  }
-) => LinkProps;
 
 /**
  * It returns the `url` to use in link `href`.
@@ -91,9 +86,8 @@ export const useGetLinkProps = (): GetLinkProps => {
  */
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
-): React.FC<Omit<T & WrappedLinkProps, 'href'>> =>
-  // eslint-disable-next-line react/display-name
-  React.memo(function ({ id, path, urlState, onClick: _onClick, ...rest }) {
+): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
+  React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
     const { onClick, href } = getLink({ id, path, urlState, onClick: _onClick });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
@@ -115,6 +109,8 @@ export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
 // Utils
 
+// External IDs are in the format `appId:deepLinkId` to match the Chrome NavLinks format.
+// Internal Security Solution links are in the format `deepLinkId`, the appId is omitted for convenience.
 export const isExternalId = (id: string): boolean => id.includes(':');
 
 export const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } => {

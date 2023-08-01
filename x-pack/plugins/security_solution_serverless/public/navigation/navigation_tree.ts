@@ -44,16 +44,16 @@ export const subscribeNavigationTree = (services: Services): void => {
   getProjectNavLinks$().subscribe((projectNavLinks) => {
     // TODO: The root link is temporary until the Platform bug having multiple links at first level is solved.
     // Assign using the following line when the issue is solved:
-    // const navigationTree = formatChromeProjectNavNodes(chrome.navLinks, projectNavLinks),
-    const navigationTree: ChromeProjectNavigationNode[] = [
-      {
-        id: 'root',
-        title: 'Root',
-        path: ['root'],
-        breadcrumbStatus: 'hidden',
-        children: formatChromeProjectNavNodes(projectNavLinks, ['root']),
-      },
-    ];
+    const navigationTree = formatChromeProjectNavNodes(projectNavLinks);
+    // const navigationTree: ChromeProjectNavigationNode[] = [
+    //   {
+    //     id: 'root',
+    //     title: 'Root',
+    //     path: ['root'],
+    //     breadcrumbStatus: 'hidden',
+    //     children: formatChromeProjectNavNodes(projectNavLinks, ['root']),
+    //   },
+    // ];
     serverless.setNavigation({ navigationTree });
   });
 };

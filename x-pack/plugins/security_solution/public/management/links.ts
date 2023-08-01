@@ -31,7 +31,7 @@ import {
   ENDPOINTS,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
-  SETTINGS,
+  MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
@@ -77,21 +77,21 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
       defaultMessage: 'Cloud Security',
     }),
-    linkIds: [cloudDefendLink.id],
+    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
 ];
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
-  title: SETTINGS,
+  title: MANAGE,
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.settings', {
-      defaultMessage: 'Settings',
+    i18n.translate('xpack.securitySolution.appLinks.manage', {
+      defaultMessage: 'Manage',
     }),
   ],
   categories,

@@ -13,9 +13,12 @@ import {
   type SolutionSideNavItem,
 } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
+import { ExternalPageName } from '../links/constants';
 
 const isBottomNavItem = (id: string) =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration;
+  id === SecurityPageName.landing ||
+  id === SecurityPageName.administration ||
+  id === ExternalPageName.devToolsRoot;
 const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
 
 /**

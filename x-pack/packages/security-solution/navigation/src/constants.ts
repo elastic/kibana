@@ -10,6 +10,7 @@ export const SECURITY_UI_APP_ID = 'securitySolutionUI' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  assets = 'assets',
   blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members

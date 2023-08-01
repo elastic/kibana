@@ -19,6 +19,7 @@ import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { configureNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
+import { projectAppLinksSwitcher } from './navigation/links/app_links';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -40,6 +41,8 @@ export class SecuritySolutionServerlessPlugin
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
+    setupDeps.securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+
     return {};
   }
 

@@ -9,6 +9,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 export const SecurityPagePath = {
   [SecurityPageName.mlLanding]: '/ml',
+  [SecurityPageName.assets]: '/assets',
 } as const;
 
 export enum ExternalPageName {

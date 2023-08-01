@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from './common/lib/upsellings';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
-import type { AppLinkItems } from './common/links';
+import type { AppLinksSwitcher } from './common/links';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 
@@ -17,15 +17,15 @@ export class PluginContract {
   public isSidebarEnabled$: BehaviorSubject<boolean>;
   public getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
   public upsellingService: UpsellingService;
-  public extraAppLinks$: BehaviorSubject<AppLinkItems>;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
+  public appLinksSwitcher: AppLinksSwitcher;
 
   constructor() {
-    this.extraAppLinks$ = new BehaviorSubject<AppLinkItems>([]);
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
     this.upsellingService = new UpsellingService();
+    this.appLinksSwitcher = (appLinks) => appLinks;
   }
 
   public getStartServices(): ContractStartServices {
@@ -41,13 +41,15 @@ export class PluginContract {
     return {
       resolver: lazyResolver,
       upselling: this.upsellingService,
+      setAppLinksSwitcher: (appLinksSwitcher) => {
+        this.appLinksSwitcher = appLinksSwitcher;
+      },
     };
   }
 
   public getStartContract(): PluginStart {
     return {
       getNavLinks$: () => navLinks$,
-      setExtraAppLinks: (extraAppLinks) => this.extraAppLinks$.next(extraAppLinks),
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),

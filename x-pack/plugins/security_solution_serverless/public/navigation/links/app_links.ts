@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-import type { Services } from '../../common/services';
+import type {
+  AppLinksSwitcher,
+  LinkItem,
+} from '@kbn/security-solution-plugin/public/common/links/types';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { cloneDeep, find, findIndex, remove } from 'lodash';
 import { mlAppLink } from './sections/ml_links';
+import { assetsAppLink } from './sections/assets_links';
 
-export const setAppLinks = (services: Services) => {
-  services.securitySolution.setExtraAppLinks([
-    mlAppLink, // ML landing page app link
-  ]);
+// This function is called by the security_solution plugin to alter the app links
+// that will be registered to the Security Solution application on Serverless projects.
+// The capabilities filtering is done after this function is called by the security_solution plugin.
+export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
+  const projectAppLinks = cloneDeep(appLinks) as LinkItem[];
+
+  // Add ml landing link at the end
+  projectAppLinks.push(mlAppLink);
+
+  return projectAppLinks;
 };
