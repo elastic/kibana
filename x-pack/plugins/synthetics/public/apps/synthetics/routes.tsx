@@ -8,8 +8,8 @@
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import { Route } from '@kbn/shared-ux-router';
-import { Switch, useHistory, useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -191,7 +191,7 @@ export const PageRouter: FC = () => {
   const isUnPrivileged = useSyntheticsPrivileges();
 
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -238,6 +238,6 @@ export const PageRouter: FC = () => {
           </SyntheticsPageTemplateComponent>
         )}
       />
-    </Switch>
+    </Routes>
   );
 };

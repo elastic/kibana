@@ -50,9 +50,7 @@ export type PackageSpecCategory =
   | 'config_management'
   | 'connector'
   | 'connector_client'
-  | 'connector_package'
   | 'containers'
-  | 'content_source'
   | 'crawler'
   | 'credential_management'
   | 'crm'
@@ -101,7 +99,8 @@ export type PackageSpecCategory =
   | 'web'
   | 'web_application_firewall'
   | 'websphere'
-  | 'workplace_search';
+  | 'workplace_search'
+  | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
   kibana: {

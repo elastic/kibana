@@ -72,16 +72,23 @@ export const registerActionFileInfoRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_AGENT_FILE_INFO_ROUTE,
-      validate: EndpointActionFileInfoSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      endpointContext.logFactory.get('actionFileInfo'),
-      getActionFileInfoRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileInfoSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        endpointContext.logFactory.get('actionFileInfo'),
+        getActionFileInfoRouteHandler(endpointContext)
+      )
+    );
 };

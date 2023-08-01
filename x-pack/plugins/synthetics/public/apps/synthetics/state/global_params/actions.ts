@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SyntheticsParamRequest, SyntheticsParamSO } from '../../../../../common/runtime_types';
+import { SyntheticsParamRequest, SyntheticsParams } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
-export const getGlobalParamAction = createAsyncAction<void, Array<SavedObject<SyntheticsParamSO>>>(
+export const getGlobalParamAction = createAsyncAction<void, SyntheticsParams[]>(
   'GET GLOBAL PARAMS'
 );
 
-export const addNewGlobalParamAction = createAsyncAction<SyntheticsParamRequest, SyntheticsParamSO>(
+export const addNewGlobalParamAction = createAsyncAction<SyntheticsParamRequest, SyntheticsParams>(
   'ADD NEW GLOBAL PARAM'
 );
 
@@ -22,5 +21,5 @@ export const editGlobalParamAction = createAsyncAction<
     id: string;
     paramRequest: SyntheticsParamRequest;
   },
-  SyntheticsParamSO
+  SyntheticsParams
 >('EDIT GLOBAL PARAM');

@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless common API', function () {
     loadTestFile(require.resolve('./security_users'));
     loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./security_response_headers'));
   });
 }

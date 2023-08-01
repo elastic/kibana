@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -26,6 +26,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
 import { v4 as uuidv4 } from 'uuid';
@@ -77,10 +78,12 @@ describe('Endpoint Pending Action Summary API', () => {
     getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
       const req = httpServerMock.createKibanaRequest(reqParams);
       const mockResponse = httpServerMock.createResponseFactory();
-      const [, routeHandler]: [
-        RouteConfig<any, any, any, any>,
-        RequestHandler<any, any, any, any>
-      ] = routerMock.get.mock.calls.find(([{ path }]) => path.startsWith(ACTION_STATUS_ROUTE))!;
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        ACTION_STATUS_ROUTE,
+        '2023-10-31'
+      );
       await routeHandler(
         createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
         req,

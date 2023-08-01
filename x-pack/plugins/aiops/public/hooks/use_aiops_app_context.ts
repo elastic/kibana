@@ -24,7 +24,10 @@ import type {
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type {
+  FieldStatsProps,
+  FieldStatsServices,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 export interface AiopsAppDependencies {

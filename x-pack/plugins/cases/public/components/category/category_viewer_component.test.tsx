@@ -12,13 +12,12 @@ import { CategoryViewer } from './category_viewer_component';
 
 describe('Category viewer ', () => {
   const sampleCategory = 'foobar';
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
 
   it('renders category', () => {
     render(<CategoryViewer category={sampleCategory} />);
 
-    expect(screen.getByText(sampleCategory)).toBeInTheDocument();
+    expect(screen.getByTestId(`category-viewer-${sampleCategory}`)).toHaveTextContent(
+      sampleCategory
+    );
   });
 });

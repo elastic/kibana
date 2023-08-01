@@ -361,7 +361,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     return (
       <div className="gauge__wrapper">
-        <Chart>
+        <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}

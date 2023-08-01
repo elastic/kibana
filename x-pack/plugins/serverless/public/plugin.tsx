@@ -55,6 +55,7 @@ export class ServerlessPlugin
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
+        order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
@@ -71,6 +72,8 @@ export class ServerlessPlugin
       setNavigation: (projectNavigation) => project.setNavigation(projectNavigation),
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getActiveNavigationNodes$: () =>
+        (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$(),
     };
   }
 

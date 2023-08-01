@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaConfig } from '../../../types';
 
-export const diskIORead: LensChartConfig = {
-  title: 'Disk Read IOPS',
-  formula: {
-    formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
-    format: {
-      id: 'number',
-      params: {
-        decimals: 0,
-      },
+export const diskIORead: FormulaConfig = {
+  label: 'Disk Read IOPS',
+  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
     },
   },
-  getFilters,
 };

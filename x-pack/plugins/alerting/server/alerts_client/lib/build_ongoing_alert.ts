@@ -7,6 +7,7 @@
 
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -22,8 +23,9 @@ interface BuildOngoingAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
-  payload?: AlertData;
+  payload?: DeepPartial<AlertData>;
   timestamp: string;
+  kibanaVersion: string;
 }
 
 /**
@@ -43,6 +45,7 @@ export const buildOngoingAlert = <
   payload,
   rule,
   timestamp,
+  kibanaVersion,
 }: BuildOngoingAlertOpts<
   AlertData,
   LegacyState,
@@ -50,7 +53,7 @@ export const buildOngoingAlert = <
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
-  const cleanedPayload = payload ? stripFrameworkFields(payload) : {};
+  const cleanedPayload = stripFrameworkFields(payload);
   return deepmerge.all(
     [
       alert,
@@ -58,6 +61,9 @@ export const buildOngoingAlert = <
       {
         // Update the timestamp to reflect latest update time
         '@timestamp': timestamp,
+        event: {
+          action: 'active',
+        },
         kibana: {
           alert: {
             // Because we're building this alert after the action execution handler has been
@@ -80,13 +86,25 @@ export const buildOngoingAlert = <
               ? { duration: { us: legacyAlert.getState().duration } }
               : {}),
             // Fields that are explicitly not updated:
+            // event.kind
             // instance.id
             // status - ongoing alerts should maintain 'active' status
             // uuid - ongoing alerts should carry over previous UUID
             // start - ongoing alerts should keep the initial start time
+            // time_range - ongoing alerts should keep the initial time_range
+            // workflow_status - ongoing alerts should keep the initial workflow status
           },
           space_ids: rule.kibana?.space_ids,
+          // Set latest kibana version
+          version: kibanaVersion,
         },
+        tags: Array.from(
+          new Set([
+            ...((cleanedPayload?.tags as string[]) ?? []),
+            ...(alert.tags ?? []),
+            ...(rule.kibana?.alert.rule.tags ?? []),
+          ])
+        ),
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }

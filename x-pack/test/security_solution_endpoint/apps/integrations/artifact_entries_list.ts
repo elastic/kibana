@@ -52,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('For each artifact list under management', function () {
-    this.timeout(150_000);
+    this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 

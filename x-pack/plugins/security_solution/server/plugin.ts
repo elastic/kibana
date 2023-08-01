@@ -94,6 +94,8 @@ import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
+import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
+
 import { AppFeatures } from './lib/app_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -118,6 +120,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+  private riskEngineDataClient: RiskEngineDataClient | undefined;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -159,6 +162,18 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
+    this.riskEngineDataClient = new RiskEngineDataClient({
+      logger: this.logger,
+      kibanaVersion: this.pluginContext.env.packageInfo.version,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+    });
+
+    if (experimentalFeatures.riskScoringPersistence) {
+      this.riskEngineDataClient.initializeResources({});
+    }
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -168,6 +183,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
+      riskEngineDataClient: this.riskEngineDataClient,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -421,6 +437,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagePolicyService,
       agentPolicyService,
       createFilesClient,
+      createFleetActionsClient,
     } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
@@ -442,6 +459,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
         experimentalFeatures: config.experimentalFeatures,
+        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
+        esClient: core.elasticsearch.client.asInternalUser,
       });
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
@@ -505,6 +524,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
       ),
+      createFleetActionsClient,
+      esClient: core.elasticsearch.client.asInternalUser,
     });
 
     this.telemetryReceiver.start(

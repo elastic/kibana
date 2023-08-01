@@ -32,9 +32,14 @@ const steps: EuiContainedStepProps[] = [
       defaultMessage: 'Discover examples of using RRF in _search queries',
     }),
     children: (
-      <EuiLink href={docLinks.rrf} target="_blank" external>
+      <EuiLink
+        data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingPanel-rrfDocsLink"
+        href={docLinks.rrf}
+        target="_blank"
+        external
+      >
         {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step1.rrfDocsLinkText', {
-          defaultMessage: 'Reciprocal Rank Fusion documentations',
+          defaultMessage: 'Reciprocal Rank Fusion documentation',
         })}
       </EuiLink>
     ),
@@ -45,7 +50,11 @@ const steps: EuiContainedStepProps[] = [
       defaultMessage: 'Try it today in Console',
     }),
     children: (
-      <EuiLinkTo to={generatePath(DEV_TOOLS_CONSOLE_PATH)} shouldNotCreateHref>
+      <EuiLinkTo
+        data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingPanel-devToolsConsoleButton"
+        to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
+        shouldNotCreateHref
+      >
         <EuiButton>
           {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step2.buttonLabel', {
             defaultMessage: 'Open Console',
@@ -66,6 +75,7 @@ export const RrfRankingPanel: React.FC = () => (
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.esre.rrfRankingPanel.description"
+              data-telemetry-id="entSearch-esre-semanticSearch-rrfRankingPanel-rrfDocsLink"
               defaultMessage="Use {rrf} to combine rankings from multiple result sets with different relevance indicators, with no fine tuning required."
               values={{
                 rrf: (

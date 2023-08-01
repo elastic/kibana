@@ -1,0 +1,10 @@
+description: The type of aggregation to perform.
+type: string
+enum:
+  - avg
+  - count
+  - max
+  - min
+  - sum
+default: count
+ 

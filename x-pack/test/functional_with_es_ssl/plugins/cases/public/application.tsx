@@ -16,11 +16,10 @@ import {
   EuiButton,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -45,7 +44,7 @@ const permissions = {
   push: true,
 };
 
-const attachments = [{ type: CommentType.user as const, comment: 'test' }];
+const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
 
 const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const { cases } = props;
@@ -111,11 +110,9 @@ const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
           >
             <StyledComponentsThemeProvider>
               <Router history={history}>
-                <CompatRouter>
-                  <CasesContext owner={[]} permissions={permissions}>
-                    <CasesFixtureAppWithContext cases={cases} />
-                  </CasesContext>
-                </CompatRouter>
+                <CasesContext owner={[]} permissions={permissions}>
+                  <CasesFixtureAppWithContext cases={cases} />
+                </CasesContext>
               </Router>
             </StyledComponentsThemeProvider>
           </KibanaContextProvider>

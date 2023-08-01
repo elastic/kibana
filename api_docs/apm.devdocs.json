@@ -81,7 +81,21 @@
             "label": "featureFlags",
             "description": [],
             "signature": [
-              "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }"
+              "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; fastRefreshAvailable: boolean; }"
+            ],
+            "path": "x-pack/plugins/apm/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "apm",
+            "id": "def-public.ConfigSchema.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
             ],
             "path": "x-pack/plugins/apm/public/index.ts",
             "deprecated": false,
@@ -110,7 +124,7 @@
           "section": "def-common.LocatorPublic",
           "text": "LocatorPublic"
         },
-        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"traces\" | \"metrics\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
         "Branded",
         "<string, ",
         {
@@ -249,9 +263,9 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverlessOnboarding: boolean; serverless: Readonly<{} & { enabled: true; }>; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; fastRefreshAvailable: boolean; }>; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -481,7 +495,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ query: { _inspect: boolean; start?: number | undefined; end?: number | undefined; }; }"
+              "{ query: { _inspect: boolean; }; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false,
@@ -495,9 +509,9 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+              "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }"
+              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverlessOnboarding: boolean; readonly serverless: Readonly<{} & { enabled: true; }>; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; fastRefreshAvailable: boolean; }>; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false,
@@ -511,7 +525,7 @@
             "label": "featureFlags",
             "description": [],
             "signature": [
-              "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }"
+              "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; fastRefreshAvailable: boolean; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false,
@@ -607,7 +621,7 @@
                 "section": "def-server.LicensingPluginStart",
                 "text": "LicensingPluginStart"
               },
-              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
                 "scope": "common",
@@ -637,9 +651,7 @@
               "GetResponse",
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "WriteResponseBase",
-              ">; } | undefined>; getOpenAIClient(): ",
-              "IOpenAIClient",
-              " | undefined; alertsLocator: ",
+              ">; } | undefined>; alertsLocator: ",
               {
                 "pluginId": "share",
                 "scope": "common",
@@ -768,7 +780,13 @@
                 "text": "HomeServerPluginStart"
               },
               ">; } | undefined; ml?: { setup: ",
-              "SharedServices",
+              {
+                "pluginId": "ml",
+                "scope": "server",
+                "docId": "kibMlPluginApi",
+                "section": "def-server.MlPluginSetup",
+                "text": "MlPluginSetup"
+              },
               "; start: () => Promise<never>; } | undefined; security?: { setup: ",
               {
                 "pluginId": "security",
@@ -943,9 +961,9 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
-          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }"
+          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverlessOnboarding: boolean; readonly serverless: Readonly<{} & { enabled: true; }>; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; fastRefreshAvailable: boolean; }>; }"
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -975,7 +993,17 @@
         "label": "APMServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/apm/diagnostics\": { endpoint: \"GET /internal/apm/diagnostics\"; params?: undefined; handler: ({}: ",
+          "{ \"GET /internal/apm/diagnostics\": { endpoint: \"GET /internal/apm/diagnostics\"; params?: ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ kuery: ",
+          "StringC",
+          "; start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -983,7 +1011,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ") => Promise<{ esResponses: { existingIndexTemplates: ",
+          " & { params?: { query?: { kuery?: string | undefined; start?: number | undefined; end?: number | undefined; } | undefined; } | undefined; }) => Promise<{ esResponses: { existingIndexTemplates: ",
           "IndicesGetIndexTemplateIndexTemplateItem",
           "[]; fieldCaps: ",
           "FieldCapsResponse",
@@ -991,13 +1019,17 @@
           "IndicesGetResponse",
           "; ingestPipelines: ",
           "IngestGetPipelineResponse",
-          "; }; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; invalidIndices: ",
+          "; }; diagnosticsPrivileges: { index: Record<string, ",
+          "SecurityHasPrivilegesPrivileges",
+          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
+          "ApmEvent",
+          "[]; invalidIndices: ",
           "IndiciesItem",
           "[]; validIndices: ",
           "IndiciesItem",
           "[]; dataStreams: ",
           "IndicesDataStream",
-          "[]; nonDataStreamIndices: string[]; indexTemplatesByIndexPattern: { indexPattern: string; indexTemplates: { priority: number | undefined; isNonStandard: boolean; templateIndexPatterns: string[]; templateName: string; }[]; }[]; }>; } & ",
+          "[]; nonDataStreamIndices: string[]; indexTemplatesByIndexPattern: { indexPattern: string; indexTemplates: { priority: number | undefined; isNonStandard: boolean; templateIndexPatterns: string[]; templateName: string; }[]; }[]; params: { start: number; end: number; kuery?: string | undefined; }; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/mobile-services/{serviceName}/detailed_statistics\": { endpoint: \"GET /internal/apm/mobile-services/{serviceName}/detailed_statistics\"; params?: ",
           "TypeC",
@@ -2025,7 +2057,13 @@
           "TypeC",
           "<{ kuery: ",
           "StringC",
-          "; }>]>; }> | undefined; handler: ({}: ",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -2045,7 +2083,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { kuery: string; }; }; }) => Promise<{ services: { serviceName: string; }[]; }>; } & ",
+          ">; } & { kuery: string; } & { start: number; end: number; }; }; }) => Promise<{ services: { serviceName: string; }[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/storage_explorer/is_cross_cluster_search\": { endpoint: \"GET /internal/apm/storage_explorer/is_cross_cluster_search\"; params?: undefined; handler: ({}: ",
           {
@@ -5188,7 +5226,7 @@
           ".TransactionEvent; rollupInterval: ",
           "RollupInterval",
           "; }; }; }) => Promise<",
-          "ServiceTransactionGroupsResponse",
+          "MergedServiceTransactionGroupsResponse",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/traces/{traceId}/spans/{spanId}\": { endpoint: \"GET /internal/apm/traces/{traceId}/spans/{spanId}\"; params?: ",
@@ -5200,6 +5238,14 @@
           "; spanId: ",
           "StringC",
           "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
           "UnionC",
           "<[",
           "PartialC",
@@ -5207,7 +5253,7 @@
           "StringC",
           "; }>, ",
           "UndefinedC",
-          "]>; }> | undefined; handler: ({}: ",
+          "]>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -5215,7 +5261,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          " & { params: { path: { traceId: string; spanId: string; }; query: { parentTransactionId?: string | undefined; } | undefined; }; }) => Promise<{ span?: ",
+          " & { params: { path: { traceId: string; spanId: string; }; query: { start: number; end: number; } & { parentTransactionId?: string | undefined; }; }; }) => Promise<{ span?: ",
           "Span",
           " | undefined; parentTransaction?: ",
           "Transaction",
@@ -5229,7 +5275,13 @@
           "StringC",
           "; transactionId: ",
           "StringC",
-          "; }>; }> | undefined; handler: ({}: ",
+          "; }>; query: ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -5237,7 +5289,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          " & { params: { path: { traceId: string; transactionId: string; }; }; }) => Promise<",
+          " & { params: { path: { traceId: string; transactionId: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "Transaction",
           ">; } & ",
           "APMRouteCreateOptions",
@@ -5395,7 +5447,13 @@
           "TypeC",
           "<{ transactionId: ",
           "StringC",
-          "; }>; }> | undefined; handler: ({}: ",
+          "; }>; query: ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -5403,7 +5461,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          " & { params: { path: { transactionId: string; }; }; }) => Promise<{ transaction: ",
+          " & { params: { path: { transactionId: string; }; query: { start: number; end: number; }; }; }) => Promise<{ transaction: ",
           "Transaction",
           "; }>; } & ",
           "APMRouteCreateOptions",
@@ -5413,7 +5471,13 @@
           "TypeC",
           "<{ traceId: ",
           "StringC",
-          "; }>; }> | undefined; handler: ({}: ",
+          "; }>; query: ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -5421,7 +5485,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          " & { params: { path: { traceId: string; }; }; }) => Promise<{ transaction: ",
+          " & { params: { path: { traceId: string; }; query: { start: number; end: number; }; }; }) => Promise<{ transaction: ",
           "Transaction",
           "; }>; } & ",
           "APMRouteCreateOptions",
@@ -8022,9 +8086,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
-            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }>>"
+            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverlessOnboarding: boolean; serverless: Readonly<{} & { enabled: true; }>; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; fastRefreshAvailable: boolean; }>; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,

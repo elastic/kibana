@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import {
@@ -39,7 +40,7 @@ import {
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
-import { useToastNotifications } from '../app_dependencies';
+import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 import { SearchItems } from './use_search_items';
@@ -52,6 +53,12 @@ export const useIndexData = (
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
   timeRangeMs?: TimeRangeMs
 ): UseIndexDataReturnType => {
+  const { analytics } = useAppDependencies();
+
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
+
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
   const api = useApi();
@@ -79,6 +86,9 @@ export const useIndexData = (
   };
 
   useEffect(() => {
+    if (dataView.timeFieldName !== undefined && timeRangeMs === undefined) {
+      return;
+    }
     const abortController = new AbortController();
 
     // Fetch 500 random documents to determine populated fields.
@@ -190,6 +200,9 @@ export const useIndexData = (
   }, [JSON.stringify([query, timeRangeMs])]);
 
   useEffect(() => {
+    if (typeof dataViewFields === 'undefined') {
+      return;
+    }
     const abortController = new AbortController();
 
     const fetchDataGridData = async function () {
@@ -314,6 +327,22 @@ export const useIndexData = (
   ]);
 
   const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);
+
+  if (
+    dataGrid.status === INDEX_STATUS.LOADED &&
+    dataViewFields !== undefined &&
+    loadIndexDataStartTime.current !== undefined
+  ) {
+    const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+    // Set this to undefined so reporting the metric gets triggered only once.
+    loadIndexDataStartTime.current = undefined;
+
+    reportPerformanceMetricEvent(analytics, {
+      eventName: 'transformLoadIndexPreview',
+      duration: loadIndexDataDuration,
+    });
+  }
 
   return {
     ...dataGrid,

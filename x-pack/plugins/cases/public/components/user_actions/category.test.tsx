@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createCategoryUserActionBuilder } from './category';
 import { getMockBuilderArgs } from './mock';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -26,7 +26,7 @@ describe('createCategoryUserActionBuilder ', () => {
   });
 
   it('renders correctly when the category is updated', () => {
-    const userAction = getUserAction('category', Actions.update, {
+    const userAction = getUserAction('category', UserActionActions.update, {
       payload: { category: 'fantasy' },
     });
     const builder = createCategoryUserActionBuilder({
@@ -41,12 +41,12 @@ describe('createCategoryUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('category-update-user-action')).toBeInTheDocument();
+    expect(screen.getByTestId('category-update-category-user-action-title')).toBeInTheDocument();
     expect(screen.getByText('added the category "fantasy"')).toBeInTheDocument();
   });
 
   it('renders correctly when the category is removed', () => {
-    const userAction = getUserAction('category', Actions.delete, {
+    const userAction = getUserAction('category', UserActionActions.delete, {
       payload: { category: null },
     });
     const builder = createCategoryUserActionBuilder({
@@ -61,7 +61,7 @@ describe('createCategoryUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('category-delete-user-action')).toBeInTheDocument();
+    expect(screen.getByTestId('category-delete-category-user-action-title')).toBeInTheDocument();
     expect(screen.getByText('removed the category')).toBeInTheDocument();
   });
 });

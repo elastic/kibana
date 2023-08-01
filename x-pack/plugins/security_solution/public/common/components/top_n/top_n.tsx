@@ -57,8 +57,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   showLegend?: boolean;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void;
-  value?: string[] | string | null;
+  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
 }
 
 const TopNComponent: React.FC<Props> = ({

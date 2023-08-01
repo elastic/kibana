@@ -14,114 +14,86 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { ChildDragDropProvider, DragContext } from '@kbn/dom-drag-drop';
+import React, { useCallback, useMemo, useRef } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { ChildDragDropProvider, useDragDropContext } from '@kbn/dom-drag-drop';
 import {
-  FieldList,
-  FieldListFilters,
-  FieldListGrouped,
-  FieldListGroupedProps,
-  FieldsGroupNames,
-  useExistingFieldsFetcher,
-  useGroupedFields,
-  useQuerySubscriber,
-} from '@kbn/unified-field-list-plugin/public';
-import { FieldListItem, FieldListItemProps } from './field_list_item';
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerProps,
+  type UnifiedFieldListSidebarContainerApi,
+  type AddFieldFilterHandler,
+} from '@kbn/unified-field-list';
+import { type CoreStart } from '@kbn/core-lifecycle-browser';
+import { PLUGIN_ID } from '../common';
+import { type AppPluginStartDependencies } from './types';
+
+const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
+  return {
+    originatingApp: PLUGIN_ID,
+    localStorageKeyPrefix: 'examples',
+    timeRangeUpdatesType: 'timefilter',
+    disablePopularFields: true,
+  };
+};
 
 export interface FieldListSidebarProps {
   dataView: DataView;
   selectedFieldNames: string[];
-  services: FieldListItemProps['services'];
-  onAddFieldToWorkplace: FieldListItemProps['onAddFieldToWorkspace'];
-  onRemoveFieldFromWorkspace: FieldListItemProps['onRemoveFieldFromWorkspace'];
+  services: AppPluginStartDependencies & {
+    core: CoreStart;
+  };
+  onAddFieldToWorkspace: UnifiedFieldListSidebarContainerProps['onAddFieldToWorkspace'];
+  onRemoveFieldFromWorkspace: UnifiedFieldListSidebarContainerProps['onRemoveFieldFromWorkspace'];
 }
 
 export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
   dataView,
   selectedFieldNames,
   services,
-  onAddFieldToWorkplace,
+  onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
 }) => {
-  const dragDropContext = useContext(DragContext);
-  const allFields = dataView.fields;
-  const activeDataViews = useMemo(() => [dataView], [dataView]);
-  const querySubscriberResult = useQuerySubscriber({
-    data: services.data,
-    listenToSearchSessionUpdates: false, // this example app does not use search sessions
-  });
+  const dragDropContext = useDragDropContext();
+  const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
+  const filterManager = services.data?.query?.filterManager;
 
-  const onSelectedFieldFilter = useCallback(
-    (field: DataViewField) => {
-      return selectedFieldNames.includes(field.name);
-    },
-    [selectedFieldNames]
+  const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
+    () =>
+      filterManager && dataView
+        ? (clickedField, values, operation) => {
+            const newFilters = generateFilters(
+              filterManager,
+              clickedField,
+              values,
+              operation,
+              dataView
+            );
+            filterManager.addFilters(newFilters);
+          }
+        : undefined,
+    [dataView, filterManager]
   );
 
-  const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
-    dataViews: activeDataViews, // if you need field existence info for more than one data view, you can specify it here
-    query: querySubscriberResult.query,
-    filters: querySubscriberResult.filters,
-    fromDate: querySubscriberResult.fromDate,
-    toDate: querySubscriberResult.toDate,
-    services,
-  });
-
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
-    dataViewId: dataView.id ?? null,
-    allFields,
-    services,
-    isAffectedByGlobalFilter: Boolean(querySubscriberResult.filters?.length),
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-  });
-
-  const onRefreshFields = useCallback(() => {
-    refetchFieldsExistenceInfo();
-  }, [refetchFieldsExistenceInfo]);
-
-  const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
-    (params) => (
-      <FieldListItem
-        dataView={dataView}
-        services={services}
-        isSelected={
-          params.groupName === FieldsGroupNames.SelectedFields ||
-          selectedFieldNames.includes(params.field.name)
-        }
-        onRefreshFields={onRefreshFields}
-        onAddFieldToWorkspace={onAddFieldToWorkplace}
-        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-        {...params}
-      />
-    ),
-    [
-      dataView,
-      services,
-      onRefreshFields,
-      selectedFieldNames,
-      onAddFieldToWorkplace,
-      onRemoveFieldFromWorkspace,
-    ]
-  );
+  const onFieldEdited = useCallback(async () => {
+    unifiedFieldListContainerRef.current?.refetchFieldsExistenceInfo();
+  }, [unifiedFieldListContainerRef]);
 
   return (
-    <ChildDragDropProvider {...dragDropContext}>
-      <FieldList
-        isProcessing={isProcessing}
-        prepend={<FieldListFilters {...fieldListFiltersProps} />}
-      >
-        <FieldListGrouped
-          {...fieldListGroupedProps}
-          renderFieldItem={renderFieldItem}
-          localStorageKeyPrefix="examples"
-        />
-      </FieldList>
+    <ChildDragDropProvider value={dragDropContext}>
+      <UnifiedFieldListSidebarContainer
+        ref={unifiedFieldListContainerRef}
+        variant="responsive"
+        getCreationOptions={getCreationOptions}
+        services={services}
+        dataView={dataView}
+        allFields={dataView.fields}
+        workspaceSelectedFieldNames={selectedFieldNames}
+        onAddFieldToWorkspace={onAddFieldToWorkspace}
+        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+        onAddFilter={onAddFilter}
+        onFieldEdited={onFieldEdited}
+      />
     </ChildDragDropProvider>
   );
 };
-
-function onSupportedFieldFilter(field: DataViewField): boolean {
-  return field.name !== '_source';
-}

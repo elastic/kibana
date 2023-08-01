@@ -37,10 +37,10 @@ export const registerActionFileUploadRoute = (
 
   const logger = endpointContext.logFactory.get('uploadAction');
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: UPLOAD_ROUTE,
-      validate: UploadActionRequestSchema,
       options: {
         authRequired: true,
         tags: ['access:securitySolution'],
@@ -50,13 +50,20 @@ export const registerActionFileUploadRoute = (
           maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
         },
       },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileUploadHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: UploadActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileUploadHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileUploadHandler = (

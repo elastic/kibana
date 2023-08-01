@@ -18,8 +18,7 @@ import { cx } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
@@ -82,7 +81,7 @@ export const Vulnerabilities = () => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route
         exact
         path={findingsNavigation.resource_vulnerabilities.path}
@@ -97,7 +96,7 @@ export const Vulnerabilities = () => {
         path={findingsNavigation.vulnerabilities.path}
         render={() => <VulnerabilitiesContent dataView={data} />}
       />
-    </Switch>
+    </Routes>
   );
 };
 

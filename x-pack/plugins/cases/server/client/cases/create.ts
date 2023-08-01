@@ -9,25 +9,11 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CasePostRequest } from '../../../common/api';
-import {
-  CaseRt,
-  ActionTypes,
-  CasePostRequestRt,
-  CaseSeverity,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
-import {
-  MAX_ASSIGNEES_PER_CASE,
-  MAX_CATEGORY_LENGTH,
-  MAX_TITLE_LENGTH,
-} from '../../../common/constants';
-import {
-  isInvalidTag,
-  areTotalAssigneesInvalid,
-  isCategoryFieldTooLong,
-  isCategoryFieldInvalidString,
-} from '../../../common/utils/validators';
+import type { Case } from '../../../common/types/domain';
+import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../../common/api';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -35,18 +21,8 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
-
-function validateCategory(category?: string | null) {
-  if (isCategoryFieldTooLong(category)) {
-    throw Boom.badRequest(
-      `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}`
-    );
-  }
-
-  if (isCategoryFieldInvalidString(category)) {
-    throw Boom.badRequest('The category cannot be an empty string.');
-  }
-}
+import type { CasePostRequest } from '../../../common/types/api';
+import { CasePostRequestRt } from '../../../common/types/api';
 
 /**
  * Creates a new case.
@@ -63,18 +39,6 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
 
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
-
-    if (query.title.length > MAX_TITLE_LENGTH) {
-      throw Boom.badRequest(
-        `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
-      );
-    }
-
-    if (query.tags.some(isInvalidTag)) {
-      throw Boom.badRequest('A tag must contain at least one non-space character');
-    }
-
-    validateCategory(query.category);
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -115,7 +79,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     });
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.create_case,
+      type: UserActionTypes.create_case,
       caseId: newCase.id,
       user,
       payload: {

@@ -47,23 +47,23 @@ export const TabbedTableListView = ({
     [activeTabId, tabs]
   );
 
+  const onFetchSuccess = useCallback(() => {
+    setHasInitialFetchReturned(true);
+  }, []);
+
   const [tableList, setTableList] = useState<React.ReactNode>(null);
 
   useEffect(() => {
     async function loadTableList() {
       const newTableList = await getActiveTab().getTableList({
-        onFetchSuccess: () => {
-          if (!hasInitialFetchReturned) {
-            setHasInitialFetchReturned(true);
-          }
-        },
+        onFetchSuccess,
         setPageDataTestSubject,
       });
       setTableList(newTableList);
     }
 
     loadTableList();
-  }, [hasInitialFetchReturned, activeTabId, tabs, getActiveTab]);
+  }, [activeTabId, tabs, getActiveTab, onFetchSuccess]);
 
   return (
     <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>

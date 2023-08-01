@@ -36,7 +36,12 @@ export const EsreDocsSection: React.FC = () => (
                 defaultMessage="To learn more about how to get started with ESRE, and test these tools with concrete examples, visit the {esreDocumentation}."
                 values={{
                   esreDocumentation: (
-                    <EuiLink target="_blank" href={docLinks.esre} external>
+                    <EuiLink
+                      data-telemetry-id="entSearch-esre-documentation-esreHomeLink"
+                      target="_blank"
+                      href={docLinks.esre}
+                      external
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.esre.esreDocsSection.description.esreLinkText',
                         {
@@ -72,10 +77,15 @@ export const EsreDocsSection: React.FC = () => (
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.esre.esreDocsSection.learn.description"
-                      defaultMessage="These are complex topics, so we've curated some {learningTopics} to help you get started."
+                      defaultMessage="These are complex subjects, so we've curated some {learningTopics} to help you get started."
                       values={{
                         learningTopics: (
-                          <EuiLink target="_blank" href={docLinks.esreLearn} external={false}>
+                          <EuiLink
+                            data-telemetry-id="entSearch-esre-documentation-esreLearnLink"
+                            target="_blank"
+                            href={docLinks.esreLearn}
+                            external={false}
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.esre.esreDocsSection.learn.learningTopicsLinkText',
                               {
@@ -113,7 +123,12 @@ export const EsreDocsSection: React.FC = () => (
                       defaultMessage="Learn what ESRE is (and isn't) from these {frequentlyAskedQuestions}."
                       values={{
                         frequentlyAskedQuestions: (
-                          <EuiLink target="_blank" href={docLinks.esreFaq} external={false}>
+                          <EuiLink
+                            data-telemetry-id="entSearch-esre-documentation-esreFaqLink"
+                            target="_blank"
+                            href={docLinks.esreFaq}
+                            external={false}
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.esre.esreDocsSection.learn.frequentlyAskedQuestionsLinkText',
                               {
@@ -151,7 +166,12 @@ export const EsreDocsSection: React.FC = () => (
                       defaultMessage="Need help? Check out the {discussForum}!"
                       values={{
                         discussForum: (
-                          <EuiLink target="_blank" href={docLinks.esreHelp} external={false}>
+                          <EuiLink
+                            data-telemetry-id="entSearch-esre-documentation-esreHelpLink"
+                            target="_blank"
+                            href={docLinks.esreHelp}
+                            external={false}
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.esre.esreDocsSection.learn.discussForumLinkText',
                               {

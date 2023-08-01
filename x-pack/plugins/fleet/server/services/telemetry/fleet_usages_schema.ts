@@ -22,6 +22,42 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Number of agents enrolled that use this version',
         },
       },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in a healthy state',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
     },
   },
 };
@@ -209,6 +245,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
           },
         },
       },
+    },
+  },
+  agent_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from agent error logs' },
+    },
+  },
+  fleet_server_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from fleet server error logs' },
     },
   },
 };

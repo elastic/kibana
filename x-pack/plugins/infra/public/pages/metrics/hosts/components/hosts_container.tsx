@@ -48,7 +48,7 @@ export const HostContainer = () => {
   ) : (
     <UnifiedSearchProvider>
       <UnifiedSearchBar />
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <HostsContent />
     </UnifiedSearchProvider>
   );

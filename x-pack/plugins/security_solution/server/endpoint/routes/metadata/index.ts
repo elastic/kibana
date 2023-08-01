@@ -50,42 +50,61 @@ export function registerEndpointRoutes(
 ) {
   const logger = getLogger(endpointAppContext);
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: HOST_METADATA_LIST_ROUTE,
-      validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      logger,
-      getMetadataListRequestHandler(endpointAppContext, logger)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: GetMetadataListRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        logger,
+        getMetadataListRequestHandler(endpointAppContext, logger)
+      )
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: HOST_METADATA_GET_ROUTE,
-      validate: GetMetadataRequestSchema,
       options: { authRequired: true },
-    },
-    withEndpointAuthz(
-      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
-      logger,
-      getMetadataRequestHandler(endpointAppContext, logger)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: GetMetadataRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canReadSecuritySolution', 'canAccessFleet'] },
+        logger,
+        getMetadataRequestHandler(endpointAppContext, logger)
+      )
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: METADATA_TRANSFORMS_STATUS_ROUTE,
-      validate: false,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      logger,
-      getMetadataTransformStatsHandler(logger)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        logger,
+        getMetadataTransformStatsHandler(logger)
+      )
+    );
 }

@@ -12,7 +12,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 export interface UseFetchHistoricalSummaryResponse {
-  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse | undefined;
+  data: FetchHistoricalSummaryResponse | undefined;
   isInitialLoading: boolean;
   isRefetching: boolean;
   isLoading: boolean;
@@ -55,7 +55,7 @@ export function useFetchHistoricalSummary({
   });
 
   return {
-    sloHistoricalSummaryResponse: data,
+    data,
     isLoading,
     isRefetching,
     isInitialLoading,

@@ -28,7 +28,6 @@ export function getRoutePaths() {
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
-    HasSetupDataCollection: `${BASE_ROUTE_PATH}/setup/has_data`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
   };
 }

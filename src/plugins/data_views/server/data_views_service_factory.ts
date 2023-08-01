@@ -18,7 +18,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
-import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
 
 interface DataViewsServiceFactoryDeps {
   logger: Logger;
@@ -44,7 +44,7 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
 
     return new DataViewsService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-      savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+      savedObjectsClient: new SavedObjectsClientWrapper(savedObjectsClient),
       apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
       fieldFormats: formats,
       onError: (error) => {

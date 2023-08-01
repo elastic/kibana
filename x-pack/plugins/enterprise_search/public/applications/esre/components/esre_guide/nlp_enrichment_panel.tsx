@@ -38,7 +38,12 @@ const steps: EuiContainedStepProps[] = [
     children: (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiLink href={docLinks.supportedNlpModels} target="_blank" external>
+          <EuiLink
+            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-supportedNlpModelsLink"
+            href={docLinks.supportedNlpModels}
+            target="_blank"
+            external
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.supportedNlpModelsLinkText',
               { defaultMessage: 'Supported NLP models' }
@@ -46,7 +51,12 @@ const steps: EuiContainedStepProps[] = [
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink href={docLinks.trainedModels} target="_blank" external>
+          <EuiLink
+            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-trainedModelsLink"
+            href={docLinks.trainedModels}
+            target="_blank"
+            external
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.guideToTrainedModelsLinkText',
               { defaultMessage: 'Guide to trained models' }
@@ -54,7 +64,11 @@ const steps: EuiContainedStepProps[] = [
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLinkTo to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)} shouldNotCreateHref>
+          <EuiLinkTo
+            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-trainedModelsButton"
+            to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)}
+            shouldNotCreateHref
+          >
             <EuiButton iconType="eye">
               {i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.buttonLabel', {
                 defaultMessage: 'View trained models',
@@ -72,6 +86,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLinkTo
+        data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-createIndexButton"
         to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
         shouldNotCreateHref
       >
@@ -128,7 +143,12 @@ export const NlpEnrichmentPanel: React.FC = () => (
               defaultMessage="Use Natural Language Processing (NLP) tools like sentiment analysis, summarization, or Named Entity Recognition to enhance the relevance of your search results. NLP uses several {supportedMlModels} you can load to intelligently analyze and enrich documents with additional fields."
               values={{
                 supportedMlModels: (
-                  <EuiLink target="_blank" href={docLinks.supportedNlpModels} external={false}>
+                  <EuiLink
+                    data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-supportedMlModelsLink"
+                    target="_blank"
+                    href={docLinks.supportedNlpModels}
+                    external={false}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description.supportedMlModelsLinkText',
                       {

@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  EuiTableSelectionType,
+  type EuiBasicTable,
+} from '@elastic/eui';
+import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
-import createContainer from 'constate';
 import { hostLensFormulas } from '../../../../common/visualizations';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
-import {
+import type {
   InfraAssetMetadataType,
   InfraAssetMetricsItem,
   InfraAssetMetricType,
@@ -23,8 +28,11 @@ import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
-import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
+import { TABLE_COLUMN_LABEL } from '../translations';
+import { TOOLTIP } from '../../../../common/visualizations/lens/dashboards/host/translations';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -118,16 +126,46 @@ const sortTableData =
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
-    services: { telemetry },
+    services: {
+      telemetry,
+      data: {
+        query: { filterManager: filterManagerService },
+      },
+    },
   } = useKibanaContextForPlugin();
+  const { dataView } = useMetricsDataViewContext();
+
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
-  const popoverContainerRef = React.createRef<HTMLDivElement>();
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
+
+  const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
+    setSelectedItems(newSelectedItems);
+  };
+
+  const filterSelectedHosts = useCallback(() => {
+    if (!selectedItems.length) {
+      return [];
+    }
+    const selectedHostNames = selectedItems.map(({ name }) => name);
+    const newFilter = buildCombinedHostsFilter({
+      field: 'host.name',
+      values: selectedHostNames,
+      dataView,
+    });
+
+    filterManagerService.addFilters(newFilter);
+    setSelectedItems([]);
+    tableRef.current?.setSelection([]);
+  }, [dataView, filterManagerService, selectedItems]);
+
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
       telemetry.reportHostEntryClicked({
@@ -217,7 +255,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={TOOLTIP.cpuUsage}
-            formula={hostLensFormulas.cpuUsage.formula.formula}
+            formula={hostLensFormulas.cpuUsage.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -232,7 +270,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={TOOLTIP.normalizedLoad1m}
-            formula={hostLensFormulas.normalizedLoad1m.formula.formula}
+            formula={hostLensFormulas.normalizedLoad1m.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -247,7 +285,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={TOOLTIP.memoryUsage}
-            formula={hostLensFormulas.memoryUsage.formula.formula}
+            formula={hostLensFormulas.memoryUsage.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -262,7 +300,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={TOOLTIP.memoryFree}
-            formula={hostLensFormulas.memoryFree.formula.formula}
+            formula={hostLensFormulas.memoryFree.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -277,7 +315,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskSpaceUsage.formula.formula}
+            formula={hostLensFormulas.diskSpaceUsage.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -292,7 +330,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={TOOLTIP.rx}
-            formula={hostLensFormulas.rx.formula.formula}
+            formula={hostLensFormulas.rx.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -308,7 +346,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={TOOLTIP.tx}
-            formula={hostLensFormulas.tx.formula.formula}
+            formula={hostLensFormulas.tx.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -329,6 +367,11 @@ export const useHostsTable = () => {
     ]
   );
 
+  const selection: EuiTableSelectionType<HostNodeRow> = {
+    onSelectionChange,
+    selectable: (item: HostNodeRow) => !!item.name,
+  };
+
   return {
     columns,
     clickedItem,
@@ -339,8 +382,12 @@ export const useHostsTable = () => {
     onTableChange,
     pagination,
     sorting,
+    selection,
+    selectedItemsCount: selectedItems.length,
+    filterSelectedHosts,
     refs: {
       popoverContainerRef,
+      tableRef,
     },
   };
 };

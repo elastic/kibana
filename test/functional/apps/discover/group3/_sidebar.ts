@@ -52,8 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159167
-    describe.skip('field filtering', function () {
+    describe('field filtering', function () {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
@@ -377,6 +376,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.discover.selectTextBaseLang('SQL');
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '50 selected fields. 51 available fields.'

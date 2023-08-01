@@ -11,9 +11,9 @@ import type {
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { syntheticsServiceAPIKeySavedObject } from '../legacy_uptime/lib/saved_objects/service_api_key';
+import { SyntheticsServerSetup } from '../types';
+import { syntheticsServiceAPIKeySavedObject } from '../saved_objects/service_api_key';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
@@ -37,7 +37,7 @@ export const serviceApiKeyPrivileges = {
 export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
 }): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
@@ -81,7 +81,7 @@ export const generateAPIKey = async ({
   request,
   projectAPIKey = false,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   request: KibanaRequest;
   projectAPIKey?: boolean;
 }) => {
@@ -140,7 +140,7 @@ export const generateAndSaveServiceAPIKey = async ({
   request,
   authSavedObjectsClient,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   request: KibanaRequest;
   // authSavedObject is needed for write operations
   authSavedObjectsClient?: SavedObjectsClientContract;
@@ -158,7 +158,7 @@ export const generateAndSaveServiceAPIKey = async ({
   }
 };
 
-export const getSyntheticsEnablement = async ({ server }: { server: UptimeServerSetup }) => {
+export const getSyntheticsEnablement = async ({ server }: { server: SyntheticsServerSetup }) => {
   const { security, config } = server;
 
   const [apiKey, hasPrivileges, areApiKeysEnabled] = await Promise.all([
@@ -188,7 +188,7 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
   };
 };
 
-const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
+const hasEnablePermissions = async ({ uptimeEsClient }: SyntheticsServerSetup) => {
   const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
     body: {
       cluster: [

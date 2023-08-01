@@ -14,8 +14,8 @@ import { createContextSearchSourceStub } from './_stubs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataTableRecord } from '../../../types';
-import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();

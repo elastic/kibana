@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
+import type { CertificatesResults } from '../../server/queries/get_certs';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
-import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
@@ -47,7 +47,7 @@ export const getCertsRequestBody = ({
 
   const searchRequest = createEsQuery({
     body: {
-      from: pageIndex * size,
+      from: (pageIndex ?? 0) * size,
       size,
       sort: asMutableArray([
         {
@@ -131,6 +131,8 @@ export const getCertsRequestBody = ({
         },
       },
       _source: [
+        '@timestamp',
+        'config_id',
         'monitor.id',
         'monitor.name',
         'monitor.type',
@@ -201,7 +203,9 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_before: notBefore,
       common_name: commonName,
       monitorName: ping?.monitor?.name,
+      configId: ping.config_id!,
       monitorUrl: ping?.url?.full,
+      '@timestamp': ping['@timestamp'],
       monitorType: ping?.monitor?.type,
       locationName: ping?.observer?.geo?.name,
     };

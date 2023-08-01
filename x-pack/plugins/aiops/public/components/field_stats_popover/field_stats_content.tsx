@@ -13,7 +13,7 @@ import {
   FieldStatsState,
   FieldTopValuesBucketParams,
   FieldTopValuesBucket,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list/src/components/field_stats';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';

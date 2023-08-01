@@ -190,6 +190,16 @@ describe('mappingFromFieldMap', () => {
         '@timestamp': {
           type: 'date',
         },
+        event: {
+          properties: {
+            action: {
+              type: 'keyword',
+            },
+            kind: {
+              type: 'keyword',
+            },
+          },
+        },
         kibana: {
           properties: {
             alert: {
@@ -292,6 +302,9 @@ describe('mappingFromFieldMap', () => {
                 workflow_status: {
                   type: 'keyword',
                 },
+                workflow_tags: {
+                  type: 'keyword',
+                },
               },
             },
             space_ids: {
@@ -301,6 +314,9 @@ describe('mappingFromFieldMap', () => {
               type: 'version',
             },
           },
+        },
+        tags: {
+          type: 'keyword',
         },
       },
     });
@@ -352,8 +368,6 @@ describe('mappingFromFieldMap', () => {
           },
         },
         ecs: { properties: { version: { type: 'keyword' } } },
-        event: { properties: { action: { type: 'keyword' }, kind: { type: 'keyword' } } },
-        tags: { type: 'keyword' },
       },
     });
   });

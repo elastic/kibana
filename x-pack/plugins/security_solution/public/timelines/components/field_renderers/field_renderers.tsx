@@ -30,6 +30,7 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
@@ -199,6 +200,7 @@ interface DefaultFieldRendererProps {
   moreMaxHeight?: string;
   render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
+  sourcererScopeId?: SourcererScopeName;
 }
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
@@ -209,6 +211,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
   render,
   rowItems,
+  sourcererScopeId,
 }) => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
@@ -250,13 +253,12 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
             attrName={attrName}
-            fieldType="keyword"
             idPrefix={idPrefix}
-            isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
             rowItems={rowItems}
+            sourcererScopeId={sourcererScopeId}
           />
         </EuiFlexItem>
       </DraggableContainerFlexGroup>
@@ -274,36 +276,33 @@ DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 interface DefaultFieldRendererOverflowProps {
   attrName: string;
-  fieldType: string;
   rowItems: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
   render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
+  sourcererScopeId?: SourcererScopeName;
 }
 
 interface MoreContainerProps {
   fieldName: string;
-  fieldType: string;
   values: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
+  sourcererScopeId?: SourcererScopeName;
 }
 
 export const MoreContainer = React.memo<MoreContainerProps>(
   ({
     fieldName,
-    fieldType,
     idPrefix,
-    isAggregatable,
     moreMaxHeight,
     overflowIndexStart,
     render,
     values,
+    sourcererScopeId,
   }) => {
     const { timelineId } = useContext(TimelineContext);
 
@@ -321,12 +320,11 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   visibleCellActions={5}
                   showActionTooltips
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
-                  field={{
-                    name: fieldName,
+                  data={{
                     value,
-                    type: fieldType,
-                    aggregatable: isAggregatable,
+                    field: fieldName,
                   }}
+                  sourcererScopeId={sourcererScopeId ?? SourcererScopeName.default}
                   metadata={{
                     scopeId: timelineId ?? undefined,
                   }}
@@ -339,16 +337,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [
-        fieldName,
-        fieldType,
-        idPrefix,
-        overflowIndexStart,
-        render,
-        values,
-        timelineId,
-        isAggregatable,
-      ]
+      [values, overflowIndexStart, idPrefix, fieldName, timelineId, render, sourcererScopeId]
     );
 
     return (
@@ -377,8 +366,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     overflowIndexStart = 5,
     render,
     rowItems,
-    fieldType,
-    isAggregatable,
+    sourcererScopeId,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
@@ -420,8 +408,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-              fieldType={fieldType}
-              isAggregatable={isAggregatable}
+              sourcererScopeId={sourcererScopeId}
             />
           </EuiPopover>
         )}

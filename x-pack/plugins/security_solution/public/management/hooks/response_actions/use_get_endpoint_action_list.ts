@@ -38,6 +38,7 @@ export const useGetEndpointActionList = (
     keepPreviousData: true,
     queryFn: async () => {
       return http.get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
+        version: '2023-10-31',
         query: {
           agentIds: query.agentIds,
           commands: query.commands,

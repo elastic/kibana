@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
 import { useLinkExists } from '../../../common/links/links';
@@ -30,14 +29,14 @@ export const HostIsolationExceptionsContainer = memo(() => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         exact
         component={HostIsolationExceptionsList}
       />
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

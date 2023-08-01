@@ -35,14 +35,8 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { VIEW_MODE } from '../../common/constants';
-import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, EsHitRecord } from '../types';
-import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { DiscoverServices } from '../build_services';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -50,7 +44,14 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../common';
+  buildDataTableRecord,
+} from '@kbn/discover-utils';
+import { VIEW_MODE } from '../../common/constants';
+import { getSortForEmbeddable, SortPair } from '../utils/sorting';
+import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
+import { DiscoverServices } from '../build_services';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
@@ -399,6 +400,7 @@ export class SavedSearchEmbeddable
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
       },
+      cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -565,11 +567,14 @@ export class SavedSearchEmbeddable
       query,
     };
     if (searchProps.services) {
+      const { getTriggerCompatibleActions } = searchProps.services.uiActions;
       ReactDOM.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
-              <SavedSearchEmbeddableComponent {...props} />
+              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+                <SavedSearchEmbeddableComponent {...props} />
+              </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>
         </I18nProvider>,

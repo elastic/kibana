@@ -32,7 +32,12 @@ const steps: EuiContainedStepProps[] = [
       defaultMessage: 'Discover how to use linear combination in _search queries',
     }),
     children: (
-      <EuiLink href={docLinks.knnSearchCombine} target="_blank" external>
+      <EuiLink
+        data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationPanel-knnSearchCombineLink"
+        href={docLinks.knnSearchCombine}
+        target="_blank"
+        external
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.esre.linearCombinationPanel.step1.knnSearchCombineLinkText',
           {
@@ -48,7 +53,11 @@ const steps: EuiContainedStepProps[] = [
       defaultMessage: 'Try it today in Console',
     }),
     children: (
-      <EuiLinkTo to={generatePath(DEV_TOOLS_CONSOLE_PATH)} shouldNotCreateHref>
+      <EuiLinkTo
+        data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationPanel-devToolsConsoleButton"
+        to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
+        shouldNotCreateHref
+      >
         <EuiButton>
           {i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step2.buttonLabel', {
             defaultMessage: 'Open Console',

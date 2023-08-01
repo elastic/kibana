@@ -13,6 +13,7 @@ import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
@@ -61,9 +62,13 @@ describe('when calling the Action state route handler', () => {
       );
 
       const mockRequest = httpServerMock.createKibanaRequest();
-      const [, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(routePrefix)
-      )!;
+
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        routePrefix,
+        '2023-10-31'
+      );
 
       await routeHandler(ctx, mockRequest, mockResponse);
     };

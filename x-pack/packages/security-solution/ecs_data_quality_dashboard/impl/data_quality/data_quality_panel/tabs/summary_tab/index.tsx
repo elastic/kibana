@@ -11,6 +11,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -49,7 +50,8 @@ interface Props {
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
   sizeInBytes: number | undefined;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 const SummaryTabComponent: React.FC<Props> = ({
@@ -69,6 +71,7 @@ const SummaryTabComponent: React.FC<Props> = ({
   setSelectedTabId,
   sizeInBytes,
   theme,
+  baseTheme,
 }) => (
   <>
     <CalloutSummary
@@ -93,6 +96,7 @@ const SummaryTabComponent: React.FC<Props> = ({
       partitionedFieldMetadata={partitionedFieldMetadata}
       setSelectedTabId={setSelectedTabId}
       theme={theme}
+      baseTheme={baseTheme}
     />
   </>
 );

@@ -1001,6 +1001,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Update_connector_request_body_properties"><code>Update_connector_request_body_properties</code> - Update connector request body properties</a></li>
     <li><a href="#action_response_properties"><code>action_response_properties</code> - Action response properties</a></li>
     <li><a href="#config_properties_cases_webhook"><code>config_properties_cases_webhook</code> - Connector request properties for Webhook - Case Management connector</a></li>
+    <li><a href="#config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a></li>
     <li><a href="#config_properties_index"><code>config_properties_index</code> - Connector request properties for an index connector</a></li>
     <li><a href="#config_properties_jira"><code>config_properties_jira</code> - Connector request properties for a Jira connector</a></li>
     <li><a href="#config_properties_opsgenie"><code>config_properties_opsgenie</code> - Connector request properties for an Opsgenie connector</a></li>
@@ -1030,6 +1031,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_types"><code>connector_types</code> - Connector types</a></li>
     <li><a href="#create_connector_request_cases_webhook"><code>create_connector_request_cases_webhook</code> - Create Webhook - Case Managment connector request</a></li>
     <li><a href="#create_connector_request_email"><code>create_connector_request_email</code> - Create email connector request</a></li>
+    <li><a href="#create_connector_request_genai"><code>create_connector_request_genai</code> - Create generative AI connector request</a></li>
     <li><a href="#create_connector_request_index"><code>create_connector_request_index</code> - Create index connector request</a></li>
     <li><a href="#create_connector_request_jira"><code>create_connector_request_jira</code> - Create Jira connector request</a></li>
     <li><a href="#create_connector_request_opsgenie"><code>create_connector_request_opsgenie</code> - Create Opsgenie connector request</a></li>
@@ -1082,6 +1084,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#run_connector_subaction_pushtoservice_subActionParams_incident_malware_url"><code>run_connector_subaction_pushtoservice_subActionParams_incident_malware_url</code> - </a></li>
     <li><a href="#run_connector_subaction_pushtoservice_subActionParams_incident_source_ip"><code>run_connector_subaction_pushtoservice_subActionParams_incident_source_ip</code> - </a></li>
     <li><a href="#secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a></li>
+    <li><a href="#secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a></li>
     <li><a href="#secrets_properties_jira"><code>secrets_properties_jira</code> - Connector secrets properties for a Jira connector</a></li>
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
     <li><a href="#secrets_properties_resilient"><code>secrets_properties_resilient</code> - Connector secrets properties for IBM Resilient connector</a></li>
@@ -1368,6 +1371,14 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">patch</div><div class="param-enum">post</div><div class="param-enum">put</div>
 <div class="param">updateIncidentUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The REST API URL to update the case by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the <code>xpack.actions.allowedHosts</code> setting, add the hostname to the allowed hosts. </div>
 <div class="param">viewIncidentUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The URL to view the case in the external system. You can use variables to add the external system ID or external system title to the URL. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.gen-ai</code>.</div>
+    <div class="field-items">
+      <div class="param">apiProvider (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API provider. </div>
+<div class="param">apiUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API endpoint. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1747,6 +1758,18 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">.email</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.email</code>. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_connector_request_genai"><code>create_connector_request_genai</code> - Create generative AI connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.</div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_genai">config_properties_genai</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.gen-ai</div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_genai">secrets_properties_genai</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2284,6 +2307,13 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The password for HTTP basic authentication. If <code>hasAuth</code> is set to <code>true</code>, this property is required. </div>
 <div class="param">user (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The username for HTTP basic authentication. If <code>hasAuth</code> is set to <code>true</code>, this property is required. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.gen-ai</code>.</div>
+    <div class="field-items">
+      <div class="param">apiKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The OpenAI API key. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

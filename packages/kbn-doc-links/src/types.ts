@@ -12,6 +12,7 @@
 export interface DocLinksMeta {
   version: string;
   elasticWebsiteUrl: string;
+  elasticGithubUrl: string;
   docsWebsiteUrl: string;
 }
 
@@ -120,7 +121,9 @@ export interface DocLinks {
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
+    readonly connectorsDropbox: string;
     readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsGoogleDrive: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
@@ -130,6 +133,7 @@ export interface DocLinks {
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
+    readonly connectorsServiceNow: string;
     readonly connectorsSharepoint: string;
     readonly connectorsSharepointOnline: string;
     readonly connectorsWorkplaceSearch: string;
@@ -156,12 +160,15 @@ export interface DocLinks {
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
     readonly searchApplicationsTemplates: string;
+    readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
+    readonly searchApplicationsSearch: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
     readonly trainedModels: string;
+    readonly textEmbedding: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
@@ -279,6 +286,9 @@ export interface DocLinks {
   };
   readonly addData: string;
   readonly kibana: {
+    readonly askElastic: string;
+    readonly createGithubIssue: string;
+    readonly feedback: string;
     readonly guide: string;
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
@@ -392,6 +402,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    sloBurnRateRule: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
@@ -478,6 +489,8 @@ export interface DocLinks {
     datastreamsILM: string;
     datastreamsNamingScheme: string;
     datastreamsManualRollover: string;
+    datastreamsTSDS: string;
+    datastreamsTSDSMetrics: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;
@@ -495,6 +508,8 @@ export interface DocLinks {
   };
   readonly clients: {
     readonly guide: string;
+    readonly goConnecting: string;
+    readonly goGettingStarted: string;
     readonly goIndex: string;
     readonly goOverview: string;
     readonly javaBasicAuthentication: string;
@@ -511,11 +526,14 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly phpGuide: string;
+    readonly phpConfiguration: string;
     readonly phpConnecting: string;
+    readonly phpGuide: string;
     readonly phpInstallation: string;
     readonly phpOverview: string;
     readonly pythonAuthentication: string;
+    readonly pythonConfig: string;
+    readonly pythonConnecting: string;
     readonly pythonGuide: string;
     readonly pythonOverview: string;
     readonly rubyAuthentication: string;

@@ -17,7 +17,7 @@ import {
 import React, { useMemo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
@@ -27,7 +27,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
@@ -94,7 +94,7 @@ export function AlertActions({
           {
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             rule: getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
           },
         ]
@@ -207,14 +207,7 @@ export function AlertActions({
     <>
       {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
       {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
-        <EuiFlexItem>
-          <EuiButtonIcon
-            iconType=""
-            disabled
-            data-test-subj="o11yAlertActionsButtonThresholdRuleDisabled"
-            size="s"
-          />
-        </EuiFlexItem>
+        <EuiFlexItem style={{ width: 32 }} />
       ) : (
         <EuiFlexItem>
           <EuiToolTip

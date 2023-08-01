@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { createRule } from '../api';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';

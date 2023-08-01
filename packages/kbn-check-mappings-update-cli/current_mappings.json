@@ -616,6 +616,30 @@
       }
     }
   },
+  "tag": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -871,30 +895,6 @@
       "events": {
         "type": "date_range",
         "format": "epoch_millis||strict_date_optional_time"
-      }
-    }
-  },
-  "tag": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
       }
     }
   },
@@ -1630,6 +1630,111 @@
       },
       "allow_edit": {
         "enabled": false
+      },
+      "version": {
+        "type": "keyword"
+      },
+      "key": {
+        "type": "keyword"
+      },
+      "compression": {
+        "type": "keyword"
+      },
+      "compression_level": {
+        "type": "integer"
+      },
+      "client_id": {
+        "type": "keyword"
+      },
+      "auth_type": {
+        "type": "keyword"
+      },
+      "username": {
+        "type": "keyword"
+      },
+      "password": {
+        "type": "text",
+        "index": false
+      },
+      "sasl": {
+        "dynamic": false,
+        "properties": {
+          "mechanism": {
+            "type": "text"
+          }
+        }
+      },
+      "partition": {
+        "type": "keyword"
+      },
+      "random": {
+        "dynamic": false,
+        "properties": {
+          "group_events": {
+            "type": "integer"
+          }
+        }
+      },
+      "round_robin": {
+        "dynamic": false,
+        "properties": {
+          "group_events": {
+            "type": "integer"
+          }
+        }
+      },
+      "hash": {
+        "dynamic": false,
+        "properties": {
+          "hash": {
+            "type": "text"
+          },
+          "random": {
+            "type": "boolean"
+          }
+        }
+      },
+      "topics": {
+        "dynamic": false,
+        "properties": {
+          "topic": {
+            "type": "keyword"
+          },
+          "when": {
+            "dynamic": false,
+            "properties": {
+              "type": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "headers": {
+        "dynamic": false,
+        "properties": {
+          "key": {
+            "type": "text"
+          },
+          "value": {
+            "type": "text"
+          }
+        }
+      },
+      "timeout": {
+        "type": "integer"
+      },
+      "broker_timeout": {
+        "type": "integer"
+      },
+      "broker_ack_reliability": {
+        "type": "text"
+      },
+      "broker_buffer_size": {
+        "type": "integer"
       }
     }
   },
@@ -2144,6 +2249,9 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "type": {
+        "type": "keyword"
+      },
       "state": {
         "type": "object",
         "dynamic": false
@@ -2151,6 +2259,14 @@
       "progress": {
         "type": "object",
         "dynamic": false
+      }
+    }
+  },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
       }
     }
   },
@@ -2691,6 +2807,9 @@
               },
               "value": {
                 "type": "text"
+              },
+              "relation": {
+                "type": "keyword"
               }
             }
           },
@@ -2827,14 +2946,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
-  },
   "metrics-explorer-view": {
     "dynamic": false,
     "properties": {}
@@ -2871,18 +2982,6 @@
       }
     }
   },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
   "apm-indices": {
     "dynamic": false,
     "properties": {}
@@ -2914,5 +3013,17 @@
         "type": "text"
       }
     }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
   }
 }

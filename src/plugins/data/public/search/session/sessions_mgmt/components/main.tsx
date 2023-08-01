@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import React from 'react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
@@ -29,7 +30,7 @@ interface Props {
 
 export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
   return (
-    <>
+    <KibanaThemeProvider theme$={tableProps.core.theme.theme$}>
       <EuiPageHeader
         pageTitle={
           <FormattedMessage
@@ -60,6 +61,6 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
 
       <EuiSpacer size="l" />
       <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
-    </>
+    </KibanaThemeProvider>
   );
 }

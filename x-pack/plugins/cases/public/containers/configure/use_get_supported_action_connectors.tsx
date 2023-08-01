@@ -17,12 +17,11 @@ export function useGetSupportedActionConnectors() {
   const { actions } = useApplicationCapabilities();
   return useQuery(
     casesQueriesKeys.connectorsList(),
-    async () => {
+    async ({ signal }) => {
       if (!actions.read) {
         return [];
       }
-      const abortCtrl = new AbortController();
-      return getSupportedActionConnectors({ signal: abortCtrl.signal });
+      return getSupportedActionConnectors({ signal });
     },
     {
       onError: (error: ServerError) => {

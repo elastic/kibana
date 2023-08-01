@@ -7,11 +7,11 @@
 
 import type { Indicator } from '@kbn/slo-schema';
 
-interface SloKeyFilter {
-  name: string;
+interface SloListFilter {
+  kqlQuery: string;
   page: number;
   sortBy: string;
-  indicatorTypes: string[];
+  sortDirection: string;
 }
 
 interface CompositeSloKeyFilter {
@@ -23,7 +23,7 @@ interface CompositeSloKeyFilter {
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
-  list: (filters: SloKeyFilter) => [...sloKeys.lists(), filters] as const,
+  list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,
@@ -33,6 +33,7 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (sloIds: string[]) => [...sloKeys.historicalSummaries(), sloIds] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  burnRates: (sloId: string) => [...sloKeys.all, 'burnRates', sloId] as const,
   preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
 };
 

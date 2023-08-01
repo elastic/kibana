@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   ORG_SETTINGS_CUSTOMIZE_PATH,
@@ -33,7 +33,7 @@ export const SettingsRouter: React.FC = () => {
   }, []);
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH}>
         <Customize />
       </Route>
@@ -49,6 +49,6 @@ export const SettingsRouter: React.FC = () => {
       <Route>
         <Redirect to={ORG_SETTINGS_CUSTOMIZE_PATH} />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

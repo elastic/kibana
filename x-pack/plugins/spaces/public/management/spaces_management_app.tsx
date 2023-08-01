@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Route } from '@kbn/shared-ux-router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
 import type { ConfigType } from '../config';
@@ -83,6 +83,7 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
             />
           );
         };
@@ -108,6 +109,7 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
             />
           );
         };
@@ -118,7 +120,7 @@ export const spacesManagementApp = Object.freeze({
               <KibanaThemeProvider theme$={theme$}>
                 <RedirectAppLinks coreStart={coreStart}>
                   <Router history={history}>
-                    <Switch>
+                    <Routes>
                       <Route path={['', '/']} exact>
                         <SpacesGridPageWithBreadcrumbs />
                       </Route>
@@ -128,7 +130,7 @@ export const spacesManagementApp = Object.freeze({
                       <Route path="/edit/:spaceId">
                         <EditSpacePageWithBreadcrumbs />
                       </Route>
-                    </Switch>
+                    </Routes>
                   </Router>
                 </RedirectAppLinks>
               </KibanaThemeProvider>

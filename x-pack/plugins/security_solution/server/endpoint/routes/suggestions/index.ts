@@ -35,18 +35,25 @@ export function registerEndpointSuggestionsRoutes(
   config$: Observable<ConfigSchema>,
   endpointContext: EndpointAppContext
 ) {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: SUGGESTIONS_ROUTE,
-      validate: EndpointSuggestionsSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { any: ['canWriteEventFilters'] },
-      endpointContext.logFactory.get('endpointSuggestions'),
-      getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointSuggestionsSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canWriteEventFilters'] },
+        endpointContext.logFactory.get('endpointSuggestions'),
+        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
+      )
+    );
 }
 
 export const getEndpointSuggestionsRequestHandler = (

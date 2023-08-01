@@ -26,6 +26,7 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
@@ -283,6 +284,16 @@ async function executor(
   invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from]);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
+  }
+
+  if (params.messageHTML != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `HTML email can only be sent via notifications`,
+      };
+    }
   }
 
   const transport: Transport = {};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
@@ -18,11 +18,11 @@ export function useDeleteSlo() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const deleteSlo = useMutation<
+  return useMutation<
     string,
     string,
     { id: string; name: string },
-    { previousSloList: FindSLOResponse | undefined }
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['deleteSlo'],
     ({ id }) => {
@@ -34,56 +34,48 @@ export function useDeleteSlo() {
     },
     {
       onMutate: async (slo) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(sloKeys.lists());
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const latestQueriesData = (
-          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) || []
-        ).at(0);
-        const [queryKey, data] = latestQueriesData || [];
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
         const optimisticUpdate = {
-          ...data,
-          results: data?.results?.filter((result) => result.id !== slo.id) ?? [],
-          total: data?.total ? data.total - 1 : 0,
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total - 1 : 0,
+          results: previousData?.results?.filter((result) => result.id !== slo.id) ?? [],
         };
 
-        // Optimistically update to the new value
-        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
 
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
-            defaultMessage: 'Deleted {name}',
-            values: { name: slo.name },
-          })
-        );
-
-        // Return a context object with the snapshotted value
-        return { previousSloList: data };
+        return { previousData, queryKey };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, slo, context) => {
-        if (context?.previousSloList) {
-          queryClient.setQueryData(sloKeys.lists(), context.previousSloList);
+      onError: (_err, { name }, context) => {
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
         }
 
         toasts.addDanger(
           i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
             defaultMessage: 'Failed to delete {name}',
-            values: { name: slo.name },
+            values: { name },
           })
         );
       },
-      onSuccess: () => {
-        if (
-          // @ts-ignore
-          queryClient.getQueryCache().find(sloKeys.lists())?.options.refetchInterval === undefined
-        ) {
-          queryClient.invalidateQueries(sloKeys.lists());
-        }
+      onSuccess: (_data, { name }) => {
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
+            defaultMessage: 'Deleted {name}',
+            values: { name },
+          })
+        );
       },
     }
   );
-
-  return deleteSlo;
 }

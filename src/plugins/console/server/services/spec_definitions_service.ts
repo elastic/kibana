@@ -8,13 +8,12 @@
 
 import _, { merge } from 'lodash';
 import globby from 'globby';
-import { basename, join, resolve } from 'path';
+import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
+import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
-
-const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
 
 interface EndpointDescription {
   methods?: string[];
@@ -23,6 +22,11 @@ interface EndpointDescription {
   data_autocomplete_rules?: Record<string, unknown>;
   url_components?: Record<string, unknown>;
   priority?: number;
+  availability?: Record<string, boolean>;
+}
+
+export interface SpecDefinitionsDependencies {
+  endpointsAvailability: string;
 }
 
 export class SpecDefinitionsService {
@@ -30,7 +34,6 @@ export class SpecDefinitionsService {
 
   private readonly globalRules: Record<string, any> = {};
   private readonly endpoints: Record<string, any> = {};
-  private readonly extensionSpecFilePaths: string[] = [];
 
   private hasLoadedSpec = false;
 
@@ -83,33 +86,11 @@ export class SpecDefinitionsService {
     };
   }
 
-  public addExtensionSpecFilePath(path: string) {
-    this.extensionSpecFilePaths.push(path);
-  }
-
-  public addProcessorDefinition(processor: unknown) {
+  public start({ endpointsAvailability }: SpecDefinitionsDependencies) {
     if (!this.hasLoadedSpec) {
-      throw new Error(
-        'Cannot add a processor definition because spec definitions have not loaded!'
-      );
-    }
-    this.endpoints._processor!.data_autocomplete_rules.__one_of.push(processor);
-  }
-
-  public setup() {
-    return {
-      addExtensionSpecFilePath: this.addExtensionSpecFilePath.bind(this),
-    };
-  }
-
-  public start() {
-    if (!this.hasLoadedSpec) {
-      this.loadJsonSpec();
+      this.loadJsonSpec(endpointsAvailability);
       this.loadJSSpec();
       this.hasLoadedSpec = true;
-      return {
-        addProcessorDefinition: this.addProcessorDefinition.bind(this),
-      };
     } else {
       throw new Error('Service has already started!');
     }
@@ -140,14 +121,19 @@ export class SpecDefinitionsService {
     }, {} as Record<string, EndpointDescription>);
   }
 
-  private loadJsonSpec() {
-    const result = this.loadJSONSpecInDir(PATH_TO_OSS_JSON_SPEC);
-    this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
-      merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
-    });
+  private loadJsonSpec(endpointsAvailability: string) {
+    const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
 
     Object.keys(result).forEach((endpoint) => {
-      this.addEndpointDescription(endpoint, result[endpoint]);
+      const description = result[endpoint];
+      const addEndpoint =
+        // If the 'availability' property doesn't exist, display the endpoint by default
+        !description.availability ||
+        (endpointsAvailability === 'stack' && description.availability.stack) ||
+        (endpointsAvailability === 'serverless' && description.availability.serverless);
+      if (addEndpoint) {
+        this.addEndpointDescription(endpoint, description);
+      }
     });
   }
 

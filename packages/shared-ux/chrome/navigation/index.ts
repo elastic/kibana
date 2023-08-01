@@ -19,10 +19,4 @@ export type {
   RootNavigationItemDefinition,
 } from './src/ui';
 
-export type {
-  ChromeNavigation,
-  ChromeNavigationNode,
-  ChromeNavigationNodeViewModel,
-  ChromeNavigationViewModel,
-  NavigationServices,
-} from './types';
+export type { NavigationServices } from './types';

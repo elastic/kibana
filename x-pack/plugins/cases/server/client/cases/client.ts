@@ -5,29 +5,22 @@
  * 2.0.
  */
 
+import type { Case, Cases, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
-  CasesPatchRequest,
   CasesFindRequest,
-  User,
+  CasesFindResponse,
+  CaseResolveResponse,
+  CasesBulkGetRequest,
+  CasesPatchRequest,
   AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
-  CasesByAlertId,
-  CasesBulkGetRequest,
+  GetRelatedCasesByAlertResponse,
   CasesBulkGetResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
-import type {
-  ICasePostRequest,
-  ICaseResolveResponse,
-  ICaseResponse,
-  ICasesFindRequest,
-  ICasesFindResponse,
-  ICasesPatchRequest,
-  ICasesResponse,
-} from '../typedoc_interfaces';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
@@ -46,22 +39,22 @@ export interface CasesSubClient {
   /**
    * Creates a case.
    */
-  create(data: ICasePostRequest): Promise<ICaseResponse>;
+  create(data: CasePostRequest): Promise<Case>;
   /**
    * Returns cases that match the search criteria.
    *
    * If the `owner` field is left empty then all the cases that the user has access to will be returned.
    */
-  find(params: ICasesFindRequest): Promise<ICasesFindResponse>;
+  find(params: CasesFindRequest): Promise<CasesFindResponse>;
   /**
    * Retrieves a single case with the specified ID.
    */
-  get(params: GetParams): Promise<ICaseResponse>;
+  get(params: GetParams): Promise<Case>;
   /**
    * @experimental
    * Retrieves a single case resolving the specified ID.
    */
-  resolve(params: GetParams): Promise<ICaseResolveResponse>;
+  resolve(params: GetParams): Promise<CaseResolveResponse>;
   /**
    * Retrieves multiple cases with the specified IDs.
    */
@@ -69,11 +62,11 @@ export interface CasesSubClient {
   /**
    * Pushes a specific case to an external system.
    */
-  push(args: PushParams): Promise<ICaseResponse>;
+  push(args: PushParams): Promise<Case>;
   /**
    * Update the specified cases with the passed in values.
    */
-  update(cases: ICasesPatchRequest): Promise<ICasesResponse>;
+  update(cases: CasesPatchRequest): Promise<Cases>;
   /**
    * Delete a case and all its comments.
    *
@@ -95,7 +88,7 @@ export interface CasesSubClient {
   /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
-  getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
+  getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
 }
 
 /**

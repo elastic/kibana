@@ -7,20 +7,20 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
-import { VulnScoreTrend } from '../../../common/types';
+import { VulnStatsTrend } from '../../../common/types';
 
 interface LastDocBucket {
   key_as_string: string;
   last_doc: {
     hits: {
       hits: Array<{
-        _source: VulnScoreTrend;
+        _source: VulnStatsTrend;
       }>;
     };
   };
 }
 
-interface VulnScoreTrendResponse {
+interface VulnStatsTrendResponse {
   vuln_severity_per_day: {
     buckets: LastDocBucket[];
   };
@@ -78,17 +78,17 @@ export const getVulnTrendsQuery = () => ({
 
 export const getVulnerabilitiesTrends = async (
   esClient: ElasticsearchClient
-): Promise<VulnScoreTrend[]> => {
-  const vulnTrendsQueryResult = await esClient.search<LastDocBucket, VulnScoreTrendResponse>(
+): Promise<VulnStatsTrend[]> => {
+  const vulnTrendsQueryResult = await esClient.search<LastDocBucket, VulnStatsTrendResponse>(
     getVulnTrendsQuery()
   );
   if (!vulnTrendsQueryResult.hits.hits) {
     throw new Error('Missing trend results from score index');
   }
 
-  const vulnScoreTrendDocs = vulnTrendsQueryResult.aggregations?.vuln_severity_per_day.buckets?.map(
+  const vulnStatsTrendDocs = vulnTrendsQueryResult.aggregations?.vuln_severity_per_day.buckets?.map(
     (bucket) => bucket.last_doc.hits.hits[0]._source
   );
 
-  return vulnScoreTrendDocs || [];
+  return vulnStatsTrendDocs || [];
 };

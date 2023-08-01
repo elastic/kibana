@@ -130,6 +130,7 @@ describe('Spaces Public API', () => {
       id: 'a-space',
       name: 'my updated space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { routeHandler } = await setup();
@@ -152,6 +153,7 @@ describe('Spaces Public API', () => {
       id: 'my-space-id',
       name: 'my new space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { routeValidation, routeHandler, savedObjectsRepositoryMock } = await setup();

@@ -13,6 +13,7 @@
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
       "embeddable",
       "exploratoryView",
       "features",
@@ -29,7 +30,7 @@
       "visualizations"
     ],
     "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "spaces"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "stackAlerts", "spaces"],
     "extraPublicDirs": ["common"]
   }
 }

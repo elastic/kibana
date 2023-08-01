@@ -17,7 +17,7 @@ import { connectors } from '../configure_cases/__mock__';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 describe('useCasesColumns ', () => {
@@ -91,6 +91,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -120,6 +121,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -160,6 +162,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -172,6 +175,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -236,6 +240,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -265,6 +270,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -326,6 +332,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -355,6 +362,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -411,6 +419,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -440,6 +449,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -501,6 +511,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "closedAt",
@@ -530,6 +541,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -564,6 +576,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -576,6 +589,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -609,6 +623,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -621,6 +636,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
@@ -678,6 +694,7 @@ describe('useCasesColumns ', () => {
             "name": "Category",
             "render": [Function],
             "sortable": true,
+            "width": "100px",
           },
           Object {
             "field": "createdAt",
@@ -707,6 +724,7 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
         ],
       }
@@ -773,6 +791,7 @@ describe('useCasesColumns ', () => {
                   name: 'None',
                   config: {},
                   isPreconfigured: false,
+                  isSystemAction: false,
                   isDeprecated: false,
                 },
               ]}

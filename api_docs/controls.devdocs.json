@@ -1777,7 +1777,8 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ", any>"
+          ", any> implements ",
+          "IClearableControl"
         ],
         "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
         "deprecated": false,
@@ -2073,6 +2074,22 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddable.clearSelections",
+            "type": "Function",
+            "tags": [],
+            "label": "clearSelections",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -2864,7 +2881,8 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ", any>"
+          ", any> implements ",
+          "IClearableControl"
         ],
         "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
@@ -3158,6 +3176,22 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddable.clearSelections",
+            "type": "Function",
+            "tags": [],
+            "label": "clearSelections",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {

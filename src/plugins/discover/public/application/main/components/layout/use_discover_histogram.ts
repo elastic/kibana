@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
+import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,

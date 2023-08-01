@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
+  const spacesService = getService('spaces');
 
   const idSpace1 = 'space1';
 
@@ -95,6 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
 
       for (const job of testSetupJobConfigs) {
         await ml.api.createAnomalyDetectionJob(job);
@@ -123,7 +125,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await spacesService.delete(idSpace1);
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('returns expected list of combined jobs with stats in default space', async () => {

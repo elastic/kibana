@@ -82,6 +82,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
@@ -110,7 +111,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [apiProvider]: expected value of type [string] but got [undefined]',
+                'error validating action type config: [apiProvider]: expected at least one defined value but got [undefined]',
             });
           });
       });

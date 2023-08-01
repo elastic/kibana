@@ -419,6 +419,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 comments: exception?.comments ?? [],
                 os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
                 tags: exception?.tags ?? [],
+                meta: exception.meta,
               }
             : exception;
         const hasValidConditions =

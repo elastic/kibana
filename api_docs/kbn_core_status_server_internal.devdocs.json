@@ -77,6 +77,40 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusService.preboot",
+            "type": "Function",
+            "tags": [],
+            "label": "preboot",
+            "description": [],
+            "signature": [
+              "({ http }: ",
+              "StatusServicePrebootDeps",
+              ") => Promise<void>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-status-server-internal",
+                "id": "def-common.StatusService.preboot.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http }",
+                "description": [],
+                "signature": [
+                  "StatusServicePrebootDeps"
+                ],
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
             "id": "def-common.StatusService.setup",
             "type": "Function",
             "tags": [],

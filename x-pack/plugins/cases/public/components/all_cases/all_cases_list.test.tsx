@@ -23,7 +23,7 @@ import {
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
@@ -38,7 +38,11 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCases, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
+import {
+  useGetCases,
+  DEFAULT_QUERY_PARAMS,
+  DEFAULT_FILTER_OPTIONS,
+} from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -82,7 +86,6 @@ const mockKibana = () => {
 };
 
 describe('AllCasesListGeneric', () => {
-  const refetchCases = jest.fn();
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
 
@@ -90,7 +93,6 @@ describe('AllCasesListGeneric', () => {
 
   const defaultGetCases = {
     ...useGetCasesMockState,
-    refetch: refetchCases,
   };
 
   const defaultColumnArgs = {
@@ -151,8 +153,8 @@ describe('AllCasesListGeneric', () => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     useGetCasesMock.mockReturnValue(defaultGetCases);
-    useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-    useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], refetch: jest.fn() });
+    useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
+    useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
@@ -294,34 +296,22 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('renders the title column', async () => {
-    appMockRenderer.render(<AllCasesList />);
+  it('renders the columns correctly', async () => {
+    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    expect(screen.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
-  });
+    const casesTable = within(screen.getByTestId('cases-table'));
 
-  it('renders the category column', async () => {
-    appMockRenderer.render(<AllCasesList />);
-
-    expect(screen.getByTestId('tableHeaderCell_category_4')).toBeInTheDocument();
-  });
-
-  it('renders the updated on column', async () => {
-    appMockRenderer.render(<AllCasesList />);
-
-    expect(screen.getByTestId('tableHeaderCell_updatedAt_6')).toBeInTheDocument();
-  });
-
-  it('renders the status column', async () => {
-    appMockRenderer.render(<AllCasesList />);
-
-    expect(screen.getByTestId('tableHeaderCell_status_8')).toBeInTheDocument();
-  });
-
-  it('renders the severity column', async () => {
-    appMockRenderer.render(<AllCasesList />);
-
-    expect(screen.getByTestId('tableHeaderCell_severity_9')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Name')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Category')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Created on')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Updated on')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Status')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Severity')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Tags')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Alerts')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Comments')).toBeInTheDocument();
+    expect(casesTable.getByTitle('External incident')).toBeInTheDocument();
+    expect(casesTable.getByTitle('Actions')).toBeInTheDocument();
   });
 
   it('should not render table utility bar when isSelectorView=true', async () => {
@@ -403,9 +393,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by status', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_status_8')).getByTestId('tableHeaderSortButton')
-    );
+    userEvent.click(screen.getByTitle('Status'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -423,20 +411,17 @@ describe('AllCasesListGeneric', () => {
   it('should render Name, Category, CreatedOn and Severity columns when isSelectorView=true', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} />);
     await waitFor(() => {
-      expect(screen.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
-      expect(screen.getByTestId('tableHeaderCell_category_1')).toBeInTheDocument();
-      expect(screen.getByTestId('tableHeaderCell_createdAt_2')).toBeInTheDocument();
-      expect(screen.getByTestId('tableHeaderCell_severity_3')).toBeInTheDocument();
-      expect(screen.queryByTestId('tableHeaderCell_assignees_1')).not.toBeInTheDocument();
+      expect(screen.getByTitle('Name')).toBeInTheDocument();
+      expect(screen.getByTitle('Category')).toBeInTheDocument();
+      expect(screen.getByTitle('Created on')).toBeInTheDocument();
+      expect(screen.getByTitle('Severity')).toBeInTheDocument();
     });
   });
 
   it('should sort by severity', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_severity_9')).getByTestId('tableHeaderSortButton')
-    );
+    userEvent.click(screen.getByTitle('Severity'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -454,9 +439,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by title', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_title_0')).getByTestId('tableHeaderSortButton')
-    );
+    userEvent.click(screen.getByTitle('Name'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -474,9 +457,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by updatedOn', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_updatedAt_6')).getByTestId('tableHeaderSortButton')
-    );
+    userEvent.click(screen.getByTitle('Updated on'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -494,9 +475,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by category', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_category_4')).getByTestId('tableHeaderSortButton')
-    );
+    userEvent.click(screen.getByTitle('Category'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -508,6 +487,26 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+  });
+
+  it('should filter by category', async () => {
+    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          searchFields: [],
+          owner: ['securitySolution'],
+          category: ['twix'],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+      });
     });
   });
 
@@ -835,14 +834,13 @@ describe('AllCasesListGeneric', () => {
           userEvent.click(screen.getByTestId(`cases-bulk-action-status-${status}`));
 
           await waitFor(() => {
-            expect(updateCasesSpy).toBeCalledWith(
-              useGetCasesMockState.data.cases.map(({ id, version }) => ({
+            expect(updateCasesSpy).toBeCalledWith({
+              cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
                 status,
               })),
-              expect.anything()
-            );
+            });
           });
         }
       );
@@ -876,14 +874,13 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith(
-            useGetCasesMockState.data.cases.map(({ id, version }) => ({
+          expect(updateCasesSpy).toBeCalledWith({
+            cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
               id,
               version,
               severity,
             })),
-            expect.anything()
-          );
+          });
         });
       });
 
@@ -909,8 +906,8 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
-          expect(deleteCasesSpy).toHaveBeenCalledWith(
-            [
+          expect(deleteCasesSpy).toHaveBeenCalledWith({
+            caseIds: [
               'basic-case-id',
               '1',
               '2',
@@ -920,8 +917,7 @@ describe('AllCasesListGeneric', () => {
               'case-with-alerts-syncoff-id',
               'case-with-registered-attachment',
             ],
-            expect.anything()
-          );
+          });
         });
       });
 
@@ -988,10 +984,9 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId(`cases-bulk-action-status-${status}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toHaveBeenCalledWith(
-            [{ id: theCase.id, status, version: theCase.version }],
-            expect.anything()
-          );
+          expect(updateCasesSpy).toHaveBeenCalledWith({
+            cases: [{ id: theCase.id, status, version: theCase.version }],
+          });
         });
       });
 
@@ -1018,10 +1013,9 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toHaveBeenCalledWith(
-            [{ id: theCase.id, severity, version: theCase.version }],
-            expect.anything()
-          );
+          expect(updateCasesSpy).toHaveBeenCalledWith({
+            cases: [{ id: theCase.id, severity, version: theCase.version }],
+          });
         });
       });
 
@@ -1044,7 +1038,7 @@ describe('AllCasesListGeneric', () => {
         userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
-          expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+          expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
         });
       });
 

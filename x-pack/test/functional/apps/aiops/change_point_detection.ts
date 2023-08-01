@@ -16,8 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/158851
-  describe.skip('change point detection', async function () {
+  describe('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -64,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.clickUseFullDataButton();
       await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
       await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
+      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(result.length).to.eql(5);
       // assert asc sorting by p_value is applied

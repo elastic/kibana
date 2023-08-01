@@ -319,7 +319,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
       {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
 
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap={true} gutterSize="m" data-test-subj="mlPageJobWizard recognizer">
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiTitle size="s">

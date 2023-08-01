@@ -23,6 +23,11 @@ export class ContactCardEmbeddableFactory
   implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
 {
   public readonly type = CONTACT_CARD_EMBEDDABLE;
+  savedObjectMetaData = {
+    name: 'Contact card',
+    type: CONTACT_CARD_EMBEDDABLE,
+    getIconForSavedObject: () => 'document',
+  };
 
   constructor(
     protected readonly execTrigger: UiActionsStart['executeTriggerActions'],

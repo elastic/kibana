@@ -14,6 +14,12 @@ export const i18nStrings = {
   popoverButton: i18n.translate('xpack.globalSearchBar.searchBar.mobileSearchButtonAriaLabel', {
     defaultMessage: 'Site-wide search',
   }),
+  showSearchAriaText: i18n.translate('xpack.globalSearchBar.searchBar.showSearchAriaText', {
+    defaultMessage: 'Show search bar',
+  }),
+  closeSearchAriaText: i18n.translate('xpack.globalSearchBar.searchBar.closeSearchAriaText', {
+    defaultMessage: 'Close search bar',
+  }),
   keyboardShortcutTooltip: {
     prefix: i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.description', {
       defaultMessage: 'Keyboard shortcut',

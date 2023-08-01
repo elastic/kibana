@@ -28,6 +28,7 @@ export const useSendGetFileRequest = (
     (reqBody) => {
       return KibanaServices.get().http.post<ResponseActionApiResponse>(GET_FILE_ROUTE, {
         body: JSON.stringify(reqBody),
+        version: '2023-10-31',
       });
     },
     customOptions

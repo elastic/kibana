@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -23,6 +21,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -61,17 +60,14 @@ describe('Action List Handler', () => {
         query,
       });
       mockResponse = httpServerMock.createResponseFactory();
-      const [, routeHandler]: [
-        RouteConfig<any, any, any, any>,
-        RequestHandler<
-          unknown,
-          EndpointActionListRequestQuery,
-          unknown,
-          SecuritySolutionRequestHandlerContext
-        >
-      ] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(BASE_ENDPOINT_ACTION_ROUTE)
-      )!;
+
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        BASE_ENDPOINT_ACTION_ROUTE,
+        '2023-10-31'
+      );
+
       await routeHandler(
         coreMock.createCustomRequestHandlerContext(
           createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())

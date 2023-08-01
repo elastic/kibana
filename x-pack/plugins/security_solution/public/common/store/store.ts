@@ -18,11 +18,9 @@ import type {
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
-
 import { createEpicMiddleware } from 'redux-observable';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, pluck } from 'rxjs';
-
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
@@ -53,6 +51,9 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import type { AnalyzerOuterState } from '../../resolver/types';
+import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
+import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
 
 let store: Store<State, Action> | null = null;
@@ -132,6 +133,12 @@ export const createStoreFactory = async (
     groups: initialGroupingState,
   };
 
+  const analyzerInitialState: AnalyzerOuterState = {
+    analyzer: {
+      analyzerById: {},
+    },
+  };
+
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -151,7 +158,8 @@ export const createStoreFactory = async (
       enableExperimental,
     },
     dataTableInitialState,
-    groupsInitialState
+    groupsInitialState,
+    analyzerInitialState
   );
 
   const rootReducer = {
@@ -162,6 +170,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
   ]);
 };
 
@@ -261,6 +270,7 @@ export const createStore = (
 ): Store<State, Action> => {
   const enhancerOptions: EnhancerOptions = {
     name: 'Kibana Security Solution',
+    actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
     stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
   };

@@ -31,20 +31,17 @@ export class FlyoutService extends FtrService {
   }
 
   public async ensureAllClosed(): Promise<void> {
-    const flyoutElements = await this.find.allByCssSelector('.euiFlyout');
-
-    if (!flyoutElements.length) {
-      return;
-    }
-
-    for (let i = 0; i < flyoutElements.length; i++) {
-      const closeBtn = await flyoutElements[i].findByCssSelector('[aria-label*="Close"]');
-      await closeBtn.click();
-    }
-
-    await this.retry.waitFor(
-      'all flyouts to be closed',
-      async () => (await this.find.allByCssSelector('.euiFlyout')).length === 0
-    );
+    await this.retry.waitFor('all flyouts to be closed', async () => {
+      let flyoutElements = await this.find.allByCssSelector('.euiFlyout', 2500);
+      if (!flyoutElements.length) {
+        return true;
+      }
+      for (let i = 0; i < flyoutElements.length; i++) {
+        const closeBtn = await flyoutElements[i].findByCssSelector('[aria-label*="Close"]');
+        await closeBtn.click();
+      }
+      flyoutElements = await this.find.allByCssSelector('.euiFlyout', 500);
+      return flyoutElements.length === 0;
+    });
   }
 }

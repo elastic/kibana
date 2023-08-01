@@ -46,7 +46,6 @@ jest.mock('../../../timelines/store/timeline/actions');
 jest.mock('../visualization_actions/actions');
 jest.mock('../visualization_actions/lens_embeddable');
 const field = 'process.name';
-const value = 'nice';
 
 const state: State = {
   ...mockGlobalState,
@@ -160,7 +159,6 @@ const testProps = {
   scopeId: TableId.hostsPageEvents,
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),
-  value,
 };
 
 describe('StatefulTopN', () => {

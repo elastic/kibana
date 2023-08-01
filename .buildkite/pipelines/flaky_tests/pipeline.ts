@@ -153,18 +153,17 @@ for (const testSuite of testSuites) {
     continue;
   }
 
-  const keyParts = testSuite.key.split('/');
-  switch (keyParts[0]) {
+  const [category, suiteName] = testSuite.key.split('/');
+  switch (category) {
     case 'cypress':
-      const CYPRESS_SUITE = keyParts[1];
-      const group = groups.find((g) => g.key.includes(CYPRESS_SUITE));
+      const group = groups.find((g) => g.key === testSuite.key);
       if (!group) {
         throw new Error(
-          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
+          `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
         );
       }
       steps.push({
-        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
         agents: { queue: 'n2-4-spot' },
         depends_on: 'build',

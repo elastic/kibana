@@ -8,13 +8,7 @@
 import React, { useCallback } from 'react';
 import type { Query, TimeRange, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGrid,
-  useEuiTheme,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -53,7 +47,7 @@ export const UnifiedSearchBar = () => {
 
   return (
     <StickyContainer>
-      <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <SearchBar
             appName={'Infra Hosts'}
@@ -73,7 +67,7 @@ export const UnifiedSearchBar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="xs">
+          <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="s">
             <EuiFlexItem>
               <ControlsContent
                 timeRange={searchCriteria.dateRange}
@@ -92,18 +86,22 @@ export const UnifiedSearchBar = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule
+        margin="xs"
+        css={css`
+          margin-bottom: 0;
+        `}
+      />
     </StickyContainer>
   );
 };
 
-const StickyContainer = (props: { children: React.ReactNode }) => {
+const StickyContainer = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
   const { headerHeight } = useKibanaHeader();
 
   return (
-    <EuiFlexGrid
-      gutterSize="none"
+    <div
       css={css`
         position: sticky;
         top: ${headerHeight}px;
@@ -111,8 +109,10 @@ const StickyContainer = (props: { children: React.ReactNode }) => {
         background: ${euiTheme.colors.emptyShade};
         padding: ${euiTheme.size.m} ${euiTheme.size.l} 0px;
         margin: -${euiTheme.size.l} -${euiTheme.size.l} 0px;
+        min-height: calc(${euiTheme.size.xxxl} * 2);
       `}
-      {...props}
-    />
+    >
+      {children}
+    </div>
   );
 };

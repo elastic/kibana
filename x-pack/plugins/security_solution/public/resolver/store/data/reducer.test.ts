@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { Store } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
 import { RelatedEventCategory } from '../../../../common/endpoint/generate_data';
 import { dataReducer } from './reducer';
 import * as selectors from './selectors';
-import type { DataState, GeneratedTreeMetadata, TimeFilters } from '../../types';
-import type { DataAction } from './action';
+import type { AnalyzerState, GeneratedTreeMetadata, TimeFilters } from '../../types';
 import { generateTreeWithDAL } from '../../data_access_layer/mocks/generator_tree';
 import { endpointSourceSchema, winlogSourceSchema } from '../../mocks/tree_schema';
 import type { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
 import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
+import { EMPTY_RESOLVER } from '../helpers';
+import { serverReturnedResolverData } from './action';
 
 type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
 
@@ -23,24 +24,33 @@ type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: strin
  * Test the data reducer and selector.
  */
 describe('Resolver Data Middleware', () => {
-  let store: Store<DataState, DataAction>;
+  let store: Store<AnalyzerState, AnyAction>;
   let dispatchTree: (
     tree: NewResolverTree,
     sourceAndSchema: SourceAndSchemaFunction,
     detectedBounds?: TimeFilters
   ) => void;
+  const id = 'test-id';
 
   beforeEach(() => {
-    store = createStore(dataReducer, undefined);
+    const testReducer: Reducer<AnalyzerState, AnyAction> = (
+      state = {
+        analyzerById: {
+          [id]: EMPTY_RESOLVER,
+        },
+      },
+      action
+    ): AnalyzerState => dataReducer(state, action);
+    store = createStore(testReducer, undefined);
     dispatchTree = (
       tree: NewResolverTree,
       sourceAndSchema: SourceAndSchemaFunction,
       detectedBounds?: TimeFilters
     ) => {
       const { schema, dataSource } = sourceAndSchema();
-      const action: DataAction = {
-        type: 'serverReturnedResolverData',
-        payload: {
+      store.dispatch(
+        serverReturnedResolverData({
+          id,
           result: tree,
           dataSource,
           schema,
@@ -50,9 +60,8 @@ describe('Resolver Data Middleware', () => {
             filters: {},
           },
           detectedBounds,
-        },
-      };
-      store.dispatch(action);
+        })
+      );
     };
   });
 
@@ -74,15 +83,15 @@ describe('Resolver Data Middleware', () => {
         dispatchTree(generatedTreeMetadata.formattedTree, schema);
       });
       it('should indicate that there are no more ancestors to retrieve', () => {
-        expect(selectors.hasMoreAncestors(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreAncestors(store.getState().analyzerById[id].data)).toBeFalsy();
       });
 
       it('should indicate that there are no more descendants to retrieve', () => {
-        expect(selectors.hasMoreChildren(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreChildren(store.getState().analyzerById[id].data)).toBeFalsy();
       });
 
       it('should indicate that there were no more generations to retrieve', () => {
-        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreGenerations(store.getState().analyzerById[id].data)).toBeFalsy();
       });
     });
     describe('when a tree with detected bounds is loaded', () => {
@@ -91,7 +100,7 @@ describe('Resolver Data Middleware', () => {
           from: 'Sep 19, 2022 @ 20:49:13.452',
           to: 'Sep 19, 2022 @ 20:49:13.452',
         });
-        expect(selectors.detectedBounds(store.getState())).toBeTruthy();
+        expect(selectors.detectedBounds(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should clear the previous detected bounds when a new response without detected bounds is recevied', () => {
@@ -99,9 +108,9 @@ describe('Resolver Data Middleware', () => {
           from: 'Sep 19, 2022 @ 20:49:13.452',
           to: 'Sep 19, 2022 @ 20:49:13.452',
         });
-        expect(selectors.detectedBounds(store.getState())).toBeTruthy();
+        expect(selectors.detectedBounds(store.getState().analyzerById[id].data)).toBeTruthy();
         dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema);
-        expect(selectors.detectedBounds(store.getState())).toBeFalsy();
+        expect(selectors.detectedBounds(store.getState().analyzerById[id].data)).toBeFalsy();
       });
     });
   });
@@ -123,15 +132,15 @@ describe('Resolver Data Middleware', () => {
         dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema);
       });
       it('should indicate that there are more ancestors to retrieve', () => {
-        expect(selectors.hasMoreAncestors(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreAncestors(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should indicate that there are more descendants to retrieve', () => {
-        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreChildren(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should indicate that there were no more generations to retrieve', () => {
-        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreGenerations(store.getState().analyzerById[id].data)).toBeFalsy();
       });
     });
 
@@ -140,15 +149,15 @@ describe('Resolver Data Middleware', () => {
         dispatchTree(generatedTreeMetadata.formattedTree, winlogSourceSchema);
       });
       it('should indicate that there are more ancestors to retrieve', () => {
-        expect(selectors.hasMoreAncestors(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreAncestors(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should indicate that there are more descendants to retrieve', () => {
-        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreChildren(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should indicate that there were more generations to retrieve', () => {
-        expect(selectors.hasMoreGenerations(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreGenerations(store.getState().analyzerById[id].data)).toBeTruthy();
       });
     });
   });
@@ -168,15 +177,15 @@ describe('Resolver Data Middleware', () => {
         dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema);
       });
       it('should indicate that there are no more ancestors to retrieve', () => {
-        expect(selectors.hasMoreAncestors(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreAncestors(store.getState().analyzerById[id].data)).toBeFalsy();
       });
 
       it('should indicate that there are more descendants to retrieve', () => {
-        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreChildren(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should indicate that there were no more generations to retrieve', () => {
-        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreGenerations(store.getState().analyzerById[id].data)).toBeFalsy();
       });
     });
 
@@ -185,15 +194,15 @@ describe('Resolver Data Middleware', () => {
         dispatchTree(generatedTreeMetadata.formattedTree, winlogSourceSchema);
       });
       it('should indicate that there are no more ancestors to retrieve', () => {
-        expect(selectors.hasMoreAncestors(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreAncestors(store.getState().analyzerById[id].data)).toBeFalsy();
       });
 
       it('should indicate that there are more descendants to retrieve', () => {
-        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+        expect(selectors.hasMoreChildren(store.getState().analyzerById[id].data)).toBeTruthy();
       });
 
       it('should indicate that there were no more generations to retrieve', () => {
-        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+        expect(selectors.hasMoreGenerations(store.getState().analyzerById[id].data)).toBeFalsy();
       });
     });
   });
@@ -217,13 +226,15 @@ describe('Resolver Data Middleware', () => {
     it('should have the correct total related events for a child node', () => {
       // get the first level of children, and there should only be a single child
       const childNode = Array.from(metadata.generatedTree.childrenLevels[0].values())[0];
-      const total = selectors.relatedEventTotalCount(store.getState())(childNode.id);
+      const total = selectors.relatedEventTotalCount(store.getState().analyzerById[id].data)(
+        childNode.id
+      );
       expect(total).toEqual(5);
     });
     it('should have the correct related events stats for a child node', () => {
       // get the first level of children, and there should only be a single child
       const childNode = Array.from(metadata.generatedTree.childrenLevels[0].values())[0];
-      const stats = selectors.nodeStats(store.getState())(childNode.id);
+      const stats = selectors.nodeStats(store.getState().analyzerById[id].data)(childNode.id);
       expect(stats).toEqual({
         total: 5,
         byCategory: {

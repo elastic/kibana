@@ -9,7 +9,6 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -73,7 +72,12 @@ import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
-
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  AttachmentType,
+} from '../../common/types/domain';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');
@@ -90,7 +94,7 @@ describe('Cases API', () => {
     const data = ['1', '2'];
 
     it('should be called with correct check url, method, signal', async () => {
-      await deleteCases(data, abortCtrl.signal);
+      await deleteCases({ caseIds: data, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'DELETE',
         query: { ids: JSON.stringify(data) },
@@ -99,7 +103,7 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await deleteCases(data, abortCtrl.signal);
+      const resp = await deleteCases({ caseIds: data, signal: abortCtrl.signal });
       expect(resp).toEqual('');
     });
   });
@@ -166,7 +170,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await resolveCase(caseId, true, abortCtrl.signal);
+      await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
         query: { includeComments: true },
@@ -175,7 +179,7 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      const resp = await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(resp).toEqual({ ...basicResolveCase, case: basicCase, aliasTargetId });
     });
 
@@ -186,7 +190,7 @@ describe('Cases API', () => {
         alias_target_id: aliasTargetId,
       });
 
-      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      const resp = await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(resp).toEqual({
         ...basicResolveCase,
         case: caseWithRegisteredAttachments,
@@ -438,6 +442,26 @@ describe('Cases API', () => {
       });
       expect(resp).toEqual({ ...allCases });
     });
+
+    it('should not send the category field if it is an empty array', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          category: [],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
   });
 
   describe('getCasesStatus', () => {
@@ -587,7 +611,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      await getTags({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -598,7 +622,7 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getTags({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(resp).toEqual(tags);
     });
   });
@@ -610,7 +634,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with the correct check url, method, signal', async () => {
-      await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      await getCategories({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(INTERNAL_GET_CASE_CATEGORIES_URL, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -621,7 +645,10 @@ describe('Cases API', () => {
     });
 
     it('should return the correct response', async () => {
-      const resp = await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getCategories({
+        owner: [SECURITY_SOLUTION_OWNER],
+        signal: abortCtrl.signal,
+      });
       expect(resp).toEqual(categories);
     });
   });
@@ -635,7 +662,12 @@ describe('Cases API', () => {
     const data = { description: 'updated description' };
 
     it('should be called with correct check url, method, signal', async () => {
-      await patchCase(basicCase.id, data, basicCase.version, abortCtrl.signal);
+      await patchCase({
+        caseId: basicCase.id,
+        updatedCase: data,
+        version: basicCase.version,
+        signal: abortCtrl.signal,
+      });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
@@ -647,24 +679,24 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await patchCase(
-        basicCase.id,
-        { description: 'updated description' },
-        basicCase.version,
-        abortCtrl.signal
-      );
+      const resp = await patchCase({
+        caseId: basicCase.id,
+        updatedCase: { description: 'updated description' },
+        version: basicCase.version,
+        signal: abortCtrl.signal,
+      });
 
       expect(resp).toEqual([basicCase]);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue([caseWithRegisteredAttachmentsSnake]);
-      const resp = await patchCase(
-        basicCase.id,
-        { description: 'updated description' },
-        basicCase.version,
-        abortCtrl.signal
-      );
+      const resp = await patchCase({
+        caseId: basicCase.id,
+        updatedCase: { description: 'updated description' },
+        version: basicCase.version,
+        signal: abortCtrl.signal,
+      });
 
       expect(resp).toEqual([caseWithRegisteredAttachments]);
     });
@@ -685,7 +717,7 @@ describe('Cases API', () => {
     ];
 
     it('should be called with correct check url, method, signal', async () => {
-      await updateCases(data, abortCtrl.signal);
+      await updateCases({ cases: data, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
         body: JSON.stringify({ cases: data }),
@@ -694,12 +726,12 @@ describe('Cases API', () => {
     });
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
-      const resp = await updateCases(data, abortCtrl.signal);
+      const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
       expect(resp).toEqual(cases);
     });
 
     it('returns an empty array if the cases are empty', async () => {
-      const resp = await updateCases([], abortCtrl.signal);
+      const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
       expect(resp).toEqual([]);
     });
   });
@@ -724,7 +756,7 @@ describe('Cases API', () => {
         method: 'PATCH',
         body: JSON.stringify({
           comment: 'updated comment',
-          type: CommentType.user,
+          type: AttachmentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
           owner: SECURITY_SOLUTION_OWNER,
@@ -785,7 +817,7 @@ describe('Cases API', () => {
     };
 
     it('should be called with correct check url, method, signal', async () => {
-      await postCase(data, abortCtrl.signal);
+      await postCase({ newCase: data, signal: abortCtrl.signal });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'POST',
@@ -795,19 +827,19 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await postCase(data, abortCtrl.signal);
+      const resp = await postCase({ newCase: data, signal: abortCtrl.signal });
       expect(resp).toEqual(basicCase);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-      const resp = await postCase(data, abortCtrl.signal);
+      const resp = await postCase({ newCase: data, signal: abortCtrl.signal });
       expect(resp).toEqual(caseWithRegisteredAttachments);
     });
 
     it('should default category to null if it is undefined', async () => {
       const dataWithoutCategory = omit(data, 'category');
-      await postCase(dataWithoutCategory, abortCtrl.signal);
+      await postCase({ newCase: dataWithoutCategory, signal: abortCtrl.signal });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'POST',
@@ -826,7 +858,7 @@ describe('Cases API', () => {
       {
         comment: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
       },
       {
         alertId: 'test-id',
@@ -836,12 +868,16 @@ describe('Cases API', () => {
           name: 'Test',
         },
         owner: SECURITY_SOLUTION_OWNER,
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
     it('should be called with correct check url, method, signal', async () => {
-      await createAttachments(data, basicCase.id, abortCtrl.signal);
+      await createAttachments({
+        attachments: data,
+        caseId: basicCase.id,
+        signal: abortCtrl.signal,
+      });
       expect(fetchMock).toHaveBeenCalledWith(
         INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
         {
@@ -853,13 +889,21 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
+      const resp = await createAttachments({
+        attachments: data,
+        caseId: basicCase.id,
+        signal: abortCtrl.signal,
+      });
       expect(resp).toEqual(basicCase);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-      const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
+      const resp = await createAttachments({
+        attachments: data,
+        caseId: basicCase.id,
+        signal: abortCtrl.signal,
+      });
       expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
@@ -897,7 +941,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      await pushCase({ caseId: basicCase.id, connectorId, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(
         `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
         {
@@ -909,13 +953,13 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      const resp = await pushCase({ caseId: basicCase.id, connectorId, signal: abortCtrl.signal });
       expect(resp).toEqual(pushedCase);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      const resp = await pushCase({ caseId: basicCase.id, connectorId, signal: abortCtrl.signal });
       expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
@@ -948,10 +992,10 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      const resp = await getFeatureIds(
-        { registrationContext: ['security', 'observability.logs'] },
-        abortCtrl.signal
-      );
+      const resp = await getFeatureIds({
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
 
       expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
         query: { registrationContext: ['security', 'observability.logs'] },
@@ -970,7 +1014,7 @@ describe('Cases API', () => {
 
     const data = {
       comment: 'Solve this fast!',
-      type: CommentType.user as const,
+      type: AttachmentType.user as const,
       owner: SECURITY_SOLUTION_OWNER,
     };
 

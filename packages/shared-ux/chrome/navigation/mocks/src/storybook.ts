@@ -9,25 +9,15 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject } from 'rxjs';
-import { ChromeNavigationViewModel, NavigationServices } from '../../types';
+import { NavigationServices } from '../../types';
 
-type Arguments = ChromeNavigationViewModel & NavigationServices;
+type Arguments = NavigationServices;
 export type Params = Pick<
   Arguments,
-  | 'activeNavItemId'
-  | 'navIsOpen'
-  | 'navigationTree'
-  | 'platformConfig'
-  | 'recentlyAccessed$'
-  | 'navLinks$'
-  | 'recentlyAccessedFilter'
-  | 'onProjectNavigationChange'
+  'navIsOpen' | 'recentlyAccessed$' | 'navLinks$' | 'onProjectNavigationChange'
 >;
 
-export class StorybookMock extends AbstractStorybookMock<
-  ChromeNavigationViewModel,
-  NavigationServices
-> {
+export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices> {
   propArguments = {};
 
   serviceArguments = {
@@ -53,13 +43,25 @@ export class StorybookMock extends AbstractStorybookMock<
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
       navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
       onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
+      activeNodes$: new BehaviorSubject([]),
+      cloudLinks: {
+        billingAndSub: {
+          title: 'Billing & Subscriptions',
+          href: 'https://cloud.elastic.co/account/billing',
+        },
+        performance: {
+          title: 'Performance',
+          href: 'https://cloud.elastic.co/deployments/123456789/performance',
+        },
+        userAndRoles: {
+          title: 'Users & Roles',
+          href: 'https://cloud.elastic.co/deployments/123456789/security/users',
+        },
+      },
     };
   }
 
-  getProps(params: Params): ChromeNavigationViewModel {
-    return {
-      ...params,
-      recentlyAccessedFilter: params.recentlyAccessedFilter,
-    };
+  getProps(params: Params) {
+    return params;
   }
 }

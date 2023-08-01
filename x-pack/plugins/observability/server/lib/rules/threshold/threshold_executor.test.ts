@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  AlertInstanceContext as AlertContext,
-  AlertInstanceState as AlertState,
-} from '@kbn/alerting-plugin/server';
+import { AlertInstanceState as AlertState } from '@kbn/alerting-plugin/server';
 import {
   AlertInstanceMock,
   RuleExecutorServicesMock,
@@ -19,6 +16,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
+  MetricThresholdAlertContext,
   NO_DATA_ACTIONS,
 } from './threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
@@ -1396,7 +1394,7 @@ describe.skip('The metric threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertDetailsUrl: '',
         alertState: 'NO DATA',
         group: '*',
         groupByKeys: undefined,
@@ -1890,13 +1888,18 @@ const mockLibs: any = {
     prepend: (path: string) => path,
   },
   logger,
+  config: {
+    thresholdRule: {
+      groupByPageSize: 10_000,
+    },
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
 const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, AlertContext, string> = {
+  LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
@@ -1934,10 +1937,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     alertInstance.state = newState;
     return alertInstance.instance;
   });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
   return alertInstance.instance;
 });
 

@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { PACKS_ID } from '../packs/constants';
@@ -23,15 +24,18 @@ export const useImportAssets = ({ successToastText }: UseImportAssetsProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.post('/internal/osquery/assets/update'), {
-    onSuccess: () => {
-      setErrorToast();
-      queryClient.invalidateQueries([PACKS_ID]);
-      queryClient.invalidateQueries([INTEGRATION_ASSETS_STATUS_ID]);
-      toasts.addSuccess(successToastText);
-    },
-    onError: (error) => {
-      setErrorToast(error);
-    },
-  });
+  return useMutation(
+    () => http.post('/internal/osquery/assets/update', { version: API_VERSIONS.internal.v1 }),
+    {
+      onSuccess: () => {
+        setErrorToast();
+        queryClient.invalidateQueries([PACKS_ID]);
+        queryClient.invalidateQueries([INTEGRATION_ASSETS_STATUS_ID]);
+        toasts.addSuccess(successToastText);
+      },
+      onError: (error) => {
+        setErrorToast(error);
+      },
+    }
+  );
 };

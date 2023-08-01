@@ -102,8 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159403
-    describe.skip('Mappings step', async () => {
+    describe('Mappings step', async () => {
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the index templates tab
@@ -119,8 +118,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Go to Mappings step
         await pageObjects.indexManagement.clickNextButton();
+        expect(await testSubjects.getVisibleText('stepTitle')).to.be(
+          'Component templates (optional)'
+        );
         await pageObjects.indexManagement.clickNextButton();
+        expect(await testSubjects.getVisibleText('stepTitle')).to.be('Index settings (optional)');
         await pageObjects.indexManagement.clickNextButton();
+        expect(await testSubjects.getVisibleText('stepTitle')).to.be('Mappings (optional)');
       });
 
       // Test for catching the bug reported in https://github.com/elastic/kibana/issues/156202
