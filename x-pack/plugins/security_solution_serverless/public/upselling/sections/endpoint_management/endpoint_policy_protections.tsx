@@ -17,7 +17,7 @@ const CARD_MESSAGE = i18n.translate(
   'xpack.securitySolution.endpointPolicyProtections.cardMessage',
   {
     defaultMessage:
-      'To turn on policy protections, like malware, ransomware and other, you must add at least Endpoint Essentials to your project. ',
+      'To turn on policy protections, like malware, ransomware and others, you must add at least Endpoint Essentials to your project. ',
   }
 );
 const BADGE_TEXT = i18n.translate('xpack.securitySolution.endpointPolicyProtections.badgeText', {
