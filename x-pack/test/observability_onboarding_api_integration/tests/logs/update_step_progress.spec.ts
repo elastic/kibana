@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     message?: string;
   }) {
     return await observabilityOnboardingApiClient.logMonitoringUser({
-      endpoint: 'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
+      endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
       params: {
         path: {
           id,
@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const req = await observabilityOnboardingApiClient.logMonitoringUser({
-          endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
+          endpoint: 'POST /internal/observability_onboarding/logs/flow',
           params: {
             body: {
               name: 'name',
