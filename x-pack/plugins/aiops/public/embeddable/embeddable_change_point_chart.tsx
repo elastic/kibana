@@ -49,10 +49,10 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 > {
   public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
-  private reload$ = new Subject<void>();
+  private reload$ = new Subject<number>();
 
   public reload(): void {
-    this.reload$.next();
+    this.reload$.next(Date.now());
   }
 
   private node?: HTMLElement;
@@ -109,7 +109,11 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
           <AiopsAppContext.Provider value={this.deps as unknown as AiopsAppDependencies}>
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
-                <EmbeddableInputTracker input$={input$} initialInput={input} />
+                <EmbeddableInputTracker
+                  input$={input$}
+                  initialInput={input}
+                  reload$={this.reload$}
+                />
               </Suspense>
             </DatePickerContextProvider>
           </AiopsAppContext.Provider>

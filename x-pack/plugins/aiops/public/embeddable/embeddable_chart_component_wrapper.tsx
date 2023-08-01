@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
 import React, { FC, useMemo } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { ReloadContextProvider } from '../hooks/use_reload';
 import type {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
@@ -33,23 +34,26 @@ const defaultSort = {
 export const EmbeddableInputTracker: FC<{
   input$: Observable<EmbeddableChangePointChartInput>;
   initialInput: EmbeddableChangePointChartInput;
-}> = ({ input$, initialInput }) => {
+  reload$: Observable<number>;
+}> = ({ input$, initialInput, reload$ }) => {
   const input = useObservable(input$, initialInput);
 
   return (
-    <DataSourceContextProvider dataViewId={input.dataViewId}>
-      <FilterQueryContextProvider timeRange={input.timeRange}>
-        <ChardGridEmbeddableWrapper
-          timeRange={input.timeRange}
-          fn={input.fn}
-          metricField={input.metricField}
-          splitField={input.splitField}
-          maxSeriesToPlot={input.maxSeriesToPlot}
-          dataViewId={input.dataViewId}
-          partitions={input.partitions}
-        />
-      </FilterQueryContextProvider>
-    </DataSourceContextProvider>
+    <ReloadContextProvider reload$={reload$}>
+      <DataSourceContextProvider dataViewId={input.dataViewId}>
+        <FilterQueryContextProvider timeRange={input.timeRange}>
+          <ChardGridEmbeddableWrapper
+            timeRange={input.timeRange}
+            fn={input.fn}
+            metricField={input.metricField}
+            splitField={input.splitField}
+            maxSeriesToPlot={input.maxSeriesToPlot}
+            dataViewId={input.dataViewId}
+            partitions={input.partitions}
+          />
+        </FilterQueryContextProvider>
+      </DataSourceContextProvider>
+    </ReloadContextProvider>
   );
 };
 

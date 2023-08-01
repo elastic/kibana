@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
+import { map } from 'rxjs/operators';
 import { pick } from 'lodash';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
@@ -15,10 +16,11 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+import { type Observable } from 'rxjs';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AiopsAppContext, AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -28,6 +30,7 @@ import { PageHeader } from '../page_header';
 import { ChangePointDetectionPage } from './change_point_detection_page';
 import { ChangePointDetectionContextProvider } from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { ReloadContextProvider } from '../../hooks/use_reload';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -51,6 +54,10 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
 
   const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
 
+  const reload$ = useMemo<Observable<number>>(() => {
+    return mlTimefilterRefresh$.pipe(map((v) => v.lastRefresh));
+  }, []);
+
   if (warning !== null) {
     return <>{warning}</>;
   }
@@ -71,9 +78,11 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
                   <DatePickerContextProvider {...datePickerDeps}>
                     <PageHeader />
                     <EuiSpacer />
-                    <ChangePointDetectionContextProvider>
-                      <ChangePointDetectionPage />
-                    </ChangePointDetectionContextProvider>
+                    <ReloadContextProvider reload$={reload$}>
+                      <ChangePointDetectionContextProvider>
+                        <ChangePointDetectionPage />
+                      </ChangePointDetectionContextProvider>
+                    </ReloadContextProvider>
                   </DatePickerContextProvider>
                 </StorageContextProvider>
               </DataSourceContext.Provider>
