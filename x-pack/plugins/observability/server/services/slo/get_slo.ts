@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
-import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
+import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
 
@@ -15,14 +15,13 @@ export class GetSLO {
 
   public async execute(sloId: string, params: GetSLOParams = {}): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
-    const summaryBySlo = await this.summaryClient.fetchSummary([slo]);
+    const instanceId = params.instanceId ?? ALL_VALUE;
+    const summary = await this.summaryClient.fetchSummary(slo, instanceId);
 
-    const sloWithSummary = mergeSloWithSummary(slo, summaryBySlo);
-
-    return getSLOResponseSchema.encode(sloWithSummary);
+    return getSLOResponseSchema.encode(mergeSloWithSummary(slo, summary, instanceId));
   }
 }
 
-function mergeSloWithSummary(slo: SLO, summaryBySlo: Record<SLOId, Summary>): SLOWithSummary {
-  return { ...slo, summary: summaryBySlo[slo.id] };
+function mergeSloWithSummary(slo: SLO, summary: Summary, instanceId: string) {
+  return { ...slo, instanceId, summary };
 }
