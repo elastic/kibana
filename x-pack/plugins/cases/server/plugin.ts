@@ -121,7 +121,7 @@ export class CasePlugin {
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
-    if(this.caseConfig.stack.enabled) {
+    if (this.caseConfig.stack.enabled) {
       plugins.features.registerKibanaFeature(getCasesKibanaFeature());
     }
 

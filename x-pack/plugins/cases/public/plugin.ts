@@ -75,7 +75,7 @@ export class CasesUiPlugin
       });
     }
 
-    if(config.stack.enabled) {
+    if (config.stack.enabled) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: APP_ID,
         title: APP_TITLE,
@@ -86,9 +86,9 @@ export class CasesUiPlugin
             CasesPluginStart,
             unknown
           ];
-  
+
           const { renderApp } = await import('./application');
-  
+
           return renderApp({
             mountParams: params,
             coreStart,

@@ -92,16 +92,18 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         const isKibanaRequest = getIsKibanaRequest(request.headers);
         const caseConfigSchema = ConfigSchema.validate({});
 
-        const hasCasesOwnerInQuery = (request.query)?.owner === 'cases' || request.query?.owners?.includes('cases');
+        const hasCasesOwnerInQuery =
+          request.query?.owner === 'cases' || request.query?.owners?.includes('cases');
 
-        const hasCasesOwnerInBody = request.body?.owner === 'cases' || request.body?.owners?.includes('cases');
+        const hasCasesOwnerInBody =
+          request.body?.owner === 'cases' || request.body?.owners?.includes('cases');
 
         if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        if(!caseConfigSchema.stack.enabled && (hasCasesOwnerInBody || hasCasesOwnerInQuery)) {
-          return response.badRequest({ body: 'Cases as owner is not registered'}); 
+        if (!caseConfigSchema.stack.enabled && (hasCasesOwnerInBody || hasCasesOwnerInQuery)) {
+          return response.badRequest({ body: 'Cases as owner is not registered' });
         }
 
         try {
