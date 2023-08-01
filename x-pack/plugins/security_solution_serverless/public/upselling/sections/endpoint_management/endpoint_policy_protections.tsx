@@ -10,19 +10,25 @@ import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 
-const CARD_TITLE = i18n.translate('xpack.securitySolution.endpointPolicyProtections.cardTitle', {
-  defaultMessage: 'Policy Protections',
-});
+const CARD_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.endpointPolicyProtections.cardTitle',
+  {
+    defaultMessage: 'Policy Protections',
+  }
+);
 const CARD_MESSAGE = i18n.translate(
-  'xpack.securitySolution.endpointPolicyProtections.cardMessage',
+  'xpack.securitySolutionServerless.endpointPolicyProtections.cardMessage',
   {
     defaultMessage:
       'To turn on policy protections, like malware, ransomware and others, you must add at least Endpoint Essentials to your project. ',
   }
 );
-const BADGE_TEXT = i18n.translate('xpack.securitySolution.endpointPolicyProtections.badgeText', {
-  defaultMessage: 'Endpoint Essentials',
-});
+const BADGE_TEXT = i18n.translate(
+  'xpack.securitySolutionServerless.endpointPolicyProtections.badgeText',
+  {
+    defaultMessage: 'Endpoint Essentials',
+  }
+);
 
 const CardDescription = styled.p`
   padding: 0 33.3%;
