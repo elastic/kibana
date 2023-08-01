@@ -92,6 +92,8 @@ describe('FindSLO', () => {
             updatedAt: slo.updatedAt.toISOString(),
             enabled: slo.enabled,
             revision: slo.revision,
+            groupBy: slo.groupBy,
+            instanceId: '*',
           },
         ],
       });
@@ -145,6 +147,7 @@ function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
     results: [
       {
         id: slo.id,
+        instanceId: slo.groupBy === '*' ? '*' : 'host-abcde',
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,

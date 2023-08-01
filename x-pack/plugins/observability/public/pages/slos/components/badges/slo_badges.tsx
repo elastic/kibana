@@ -17,6 +17,7 @@ import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
 import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SloGroupByBadge } from './slo_group_by_badge';
 
 export interface Props {
   activeAlerts?: ActiveAlerts;
@@ -56,6 +57,7 @@ export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadg
       ) : (
         <>
           <SloStatusBadge slo={slo} />
+          <SloGroupByBadge slo={slo} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
           <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />

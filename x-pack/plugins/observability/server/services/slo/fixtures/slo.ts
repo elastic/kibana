@@ -129,6 +129,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   },
   tags: ['critical', 'k8s'],
   enabled: true,
+  groupBy: '*',
 };
 
 const defaultCreateSloParams: CreateSLOParams = {

@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import {
+  allOrAnyString,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
@@ -39,7 +40,12 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ id: sloIdSchema, settings: optionalSettingsSchema, tags: tagsSchema }),
+    t.partial({
+      id: sloIdSchema,
+      settings: optionalSettingsSchema,
+      tags: tagsSchema,
+      groupBy: allOrAnyString,
+    }),
   ]),
 });
 
@@ -85,21 +91,27 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const sloResponseSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  revision: t.number,
-  settings: settingsSchema,
-  enabled: t.boolean,
-  tags: tagsSchema,
-  createdAt: dateType,
-  updatedAt: dateType,
-});
+const sloResponseSchema = t.intersection([
+  t.type({
+    id: sloIdSchema,
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    revision: t.number,
+    settings: settingsSchema,
+    enabled: t.boolean,
+    tags: tagsSchema,
+    groupBy: allOrAnyString,
+    createdAt: dateType,
+    updatedAt: dateType,
+  }),
+  t.partial({
+    instanceId: allOrAnyString,
+  }),
+]);
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
@@ -121,6 +133,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
+    groupBy: allOrAnyString,
   }),
 });
 

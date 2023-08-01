@@ -83,6 +83,7 @@ describe('GetSLO', () => {
         updatedAt: slo.updatedAt.toISOString(),
         enabled: slo.enabled,
         revision: slo.revision,
+        groupBy: slo.groupBy,
       });
     });
   });
