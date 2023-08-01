@@ -14,7 +14,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TimestampOption } from '@kbn/data-view-editor-plugin/public/types';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { canAppendWildcard, matchedIndiciesDefault } from './data_drift_index_patterns_editor';
+import { canAppendWildcard, matchedIndicesDefault } from './data_drift_index_patterns_editor';
 
 interface DataViewEditorProps {
   label: ReactNode;
@@ -38,7 +38,7 @@ export function DataViewEditor({
   );
   const matchedIndices = useObservable(
     dataViewEditorService.matchedIndices$,
-    matchedIndiciesDefault
+    matchedIndicesDefault
   );
   const options = useObservable<TimestampOption[]>(
     dataViewEditorService.timestampFieldOptions$,
@@ -91,7 +91,7 @@ export function DataViewEditor({
       });
 
     if (isLoadingOptions === false && options.length === 0)
-      return i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.error.noEmptyIndexPattern', {
+      return i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.error.noTimestampField', {
         defaultMessage: 'No matching data stream, index, or index alias has a timestamp field.',
       });
     return undefined;
