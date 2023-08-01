@@ -27,7 +27,7 @@ import { Transform } from 'stream';
  *  @param  {String} splitChunk
  *  @return {Transform}
  */
-export function createSplitStream(splitChunk: string | Uint8Array) {
+export function createSplitStream(splitChunk: string | Uint8Array): Transform {
   let unsplitBuffer = Buffer.alloc(0);
 
   return new Transform({

@@ -8,7 +8,7 @@
 
 import { Transform } from 'stream';
 
-export function createReplaceStream(toReplace: string, replacement: string | Buffer) {
+export function createReplaceStream(toReplace: string, replacement: string | Buffer): Transform {
   if (typeof toReplace !== 'string') {
     throw new TypeError('toReplace must be a string');
   }
