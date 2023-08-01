@@ -107,16 +107,7 @@ function getPluginPackagesFilter(selector = {}) {
  */
 function getDistributablePacakgesFilter() {
   return (pkg) => {
-    // if (pkg.isDevOnly()) {
-    //   return false;
-    // }
-
-    if (
-      // @ts-expect-error upgrade ts
-      pkg.isDevOnly ||
-      pkg.manifest.type === 'functional-tests' ||
-      pkg.manifest.type === 'test-helper'
-    ) {
+    if (pkg.isDevOnly()) {
       return false;
     }
 
