@@ -21,8 +21,6 @@ export const createAndSetDataView =
     LogExplorerProfileEvent
   > =>
   async (context) => {
-    if (!('datasetSelection' in context)) return;
-
     const dataView = await stateContainer.actions.createAndAppendAdHocDataView(
       context.datasetSelection.toDataviewSpec()
     );
