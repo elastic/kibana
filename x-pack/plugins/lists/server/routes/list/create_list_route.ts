@@ -38,12 +38,18 @@ export const createListRoute = (router: ListsPluginRouter): void => {
           request.body;
         const lists = await getListClient(context);
         const dataStreamExists = await lists.getListDataStreamExists();
-        if (!dataStreamExists) {
+        const indexExists = await lists.getListIndexExists();
+
+        if (!dataStreamExists && !indexExists) {
           return siemResponse.error({
             body: `To create a list, the data stream must exist first. Data stream "${lists.getListIndex()}" does not exist`,
             statusCode: 400,
           });
         } else {
+          // needs to be migrated to data stream
+          if (!dataStreamExists && indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
           if (id != null) {
             const list = await lists.getList({ id });
             if (list != null) {
