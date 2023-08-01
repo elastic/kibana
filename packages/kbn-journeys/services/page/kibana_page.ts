@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
 
@@ -22,6 +23,10 @@ export class KibanaPage {
     return this.page.waitForSelector('.headerGlobalNav', {
       state: 'attached',
     });
+  }
+
+  async backToDashboardListing() {
+    await this.page.click(subj('breadcrumb dashboardListingBreadcrumb first'));
   }
 
   async waitForVisualizations(visCount: number) {

@@ -15,4 +15,8 @@ export class ProjectPage extends KibanaPage {
       state: 'attached',
     });
   }
+
+  async backToDashboardListing() {
+    await this.page.click(subj('nav-item-search_project_nav.explore.dashboards'));
+  }
 }

@@ -41,7 +41,7 @@ export const journey = new Journey({
     await page.click('[data-test-subj="confirmSaveSavedObjectButton"]');
     await page.waitForSelector('[data-test-subj="saveDashboardSuccess"]');
   })
-  .step('Return to dashboard list', async ({ page, auth }) => {
+  .step('Return to dashboard list', async ({ kibanaPage, page, auth }) => {
     if (auth.isServerless()) {
       await page.click(subj('nav-item-search_project_nav.explore.dashboards'));
     } else {
