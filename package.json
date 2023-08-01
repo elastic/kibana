@@ -626,7 +626,7 @@
     "@types/styled-components": "^5.1.0",
     "@types/supertest": "^2.0.5",
     "@types/tapable": "^1.0.6",
-    "@types/tar": "^4.0.5",
+    "@types/tar": "^6.1.5",
     "@types/tar-fs": "^1.16.1",
     "@types/tempy": "^0.2.0",
     "@types/testing-library__jest-dom": "5.14.5",
