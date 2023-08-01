@@ -20,6 +20,9 @@ const CARD_MESSAGE = i18n.translate(
       'To turn on policy protections, like malware, ransomware and other, you must add at least Endpoint Essentials to your project. ',
   }
 );
+const BADGE_TEXT = i18n.translate('xpack.securitySolution.endpointPolicyProtections.badgeText', {
+  defaultMessage: 'Endpoint Essentials',
+});
 
 const CardDescription = styled.p`
   padding: 0 33.3%;
@@ -37,9 +40,7 @@ export const EndpointPolicyProtections = memo(() => {
       icon={<EuiIcon size="xl" type="lock" />}
       betaBadgeProps={{
         'data-test-subj': 'endpointPolicy-protectionsLockedCard-badge',
-        label: i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
-          defaultMessage: 'Endpoint Essentials',
-        }),
+        label: BADGE_TEXT,
       }}
       title={
         <h3 data-test-subj="endpointPolicy-protectionsLockedCard-title">
