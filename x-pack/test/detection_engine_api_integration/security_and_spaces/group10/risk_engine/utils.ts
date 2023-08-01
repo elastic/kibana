@@ -142,7 +142,7 @@ export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: Kb
     type: 'risk-engine-configuration',
   });
 
-  return soResponse.saved_objects[0];
+  return soResponse?.saved_objects?.[0];
 };
 
 export const cleanRiskEngineConfig = async ({
