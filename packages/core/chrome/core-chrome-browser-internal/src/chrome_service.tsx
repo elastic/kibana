@@ -305,10 +305,8 @@ export class ChromeService {
 
             return (
               <ProjectHeader
-                {...{
-                  application,
-                  globalHelpExtensionMenuLinks$,
-                }}
+                application={application}
+                globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
                 breadcrumbs$={currentProjectBreadcrumbs$}
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
