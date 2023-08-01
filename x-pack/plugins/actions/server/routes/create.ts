@@ -11,7 +11,7 @@ import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { ILicenseState, validateEmptyStrings } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { CreateOptions } from '../actions_client/actions_client';
+import { CreateOptions } from '../actions_client';
 
 export const bodySchema = schema.object({
   name: schema.string({ validate: validateEmptyStrings }),
