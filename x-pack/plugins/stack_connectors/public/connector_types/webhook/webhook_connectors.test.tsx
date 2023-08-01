@@ -152,6 +152,7 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: false,
+            authType: null,
           },
           __internal__: {
             hasHeaders: true,
