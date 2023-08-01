@@ -15,9 +15,9 @@ import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { InsightBase } from './insight_base';
 import { InsightMissingCredentials } from './insight_missing_credentials';
-import { StopGeneratingButton } from '../stop_generating_button';
-import { RegenerateResponseButton } from '../regenerate_response_button';
-import { StartChatButton } from '../start_chat_button';
+import { StopGeneratingButton } from '../buttons/stop_generating_button';
+import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
+import { StartChatButton } from '../buttons/start_chat_button';
 import { ChatFlyout } from '../chat/chat_flyout';
 
 function ChatContent({ messages, connectorId }: { messages: Message[]; connectorId: string }) {

@@ -16,8 +16,8 @@ import { ConnectorSelectorBase } from '../connector_selector/connector_selector_
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { FeedbackButtons } from '../feedback_buttons';
-import { RegenerateResponseButton } from '../regenerate_response_button';
-import { StartChatButton } from '../start_chat_button';
+import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
+import { StartChatButton } from '../buttons/start_chat_button';
 
 export default {
   component: Component,

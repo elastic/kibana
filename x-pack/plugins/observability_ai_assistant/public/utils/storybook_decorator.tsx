@@ -6,8 +6,21 @@
  */
 import React, { ComponentType } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
+
+const service = {
+  isEnabled: () => true,
+  chat: async (options: {
+    messages: [];
+    connectorId: string;
+    // signal: new AbortSignal();
+  }) => {},
+  // callApi: ObservabilityAIAssistantAPIClient;
+  getCurrentUser: async () => {},
+};
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
+  console.log('hello?');
   return (
     <KibanaContextProvider
       services={{
@@ -21,7 +34,9 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         },
       }}
     >
-      <Story />
+      <ObservabilityAIAssistantProvider value={service}>
+        <Story />
+      </ObservabilityAIAssistantProvider>
     </KibanaContextProvider>
   );
 }
