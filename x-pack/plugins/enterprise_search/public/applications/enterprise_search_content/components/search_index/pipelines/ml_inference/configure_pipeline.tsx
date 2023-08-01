@@ -32,6 +32,8 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
+import { IndexNameLogic } from '../../index_name_logic';
+
 import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
@@ -65,6 +67,7 @@ export const ConfigurePipeline: React.FC = () => {
   const { selectExistingPipeline, setInferencePipelineConfiguration } =
     useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
+  const { indexName } = useValues(IndexNameLogic);
 
   const { existingPipeline, modelID, pipelineName } = configuration;
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
@@ -216,7 +219,7 @@ export const ConfigurePipeline: React.FC = () => {
                               'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. This will create a pipeline named {pipelineName}.',
                             values: {
                               pipelineName: `ml-inference-${
-                                pipelineName.length > 0 ? pipelineName : '<name>'
+                                pipelineName.length > 0 ? pipelineName : indexName
                               }`,
                             },
                           }
@@ -232,13 +235,7 @@ export const ConfigurePipeline: React.FC = () => {
                     disabled={inputsDisabled}
                     fullWidth
                     prepend="ml-inference-"
-                    placeholder={i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
-                      {
-                        defaultMessage: 'Enter a unique name for this pipeline',
-                      }
-                    )}
-                    value={pipelineName}
+                    value={pipelineName || indexName}
                     onChange={(e) =>
                       setInferencePipelineConfiguration({
                         ...configuration,
