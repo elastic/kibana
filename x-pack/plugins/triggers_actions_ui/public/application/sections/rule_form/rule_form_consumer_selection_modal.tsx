@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 const consumerSelectionModalTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.title',
   {
-    defaultMessage: 'Select rule access',
+    defaultMessage: 'Select rule association',
   }
 );
 
@@ -27,7 +27,7 @@ const consumerSelectionModalDescription = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.description',
   {
     defaultMessage:
-      'This rule needs to be associated with a particular application for role access compatibility.',
+      'This rule needs to be associated with a particular application for proper role access visibility.',
   }
 );
 
@@ -72,8 +72,12 @@ const featureNameMap: Record<string, string> = {
   ),
 };
 
+export type ValidConsumer = 'logs' | 'infrastructure' | 'apm' | 'uptime' | 'slo' | 'stackAlerts';
+
+export const VALID_CONSUMERS = ['logs', 'infrastructure', 'apm', 'uptime', 'slo', 'stackAlerts'];
+
 export interface RuleFormConsumerSelectionModalProps {
-  consumers: string[];
+  consumers: ValidConsumer[];
   onSave: (consumer: string) => void;
   onCancel: () => void;
 }
@@ -94,15 +98,19 @@ export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionM
   }, [selectedConsumer, onSave]);
 
   const formattedSelectOptions: EuiSelectOption[] = useMemo(() => {
-    return consumers.reduce<EuiSelectOption[]>((result, consumer) => {
-      if (featureNameMap[consumer]) {
-        result.push({
-          value: consumer,
-          text: featureNameMap[consumer],
-        });
-      }
-      return result;
-    }, []);
+    return consumers
+      .reduce<EuiSelectOption[]>((result, consumer) => {
+        if (featureNameMap[consumer]) {
+          result.push({
+            value: consumer,
+            text: featureNameMap[consumer],
+          });
+        }
+        return result;
+      }, [])
+      .sort((a, b) => {
+        return (a.value as string).localeCompare(b.value as string);
+      });
   }, [consumers]);
 
   // Initialize dropdown with the first option
@@ -137,6 +145,7 @@ export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionM
             value={selectedConsumer}
             onChange={handleOnChange}
             options={formattedSelectOptions}
+            data-test-subj="ruleFormConsumerSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
