@@ -725,7 +725,7 @@ module.exports = {
     {
       files: ['**/*.test.{js,mjs,ts,tsx}'],
       rules: {
-        'jest/valid-describe': 'error',
+        'jest/valid-describe-callback': 'error',
       },
     },
 

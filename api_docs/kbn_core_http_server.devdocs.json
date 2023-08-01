@@ -7254,6 +7254,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_calculation_route.ts"
+              },
+              {
                 "plugin": "serverless",
                 "path": "x-pack/plugins/serverless/server/plugin.ts"
               },
@@ -14761,6 +14765,10 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/server/routes/log_categorization.ts"
               },
               {
                 "plugin": "unifiedSearch",

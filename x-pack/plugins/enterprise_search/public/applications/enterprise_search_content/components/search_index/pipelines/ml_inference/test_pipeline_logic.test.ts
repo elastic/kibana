@@ -21,10 +21,8 @@ import { AddInferencePipelineSteps } from './types';
 const DEFAULT_VALUES: TestPipelineValues = {
   addInferencePipelineModal: {
     configuration: {
-      destinationField: '',
       modelID: '',
       pipelineName: '',
-      sourceField: '',
       targetField: '',
     },
     indexName: '',
@@ -67,10 +65,8 @@ describe('TestPipelineLogic', () => {
     jest.clearAllMocks();
     mockMlInferenceValues.addInferencePipelineModal = {
       configuration: {
-        destinationField: '',
         modelID: '',
         pipelineName: '',
-        sourceField: '',
         targetField: '',
       },
       indexName: '',
@@ -123,10 +119,8 @@ describe('TestPipelineLogic', () => {
     describe('simulatePipeline', () => {
       const mockModelConfiguration = {
         configuration: {
-          destinationField: '',
           modelID: nerModel.model_id,
           pipelineName: 'mock-pipeline-name',
-          sourceField: 'mock_text_field',
         },
         indexName: 'my-index-123',
       };
