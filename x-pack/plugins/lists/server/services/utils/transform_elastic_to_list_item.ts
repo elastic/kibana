@@ -63,7 +63,9 @@ export const transformElasticHitsToListItem = ({
         deserializer,
         id: _id,
         list_id,
-        meta,
+        // meta can be null if deleted (empty in PUT payload), since update_by_query set deleted values as null
+        // return it as undefined to keep it consistent with payload
+        meta: meta ?? undefined,
         serializer,
         tie_breaker_id,
         type,
