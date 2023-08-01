@@ -1352,7 +1352,7 @@
     "@types/styled-components": "^5.1.0",
     "@types/supertest": "^2.0.5",
     "@types/tapable": "^1.0.6",
-    "@types/tar": "^6.1.3",
+    "@types/tar": "^6.1.5",
     "@types/tempy": "^0.2.0",
     "@types/testing-library__jest-dom": "^5.14.7",
     "@types/tinycolor2": "^1.4.1",
