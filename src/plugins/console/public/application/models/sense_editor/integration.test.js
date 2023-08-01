@@ -196,7 +196,7 @@ describe('Integration', () => {
     endpoints: {
       _search: {
         methods: ['GET', 'POST'],
-        patterns: ['{indices}/_search', '_search'],
+        patterns: ['{index}/_search', '_search'],
         data_autocomplete_rules: {
           query: {
             match_all: {},
@@ -996,7 +996,7 @@ describe('Integration', () => {
   const CLUSTER_KB = {
     endpoints: {
       _search: {
-        patterns: ['_search', '{indices}/_search'],
+        patterns: ['_search', '{index}/_search'],
         url_params: {
           search_type: ['count', 'query_then_fetch'],
           scroll: '10m',

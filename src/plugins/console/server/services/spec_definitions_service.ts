@@ -55,7 +55,7 @@ export class SpecDefinitionsService {
       | undefined;
 
     _.each(description.patterns || [], function (p) {
-      if (p.indexOf('{indices}') >= 0) {
+      if (p.indexOf('{index}') >= 0) {
         urlParamsDef = urlParamsDef || {};
         urlParamsDef.ignore_unavailable = '__flag__';
         urlParamsDef.allow_no_indices = '__flag__';

@@ -66,7 +66,8 @@ Url to Elasticsearch REST API documentation for the endpoint (If the url contain
 Allowed http methods (`GET`, `POST` etc)
 
 #### `patterns`
-Array of API endpoints that contain variables like `{indices}` or `{fields}`. For example, `{indices}/_rollup/{rollup_index}`. See the [Variables](#variables) section below for more info.
+Array of API endpoints that contain variables like `{index}` or `{fields}`. For example, `{index}/_rollup/{rollup_index}`. Variables used in patterns are not always defined. For example, a pattern `_ilm/policy/{policy}` indicates that any string can be used as policy name. 
+See the [Variables](#variables) section below for more info about variables defined in the autocomplete engine, such as `{index}`.
 
 #### `url_params`
 Query url parameters and their values. See the [Query url parameters](#query-url-parameters) section below for more info. An example: 
@@ -134,7 +135,7 @@ GET /_some_endpoint?expand_wildcards=hi
 ```
 "hidden" is displayed for autocompletion. 
 
-Variables such as `{indices}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Variables](#variables) section below for more information.
+Variables such as `{index}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Variables](#variables) section below for more information.
 
 ### Request body parameters
 Request body parameters are configured in form of an object, for example: 
@@ -258,7 +259,7 @@ To provide a different set of autocomplete suggestions based on the value config
 ### Variables
 Some autocomplete definitions need to be configured with dynamic values that can't be hard coded into a json or js file, for example a list of indices in the cluster. 
 A list of variables is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/kb/kb.js) file. The values of these variables are assigned dynamically for every cluster. 
-Use these variables with curly braces, for example `{indices}`, `{types}`, `{id}`, `{username}`, `{template}`, `{nodes}` etc.
+Use these variables with curly braces, for example `{index}`, `{fields}`, `{template}` etc.
 
 
 ### Architecture changes in 8.3 release (timeline: 07-04-2022 - 19-06-2022)

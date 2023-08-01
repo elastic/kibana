@@ -111,7 +111,7 @@ describe('Knowledge base', () => {
           indexTest: {
             endpoints: {
               _multi_indices: {
-                patterns: ['{indices}/_multi_indices'],
+                patterns: ['{index}/_multi_indices'],
               },
               _single_index: { patterns: ['{index}/_single_index'] },
               _no_index: {
@@ -152,63 +152,4 @@ describe('Knowledge base', () => {
     indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices'],
   });
-
-  function typeTest(name, tokenPath, otherTokenValues, expectedContext) {
-    test(name, function () {
-      const testApi = kb._test.loadApisFromJson(
-        {
-          typeTest: {
-            endpoints: {
-              _multi_types: { patterns: ['{indices}/{types}/_multi_types'] },
-              _single_type: { patterns: ['{indices}/{type}/_single_type'] },
-              _no_types: { patterns: ['{indices}/_no_types'] },
-            },
-          },
-        },
-        kb._test.globalUrlComponentFactories
-      );
-      kb.setActiveApi(testApi);
-
-      autocompleteInfo.mapping.loadMappings(MAPPING);
-
-      testUrlContext(tokenPath, otherTokenValues, expectedContext);
-    });
-  }
-
-  typeTest('Type integration 1', ['index1'], [], {
-    indices: ['index1'],
-    autoCompleteSet: ['_no_types', t('type1.1'), t('type1.2')],
-  });
-  typeTest(
-    'Type integration 2',
-    ['index1'],
-    ['type1.2'],
-    // we are not yet comitted to type1.2, so _no_types is returned
-    { indices: ['index1'], autoCompleteSet: ['_no_types', t('type1.1')] }
-  );
-
-  typeTest('Type integration 3', ['index2'], [], {
-    indices: ['index2'],
-    autoCompleteSet: ['_no_types', t('type2.1')],
-  });
-
-  typeTest('Type integration 4', ['index1', 'type1.2'], [], {
-    indices: ['index1'],
-    types: ['type1.2'],
-    autoCompleteSet: ['_multi_types', '_single_type'],
-  });
-
-  typeTest(
-    'Type integration 5',
-    [
-      ['index1', 'index2'],
-      ['type1.2', 'type1.1'],
-    ],
-    [],
-    {
-      indices: ['index1', 'index2'],
-      types: ['type1.2', 'type1.1'],
-      autoCompleteSet: ['_multi_types'],
-    }
-  );
 });
