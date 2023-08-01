@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LocatorParams } from '@kbn/reporting-common';
 import type { JobId } from './base';
 
 type DownloadLink = string;

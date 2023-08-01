@@ -19,9 +19,9 @@ import {
   of,
   lastValueFrom,
 } from 'rxjs';
+import { validateUrls } from '@kbn/reporting-common/export_type_helpers/validate_urls';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 import { decryptJobHeaders, ExportType, generatePngObservable, getFullUrls } from '../common';
-import { validateUrls } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/validate_urls';
 import {
   LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_CLOUD_STANDARD,

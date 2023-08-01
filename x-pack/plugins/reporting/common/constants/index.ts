@@ -48,7 +48,6 @@ export const API_GET_ILM_POLICY_STATUS = `${API_BASE_URL}/ilm_policy_status`;
 export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_ilm_policy`;
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 
-
 export const ILM_POLICY_NAME = 'kibana-reporting';
 
 // Usage counter types

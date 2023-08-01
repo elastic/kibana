@@ -7,7 +7,6 @@
  */
 
 import * as jobTypes from './job_types';
-import * as reportTypes from './report_types';
 
 export const PLUGIN_ID = 'reporting';
 
