@@ -15,10 +15,8 @@ import {
   EuiFormRow,
   EuiLink,
   EuiPanel,
-  EuiSwitch,
   EuiTextArea,
   htmlIdGenerator,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -50,9 +48,7 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(({ handleAdvancedConfi
   const additionalSettingsUpdated = useMemo(
     () =>
       (additionalSettings?.tag !== undefined && additionalSettings.tag !== '') ||
-      (additionalSettings?.condition !== undefined && additionalSettings.condition !== '') ||
-      (additionalSettings?.ignoreFailure !== undefined &&
-        additionalSettings.ignoreFailure !== false),
+      (additionalSettings?.condition !== undefined && additionalSettings.condition !== ''),
     [additionalSettings]
   );
 
@@ -124,7 +120,7 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(({ handleAdvancedConfi
               />
             </EuiFormRow>
           </EuiFlexItem>
-          {/* TAG AND IGNORE FAILURE */}
+          {/* TAG */}
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
@@ -152,30 +148,6 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(({ handleAdvancedConfi
                       'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.tagAriaLabel',
                       { defaultMessage: 'Optional tag identifier for the processor' }
                     )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow
-                  fullWidth
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureHelpText"
-                      defaultMessage="Ignore failures for this processor."
-                    />
-                  }
-                >
-                  <EuiSwitch
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
-                        defaultMessage="Ignore failure"
-                      />
-                    }
-                    checked={additionalSettings?.ignoreFailure ?? false}
-                    onChange={(e: EuiSwitchEvent) =>
-                      handleAdditionalSettingsChange({ ignoreFailure: e.target.checked })
-                    }
                   />
                 </EuiFormRow>
               </EuiFlexItem>

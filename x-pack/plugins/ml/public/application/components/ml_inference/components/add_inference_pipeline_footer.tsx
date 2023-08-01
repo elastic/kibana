@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AddInferencePipelineSteps } from '../types';
-import { BACK_BUTTON_LABEL, CANCEL_BUTTON_LABEL, CONTINUE_BUTTON_LABEL } from '../constants';
+import {
+  BACK_BUTTON_LABEL,
+  CANCEL_BUTTON_LABEL,
+  CLOSE_BUTTON_LABEL,
+  CONTINUE_BUTTON_LABEL,
+} from '../constants';
+import { getSteps } from '../get_steps';
 
 interface Props {
   isConfigureStepValid: boolean;
@@ -33,39 +39,21 @@ export const AddInferencePipelineFooter: FC<Props> = ({
   step,
   setStep,
 }) => {
-  let nextStep: AddInferencePipelineSteps | undefined;
-  let previousStep: AddInferencePipelineSteps | undefined;
-  let isContinueButtonEnabled = false;
-
-  switch (step) {
-    case AddInferencePipelineSteps.Configuration:
-      nextStep = AddInferencePipelineSteps.Advanced;
-      isContinueButtonEnabled = isConfigureStepValid;
-      break;
-    case AddInferencePipelineSteps.Advanced:
-      nextStep = AddInferencePipelineSteps.Test;
-      previousStep = AddInferencePipelineSteps.Configuration;
-      isContinueButtonEnabled = isPipelineDataValid;
-      break;
-    case AddInferencePipelineSteps.Test:
-      nextStep = AddInferencePipelineSteps.Create;
-      previousStep = AddInferencePipelineSteps.Advanced;
-      isContinueButtonEnabled = true;
-      break;
-    case AddInferencePipelineSteps.Create:
-      previousStep = AddInferencePipelineSteps.Test;
-      isContinueButtonEnabled = true;
-      break;
-  }
+  const { nextStep, previousStep, isContinueButtonEnabled } = useMemo(
+    () => getSteps(step, isConfigureStepValid, isPipelineDataValid),
+    [isConfigureStepValid, isPipelineDataValid, step]
+  );
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose}>
+          {pipelineCreated ? CLOSE_BUTTON_LABEL : CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
-        {previousStep !== undefined ? (
+        {previousStep !== undefined && pipelineCreated === false ? (
           <EuiButtonEmpty
             flush="both"
             iconType="arrowLeft"

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiAccordion,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -17,6 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -48,6 +50,17 @@ export const ReviewPipeline: FC<Props> = ({
     modelType === 'regression'
       ? links.ingest.inferenceRegression
       : links.ingest.inferenceClassification;
+
+  const accordionId = useMemo(() => htmlIdGenerator()(), []);
+
+  const configCodeBlock = useMemo(
+    () => (
+      <EuiCodeBlock language="json" isCopyable overflowHeight="400px">
+        {JSON.stringify(inferencePipeline ?? {}, null, 2)}
+      </EuiCodeBlock>
+    ),
+    [inferencePipeline]
+  );
 
   return (
     <>
@@ -137,24 +150,28 @@ export const ReviewPipeline: FC<Props> = ({
                   defaultMessage="This pipeline will be created with the configuration below."
                 />
               ) : null}
-              {pipelineCreated
-                ? i18n.translate(
-                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.successDescription',
-                    {
-                      defaultMessage: 'The pipeline has been created with the configuration below.',
-                    }
-                  )
-                : null}
             </p>
           </EuiText>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow>
-          <EuiCodeBlock language="json" isCopyable overflowHeight="400px">
-            {JSON.stringify(inferencePipeline ?? {}, null, 2)}
-          </EuiCodeBlock>
+          {pipelineCreated ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                id={accordionId}
+                buttonContent={
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.viewConfig"
+                    defaultMessage="View configuration"
+                  />
+                }
+              >
+                {configCodeBlock}
+              </EuiAccordion>
+            </>
+          ) : (
+            [configCodeBlock]
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

@@ -6,6 +6,9 @@
  */
 
 import React, { FC, memo, useEffect, useCallback, useState } from 'react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiButton,
@@ -30,11 +33,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { getPipelineConfig } from '../get_pipeline_config';
-import { SimulateIngestPipelineResponse } from '../../../../../common/types/trained_models';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import type { MlInferenceState } from '../types';
-
-import '../add_inference_pipeline_flyout.scss';
 
 interface Props {
   sourceIndex?: string;
@@ -43,7 +43,7 @@ interface Props {
 
 export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
   const [simulatePipelineResult, setSimulatePipelineResult] = useState<
-    undefined | SimulateIngestPipelineResponse
+    undefined | estypes.IngestSimulateResponse
   >();
   const [simulatePipelineError, setSimulatePipelineError] = useState<undefined | string>();
   const [sampleDocsString, setSampleDocsString] = useState<string>('');
@@ -151,9 +151,15 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
               &nbsp;
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.description"
-                defaultMessage="Use this tool to run a simulation of your pipeline in order to confirm that it produces your anticipated results. Look for the target field {targetField}."
-                values={{ targetField: <EuiCode>{state.targetField}</EuiCode> }}
+                defaultMessage="Use this tool to run a simulation of your pipeline in order to confirm that it produces your anticipated results."
               />
+              {state.targetField && (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.targetFieldHint"
+                  defaultMessage="Look for the target field {targetField}."
+                  values={{ targetField: <EuiCode>{state.targetField}</EuiCode> }}
+                />
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -188,7 +194,9 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
           <EuiFlexItem>
             <EuiResizableContainer
               direction={isSmallerViewport ? 'vertical' : 'horizontal'}
-              className="resizableContainer"
+              css={css`
+                min-height: calc(${euiThemeVars.euiSizeXL} * 10);
+              `}
             >
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>

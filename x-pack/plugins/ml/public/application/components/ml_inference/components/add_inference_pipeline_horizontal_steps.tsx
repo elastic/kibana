@@ -56,7 +56,7 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
           if (!isPipelineDataValid) return;
           setStep(AddInferencePipelineSteps.Test);
         },
-        status: isPipelineDataValid ? 'incomplete' : 'disabled',
+        status: isPipelineDataValid ? 'complete' : 'disabled',
         title: i18n.translate(
           'xpack.ml.trainedModels.content.indices.transforms.addInferencePipelineModal.steps.test.title',
           {

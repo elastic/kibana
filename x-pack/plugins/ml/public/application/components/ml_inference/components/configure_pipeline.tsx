@@ -53,19 +53,8 @@ export const ConfigurePipeline: FC<Props> = memo(
       },
     } = useMlKibana();
 
-    const handlePipelineNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = e.target;
-      handlePipelineConfigUpdate({ pipelineName: value });
-    };
-
-    const handlePipelineDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const { value } = e.target;
-      handlePipelineConfigUpdate({ pipelineDescription: value });
-    };
-
-    const handleTargetFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = e.target;
-      handlePipelineConfigUpdate({ targetField: value });
+    const handleConfigChange = (value: string, type: string) => {
+      handlePipelineConfigUpdate({ [type]: value });
     };
 
     return (
@@ -84,7 +73,7 @@ export const ConfigurePipeline: FC<Props> = memo(
             <p>
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.description"
-                defaultMessage="Build a {pipeline} that will utilize the pre-trained data frame analytics model - {modelId} - to infer against the data that is being ingested in the pipeline."
+                defaultMessage="Build a {pipeline} to use the trained data frame analytics model - {modelId} - for inference."
                 values={{
                   modelId: <EuiCode>{modelId}</EuiCode>,
                   pipeline: (
@@ -100,7 +89,7 @@ export const ConfigurePipeline: FC<Props> = memo(
                 'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionUsePipelines',
                 {
                   defaultMessage:
-                    'Pipelines you create will be saved and can be used elsewhere in your Elastic deployment.',
+                    "Use pipeline/_simulate or _reindex API to pass data into this pipeline. The model's predictions will be stored in the Target field.",
                 }
               )}
             </p>
@@ -146,7 +135,9 @@ export const ConfigurePipeline: FC<Props> = memo(
                     }
                   )}
                   value={pipelineName}
-                  onChange={handlePipelineNameChange}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleConfigChange(e.target.value, 'pipelineName')
+                  }
                 />
               </EuiFormRow>
               {/* DESCRIPTION */}
@@ -179,7 +170,9 @@ export const ConfigurePipeline: FC<Props> = memo(
                     }
                   )}
                   value={pipelineDescription}
-                  onChange={handlePipelineDescriptionChange}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    handleConfigChange(e.target.value, 'pipelineDescription')
+                  }
                 />
               </EuiFormRow>
               {/* TARGET FIELD */}
@@ -203,7 +196,13 @@ export const ConfigurePipeline: FC<Props> = memo(
                 error={targetFieldError}
                 isInvalid={targetFieldError !== undefined}
               >
-                <EuiFieldText fullWidth value={targetField} onChange={handleTargetFieldChange} />
+                <EuiFieldText
+                  fullWidth
+                  value={targetField}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleConfigChange(e.target.value, 'targetField')
+                  }
+                />
               </EuiFormRow>
             </EuiForm>
           </EuiPanel>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import {
   EuiFlyout,
@@ -27,15 +27,14 @@ import { ConfigurePipeline } from './components/configure_pipeline';
 import { AdvancedConfiguration } from './components/advanced_configuration';
 import { TestPipeline } from './components/test_pipeline';
 import { ReviewPipeline } from './components/review_and_create_pipeline';
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import {
   validateInferencePipelineConfigurationStep,
   validateInferencePipelineAdvancedStep,
 } from './validation';
 import type { MlInferenceState, InferenceModelTypes } from './types';
-
-import './add_inference_pipeline_flyout.scss';
+import { useFetchPipelines } from './hooks/use_fetch_pipelines';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
@@ -52,14 +51,11 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   const [step, setStep] = useState<AddInferencePipelineSteps>(
     AddInferencePipelineSteps.Configuration
   );
-  const [pipelineNames, setPipelineNames] = useState<string[]>([]);
 
   const {
-    trainedModels: { getAllIngestPipelines, createInferencePipeline },
+    trainedModels: { createInferencePipeline },
   } = useMlApiContext();
-  const {
-    notifications: { toasts },
-  } = useMlKibana();
+
   const modelType = getModelType(model);
 
   const createPipeline = async () => {
@@ -72,29 +68,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
     }
   };
 
-  useEffect(() => {
-    async function fetchPipelines() {
-      let names: string[] = [];
-      try {
-        const results = await getAllIngestPipelines();
-        names = Object.keys(results);
-        setPipelineNames(names);
-      } catch (e) {
-        toasts.danger({
-          title: i18n.translate(
-            'xpack.ml.trainedModels.content.indices.pipelines.fetchIngestPipelinesError',
-            {
-              defaultMessage: 'Unable to fetch ingest pipelines.',
-            }
-          ),
-          body: e.message,
-          toastLifeTimeMs: 5000,
-        });
-      }
-    }
-
-    fetchPipelines();
-  }, [getAllIngestPipelines, toasts]);
+  const pipelineNames = useFetchPipelines();
 
   const handleConfigUpdate = (configUpdate: Partial<MlInferenceState>) => {
     setFormState({ ...formState, ...configUpdate });
@@ -168,6 +142,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         {step === AddInferencePipelineSteps.Advanced && model && (
           <AdvancedConfiguration
             handleAdvancedConfigUpdate={handleConfigUpdate}
+            ignoreFailure={formState.ignoreFailure}
             inferenceConfig={formState.inferenceConfig}
             inferenceConfigError={inferenceConfigError}
             modelInferenceConfig={model.inference_config}

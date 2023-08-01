@@ -34,11 +34,6 @@ export interface MlInferenceState {
   targetFieldError?: string;
 }
 
-export interface MlInferenceAction {
-  type: string;
-  payload: any;
-}
-
 export interface AddInferencePipelineFormErrors {
   targetField?: string;
   fieldMap?: string;
@@ -51,5 +46,4 @@ export type InferenceModelTypes = 'regression' | 'classification';
 export interface AdditionalSettings {
   condition?: string;
   tag?: string;
-  ignoreFailure?: boolean;
 }
