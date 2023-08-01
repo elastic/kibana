@@ -93,8 +93,8 @@ const RolesSchema = schema.object({
   allow: schema.conditional(
     schema.contextRef('serverless'),
     true,
-    schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
-    schema.arrayOf(schema.string(), { defaultValue: [] })
+    schema.arrayOf(schema.string(), { defaultValue: [] }),
+    schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] })
   ),
 });
 
