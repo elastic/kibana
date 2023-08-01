@@ -40,18 +40,18 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   return (
     <div data-test-subj={getTestId()}>
+      <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
+      <EuiSpacer size="s" />
+
       {ProtectionsUpSellingComponent && (
         <>
           <ProtectionsUpSellingComponent />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="l" />
         </>
       )}
 
       {!ProtectionsUpSellingComponent && (
         <>
-          <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
-          <EuiSpacer size="s" />
-
           <MalwareProtectionsCard {...props} data-test-subj={getTestId('malware')} />
           <EuiSpacer size="l" />
 
