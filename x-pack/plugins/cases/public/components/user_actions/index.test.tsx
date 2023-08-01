@@ -82,7 +82,8 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-describe(`UserActions`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/156741
+describe.skip(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
