@@ -67,7 +67,6 @@ export function getSuggestions({
   mainPalette?: PaletteOutput;
   allowMixed?: boolean;
 }): Suggestion[] {
-  const startTime = window.performance.now();
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
   );
@@ -134,7 +133,7 @@ export function getSuggestions({
   });
   // Pass all table suggestions to all visualization extensions to get visualization suggestions
   // and rank them by score
-  const suggestions = Object.entries(visualizationMap)
+  return Object.entries(visualizationMap)
     .flatMap(([visualizationId, visualization]) => {
       // in case a missing visualization type is passed via SO, just avoid to compute anything for it
       if (!visualization) {
@@ -176,9 +175,6 @@ export function getSuggestions({
         });
     })
     .sort((a, b) => b.score - a.score);
-  const duration = window.performance.now() - startTime;
-  window.console.log(`getSuggestions: ${duration}`);
-  return suggestions;
 }
 
 export function getVisualizeFieldSuggestions({
