@@ -40,6 +40,7 @@ import type {
   RegistryPackage,
   EpmPackageAdditions,
   GetCategoriesRequest,
+  GetPackagesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
@@ -47,6 +48,7 @@ import {
   PackageFailedVerificationError,
   PackageNotFoundError,
   RegistryResponseError,
+  PackageInvalidArchiveError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
@@ -61,7 +63,6 @@ import { getFilteredSearchPackages } from '../filtered_packages';
 
 import { createInstallableFrom } from '.';
 
-export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
 
 function nameAsTitle(name: string) {
@@ -76,8 +77,9 @@ export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
     excludeInstallStatus?: boolean;
-  } & Registry.SearchParams
+  } & GetPackagesRequest['query']
 ) {
+  const logger = appContextService.getLogger();
   const {
     savedObjectsClient,
     category,
@@ -98,29 +100,41 @@ export async function getPackages(
     (pkg) => !registryItems.some((item) => item.name === pkg.id)
   );
 
-  const uploadedPackagesNotInRegistry = await pMap(
-    packagesNotInRegistry.entries(),
-    async ([i, pkg]) => {
-      // fetching info of uploaded packages to populate title, description
-      // limit to 10 for performance
-      if (i < MAX_PKGS_TO_LOAD_TITLE) {
-        const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
-          getPackageInfo({
-            savedObjectsClient,
-            pkgName: pkg.id,
-            pkgVersion: pkg.attributes.version,
-          })
-        );
-        return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
-      } else {
-        return createInstallableFrom(
-          { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
-          pkg
-        );
-      }
-    },
-    { concurrency: 10 }
-  );
+  const uploadedPackagesNotInRegistry = (
+    await pMap(
+      packagesNotInRegistry.entries(),
+      async ([i, pkg]) => {
+        // fetching info of uploaded packages to populate title, description
+        // limit to 10 for performance
+        if (i < MAX_PKGS_TO_LOAD_TITLE) {
+          try {
+            const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
+              getPackageInfo({
+                savedObjectsClient,
+                pkgName: pkg.id,
+                pkgVersion: pkg.attributes.version,
+              })
+            );
+            return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
+          } catch (err) {
+            if (err instanceof PackageInvalidArchiveError) {
+              logger.warn(
+                `Installed package ${pkg.id} ${pkg.attributes.version} is not a valid package anymore`
+              );
+              return null;
+            }
+            throw err;
+          }
+        } else {
+          return createInstallableFrom(
+            { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
+            pkg
+          );
+        }
+      },
+      { concurrency: 10 }
+    )
+  ).filter((p): p is Installable<any> => p !== null);
 
   const filteredPackages = getFilteredSearchPackages();
   const packageList = registryItems

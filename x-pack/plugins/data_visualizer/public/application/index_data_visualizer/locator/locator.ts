@@ -12,7 +12,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state';
-import { SearchQueryLanguage } from '../types/combined_query';
+import { SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 export const DATA_VISUALIZER_APP_LOCATOR = 'DATA_VISUALIZER_APP_LOCATOR';
 
