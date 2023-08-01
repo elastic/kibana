@@ -13,7 +13,7 @@ import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const FilterQueryContext = createContext<{
   filters: Filter[];
-  query: Query | AggregateQuery;
+  query: Query;
   timeRange: TimeRange;
 }>({
   get filters(): Filter[] {
@@ -72,7 +72,7 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
     <FilterQueryContext.Provider
       value={{
         filters: resultFilters,
-        query: resultQuery,
+        query: resultQuery as Query,
         timeRange: timeRange ?? timeRangeUpdates,
       }}
     >

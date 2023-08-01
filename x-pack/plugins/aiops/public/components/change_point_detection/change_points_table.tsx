@@ -25,6 +25,7 @@ import {
   type ChangePointAnnotation,
   FieldConfig,
   SelectedChangePoint,
+  useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -92,6 +93,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   const hasActions = fieldConfig.splitField !== undefined;
 
+  const { bucketInterval } = useChangePointDetectionContext();
+
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
       id: 'timestamp',
@@ -122,7 +125,13 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
         ['&.euiTableCellContent']: { display: 'block', padding: 0 },
       },
       render: (annotation: ChangePointAnnotation) => {
-        return <MiniChartPreview annotation={annotation} fieldConfig={fieldConfig} />;
+        return (
+          <MiniChartPreview
+            annotation={annotation}
+            fieldConfig={fieldConfig}
+            interval={bucketInterval.expression}
+          />
+        );
       },
     },
     {
@@ -313,10 +322,13 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();
 
+  const { bucketInterval } = useChangePointDetectionContext();
+
   const { filters, query, attributes, timeRange } = useCommonChartProps({
     annotation,
     fieldConfig,
     previewMode: true,
+    bucketInterval: bucketInterval.expression,
   });
 
   return (

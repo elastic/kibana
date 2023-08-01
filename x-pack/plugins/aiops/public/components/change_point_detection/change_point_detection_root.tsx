@@ -55,7 +55,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     return <>{warning}</>;
   }
 
-  const PresentationContextProvider = appDependencies.presentationUtil.ContextProvider;
+  const PresentationContextProvider = appDependencies.presentationUtil!.ContextProvider;
 
   const CasesContext = appDependencies.cases?.ui.getCasesContext() ?? React.Fragment;
   const casesPermissions = appDependencies.cases?.helpers.canUseCases();

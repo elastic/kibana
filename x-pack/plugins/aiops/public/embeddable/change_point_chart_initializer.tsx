@@ -45,7 +45,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
     initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
 
-  const [fn, setFn] = useState<string>(initialInput?.function ?? 'avg');
+  const [fn, setFn] = useState<string>(initialInput?.fn ?? 'avg');
 
   const isPanelTitleValid = panelTitle.length > 0;
   const isMaxSeriesToPlotValid =

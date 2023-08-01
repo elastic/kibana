@@ -60,7 +60,7 @@ export interface AiopsAppDependencies {
       dslQuery?: FieldStatsProps['dslQuery'];
     }>;
   };
-  presentationUtil: PresentationUtilPluginStart;
+  presentationUtil?: PresentationUtilPluginStart;
   embeddable: EmbeddableStart;
   cases?: CasesUiStart;
 }
