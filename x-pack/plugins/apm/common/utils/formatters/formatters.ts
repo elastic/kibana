@@ -62,3 +62,23 @@ export function asDecimalOrInteger(value: number, threshold = 10) {
   }
   return asDecimal(value);
 }
+
+export function asBigNumber(value: number): string {
+  if (value < 1e3) {
+    return asInteger(value);
+  }
+
+  if (value < 1e6) {
+    return `${asInteger(value / 1e3)}k`;
+  }
+
+  if (value < 1e9) {
+    return `${asInteger(value / 1e6)}m`;
+  }
+
+  if (value < 1e12) {
+    return `${asInteger(value / 1e9)}b`;
+  }
+
+  return `${asInteger(value / 1e12)}t`;
+}

@@ -21,7 +21,11 @@ import {
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewSpec,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { EsQueryRuleMetaData } from '../es_query/types';
@@ -129,8 +133,8 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const createDataViewButtonPadding = useEuiPaddingCSS('left');
 
   const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const newDataView = await dataViews.create({ title: pattern });
+    async (dataViewSpec: DataViewSpec) => {
+      const newDataView = await dataViews.create(dataViewSpec);
       if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
         newDataView.timeFieldName = '@timestamp';
       }

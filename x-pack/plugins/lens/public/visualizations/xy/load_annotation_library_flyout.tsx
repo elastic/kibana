@@ -70,6 +70,7 @@ export function LoadAnnotationLibraryFlyout({
       <div
         css={css`
           padding: ${euiThemeVars.euiSize};
+          height: 100%;
         `}
       >
         <EventAnnotationGroupSavedObjectFinder

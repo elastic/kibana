@@ -26,6 +26,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       defaultScheduleInterval,
       doesSetRecoveryContext,
       hasGetSummarizedAlerts,
+      hasFieldsForAAD,
       ...rest
     }) => ({
       ...rest,
@@ -41,6 +42,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       default_schedule_interval: defaultScheduleInterval,
       does_set_recovery_context: doesSetRecoveryContext,
       has_get_summarized_alerts: !!hasGetSummarizedAlerts,
+      has_fields_for_a_a_d: !!hasFieldsForAAD,
     })
   );
 };

@@ -149,6 +149,7 @@ const renderWithProviders = (ui: any) => {
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
+  const addDanger = jest.fn();
 
   beforeAll(() => {
     loadRulesWithKueryFilter.mockResolvedValue({
@@ -163,7 +164,9 @@ describe('Update Api Key', () => {
     useKibanaMock().services.notifications.toasts = {
       addSuccess,
       addError,
+      addDanger,
     } as unknown as IToasts;
+    useKibanaMock().services.unifiedSearch.ui.SearchBar = () => <></>;
     loadRuleTags.mockResolvedValue({
       data: [],
       page: 1,

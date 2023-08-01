@@ -22,7 +22,7 @@ import {
 
 import {
   MlInferencePipeline,
-  CreateMlInferencePipelineParameters,
+  CreateMLInferencePipeline,
   TrainedModelState,
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
@@ -215,25 +215,35 @@ export const formatPipelineName = (rawName: string) =>
 export const parseMlInferenceParametersFromPipeline = (
   name: string,
   pipeline: IngestPipeline
-): CreateMlInferencePipelineParameters | null => {
-  const processor = pipeline?.processors?.find((proc) => proc.inference !== undefined);
-  if (!processor || processor?.inference === undefined) {
+): CreateMLInferencePipeline | null => {
+  const inferenceProcessors = pipeline?.processors
+    ?.filter((p) => p.inference)
+    .map((p) => p.inference) as IngestInferenceProcessor[];
+  if (!inferenceProcessors || inferenceProcessors.length === 0) {
     return null;
   }
-  const { inference: inferenceProcessor } = processor;
-  const sourceFields = Object.keys(inferenceProcessor.field_map ?? {});
-  const sourceField = sourceFields.length === 1 ? sourceFields[0] : null;
-  if (!sourceField) {
-    return null;
-  }
-  return {
-    destination_field: inferenceProcessor.target_field
-      ? stripMlInferencePrefix(inferenceProcessor.target_field)
-      : inferenceProcessor.target_field,
-    model_id: inferenceProcessor.model_id,
-    pipeline_name: name,
-    source_field: sourceField,
-  };
+
+  // Extract source -> target field mappings from all inference processors in pipeline
+  const fieldMappings = inferenceProcessors
+    .map((p) => {
+      const sourceFields = Object.keys(p.field_map ?? {});
+      // We assume that there is only one source field per inference processor
+      const sourceField = sourceFields.length >= 1 ? sourceFields[0] : null;
+      return {
+        sourceField,
+        targetField: p.target_field, // Prefixed target field
+      };
+    })
+    .filter((f) => f.sourceField) as FieldMapping[];
+
+  return fieldMappings.length === 0
+    ? null
+    : {
+        model_id: inferenceProcessors[0].model_id,
+        pipeline_name: name,
+        pipeline_definition: {},
+        field_mappings: fieldMappings,
+      };
 };
 
 export const parseModelStateFromStats = (
@@ -265,8 +275,3 @@ export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTra
 
 export const getMlInferencePrefixedFieldName = (fieldName: string) =>
   fieldName.startsWith(ML_INFERENCE_PREFIX) ? fieldName : `${ML_INFERENCE_PREFIX}${fieldName}`;
-
-const stripMlInferencePrefix = (fieldName: string) =>
-  fieldName.startsWith(ML_INFERENCE_PREFIX)
-    ? fieldName.replace(ML_INFERENCE_PREFIX, '')
-    : fieldName;

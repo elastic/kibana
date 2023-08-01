@@ -69,7 +69,6 @@ const fieldSubTypeSchema = schema.object({
   nested: schema.maybe(schema.object({ path: schema.string() })),
 });
 
-// @ts-expect-error
 const FieldDescriptorSchema = schema.object({
   aggregatable: schema.boolean(),
   name: schema.string(),
@@ -87,9 +86,13 @@ const FieldDescriptorSchema = schema.object({
       schema.literal('summary'),
       schema.literal('counter'),
       schema.literal('gauge'),
+      schema.literal('position'),
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
+  conflictDescriptions: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+  ),
 });
 
 const validate: FullValidationConfig<any, any, any> = {
@@ -98,7 +101,6 @@ const validate: FullValidationConfig<any, any, any> = {
     // not available to get request
     body: schema.maybe(schema.object({ index_filter: schema.any() })),
   },
-  /*
   response: {
     200: {
       body: schema.object({
@@ -107,7 +109,6 @@ const validate: FullValidationConfig<any, any, any> = {
       }),
     },
   },
-  */
 };
 
 const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
@@ -188,5 +189,8 @@ export const registerFieldForWildcard = (
   router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
   router.versioned
     .get({ path, access })
-    .addVersion({ version, validate: { request: { query: querySchema } } }, handler);
+    .addVersion(
+      { version, validate: { request: { query: querySchema }, response: validate.response } },
+      handler
+    );
 };

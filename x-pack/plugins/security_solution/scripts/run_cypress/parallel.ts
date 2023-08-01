@@ -8,7 +8,6 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -28,18 +27,12 @@ import {
   ProviderCollection,
   readProviderSpec,
 } from '@kbn/test/src/functional_test_runner/lib';
-import * as parser from '@babel/parser';
-import type {
-  ExpressionStatement,
-  Identifier,
-  ObjectExpression,
-  ObjectProperty,
-} from '@babel/types';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
+import { parseTestFileConfig } from './utils';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -77,6 +70,8 @@ export const cli = () => {
     async () => {
       const { argv } = yargs(process.argv.slice(2));
 
+      const isOpen = argv._[0] === 'open';
+      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
@@ -99,6 +94,10 @@ export const cli = () => {
       };
 
       const getKibanaPort = <T>(): T | number => {
+        if (isOpen) {
+          return 5620;
+        }
+
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
           return getKibanaPort();
@@ -108,6 +107,10 @@ export const cli = () => {
       };
 
       const getFleetServerPort = <T>(): T | number => {
+        if (isOpen) {
+          return 8220;
+        }
+
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
           return getFleetServerPort();
@@ -130,76 +133,12 @@ export const cli = () => {
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
-      const parseTestFileConfig = (
-        filePath: string
-      ): Record<string, string | number | Record<string, string | number>> | undefined => {
-        const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
-
-        const ast = parser.parse(testFile, {
-          sourceType: 'module',
-          plugins: ['typescript'],
-        });
-
-        const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
-          | ExpressionStatement
-          | undefined;
-
-        const callExpression = expressionStatement?.expression;
-        // @ts-expect-error
-        if (expressionStatement?.expression?.arguments?.length === 3) {
-          // @ts-expect-error
-          const callExpressionArguments = _.find(callExpression?.arguments, [
-            'type',
-            'ObjectExpression',
-          ]) as ObjectExpression | undefined;
-
-          const callExpressionProperties = _.find(callExpressionArguments?.properties, [
-            'key.name',
-            'env',
-          ]) as ObjectProperty[] | undefined;
-          // @ts-expect-error
-          const ftrConfig = _.find(callExpressionProperties?.value?.properties, [
-            'key.name',
-            'ftrConfig',
-          ]);
-
-          if (!ftrConfig) {
-            return {};
-          }
-
-          return _.reduce(
-            ftrConfig.value.properties,
-            (acc: Record<string, string | number | Record<string, string>>, property) => {
-              const key = (property.key as Identifier).name;
-              let value;
-              if (property.value.type === 'ArrayExpression') {
-                value = _.map(property.value.elements, (element) => {
-                  if (element.type === 'StringLiteral') {
-                    return element.value as string;
-                  }
-                  return element.value as string;
-                });
-              }
-              if (key && value) {
-                // @ts-expect-error
-                acc[key] = value;
-              }
-              return acc;
-            },
-            {}
-          );
-        }
-        return undefined;
-      };
-
       const log = new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
       });
 
       const hostRealIp = getLocalhostRealIp();
-
-      const isOpen = argv._[0] === 'open';
 
       await pMap(
         files,
@@ -280,6 +219,10 @@ export const cli = () => {
                   );
                 }
 
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
+                }
+
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
@@ -343,7 +286,7 @@ export const cli = () => {
 
             if (isOpen) {
               await cypress.open({
-                configFile: require.resolve(`../../${argv.configFile}`),
+                configFile: cypressConfigFilePath,
                 config: {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
@@ -356,7 +299,7 @@ export const cli = () => {
                 result = await cypress.run({
                   browser: 'chrome',
                   spec: filePath,
-                  configFile: argv.configFile as string,
+                  configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,
                   config: {
@@ -373,7 +316,7 @@ export const cli = () => {
             }
 
             await procs.stop('kibana');
-            shutdownEs();
+            await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             return result;
@@ -384,7 +327,7 @@ export const cli = () => {
           concurrency: (argv.concurrency as number | undefined)
             ? (argv.concurrency as number)
             : !isOpen
-            ? 3
+            ? 2
             : 1,
         }
       ).then((results) => {

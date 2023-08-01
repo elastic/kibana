@@ -18,7 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -26,7 +26,7 @@ import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import { Subscription } from 'rxjs';
-import { blurEvent, CLICK_METRIC, COUNT_METRIC, getClickMetric, isMac, sort } from '.';
+import { blurEvent, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
@@ -48,14 +48,9 @@ const EmptyMessage = () => (
   </EuiFlexGroup>
 );
 
-export const SearchBar: FC<SearchBarProps> = ({
-  globalSearch,
-  taggingApi,
-  navigateToUrl,
-  trackUiMetric,
-  chromeStyle$,
-  ...props
-}) => {
+export const SearchBar: FC<SearchBarProps> = (opts) => {
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
+
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
@@ -134,7 +129,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
-          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_REQUEST);
+          reportEvent.searchRequest();
         }
 
         const rawParams = parseSearchParams(searchValue);
@@ -170,10 +165,10 @@ export const SearchBar: FC<SearchBarProps> = ({
 
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
-          error: () => {
+          error: (err) => {
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.UNHANDLED_ERROR);
+            reportEvent.error({ message: err, searchValue });
           },
           complete: () => {},
         });
@@ -187,7 +182,7 @@ export const SearchBar: FC<SearchBarProps> = ({
     (event: KeyboardEvent) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SHORTCUT_USED);
+        reportEvent.shortcutUsed();
         if (chromeStyle === 'project' && !isVisible) {
           visibilityButtonRef.current?.click();
         } else if (searchRef) {
@@ -197,15 +192,25 @@ export const SearchBar: FC<SearchBarProps> = ({
         }
       }
     },
-    [chromeStyle, isVisible, buttonRef, searchRef, trackUiMetric]
+    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
 
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[]) => {
-      const selected = selection.find(({ checked }) => checked === 'on');
+      let selectedRank: number | null = null;
+      const selected = selection.find(({ checked }, rank) => {
+        const isChecked = checked === 'on';
+        if (isChecked) {
+          selectedRank = rank + 1;
+        }
+        return isChecked;
+      });
+
       if (!selected) {
         return;
       }
+
+      const selectedLabel = selected.label ?? null;
 
       // @ts-ignore - ts error is "union type is too complex to express"
       const { url, type, suggestion } = selected;
@@ -222,19 +227,24 @@ export const SearchBar: FC<SearchBarProps> = ({
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          trackUiMetric(
-            METRIC_TYPE.CLICK,
-            getClickMetric(CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, application)
-          );
+          reportEvent.navigateToApplication({
+            application,
+            searchValue,
+            selectedLabel,
+            selectedRank,
+          });
         } else {
-          trackUiMetric(
-            METRIC_TYPE.CLICK,
-            getClickMetric(CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, type)
-          );
+          reportEvent.navigateToSavedObject({
+            type,
+            searchValue,
+            selectedLabel,
+            selectedRank,
+          });
         }
-      } catch (e) {
+      } catch (err) {
+        reportEvent.error({ message: err, searchValue });
         // eslint-disable-next-line no-console
-        console.log('Error trying to track searchbar metrics', e);
+        console.log('Error trying to track searchbar metrics', err);
       }
 
       navigateToUrl(url);
@@ -245,7 +255,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [trackUiMetric, navigateToUrl, searchRef]
+    [reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
@@ -257,9 +267,6 @@ export const SearchBar: FC<SearchBarProps> = ({
   useEvent('keydown', onKeyDown);
 
   if (chromeStyle === 'project' && !isVisible) {
-    const onShowSearch = () => {
-      setIsVisible(true);
-    };
     return (
       <EuiButtonIcon
         aria-label={i18nStrings.showSearchAriaText}
@@ -267,7 +274,9 @@ export const SearchBar: FC<SearchBarProps> = ({
         color="text"
         data-test-subj="nav-search-reveal"
         iconType="search"
-        onClick={onShowSearch}
+        onClick={() => {
+          setIsVisible(true);
+        }}
       />
     );
   }
@@ -281,6 +290,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           data-test-subj="nav-search-conceal"
           iconType="cross"
           onClick={() => {
+            reportEvent.searchBlur();
             setIsVisible(false);
           }}
         />
@@ -308,6 +318,12 @@ export const SearchBar: FC<SearchBarProps> = ({
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      listProps={{
+        className: 'eui-yScroll',
+        css: css`
+          max-block-size: 75vh;
+        `,
+      }}
       searchProps={{
         autoFocus: chromeStyle === 'project',
         value: searchValue,
@@ -318,11 +334,12 @@ export const SearchBar: FC<SearchBarProps> = ({
         'aria-label': i18nStrings.placeholderText,
         placeholder: i18nStrings.placeholderText,
         onFocus: () => {
-          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_FOCUS);
+          reportEvent.searchFocus();
           setInitialLoad(true);
           setShowAppend(false);
         },
         onBlur: () => {
+          reportEvent.searchBlur();
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,

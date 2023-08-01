@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
@@ -23,15 +23,13 @@ export interface HeaderActionsProps {
 
 export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
-    http,
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
   } = useKibana().services;
 
-  const { rule, reloadRule } = useFetchRule({
-    http,
+  const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
 
@@ -54,7 +52,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
               id: rule.id,
               name: rule.name,
             },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
           },
         ]
       : [];
@@ -142,7 +140,9 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           onClose={() => {
             setRuleConditionsFlyoutOpen(false);
           }}
-          onSave={reloadRule}
+          onSave={async () => {
+            refetch();
+          }}
         />
       ) : null}
 
@@ -150,7 +150,9 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
         <RuleSnoozeModal
           rule={rule}
           onClose={() => setSnoozeModalOpen(false)}
-          onRuleChanged={reloadRule}
+          onRuleChanged={async () => {
+            refetch();
+          }}
           onLoading={noop}
         />
       ) : null}

@@ -91,11 +91,6 @@ export const getPanelAddedSuccessString = (savedObjectName: string) =>
     },
   });
 
-export const getDashboardURL404String = () =>
-  i18n.translate('dashboard.loadingError.dashboardNotFound', {
-    defaultMessage: 'The requested dashboard could not be found.',
-  });
-
 export const getPanelTooOldErrorString = () =>
   i18n.translate('dashboard.loadURLError.PanelTooOld', {
     defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',

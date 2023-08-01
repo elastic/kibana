@@ -17,7 +17,11 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
+<<<<<<< HEAD
 import { BaseState, FatalState } from '../state';
+=======
+import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
+>>>>>>> main
 
 /** @internal */
 export const REINDEX_TEMP_SUFFIX = '_reindex_temp';
@@ -361,4 +365,8 @@ export const adjustBatchSize = (
       ],
     });
   }
+};
+
+export const getIndexTypes = (state: BaseState): string[] => {
+  return state.indexTypesMap[state.indexPrefix];
 };

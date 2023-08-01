@@ -11,6 +11,7 @@ import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DeepPartial } from '@kbn/utility-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -30,6 +31,7 @@ import {
   ProcessAndLogAlertsOpts,
   TrackedAlerts,
   ReportedAlert,
+  ReportedAlertData,
   UpdateableAlert,
 } from './types';
 import {
@@ -45,6 +47,7 @@ const CHUNK_SIZE = 10000;
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  kibanaVersion: string;
 }
 
 export class AlertsClient<
@@ -75,7 +78,7 @@ export class AlertsClient<
 
   private indexTemplateAndPattern: IIndexPatternString;
 
-  private reportedAlerts: Record<string, AlertData> = {};
+  private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -177,7 +180,7 @@ export class AlertsClient<
       LegacyContext,
       WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
     >
-  ) {
+  ): ReportedAlertData {
     const context = alert.context ? alert.context : ({} as LegacyContext);
     const state = !isEmpty(alert.state) ? alert.state : null;
 
@@ -195,6 +198,11 @@ export class AlertsClient<
     if (alert.payload) {
       this.reportedAlerts[alert.id] = alert.payload;
     }
+
+    return {
+      uuid: legacyAlert.getUuid(),
+      start: legacyAlert.getStart(),
+    };
   }
 
   public setAlertData(
@@ -273,6 +281,7 @@ export class AlertsClient<
             rule: this.rule,
             timestamp: currentTime,
             payload: this.reportedAlerts[id],
+            kibanaVersion: this.options.kibanaVersion,
           })
         );
       } else {
@@ -288,6 +297,7 @@ export class AlertsClient<
             rule: this.rule,
             timestamp: currentTime,
             payload: this.reportedAlerts[id],
+            kibanaVersion: this.options.kibanaVersion,
           })
         );
       }
@@ -313,6 +323,7 @@ export class AlertsClient<
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+                kibanaVersion: this.options.kibanaVersion,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
@@ -409,7 +420,11 @@ export class AlertsClient<
         this.factory().alertLimit.setLimitReached(reached),
       getRecoveredAlerts: () => {
         const { getRecoveredAlerts } = this.factory().done();
-        return getRecoveredAlerts();
+        const recoveredLegacyAlerts = getRecoveredAlerts() ?? [];
+        return recoveredLegacyAlerts.map((alert) => ({
+          alert,
+          hit: this.fetchedAlerts.data[alert.getId()],
+        }));
       },
     };
   }

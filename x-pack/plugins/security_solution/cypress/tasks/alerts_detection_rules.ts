@@ -7,13 +7,10 @@
 
 import { duplicatedRuleName } from '../objects/rule';
 import {
-  BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
-  DELETE_RULE_BULK_BTN,
   RULES_SELECTED_TAG,
-  LOAD_PREBUILT_RULES_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULE_CHECKBOX,
@@ -25,14 +22,11 @@ import {
   EDIT_RULE_ACTION_BTN,
   DUPLICATE_RULE_ACTION_BTN,
   DUPLICATE_RULE_MENU_PANEL_BTN,
-  DUPLICATE_RULE_BULK_BTN,
   CONFIRM_DUPLICATE_RULE,
   RULES_ROW,
   SELECT_ALL_RULES_BTN,
   MODAL_CONFIRMATION_BTN,
   RULES_DELETE_CONFIRMATION_MODAL,
-  ENABLE_RULE_BULK_BTN,
-  DISABLE_RULE_BULK_BTN,
   RULE_DETAILS_DELETE_BTN,
   RULE_IMPORT_MODAL_BUTTON,
   RULE_IMPORT_MODAL,
@@ -46,7 +40,6 @@ import {
   REFRESH_SETTINGS_POPOVER,
   REFRESH_SETTINGS_SWITCH,
   ELASTIC_RULES_BTN,
-  BULK_EXPORT_ACTION_BTN,
   TOASTER_ERROR_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
@@ -61,10 +54,8 @@ import {
   DISABLED_RULES_BTN,
   REFRESH_RULES_TABLE_BUTTON,
   RULE_LAST_RUN,
-  DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
-  DUPLICATE_WITH_EXCEPTIONS_OPTION,
-  DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
   TOASTER_CLOSE_ICON,
+  ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -126,11 +117,6 @@ export const deleteFirstRule = () => {
   cy.get(DELETE_RULE_ACTION_BTN).click();
 };
 
-export const deleteSelectedRules = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(DELETE_RULE_BULK_BTN).click();
-};
-
 export const deleteRuleFromDetailsPage = () => {
   cy.get(ALL_ACTIONS).should('be.visible');
   // We cannot use cy.root().pipe($el) withing this function and instead have to use a cy.wait()
@@ -143,42 +129,6 @@ export const deleteRuleFromDetailsPage = () => {
   cy.get(ALL_ACTIONS).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.be.visible');
-};
-
-export const duplicateSelectedRulesWithoutExceptions = () => {
-  cy.log('Duplicate selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(DUPLICATE_RULE_BULK_BTN).click();
-  cy.get(DUPLICATE_WITHOUT_EXCEPTIONS_OPTION).click();
-  cy.get(CONFIRM_DUPLICATE_RULE).click();
-};
-
-export const duplicateSelectedRulesWithExceptions = () => {
-  cy.log('Duplicate selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(DUPLICATE_RULE_BULK_BTN).click();
-  cy.get(DUPLICATE_WITH_EXCEPTIONS_OPTION).click();
-  cy.get(CONFIRM_DUPLICATE_RULE).click();
-};
-
-export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
-  cy.log('Duplicate selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(DUPLICATE_RULE_BULK_BTN).click();
-  cy.get(DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION).click();
-  cy.get(CONFIRM_DUPLICATE_RULE).click();
-};
-
-export const enableSelectedRules = () => {
-  cy.log('Enable selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(ENABLE_RULE_BULK_BTN).click();
-};
-
-export const disableSelectedRules = () => {
-  cy.log('Disable selected rules');
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(DISABLE_RULE_BULK_BTN).click();
 };
 
 export const exportRule = (name: string) => {
@@ -336,7 +286,7 @@ export const waitForRulesTableToBeRefreshed = () => {
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.log('Wait for prebuilt rules to be loaded');
-  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
+  cy.get(ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN, { timeout: 300000 }).should('not.exist');
   cy.get(RULES_MANAGEMENT_TABLE).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
@@ -532,11 +482,6 @@ export const mockGlobalClock = () => {
    */
 
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
-};
-
-export const bulkExportRules = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(BULK_EXPORT_ACTION_BTN).click();
 };
 
 export const cancelConfirmationModal = () => {

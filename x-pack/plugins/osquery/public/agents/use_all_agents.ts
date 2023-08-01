@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 
 import type { ListResult, Agent } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 import { useOsqueryPolicies } from './use_osquery_policies';
@@ -40,6 +41,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
       }
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
+        version: API_VERSIONS.internal.v1,
         query: {
           kuery,
           perPage,

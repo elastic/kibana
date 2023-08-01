@@ -29,6 +29,7 @@ export async function mountManagementSection(
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
   const {
+    analytics,
     application,
     chrome,
     docLinks,
@@ -61,6 +62,7 @@ export async function mountManagementSection(
 
   // AppCore/AppPlugins to be passed on as React context
   const appDependencies: AppDependencies = {
+    analytics,
     application,
     chrome,
     data,

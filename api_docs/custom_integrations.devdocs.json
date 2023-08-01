@@ -1530,41 +1530,6 @@
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_package",
-            "type": "Object",
-            "tags": [],
-            "label": "connector_package",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_package.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_package.parent_id",
-                "type": "string",
-                "tags": [],
-                "label": "parent_id",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.containers",
             "type": "Object",
             "tags": [],
@@ -1595,41 +1560,6 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.content_source",
-            "type": "Object",
-            "tags": [],
-            "label": "content_source",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.content_source.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.content_source.parent_id",
-                "type": "string",
-                "tags": [],
-                "label": "parent_id",
-                "description": [],
                 "path": "src/plugins/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3392,6 +3322,41 @@
               {
                 "parentPluginId": "customIntegrations",
                 "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search_content_source",
+            "type": "Object",
+            "tags": [],
+            "label": "workplace_search_content_source",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search_content_source.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search_content_source.parent_id",
                 "type": "string",
                 "tags": [],
                 "label": "parent_id",

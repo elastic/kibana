@@ -88,8 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160299
-    describe.skip('create alert', () => {
+    describe('create alert', () => {
       before(async () => {
         actionId = await createIndexConnector({
           supertest,
@@ -110,6 +109,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               'service.environment',
               'transaction.name',
               'error.grouping_key',
+              'error.grouping_name',
             ],
           },
           actions: [
@@ -121,7 +121,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   {
                     message: `${errorCountMessage}
 - Transaction name: {{context.transactionName}}
-- Error grouping key: {{context.errorGroupingKey}}`,
+- Error grouping key: {{context.errorGroupingKey}}
+- Error grouping name: {{context.errorGroupingName}}`,
                   },
                 ],
               },
@@ -159,6 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('service.environment', 'production');
         expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
         expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
+        expect(resp.hits.hits[0]._source).property('error.grouping_name', errorMessage);
       });
 
       it('returns correct message', async () => {
@@ -169,7 +171,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(
-          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${errorGroupingKey}. Alert when > 1.
+          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${errorGroupingKey}, error name: ${errorMessage}. Alert when > 1.
 
 Apm error count is active with the following conditions:
 
@@ -181,7 +183,8 @@ Apm error count is active with the following conditions:
 [View alert details](http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all))
 
 - Transaction name: tx-java
-- Error grouping key: ${errorGroupingKey}`
+- Error grouping key: ${errorGroupingKey}
+- Error grouping name: ${errorMessage}`
         );
       });
 

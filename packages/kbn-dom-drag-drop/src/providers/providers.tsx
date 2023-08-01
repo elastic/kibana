@@ -6,45 +6,54 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { Reducer, useReducer } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   DropIdentifier,
-  DraggingIdentifier,
   DragDropIdentifier,
   RegisteredDropTargets,
+  DragContextValue,
   DragContextState,
+  CustomMiddleware,
+  DraggingIdentifier,
 } from './types';
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
+import { announce } from './announcements';
 
+const initialState = {
+  dragging: undefined,
+  activeDropTarget: undefined,
+  keyboardMode: false,
+  dropTargetsByOrder: {},
+  dataTestSubjPrefix: DEFAULT_DATA_TEST_SUBJ,
+};
 /**
  * The drag / drop context singleton, used like so:
  *
- * const { dragging, setDragging } = useContext(DragContext);
+ * const [ state, dispatch ] = useDragDropContext();
  */
-export const DragContext = React.createContext<DragContextState>({
-  dragging: undefined,
-  setDragging: () => {},
-  keyboardMode: false,
-  setKeyboardMode: () => {},
-  activeDropTarget: undefined,
-  setActiveDropTarget: () => {},
-  setA11yMessage: () => {},
-  dropTargetsByOrder: undefined,
-  registerDropTarget: () => {},
-  dataTestSubjPrefix: DEFAULT_DATA_TEST_SUBJ,
-  onTrackUICounterEvent: undefined,
-});
+const DragContext = React.createContext<DragContextValue>([initialState, () => {}]);
+
+export function useDragDropContext() {
+  const context = React.useContext(DragContext);
+  if (context === undefined) {
+    throw new Error(
+      'useDragDropContext must be used within a <RootDragDropProvider/> or <ChildDragDropProvider/>'
+    );
+  }
+  return context;
+}
 
 /**
  * The argument to DragDropProvider.
  */
-export interface ProviderProps extends DragContextState {
+export interface ProviderProps {
   /**
    * The React children.
    */
   children: React.ReactNode;
+  value: DragContextValue;
 }
 
 /**
@@ -54,74 +63,193 @@ export interface ProviderProps extends DragContextState {
  *
  * @param props
  */
+
+interface ResetStateAction {
+  type: 'resetState';
+  payload?: string;
+}
+
+interface EndDraggingAction {
+  type: 'endDragging';
+  payload: {
+    dragging: DraggingIdentifier;
+  };
+}
+
+interface StartDraggingAction {
+  type: 'startDragging';
+  payload: {
+    dragging: DraggingIdentifier;
+    keyboardMode?: boolean;
+  };
+}
+
+interface LeaveDropTargetAction {
+  type: 'leaveDropTarget';
+}
+
+interface SelectDropTargetAction {
+  type: 'selectDropTarget';
+  payload: {
+    dropTarget: DropIdentifier;
+    dragging: DragDropIdentifier;
+  };
+}
+
+interface DragToTargetAction {
+  type: 'dropToTarget';
+  payload: {
+    dragging: DragDropIdentifier;
+    dropTarget: DropIdentifier;
+  };
+}
+
+interface RegisterDropTargetAction {
+  type: 'registerDropTargets';
+  payload: RegisteredDropTargets;
+}
+
+export type DragDropAction =
+  | ResetStateAction
+  | RegisterDropTargetAction
+  | LeaveDropTargetAction
+  | SelectDropTargetAction
+  | DragToTargetAction
+  | StartDraggingAction
+  | EndDraggingAction;
+
+const dragDropReducer = (state: DragContextState, action: DragDropAction) => {
+  switch (action.type) {
+    case 'resetState':
+    case 'endDragging':
+      return {
+        ...state,
+        dropTargetsByOrder: undefined,
+        dragging: undefined,
+        keyboardMode: false,
+        activeDropTarget: undefined,
+      };
+    case 'registerDropTargets':
+      return {
+        ...state,
+        dropTargetsByOrder: {
+          ...state.dropTargetsByOrder,
+          ...action.payload,
+        },
+      };
+    case 'dropToTarget':
+      return {
+        ...state,
+        dropTargetsByOrder: undefined,
+        dragging: undefined,
+        keyboardMode: false,
+        activeDropTarget: undefined,
+      };
+    case 'leaveDropTarget':
+      return {
+        ...state,
+        activeDropTarget: undefined,
+      };
+    case 'selectDropTarget':
+      return {
+        ...state,
+        activeDropTarget: action.payload.dropTarget,
+      };
+    case 'startDragging':
+      return {
+        ...state,
+        ...action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
+const useReducerWithMiddleware = (
+  reducer: Reducer<DragContextState, DragDropAction>,
+  initState: DragContextState,
+  middlewareFns?: Array<(action: DragDropAction) => void>
+) => {
+  const [state, dispatch] = useReducer(reducer, initState);
+
+  const dispatchWithMiddleware = React.useCallback(
+    (action: DragDropAction) => {
+      if (middlewareFns !== undefined && middlewareFns.length > 0) {
+        middlewareFns.forEach((middlewareFn) => middlewareFn(action));
+      }
+      dispatch(action);
+    },
+    [middlewareFns]
+  );
+
+  return [state, dispatchWithMiddleware] as const;
+};
+
+const useA11yMiddleware = () => {
+  const [a11yMessage, setA11yMessage] = React.useState('');
+  const a11yMiddleware = React.useCallback((action: DragDropAction) => {
+    switch (action.type) {
+      case 'startDragging':
+        setA11yMessage(announce.lifted(action.payload.dragging.humanData));
+        return;
+      case 'selectDropTarget':
+        setA11yMessage(
+          announce.selectedTarget(
+            action.payload.dragging.humanData,
+            action.payload.dropTarget.humanData,
+            action.payload.dropTarget.dropType
+          )
+        );
+        return;
+      case 'leaveDropTarget':
+        setA11yMessage(announce.noTarget());
+        return;
+      case 'dropToTarget':
+        const { dragging, dropTarget } = action.payload;
+        setA11yMessage(
+          announce.dropped(dragging.humanData, dropTarget.humanData, dropTarget.dropType)
+        );
+        return;
+      case 'endDragging':
+        setA11yMessage(announce.cancelled(action.payload.dragging.humanData));
+        return;
+      default:
+        return;
+    }
+  }, []);
+  return { a11yMessage, a11yMiddleware };
+};
+
 export function RootDragDropProvider({
   children,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
-  onTrackUICounterEvent,
+  customMiddleware,
 }: {
   children: React.ReactNode;
   dataTestSubj?: string;
-  onTrackUICounterEvent?: DragContextState['onTrackUICounterEvent'];
+  customMiddleware?: CustomMiddleware;
 }) {
-  const [draggingState, setDraggingState] = useState<{ dragging?: DraggingIdentifier }>({
-    dragging: undefined,
-  });
-  const [keyboardModeState, setKeyboardModeState] = useState(false);
-  const [a11yMessageState, setA11yMessageState] = useState('');
-  const [activeDropTargetState, setActiveDropTargetState] = useState<DropIdentifier | undefined>(
-    undefined
-  );
+  const { a11yMessage, a11yMiddleware } = useA11yMiddleware();
+  const middlewareFns = React.useMemo(() => {
+    return customMiddleware ? [customMiddleware, a11yMiddleware] : [a11yMiddleware];
+  }, [customMiddleware, a11yMiddleware]);
 
-  const [dropTargetsByOrderState, setDropTargetsByOrderState] = useState<RegisteredDropTargets>({});
-
-  const setDragging = useMemo(
-    () => (dragging?: DraggingIdentifier) => setDraggingState({ dragging }),
-    [setDraggingState]
-  );
-
-  const setA11yMessage = useMemo(
-    () => (message: string) => setA11yMessageState(message),
-    [setA11yMessageState]
-  );
-
-  const setActiveDropTarget = useMemo(
-    () => (activeDropTarget?: DropIdentifier) => setActiveDropTargetState(activeDropTarget),
-    [setActiveDropTargetState]
-  );
-
-  const registerDropTarget = useMemo(
-    () => (order: number[], dropTarget?: DropIdentifier) => {
-      return setDropTargetsByOrderState((s) => {
-        return {
-          ...s,
-          [order.join(',')]: dropTarget,
-        };
-      });
+  const [state, dispatch] = useReducerWithMiddleware(
+    dragDropReducer,
+    {
+      ...initialState,
+      dataTestSubjPrefix: dataTestSubj,
     },
-    [setDropTargetsByOrderState]
+    middlewareFns
   );
 
   return (
     <>
-      <ChildDragDropProvider
-        keyboardMode={keyboardModeState}
-        setKeyboardMode={setKeyboardModeState}
-        dragging={draggingState.dragging}
-        setA11yMessage={setA11yMessage}
-        setDragging={setDragging}
-        activeDropTarget={activeDropTargetState}
-        setActiveDropTarget={setActiveDropTarget}
-        registerDropTarget={registerDropTarget}
-        dropTargetsByOrder={dropTargetsByOrderState}
-        dataTestSubjPrefix={dataTestSubj}
-        onTrackUICounterEvent={onTrackUICounterEvent}
-      >
-        {children}
-      </ChildDragDropProvider>
+      <ChildDragDropProvider value={[state, dispatch]}>{children}</ChildDragDropProvider>
       <EuiScreenReaderOnly>
         <div>
           <p aria-live="assertive" aria-atomic={true}>
-            {a11yMessageState}
+            {a11yMessage}
           </p>
           <p id={`${dataTestSubj}-keyboardInstructionsWithReorder`}>
             {i18n.translate('domDragDrop.keyboardInstructionsReorder', {
@@ -206,47 +334,6 @@ export function nextValidDropTarget(
  *
  * @param props
  */
-export function ChildDragDropProvider({
-  dragging,
-  setDragging,
-  setKeyboardMode,
-  keyboardMode,
-  activeDropTarget,
-  setActiveDropTarget,
-  setA11yMessage,
-  registerDropTarget,
-  dropTargetsByOrder,
-  dataTestSubjPrefix,
-  onTrackUICounterEvent,
-  children,
-}: ProviderProps) {
-  const value = useMemo(
-    () => ({
-      setKeyboardMode,
-      keyboardMode,
-      dragging,
-      setDragging,
-      activeDropTarget,
-      setActiveDropTarget,
-      setA11yMessage,
-      dropTargetsByOrder,
-      registerDropTarget,
-      dataTestSubjPrefix,
-      onTrackUICounterEvent,
-    }),
-    [
-      setDragging,
-      dragging,
-      activeDropTarget,
-      setActiveDropTarget,
-      setKeyboardMode,
-      keyboardMode,
-      setA11yMessage,
-      dropTargetsByOrder,
-      registerDropTarget,
-      dataTestSubjPrefix,
-      onTrackUICounterEvent,
-    ]
-  );
+export function ChildDragDropProvider({ value, children }: ProviderProps) {
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }

@@ -8,10 +8,11 @@
 import React from 'react';
 import { fireEvent, waitFor, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Frequency } from '@kbn/rrule';
 import { AppMockRenderer, createAppMockRenderer } from '../../../../lib/test_utils';
 import { FormProps, schema } from '../schema';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
-import { EndsOptions, Frequency } from '../../constants';
+import { EndsOptions } from '../../constants';
 
 const initialValue: FormProps = {
   title: 'test',

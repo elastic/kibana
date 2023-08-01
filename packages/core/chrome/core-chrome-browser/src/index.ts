@@ -20,7 +20,7 @@ export type {
   ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl } from './nav_controls';
+export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
@@ -33,6 +33,7 @@ export type {
   ChromeProjectNavigationNode,
   AppDeepLinkId,
   AppId,
+  CloudLinkId,
   SideNavCompProps,
   SideNavComponent,
   ChromeSetProjectBreadcrumbsParams,

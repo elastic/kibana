@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
@@ -27,10 +27,13 @@ interface Props {
 
 export const LimitOptions = ({ limit, onChange }: Props) => {
   const [idSelected, setIdSelected] = useState(limit as number);
-  const onSelected = (_id: string, value: number) => {
-    setIdSelected(value);
-    onChange(value);
-  };
+  const onSelected = useCallback(
+    (_id: string, value: number) => {
+      setIdSelected(value);
+      onChange(value);
+    },
+    [onChange]
+  );
   return (
     <EuiFlexGroup
       direction="row"

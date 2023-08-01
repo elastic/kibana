@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../typings/**/*",
@@ -13,7 +13,7 @@
     "jest.config.js",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
-    "server/**/*.json",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -92,10 +92,11 @@
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
+    "@kbn/profiling-plugin",
+    "@kbn/logs-shared-plugin",
     "@kbn/unified-field-list",
-    "@kbn/slo-schema",
+    "@kbn/discover-plugin",
+    "@kbn/observability-ai-assistant-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

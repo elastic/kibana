@@ -18,6 +18,7 @@ import { ManagementService } from './management_service';
 describe('ManagementService', () => {
   const config: ConfigType = {
     maxSpaces: 1000,
+    allowFeatureVisibility: true,
   };
 
   describe('#setup', () => {

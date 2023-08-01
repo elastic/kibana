@@ -11,11 +11,11 @@ import type {
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/public';
+import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import {
   type LogEntriesSearchResponsePayload,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../../../common/search_strategies/log_entries/log_entries';
-import { defaultLogViewAttributes } from '../../../../../../common/log_views';
 import { generateFakeEntries } from '../../../../../test_utils/entries';
 
 export const getLogEntries = ({ params }: IKibanaSearchRequest, options?: ISearchOptions) => {

@@ -29,7 +29,7 @@ const store = {
 const value = 'the-value';
 
 const context = {
-  data: [{ field: { name: 'user.name', type: 'text' }, value }],
+  data: [{ field: { name: 'user.name', type: 'string' }, value }],
 } as CellActionExecutionContext;
 
 const defaultDataProvider = {

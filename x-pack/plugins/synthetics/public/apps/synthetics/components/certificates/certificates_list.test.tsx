@@ -65,6 +65,7 @@ describe('CertificateList', () => {
               not_after: '2015-04-12T23:59:59.000Z',
               not_before: '2015-04-09T00:00:00.000Z',
               common_name: '*.badssl.com',
+              configId: 'uptime-advanced-http-tls',
             },
           ],
         }}

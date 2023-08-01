@@ -19,6 +19,56 @@ export interface ConnectorServerSideDefinition {
 
 export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
+    iconPath: 'azure_blob_storage.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
+      defaultMessage: 'Azure Blob Storage',
+    }),
+    serviceType: 'azure_blob_storage',
+  },
+  {
+    iconPath: 'confluence_cloud.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['confluence', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
+      defaultMessage: 'Confluence Cloud & Server',
+    }),
+    serviceType: 'confluence',
+  },
+  {
+    iconPath: 'jira_cloud.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['jira', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
+      defaultMessage: 'Jira Cloud & Server',
+    }),
+    serviceType: 'jira',
+  },
+  {
+    iconPath: 'google_cloud_storage.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
+      defaultMessage: 'Google Cloud Storage',
+    }),
+    serviceType: 'google_cloud_storage',
+  },
+  {
+    iconPath: 'google_drive.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['google', 'drive', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleDrive.name', {
+      defaultMessage: 'Google Drive',
+    }),
+    serviceType: 'google_drive',
+  },
+  {
     iconPath: 'mongodb.svg',
     isBeta: false,
     isNative: true,
@@ -49,6 +99,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'mssql',
   },
   {
+    iconPath: 'network_drive.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['network', 'drive', 'file', 'directory', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
+      defaultMessage: 'Network drive',
+    }),
+    serviceType: 'network_drive',
+  },
+  {
     iconPath: 'postgresql.svg',
     isBeta: true,
     isNative: true,
@@ -59,54 +119,26 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'postgresql',
   },
   {
-    iconPath: 'azure_blob_storage.svg',
-    isBeta: true,
+    iconPath: 'sharepoint_online.svg',
+    isBeta: false,
     isNative: true,
-    keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
-      defaultMessage: 'Azure Blob Storage',
+    isTechPreview: false,
+    keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint_online.name', {
+      defaultMessage: 'Sharepoint Online',
     }),
-    serviceType: 'azure_blob_storage',
+    serviceType: 'sharepoint_online',
   },
   {
-    iconPath: 'confluence_cloud.svg',
-    isBeta: true,
-    isNative: true,
-    keywords: ['confluence', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
-      defaultMessage: 'Confluence Cloud & Server',
-    }),
-    serviceType: 'confluence',
-  },
-  {
-    iconPath: 'google_cloud_storage.svg',
+    iconPath: 'dropbox.svg',
     isBeta: true,
     isNative: false,
-    keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
-      defaultMessage: 'Google Cloud Storage',
+    isTechPreview: false,
+    keywords: ['dropbox', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
+      defaultMessage: 'Dropbox',
     }),
-    serviceType: 'google_cloud_storage',
-  },
-  {
-    iconPath: 'jira_cloud.svg',
-    isBeta: true,
-    isNative: true,
-    keywords: ['jira', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
-      defaultMessage: 'Jira Cloud & Server',
-    }),
-    serviceType: 'jira',
-  },
-  {
-    iconPath: 'network_drive.svg',
-    isBeta: true,
-    isNative: true,
-    keywords: ['network', 'drive', 'file', 'directory', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
-      defaultMessage: 'Network drive',
-    }),
-    serviceType: 'network_drive',
+    serviceType: 'dropbox',
   },
   {
     iconPath: 'oracle.svg',
@@ -129,26 +161,26 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 's3',
   },
   {
-    iconPath: 'sharepoint.svg',
+    iconPath: 'servicenow.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['servicenow', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {
+      defaultMessage: 'ServiceNow',
+    }),
+    serviceType: 'servicenow',
+  },
+  {
+    iconPath: 'sharepoint_server.svg',
     isBeta: true,
     isNative: false,
     isTechPreview: false,
     keywords: ['sharepoint', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint.name', {
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepointServer.name', {
       defaultMessage: 'Sharepoint Server',
     }),
     serviceType: 'sharepoint_server',
-  },
-  {
-    iconPath: 'sharepoint_online.svg',
-    isBeta: false,
-    isNative: true,
-    isTechPreview: false,
-    keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint_online.name', {
-      defaultMessage: 'Sharepoint Online',
-    }),
-    serviceType: 'sharepoint_online',
   },
   {
     iconPath: 'custom.svg',

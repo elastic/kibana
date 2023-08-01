@@ -31,7 +31,7 @@ export function getFlamegraphModel({
   colorSuccess,
   colorDanger,
   colorNeutral,
-  comparisonMode,
+  comparisonMode = ComparisonMode.Absolute,
   comparison,
   baseline,
 }: {
@@ -40,7 +40,7 @@ export function getFlamegraphModel({
   colorSuccess: string;
   colorDanger: string;
   colorNeutral: string;
-  comparisonMode: ComparisonMode;
+  comparisonMode?: ComparisonMode;
   baseline?: number;
   comparison?: number;
 }): {

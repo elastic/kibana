@@ -10,8 +10,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/fleet_integrations';
-import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/detection_engine/fleet_integrations';
+import type { GetInstalledIntegrationsResponse } from '../../../../../../common/api/detection_engine/fleet_integrations';
+import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { createInstalledIntegrationSet } from './installed_integration_set';
 
 /**

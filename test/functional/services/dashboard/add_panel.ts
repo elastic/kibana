@@ -38,17 +38,14 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
-  async clickQuickButton(visType: string) {
-    this.log.debug(`DashboardAddPanel.clickQuickButton${visType}`);
-    await this.testSubjects.click(`dashboardQuickButton${visType}`);
-  }
-
   async clickMarkdownQuickButton() {
-    await this.clickQuickButton('markdown');
+    await this.clickEditorMenuButton();
+    await this.clickVisType('markdown');
   }
 
   async clickMapQuickButton() {
-    await this.clickQuickButton('map');
+    await this.clickEditorMenuButton();
+    await this.clickVisType('map');
   }
 
   async clickEditorMenuButton() {
@@ -131,7 +128,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardAddPanel');
+    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
   }
 
   async ensureAddPanelIsShowing() {

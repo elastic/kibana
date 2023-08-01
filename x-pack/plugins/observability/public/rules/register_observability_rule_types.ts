@@ -9,7 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
+import { SLO_ID_FIELD } from '../../common/field_names/slo';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import {
@@ -53,6 +53,27 @@ const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   }
 );
 
+const thresholdDefaultActionMessage = i18n.translate(
+  'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const thresholdDefaultRecoveryMessage = i18n.translate(
+  'xpack.observability.threshold.rule.alerting.threshold.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
@@ -70,7 +91,7 @@ export const registerObservabilityRuleTypes = (
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return 'https://www.elastic.co/guide/en/observability/current/slo-burn-rate-alert.html';
+      return `${docLinks.links.observability.sloBurnRateRule}`;
     },
     ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
     validate: validateBurnRateRule,
@@ -78,6 +99,7 @@ export const registerObservabilityRuleTypes = (
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
   });
+
   if (config.unsafe.thresholdRule.enabled) {
     observabilityRuleTypeRegistry.register({
       id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -92,18 +114,10 @@ export const registerObservabilityRuleTypes = (
       documentationUrl(docLinks) {
         return `${docLinks.links.observability.threshold}`;
       },
-      ruleParamsExpression: lazy(() => import('../components/threshold/components/expression')),
+      ruleParamsExpression: lazy(() => import('../components/threshold/threshold_rule_expression')),
       validate: validateMetricThreshold,
-      defaultActionMessage: i18n.translate(
-        'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
-        {
-          defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
-
-  Reason:
-  \\{\\{context.reason\\}\\}
-  `,
-        }
-      ),
+      defaultActionMessage: thresholdDefaultActionMessage,
+      defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
       requiresAppContext: false,
       format: formatReason,
       alertDetailsAppSection: lazy(

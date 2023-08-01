@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
 
 describe('Endpoints page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
@@ -31,7 +33,7 @@ describe('Endpoints page', () => {
   });
 
   it('Loads the endpoints page', () => {
-    cy.visit('/app/security/administration/endpoints');
+    loadPage(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
   });
 });

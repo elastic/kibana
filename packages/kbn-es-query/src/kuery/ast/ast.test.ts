@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
+import {
+  fromKueryExpression,
+  fromLiteralExpression,
+  toElasticsearchQuery,
+  toKqlExpression,
+} from './ast';
 import { nodeTypes } from '../node_types';
 import { DataViewBase } from '../../..';
 import { KueryNode } from '../types';
@@ -385,6 +390,46 @@ describe('kuery AST API', () => {
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
       const result = toElasticsearchQuery(node, indexPattern, config);
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('toKqlExpression', () => {
+    test('function node', () => {
+      const node = nodeTypes.function.buildNode('exists', 'response');
+      const result = toKqlExpression(node);
+      expect(result).toEqual('response: *');
+    });
+
+    test('literal node', () => {
+      const node = nodeTypes.literal.buildNode('foo');
+      const result = toKqlExpression(node);
+      expect(result).toEqual('foo');
+    });
+
+    test('wildcard node', () => {
+      const node = nodeTypes.wildcard.buildNode('foo*bar');
+      const result = toKqlExpression(node);
+      expect(result).toEqual('foo*bar');
+    });
+
+    test('should throw an error with invalid node type', () => {
+      const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
+
+      // @ts-expect-error
+      delete noTypeNode.type;
+      expect(() => toKqlExpression(noTypeNode)).toThrowErrorMatchingInlineSnapshot(
+        `"Unknown KQL node type: \\"undefined\\""`
+      );
+    });
+
+    test('fromKueryExpression toKqlExpression', () => {
+      const node = fromKueryExpression(
+        'field: (value AND value2 OR "value3") OR nested: { field2: value4 }'
+      );
+      const result = toKqlExpression(node);
+      expect(result).toMatchInlineSnapshot(
+        `"(((field: value AND field: value2) OR field: \\"value3\\") OR nested: { field2: value4 })"`
+      );
     });
   });
 });

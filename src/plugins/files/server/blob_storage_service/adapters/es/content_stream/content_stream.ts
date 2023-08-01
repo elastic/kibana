@@ -16,6 +16,7 @@ import { Duplex, Writable, Readable } from 'stream';
 
 import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { inspect } from 'util';
+import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';
 
 type Callback = (error?: Error) => void;
@@ -238,27 +239,29 @@ export class ContentStream extends Duplex {
   }
 
   private async indexChunk({ bid, data, id, index }: IndexRequestParams, last?: true) {
-    await this.client.index(
-      {
-        id,
-        index,
-        document: cborx.encode(
-          last
-            ? {
-                data,
-                bid,
-                last,
-              }
-            : { data, bid }
-        ),
-      },
-      {
-        headers: {
-          'content-type': 'application/cbor',
-          accept: 'application/json',
+    await this.client
+      .index(
+        {
+          id,
+          index,
+          op_type: 'create',
+          document: cborx.encode({
+            data,
+            bid,
+            // Mark it as last?
+            ...(last ? { last } : {}),
+            // Add `@timestamp` for Index Alias/DS?
+            ...(this.indexIsAlias ? { '@timestamp': new Date().toISOString() } : {}),
+          }),
         },
-      }
-    );
+        {
+          headers: {
+            'content-type': 'application/cbor',
+            accept: 'application/json',
+          },
+        }
+      )
+      .catch(wrapErrorAndReThrow.withMessagePrefix('ContentStream.indexChunk(): '));
   }
 
   /**

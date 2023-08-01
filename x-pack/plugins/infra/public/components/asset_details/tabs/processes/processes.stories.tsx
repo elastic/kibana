@@ -18,7 +18,7 @@ const stories: Meta<ProcessesProps> = {
   args: {
     nodeName: 'host1',
     nodeType: 'host',
-    currentTime: 1683630468,
+    currentTimestamp: 1683630468,
   },
 };
 

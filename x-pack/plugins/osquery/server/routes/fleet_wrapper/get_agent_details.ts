@@ -7,31 +7,39 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: '/internal/osquery/fleet_wrapper/agents/{id}',
-      validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-      },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
-    },
-    async (context, request, response) => {
-      let agent;
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        let agent;
 
-      try {
-        agent = await osqueryContext.service
-          .getAgentService()
-          ?.asInternalUser // @ts-expect-error update types
-          ?.getAgent(request.params.id);
-      } catch (err) {
-        return response.notFound();
+        try {
+          agent = await osqueryContext.service
+            .getAgentService()
+            ?.asInternalUser // @ts-expect-error update types
+            ?.getAgent(request.params.id);
+        } catch (err) {
+          return response.notFound();
+        }
+
+        return response.ok({ body: { item: agent } });
       }
-
-      return response.ok({ body: { item: agent } });
-    }
-  );
+    );
 };

@@ -132,7 +132,7 @@ describe('Alert Event Details', () => {
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       closeDateTabIfVisible();
       cy.getBySel('edit-rule-actions-tab').click();
-      cy.contains('Response actions are run on each rule execution');
+      cy.contains('Response actions are run on each rule execution.');
       cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains('Query is a required field');
@@ -328,7 +328,9 @@ describe('Alert Event Details', () => {
       cy.contains('Add to timeline investigation');
       cy.contains('Save for later').click();
       cy.contains('Save query');
-      cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
+      cy.get('[data-test-subj="osquery-save-query-flyout"]').within(() => {
+        cy.get('.euiButtonEmpty').contains('Cancel').click();
+      });
       cy.getBySel('add-to-timeline').first().click();
       cy.getBySel('globalToastList').contains('Added');
       closeToastIfVisible();

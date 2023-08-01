@@ -108,6 +108,7 @@ export interface TableListViewTableProps<
   contentEditor?: ContentEditorConfig;
 
   tableCaption: string;
+  /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
@@ -115,6 +116,12 @@ export interface TableListViewTableProps<
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
+  /**
+   * Flag to indicate if there aren't any item when **no filteres are applied**.
+   * When there are no item we render an empty prompt.
+   * Default to `undefined` to indicate that we don't know yet if there are items or not.
+   */
+  hasNoItems: boolean | undefined;
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -294,6 +301,16 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
+  /**
+   * The "onTableSearchChange()" handler has an async behavior. We want to be able to discard
+   * previsous search changes and only handle the last one. For that we keep a counter of the changes.
+   */
+  const tableSearchChangeIdx = useRef(0);
+  /**
+   * We want to build the initial query
+   */
+  const initialQueryInitialized = useRef(false);
+
   const {
     canEditAdvancedSettings,
     getListingLimitSettingsUrl,
@@ -326,17 +343,15 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialState = useMemo<State<T>>(
     () => ({
       items: [],
+      hasNoItems: undefined,
       totalItems: 0,
       hasInitialFetchReturned: false,
-      isFetchingItems: false,
+      isFetchingItems: true,
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
       selectedIds: [],
-      searchQuery:
-        initialQuery !== undefined
-          ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
-          : { text: '', query: new Query(Ast.create([]), undefined, '') },
+      searchQuery: { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
         pageIndex: 0,
         totalItemCount: 0,
@@ -348,7 +363,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         direction: 'asc',
       },
     }),
-    [initialPageSize, initialQuery]
+    [initialPageSize]
   );
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -358,6 +373,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasInitialFetchReturned,
     isFetchingItems,
     items,
+    hasNoItems,
     fetchError,
     showDeleteModal,
     isDeletingItems,
@@ -368,8 +384,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableSort,
   } = state;
 
-  const hasQuery = searchQuery.text !== '';
-  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -410,10 +424,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     }
   }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems, refreshListBouncer]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -618,12 +628,67 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Callbacks
   // ------------
+  const buildQueryFromText = useCallback(
+    async (text: string) => {
+      let ast = Ast.create([]);
+      let termMatch = text;
+
+      if (searchQueryParser) {
+        // Parse possible tags in the search text
+        const {
+          references,
+          referencesToExclude,
+          searchQuery: searchTerm,
+        } = await searchQueryParser(text);
+
+        termMatch = searchTerm;
+
+        if (references?.length || referencesToExclude?.length) {
+          const allTags = getTagList();
+
+          if (references?.length) {
+            references.forEach(({ id: refId }) => {
+              const tag = allTags.find(({ id }) => id === refId);
+              if (tag) {
+                ast = ast.addOrFieldValue('tag', tag.name, true, 'eq');
+              }
+            });
+          }
+
+          if (referencesToExclude?.length) {
+            referencesToExclude.forEach(({ id: refId }) => {
+              const tag = allTags.find(({ id }) => id === refId);
+              if (tag) {
+                ast = ast.addOrFieldValue('tag', tag.name, false, 'eq');
+              }
+            });
+          }
+        }
+      }
+
+      if (termMatch.trim() !== '') {
+        ast = ast.addClause({ type: 'term', value: termMatch, match: 'must' });
+      }
+
+      return new Query(ast, undefined, text);
+    },
+    [getTagList, searchQueryParser]
+  );
+
   const onTableSearchChange = useCallback(
     (arg: { query: Query | null; queryText: string }) => {
-      const query = arg.query ?? new Query(Ast.create([]), undefined, arg.queryText);
-      updateQuery(query);
+      if (arg.query) {
+        updateQuery(arg.query);
+      } else {
+        const idx = tableSearchChangeIdx.current + 1;
+        buildQueryFromText(arg.queryText).then((query) => {
+          if (idx === tableSearchChangeIdx.current) {
+            updateQuery(query);
+          }
+        });
+      }
     },
-    [updateQuery]
+    [updateQuery, buildQueryFromText]
   );
 
   const updateTableSortAndPagination = useCallback(
@@ -800,7 +865,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(fetchItems, 300, [fetchItems]);
+  useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
   useEffect(() => {
     if (!urlStateEnabled) {
@@ -809,47 +874,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
     // Update our Query instance based on the URL "s" text
     const updateQueryFromURL = async (text: string = '') => {
-      let ast = Ast.create([]);
-      let termMatch = text;
-
-      if (searchQueryParser) {
-        // Parse possible tags in the search text
-        const {
-          references,
-          referencesToExclude,
-          searchQuery: searchTerm,
-        } = await searchQueryParser(text);
-
-        termMatch = searchTerm;
-
-        if (references?.length || referencesToExclude?.length) {
-          const allTags = getTagList();
-
-          if (references?.length) {
-            references.forEach(({ id: refId }) => {
-              const tag = allTags.find(({ id }) => id === refId);
-              if (tag) {
-                ast = ast.addOrFieldValue('tag', tag.name, true, 'eq');
-              }
-            });
-          }
-
-          if (referencesToExclude?.length) {
-            referencesToExclude.forEach(({ id: refId }) => {
-              const tag = allTags.find(({ id }) => id === refId);
-              if (tag) {
-                ast = ast.addOrFieldValue('tag', tag.name, false, 'eq');
-              }
-            });
-          }
-        }
-      }
-
-      if (termMatch.trim() !== '') {
-        ast = ast.addClause({ type: 'term', value: termMatch, match: 'must' });
-      }
-
-      const updatedQuery = new Query(ast, undefined, text);
+      const updatedQuery = await buildQueryFromText(text);
 
       dispatch({
         type: 'onSearchQueryChange',
@@ -879,7 +904,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
-  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
+  }, [urlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -888,6 +913,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       isMounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (initialQuery && !initialQueryInitialized.current) {
+      initialQueryInitialized.current = true;
+      buildQueryFromText(initialQuery).then(updateQuery);
+    }
+  }, [initialQuery, buildQueryFromText, updateQuery]);
 
   const PageTemplate = useMemo<typeof KibanaPageTemplate>(() => {
     return withoutPageTemplateWrapper

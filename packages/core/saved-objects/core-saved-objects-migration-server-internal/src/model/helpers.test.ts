@@ -23,6 +23,7 @@ import {
   hasLaterVersionAlias,
   aliasVersion,
   adjustBatchSize,
+  getIndexTypes,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -558,5 +559,19 @@ describe('adjustBatchSize', () => {
           'After reducing the read batch size to a single document, the Elasticsearch response content length was 20 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.',
       })
     );
+  });
+});
+
+describe('getIndexTypes', () => {
+  it("returns the list of types that belong to a migrator's index, based on its state", () => {
+    const baseState = {
+      indexPrefix: '.kibana_task_manager',
+      indexTypesMap: {
+        '.kibana': ['foo', 'bar'],
+        '.kibana_task_manager': ['task'],
+      },
+    };
+
+    expect(getIndexTypes(baseState as unknown as BaseState)).toEqual(['task']);
   });
 });

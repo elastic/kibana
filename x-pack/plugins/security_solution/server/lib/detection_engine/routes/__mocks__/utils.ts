@@ -9,7 +9,7 @@ import { Readable } from 'stream';
 
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { HapiReadableStream } from '../../../../types';
 
 /**

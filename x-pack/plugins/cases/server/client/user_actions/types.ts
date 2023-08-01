@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionFindRequest } from '../../../common/api';
+import type { UserActionFindRequest } from '../../../common/types/api';
 
 /**
  * Parameters for retrieving user actions for a particular case

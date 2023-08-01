@@ -105,8 +105,8 @@ export const getCspPackagePolicies = async (
           ? input.enabled
           : input.enabled && input.policy_template === postureType
       ).length > 0 &&
-      (!queryParams.benchmark_name ||
-        pkg.name.toLowerCase().includes(queryParams.benchmark_name.toLowerCase()))
+      (!queryParams.package_policy_name ||
+        pkg.name.toLowerCase().includes(queryParams.package_policy_name.toLowerCase()))
   );
 
   const page = queryParams?.page ?? 1;

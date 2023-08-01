@@ -125,7 +125,7 @@ import { MissingPrivilegesCallOut } from '../../../../detections/components/call
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -612,6 +612,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+  const currentAlertStatusFilterValue = useMemo(() => [filterGroup], [filterGroup]);
+  const updatedAtValue = useMemo(() => {
+    return timelinesUi.getLastUpdated({
+      updatedAt: updatedAt || Date.now(),
+      showUpdating,
+    });
+  }, [updatedAt, showUpdating, timelinesUi]);
 
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
@@ -832,13 +839,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           onFilterGroupChanged={onFilterGroupChangedCallback}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {updatedAt &&
-                          timelinesUi.getLastUpdated({
-                            updatedAt: updatedAt || Date.now(),
-                            showUpdating,
-                          })}
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer size="l" />
                     <Display show={!globalFullScreen}>
@@ -854,7 +855,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={[filterGroup]}
+                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}
