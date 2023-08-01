@@ -45,6 +45,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
       {ProtectionsUpSellingComponent && (
         <>
+          <EuiSpacer size="m" />
           <ProtectionsUpSellingComponent />
           <EuiSpacer size="l" />
         </>
