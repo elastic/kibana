@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
+import rison from '@kbn/rison';
+
 import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
 import { JobParamsPNGV2 } from '@kbn/reporting-plugin/common/types';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -133,7 +135,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
     return await supertestWithoutAuth
-      .post(INTERNAL_ROUTES.DOWNLOAD_CSV)
+      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send(job);
@@ -149,7 +151,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/pngV2`)
+      .post(`/api/reporting/generate/png`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -196,7 +198,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const {
       body: [job],
     } = await supertestWithoutAuth
-      .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
+      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send()
