@@ -15,33 +15,52 @@ export interface WithDatasetSelection {
 }
 
 export interface WithControlPanelGroupAPI {
-  controlGroupAPI: ControlGroupAPI | undefined;
+  controlGroupAPI: ControlGroupAPI;
 }
 
-export interface WithControlPanel {
-  controlPanels: ControlPanels | null;
+export interface WithControlPanels {
+  controlPanels: ControlPanels;
 }
 
-export type DefaultLogExplorerProfileState = WithDatasetSelection &
-  WithControlPanelGroupAPI &
-  WithControlPanel;
+export type DefaultLogExplorerProfileState = WithDatasetSelection;
 
-export enum LogExplorerProfileStates {
-  Uninitialized = 'uninitialized',
-  InitializingFromUrl = 'initializingFromUrl',
-  InitializingDataView = 'initializingDataView',
-  Initialized = 'initialized',
-  InitializedDatasetSelectionIdle = 'initialized.datasetSelection.idle',
-  InitializedDatasetSelectionUpdatingDataView = 'initialized.datasetSelection.updatingDataView',
-  InitializedControlGroupsUninitialized = 'initialized.controlGroups.uninitialized',
-  InitializedControlGroupsIdle = 'initialized.controlGroups.idle',
-  InitializedControlGroupsUpdatingControlPanels = 'initialized.controlGroups.updatingControlPanels',
-}
-
-export interface LogExplorerProfileTypeState {
-  value: LogExplorerProfileStates;
-  context: DefaultLogExplorerProfileState;
-}
+export type LogExplorerProfileTypeState =
+  | {
+      value: 'uninitialized';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initializingFromUrl';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initializingDataView';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.idle';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.updatingDataView';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.controlGroups.uninitialized';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.controlGroups.idle';
+      context: WithControlPanelGroupAPI & WithControlPanels;
+    }
+  | {
+      value: 'initialized.controlGroups.updatingControlPanels';
+      context: WithControlPanelGroupAPI & WithControlPanels;
+    };
 
 export type LogExplorerProfileContext = LogExplorerProfileTypeState['context'];
 

@@ -97,7 +97,9 @@ const extractDatasetSelectionFromIndex = ({
 }) => {
   // If the index parameter doesn't exists, use initialContext value or fallback to AllDatasetSelection
   if (!index) {
-    return context.datasetSelection ?? AllDatasetSelection.create();
+    return (
+      ('datasetSelection' in context && context.datasetSelection) ?? AllDatasetSelection.create()
+    );
   }
 
   const rawDatasetSelection = decodeDatasetSelectionId(index);
@@ -115,7 +117,7 @@ export const subscribeControlGroup =
   > =>
   (context) =>
   (send) => {
-    if (!context.controlGroupAPI) return;
+    if (!('controlGroupAPI' in context)) return;
 
     const filtersSubscription = context.controlGroupAPI.onFiltersPublished$.subscribe(
       (newFilters) => {
@@ -155,15 +157,16 @@ export const updateControlPanels =
     LogExplorerProfileEvent
   > =>
   async (context, event) => {
-    if (!('controlPanels' in event)) return;
+    if (!('controlGroupAPI' in context)) return;
 
-    const newControlPanels = event.controlPanels || context.controlPanels;
+    const newControlPanels =
+      ('controlPanels' in event && event.controlPanels) || context.controlPanels;
     const controlPanelsWithId = constructControlPanelsWithDataViewId(
       stateContainer,
       newControlPanels!
     );
 
-    context.controlGroupAPI?.updateInput({ panels: controlPanelsWithId });
+    context.controlGroupAPI.updateInput({ panels: controlPanelsWithId });
 
     return controlPanelsWithId;
   };
@@ -184,13 +187,7 @@ const constructControlPanelsWithDataViewId = (
 
   const controlsPanelsWithId = mergeDefaultPanelsWithUrlConfig(dataView, validatedControlPanels!);
 
-  stateContainer.stateStorage.set(
-    CONTROL_PANELS_URL_KEY,
-    cleanControlPanels(controlsPanelsWithId),
-    {
-      replace: true,
-    }
-  );
+  stateContainer.stateStorage.set(CONTROL_PANELS_URL_KEY, cleanControlPanels(controlsPanelsWithId));
 
   return controlsPanelsWithId;
 };

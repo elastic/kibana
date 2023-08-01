@@ -22,10 +22,10 @@ export const useControlPanels = (
   const { query, filters, fromDate, toDate } = useQuerySubscriber({ data });
   const timeRange: TimeRange = { from: fromDate!, to: toDate! };
 
-  const controlPanels = useSelector(
-    logExplorerProfileStateService,
-    (state) => state.context.controlPanels
-  );
+  const controlPanels = useSelector(logExplorerProfileStateService, (state) => {
+    if (!('controlPanels' in state.context)) return;
+    return state.context.controlPanels;
+  });
 
   const getInitialInput = useCallback(
     async (initialInput: Partial<ControlGroupInput>) => {
