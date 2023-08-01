@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
   PageUpsellings,
@@ -13,12 +12,18 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import React, { lazy } from 'react';
-import type React from 'react';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 
-const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
+const ThreatIntelligencePaywallLazy = lazy(async () => {
+  const ThreatIntelligencePaywall = (await import('./pages/threat_intelligence_paywall')).default;
+
+  return {
+    default: () => <ThreatIntelligencePaywall requiredPLI={AppFeatureKey.threatIntelligence} />,
+  };
+});
+
 interface UpsellingsConfig {
   pli: AppFeatureKey;
   component: React.LazyExoticComponent<React.ComponentType>;
@@ -69,9 +74,7 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.threatIntelligence,
     pli: AppFeatureKey.threatIntelligence,
-    component: () => (
-      <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
-    ),
+    component: ThreatIntelligencePaywallLazy,
   },
 ];
 
