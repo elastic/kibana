@@ -6,6 +6,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+
 import { css } from '@emotion/react';
 import React from 'react';
 import progress from './images/progress.svg';
@@ -18,6 +19,7 @@ import {
   WELCOME_PANEL_INVITE_YOUR_TEAM_DESCRIPTION,
   WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
 } from './translations';
+import { ProgressTracker } from './progress_tracker';
 
 const headerCards: HeaderSection[] = [
   {
@@ -36,14 +38,13 @@ const headerCards: HeaderSection[] = [
     icon: { type: progress },
     title: WELCOME_PANEL_PROGRESS_TRACKER_TITLE,
     id: 'progressTracker',
-    description: (params?: { totalActiveSteps: number | null; totalStepsLeft: number | null }) => {
-      const { totalActiveSteps, totalStepsLeft } = params ?? {};
-      if (totalActiveSteps != null && totalStepsLeft != null) {
-        return `${totalActiveSteps - totalStepsLeft} / ${totalActiveSteps}`;
-      }
-
-      return null;
-    },
+    description: ({
+      totalActiveSteps,
+      totalStepsLeft,
+    }: {
+      totalActiveSteps?: number | null;
+      totalStepsLeft?: number | null;
+    }) => <ProgressTracker totalActiveSteps={totalActiveSteps} totalStepsLeft={totalStepsLeft} />,
   },
 ];
 

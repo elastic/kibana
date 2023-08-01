@@ -11,10 +11,10 @@ import type React from 'react';
 import type { ProductLine } from '../../common/product';
 
 export interface HeaderSection {
-  description?: (params?: {
+  description?: (params: {
     totalActiveSteps: number | null;
     totalStepsLeft: number | null;
-  }) => string | null;
+  }) => React.ReactNode | null;
   icon: EuiIconProps;
   id: string;
   title: string;
