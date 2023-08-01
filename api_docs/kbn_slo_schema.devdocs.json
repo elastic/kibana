@@ -288,6 +288,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.Duration.asSeconds",
+            "type": "Function",
+            "tags": [],
+            "label": "asSeconds",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -680,7 +696,7 @@
         "label": "FindSLOParams",
         "description": [],
         "signature": [
-          "{ name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
+          "{ kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -908,21 +924,6 @@
           "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; filter: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.SummarySchema",
-        "type": "Type",
-        "tags": [],
-        "label": "SummarySchema",
-        "description": [],
-        "signature": [
-          "{ status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }"
-        ],
-        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2328,11 +2329,9 @@
           "PartialC",
           "<{ query: ",
           "PartialC",
-          "<{ name: ",
+          "<{ kqlQuery: ",
           "StringC",
-          "; indicatorTypes: ",
-          "Type",
-          "<string[], string, unknown>; page: ",
+          "; page: ",
           "StringC",
           "; perPage: ",
           "StringC",
@@ -2340,9 +2339,13 @@
           "UnionC",
           "<[",
           "LiteralC",
-          "<\"creationTime\">, ",
+          "<\"error_budget_consumed\">, ",
           "LiteralC",
-          "<\"indicatorType\">]>; sortDirection: ",
+          "<\"error_budget_remaining\">, ",
+          "LiteralC",
+          "<\"sli_value\">, ",
+          "LiteralC",
+          "<\"status\">]>; sortDirection: ",
           "UnionC",
           "<[",
           "LiteralC",
