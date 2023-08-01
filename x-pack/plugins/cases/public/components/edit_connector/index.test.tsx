@@ -11,13 +11,14 @@ import userEvent from '@testing-library/user-event';
 
 import type { EditConnectorProps } from '.';
 import { EditConnector } from '.';
-import type { AppMockRenderer } from '../../common/mock';
+
 import {
+  type AppMockRenderer,
   createAppMockRenderer,
   readCasesPermissions,
   noPushCasesPermissions,
   TestProviders,
-  allCasesPermissions,
+  noConnectorsCasePermission,
 } from '../../common/mock';
 import { basicCase, connectorsMock } from '../../containers/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
@@ -32,8 +33,6 @@ const defaultProps: EditConnectorProps = {
   caseConnectors,
   onSubmit,
 };
-
-const noConnectorsPermission = { ...allCasesPermissions(), connectors: false };
 
 describe('EditConnector ', () => {
   let appMockRender: AppMockRenderer;
@@ -279,7 +278,7 @@ describe('EditConnector ', () => {
 
   it('does not show the callout if the user does not have access to cases connectors', async () => {
     const props = { ...defaultProps, connectors: [] };
-    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<EditConnector {...props} />);
     await waitFor(() => {
@@ -301,7 +300,7 @@ describe('EditConnector ', () => {
 
   it('does not show the connectors previewer if the user does not have access to cases connectors', async () => {
     const props = { ...defaultProps, connectors: [] };
-    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<EditConnector {...props} />);
     expect(result.queryByTestId('connector-fields-preview')).not.toBeInTheDocument();
@@ -320,7 +319,7 @@ describe('EditConnector ', () => {
 
   it('does not show the connectors form if the user does not have access to cases connectors', async () => {
     const props = { ...defaultProps, connectors: [] };
-    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<EditConnector {...props} />);
     expect(result.queryByTestId('edit-connector-fields-form-flex-item')).not.toBeInTheDocument();
@@ -348,7 +347,7 @@ describe('EditConnector ', () => {
   });
 
   it('does not show the push button if the user does not have access to cases actions', async () => {
-    appMockRender = createAppMockRenderer({ permissions: noConnectorsPermission });
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<EditConnector {...defaultProps} />);
     await waitFor(() => {
@@ -374,7 +373,7 @@ describe('EditConnector ', () => {
   it('does not show the edit connectors pencil if the user does not have access to case connectors', async () => {
     const props = { ...defaultProps, connectors: [] };
     appMockRender = createAppMockRenderer({
-      permissions: noConnectorsPermission,
+      permissions: noConnectorsCasePermission(),
     });
 
     appMockRender.render(<EditConnector {...props} />);

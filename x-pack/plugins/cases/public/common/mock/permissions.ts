@@ -33,6 +33,7 @@ export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: fa
 export const writeCasesPermissions = () => buildCasesPermissions({ read: false });
 export const onlyDeleteCasesPermission = () =>
   buildCasesPermissions({ read: false, create: false, update: false, delete: true, push: false });
+export const noConnectorsCasePermission = () => buildCasesPermissions({ connectors: false });
 
 export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
   const create = overrides.create ?? true;

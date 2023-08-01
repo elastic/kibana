@@ -12,21 +12,15 @@ import { render, screen } from '@testing-library/react';
 
 import type { Props } from './connectors';
 import { Connectors } from './connectors';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  type AppMockRenderer,
+  noConnectorsCasePermission,
+  createAppMockRenderer,
+  TestProviders,
+} from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
-
-const mockUseCasesContext = jest.fn().mockReturnValue({
-  permissions: {
-    connectors: true,
-  },
-});
-
-jest.mock('../cases_context/use_cases_context', () => ({
-  useCasesContext: () => mockUseCasesContext(),
-}));
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -52,7 +46,7 @@ describe('Connectors', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
   });
 
   it('shows the connectors from group', () => {
@@ -173,11 +167,7 @@ describe('Connectors', () => {
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
-    mockUseCasesContext.mockReturnValue({
-      permissions: {
-        connectors: false,
-      },
-    });
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<Connectors {...props} />);
     expect(
