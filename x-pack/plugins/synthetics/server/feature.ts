@@ -10,10 +10,15 @@ import { syntheticsMonitorType, syntheticsParamType } from '../common/types/save
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
-import { UPTIME_RULE_TYPES } from '../common/constants/uptime_alerts';
 import { settingsObjectType } from './saved_objects/uptime_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
+const UPTIME_RULE_TYPES = [
+  'xpack.uptime.alerts.tls',
+  'xpack.uptime.alerts.tlsCertificate',
+  'xpack.uptime.alerts.monitorStatus',
+  'xpack.uptime.alerts.durationAnomaly',
+];
 export const uptimeFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,

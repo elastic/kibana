@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Tests'
+    label: 'Threat Intelligence Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -8,8 +8,6 @@ steps:
     parallelism: 2
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
