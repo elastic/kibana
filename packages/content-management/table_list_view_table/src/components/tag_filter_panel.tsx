@@ -176,11 +176,9 @@ export const TagFilterPanel: FC<Props> = ({
 
             <EuiFlexItem css={saveBtnWrapperCSS}>
               <EuiButton onClick={closePopover}>
-                {i18n.translate('contentManagement.tableList.tagFilterPanel.applyButtonLabel',
-                    { 
-                      defaultMessage: 'Apply' , 
-                    }
-                  )} 
+                {i18n.translate('contentManagement.tableList.tagFilterPanel.applyButtonLabel', {
+                  defaultMessage: 'Apply',
+                })}
               </EuiButton>
             </EuiFlexItem>
 
