@@ -7,13 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASE_METRICS_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_METRICS_URL } from '../../../../common/constants';
+import type { CasesMetricsFeatureField } from '../../../../common/api/metrics/case';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
 export const getCasesMetricRoute = createCasesRoute({
   method: 'get',
-  path: CASE_METRICS_URL,
+  path: INTERNAL_CASE_METRICS_URL,
   params: {
     query: schema.object({
       features: schema.oneOf([
@@ -34,7 +35,9 @@ export const getCasesMetricRoute = createCasesRoute({
       return response.ok({
         body: await client.metrics.getCasesMetrics({
           ...request.query,
-          features: Array.isArray(features) ? features : [features],
+          features: Array.isArray(features)
+            ? (features as CasesMetricsFeatureField[])
+            : [features as CasesMetricsFeatureField],
         }),
       });
     } catch (error) {
