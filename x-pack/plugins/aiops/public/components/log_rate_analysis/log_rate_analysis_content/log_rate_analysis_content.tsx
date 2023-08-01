@@ -134,7 +134,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     <EuiPanel hasBorder={false} hasShadow={false}>
       {documentCountStats !== undefined && (
         <DocumentCountContent
-          analysisType={analysisType}
           brushSelectionUpdateHandler={brushSelectionUpdate}
           documentCountStats={documentCountStats}
           documentCountStatsSplit={documentCountStatsCompare}
