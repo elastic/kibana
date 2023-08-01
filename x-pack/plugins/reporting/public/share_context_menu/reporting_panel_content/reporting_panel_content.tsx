@@ -84,11 +84,11 @@ class ReportingPanelContentUi extends Component<Props, State> {
   }
 
   private getAbsoluteReportGenerationUrl = (props: Props) => {
-    const relativePath = this.props.apiClient.getReportingJobPath(
+    const relativePath = this.props.apiClient.getReportingPublicJobPath(
       props.reportType,
       this.props.apiClient.getDecoratedJobParams(this.props.getJobParams(true))
     );
-    return url.resolve(window.location.href, relativePath); // FIXME: '(from: string, to: string): string' is deprecated
+    return url.resolve(window.location.href, relativePath);
   };
 
   public componentDidUpdate(_prevProps: Props, prevState: State) {
