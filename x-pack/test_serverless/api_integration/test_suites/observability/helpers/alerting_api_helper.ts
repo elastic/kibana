@@ -21,6 +21,7 @@ export async function createIndexConnector({
   const { body } = await supertest
     .post(`/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       name,
       config: {
@@ -54,6 +55,7 @@ export async function createRule({
   const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       params,
       consumer,
