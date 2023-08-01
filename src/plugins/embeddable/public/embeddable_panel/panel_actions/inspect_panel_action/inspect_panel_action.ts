@@ -11,6 +11,7 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
 import { IEmbeddable } from '../../../lib/embeddables';
+import { tracksOverlays } from '../track_overlays';
 
 export const ACTION_INSPECT_PANEL = 'openInspector';
 
@@ -45,6 +46,11 @@ export class InspectPanelAction implements Action<ActionContext> {
     if (!(await this.isCompatible({ embeddable })) || adapters === undefined) {
       throw new Error('Action not compatible with context');
     }
+
+    // send the overlay ref to the root embeddable if it is capable of tracking overlays
+    const rootEmbeddable = embeddable.getRoot();
+    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+
     const session = this.inspector.open(adapters, {
       title: embeddable.getTitle(),
       options: {
@@ -62,14 +68,20 @@ export class InspectPanelAction implements Action<ActionContext> {
     // before calling the original destroy method
     const originalDestroy = embeddable.destroy;
     embeddable.destroy = () => {
+      if (overlayTracker) overlayTracker.clearOverlays();
+
       session.close();
       if (originalDestroy) {
         originalDestroy.call(embeddable);
       }
     };
+
     // In case the inspector gets closed (otherwise), restore the original destroy function
     session.onClose.finally(() => {
+      if (overlayTracker) overlayTracker.clearOverlays();
       embeddable.destroy = originalDestroy;
     });
+
+    overlayTracker?.openOverlay(session);
   }
 }
