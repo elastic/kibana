@@ -41,14 +41,10 @@ export const RangeSliderControl: FC = () => {
   const dataViewId = rangeSlider.select((state) => state.output.dataViewId);
 
   // React component state
+  const [displayedMax, setDisplayedMax] = useState<number>(max ?? Infinity);
+  const [displayedMin, setDisplayedMin] = useState<number>(min ?? -Infinity);
   const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
-
-  useEffect(() => {
-    // Ensures that changes to the value (for example, from the `reset` button on the dashboard) are reflected
-    // in the displayed value
-    setDisplayedValue(value ?? ['', '']);
-  }, [value]);
 
   const debouncedOnChange = useMemo(
     () =>
@@ -76,41 +72,47 @@ export const RangeSliderControl: FC = () => {
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);
 
+  /**
+   * The following `useEffects` ensure that the changes to min, max, and value that come from the embeddable (for example,
+   * from the `reset` button on the dashboard or via chaining) are reflected in the displayed value
+   */
+  useEffect(() => setDisplayedValue(value ?? ['', '']), [value]);
+  useEffect(() => setDisplayedMin(min ?? -Infinity), [min]);
+  useEffect(() => setDisplayedMax(max ?? Infinity), [max]);
+
   const ticks: EuiRangeTick[] = useMemo(() => {
     return [
-      { value: min ?? -Infinity, label: fieldFormatter(String(min)) },
-      { value: max ?? Infinity, label: fieldFormatter(String(max)) },
+      { value: displayedMin, label: fieldFormatter(String(displayedMin)) },
+      { value: displayedMax, label: fieldFormatter(String(displayedMax)) },
     ];
-  }, [min, max, fieldFormatter]);
+  }, [displayedMin, displayedMax, fieldFormatter]);
 
   const disablePopover = useMemo(
     () =>
       isLoading ||
-      min === undefined ||
-      max === undefined ||
-      min === -Infinity ||
-      max === Infinity ||
-      min === max,
-    [isLoading, min, max]
+      displayedMin === -Infinity ||
+      displayedMax === Infinity ||
+      displayedMin === displayedMax,
+    [isLoading, displayedMin, displayedMax]
   );
 
   const getCommonInputProps = useCallback(
     ({
       inputValue,
       testSubj,
-      inputPlaceholder,
+      placeholder,
     }: {
       inputValue: string;
       testSubj: string;
-      inputPlaceholder: string;
+      placeholder: string;
     }) => {
       return {
         isInvalid,
+        placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
-        value: inputValue,
-        placeholder: inputPlaceholder,
-        'data-test-subj': `rangeSlider__${testSubj}`,
         className: 'rangeSliderAnchor__fieldNumber',
+        'data-test-subj': `rangeSlider__${testSubj}`,
+        value: inputValue === placeholder ? '' : inputValue,
       };
     },
     [isInvalid]
@@ -122,26 +124,26 @@ export const RangeSliderControl: FC = () => {
     <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
       <EuiDualRange
         id={id}
-        min={min ?? -Infinity}
-        max={max ?? Infinity}
         fullWidth
         showTicks
         ticks={ticks}
+        min={displayedMin}
+        max={displayedMax}
         isLoading={isLoading}
         readOnly={disablePopover}
         showInput={'inputWithPopover'}
         data-test-subj="rangeSlider__slider"
-        value={[displayedValue[0] || (min ?? -Infinity), displayedValue[1] || (max ?? Infinity)]}
         minInputProps={getCommonInputProps({
-          inputPlaceholder: String(min),
+          inputValue: displayedValue[0],
           testSubj: 'lowerBoundFieldNumber',
-          inputValue: String(min) === displayedValue[0] ? '' : displayedValue[0],
+          placeholder: String(displayedMin),
         })}
         maxInputProps={getCommonInputProps({
-          inputPlaceholder: String(max),
+          inputValue: displayedValue[1],
           testSubj: 'upperBoundFieldNumber',
-          inputValue: String(max) === displayedValue[1] ? '' : displayedValue[1],
+          placeholder: String(displayedMax),
         })}
+        value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
         onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
           setDisplayedValue([String(minSelection), String(maxSelection)]);
         }}

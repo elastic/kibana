@@ -283,8 +283,8 @@ export class RangeSliderEmbeddable
     });
 
     this.dispatch.setMinMax({
-      min: `${min ?? '-Infinity'}`,
-      max: `${max ?? 'Infinity'}`,
+      min,
+      max,
     });
   };
 
