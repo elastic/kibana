@@ -208,9 +208,14 @@ const FieldPanel: FC<FieldPanelProps> = ({
       size: 's',
       items: [
         {
-          name: i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
-            defaultMessage: 'Attach charts',
-          }),
+          name:
+            selectedPartitions.length > 0
+              ? i18n.translate('xpack.aiops.changePointDetection.attachSelectedChartsLabel', {
+                  defaultMessage: 'Attach selected charts',
+                })
+              : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
+                  defaultMessage: 'Attach charts',
+                }),
           icon: 'plusInCircle',
           panel: 'attachMainPanel',
         },
@@ -228,9 +233,14 @@ const FieldPanel: FC<FieldPanelProps> = ({
       id: 'attachMainPanel',
       size: 's',
       initialFocusedItemIndex: 0,
-      title: i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
-        defaultMessage: 'Attach charts',
-      }),
+      title:
+        selectedPartitions.length > 0
+          ? i18n.translate('xpack.aiops.changePointDetection.attachSelectedChartsLabel', {
+              defaultMessage: 'Attach selected charts',
+            })
+          : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
+              defaultMessage: 'Attach charts',
+            }),
       items: [
         {
           name: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardLabel', {
@@ -279,6 +289,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
       size: 's',
       content: (
         <EuiPanel paddingSize={'s'}>
+          <EuiSpacer size={'s'} />
           <EuiForm>
             <EuiFormRow fullWidth>
               <EuiSwitch
@@ -297,29 +308,31 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 compressed
               />
             </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
-                  defaultMessage="Max series"
-                />
-              }
-            >
-              <EuiFieldNumber
-                value={dashboardAttachment.maxSeriesToPlot}
-                onChange={(e) =>
-                  setDashboardAttachment((prevState) => {
-                    return {
-                      ...prevState,
-                      maxSeriesToPlot: Number(e.target.value),
-                    };
-                  })
+            {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
+              <EuiFormRow
+                fullWidth
+                label={
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
+                    defaultMessage="Max series"
+                  />
                 }
-              />
-            </EuiFormRow>
+              >
+                <EuiFieldNumber
+                  value={dashboardAttachment.maxSeriesToPlot}
+                  onChange={(e) =>
+                    setDashboardAttachment((prevState) => {
+                      return {
+                        ...prevState,
+                        maxSeriesToPlot: Number(e.target.value),
+                      };
+                    })
+                  }
+                />
+              </EuiFormRow>
+            ) : null}
 
-            <EuiSpacer />
+            <EuiSpacer size={'m'} />
 
             <EuiButton
               fill
