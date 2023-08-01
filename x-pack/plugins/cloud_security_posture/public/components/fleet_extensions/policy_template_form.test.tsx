@@ -717,15 +717,16 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it(`clears ${CLOUDBEAT_EKS} credential fields on type change`, () => {
+    it(`prompts the user and then clears ${CLOUDBEAT_EKS} credential fields on type change`, () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'shared_credentials' },
         'aws.setup.format': { value: 'manual' },
         shared_credential_file: { value: 'a' },
       });
-      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const { getByLabelText, getByText } = render(<WrappedComponent newPolicy={policy} />);
       userEvent.click(getByLabelText('Assume role'));
+      userEvent.click(getByText('Continue'));
 
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'assume_role' },
