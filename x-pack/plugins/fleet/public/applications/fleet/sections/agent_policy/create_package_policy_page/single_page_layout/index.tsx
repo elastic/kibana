@@ -57,6 +57,8 @@ import {
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
+import type { PackagePolicy } from '../../../../types';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
@@ -231,6 +233,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageInfo,
   });
 
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const extensionTabsView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-edit-tabs'
+  );
+
+  const tabsViews = extensionTabsView?.tabs;
+
   const layoutProps = useMemo(
     () => ({
       from,
@@ -239,8 +250,37 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       agentPolicy,
       packageInfo,
       integrationInfo,
+      tabs: tabsViews?.length
+        ? [
+            {
+              title: i18n.translate('xpack.fleet.editPackagePolicy.settingsTabName', {
+                defaultMessage: 'Settings',
+              }),
+              isSelected: selectedTab === 0,
+              onClick: () => {
+                setSelectedTab(0);
+              },
+            },
+            ...tabsViews.map(({ title }, index) => ({
+              title,
+              isSelected: selectedTab === index + 1,
+              onClick: () => {
+                setSelectedTab(index + 1);
+              },
+            })),
+          ]
+        : [],
     }),
-    [agentPolicy, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicy,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      packageInfo,
+      selectedTab,
+      tabsViews,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -314,17 +354,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <Loading />
       ) : packageInfo ? (
         <>
-          <StepDefinePackagePolicy
-            agentPolicy={agentPolicy}
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults}
-            submitAttempted={formState === 'INVALID'}
-          />
+          {selectedTab === 0 && (
+            <StepDefinePackagePolicy
+              agentPolicy={agentPolicy}
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!extensionView && (
+          {!extensionView && selectedTab === 0 && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               showOnlyIntegration={integrationInfo?.name}
@@ -338,10 +380,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* If a package has been loaded, then show UI extension (if any) */}
           {extensionView && packagePolicy.package?.name && (
             <ExtensionWrapper>
-              <extensionView.Component
-                newPolicy={packagePolicy}
-                onChange={handleExtensionViewOnChange}
-              />
+              {selectedTab > 0 && tabsViews ? (
+                React.createElement(tabsViews[selectedTab - 1].Component, {
+                  policy: packagePolicy as PackagePolicy,
+                  newPolicy: packagePolicy,
+                  onChange: handleExtensionViewOnChange,
+                })
+              ) : (
+                <extensionView.Component
+                  newPolicy={packagePolicy}
+                  onChange={handleExtensionViewOnChange}
+                />
+              )}
             </ExtensionWrapper>
           )}
         </>
@@ -349,16 +399,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
-      isInitialized,
       isPackageInfoLoading,
-      agentPolicy,
+      isInitialized,
       packageInfo,
+      agentPolicy,
       packagePolicy,
       updatePackagePolicy,
       validationResults,
       formState,
-      integrationInfo?.name,
       extensionView,
+      selectedTab,
+      integrationInfo?.name,
+      tabsViews,
       handleExtensionViewOnChange,
     ]
   );
