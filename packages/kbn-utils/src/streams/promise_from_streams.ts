@@ -28,16 +28,19 @@ import { pipeline, Writable, Readable } from 'stream';
 function isReadable(stream: Readable | Writable): stream is Readable {
   return 'read' in stream && typeof stream.read === 'function';
 }
-
+type OneReadableRestWritable = [Readable, ...Writable[]];
+const pluckLast = (xs: OneReadableRestWritable) => xs[(xs.length = 1)];
+const isSize1 = (xs: OneReadableRestWritable): boolean => xs.length === 1;
+const lastNotReadable = (last: Readable | Writable) => !isReadable(last);
 export async function createPromiseFromStreams<T>(streams: [Readable, ...Writable[]]): Promise<T> {
   let finalChunk: any;
-  const last = streams[streams.length - 1];
-  if (!isReadable(last) && streams.length === 1) {
-    // For a nicer error than what stream.pipeline throws
+  const last = pluckLast(streams);
+  // For a nicer error than what stream.pipeline throws
+  if (lastNotReadable(last) && isSize1(streams))
     throw new Error('A minimum of 2 streams is required when a non-readable stream is given');
-  }
+
+  // We are pushing a writable stream to capture the last chunk
   if (isReadable(last)) {
-    // We are pushing a writable stream to capture the last chunk
     streams.push(
       new Writable({
         // Use object mode even when "last" stream isn't. This allows to
@@ -56,6 +59,26 @@ export async function createPromiseFromStreams<T>(streams: [Readable, ...Writabl
     pipeline(...streams, (err) => {
       if (err) return reject(err);
       resolve(finalChunk);
+    });
+  });
+}
+/**
+ * Reads all the text in a readable stream and returns it as a string,
+ * via a Promise.
+ * @param {stream.Readable} readable
+ */
+export function readableToString(readable) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    readable.on('data', function (chunk) {
+      // console.log(`\nλjs chunk: \n\t${chunk}`);
+      data += chunk;
+    });
+    readable.on('end', function () {
+      resolve(data);
+    });
+    readable.on('error', function (err) {
+      reject(err);
     });
   });
 }

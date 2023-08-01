@@ -69,8 +69,8 @@ export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
   progress: Progress,
-  useCreate: boolean = false,
-  inputDir: string
+  inputDir: string,
+  useCreate: boolean = false
 ): Writable {
   const doIndexDocs = indexDocs(stats, client, useCreate);
 

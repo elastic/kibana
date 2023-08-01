@@ -55,3 +55,10 @@ export async function freshenUp(client: Client, indicesWithDocs: string[]): Prom
 export function hasDotKibanaPrefix(mainSOIndex: string) {
   return (x: string) => x.startsWith(mainSOIndex);
 }
+// pipe a series of streams into each other so that data and errors
+// flow from the first stream to the last. Errors from the last stream
+// are not listened for
+export const readablesToReadable = (...streams: Readable[]): Readable =>
+  streams.reduce((source: Readable, dest: Readable) =>
+    source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
+  );
