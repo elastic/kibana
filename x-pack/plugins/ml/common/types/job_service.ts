@@ -56,3 +56,7 @@ export interface ResetJobsResponse {
     error?: ErrorType;
   };
 }
+
+export interface UpdateGroupsRequest {
+  jobs: Array<{ jobId: string; groups: string[] }>;
+}

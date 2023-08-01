@@ -21,9 +21,9 @@ import { updateRuleRoute } from './route';
 import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
-} from '../../../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { RESPONSE_ACTION_TYPES } from '../../../../../../../common/detection_engine/rule_response_actions/schemas';
+import { RESPONSE_ACTION_TYPES } from '../../../../../../../common/api/detection_engine/model/rule_response_actions';
 
 jest.mock('../../../../../machine_learning/authz');
 

@@ -103,16 +103,16 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
     title: i18n.translate('xpack.ml.deepLink.aiOps', {
       defaultMessage: 'AIOps',
     }),
-    // Default to the index select page for the explain log rate spikes since we don't have an AIops overview page
-    path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+    // Default to the index select page for log rate analysis since we don't have an AIops overview page
+    path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
     navLinkStatus,
     deepLinks: [
       {
-        id: 'explainLogRateSpikes',
-        title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
-          defaultMessage: 'Explain Log Rate Spikes',
+        id: 'logRateAnalysis',
+        title: i18n.translate('xpack.ml.deepLink.logRateAnalysis', {
+          defaultMessage: 'Log Rate Analysis',
         }),
-        path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+        path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
         navLinkStatus,
       },
       {
@@ -210,6 +210,17 @@ function getIndexDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeep
   };
 }
 
+function getDataComparisonDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'dataComparison',
+    title: i18n.translate('xpack.ml.deepLink.dataComparison', {
+      defaultMessage: 'Data Comparison',
+    }),
+    path: `/${ML_PAGES.DATA_COMPARISON_INDEX_SELECT}`,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
+  };
+}
+
 function getSettingsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
   const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isADEnabled);
   return {
@@ -256,6 +267,7 @@ export function getDeepLinks(isFullLicense: boolean, mlCapabilities: MlCapabilit
     getDataVisualizerDeepLink(mlCapabilities),
     getFileUploadDeepLink(mlCapabilities),
     getIndexDataVisualizerDeepLink(mlCapabilities),
+    getDataComparisonDeepLink(mlCapabilities),
   ];
 
   if (isFullLicense === true) {

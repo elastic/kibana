@@ -138,7 +138,6 @@ export function MetricsAlertDropdown() {
       ].concat(canCreateAlerts ? [infrastructureAlertsPanel, metricsAlertsPanel] : []),
     [infrastructureAlertsPanel, metricsAlertsPanel, firstPanelMenuItems, canCreateAlerts]
   );
-
   return (
     <>
       <EuiPopover
@@ -150,7 +149,7 @@ export function MetricsAlertDropdown() {
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={togglePopover}
-            data-test-subj="thresholdRulestructure-alerts-and-rules"
+            data-test-subj="thresholdRuleStructure-alerts-and-rules"
           >
             <FormattedMessage
               id="xpack.observability.threshold.rule.alertsButton"

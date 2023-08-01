@@ -11,7 +11,7 @@ import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsType,
   SavedObjectsModelVersion,
-  SavedObjectModelTransformationFn,
+  SavedObjectModelDataBackfillFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -48,7 +48,7 @@ describe('getModelVersionTransforms', () => {
       name: 'foo',
       modelVersions: {
         '1': {
-          changes: [{ type: 'data_backfill', transform: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '2': {
           changes: [{ type: 'mappings_deprecation', deprecatedMappings: [] }],
@@ -73,13 +73,13 @@ describe('getModelVersionTransforms', () => {
       name: 'foo',
       modelVersions: () => ({
         '1': {
-          changes: [{ type: 'data_backfill', transform: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '2': {
-          changes: [{ type: 'data_backfill', transform: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '3': {
-          changes: [{ type: 'data_backfill', transform: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
       }),
     });
@@ -107,110 +107,73 @@ describe('convertModelVersionTransformFn', () => {
     return { type: 'foo', id: `foo-${i++}`, attributes: {} };
   };
 
-  const createModelTransformFn = (): jest.MockedFunction<SavedObjectModelTransformationFn> => {
-    return jest.fn().mockImplementation((doc: unknown) => ({
-      document: doc,
-    }));
+  const createModelTransformFn = (): jest.MockedFunction<SavedObjectModelDataBackfillFn> => {
+    return jest.fn().mockImplementation((doc: unknown) => ({}));
   };
 
-  describe('up transformation', () => {
-    it('generates a transform function calling the model transform', () => {
-      const upTransform = createModelTransformFn();
+  it('generates a transform function calling the model transform', () => {
+    const upTransform = createModelTransformFn();
 
-      const definition: SavedObjectsModelVersion = {
-        changes: [
-          {
-            type: 'data_backfill',
-            transform: upTransform,
-          },
-        ],
-      };
+    const definition: SavedObjectsModelVersion = {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: upTransform,
+        },
+      ],
+    };
 
-      const transform = convertModelVersionTransformFn({
-        log,
-        modelVersion: 1,
-        virtualVersion: '10.1.0',
-        definition,
-      });
-
-      expect(upTransform).not.toHaveBeenCalled();
-
-      const doc = createDoc();
-      const context = { log, modelVersion: 1 };
-
-      transform(doc);
-
-      expect(upTransform).toHaveBeenCalledTimes(1);
-      expect(upTransform).toHaveBeenCalledWith(doc, context);
+    const transform = convertModelVersionTransformFn({
+      log,
+      modelVersion: 1,
+      virtualVersion: '10.1.0',
+      definition,
     });
 
-    it('generates a transform function calling all model transforms of the version', () => {
-      const upTransform1 = createModelTransformFn();
-      const upTransform2 = createModelTransformFn();
+    expect(upTransform).not.toHaveBeenCalled();
 
-      const definition: SavedObjectsModelVersion = {
-        changes: [
-          {
-            type: 'data_backfill',
-            transform: upTransform1,
-          },
-          {
-            type: 'data_backfill',
-            transform: upTransform2,
-          },
-        ],
-      };
+    const doc = createDoc();
+    const context = { log, modelVersion: 1 };
 
-      const transform = convertModelVersionTransformFn({
-        log,
-        modelVersion: 1,
-        virtualVersion: '10.1.0',
-        definition,
-      });
+    transform(doc);
 
-      const doc = createDoc();
-      const context = { log, modelVersion: 1 };
+    expect(upTransform).toHaveBeenCalledTimes(1);
+    expect(upTransform).toHaveBeenCalledWith(doc, context);
+  });
 
-      transform(doc);
+  it('generates a transform function calling all model transforms of the version', () => {
+    const upTransform1 = createModelTransformFn();
+    const upTransform2 = createModelTransformFn();
 
-      expect(upTransform1).toHaveBeenCalledTimes(1);
-      expect(upTransform1).toHaveBeenCalledWith(doc, context);
-      expect(upTransform2).toHaveBeenCalledTimes(1);
-      expect(upTransform2).toHaveBeenCalledWith(doc, context);
+    const definition: SavedObjectsModelVersion = {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: upTransform1,
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: upTransform2,
+        },
+      ],
+    };
+
+    const transform = convertModelVersionTransformFn({
+      log,
+      modelVersion: 1,
+      virtualVersion: '10.1.0',
+      definition,
     });
 
-    it('returns the document from the model transform', () => {
-      const upTransform = createModelTransformFn();
+    const doc = createDoc();
+    const context = { log, modelVersion: 1 };
 
-      const resultDoc = createDoc();
-      upTransform.mockImplementation((doc) => {
-        return { document: resultDoc };
-      });
+    transform(doc);
 
-      const definition: SavedObjectsModelVersion = {
-        changes: [
-          {
-            type: 'data_backfill',
-            transform: upTransform,
-          },
-        ],
-      };
-
-      const transform = convertModelVersionTransformFn({
-        log,
-        modelVersion: 1,
-        virtualVersion: '10.1.0',
-        definition,
-      });
-
-      const doc = createDoc();
-
-      const result = transform(doc);
-      expect(result).toEqual({
-        transformedDoc: resultDoc,
-        additionalDocs: [],
-      });
-    });
+    expect(upTransform1).toHaveBeenCalledTimes(1);
+    expect(upTransform1).toHaveBeenCalledWith(doc, context);
+    expect(upTransform2).toHaveBeenCalledTimes(1);
+    expect(upTransform2).toHaveBeenCalledWith(doc, context);
   });
 });
 

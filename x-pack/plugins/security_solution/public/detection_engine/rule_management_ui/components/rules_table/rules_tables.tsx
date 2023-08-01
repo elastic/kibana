@@ -33,7 +33,7 @@ import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_d
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
-import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
+import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 
 const INITIAL_SORT_FIELD = 'enabled';

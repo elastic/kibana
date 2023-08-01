@@ -33,6 +33,21 @@ interface SuggestionsComponentProps {
   inputContainer: HTMLElement | null;
 }
 
+export interface SuggestionsAbstraction {
+  type: 'alerts' | 'rules' | 'cases';
+  fields: Record<
+    string,
+    {
+      field: string;
+      fieldToQuery: string;
+      displayField: string | undefined;
+      nestedDisplayField?: string;
+      nestedField?: string;
+      nestedPath?: string;
+    }
+  >;
+}
+
 export type SuggestionsListSize = 's' | 'l';
 
 // Needed for React.lazy

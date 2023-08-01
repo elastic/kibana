@@ -490,8 +490,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/155122
-      describe.skip('working against string values in the data set', () => {
+      describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
           await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);

@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   createSearchSourceMock,
@@ -31,11 +31,10 @@ import {
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
@@ -83,7 +82,7 @@ async function mountComponent(
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataView)),
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -93,7 +92,7 @@ async function mountComponent(
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$;
 
   stateContainer.dataState.data$ = {
@@ -164,17 +163,17 @@ describe('Discover component', () => {
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, undefined);
-      expect(component.find(DiscoverSidebar).length).toBe(1);
+      expect(component.find(EuiPageSidebar).length).toBe(1);
     }, 10000);
 
     test('should be opened if discover:sidebarClosed is false', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, false);
-      expect(component.find(DiscoverSidebar).length).toBe(1);
+      expect(component.find(EuiPageSidebar).length).toBe(1);
     }, 10000);
 
     test('should be closed if discover:sidebarClosed is true', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, true);
-      expect(component.find(DiscoverSidebar).length).toBe(0);
+      expect(component.find(EuiPageSidebar).length).toBe(0);
     }, 10000);
   });
 

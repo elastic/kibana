@@ -123,6 +123,7 @@ export interface DocLinks {
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
     readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsGoogleDrive: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
@@ -161,7 +162,7 @@ export interface DocLinks {
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
-    readonly searchApplicationsGettingStarted: string;
+    readonly searchApplicationsSearch: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
@@ -488,6 +489,8 @@ export interface DocLinks {
     datastreamsILM: string;
     datastreamsNamingScheme: string;
     datastreamsManualRollover: string;
+    datastreamsTSDS: string;
+    datastreamsTSDSMetrics: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;
@@ -505,6 +508,8 @@ export interface DocLinks {
   };
   readonly clients: {
     readonly guide: string;
+    readonly goConnecting: string;
+    readonly goGettingStarted: string;
     readonly goIndex: string;
     readonly goOverview: string;
     readonly javaBasicAuthentication: string;
@@ -521,11 +526,14 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly phpGuide: string;
+    readonly phpConfiguration: string;
     readonly phpConnecting: string;
+    readonly phpGuide: string;
     readonly phpInstallation: string;
     readonly phpOverview: string;
     readonly pythonAuthentication: string;
+    readonly pythonConfig: string;
+    readonly pythonConnecting: string;
     readonly pythonGuide: string;
     readonly pythonOverview: string;
     readonly rubyAuthentication: string;

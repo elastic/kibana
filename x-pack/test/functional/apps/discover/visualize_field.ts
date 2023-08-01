@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DebugState } from '@elastic/charts';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -28,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'unifiedFieldList',
   ]);
+  const elasticChart = getService('elasticChart');
   const monacoEditor = getService('monacoEditor');
 
   const defaultSettings = {
@@ -36,6 +38,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
+  }
+
+  function assertMatchesExpectedData(state: DebugState) {
+    expect(state.legend?.items.map(({ name }) => name).sort()).to.eql([
+      'css',
+      'gif',
+      'jpg',
+      'php',
+      'png',
+    ]);
   }
 
   describe('discover field visualize button', () => {
@@ -147,7 +159,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 
-    it('should visualize correctly text based language queries in Lens', async () => {
+    it('should allow changing dimensions', async () => {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      assertMatchesExpectedData(data!);
+    });
+
+    it('should visualize correctly text based language queries in Lenss', async () => {
       await PageObjects.discover.selectTextBaseLang('SQL');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -185,7 +224,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should save correctly chart to dashboard', async () => {
+    it('should save and edit chart in the dashboard on the fly', async () => {
       await PageObjects.discover.selectTextBaseLang('SQL');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -193,12 +232,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.saveModal('TextBasedChart', false, false, false, 'new');
       await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const data = await PageObjects.lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      assertMatchesExpectedData(data!);
     });
   });
 }

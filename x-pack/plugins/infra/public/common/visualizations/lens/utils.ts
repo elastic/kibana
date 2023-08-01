@@ -10,10 +10,11 @@ import {
   TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 
-export const DEFAULT_LAYER_ID = 'layer1';
+export const DEFAULT_LAYER_ID = 'layer';
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
+
 const DEFAULT_BREAKDOWN_SIZE = 10;
 
 export const getHistogramColumn = ({
@@ -37,7 +38,7 @@ export const getHistogramColumn = ({
   };
 };
 
-export const getBreakdownColumn = ({
+export const getTopValuesColumn = ({
   columnName,
   overrides,
 }: {

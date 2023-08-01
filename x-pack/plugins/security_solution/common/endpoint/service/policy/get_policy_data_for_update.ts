@@ -15,9 +15,10 @@ import type { MaybeImmutable, NewPolicyData, PolicyData } from '../../types';
  */
 export const getPolicyDataForUpdate = (policy: MaybeImmutable<PolicyData>): NewPolicyData => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-  // cast to `NewPolicyData` (mutable) since we cloned the entire object
-  const policyDataForUpdate = cloneDeep(newPolicy) as NewPolicyData;
+  const { id, revision, created_by, created_at, updated_by, updated_at, ...rest } =
+    policy as PolicyData;
+
+  const policyDataForUpdate: NewPolicyData = cloneDeep(rest);
   const endpointPolicy = policyDataForUpdate.inputs[0].config.policy.value;
 
   // trim custom malware notification string

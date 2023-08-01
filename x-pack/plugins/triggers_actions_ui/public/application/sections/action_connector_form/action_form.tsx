@@ -86,6 +86,7 @@ export interface ActionAccordionFormProps {
   defaultRuleFrequency?: RuleActionFrequency;
   ruleTypeId?: string;
   hasFieldsForAAD?: boolean;
+  disableErrorMessages?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -122,6 +123,7 @@ export const ActionForm = ({
   ruleTypeId,
   producerId,
   hasFieldsForAAD,
+  disableErrorMessages,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -499,6 +501,7 @@ export const ActionForm = ({
               producerId={producerId}
               ruleTypeId={ruleTypeId}
               hasFieldsForAAD={hasFieldsForAAD}
+              disableErrorMessages={disableErrorMessages}
             />
           );
         })}

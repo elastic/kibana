@@ -201,5 +201,25 @@ export default function ({ getService }: FtrProviderContext) {
         expect(total).to.eql(0);
       });
     });
+
+    it('should enqueue system actions correctly', async () => {
+      const connectorId = 'system-connector-test.system-action-kibana-privileges';
+      const reference = `actions-enqueue-1:${Spaces.space1.id}:${connectorId}`;
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${connectorId}/enqueue_action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: { index: ES_TEST_INDEX_NAME, reference },
+        });
+
+      expect(response.status).to.eql(204);
+
+      await esTestIndexTool.waitForDocs(
+        'action:test.system-action-kibana-privileges',
+        reference,
+        1
+      );
+    });
   });
 }

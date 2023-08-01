@@ -24,22 +24,26 @@ import {
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
-} from '../../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
-} from '../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../common/api/detection_engine/rule_management/mocks';
 
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
-import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import type {
+  QuerySignalsSchemaDecoded,
+  SetSignalsStatusSchemaDecoded,
+} from '../../../../../common/api/detection_engine/signals';
+import {
+  getFinalizeSignalsMigrationSchemaMock,
+  getSignalsMigrationStatusSchemaMock,
+} from '../../../../../common/api/detection_engine/signals_migration/mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../rule_actions_legacy';

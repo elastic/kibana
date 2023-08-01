@@ -72,12 +72,14 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: apiResponse.body.created_at,
+            updated_at: apiResponse.body.updated_at,
           },
           secretKeys
         )
@@ -144,7 +146,7 @@ const defaultAlertRules = {
     mutedInstanceIds: [],
     revision: 0,
     running: false,
-    schedule: { interval: '10m' },
+    schedule: { interval: '1m' },
     actions: [],
     params: {},
     snoozeSchedule: [],

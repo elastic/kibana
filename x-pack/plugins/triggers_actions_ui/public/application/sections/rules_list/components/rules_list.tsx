@@ -191,6 +191,7 @@ export const RulesList = ({
     searchText: searchFilter || '',
     tags: [],
     types: typeFilter || [],
+    kueryNode: undefined,
   });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);

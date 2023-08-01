@@ -14,11 +14,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import { convertRulesFilterToKQL } from '../../../../../../common/utils/kql';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';

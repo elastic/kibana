@@ -6,14 +6,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { TOOLTIP } from '../../translations';
+import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
-import { TooltipContent } from '../metric_explanation/tooltip_content';
-import { KPIChartProps } from './tile';
+import { TooltipContent } from '../../../../../components/lens';
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   id: `metric-hostCount`,
@@ -47,7 +47,7 @@ export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
       subtitle={getSubtitle()}
       toolTip={
         <TooltipContent
-          formula={hostLensFormulas.hostCount.formula.formula}
+          formula={hostLensFormulas.hostCount.value}
           description={TOOLTIP.hostCount}
         />
       }

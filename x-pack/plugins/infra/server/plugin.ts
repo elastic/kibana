@@ -60,6 +60,7 @@ import { mapSourceToLogView } from './utils/map_source_to_log_view';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
     logs: schema.conditional(
       schema.contextRef('serverless'),
@@ -193,6 +194,7 @@ export class InfraServerPlugin
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
+      getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
       alertsLocator: plugins.share.url.locators.get(alertsLocatorID),

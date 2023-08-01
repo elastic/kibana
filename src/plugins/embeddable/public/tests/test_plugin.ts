@@ -65,6 +65,7 @@ export const testPlugin = (
         uiActions: uiActionsPluginMock.createStartContract(),
         savedObjectsManagement:
           savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
+        usageCollection: { reportUiCounter: jest.fn() },
       });
       return start;
     },

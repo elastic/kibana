@@ -13,21 +13,60 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
+import { inputsFormat } from '../../../common/constants';
+
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICIES_MAPPINGS } from '../../constants';
+
+import { validateKuery } from '../../routes/utils/filter_utils';
+
+import { BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
-  query: ListWithKuerySchema.extends({
+  query: schema.object({
+    page: schema.maybe(schema.number({ defaultValue: 1 })),
+    perPage: schema.maybe(schema.number({ defaultValue: 20 })),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+    showUpgradeable: schema.maybe(schema.boolean()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(
+            value,
+            [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+            PACKAGE_POLICIES_MAPPINGS,
+            true
+          );
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
     withAgentCount: schema.maybe(schema.boolean()),
   }),
 };
 
 export const BulkGetPackagePoliciesRequestSchema = {
   body: BulkRequestBodySchema,
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
     packagePolicyId: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
@@ -36,6 +75,11 @@ export const CreatePackagePolicyRequestSchema = {
     CreatePackagePolicyRequestBodySchema,
     SimplifiedCreatePackagePolicyRequestBodySchema,
   ]),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const UpdatePackagePolicyRequestSchema = {
@@ -44,6 +88,11 @@ export const UpdatePackagePolicyRequestSchema = {
     UpdatePackagePolicyRequestBodySchema,
     SimplifiedCreatePackagePolicyRequestBodySchema,
   ]),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const DeletePackagePoliciesRequestSchema = {

@@ -7,14 +7,13 @@
 
 import { each, flatMap, flatten, map, reduce } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { EndpointParamsConfig } from '../../../../common/detection_engine/rule_response_actions/schemas/endpoint';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { RuleResponseEndpointAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type {
   Alert,
   AlertAgent,
   EndpointResponseActionAlerts,
   ResponseActionAlerts,
+  RuleResponseEndpointAction
 } from './types';
 
 export const endpointResponseAction = (

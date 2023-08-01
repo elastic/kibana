@@ -68,8 +68,7 @@ describe('<IndicatorField />', () => {
     expect(asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
         <span
-          class="euiBadge emotion-euiBadge"
-          style="background-color: rgb(189, 39, 30); color: rgb(255, 255, 255);"
+          class="euiBadge emotion-euiBadge-danger"
           title="Red"
         >
           <span

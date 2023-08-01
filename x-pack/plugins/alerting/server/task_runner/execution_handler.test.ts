@@ -97,7 +97,8 @@ const rule = {
         foo: true,
         contextVal: 'My {{context.value}} goes here',
         stateVal: 'My {{state.value}} goes here',
-        alertVal: 'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+        alertVal:
+          'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
       uuid: '111-111',
     },
@@ -354,7 +355,7 @@ describe('Execution Handler', () => {
   });
 
   test('throw error message when action type is disabled', async () => {
-    mockActionsPlugin.preconfiguredActions = [];
+    mockActionsPlugin.inMemoryConnectors = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
     const executionHandler = new ExecutionHandler(
@@ -656,7 +657,7 @@ describe('Execution Handler', () => {
           contextVal: 'My {{context.value}} goes here',
           stateVal: 'My {{state.value}} goes here',
           alertVal:
-            'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
       },
     ];
@@ -725,7 +726,7 @@ describe('Execution Handler', () => {
                 contextVal: 'My {{context.value}} goes here',
                 stateVal: 'My {{state.value}} goes here',
                 alertVal:
-                  'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+                  'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
               },
             },
           ],
@@ -1209,7 +1210,7 @@ describe('Execution Handler', () => {
           contextVal: 'My {{context.value}} goes here',
           stateVal: 'My {{state.value}} goes here',
           alertVal:
-            'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
       },
       {
@@ -1221,7 +1222,7 @@ describe('Execution Handler', () => {
           contextVal: 'My {{context.value}} goes here',
           stateVal: 'My {{state.value}} goes here',
           alertVal:
-            'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
       },
     ];
