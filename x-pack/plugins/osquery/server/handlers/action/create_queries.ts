@@ -9,9 +9,9 @@ import { isEmpty, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 

@@ -25,8 +25,8 @@ export const journey = new Journey({
     // Setup Synthtrace Client
     await synthClient.initialiseEsClient();
     // Generate data using Synthtrace
-    const start = Date.now() - 1000;
-    const end = Date.now();
+    const start = Date.now() - 1000 * 60 * 15;
+    const end = Date.now() + 1000 * 60 * 15;
     await synthClient.index(
       generateData({
         from: new Date(start).getTime(),
@@ -35,7 +35,6 @@ export const journey = new Journey({
     );
   },
   ftrConfigPath: 'x-pack/performance/configs/apm_config.ts',
-  skipped: true
 })
   .step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`app/apm/services`));
