@@ -291,6 +291,13 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getFieldFilterTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-sourceFilters');
+      return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
     return await Promise.all(
