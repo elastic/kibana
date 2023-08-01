@@ -31,6 +31,7 @@ import type {
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { CasesUiStart } from '@kbn/cases-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -61,6 +62,7 @@ export interface AiopsAppDependencies {
   };
   presentationUtil: PresentationUtilPluginStart;
   embeddable: EmbeddableStart;
+  cases?: CasesUiStart;
 }
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);

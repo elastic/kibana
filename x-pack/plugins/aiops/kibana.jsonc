@@ -15,13 +15,18 @@
       "uiActions",
       "embeddable",
       "presentationUtil",
-      "dashboard"
+      "dashboard",
+      "fieldFormats"
+    ],
+    "optionalPlugins": [
+      "cases"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable"
+      "embeddable",
+      "cases"
     ],
     "extraPublicDirs": [
       "common"

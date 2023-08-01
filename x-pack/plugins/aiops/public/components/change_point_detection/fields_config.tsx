@@ -32,6 +32,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../embeddable/embeddable_change_point_chart_factory';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -191,6 +192,8 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
+  const openCasesModalCallback = useCasesModal(EMBEDDABLE_CHANGE_POINT_CHART_TYPE);
+
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 'panelActions',
@@ -231,7 +234,16 @@ const FieldPanel: FC<FieldPanelProps> = ({
           name: i18n.translate('xpack.aiops.changePointDetection.attachToCaseLabel', {
             defaultMessage: 'To case',
           }),
-          onClick: () => {},
+          onClick: () => {
+            openCasesModalCallback({
+              timeRange,
+              splitField: fieldConfig.splitField,
+              fn: fieldConfig.fn,
+              metricField: fieldConfig.metricField,
+              dataViewId: dataView.id,
+              partitions: selectedChangePoints[panelIndex].map((v) => v.group?.value as string),
+            });
+          },
         },
       ],
     },

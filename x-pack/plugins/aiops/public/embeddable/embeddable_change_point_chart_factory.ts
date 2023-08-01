@@ -23,7 +23,9 @@ export interface EmbeddableChangePointChartStartServices {
   data: DataPublicPluginStart;
 }
 
-export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart';
+export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
+
+export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
 export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefinition {
   public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
@@ -47,7 +49,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
    * TODO
    */
   public isEditable = async () => {
-    return true;
+    return false;
   };
 
   getDisplayName() {
@@ -60,7 +62,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
    * TODO
    */
   canCreateNew() {
-    return true;
+    return false;
   }
 
   public async getExplicitInput(): Promise<Partial<EmbeddableChangePointChartInput>> {

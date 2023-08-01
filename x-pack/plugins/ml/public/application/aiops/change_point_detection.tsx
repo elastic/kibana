@@ -62,6 +62,7 @@ export const ChangePointDetectionPage: FC = () => {
               'lens',
               'presentationUtil',
               'embeddable',
+              'cases',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

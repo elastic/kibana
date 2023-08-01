@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { pick } from 'lodash';
-
+import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -57,23 +57,30 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
 
   const PresentationContextProvider = appDependencies.presentationUtil.ContextProvider;
 
+  const CasesContext = appDependencies.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appDependencies.cases?.helpers.canUseCases();
+
   return (
     <PresentationContextProvider>
-      <AiopsAppContext.Provider value={appDependencies}>
-        <UrlStateProvider>
-          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <PageHeader />
-                <EuiSpacer />
-                <ChangePointDetectionContextProvider>
-                  <ChangePointDetectionPage />
-                </ChangePointDetectionContextProvider>
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </DataSourceContext.Provider>
-        </UrlStateProvider>
-      </AiopsAppContext.Provider>
+      <StyledComponentsThemeProvider>
+        <CasesContext owner={[]} permissions={casesPermissions!}>
+          <AiopsAppContext.Provider value={appDependencies}>
+            <UrlStateProvider>
+              <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+                <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                  <DatePickerContextProvider {...datePickerDeps}>
+                    <PageHeader />
+                    <EuiSpacer />
+                    <ChangePointDetectionContextProvider>
+                      <ChangePointDetectionPage />
+                    </ChangePointDetectionContextProvider>
+                  </DatePickerContextProvider>
+                </StorageContextProvider>
+              </DataSourceContext.Provider>
+            </UrlStateProvider>
+          </AiopsAppContext.Provider>
+        </CasesContext>
+      </StyledComponentsThemeProvider>
     </PresentationContextProvider>
   );
 };

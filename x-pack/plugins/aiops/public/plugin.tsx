@@ -6,29 +6,40 @@
  */
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
-import { firstValueFrom } from 'rxjs';
-
 import { type CoreSetup } from '@kbn/core/public';
-import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
-import { EmbeddableChangePointChartFactory } from './embeddable';
+import { firstValueFrom } from 'rxjs';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
+import { EmbeddableChangePointChartFactory } from './embeddable';
+import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
   public setup(
     core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
-    { embeddable }: AiopsPluginSetupDeps
+    { embeddable, cases, licensing }: AiopsPluginSetupDeps
   ) {
-    if (embeddable) {
-      const factory = new EmbeddableChangePointChartFactory(core.getStartServices);
-      embeddable.registerEmbeddableFactory(factory.type, factory);
-    }
+    firstValueFrom(licensing.license$).then(async (license) => {
+      if (license.hasAtLeast('platinum')) {
+        if (embeddable) {
+          const factory = new EmbeddableChangePointChartFactory(core.getStartServices);
+          embeddable.registerEmbeddableFactory(factory.type, factory);
+        }
+
+        if (cases) {
+          const [coreStart, pluginStart] = await core.getStartServices();
+          const { registerChangePointChartsAttachment } = await import(
+            './cases/register_change_point_charts_attachment'
+          );
+          registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+        }
+      }
+    });
   }
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
