@@ -7,16 +7,17 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
+import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   deleteAllCaseItems,
   getCaseMetrics,
   updateCase,
-} from '../../../../common/lib/api';
+} from '../../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId,
-          features: ['connectors'],
+          features: [CaseMetricsFeature.CONNECTORS],
         });
 
         expect(metrics).to.eql({
