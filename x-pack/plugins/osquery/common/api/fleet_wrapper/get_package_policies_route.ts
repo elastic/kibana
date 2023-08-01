@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './create_saved_query_request_schema';
+import * as t from 'io-ts';
+
+export const getPackagePoliciesRequestQuerySchema = t.unknown;
+
+export type GetPackagePoliciesRequestQuerySchema = t.OutputOf<
+  typeof getPackagePoliciesRequestQuerySchema
+>;

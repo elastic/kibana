@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './utils';
+import * as t from 'io-ts';
+
+export const deletePacksRequestParamsSchema = t.type({
+  id: t.string,
+});
+
+export type DeletePacksRequestParamsSchema = t.OutputOf<typeof deletePacksRequestParamsSchema>;
