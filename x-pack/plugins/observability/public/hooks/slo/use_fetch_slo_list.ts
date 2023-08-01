@@ -20,10 +20,10 @@ import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 interface SLOListParams {
-  name?: string;
+  kqlQuery?: string;
   page?: number;
   sortBy?: string;
-  indicatorTypes?: string[];
+  sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
 }
 
@@ -43,10 +43,10 @@ const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloList({
-  name = '',
+  kqlQuery = '',
   page = 1,
-  sortBy = 'creationTime',
-  indicatorTypes = [],
+  sortBy = 'status',
+  sortDirection = 'desc',
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const {
@@ -61,18 +61,15 @@ export function useFetchSloList({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: sloKeys.list({ name, page, sortBy, indicatorTypes }),
+      queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
             query: {
-              ...(page && { page }),
-              ...(name && { name }),
+              ...(kqlQuery && { kqlQuery }),
               ...(sortBy && { sortBy }),
-              ...(indicatorTypes &&
-                indicatorTypes.length > 0 && {
-                  indicatorTypes: indicatorTypes.join(','),
-                }),
+              ...(sortDirection && { sortDirection }),
+              ...(page && { page }),
             },
             signal,
           });

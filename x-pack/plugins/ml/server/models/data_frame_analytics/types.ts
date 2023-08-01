@@ -15,10 +15,10 @@ import type {
 interface AnalyticsMapArg {
   analyticsId: string;
 }
-interface GetAnalyticsJobIdArg extends AnalyticsMapArg {
+export interface GetAnalyticsJobIdArg extends AnalyticsMapArg {
   modelId?: never;
 }
-interface GetAnalyticsModelIdArg {
+export interface GetAnalyticsModelIdArg {
   analyticsId?: never;
   modelId: string;
 }
