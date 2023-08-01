@@ -63,6 +63,7 @@ import {
   selectStagedActiveData,
   selectFrameDatasourceAPI,
 } from '../../state_management';
+import type { Suggestion } from '../../types';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -99,8 +100,9 @@ export interface SuggestionPanelProps {
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
-  getUserMessages: UserMessagesGetter;
+  getUserMessages?: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
+  customSwitchSuggestionAction?: (s: Suggestion) => void;
 }
 
 const PreviewRenderer = ({
@@ -221,6 +223,7 @@ export function SuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
   nowProvider,
+  customSwitchSuggestionAction,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -296,8 +299,10 @@ export function SuggestionPanel({
             ),
           }));
 
-    const hasErrors =
-      getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length > 0;
+    const hasErrors = getUserMessages
+      ? getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length >
+        0
+      : false;
 
     const newStateExpression =
       currentVisualization.state && currentVisualization.activeId && !hasErrors
@@ -437,7 +442,11 @@ export function SuggestionPanel({
                   rollbackToCurrentVisualization();
                 } else {
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                  if (customSwitchSuggestionAction) {
+                    customSwitchSuggestionAction(suggestion);
+                  } else {
+                    switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                  }
                 }
               }}
               selected={index === lastSelectedSuggestion}

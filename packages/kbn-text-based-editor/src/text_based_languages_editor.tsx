@@ -62,6 +62,7 @@ export interface TextBasedLanguagesEditorProps {
   dataTestSubj?: string;
   hideExpandButton?: boolean;
   renderRunButton?: boolean;
+  disableSubmitAction?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -96,6 +97,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isDarkMode,
   hideExpandButton,
   renderRunButton,
+  disableSubmitAction,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
@@ -233,7 +235,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       // eslint-disable-next-line no-bitwise
       editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
         editor1.current?.getValue();
-        onQuerySubmit();
+        if (!disableSubmitAction) {
+          onQuerySubmit();
+        }
       });
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);
@@ -554,6 +558,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         refreshErrors={onQuerySubmit}
                         detectTimestamp={detectTimestamp}
                         renderRunButton={renderRunButton}
+                        disableSubmitAction={disableSubmitAction}
                       />
                     )}
                   </div>
@@ -627,6 +632,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           refreshErrors={onQuerySubmit}
           detectTimestamp={detectTimestamp}
           renderRunButton={renderRunButton}
+          disableSubmitAction={disableSubmitAction}
         />
       )}
       {isCodeEditorExpanded && (

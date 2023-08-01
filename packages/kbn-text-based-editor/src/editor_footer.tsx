@@ -37,6 +37,7 @@ interface EditorFooterProps {
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
   renderRunButton?: boolean;
+  disableSubmitAction?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -45,6 +46,7 @@ export const EditorFooter = memo(function EditorFooter({
   errors,
   detectTimestamp,
   renderRunButton,
+  disableSubmitAction,
   onErrorClick,
   refreshErrors,
 }: EditorFooterProps) {
@@ -215,7 +217,13 @@ export const EditorFooter = memo(function EditorFooter({
       )}
       {Boolean(renderRunButton) && (
         <EuiFlexItem grow={false}>
-          <EuiButton color="text" size="s" fill onClick={refreshErrors}>
+          <EuiButton
+            color="text"
+            size="s"
+            fill
+            onClick={refreshErrors}
+            isDisabled={Boolean(disableSubmitAction)}
+          >
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
                 {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {

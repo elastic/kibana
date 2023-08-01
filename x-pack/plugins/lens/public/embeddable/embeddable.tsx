@@ -809,7 +809,7 @@ export class Embeddable
           updateSuggestion={this.updateSuggestion.bind(this)}
           updateAllAttributes={this.updateAllAttributes.bind(this)}
           datasourceId={datasourceId}
-          adaptersTables={this.lensInspector.adapters.tables?.tables}
+          adaptersTables={this.activeData}
           panelId={this.id}
           canEditTextBasedQuery={this.isTextBasedLanguage()}
         />
@@ -918,6 +918,9 @@ export class Embeddable
     );
 
     this.activeData = newActiveData;
+    // if (this.services) {
+    //   await this.openConfingPanel(this.services);
+    // }
 
     // Refresh messanges if info type is found as with active data
     // these messages can be enriched

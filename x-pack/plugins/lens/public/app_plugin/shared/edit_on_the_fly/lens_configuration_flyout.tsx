@@ -5,32 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import {
-  isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
-  type AggregateQuery,
-  // type Query,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import type { Datatable, ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { useLensSelector, selectCurrentDatasourceStates } from '../../../state_management';
-import type { Suggestion } from '../../../types';
-import { suggestionsApi } from '../../../lens_suggestions_api';
-import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
-import {
-  preparePreviewExpression,
-  SuggestionPreview,
-} from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { useLensSelector } from '../../../state_management';
+import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import type { EditConfigPanelProps } from './types';
 import { LayerConfiguration } from './layer_configuration';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getLensAttributes } from './get_lens_attributes';
-import { mapDataToColumns } from './map_to_columns';
 import { useFramePublicApi } from './use_frame_public_api';
+import { getLensDataFromQuery } from './helpers';
+import { getLensAttributes } from './get_lens_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -46,22 +35,11 @@ export function LensEditConfigurationFlyout({
   adaptersTables,
   canEditTextBasedQuery,
 }: EditConfigPanelProps) {
-  // const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(query);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>();
-  // const [currentSuggestion, setCurrentSuggestion] = useState<Suggestion>();
-  const [currentSelectedSuggestion, setCurrentSelectedSuggestion] = useState<number>(-1);
+  const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(
+    attributes.state.query
+  );
   const [dataTable, setDataTable] = useState<Datatable | undefined>();
   const [fetchFromAdapters, setFetchFromAdapters] = useState(true);
-
-  useEffect(() => {
-    if (
-      fetchFromAdapters &&
-      adaptersTables &&
-      !isEqual(Object.values(adaptersTables)[0], dataTable)
-    ) {
-      setDataTable(Object.values(adaptersTables)[0]);
-    }
-  }, [adaptersTables, dataTable, fetchFromAdapters]);
 
   const frameApi = useFramePublicApi({
     attributes,
@@ -69,63 +47,36 @@ export function LensEditConfigurationFlyout({
     datasourceMap,
     dataTable,
   });
-  const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+
+  useEffect(() => {
+    if (
+      fetchFromAdapters &&
+      adaptersTables &&
+      !isEqual(Object.values(adaptersTables)[0], dataTable)
+    ) {
+      const table = Object.values(adaptersTables)[0];
+      setDataTable(table);
+    }
+  }, [adaptersTables, dataTable, fetchFromAdapters]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery) => {
-      let indexPattern = '';
       setFetchFromAdapters(false);
-      if ('sql' in q) {
-        indexPattern = getIndexPatternFromSQLQuery(q.sql);
-      }
-      const dv =
-        indexPattern && indexPattern !== dataView.name
-          ? await startDependencies.dataViews.create({
-              title: indexPattern,
-            })
-          : dataView;
-      const table = await fetchDataFromAggregateQuery(
+      const attrs = await getLensDataFromQuery(
         q,
-        dv,
-        startDependencies.data,
-        startDependencies.expressions
+        dataView,
+        startDependencies,
+        datasourceMap,
+        visualizationMap,
+        datasourceId,
+        setDataTable
       );
-
-      const columns = table?.columns?.map(({ name }) => name);
-
-      const context = {
-        dataViewSpec: dv?.toSpec(),
-        fieldName: '',
-        contextualFields: columns,
-        query: q,
-      };
-
-      const allSuggestions =
-        suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
-      const firstSuggestion = allSuggestions[0];
-      setCurrentSelectedSuggestion(0);
-      const attrs = getLensAttributes({
-        filters: [],
-        query: q,
-        dataView: dv,
-        suggestion: firstSuggestion,
-      });
-      if (table) {
-        const activeDatasource = datasourceMap[datasourceId];
-        const datasourceState = attrs.state.datasourceStates[datasourceId];
-        const fields = activeDatasource?.getColumns?.(datasourceState) ?? [];
-        const updatedTable = mapDataToColumns(table, fields);
-        setDataTable(updatedTable);
-      }
       updateAllAttributes?.(attrs);
       setCurrentAttributes?.(attrs);
-      setSuggestions(allSuggestions);
     },
     [
       dataView,
-      startDependencies.dataViews,
-      startDependencies.data,
-      startDependencies.expressions,
+      startDependencies,
       datasourceMap,
       visualizationMap,
       updateAllAttributes,
@@ -133,11 +84,6 @@ export function LensEditConfigurationFlyout({
       datasourceId,
     ]
   );
-
-  const AutoRefreshExpressionRenderer = useMemo(() => {
-    const ExpressionRendererComponent = startDependencies.expressions.ReactExpressionRenderer;
-    return (props: ReactExpressionRendererProps) => <ExpressionRendererComponent {...props} />;
-  }, [startDependencies.expressions.ReactExpressionRenderer]);
 
   const { isLoading } = useLensSelector((state) => state.lens);
   if (isLoading) return null;
@@ -177,13 +123,16 @@ export function LensEditConfigurationFlyout({
           {isOfAggregateQueryType(attributes.state.query) && (
             <TextBasedLangEditor
               query={attributes.state.query}
-              onTextLangQueryChange={(q) => {}}
+              onTextLangQueryChange={(q) => {
+                setQueryTextBased(q);
+              }}
               expandCodeEditor={(status: boolean) => {}}
               isCodeEditorExpanded={true}
               detectTimestamp={Boolean(dataView?.timeFieldName)}
               errors={[]}
               hideExpandButton={true}
               renderRunButton={true}
+              disableSubmitAction={isEqual(queryTextBased, attributes.state.query)}
               onTextLangQuerySubmit={(q) => {
                 if (q) {
                   runQuery(q);
@@ -217,46 +166,23 @@ export function LensEditConfigurationFlyout({
             />
           </EuiAccordion>
           <EuiSpacer />
-          {suggestions && suggestions.length && (
-            <EuiAccordion
-              id="chart-suggestions"
-              buttonContent={
-                <EuiTitle size="xs">
-                  <h5>
-                    {i18n.translate('xpack.lens.config.chartSuggestionsLabel', {
-                      defaultMessage: 'Suggestions',
-                    })}
-                  </h5>
-                </EuiTitle>
-              }
-              initialIsOpen={true}
-            >
-              {suggestions.map((suggestion, index) => {
-                return (
-                  <SuggestionPreview
-                    preview={{
-                      expression: preparePreviewExpression(
-                        suggestion,
-                        visualizationMap[suggestion.visualizationId],
-                        datasourceMap,
-                        currentDatasourceStates,
-                        frameApi,
-                        startDependencies.data.nowProvider
-                      ),
-                      icon: suggestion.previewIcon,
-                      title: suggestion.title,
-                    }}
-                    ExpressionRenderer={AutoRefreshExpressionRenderer}
-                    key={index}
-                    onSelect={() => {
-                      setCurrentSelectedSuggestion(index);
-                    }}
-                    selected={index === currentSelectedSuggestion}
-                  />
-                );
-              })}
-            </EuiAccordion>
-          )}
+          <SuggestionPanel
+            ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+            datasourceMap={datasourceMap}
+            visualizationMap={visualizationMap}
+            frame={frameApi}
+            nowProvider={startDependencies.data.nowProvider}
+            customSwitchSuggestionAction={(suggestion) => {
+              const attrs = getLensAttributes({
+                filters: [],
+                query: queryTextBased,
+                dataView,
+                suggestion,
+              });
+              updateAllAttributes?.(attrs);
+              setCurrentAttributes?.(attrs);
+            }}
+          />
         </>
       </FlyoutWrapper>
     </>
