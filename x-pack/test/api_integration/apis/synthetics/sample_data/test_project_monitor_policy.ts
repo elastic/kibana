@@ -138,7 +138,22 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'password',
               value: null,
             },
-            processors: { type: 'yaml' },
+            processors: {
+              type: 'yaml',
+              value: JSON.stringify([
+                {
+                  add_fields: {
+                    fields: {
+                      'monitor.fleet_managed': true,
+                      config_id: configId,
+                      'monitor.project.name': projectId,
+                      'monitor.project.id': projectId,
+                    },
+                    target: '',
+                  },
+                },
+              ]),
+            },
             proxy_headers: {
               type: 'yaml',
               value: null,
@@ -248,6 +263,19 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             ipv4: true,
             ipv6: true,
             mode: 'any',
+            processors: [
+              {
+                add_fields: {
+                  fields: {
+                    config_id: configId,
+                    'monitor.fleet_managed': true,
+                    'monitor.project.id': projectId,
+                    'monitor.project.name': projectId,
+                  },
+                  target: '',
+                },
+              },
+            ],
           },
           id: `synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },

@@ -186,7 +186,22 @@ export const getHttpInput = ({
     'service.name': { value: null, type: 'text' },
     timeout: { value: '3ms', type: 'text' },
     max_redirects: { value: '3', type: 'integer' },
-    processors: { type: 'yaml' },
+    processors: {
+      type: 'yaml',
+      value: JSON.stringify([
+        {
+          add_fields: {
+            fields: {
+              'monitor.fleet_managed': true,
+              config_id: id,
+              'monitor.project.name': projectId,
+              'monitor.project.id': projectId,
+            },
+            target: '',
+          },
+        },
+      ]),
+    },
     proxy_url: { value: proxyUrl ?? '"http://proxy.com"', type: 'text' },
     proxy_headers: { value: null, type: 'yaml' },
     tags: { value: '["tag1","tag2"]', type: 'yaml' },
@@ -272,6 +287,20 @@ export const getHttpInput = ({
           'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
         }
       : {}),
+    processors: [
+      {
+        add_fields: {
+          fields: {
+            config_id: id,
+            'monitor.fleet_managed': true,
+            ...(projectId
+              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
+              : {}),
+          },
+          target: '',
+        },
+      },
+    ],
   };
 
   return {
