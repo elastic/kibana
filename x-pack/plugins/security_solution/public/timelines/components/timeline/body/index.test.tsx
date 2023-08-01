@@ -45,7 +45,7 @@ jest.mock(
 );
 
 jest.mock('../../../../common/hooks/use_upselling', () => ({
-  useUpsellingComponent: jest.fn(),
+  useUpsellingMessage: jest.fn(),
 }));
 
 jest.mock('../../../../common/components/user_privileges', () => {
