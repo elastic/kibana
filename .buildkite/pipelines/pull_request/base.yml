@@ -59,7 +59,7 @@ steps:
   - command: SERVERLESS_ENVIRONMENT=observability .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Observability Tests'
     agents:
-      queue: n2-16-spot
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
     soft_fail:
@@ -72,7 +72,7 @@ steps:
   - command: SERVERLESS_ENVIRONMENT=search .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Search Tests'
     agents:
-      queue: n2-16-spot
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
     soft_fail:
@@ -85,7 +85,7 @@ steps:
   - command: SERVERLESS_ENVIRONMENT=security .buildkite/scripts/steps/functional/serverless_ftr.sh
     label: 'Serverless Security Tests'
     agents:
-      queue: n2-16-spot
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
     soft_fail:
@@ -98,7 +98,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
-      queue: n2-16-spot
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
     soft_fail:
