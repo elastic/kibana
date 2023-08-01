@@ -45,9 +45,9 @@ Object.defineProperty(window, 'localStorage', {
   writable: true,
 });
 
-function defaultStartDeps(availableApps?: App[]) {
+function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const deps = {
-    application: applicationServiceMock.createInternalStartContract(),
+    application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
@@ -202,11 +202,42 @@ describe('start', () => {
     });
 
     it('renders the default project side navigation', async () => {
-      const { chrome } = await start();
+      const { chrome } = await start({
+        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
+      });
+
       chrome.setChromeStyle('project');
+
       const component = mount(chrome.getHeaderComponent());
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeaderInvisible');
+
+      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
       expect(projectHeader.length).toBe(1);
+
+      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
+      expect(defaultProjectSideNav.length).toBe(1);
+    });
+
+    it('renders the custom project side navigation', async () => {
+      const { chrome } = await start({
+        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
+      });
+
+      const MyNav = function MyNav() {
+        return <div data-test-subj="customProjectSideNav">HELLO</div>;
+      };
+      chrome.setChromeStyle('project');
+      chrome.project.setSideNavComponent(MyNav);
+
+      const component = mount(chrome.getHeaderComponent());
+
+      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
+      expect(projectHeader.length).toBe(1);
+
+      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
+      expect(defaultProjectSideNav.length).toBe(0); // Default side nav not mounted
+
+      const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
+      expect(customProjectSideNav.text()).toBe('HELLO');
     });
   });
 
