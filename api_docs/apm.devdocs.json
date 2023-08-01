@@ -621,7 +621,7 @@
                 "section": "def-server.LicensingPluginStart",
                 "text": "LicensingPluginStart"
               },
-              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
                 "scope": "common",
@@ -651,9 +651,7 @@
               "GetResponse",
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "WriteResponseBase",
-              ">; } | undefined>; getOpenAIClient(): ",
-              "IOpenAIClient",
-              " | undefined; alertsLocator: ",
+              ">; } | undefined>; alertsLocator: ",
               {
                 "pluginId": "share",
                 "scope": "common",
@@ -2059,7 +2057,13 @@
           "TypeC",
           "<{ kuery: ",
           "StringC",
-          "; }>]>; }> | undefined; handler: ({}: ",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -2079,7 +2083,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { kuery: string; }; }; }) => Promise<{ services: { serviceName: string; }[]; }>; } & ",
+          ">; } & { kuery: string; } & { start: number; end: number; }; }; }) => Promise<{ services: { serviceName: string; }[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/storage_explorer/is_cross_cluster_search\": { endpoint: \"GET /internal/apm/storage_explorer/is_cross_cluster_search\"; params?: undefined; handler: ({}: ",
           {
