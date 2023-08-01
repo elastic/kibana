@@ -226,9 +226,7 @@ export const ConfigurePipeline: React.FC = () => {
                             defaultMessage:
                               'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. This will create a pipeline named {pipelineName}.',
                             values: {
-                              pipelineName: `ml-inference-${
-                                pipelineName.length > 0 ? pipelineName : indexName
-                              }`,
+                              pipelineName: `ml-inference-${pipelineName}`,
                             },
                           }
                         )}
