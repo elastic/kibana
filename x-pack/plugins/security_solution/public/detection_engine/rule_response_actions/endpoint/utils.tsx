@@ -68,6 +68,12 @@ const useGetCommandText = (
         description: name,
         tooltip: '',
       };
+    case 'suspend-process':
+      return {
+        title: name,
+        description: name,
+        tooltip: '',
+      };
     default:
       return {
         title: '',
