@@ -129,7 +129,7 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels));
+  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, true));
 
   /**
    * Parse global time filter settings

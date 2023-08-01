@@ -128,8 +128,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     reduxToolsPackage: ReduxToolsPackage,
-    initialComponentState?: DashboardPublicState,
     initialSessionId?: string,
+    initialComponentState?: DashboardPublicState,
     dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,

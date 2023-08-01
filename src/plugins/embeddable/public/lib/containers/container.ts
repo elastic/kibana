@@ -38,7 +38,6 @@ import {
   EmbeddableContainerSettings,
 } from './i_container';
 import { EmbeddableStart } from '../../plugin';
-import { initializePanelVersions } from './initialize_panel_versions';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
@@ -68,7 +67,6 @@ export abstract class Container<
     settings?: EmbeddableContainerSettings
   ) {
     super(input, output, parent);
-    input.panels = initializePanelVersions(input.panels) as TContainerInput['panels'];
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
 
     // if there is no special initialization logic, we can immediately start updating children on input updates.
@@ -493,7 +491,6 @@ export abstract class Container<
       }
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
-      return;
     }
 
     return embeddable;

@@ -87,8 +87,8 @@ export const createDashboard = async (
   const dashboardContainer = new DashboardContainer(
     input,
     reduxEmbeddablePackage,
-    initialComponentState,
     searchSessionId,
+    initialComponentState,
     dashboardCreationStartTime,
     undefined,
     creationOptions,
