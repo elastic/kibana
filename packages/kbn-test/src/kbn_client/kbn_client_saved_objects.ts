@@ -8,7 +8,10 @@
 
 import { chunk } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsBulkDeleteResponse,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -28,13 +31,6 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
   type: string;
   updated_at?: string;
   version?: string;
-}
-
-interface SavedObjectsFindResponse<Attributes extends Record<string, any>> {
-  page: number;
-  per_page: number;
-  total: number;
-  saved_objects: Array<SavedObjectResponse<Attributes>>;
 }
 
 interface GetFindOptions {
