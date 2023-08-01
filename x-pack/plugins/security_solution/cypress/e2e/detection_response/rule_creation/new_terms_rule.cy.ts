@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getIndexPatterns, getNewTermsRule } from '../../../objects/rule';
 
@@ -59,7 +61,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('New Terms rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('New Terms rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();

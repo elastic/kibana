@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
+
 import {
   PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,
@@ -24,7 +26,7 @@ import { createRule } from '../../tasks/api_calls/rules';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 
-describe('Entity analytics management page', { tags: ['@brokenInServerless', '@ess'] }, () => {
+describe('Entity analytics management page', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'all_users');

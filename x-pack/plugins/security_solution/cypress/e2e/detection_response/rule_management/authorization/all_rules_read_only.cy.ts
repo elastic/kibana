@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../tags';
+
 import { ROLES } from '../../../../../common/test';
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -26,7 +28,7 @@ import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-describe('All rules - read only', { tags: '@ess' }, () => {
+describe('All rules - read only', { tags: tag.ESS }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: '1' }));

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 import { ROLES } from '../../../../common/test';
@@ -42,7 +43,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -56,7 +57,7 @@ describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] },
 
   it(
     'Should have the same query and open the timeline modal',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       selectCustomTemplates();
       expandEventAction();
@@ -76,7 +77,7 @@ describe('Timelines', (): void => {
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    context('Privileges: CRUD', { tags: '@ess' }, () => {
+    context('Privileges: CRUD', { tags: tag.ESS }, () => {
       beforeEach(() => {
         login();
         visit(OVERVIEW_URL);
@@ -89,7 +90,7 @@ describe('Timelines', (): void => {
       });
     });
 
-    context('Privileges: READ', { tags: '@ess' }, () => {
+    context('Privileges: READ', { tags: tag.ESS }, () => {
       beforeEach(() => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
@@ -111,7 +112,7 @@ describe('Timelines', (): void => {
 
   describe(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       beforeEach(() => {
         login();

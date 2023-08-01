@@ -6,6 +6,7 @@
  */
 
 import path from 'path';
+import { tag } from '../../../../../tags';
 
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
@@ -56,7 +57,7 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('Export rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {

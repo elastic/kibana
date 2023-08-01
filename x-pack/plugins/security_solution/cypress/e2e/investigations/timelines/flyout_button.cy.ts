@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../../screens/security_main';
 import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/timeline';
@@ -23,7 +24,7 @@ import {
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('timeline flyout button', { tags: ['@ess', '@serverless'] }, () => {
+describe('timeline flyout button', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -49,7 +50,7 @@ describe('timeline flyout button', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     're-focuses the toggle button when timeline is closed by clicking the [X] close button',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       openTimelineUsingToggle();
       closeTimelineUsingCloseButton();

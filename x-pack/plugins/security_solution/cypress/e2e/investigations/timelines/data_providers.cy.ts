@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import {
   TIMELINE_DROPPED_DATA_PROVIDERS,
@@ -29,7 +30,7 @@ import { getTimeline } from '../../../objects/timeline';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../../tasks/common';
 
-describe('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
+describe('timeline data providers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

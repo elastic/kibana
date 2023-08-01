@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../../tags';
+
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
@@ -121,7 +123,7 @@ const defaultRuleData = {
   timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
 
-describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

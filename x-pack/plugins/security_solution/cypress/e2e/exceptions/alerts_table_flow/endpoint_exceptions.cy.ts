@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -45,7 +46,7 @@ import {
   goToEndpointExceptionsTab,
 } from '../../../tasks/rule_details';
 
-describe('Endpoint Exceptions workflows from Alert', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoint Exceptions workflows from Alert', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const expectedNumberOfAlerts = 1;
   const ITEM_NAME = 'Sample Exception List Item';
   const ITEM_NAME_EDIT = 'Sample Exception List Item';

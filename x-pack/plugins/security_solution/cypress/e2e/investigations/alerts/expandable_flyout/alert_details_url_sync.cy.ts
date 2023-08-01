@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import { getNewRule } from '../../../../objects/rule';
 import { cleanKibana } from '../../../../tasks/common';
@@ -18,7 +19,7 @@ import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expand
 describe(
   'Expandable flyout state sync',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -30,7 +31,7 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should test flyout url sync', { tags: '@brokenInServerless' }, () => {
+    it('should test flyout url sync', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       cy.url().should('not.include', 'eventFlyout');
 
       expandFirstAlertExpandableFlyout();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { ruleFields } from '../../../data/detection_engine';
 import {
   getNewRule,
@@ -112,7 +114,7 @@ import { enablesRule, getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('Custom query rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

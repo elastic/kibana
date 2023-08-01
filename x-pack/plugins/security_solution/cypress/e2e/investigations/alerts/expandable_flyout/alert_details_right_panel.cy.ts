@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { upperFirst } from 'lodash';
+import { tag } from '../../../../tags';
+
 import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
@@ -68,7 +69,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout right panel',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -80,7 +81,7 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should display header and footer basics', { tags: '@brokenInServerless' }, () => {
+    it('should display header and footer basics', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       expandFirstAlertExpandableFlyout();
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);

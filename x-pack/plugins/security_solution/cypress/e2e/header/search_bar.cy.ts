@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../tags';
 
 import { login, visit } from '../../tasks/login';
 import {
@@ -22,7 +23,7 @@ import { getHostIpFilter } from '../../objects/filter';
 import { HOSTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
-describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
+describe('SearchBar', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     login();
     visit(HOSTS_URL);

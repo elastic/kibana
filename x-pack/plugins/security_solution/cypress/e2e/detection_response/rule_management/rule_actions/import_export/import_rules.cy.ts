@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../../tags';
+
 import { TOASTER } from '../../../../../screens/alerts_detection_rules';
 import {
   expectManagementTableRules,
@@ -17,7 +19,7 @@ import { login, visitWithoutDateRange } from '../../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../../urls/navigation';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-describe('Import rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('Import rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

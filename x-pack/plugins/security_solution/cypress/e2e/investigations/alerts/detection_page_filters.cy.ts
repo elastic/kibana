@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { encode } from '@kbn/rison';
+import { tag } from '../../../tags';
+
 import type { FilterItemObj } from '../../../../public/common/components/filter_group/types';
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -107,7 +108,7 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));

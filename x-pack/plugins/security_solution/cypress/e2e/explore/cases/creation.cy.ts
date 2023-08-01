@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import type { TestCase } from '../../../objects/case';
 import { getCase1 } from '../../../objects/case';
@@ -53,7 +54,7 @@ import { loginWithUser, visit, visitWithoutDateRange } from '../../../tasks/logi
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
-describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
+describe('Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
@@ -86,8 +87,8 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
-    (this.mycase as TestCase).tags.forEach((tag) => {
-      cy.get(ALL_CASES_TAGS(tag)).should('have.text', tag);
+    (this.mycase as TestCase).tags.forEach((CaseTag) => {
+      cy.get(ALL_CASES_TAGS(tag)).should('have.text', CaseTag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
@@ -37,7 +38,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 describe(
   'Expandable flyout left panel correlations',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -52,7 +53,7 @@ describe(
       openCorrelationsTab();
     });
 
-    it('should render correlations details correctly', { tags: '@brokenInServerless' }, () => {
+    it('should render correlations details correctly', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       cy.log('link the alert to a new case');
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();

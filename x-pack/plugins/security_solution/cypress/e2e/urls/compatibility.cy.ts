@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../tags';
 
 import { ROLES } from '../../../common/test';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
@@ -34,7 +35,7 @@ const ABSOLUTE_DATE = {
 
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-describe('URL compatibility', { tags: ['@ess', '@serverless'] }, () => {
+describe('URL compatibility', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     login(ROLES.platform_engineer);
     visit(SECURITY_DETECTIONS_URL);

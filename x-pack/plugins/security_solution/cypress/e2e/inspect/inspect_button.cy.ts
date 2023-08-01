@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../tags';
 
 import {
   INSPECT_BUTTONS_IN_SECURITY,
@@ -22,7 +23,7 @@ import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
+describe('Inspect Explore pages', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'risk_users');
     cy.task('esArchiverLoad', 'risk_hosts');

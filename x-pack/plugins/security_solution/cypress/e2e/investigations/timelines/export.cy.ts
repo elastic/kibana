@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import {
   exportTimeline,
@@ -20,7 +21,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+describe('Export timelines', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();

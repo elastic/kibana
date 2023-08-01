@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../../screens/alerts_detection_rules';
 import {
@@ -31,7 +33,7 @@ const RULE_1 = createRuleAssetSavedObject({
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       login();

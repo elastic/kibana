@@ -6,6 +6,8 @@
  */
 
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
+import { tag } from '../../../tags';
+
 import type { Rule } from '../../../../public/detection_engine/rule_management/logic/types';
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
@@ -42,7 +44,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       login();

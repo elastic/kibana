@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { login, visitTimeline } from '../../../tasks/login';
 import {
@@ -19,7 +20,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
 import { createCase } from '../../../tasks/api_calls/cases';
 
-describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
+describe('attach timeline to case', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   context('without cases created', () => {
     before(() => {
       cleanKibana();
@@ -33,7 +34,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
       });
     });
 
-    it('attach timeline to a new case', { tags: '@brokenInServerless' }, function () {
+    it('attach timeline to a new case', { tags: tag.BROKEN_IN_SERVERLESS }, function () {
       visitTimeline(this.myTimeline.savedObjectId);
       attachTimelineToNewCase();
 
@@ -47,7 +48,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
 
     it(
       'attach timeline to an existing case with no case',
-      { tags: '@brokenInServerless' },
+      { tags: tag.BROKEN_IN_SERVERLESS },
       function () {
         visitTimeline(this.myTimeline.savedObjectId);
         attachTimelineToExistingCase();
@@ -63,7 +64,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
     );
   });
 
-  context('with cases created', { tags: '@brokenInServerless' }, () => {
+  context('with cases created', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
     before(() => {
       login();
       deleteTimelines();

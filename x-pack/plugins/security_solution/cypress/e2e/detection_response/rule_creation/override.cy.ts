@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../../objects/rule';
 
@@ -61,7 +63,7 @@ import { getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, override', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection rules, override', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');

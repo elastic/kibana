@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
@@ -27,7 +28,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: '@ess' }, () => {
+describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
   const exceptionList = getExceptionList();
 
   before(() => {

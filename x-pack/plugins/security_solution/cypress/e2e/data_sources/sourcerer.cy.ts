@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
+
 import { login, loginWithUser, visit, visitWithUser } from '../../tasks/login';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
@@ -46,7 +48,7 @@ describe('Sourcerer', () => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
-  describe('permissions', { tags: '@ess' }, () => {
+  describe('permissions', { tags: tag.ESS }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
@@ -57,7 +59,7 @@ describe('Sourcerer', () => {
     });
   });
 
-  describe('Default scope', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Default scope', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
@@ -119,7 +121,7 @@ describe('Sourcerer', () => {
 
     it(
       'adds a pattern to the default index and correctly filters out auditbeat-*',
-      { tags: '@brokenInServerless' },
+      { tags: tag.BROKEN_IN_SERVERLESS },
       () => {
         openSourcerer();
         isSourcererSelection(`auditbeat-*`);
@@ -134,7 +136,7 @@ describe('Sourcerer', () => {
     );
   });
 });
-describe('Timeline scope', { tags: '@brokenInServerless' }, () => {
+describe('Timeline scope', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();

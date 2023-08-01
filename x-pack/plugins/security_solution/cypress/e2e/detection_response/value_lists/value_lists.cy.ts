@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { ROLES } from '../../../../common/test';
 import { deleteRoleAndUser, login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -28,7 +30,7 @@ import {
   VALUE_LISTS_MODAL_ACTIVATOR,
 } from '../../../screens/lists';
 
-describe('value lists', { tags: ['@ess', '@serverless'] }, () => {
+describe('value lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('management modal', () => {
     beforeEach(() => {
       login();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
+
 import { ROLES } from '../../../common/test';
 import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
@@ -27,7 +29,7 @@ const waitForPageTitleToBeShown = () => {
 
 describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
-  { tags: '@ess' },
+  { tags: tag.ESS },
   () => {
     const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
 

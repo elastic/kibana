@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
@@ -26,7 +27,7 @@ import {
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
 
-describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
+describe('Investigate in timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

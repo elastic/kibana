@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -67,7 +68,7 @@ import { getExceptionList } from '../../../objects/exception';
 // ensure the most basic logic holds.
 describe.skip(
   'Exceptions flyout',
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   { testIsolation: false },
   () => {
     before(() => {

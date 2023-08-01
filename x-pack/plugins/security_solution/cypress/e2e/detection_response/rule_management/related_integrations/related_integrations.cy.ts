@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../tags';
+
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
 import { FIELD } from '../../../../screens/alerts_details';
@@ -52,7 +54,7 @@ Note that the rule we are using for testing purposes has the following character
   - Integration: unknown
 */
 
-describe('Related integrations', { tags: ['@ess', '@serverless'] }, () => {
+describe('Related integrations', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();

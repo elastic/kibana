@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
@@ -25,7 +26,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout left panel session view',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -37,7 +38,7 @@ describe(
       expandDocumentDetailsExpandableFlyoutLeftSection();
     });
 
-    it('should display session view under visualize', { tags: '@brokenInServerless' }, () => {
+    it('should display session view under visualize', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
         .should('be.visible')
         .and('have.text', 'Visualize');

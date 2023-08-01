@@ -6,6 +6,8 @@
  */
 
 import type { ExceptionListTypeEnum, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { tag } from '../../../tags';
+
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
@@ -53,7 +55,7 @@ interface ResponseType {
 }
 describe(
   'Add, copy comments in different exceptions type and validate sharing them between users',
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     describe('Rule exceptions', () => {
       beforeEach(() => {

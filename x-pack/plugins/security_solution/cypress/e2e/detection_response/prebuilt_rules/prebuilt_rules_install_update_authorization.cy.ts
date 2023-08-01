@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { APP_PATH, RULES_ADD_PATH, RULES_UPDATES } from '../../../../common/constants';
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
@@ -53,7 +55,7 @@ const loadPageAsReadOnlyUser = (url: string) => {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: '@ess' },
+  { tags: tag.ESS },
   () => {
     beforeEach(() => {
       login();

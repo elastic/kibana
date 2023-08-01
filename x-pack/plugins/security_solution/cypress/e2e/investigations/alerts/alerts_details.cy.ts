@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import { tag } from '../../../tags';
+
 import {
   ALERT_FLYOUT,
   CELL_TEXT,
@@ -34,7 +35,7 @@ import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
-describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Basic functions', () => {
     before(() => {
       cleanKibana();

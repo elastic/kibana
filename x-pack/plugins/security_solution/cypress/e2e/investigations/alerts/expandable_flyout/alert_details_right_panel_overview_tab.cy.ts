@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
@@ -71,7 +72,7 @@ import {
 describe(
   'Alert details expandable flyout right panel overview tab',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -85,7 +86,7 @@ describe(
     });
 
     describe('about section', () => {
-      it('should display about section', { tags: '@brokenInServerless' }, () => {
+      it('should display about section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
         cy.log('header and content');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER)
@@ -142,7 +143,7 @@ describe(
       });
     });
 
-    describe('visualizations section', { tags: '@brokenInServerless' }, () => {
+    describe('visualizations section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       it('should display analyzer and session previews', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabVisualizationsSection();
@@ -159,7 +160,7 @@ describe(
       });
     });
 
-    describe('investigation section', { tags: '@brokenInServerless' }, () => {
+    describe('investigation section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       it('should display investigation section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
@@ -220,7 +221,7 @@ describe(
       });
     });
 
-    describe('insights section', { tags: '@brokenInServerless' }, () => {
+    describe('insights section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       it('should display entities section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();

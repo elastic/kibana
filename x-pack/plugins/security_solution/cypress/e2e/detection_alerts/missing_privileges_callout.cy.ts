@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
+
 import { ROLES } from '../../../common/test';
 import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
@@ -36,7 +38,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts', { tags: '@ess' }, () => {
+describe('Detections > Callouts', { tags: tag.ESS }, () => {
   const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
   before(() => {

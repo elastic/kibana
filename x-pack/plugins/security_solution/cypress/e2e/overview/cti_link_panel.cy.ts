@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../tags';
 
 import {
   OVERVIEW_CTI_ENABLE_MODULE_BUTTON,
@@ -15,7 +16,7 @@ import {
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
+describe('CTI Link Panel', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     login();
   });

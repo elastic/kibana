@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../../tags';
+
 import {
   RULES_BULK_EDIT_DATA_VIEWS_WARNING,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
@@ -56,7 +58,7 @@ const expectedNumberOfCustomRulesToBeEdited = 6;
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     before(() => {
       cleanKibana();

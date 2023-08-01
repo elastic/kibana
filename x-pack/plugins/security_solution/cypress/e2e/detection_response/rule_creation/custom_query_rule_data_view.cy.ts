@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getDataViewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
@@ -67,7 +69,7 @@ import { getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('Custom query rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');

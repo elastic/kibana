@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { ROLES } from '../../../../common/test';
@@ -34,7 +35,7 @@ describe('Alerts timeline', () => {
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', { tags: '@ess' }, () => {
+  context('Privileges: read only', { tags: tag.ESS }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.reader);
     });
@@ -52,7 +53,7 @@ describe('Alerts timeline', () => {
     });
   });
 
-  context('Privileges: can crud', { tags: '@ess' }, () => {
+  context('Privileges: can crud', { tags: tag.ESS }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist');

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../tags';
+
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import {
@@ -26,7 +28,7 @@ import {
 
 import { getNewRule } from '../../../../objects/rule';
 
-describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

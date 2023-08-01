@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../../objects/rule';
 
@@ -61,7 +63,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('EQL rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

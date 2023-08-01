@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import {
   IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
@@ -20,7 +21,7 @@ import {
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
-describe('Import Lists', { tags: ['@ess', '@serverless'] }, () => {
+describe('Import Lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   before(() => {
     cy.task('esArchiverResetKibana');

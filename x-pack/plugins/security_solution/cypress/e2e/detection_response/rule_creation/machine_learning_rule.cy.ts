@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isArray } from 'lodash';
+import { tag } from '../../../tags';
 
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getMachineLearningRule } from '../../../objects/rule';
@@ -54,7 +54,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, machine learning', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection rules, machine learning', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');

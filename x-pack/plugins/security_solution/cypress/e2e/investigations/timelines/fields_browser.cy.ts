@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import {
   FIELDS_BROWSER_CATEGORIES_COUNT,
@@ -49,7 +50,7 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
+describe('Fields Browser', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

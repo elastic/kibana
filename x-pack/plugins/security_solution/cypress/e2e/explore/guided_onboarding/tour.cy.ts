@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, TIMELINES } from '../../../screens/security_header';
@@ -28,7 +29,7 @@ import { login, visit } from '../../../tasks/login';
 import { quitGlobalTour, startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 import { AlertsCasesTourSteps } from '../../../../public/common/components/guided_onboarding_tour/tour_config';
 
-describe('Guided onboarding tour', { tags: '@ess' }, () => {
+describe('Guided onboarding tour', { tags: tag.ESS }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -43,14 +44,14 @@ describe('Guided onboarding tour', { tags: '@ess' }, () => {
   after(() => {
     quitGlobalTour();
   });
-  it('Completes the tour with next button clicks', { tags: '@brokenInServerless' }, () => {
+  it('Completes the tour with next button clicks', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
     startTour();
     completeTourWithNextButton();
     finishTour();
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('Completes the tour with action clicks', { tags: '@brokenInServerless' }, () => {
+  it('Completes the tour with action clicks', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
     startTour();
     completeTourWithActions();
     finishTour();
@@ -58,7 +59,7 @@ describe('Guided onboarding tour', { tags: '@ess' }, () => {
   });
 
   // unhappy paths
-  it('Resets the tour to step 1 when we navigate away', { tags: '@brokenInServerless' }, () => {
+  it('Resets the tour to step 1 when we navigate away', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
     startTour();
     goToStep(AlertsCasesTourSteps.expandEvent);
     assertTourStepExist(AlertsCasesTourSteps.expandEvent);
@@ -71,7 +72,7 @@ describe('Guided onboarding tour', { tags: '@ess' }, () => {
 
   describe(
     'persists tour steps in flyout on flyout toggle',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       const stepsInAlertsFlyout = [
         AlertsCasesTourSteps.reviewAlertDetailsFlyout,

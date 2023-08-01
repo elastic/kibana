@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { getIndexConnector } from '../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../objects/rule';
 
@@ -27,7 +29,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Rule actions during detection rule creation', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule actions during detection rule creation', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const indexConnector = getIndexConnector();
 
   before(() => {

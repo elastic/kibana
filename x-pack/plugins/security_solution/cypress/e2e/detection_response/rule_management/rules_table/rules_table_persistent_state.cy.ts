@@ -6,6 +6,8 @@
  */
 
 import { encode } from '@kbn/rison';
+import { tag } from '../../../../tags';
+
 import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import {
@@ -109,7 +111,7 @@ describe('Rules table: persistent state', () => {
     resetRulesTableState();
   });
 
-  describe('while on a happy path', { tags: ['@ess', '@serverless'] }, () => {
+  describe('while on a happy path', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     it('activates management tab by default', () => {
       visit(SECURITY_DETECTIONS_RULES_URL);
 
@@ -271,7 +273,7 @@ describe('Rules table: persistent state', () => {
     });
   });
 
-  describe('upon state format upgrade', { tags: ['@ess', '@serverless'] }, async () => {
+  describe('upon state format upgrade', { tags: [tag.ESS, tag.SERVERLESS] }, async () => {
     beforeEach(() => {
       login();
     });
@@ -318,7 +320,7 @@ describe('Rules table: persistent state', () => {
 
   describe(
     'when persisted state is partially unavailable',
-    { tags: ['@ess', '@serverless'] },
+    { tags: [tag.ESS, tag.SERVERLESS] },
     () => {
       describe('and on the rules management tab', () => {
         beforeEach(() => {
@@ -354,7 +356,7 @@ describe('Rules table: persistent state', () => {
     }
   );
 
-  describe('when corrupted', { tags: ['@ess', '@serverless'] }, () => {
+  describe('when corrupted', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
         login();

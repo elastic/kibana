@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -35,8 +36,8 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
-  describe('Open timeline modal', { tags: '@brokenInServerless' }, () => {
+describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+  describe('Open timeline modal', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
     beforeEach(function () {
       cleanKibana();
       login();
@@ -64,7 +65,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
       openTimelineById(this.timelineId);
     });
 
-    it('should open a modal', { tags: '@brokenInServerless' }, () => {
+    it('should open a modal', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
     });
 

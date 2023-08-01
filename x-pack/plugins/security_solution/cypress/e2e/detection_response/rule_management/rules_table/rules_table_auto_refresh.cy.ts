@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../tags';
+
 import {
   RULE_CHECKBOX,
   REFRESH_RULES_STATUS,
@@ -34,7 +36,7 @@ import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
 // TODO: See https://github.com/elastic/kibana/issues/154694
-describe.skip('Rules table: auto-refresh', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Rules table: auto-refresh', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();

@@ -13,7 +13,7 @@ export default defineCypressConfig({
   defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@serverless',
+    grepTags: '@serverless --@brokenInServerless',
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,

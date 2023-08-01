@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { tag } from '../../../../tags';
+
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
@@ -32,7 +35,7 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-describe('Rules table: selection', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rules table: selection', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
@@ -25,7 +26,7 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from 
 describe(
   'Expandable flyout left panel threat intelligence',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: ['@ess', '@serverless'] },
+  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -39,7 +40,7 @@ describe(
       openThreatIntelligenceTab();
     });
 
-    it('should serialize its state to url', { tags: '@brokenInServerless' }, () => {
+    it('should serialize its state to url', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');

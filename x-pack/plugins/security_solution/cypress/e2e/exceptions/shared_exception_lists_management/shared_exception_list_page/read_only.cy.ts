@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../../tags';
 
 import { ROLES } from '../../../../../common/test';
 import { getExceptionList } from '../../../../objects/exception';
@@ -22,7 +23,7 @@ import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-describe('Shared exception lists - read only', { tags: '@ess' }, () => {
+describe('Shared exception lists - read only', { tags: tag.ESS }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
   });

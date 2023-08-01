@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../../../tags';
+
 import {
   waitForRulesTableToBeLoaded,
   goToTheRuleDetailsOf,
@@ -53,7 +55,7 @@ const EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item';
 
 const NON_EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item with future expiration';
 
-describe('Detection rules, bulk duplicate', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection rules, bulk duplicate', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

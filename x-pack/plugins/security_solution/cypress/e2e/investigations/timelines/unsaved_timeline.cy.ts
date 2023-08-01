@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import type { Timeline } from '../../../objects/timeline';
 import {
@@ -33,7 +34,7 @@ import {
 } from '../../../tasks/timeline';
 import { HOSTS_URL, MANAGE_URL } from '../../../urls/navigation';
 
-describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
+describe('Save Timeline Prompts', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -56,7 +57,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'unchanged & unsaved timeline should NOT prompt when user navigates away',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       openKibanaNavigation();
       navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
@@ -66,7 +67,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'Changed & unsaved timeline should prompt when user navigates away from security solution',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
       waitForTimelineChanges();
@@ -80,7 +81,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'Changed & unsaved timeline should NOT prompt when user navigates away within security solution where timelines are enabled',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
 
@@ -95,7 +96,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'Changed & unsaved timeline should prompt when user navigates away within security solution where timelines are disbaled eg. admin screen',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
       waitForTimelineChanges();
@@ -108,7 +109,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'Changed & saved timeline should NOT prompt when user navigates away out of security solution',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
       waitForTimelineChanges();
@@ -132,7 +133,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
       waitForTimelineChanges();
@@ -156,7 +157,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'When user navigates to the page where timeline is present, Time save modal should not exists.',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
       waitForTimelineChanges();
@@ -177,7 +178,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'Changed and unsaved timeline should NOT prompt when user navigates from the page where timeline is disabled',
-    { tags: '@brokenInServerless' },
+    { tags: tag.BROKEN_IN_SERVERLESS },
     () => {
       populateTimeline();
       waitForTimelineChanges();

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
 
 import { ROLES } from '../../../../common/test';
 import { getNewRule } from '../../../objects/rule';
@@ -38,7 +39,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+describe('Changing alert status', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'auditbeat_big');
     cleanKibana();

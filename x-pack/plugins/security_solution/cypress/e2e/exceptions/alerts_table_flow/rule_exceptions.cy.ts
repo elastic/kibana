@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../../tags';
+
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule, getEndpointRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
@@ -61,7 +63,7 @@ const loadEndpointRuleAndAlerts = () => {
   waitForAlertsToPopulate();
 };
 
-describe('Rule Exceptions workflows from Alert', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule Exceptions workflows from Alert', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception Item';
   const ITEM_NAME_EDIT = 'Sample Exception Item Edit';

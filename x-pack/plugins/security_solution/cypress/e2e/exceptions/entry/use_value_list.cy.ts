@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { tag } from '../../../tags';
+
 import {
   addExceptionEntryFieldMatchIncludedValue,
   addExceptionEntryFieldValue,
@@ -49,7 +51,7 @@ const goToRulesAndOpenValueListModal = () => {
   openValueListsModal();
 };
 
-describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
+describe('Use Value list in exception entry', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();
