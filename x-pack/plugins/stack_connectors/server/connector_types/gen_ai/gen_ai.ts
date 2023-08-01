@@ -82,7 +82,6 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     if (error.response.status === 401) {
       return 'Unauthorized API Error';
     }
-
     return `API Error: ${error.response?.status} - ${error.response?.statusText}${
       error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
     }`;
