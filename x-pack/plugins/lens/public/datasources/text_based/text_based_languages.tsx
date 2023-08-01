@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -19,6 +20,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import { TextBasedDataPanel } from './datapanel';
+import { toExpression } from './to_expression';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -31,8 +34,6 @@ import {
   UserMessage,
 } from '../../types';
 import { generateId } from '../../id_generator';
-import { toExpression } from './to_expression';
-import { TextBasedDataPanel } from './datapanel';
 import type {
   TextBasedPrivateState,
   TextBasedPersistedState,
@@ -43,6 +44,8 @@ import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../../types';
 import { LayerPanel } from './layerpanel';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
+import { onDrop, getDropProps } from './dnd';
+import { removeColumn } from './remove_column';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -337,18 +340,7 @@ export function getTextBasedDatasource({
       return state.layers[layerId].index;
     },
 
-    removeColumn({ prevState, layerId, columnId }) {
-      return {
-        ...prevState,
-        layers: {
-          ...prevState.layers,
-          [layerId]: {
-            ...prevState.layers[layerId],
-            columns: prevState.layers[layerId].columns.filter((col) => col.columnId !== columnId),
-          },
-        },
-      };
-    },
+    removeColumn,
 
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
       return toExpression(state, layerId);
@@ -511,58 +503,8 @@ export function getTextBasedDatasource({
 
       return columnLabelMap;
     },
-
-    getDropProps: (props) => {
-      const { source, target, state } = props;
-      if (!source) {
-        return;
-      }
-      if (target && target.isMetricDimension) {
-        const layerId = target.layerId;
-        const currentLayer = state.layers[layerId];
-        const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
-        if (field?.meta?.type !== 'number') return;
-      }
-      const label = source.field as string;
-      return { dropTypes: ['field_add'], nextLabel: label };
-    },
-
-    onDrop: (props) => {
-      const { dropType, state, source, target } = props;
-      const { layers } = state;
-
-      if (dropType === 'field_add') {
-        Object.keys(layers).forEach((layerId) => {
-          const currentLayer = layers[layerId];
-          const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
-          const newColumn = {
-            columnId: target.columnId,
-            fieldName: field?.fieldName ?? '',
-            meta: field?.meta,
-          };
-          const columns = currentLayer.columns.filter((c) => c.columnId !== target.columnId);
-          columns.push(newColumn);
-
-          const allColumns = currentLayer.allColumns.filter((c) => c.columnId !== target.columnId);
-          allColumns.push(newColumn);
-
-          props.setState({
-            ...props.state,
-            layers: {
-              ...props.state.layers,
-              [layerId]: {
-                ...props.state.layers[layerId],
-                columns,
-                allColumns,
-              },
-            },
-          });
-        });
-        return true;
-      }
-      return false;
-    },
-
+    getDropProps,
+    onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
         datasourceId: 'textBased',

@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { formatFieldValue } from './format_value';
+import { formatFieldValue } from '@kbn/discover-utils';
 
 interface ConvertedResult {
   formattedString: string;

@@ -677,7 +677,13 @@ export class LensPlugin {
           this.editorFrameService!.loadVisualizations(),
           this.editorFrameService!.loadDatasources(),
         ]);
-        return getEditLensConfiguration(core, startDependencies, visualizationMap, datasourceMap);
+        const Component = await getEditLensConfiguration(
+          core,
+          startDependencies,
+          visualizationMap,
+          datasourceMap
+        );
+        return Component;
       },
     };
   }

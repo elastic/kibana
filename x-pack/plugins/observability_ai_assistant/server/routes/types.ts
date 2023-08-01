@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import type {
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies,
+} from '../types';
+import type { IObservabilityAIAssistantService } from '../service/types';
+
+export interface ObservabilityAIAssistantRouteHandlerResources {
+  request: KibanaRequest;
+  context: RequestHandlerContext;
+  logger: Logger;
+  service: IObservabilityAIAssistantService;
+  plugins: {
+    [key in keyof ObservabilityAIAssistantPluginSetupDependencies]: {
+      setup: Required<ObservabilityAIAssistantPluginSetupDependencies>[key];
+    };
+  } & {
+    [key in keyof ObservabilityAIAssistantPluginStartDependencies]: {
+      start: () => Promise<Required<ObservabilityAIAssistantPluginStartDependencies>[key]>;
+    };
+  };
+}
+
+export interface ObservabilityAIAssistantRouteCreateOptions {
+  options: {
+    tags: Array<'access:ai_assistant'>;
+  };
+}

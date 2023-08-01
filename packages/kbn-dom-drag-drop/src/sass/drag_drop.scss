@@ -146,7 +146,8 @@ $reorderItemMargin: $euiSizeS;
   right: calc(100% + #{$euiSizeS});
   top: 0;
   transition: opacity $euiAnimSpeedFast ease-in-out;
-  width:100%;
+  width: 100%;
+  max-width: $euiFormMaxWidth;
 }
 
 .domDragDrop__extraDrops-visible {
@@ -154,19 +155,12 @@ $reorderItemMargin: $euiSizeS;
   visibility: visible;
 }
 
-.domDragDrop__diamondPath {
-  position: absolute;
-  width: 30%;
-  top: 0;
-  left: -$euiSize;
-  z-index: $domDragDropZLevel0;
-}
-
 .domDragDrop__extraDropWrapper {
   position: relative;
   width: 100%;
   height: 100%;
   background: $euiColorLightestShade;
+  border-radius: $euiSizeXS;
 
   .domDragDrop__extraDrop,
   .domDragDrop__extraDrop:before {

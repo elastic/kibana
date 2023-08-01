@@ -1,6 +1,5 @@
 interactiveSetup.enabled: false
 newsfeed.enabled: false
-xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
 # Fleet settings
 xpack.fleet.internal.fleetServerStandalone: true
@@ -42,10 +41,14 @@ management.deeplinks.navLinkStatus: visible
 
 # Other disabled plugins
 #xpack.canvas.enabled: false #only disabable in dev-mode
-xpack.reporting.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
+
+# Disable UI of security management plugins
+xpack.security.ui.userManagementEnabled: false
+xpack.security.ui.roleManagementEnabled: false
+xpack.security.ui.roleMappingManagementEnabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true
