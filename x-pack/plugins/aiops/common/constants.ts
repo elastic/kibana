@@ -12,3 +12,5 @@ export const SPIKE_ANALYSIS_THRESHOLD = 0.02;
 export const RANDOM_SAMPLER_SEED = 3867412;
 
 export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
+
+export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;

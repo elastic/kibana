@@ -15,9 +15,9 @@ import {
   useEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
 import type { AiopsPluginStartDeps } from '../types';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from './embeddable_change_point_chart_factory';
-import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 
 export interface EmbeddableChangePointChartProps {
   dataViewId: string;
@@ -35,9 +35,11 @@ export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPlu
     EMBEDDABLE_CHANGE_POINT_CHART_TYPE
   )!;
 
-  return (props: any) => {
+  return (props: EmbeddableChangePointChartProps) => {
     const input = { ...props };
-    return <EmbeddableRootWrapper factory={factory} input={input} />;
+    return (
+      <EmbeddableRootWrapper factory={factory} input={input as EmbeddableChangePointChartInput} />
+    );
   };
 }
 

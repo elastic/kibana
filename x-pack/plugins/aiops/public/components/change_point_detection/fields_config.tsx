@@ -33,9 +33,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../embeddable/embeddable_change_point_chart_factory';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
