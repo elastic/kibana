@@ -427,10 +427,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public openOverlay = (ref: OverlayRef) => {
     this.clearOverlays();
+    this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
   };
 
   public clearOverlays = () => {
+    this.dispatch.setHasOverlays(false);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
