@@ -19,6 +19,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { BehaviorSubject, Observable, combineLatest, map, takeUntil, ReplaySubject } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
+import classnames from 'classnames';
 
 import { createHomeBreadcrumb } from './home_breadcrumbs';
 import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
@@ -113,6 +114,9 @@ export class ProjectNavigationService {
                   (node): ChromeProjectBreadcrumb => ({
                     href: node.deepLink?.url ?? node.href,
                     text: node.title,
+                    'data-test-subj': classnames({
+                      [`breadcrumb-deepLinkId-${node.deepLink?.id}`]: !!node.deepLink,
+                    }),
                   })
                 );
 
@@ -140,7 +144,8 @@ export class ProjectNavigationService {
     const activeNodes = findActiveNodes(
       currentPathname,
       this.projectNavigationNavTreeFlattened,
-      location
+      location,
+      this.http?.basePath.prepend
     );
 
     // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used

@@ -30,3 +30,11 @@ export const WELCOME_GENERAL_3 = i18n.translate(
       'Go ahead and click the add connector button below to continue the conversation!',
   }
 );
+
+export const ENTERPRISE = i18n.translate(
+  'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt',
+  {
+    defaultMessage:
+      'Elastic AI Assistant is available to Enterprise users only. Please upgrade your license to use this feature.',
+  }
+);

@@ -35,7 +35,8 @@
       "home",
       "taskManager",
       "usageCollection",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
     "requiredBundles": [],
     "extraPublicDirs": [

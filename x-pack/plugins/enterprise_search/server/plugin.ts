@@ -21,7 +21,7 @@ import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
-import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -88,7 +88,7 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
-  infra: InfraPluginSetup;
+  logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -125,7 +125,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       security,
       features,
       globalSearch,
-      infra,
+      logsShared,
       customIntegrations,
       ml,
       guidedOnboarding,
@@ -261,9 +261,9 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     /*
      * Register logs source configuration, used by LogStream components
-     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'logs-app_search.search_relevance_suggestions-*',
         type: 'index_name',
@@ -271,7 +271,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: 'Enterprise Search Search Relevance Logs',
     });
 
-    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'logs-enterprise_search*',
         type: 'index_name',
@@ -279,7 +279,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: 'Enterprise Search Audit Logs',
     });
 
-    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'behavioral_analytics-events-*',
         type: 'index_name',

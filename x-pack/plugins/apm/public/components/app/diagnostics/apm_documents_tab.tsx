@@ -10,25 +10,19 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { asInteger } from '../../../../common/utils/formatters';
+import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../common/data_view_constants';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
-
-function formatDocCount(count?: number) {
-  if (count === undefined) {
-    return '-';
-  }
-
-  return asInteger(count);
-}
 
 export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
@@ -46,7 +40,9 @@ export function DiagnosticsApmDocuments() {
           legacy === true &&
           docCount === 0 &&
           intervals &&
-          Object.values(intervals).every((interval) => interval === 0);
+          Object.values(intervals).every(
+            (interval) => interval.eventDocCount === 0
+          );
 
         return !isLegacyAndUnused;
       }) ?? []
@@ -57,36 +53,40 @@ export function DiagnosticsApmDocuments() {
     {
       name: 'Name',
       field: 'name',
-      width: '40%',
+      width: '30%',
     },
     {
       name: 'Doc count',
       field: 'docCount',
-      render: (_, { docCount }) => asInteger(docCount),
+      render: (_, { docCount }) => (
+        <EuiToolTip content={`${asInteger(docCount)} docs`}>
+          <div style={{ cursor: 'pointer' }}>{asBigNumber(docCount)}</div>
+        </EuiToolTip>
+      ),
       sortable: true,
     },
     {
       name: '1m',
       field: 'intervals.1m',
       render: (_, { intervals }) => {
-        const docCount = intervals?.['1m'];
-        return formatDocCount(docCount);
+        const interval = intervals?.['1m'];
+        return <IntervalDocCount interval={interval} />;
       },
     },
     {
       name: '10m',
       field: 'intervals.10m',
       render: (_, { intervals }) => {
-        const docCount = intervals?.['10m'];
-        return formatDocCount(docCount);
+        const interval = intervals?.['10m'];
+        return <IntervalDocCount interval={interval} />;
       },
     },
     {
       name: '60m',
       field: 'intervals.60m',
       render: (_, { intervals }) => {
-        const docCount = intervals?.['60m'];
-        return formatDocCount(docCount);
+        const interval = intervals?.['60m'];
+        return <IntervalDocCount interval={interval} />;
       },
     },
     {
@@ -157,5 +157,35 @@ export function DiagnosticsApmDocuments() {
         }}
       />
     </>
+  );
+}
+
+function IntervalDocCount({
+  interval,
+}: {
+  interval?: {
+    metricDocCount: number;
+    eventDocCount: number;
+  };
+}) {
+  if (interval === undefined) {
+    return <>-</>;
+  }
+
+  return (
+    <EuiToolTip
+      content={`${asInteger(interval.metricDocCount)} docs / ${asInteger(
+        interval.eventDocCount
+      )} events`}
+    >
+      <div style={{ cursor: 'pointer' }}>
+        {asBigNumber(interval.metricDocCount)}&nbsp;
+        <EuiText
+          css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}
+        >
+          ({asBigNumber(interval.eventDocCount)} events)
+        </EuiText>
+      </div>
+    </EuiToolTip>
   );
 }

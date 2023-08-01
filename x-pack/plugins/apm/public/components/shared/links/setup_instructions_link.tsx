@@ -31,7 +31,7 @@ export function SetupInstructionsLink({
   return (
     <EuiLink
       data-test-subj="apmSetupInstructionsLinkLink"
-      href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
+      href={core.http.basePath.prepend('/app/apm/tutorial')}
     >
       {buttonFill ? (
         <EuiButton

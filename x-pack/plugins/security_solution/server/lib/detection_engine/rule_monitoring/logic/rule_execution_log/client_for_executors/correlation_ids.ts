@@ -6,7 +6,7 @@
  */
 
 import type { ExtMeta } from '../../utils/console_logging';
-import type { RuleExecutionStatus } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleExecutionContext } from './client_interface';
 
 export interface ICorrelationIds {

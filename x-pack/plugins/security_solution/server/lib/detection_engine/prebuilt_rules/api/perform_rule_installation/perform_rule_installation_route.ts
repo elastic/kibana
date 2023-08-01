@@ -6,13 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
-import { PerformRuleInstallationRequestBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
+import {
+  PERFORM_RULE_INSTALLATION_URL,
+  PerformRuleInstallationRequestBody,
+  SkipRuleInstallReason,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
-import { SkipRuleInstallReason } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';

@@ -13,6 +13,7 @@ import type {
   AgentMetadata,
   OutputType,
   ShipperOutput,
+  KafkaAcknowledgeReliabilityLevel,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -23,6 +24,12 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
+import type {
+  KafkaPartitionType,
+  KafkaSaslMechanism,
+  KafkaTopicWhenType,
+} from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -120,11 +127,10 @@ export interface PackagePolicySOAttributes {
   agents?: number;
 }
 
-export interface OutputSOAttributes {
+interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
-  type: ValueOf<OutputType>;
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
@@ -136,6 +142,60 @@ export interface OutputSOAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
 }
+
+interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Elasticsearch'];
+}
+
+interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Logstash'];
+}
+
+export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Kafka'];
+  client_id?: string;
+  version?: string;
+  key?: string;
+  compression?: ValueOf<KafkaCompressionType>;
+  compression_level?: number;
+  auth_type?: ValueOf<KafkaAuthType>;
+  username?: string;
+  password?: string;
+  sasl?: {
+    mechanism?: ValueOf<KafkaSaslMechanism>;
+  };
+  partition?: ValueOf<KafkaPartitionType>;
+  random?: {
+    group_events?: number;
+  };
+  round_robin?: {
+    group_events?: number;
+  };
+  hash?: {
+    hash?: string;
+    random?: boolean;
+  };
+  topics?: Array<{
+    topic: string;
+    when?: {
+      type?: ValueOf<KafkaTopicWhenType>;
+      condition?: string;
+    };
+  }>;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+  timeout?: number;
+  broker_timeout?: number;
+  broker_buffer_size?: number;
+  broker_ack_reliability?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+}
+
+export type OutputSOAttributes =
+  | OutputSoElasticsearchAttributes
+  | OutputSoLogstashAttributes
+  | OutputSoKafkaAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled: boolean;

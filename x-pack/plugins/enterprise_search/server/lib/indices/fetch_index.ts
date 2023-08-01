@@ -12,6 +12,7 @@ import { CONNECTORS_JOBS_INDEX } from '../..';
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { ConnectorSyncJobDocument, SyncStatus } from '../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
@@ -21,29 +22,36 @@ const hasInProgressSyncs = async (
   client: IScopedClusterClient,
   connectorId: string
 ): Promise<{ inProgress: boolean; pending: boolean }> => {
-  const syncs = await client.asCurrentUser.search<ConnectorSyncJobDocument>({
-    index: CONNECTORS_JOBS_INDEX,
-    query: {
-      bool: {
-        filter: [
-          { term: { 'connector.id': connectorId } },
-          {
-            dis_max: {
-              queries: [
-                { term: { status: SyncStatus.IN_PROGRESS } },
-                { term: { status: SyncStatus.PENDING } },
-              ],
+  try {
+    const syncs = await client.asCurrentUser.search<ConnectorSyncJobDocument>({
+      index: CONNECTORS_JOBS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'connector.id': connectorId } },
+            {
+              dis_max: {
+                queries: [
+                  { term: { status: SyncStatus.IN_PROGRESS } },
+                  { term: { status: SyncStatus.PENDING } },
+                ],
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-  });
-  const inProgress = syncs.hits.hits.some(
-    (sync) => sync._source?.status === SyncStatus.IN_PROGRESS
-  );
-  const pending = syncs.hits.hits.some((sync) => sync._source?.status === SyncStatus.PENDING);
-  return { inProgress, pending };
+    });
+    const inProgress = syncs.hits.hits.some(
+      (sync) => sync._source?.status === SyncStatus.IN_PROGRESS
+    );
+    const pending = syncs.hits.hits.some((sync) => sync._source?.status === SyncStatus.PENDING);
+    return { inProgress, pending };
+  } catch (error) {
+    if (isIndexNotFoundException(error)) {
+      return { inProgress: false, pending: false };
+    }
+    throw error;
+  }
 };
 
 export const fetchIndex = async (

@@ -12,8 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
@@ -23,11 +21,11 @@ import {
   LogEntryContextMenu,
   LogEntryColumnWidths,
   iconColumnId,
-} from '../../../../../components/logging/log_text_stream';
-import {
   LogColumnHeadersWrapper,
   LogColumnHeader,
-} from '../../../../../components/logging/log_text_stream/column_headers';
+} from '@kbn/logs-shared-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';

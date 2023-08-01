@@ -15,18 +15,19 @@ import {
   SearchIntegrations,
 } from '../../hooks/use_integrations';
 import { INTEGRATION_PANEL_ID, UNMANAGED_STREAMS_PANEL_ID } from './constants';
+import type { DatasetSelection, DatasetSelectionChange } from '../../utils/dataset_selection';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */
   datasets: Dataset[] | null;
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError?: Error | null;
-  /* The integrations list, each integration includes its data streams */
-  initialSelected: Dataset;
+  /* The current selection instance */
+  datasetSelection: DatasetSelection;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */
-  integrationsError?: Error | null;
+  integrationsError: Error | null;
   /* Flags for loading/searching integrations or data streams*/
   isLoadingIntegrations: boolean;
   isLoadingStreams: boolean;
@@ -45,8 +46,8 @@ export interface DatasetSelectorProps {
   onUnmanagedStreamsReload: ReloadDatasets;
   /* Triggered when the uncategorized streams entry is selected */
   onStreamsEntryClick: LoadDatasets;
-  /* Triggered when a data stream entry is selected */
-  onDatasetSelected: DatasetSelectionHandler;
+  /* Triggered when the selection is updated */
+  onSelectionChange: DatasetSelectionChange;
 }
 
 export type PanelId =

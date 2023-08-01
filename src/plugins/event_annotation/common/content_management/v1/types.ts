@@ -20,8 +20,8 @@ import {
 } from '@kbn/content-management-plugin/common';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { EventAnnotationGroupContentType } from '../types';
-import { EventAnnotationConfig } from '../../types';
 
 export interface Reference {
   type: string;
@@ -120,6 +120,9 @@ export interface EventAnnotationGroupSearchQuery {
   searchFields?: string[];
 }
 
-export type EventAnnotationGroupSearchIn = SearchIn<EventAnnotationGroupContentType, {}>;
+export type EventAnnotationGroupSearchIn = SearchIn<
+  EventAnnotationGroupContentType,
+  EventAnnotationGroupSearchQuery
+>;
 
 export type EventAnnotationGroupSearchOut = SearchResult<EventAnnotationGroupSavedObject>;

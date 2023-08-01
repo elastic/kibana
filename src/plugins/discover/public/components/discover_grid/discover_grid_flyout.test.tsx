@@ -11,17 +11,16 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
-import { esHits } from '../../__mocks__/es_hits';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../build_services';
 import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../kibana_services';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, EsHitRecord } from '../../types';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
@@ -63,7 +62,7 @@ describe('Discover flyout', function () {
     } as unknown as DiscoverServices;
 
     const hit = buildDataTableRecord(
-      hitIndex ? esHits[hitIndex] : (esHits[0] as EsHitRecord),
+      hitIndex ? esHitsMock[hitIndex] : (esHitsMock[0] as EsHitRecord),
       dataViewMock
     );
 
@@ -73,7 +72,9 @@ describe('Discover flyout', function () {
       hit,
       hits:
         hits ||
-        esHits.map((entry: EsHitRecord) => buildDataTableRecord(entry, dataView || dataViewMock)),
+        esHitsMock.map((entry: EsHitRecord) =>
+          buildDataTableRecord(entry, dataView || dataViewMock)
+        ),
       query,
       onAddColumn: jest.fn(),
       onClose,
@@ -166,14 +167,14 @@ describe('Discover flyout', function () {
 
   it('doesnt allow you to navigate to the next doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({ hitIndex: esHits.length - 1 });
+    const { component, props } = await mountComponent({ hitIndex: esHitsMock.length - 1 });
     findTestSubject(component, 'pagination-button-next').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(0);
   });
 
   it('allows you to navigate to the previous doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({ hitIndex: esHits.length - 1 });
+    const { component, props } = await mountComponent({ hitIndex: esHitsMock.length - 1 });
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
     expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('4');

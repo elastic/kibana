@@ -8,6 +8,8 @@
 import { PostureTypes, VulnSeverity } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
+export const STATUS_API_CURRENT_VERSION = '1';
+
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
 
 export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =

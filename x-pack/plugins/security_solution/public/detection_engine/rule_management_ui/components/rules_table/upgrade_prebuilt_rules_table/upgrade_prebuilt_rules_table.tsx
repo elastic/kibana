@@ -18,6 +18,7 @@ import {
 import React from 'react';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RulesChangelogLink } from '../rules_changelog_link';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
@@ -28,6 +29,7 @@ const NO_ITEMS_MESSAGE = (
     title={<h3>{i18n.NO_RULES_AVAILABLE_FOR_UPGRADE}</h3>}
     titleSize="s"
     body={i18n.NO_RULES_AVAILABLE_FOR_UPGRADE_BODY}
+    data-test-subj="noPrebuiltRulesAvailableForUpgrade"
   />
 );
 
@@ -78,12 +80,24 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
             NO_ITEMS_MESSAGE
           ) : (
             <>
-              <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap={true}>
-                <EuiFlexItem grow={true}>
-                  <UpgradePrebuiltRulesTableFilters />
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem grow={false}>
+                  <RulesChangelogLink />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <UpgradePrebuiltRulesTableButtons />
+                  <EuiFlexGroup
+                    alignItems="flexStart"
+                    gutterSize="s"
+                    responsive={false}
+                    wrap={true}
+                  >
+                    <EuiFlexItem grow={true}>
+                      <UpgradePrebuiltRulesTableFilters />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <UpgradePrebuiltRulesTableButtons />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
 

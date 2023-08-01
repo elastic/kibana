@@ -70,15 +70,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleNavigateToRules = async () => {
     const locator = locators.get<RulesParams>(rulesLocatorID);
 
-    if (slo?.id) {
-      locator?.navigate(
-        {
-          params: { sloId: slo.id },
-        },
-        {
-          replace: true,
-        }
-      );
+    if (slo?.id && locator) {
+      locator.navigate({ params: { sloId: slo.id } }, { replace: false });
     }
   };
 
@@ -250,7 +243,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         />
       </EuiPopover>
 
-      {!!slo && isRuleFlyoutVisible ? (
+      {slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}

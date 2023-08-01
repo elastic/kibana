@@ -55,22 +55,71 @@ const BRUSH_HANDLE_SIZE = 4;
 const BRUSH_HANDLE_ROUNDED_CORNER = 2;
 
 interface DualBrushProps {
+  /**
+   * Min and max numeric timestamps for the two brushes
+   */
   windowParameters: WindowParameters;
+  /**
+   * Min timestamp for x domain
+   */
   min: number;
+  /**
+   * Max timestamp for x domain
+   */
   max: number;
+  /**
+   * Callback function whenever the brush changes
+   */
   onChange?: (windowParameters: WindowParameters, windowPxParameters: WindowParameters) => void;
+  /**
+   * Margin left
+   */
   marginLeft: number;
+  /**
+   * Nearest timestamps to snap to the brushes to
+   */
   snapTimestamps?: number[];
+  /**
+   * Width
+   */
   width: number;
 }
 
+/**
+ * DualBrush React Component
+ * Dual brush component that overlays the document count chart
+ * @type {FC<DualBrushProps>}
+ * @param props - `DualBrushProps` component props
+ * @returns {React.ReactElement} The DualBrush component.
+ */
 export function DualBrush({
+  /**
+   * Min and max numeric timestamps for the two brushes
+   */
   windowParameters,
+  /**
+   * Min timestamp for x domain
+   */
   min,
+  /**
+   * Max timestamp for x domain
+   */
   max,
+  /**
+   * Callback function whenever the brush changes
+   */
   onChange,
+  /**
+   * Margin left
+   */
   marginLeft,
+  /**
+   * Nearest timestamps to snap to the brushes to
+   */
   snapTimestamps,
+  /**
+   * Width
+   */
   width,
 }: DualBrushProps) {
   const d3BrushContainer = useRef(null);

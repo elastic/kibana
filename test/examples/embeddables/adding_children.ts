@@ -41,8 +41,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     });
 
     it('Can add a child backed off a saved object', async () => {
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
+      await testSubjects.click('addPanelToListContainer');
       await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
       await toggleFilterPopover();
       await clickFilter('Todo');

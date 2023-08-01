@@ -8,6 +8,16 @@
 import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
+import { MAX_DOCS_PER_PAGE } from '../constants';
+import type { PartialPaginationType } from './types';
+import { PaginationSchemaRt } from './types';
+
+export interface LimitedSchemaType {
+  fieldName: string;
+  min: number;
+  max: number;
+}
+
 export const NonEmptyString = new rt.Type<string, string, unknown>(
   'NonEmptyString',
   rt.string.is,
@@ -22,7 +32,7 @@ export const NonEmptyString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
-export const limitedStringSchema = (fieldName: string, min: number, max: number) =>
+export const limitedStringSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
   new rt.Type<string, string, unknown>(
     'LimitedString',
     rt.string.is,
@@ -55,12 +65,12 @@ export const limitedStringSchema = (fieldName: string, min: number, max: number)
     rt.identity
   );
 
-export const limitedArraySchema = <T extends rt.Mixed>(
-  codec: T,
-  min: number,
-  max: number,
-  fieldName: string
-) =>
+export const limitedArraySchema = <T extends rt.Mixed>({
+  codec,
+  fieldName,
+  min,
+  max,
+}: { codec: T } & LimitedSchemaType) =>
   new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
     'LimitedArray',
     (input): input is T[] => rt.array(codec).is(input),
@@ -80,6 +90,63 @@ export const limitedArraySchema = <T extends rt.Mixed>(
             context,
             `The length of the field ${fieldName} is too long. Array must be of length <= ${max}.`
           );
+        }
+
+        return rt.success(s);
+      }),
+    rt.identity
+  );
+
+export const paginationSchema = ({ maxPerPage }: { maxPerPage: number }) =>
+  new rt.PartialType<undefined, PartialPaginationType, PartialPaginationType, unknown>(
+    'Pagination',
+    PaginationSchemaRt.is,
+    (u, c) =>
+      either.chain(PaginationSchemaRt.validate(u, c), (params) => {
+        if (params.page == null && params.perPage == null) {
+          return rt.success(params);
+        }
+
+        const pageAsNumber = params.page ?? 0;
+        const perPageAsNumber = params.perPage ?? 0;
+
+        if (perPageAsNumber > maxPerPage) {
+          return rt.failure(
+            u,
+            c,
+            `The provided perPage value is too high. The maximum allowed perPage value is ${maxPerPage}.`
+          );
+        }
+
+        if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
+          return rt.failure(
+            u,
+            c,
+            `The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
+          );
+        }
+
+        return rt.success({
+          ...(params.page != null && { page: pageAsNumber }),
+          ...(params.perPage != null && { perPage: perPageAsNumber }),
+        });
+      }),
+    rt.identity,
+    undefined
+  );
+
+export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
+  new rt.Type<number, number, unknown>(
+    'LimitedNumber',
+    rt.number.is,
+    (input, context) =>
+      either.chain(rt.number.validate(input, context), (s) => {
+        if (s < min) {
+          return rt.failure(input, context, `The ${fieldName} field cannot be less than ${min}.`);
+        }
+
+        if (s > max) {
+          return rt.failure(input, context, `The ${fieldName} field cannot be more than ${max}.`);
         }
 
         return rt.success(s);

@@ -8,8 +8,8 @@ import React, { useState, useRef, useCallback, useLayoutEffect } from 'react';
 import { EuiPopover, EuiIcon, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { TooltipContent } from '../../../../../components/lens/metric_explanation/tooltip_content';
 import { useBoolean } from '../../../../../hooks/use_boolean';
-import { TooltipContent } from '../metric_explanation/tooltip_content';
 
 interface Props {
   label: string;

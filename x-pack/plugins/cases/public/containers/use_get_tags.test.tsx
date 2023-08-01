@@ -20,7 +20,6 @@ describe('useGetTags', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('calls getTags api', async () => {

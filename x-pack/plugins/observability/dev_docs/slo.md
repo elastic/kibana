@@ -337,17 +337,17 @@ curl --request POST \
             "field": "processor.processed"
           }
         ],
-        equation: 'A'
+        "equation": "A"
       },
 			"total": {
         "metrics": [
           {
             "name": "A",
             "aggregation": "sum",
-            "processor.accepted"
+            "field": "processor.accepted"
           }
         ],
-        equation: 'A'
+        "equation": "A"
       },
 			"filter": "",
 			"timestampField": "@timestamp"

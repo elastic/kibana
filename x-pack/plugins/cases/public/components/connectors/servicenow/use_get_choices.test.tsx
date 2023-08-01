@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import type { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetChoices } from './use_get_choices';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';

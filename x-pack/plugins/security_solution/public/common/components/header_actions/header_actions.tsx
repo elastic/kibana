@@ -33,7 +33,7 @@ const SortingColumnsContainer = styled.div`
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 
-  .euiPopover .euiButtonEmpty .euiButtonContent {
+  .euiPopover .euiButtonEmpty {
     padding: 0;
 
     .euiButtonEmpty__text {

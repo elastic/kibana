@@ -16,10 +16,9 @@ const stories: Meta<MetadataProps> = {
   decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: Metadata,
   args: {
-    currentTimeRange: {
-      from: 1679316685686,
-      to: 1679585836087,
-      interval: '1m',
+    dateRange: {
+      from: '2023-04-09T11:07:49Z',
+      to: '2023-04-09T11:23:49Z',
     },
     nodeType: 'host',
     nodeName: 'host-1',

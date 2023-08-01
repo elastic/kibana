@@ -35,7 +35,7 @@ interface CreateActionEventLogRecordParams {
     relation?: string;
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
-  isPreconfigured?: boolean;
+  isInMemory?: boolean;
   source?: ActionExecutionSource<unknown>;
 }
 
@@ -51,7 +51,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     relatedSavedObjects,
     name,
     actionExecutionId,
-    isPreconfigured,
+    isInMemory,
     actionId,
     source,
   } = params;
@@ -80,8 +80,8 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        // set space_agnostic to true for preconfigured connectors
-        ...(so.type === 'action' && isPreconfigured ? { space_agnostic: isPreconfigured } : {}),
+        // set space_agnostic to true for in-memory connectors
+        ...(so.type === 'action' && isInMemory ? { space_agnostic: isInMemory } : {}),
         ...(namespace ? { namespace } : {}),
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),

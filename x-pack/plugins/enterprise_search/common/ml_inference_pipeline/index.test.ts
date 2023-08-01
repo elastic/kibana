@@ -65,34 +65,34 @@ describe('getMlModelTypesForModelConfig lib function', () => {
 });
 
 describe('getRemoveProcessorForInferenceType lib function', () => {
-  const destinationField = 'dest';
+  const targetField = 'ml.inference.target';
 
   it('should return expected value for TEXT_CLASSIFICATION', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
 
     const expected: IngestRemoveProcessor = {
-      field: destinationField,
+      field: targetField,
       ignore_missing: true,
     };
 
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+    expect(getRemoveProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
   });
 
   it('should return expected value for TEXT_EMBEDDING', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
 
     const expected: IngestRemoveProcessor = {
-      field: destinationField,
+      field: targetField,
       ignore_missing: true,
     };
 
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+    expect(getRemoveProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
   });
 
   it('should return undefined for unknown inferenceType', () => {
     const inferenceType = 'wrongInferenceType';
 
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toBeUndefined();
+    expect(getRemoveProcessorForInferenceType(targetField, inferenceType)).toBeUndefined();
   });
 });
 
@@ -377,16 +377,61 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toEqual({
-      destination_field: 'test',
       model_id: 'test-model',
       pipeline_name: 'unit-test',
-      source_field: 'body',
+      pipeline_definition: {},
+      field_mappings: [
+        {
+          sourceField: 'body',
+          targetField: 'ml.inference.test',
+        },
+      ],
     });
   });
-  it('return null if pipeline missing inference processor', () => {
+  it('returns pipeline parameters from ingest pipeline with multiple inference processors', () => {
+    expect(
+      parseMlInferenceParametersFromPipeline('unit-test', {
+        processors: [
+          {
+            inference: {
+              field_map: {
+                body: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.body',
+            },
+          },
+          {
+            inference: {
+              field_map: {
+                title: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.title',
+            },
+          },
+        ],
+      })
+    ).toEqual({
+      model_id: 'test-model',
+      pipeline_name: 'unit-test',
+      pipeline_definition: {},
+      field_mappings: [
+        {
+          sourceField: 'body',
+          targetField: 'ml.inference.body',
+        },
+        {
+          sourceField: 'title',
+          targetField: 'ml.inference.title',
+        },
+      ],
+    });
+  });
+  it('return null if pipeline is missing inference processor', () => {
     expect(parseMlInferenceParametersFromPipeline('unit-test', { processors: [] })).toBeNull();
   });
-  it('return null if pipeline missing field_map', () => {
+  it('return null if pipeline is missing field_map', () => {
     expect(
       parseMlInferenceParametersFromPipeline('unit-test', {
         processors: [

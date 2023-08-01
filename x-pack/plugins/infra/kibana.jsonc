@@ -20,7 +20,9 @@
       "features",
       "fieldFormats",
       "lens",
+      "logsShared",
       "observability",
+      "observabilityAIAssistant",
       "observabilityShared",
       "ruleRegistry",
       "security",
@@ -35,6 +37,7 @@
     "requiredBundles": [
       "unifiedSearch",
       "observability",
+      "observabilityAIAssistant",
       "licenseManagement",
       "kibanaUtils",
       "kibanaReact",

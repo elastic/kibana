@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withTheme } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
 import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
-import { LayoutContent } from '../layout_content';
 import { MetadataDetails } from '../metadata_details';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
@@ -28,7 +28,7 @@ export const AwsEC2Layout = withTheme(
           'cloud.project.id',
         ]}
       />
-      <LayoutContent>
+      <EuiPanel>
         <Section
           navLabel="AWS EC2"
           sectionLabel={i18n.translate(
@@ -129,7 +129,7 @@ export const AwsEC2Layout = withTheme(
             />
           </SubSection>
         </Section>
-      </LayoutContent>
+      </EuiPanel>
     </React.Fragment>
   )
 );

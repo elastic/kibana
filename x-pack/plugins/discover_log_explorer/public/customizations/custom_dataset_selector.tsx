@@ -6,27 +6,21 @@
  */
 
 import React from 'react';
-import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { IndexPattern } from '@kbn/io-ts-utils';
-import { Dataset } from '../../common/datasets/models/dataset';
-import { DatasetSelectionHandler, DatasetSelector } from '../components/dataset_selector';
+import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
-import { InternalStateProvider, useDataView } from '../hooks/use_data_view';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
+import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { useLogExplorerProfile } from '../hooks/use_log_explorer_profile';
 
 interface CustomDatasetSelectorProps {
-  stateContainer: DiscoverStateContainer;
+  logExplorerProfileStateService: LogExplorerProfileStateService;
 }
 
-export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
-  // Container component, here goes all the state management and custom logic usage to keep the DatasetSelector presentational.
-  const dataView = useDataView();
-
-  const initialSelected: Dataset = Dataset.create({
-    name: dataView.getIndexPattern() as IndexPattern,
-    title: dataView.getName(),
-  });
+export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateService }) => {
+  const { datasetSelection, handleDatasetSelectionChange } = useLogExplorerProfile(
+    logExplorerProfileStateService
+  );
 
   const {
     error: integrationsError,
@@ -50,19 +44,11 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
     sortDatasets,
   } = useDatasetsContext();
 
-  /**
-   * TODO: this action will be abstracted into a method of a class adapter in a follow-up PR
-   * since we'll need to handle more actions from the stateContainer
-   */
-  const handleStreamSelection: DatasetSelectionHandler = (dataset) => {
-    return stateContainer.actions.onCreateDefaultAdHocDataView(dataset.toDataviewSpec());
-  };
-
   return (
     <DatasetSelector
       datasets={datasets}
+      datasetSelection={datasetSelection}
       datasetsError={datasetsError}
-      initialSelected={initialSelected}
       integrations={integrations}
       integrationsError={integrationsError}
       isLoadingIntegrations={isLoadingIntegrations}
@@ -73,7 +59,7 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
       onIntegrationsSort={sortIntegrations}
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
-      onDatasetSelected={handleStreamSelection}
+      onSelectionChange={handleDatasetSelectionChange}
       onStreamsEntryClick={loadDatasets}
       onUnmanagedStreamsReload={reloadDatasets}
       onUnmanagedStreamsSearch={searchDatasets}
@@ -91,17 +77,15 @@ export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
-    stateContainer,
+    logExplorerProfileStateService,
     datasetsClient,
   }: CustomDatasetSelectorBuilderProps) {
     return (
-      <InternalStateProvider value={stateContainer.internalState}>
-        <IntegrationsProvider datasetsClient={datasetsClient}>
-          <DatasetsProvider datasetsClient={datasetsClient}>
-            <Component stateContainer={stateContainer} />
-          </DatasetsProvider>
-        </IntegrationsProvider>
-      </InternalStateProvider>
+      <IntegrationsProvider datasetsClient={datasetsClient}>
+        <DatasetsProvider datasetsClient={datasetsClient}>
+          <Component logExplorerProfileStateService={logExplorerProfileStateService} />
+        </DatasetsProvider>
+      </IntegrationsProvider>
     );
   };
 }

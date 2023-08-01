@@ -15,52 +15,41 @@ export default {
   title: 'Flyout/InsightsSummaryRow',
 };
 
-export const Default: Story<void> = () => (
+const wrapper = (children: React.ReactNode) => (
   <div
     css={css`
       width: 500px;
     `}
   >
+    {children}
+  </div>
+);
+
+export const Default: Story<void> = () =>
+  wrapper(
     <InsightsSummaryRow
       icon={'image'}
       value={1}
       text={'this is a test for red'}
       color={'rgb(189,39,30)'}
     />
-  </div>
-);
+  );
 
-export const InvalidColor: Story<void> = () => (
-  <div
-    css={css`
-      width: 500px;
-    `}
-  >
+export const InvalidColor: Story<void> = () =>
+  wrapper(
     <InsightsSummaryRow
       icon={'warning'}
       value={2}
       text={'this is a test for an invalid color (abc)'}
       color={'abc'}
     />
-  </div>
-);
+  );
 
-export const NoColor: Story<void> = () => (
-  <div
-    css={css`
-      width: 500px;
-    `}
-  >
-    <InsightsSummaryRow icon={'image'} value={3} text={'this is a test for an no color'} />
-  </div>
-);
+export const NoColor: Story<void> = () =>
+  wrapper(<InsightsSummaryRow icon={'image'} value={3} text={'this is a test for an no color'} />);
 
-export const LongText: Story<void> = () => (
-  <div
-    css={css`
-      width: 500px;
-    `}
-  >
+export const LongText: Story<void> = () =>
+  wrapper(
     <InsightsSummaryRow
       icon={'image'}
       value={10}
@@ -69,40 +58,20 @@ export const LongText: Story<void> = () => (
       }
       color={'rgb(255,126,98)'}
     />
-  </div>
-);
+  );
 
-export const LongNumber: Story<void> = () => (
-  <div
-    css={css`
-      width: 500px;
-    `}
-  >
+export const LongNumber: Story<void> = () =>
+  wrapper(
     <InsightsSummaryRow
       icon={'image'}
       value={160000}
       text={'160000 value shown as compact notation'}
       color={'rgb(241,216,11)'}
     />
-  </div>
-);
+  );
 
-export const Loading: Story<void> = () => (
-  <div
-    css={css`
-      width: 500px;
-    `}
-  >
-    <InsightsSummaryRow loading={true} icon={''} value={0} text={''} />
-  </div>
-);
+export const Loading: Story<void> = () =>
+  wrapper(<InsightsSummaryRow loading={true} icon={''} value={0} text={''} />);
 
-export const Error: Story<void> = () => (
-  <div
-    css={css`
-      width: 500px;
-    `}
-  >
-    <InsightsSummaryRow error={true} icon={''} value={0} text={''} />
-  </div>
-);
+export const Error: Story<void> = () =>
+  wrapper(<InsightsSummaryRow error={true} icon={''} value={0} text={''} />);
