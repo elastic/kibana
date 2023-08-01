@@ -192,9 +192,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dataViews,
   };
 
+  const initialRenderTime = useRef<number>(performance.now());
+
   const onRender$ = useCallback(() => {
-    const startTime = window.performance.now();
     if (renderDeps.current) {
+      console.log('onRender$', performance.now() - initialRenderTime.current);
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
           if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
@@ -225,8 +227,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
       trackUiCounterEvents(events);
     }
-    const duration = window.performance.now() - startTime;
-    window.console.log(`onRender$: ${duration}`);
   }, []);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
@@ -236,6 +236,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       const startTime = window.performance.now();
       if (renderDeps.current) {
+        console.log('onData$', performance.now() - initialRenderTime.current);
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
@@ -277,7 +278,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
       }
       const duration = window.performance.now() - startTime;
-      window.console.log(`onData$: ${duration}`);
     },
     [addUserMessages, dispatchLens, plugins.data.search]
   );
@@ -693,6 +693,12 @@ export const VisualizationWrapper = ({
   // Used for reporting
   const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
     useReportingState(errors);
+
+  const onRenderHandler = useCallback(() => {
+    setIsRenderComplete(true);
+    onRender$();
+  }, [setIsRenderComplete, onRender$]);
+
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -788,10 +794,7 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
-        onRender$={() => {
-          setIsRenderComplete(true);
-          onRender$();
-        }}
+        onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
         renderMode="edit"
