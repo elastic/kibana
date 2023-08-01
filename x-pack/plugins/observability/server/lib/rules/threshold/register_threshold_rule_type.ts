@@ -104,7 +104,11 @@ export function thresholdRuleType(
         schema.object({
           name: schema.string(),
           aggType: schema.literal('count'),
-          filter: schema.maybe(schema.string()),
+          filter: schema.maybe(
+            schema.string({
+              validate: validateKQLStringFilter,
+            })
+          ),
           field: schema.never(),
         }),
       ])
