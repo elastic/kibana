@@ -50,9 +50,7 @@ Object {
     "timeout": "PT4M",
   },
   "roles": Object {
-    "allow": Array [
-      "reporting_user",
-    ],
+    "allow": Array [],
     "enabled": true,
   },
 }
@@ -107,9 +105,7 @@ Object {
     "timeout": "PT4M",
   },
   "roles": Object {
-    "allow": Array [
-      "reporting_user",
-    ],
+    "allow": Array [],
     "enabled": true,
   },
 }

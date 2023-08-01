@@ -84,7 +84,12 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.boolean({ defaultValue: true })
+  ), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
   allow: schema.conditional(
     schema.contextRef('serverless'),
     true,
