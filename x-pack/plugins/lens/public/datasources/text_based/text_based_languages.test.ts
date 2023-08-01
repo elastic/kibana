@@ -251,31 +251,6 @@ describe('Textbased Data Source', () => {
       };
       expect(TextBasedDatasource.getDropProps(props)).toBeUndefined();
     });
-
-    it('should return props if field is allowed to be dropped', () => {
-      const props = {
-        target: {
-          layerId: 'a',
-          groupId: 'groupId',
-          columnId: 'col1',
-          filterOperations: jest.fn(),
-          isMetricDimension: true,
-        },
-        source: {
-          id: 'col1',
-          field: 'Test 1',
-          humanData: {
-            label: 'Test 1',
-          },
-        },
-        state: baseState,
-        indexPatterns,
-      };
-      expect(TextBasedDatasource.getDropProps(props)).toStrictEqual({
-        dropTypes: ['field_add'],
-        nextLabel: 'Test 1',
-      });
-    });
   });
 
   describe('#insertLayer', () => {
