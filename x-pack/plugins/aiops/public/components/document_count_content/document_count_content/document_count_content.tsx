@@ -8,14 +8,18 @@
 import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
+import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
 
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
-
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DocumentCountStats } from '../../../get_document_stats';
 
-import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
@@ -32,6 +36,13 @@ export interface DocumentCountContentProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  windowParameters?: WindowParameters;
+  incomingInitialAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
+  barStyleAccessor?: BarStyleAccessor;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -46,7 +57,12 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   initialAnalysisStart,
   barColorOverride,
   barHighlightColorOverride,
+  windowParameters,
+  incomingInitialAnalysisStart,
+  ...docCountChartProps
 }) => {
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
     (time) => +time
@@ -88,7 +104,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
           <DocumentCountChart
-            analysisType={analysisType}
+            dependencies={{ data, uiSettings, fieldFormats, charts }}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
             chartPointsSplit={chartPointsSplit}
@@ -100,6 +116,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             autoAnalysisStart={initialAnalysisStart}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            {...docCountChartProps}
           />
         </EuiFlexItem>
       )}
