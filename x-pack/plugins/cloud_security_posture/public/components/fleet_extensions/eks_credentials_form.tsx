@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFieldText,
   EuiFieldPassword,
@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
@@ -238,22 +239,75 @@ export const EksCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
-  const onCredentialTypeChange = useCallback(
-    (optionId: string) => {
-      // clear out credentials when switching methods to avoid persisting unused values.
-      clearInputVarsFields(input, group.fields);
 
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
-          'aws.credentials.type': { value: optionId },
-        })
-      );
+  // to avoid sending up credential fields unrelated to the new selection
+  // we confirm with the user that we will clear these fields if they switch methods (edit mode only)
+  const [confirmTypeChange, setConfirmTypeChange] = useState<string | false>(false);
+  const onCredentialTypeChange = useCallback(
+    (optionId: string, confirmed?: boolean) => {
+      const fieldsHaveValues = !!fields.find((field) => field.value);
+      if (fieldsHaveValues && !confirmed) {
+        setConfirmTypeChange(optionId); // stored, so the confirm modal can call this function if the user hits OK
+      } else {
+        // clear out credentials when switching methods to avoid persisting unused values.
+        clearInputVarsFields(input, group.fields);
+
+        updatePolicy(
+          getPosturePolicy(newPolicy, input.type, {
+            'aws.credentials.type': { value: optionId },
+          })
+        );
+      }
     },
-    [group.fields, input, newPolicy, updatePolicy]
+    [fields, group.fields, input, newPolicy, updatePolicy]
   );
+
+  const onCancelTypeChange = useCallback(() => {
+    setConfirmTypeChange(false);
+  }, []);
+
+  const onConfirmTypeChange = useCallback(() => {
+    if (confirmTypeChange) {
+      onCredentialTypeChange(confirmTypeChange, true);
+      setConfirmTypeChange(false);
+    }
+  }, [confirmTypeChange, onCredentialTypeChange]);
 
   return (
     <>
+      {confirmTypeChange && (
+        <EuiConfirmModal
+          style={{ width: 600 }}
+          title={
+            <FormattedMessage
+              id="xpack.csp.eksIntegration.confirmCredTypeChangeTitle"
+              defaultMessage="Clear credentials?"
+            />
+          }
+          onCancel={onCancelTypeChange}
+          onConfirm={onConfirmTypeChange}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.csp.eksIntegration.confirmCredTypeChangeBtnCancel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.csp.eksIntegration.confirmCredTypeChangeBtnConfirm"
+              defaultMessage="Continue"
+            />
+          }
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.csp.eksIntegration.confirmCredTypeChangeMessage"
+              defaultMessage="Switching AWS credential methods will clear the current credentials."
+            />
+          </p>
+        </EuiConfirmModal>
+      )}
       <AWSSetupInfoContent />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector type={awsCredentialsType} onChange={onCredentialTypeChange} />
