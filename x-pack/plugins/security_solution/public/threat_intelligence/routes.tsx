@@ -6,7 +6,6 @@
  */
 
 import React, { memo } from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
 import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
@@ -31,6 +30,7 @@ import { useGlobalTime } from '../common/containers/use_global_time';
 import { deleteOneQuery, setQuery } from '../common/store/inputs/actions';
 import { InputsModelId } from '../common/store/inputs/constants';
 import { ArtifactFlyout } from '../management/components/artifact_list_page/components/artifact_flyout';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence, http } = useKibana().services;
@@ -85,10 +85,10 @@ const ThreatIntelligence = memo(() => {
   };
 
   return (
-    <TrackApplicationView viewId="threat_intelligence">
+    <SecurityRoutePageWrapper pageName={SecurityPageName.threatIntelligence}>
       <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
-      <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
-    </TrackApplicationView>
+      <SpyRoute pageName={SecurityPageName.threatIntelligence} />
+    </SecurityRoutePageWrapper>
   );
 });
 
