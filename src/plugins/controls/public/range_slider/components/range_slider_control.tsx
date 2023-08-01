@@ -83,9 +83,14 @@ export const RangeSliderControl: FC = () => {
     ];
   }, [min, max, fieldFormatter]);
 
-  const canOpenPopover = useMemo(
+  const disablePopover = useMemo(
     () =>
-      isLoading || min === undefined || max === undefined || min === -Infinity || max === Infinity,
+      isLoading ||
+      min === undefined ||
+      max === undefined ||
+      min === -Infinity ||
+      max === Infinity ||
+      min === max,
     [isLoading, min, max]
   );
 
@@ -123,7 +128,7 @@ export const RangeSliderControl: FC = () => {
         showTicks
         ticks={ticks}
         isLoading={isLoading}
-        readOnly={canOpenPopover}
+        readOnly={disablePopover}
         showInput={'inputWithPopover'}
         data-test-subj="rangeSlider__slider"
         value={[displayedValue[0] || (min ?? -Infinity), displayedValue[1] || (max ?? Infinity)]}

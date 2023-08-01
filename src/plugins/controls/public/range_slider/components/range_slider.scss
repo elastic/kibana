@@ -26,7 +26,7 @@
     background-image: none; // hide the red bottom border
   }
 
-  &:placeholder-shown {
+  &:placeholder-shown, &::placeholder {
     font-weight: $euiFontWeightRegular;
     color: $euiTextSubduedColor;
     text-decoration: none;
