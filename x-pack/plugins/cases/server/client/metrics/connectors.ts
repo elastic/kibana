@@ -6,6 +6,7 @@
  */
 
 import type { SingleCaseMetricsResponse } from '../../../common/api';
+import { CaseMetricsFeature } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';
@@ -13,7 +14,7 @@ import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
 export class Connectors extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
-    super(options, ['connectors']);
+    super(options, [CaseMetricsFeature.CONNECTORS]);
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
