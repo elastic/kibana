@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
-
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
+import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/server/export_types/png/types';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
-import { JobParamsPNGV2 } from '@kbn/reporting-plugin/common/types';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
+import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -135,7 +134,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
     return await supertestWithoutAuth
-      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
+      .post(INTERNAL_ROUTES.DOWNLOAD_CSV)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send(job);
@@ -148,7 +147,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
+  const generatePng = async (username: string, password: string, job: JobParamsPNGDeprecated) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
@@ -198,7 +197,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const {
       body: [job],
     } = await supertestWithoutAuth
-      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
+      .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send()
