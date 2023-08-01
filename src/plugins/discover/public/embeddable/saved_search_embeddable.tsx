@@ -123,8 +123,7 @@ export class SavedSearchEmbeddable
   private prevSort?: SortOrder[];
   private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
-  private isInitialized?: boolean;
-  private isDestroyed?: boolean;
+  private initialized?: boolean;
   private node?: HTMLElement;
 
   constructor(
@@ -165,7 +164,7 @@ export class SavedSearchEmbeddable
     try {
       const unwrapResult = await this.attributeService.unwrapAttributes(input);
 
-      if (this.isDestroyed) {
+      if (this.destroyed) {
         return;
       }
 
@@ -181,7 +180,7 @@ export class SavedSearchEmbeddable
       // deferred loading of this embeddable is complete
       this.setInitializationFinished();
 
-      this.isInitialized = true;
+      this.initialized = true;
     } catch (e) {
       this.onFatalError(e);
     }
@@ -595,7 +594,7 @@ export class SavedSearchEmbeddable
   public async render(domNode: HTMLElement) {
     this.node = domNode;
 
-    if (!this.searchProps || !this.isInitialized || this.isDestroyed) {
+    if (!this.searchProps || !this.initialized || this.destroyed) {
       return;
     }
 
@@ -701,7 +700,7 @@ export class SavedSearchEmbeddable
   }
 
   public reload(forceFetch = true) {
-    if (this.searchProps && this.isInitialized && !this.isDestroyed) {
+    if (this.searchProps && this.initialized && !this.destroyed) {
       this.load(this.searchProps, forceFetch);
     }
   }
@@ -735,8 +734,6 @@ export class SavedSearchEmbeddable
   }
 
   public destroy() {
-    this.isDestroyed = true;
-
     super.destroy();
 
     if (this.searchProps) {
