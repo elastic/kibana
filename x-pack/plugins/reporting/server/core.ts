@@ -110,7 +110,6 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private exportTypes: ExportType[] = [];
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -126,8 +125,7 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.exportTypes = this.validateExportTypesWithConfig();
-    this.exportTypes.forEach((et) => {
+    this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
@@ -155,7 +153,7 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.exportTypes.forEach((et) => {
+    this.exportTypesRegistry.getAll().forEach((et) => {
       et.setup(setupDeps);
     });
 
@@ -173,7 +171,7 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    this.exportTypes.forEach((et) => {
+    this.exportTypesRegistry.getAll().forEach((et) => {
       et.start({ ...startDeps, reporting: this.getContract() });
     });
 
@@ -228,24 +226,25 @@ export class ReportingCore {
    * Validate export types with config settings
    * only CSV export types should be registered in the export types registry for serverless
    */
-  private validateExportTypesWithConfig(): ExportType[] {
+  private getExportTypes(): ExportType[] {
+    const exportTypes = [];
     if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
-      this.exportTypes.push(
+      exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
-      this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
     } else {
-      this.exportTypes.push(
+      exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
-      this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-      this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
-      this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
       // deprecated export types for tests
-      this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-      this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
     }
-    return this.exportTypes;
+    return exportTypes;
   }
 
   /**
