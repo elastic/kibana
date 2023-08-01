@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
@@ -13,7 +13,7 @@ import { SummaryClient } from './summary_client';
 export class GetSLO {
   constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
-  public async execute(sloId: string): Promise<GetSLOResponse> {
+  public async execute(sloId: string, params: GetSLOParams = {}): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
     const summaryBySlo = await this.summaryClient.fetchSummary([slo]);
 

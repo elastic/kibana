@@ -162,7 +162,7 @@ const getSLORoute = createObservabilityServerRoute({
     const summaryClient = new DefaultSummaryClient(esClient);
     const getSLO = new GetSLO(repository, summaryClient);
 
-    const response = await getSLO.execute(params.path.id);
+    const response = await getSLO.execute(params.path.id, params.query);
 
     return response;
   },

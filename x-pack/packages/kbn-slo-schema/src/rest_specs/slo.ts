@@ -67,12 +67,6 @@ const deleteSLOParamsSchema = t.type({
   }),
 });
 
-const getSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-});
-
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.union([
   t.literal('error_budget_consumed'),
@@ -116,6 +110,20 @@ const sloResponseSchema = t.intersection([
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
   t.type({ summary: summarySchema }),
+]);
+
+const getSLOQuerySchema = t.partial({
+  query: t.partial({
+    instanceId: allOrAnyString,
+  }),
+});
+const getSLOParamsSchema = t.intersection([
+  t.type({
+    path: t.type({
+      id: sloIdSchema,
+    }),
+  }),
+  getSLOQuerySchema,
 ]);
 
 const getSLOResponseSchema = sloWithSummaryResponseSchema;
@@ -191,6 +199,7 @@ type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Ra
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
+type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
@@ -249,6 +258,7 @@ export type {
   FindSLOResponse,
   GetPreviewDataParams,
   GetPreviewDataResponse,
+  GetSLOParams,
   GetSLOResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
