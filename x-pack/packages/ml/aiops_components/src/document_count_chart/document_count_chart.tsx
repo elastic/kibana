@@ -20,6 +20,10 @@ import {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -27,16 +31,11 @@ import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-util
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
-import {
-  BarStyleAccessor,
-  RectAnnotationSpec,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { BrushBadge } from './brush_badge';
 import { DualBrush, DualBrushAnnotation } from '../..';
+import { BrushBadge } from './brush_badge';
 
 declare global {
   interface Window {
