@@ -10,7 +10,6 @@ import { ReportingConfigType } from '../schema';
 import { TaskPayloadPNG, TaskPayloadPDF, ReportingServerInfo } from '../types';
 import { getFullUrls } from './get_full_urls';
 
-
 const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
 const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
 const mockServerInfo: ReportingServerInfo = {
