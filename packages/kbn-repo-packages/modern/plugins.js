@@ -107,7 +107,15 @@ function getPluginPackagesFilter(selector = {}) {
  */
 function getDistributablePacakgesFilter() {
   return (pkg) => {
-    if (pkg.isDevOnly()) {
+    // if (pkg.isDevOnly()) {
+    //   return false;
+    // }
+
+    if (
+      pkg.isDevOnly ||
+      pkg.manifest.type === 'functional-tests' ||
+      pkg.manifest.type === 'test-helper'
+    ) {
       return false;
     }
 
