@@ -68,7 +68,7 @@ export const getCloudSecurityUsageRecord = async ({
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
       : new Date().toISOString();
 
-    const usageRecords = {
+    const usageRecord = {
       id: `${CLOUD_SECURITY_TASK_TYPE}:${postureType}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toISOString(),
@@ -86,7 +86,7 @@ export const getCloudSecurityUsageRecord = async ({
 
     logger.debug(`Fetched ${postureType} metring data`);
 
-    return usageRecords;
+    return usageRecord;
   } catch (err) {
     logger.error(`Failed to fetch ${postureType} metering data ${err}`);
   }
