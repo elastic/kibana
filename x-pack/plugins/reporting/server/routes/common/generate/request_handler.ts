@@ -206,7 +206,7 @@ export class RequestHandler {
       return this.res.ok({
         headers: { 'content-type': 'application/json' },
         body: {
-          path: `${publicDownloadPath}/${report._id}`,
+          path: `${publicDownloadPath}/${report._id}`, // IMPORTANT: needed for Watcher and automating report downloads
           job: report.toApiJSON(),
         },
       });
