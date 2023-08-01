@@ -234,6 +234,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: false,
             testSubj: 'mlMainTab indexDataVisualizer',
           },
+          {
+            id: 'data_comparison',
+            pathId: ML_PAGES.DATA_COMPARISON_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
+              defaultMessage: 'Data Comparison',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataComparison',
+          },
         ],
       },
     ];
