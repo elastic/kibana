@@ -64,7 +64,7 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 2,
       total: 2,
-      duration: { counts: [2], values: [10] },
+      duration: { counts: [2], values: [100] },
     });
   });
 
@@ -89,7 +89,7 @@ describe('TaskClaimMetricsAggregator', () => {
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 4,
       total: 7,
-      duration: { counts: [4], values: [10] },
+      duration: { counts: [4], values: [100] },
     });
 
     taskClaimMetricsAggregator.reset();

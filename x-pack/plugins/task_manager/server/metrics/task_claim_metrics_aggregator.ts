@@ -15,7 +15,8 @@ import { SuccessRate, SuccessRateCounter } from './success_rate_counter';
 import { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MIN = 1; // 1 millis
-const HDR_HISTOGRAM_MAX = 300000; // 5 min
+const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
+const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
 
 export type TaskClaimMetric = SuccessRate & {
   duration: {
@@ -59,7 +60,8 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
   private serializeHistogram() {
     const counts: number[] = [];
     const values: number[] = [];
-    for (const { count, value } of this.durationHistogram.recordedcounts()) {
+
+    for (const { count, value } of this.durationHistogram.linearcounts(HDR_HISTOGRAM_BUCKET_SIZE)) {
       counts.push(count);
       values.push(value);
     }
