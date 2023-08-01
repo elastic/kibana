@@ -11,11 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import {
-  createGetSummarizedAlertsFn,
-  createLifecycleExecutor,
-  IRuleDataClient,
-} from '@kbn/rule-registry-plugin/server';
+import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
@@ -112,11 +108,6 @@ export function thresholdRuleType(
     equation: schema.maybe(schema.string()),
     label: schema.maybe(schema.string()),
   });
-  const getSummarizedAlerts = createGetSummarizedAlertsFn({
-    ruleDataClient,
-    useNamespace: false,
-    isLifecycleAlert: false,
-  });
 
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -184,7 +175,6 @@ export function thresholdRuleType(
       },
     },
     producer: observabilityFeatureId,
-    getSummarizedAlerts: getSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
   };
 }
