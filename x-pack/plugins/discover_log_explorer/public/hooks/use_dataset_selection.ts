@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { DatasetSelectionChange } from '../utils/dataset_selection';
 
-export const useLogExplorerProfile = (
+export const useDatasetSelection = (
   logExplorerProfileStateService: LogExplorerProfileStateService
 ) => {
   const datasetSelection = useSelector(

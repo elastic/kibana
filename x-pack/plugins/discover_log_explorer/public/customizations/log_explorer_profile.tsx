@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { dynamic } from '../utils/dynamic';
+import { LogExplorerProfileStates } from '../state_machines/log_explorer_profile';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
@@ -43,10 +44,11 @@ export const createLogExplorerProfileCustomizations =
      * Wait for the machine to be fully initialized to set the restored selection
      * create the DataView and set it in the stateContainer from Discover
      */
-    await waitForState(logExplorerProfileStateService, 'initialized');
+    await waitForState(logExplorerProfileStateService, LogExplorerProfileStates.Initialized);
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
+     * Prepend the search bar with custom filter control groups depending on the selected dataset
      */
     customizations.set({
       id: 'search_bar',
@@ -57,7 +59,10 @@ export const createLogExplorerProfileCustomizations =
         />
       ),
       PrependFilterBar: () => (
-        <LazyCustomDatasetFilters stateContainer={stateContainer} data={data} />
+        <LazyCustomDatasetFilters
+          logExplorerProfileStateService={logExplorerProfileStateService}
+          data={data}
+        />
       ),
     });
 

@@ -4,95 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { ControlGroupInput } from '@kbn/controls-plugin/common';
+import React from 'react';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { useQuerySubscriber } from '@kbn/unified-field-list';
-import {
-  ControlPanels,
-  CONTROL_PANELS_URL_KEY,
-  useControlPanelsUrlState,
-} from '../hooks/use_control_panels_url_state';
+import { useControlPanels } from '../hooks/use_control_panels';
+import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 
 interface CustomDatasetFiltersProps {
-  stateContainer: DiscoverStateContainer;
+  logExplorerProfileStateService: LogExplorerProfileStateService;
   data: DataPublicPluginStart;
 }
 
-const CustomDatasetFilters = ({ stateContainer, data }: CustomDatasetFiltersProps) => {
-  const { query, filters, fromDate, toDate } = useQuerySubscriber({ data });
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
-  const stateStorage = useMemo(() => stateContainer.stateStorage, [stateContainer.stateStorage]);
-
-  const dataView = useObservable(
-    stateContainer.internalState.state$,
-    stateContainer.internalState.getState()
-  ).dataView;
-
-  const [controlPanels, setControlPanels] = useControlPanelsUrlState(dataView, stateStorage);
-
-  const getInitialInput = useCallback(
-    async (initialInput: Partial<ControlGroupInput>) => {
-      const input: Partial<ControlGroupInput> = {
-        ...initialInput,
-        viewMode: ViewMode.VIEW,
-        panels: controlPanels ?? initialInput.panels,
-        filters: filters ?? [],
-        query: query as Query,
-        timeRange: { from: fromDate!, to: toDate! },
-      };
-
-      return { initialInput: input };
-    },
-    [controlPanels, filters, fromDate, query, toDate]
+const CustomDatasetFilters = ({
+  logExplorerProfileStateService,
+  data,
+}: CustomDatasetFiltersProps) => {
+  const { getInitialInput, setControlGroupAPI, query, filters, timeRange } = useControlPanels(
+    logExplorerProfileStateService,
+    data
   );
-
-  // Makes sure we are updating the panels incase new panels are created when data view changes
-  useEffect(() => {
-    if (!controlGroupAPI) return;
-
-    controlGroupAPI.updateInput({ panels: controlPanels });
-  }, [controlGroupAPI, controlPanels]);
-
-  useEffect(() => {
-    if (!controlGroupAPI) return;
-
-    const filtersSubscription = controlGroupAPI.onFiltersPublished$.subscribe(
-      async (newFilters) => {
-        stateContainer.internalState.transitions.setCustomFilters(newFilters);
-        stateContainer.actions.fetchData();
-      }
-    );
-
-    // Keeps our state in sync with the url changes and makes sure it adheres to correct schema
-    const urlSubscription = stateStorage
-      .change$<ControlPanels>(CONTROL_PANELS_URL_KEY)
-      .subscribe((panels) => setControlPanels(panels ?? undefined));
-
-    // Keeps the url in sync with the controls state after change
-    const inputSubscription = controlGroupAPI
-      .getInput$()
-      .subscribe(({ panels }) => setControlPanels(panels));
-
-    return () => {
-      filtersSubscription.unsubscribe();
-      urlSubscription.unsubscribe();
-      inputSubscription.unsubscribe();
-    };
-  }, [
-    controlGroupAPI,
-    setControlPanels,
-    stateContainer.actions,
-    stateContainer.internalState.transitions,
-    stateStorage,
-  ]);
 
   return (
     <ControlGroupContainer>
@@ -101,7 +33,7 @@ const CustomDatasetFilters = ({ stateContainer, data }: CustomDatasetFiltersProp
         getCreationOptions={getInitialInput}
         query={query as Query}
         filters={filters ?? []}
-        timeRange={{ from: fromDate!, to: toDate! }}
+        timeRange={timeRange}
       />
     </ControlGroupContainer>
   );
