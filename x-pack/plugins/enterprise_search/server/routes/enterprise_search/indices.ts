@@ -394,20 +394,10 @@ export function registerIndexRoutes({
           indexName: schema.string(),
         }),
         body: schema.object({
-          destination_field: schema.maybe(schema.nullable(schema.string())),
           field_mappings: schema.maybe(
             schema.arrayOf(
               schema.object({ sourceField: schema.string(), targetField: schema.string() })
             )
-          ),
-          inference_config: schema.maybe(
-            schema.object({
-              zero_shot_classification: schema.maybe(
-                schema.object({
-                  labels: schema.arrayOf(schema.string()),
-                })
-              ),
-            })
           ),
           model_id: schema.string(),
           pipeline_definition: schema.maybe(
@@ -418,7 +408,6 @@ export function registerIndexRoutes({
             })
           ),
           pipeline_name: schema.string(),
-          source_field: schema.maybe(schema.string()),
         }),
       },
     },
@@ -430,40 +419,8 @@ export function registerIndexRoutes({
         model_id: modelId,
         pipeline_name: pipelineName,
         pipeline_definition: pipelineDefinition,
-        source_field: sourceField,
-        destination_field: destinationField,
-        inference_config: inferenceConfig,
         field_mappings: fieldMappings,
       } = request.body;
-
-      // additional validations
-      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField)) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
-            {
-              defaultMessage:
-                'pipeline_definition and field_mappings should only be provided if source_field and destination_field are not provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      } else if (!((pipelineDefinition && fieldMappings) || (sourceField && modelId))) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError',
-            {
-              defaultMessage:
-                'either pipeline_definition AND fieldMappings or source_field AND model_id must be provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      }
 
       try {
         // Create the sub-pipeline for inference
@@ -472,10 +429,7 @@ export function registerIndexRoutes({
           pipelineName,
           pipelineDefinition,
           modelId,
-          sourceField,
-          destinationField,
           fieldMappings,
-          inferenceConfig,
           client.asCurrentUser
         );
         return response.ok({

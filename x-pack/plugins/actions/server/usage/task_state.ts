@@ -66,7 +66,7 @@ export const stateSchemaByVersion = {
       avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
       count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
         schema.string(),
-        schema.number()
+        schema.recordOf(schema.string(), schema.number())
       ),
     }),
   },
