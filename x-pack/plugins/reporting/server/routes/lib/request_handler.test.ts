@@ -7,7 +7,7 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
+import { TaskPayloadPDFV2 } from '../../../common/types.ts/export_types/printable_pdf_v2';
 import { ReportingCore } from '../..';
 import { JobParamsPDFDeprecated } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';

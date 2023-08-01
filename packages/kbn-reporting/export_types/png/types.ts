@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { BaseParams, BasePayload, LocatorParams } from '@kbn/reporting-common';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { LocatorParams } from '../url';
-import type { BaseParams, BasePayload } from '../base';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNGV2 extends BaseParams {

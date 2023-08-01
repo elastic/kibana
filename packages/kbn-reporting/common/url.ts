@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { JobId } from './types';
+
+type DownloadLink = string;
+export type DownloadReportFn = (jobId: JobId) => DownloadLink;
+
+type ManagementLink = string;
+export type ManagementLinkFn = () => ManagementLink;
 
 export interface LocatorParams<P extends SerializableRecord = SerializableRecord> {
   id: string;
@@ -20,6 +27,12 @@ export interface LocatorParams<P extends SerializableRecord = SerializableRecord
    * Data to recreate the user's state in the application
    */
   params: P;
+}
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
 }
 
 type Url = string;

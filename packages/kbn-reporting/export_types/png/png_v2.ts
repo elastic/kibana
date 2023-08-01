@@ -1,12 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import apm from 'elastic-apm-node';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import {
+  CancellationToken,
+  decryptJobHeaders,
+  ExportType,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_TRIAL,
+  LocatorParams,
+  PNG_JOB_TYPE_V2,
+  REPORTING_TRANSACTION_TYPE,
+  TaskRunResult,
+  getFullRedirectAppUrl,
+  generatePngObservable,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+} from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import {
   finalize,
@@ -20,19 +38,9 @@ import {
   tap,
 } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
-import { getFullRedirectAppUrl } from '@kbn/reporting-common/export_type_helpers/v2/get_full_redirect_app_url';
-import { LocatorParams } from '../../../common';
-import {
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-  PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-  REPORTING_TRANSACTION_TYPE,
-} from '../../../common/constants';
-import { decryptJobHeaders, ExportType, generatePngObservable } from '../common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
+import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
@@ -52,6 +60,15 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('png-export-v2');
+  }
+
+  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    });
   }
 
   /**
@@ -97,14 +114,14 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           payload.forceNow
         );
 
-        const [locatorParams] = payload.locatorParams;
+        const [locatorParams] = payload.locatorParams as unknown as Context[];
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
         return generatePngObservable(
           () =>
-            this.startDeps.reporting.getScreenshots({
+            this.getScreenshots({
               format: 'png',
               headers,
               layout: { ...payload.layout, id: 'preserve_layout' },

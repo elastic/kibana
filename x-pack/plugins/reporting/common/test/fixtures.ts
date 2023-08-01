@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReportApiJSON } from '../types';
+import { ReportApiJSON } from '../types';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({

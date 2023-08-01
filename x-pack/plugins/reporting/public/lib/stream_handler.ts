@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup, ThemeServiceStart, DocLinksStart } from '@kbn/core/public';
+import { JobId } from '@kbn/reporting-common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
-import { JobId, JobSummary, JobSummarySet } from '../../common/types';
+import { JobSummary, JobSummarySet } from '../../common/types';
 import {
   getFailureToast,
   getWarningToast,

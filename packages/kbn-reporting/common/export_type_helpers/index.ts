@@ -14,3 +14,4 @@ export { generatePdfObservable } from './generate_pdf';
 export { validateUrls } from './validate_urls';
 export { getFullUrls } from './get_full_urls';
 export { getAbsoluteUrlFactory } from './get_absolute_url';
+export { generatePngObservable } from './generate_png';

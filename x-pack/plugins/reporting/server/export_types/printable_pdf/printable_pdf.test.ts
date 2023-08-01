@@ -9,14 +9,14 @@ import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
-import { generatePdfObservable } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/generate_pdf';
-import { cryptoFactory } from '../../lib/crypto';
-import { TaskPayloadPDF } from './types';
-import { PdfV1ExportType } from './printable_pdf';
+import { generatePdfObservable } from '@kbn/reporting-common/export_type_helpers/generate_pdf';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { createMockConfigSchema } from '../../test_helpers';
+import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
+import { cryptoFactory } from '@kbn/reporting-common/crypto';
+import { TaskPayloadPDF } from '@kbn/reporting-common/types';
 
-jest.mock('./lib/generate_pdf');
+jest.mock('@kbn/reporting-export-types-pdf/lib/generate_pdf');
 
 let content: string;
 let mockPdfExportType: PdfV1ExportType;
@@ -44,7 +44,6 @@ beforeEach(async () => {
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
-  const mockReportingCore = await createMockReportingCore(createMockConfigSchema());
 
   mockPdfExportType = new PdfV1ExportType(mockCoreSetup, configType, mockLogger, context);
 
@@ -56,7 +55,6 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
-    reporting: mockReportingCore.getContract(),
   });
 });
 

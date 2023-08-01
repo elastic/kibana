@@ -5069,6 +5069,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-png@link:packages/kbn-reporting/export_types/png":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
   version "0.0.0"
   uid ""

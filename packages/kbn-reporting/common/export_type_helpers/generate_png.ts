@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import type { PngMetrics } from '../../../common/types';
-import type { PngScreenshotOptions } from '../../types';
+import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { PngMetrics } from '../metrics';
+import { REPORTING_TRANSACTION_TYPE } from '../constants';
 
 interface PngResult {
   buffer: Buffer;

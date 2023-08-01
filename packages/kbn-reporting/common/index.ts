@@ -24,7 +24,7 @@ export type {
   JobParamsDownloadCSV,
   ReportingRequestHandlerContext,
 } from './types';
-export type { LocatorParams, UrlOrUrlLocatorTuple } from './url';
+export type { LocatorParams, UrlOrUrlLocatorTuple, IlmPolicyStatusResponse } from './url';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
 export {
@@ -37,4 +37,5 @@ export {
   validateUrls,
   getFullUrls,
   getAbsoluteUrlFactory,
+  generatePngObservable,
 } from './export_type_helpers';

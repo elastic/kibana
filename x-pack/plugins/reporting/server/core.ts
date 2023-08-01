@@ -47,10 +47,9 @@ import {
 } from '@kbn/reporting-export-types-csv';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
+import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
-import { PngV1ExportType } from './export_types/png';
-import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -125,7 +124,6 @@ export class ReportingCore {
     this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
     // deprecated export types for tests
     this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
 
     this.exportTypes.forEach((et) => {
       this.exportTypesRegistry.register(et);

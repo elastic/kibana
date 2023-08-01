@@ -565,6 +565,7 @@
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-deprecated": "link:packages/kbn-reporting/export_types/deprecated",
     "@kbn/reporting-export-types-pdf": "link:packages/kbn-reporting/export_types/printable_pdf_v2",
+    "@kbn/reporting-export-types-png": "link:packages/kbn-reporting/export_types/png",
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
