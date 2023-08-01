@@ -29,7 +29,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.3' },
+    package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.4' },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     inputs: [
@@ -272,17 +272,6 @@ export const getHttpInput = ({
           'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
         }
       : {}),
-    processors: [
-      {
-        add_fields: {
-          fields: {
-            config_id: id,
-            'monitor.fleet_managed': true,
-          },
-          target: '',
-        },
-      },
-    ],
   };
 
   return {
