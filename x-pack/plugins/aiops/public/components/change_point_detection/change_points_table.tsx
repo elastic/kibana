@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { NoChangePointsWarning } from './no_change_points_warning';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCommonChartProps } from './use_common_chart_props';
 import {
@@ -292,25 +293,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             }
           />
         ) : (
-          <EuiEmptyPrompt
-            iconType="search"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
-                  defaultMessage="No change points found"
-                />
-              </h2>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-                  defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
-                />
-              </p>
-            }
-          />
+          <NoChangePointsWarning />
         )
       }
     />
