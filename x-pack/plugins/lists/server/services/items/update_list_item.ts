@@ -12,7 +12,7 @@ import type {
   MetaOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { transformListItemToElasticQuery } from '../utils';
 
