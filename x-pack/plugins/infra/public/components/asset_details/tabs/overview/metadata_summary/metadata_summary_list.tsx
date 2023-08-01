@@ -29,7 +29,7 @@ interface MetadataSummaryProps {
 
 export interface MetadataData {
   field: string;
-  value: string | string[] | undefined;
+  value?: string | string[];
   tooltipFieldLabel: string;
   tooltipLink?: string;
 }
