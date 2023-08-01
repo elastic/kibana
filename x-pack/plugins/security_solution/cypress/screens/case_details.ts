@@ -16,7 +16,7 @@ export const CASE_DELETE = '[data-test-subj="property-actions-trash"]';
 export const CASE_DETAILS_DESCRIPTION =
   '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]';
 
-export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="header-page-title"]';
+export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="editable-title-header-value"]';
 
 export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status-dropdown"]';
 
