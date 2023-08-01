@@ -36,21 +36,21 @@ const MANAGED_TAG_COLOR = '#0077CC';
 const PACKAGE_TAG_COLOR = '#4DD2CA';
 const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
+
+// the tag service only accepts 6-digits hex colors
 const TAG_COLORS = [
   '#FEC514',
   '#F583B7',
-  '#07C',
   '#F04E98',
   '#00BFB3',
   '#FEC514',
-  '#BD271E',
   '#BADA55',
   '#FFA500',
-  '#FCF7BC',
-  '#0000FF',
-  '#AAA',
-  '#333',
-  '#DDD',
+  '#9696F1',
+  '#D36086',
+  '#54B399',
+  '#AAA8A5',
+  '#A0A0A0',
 ];
 
 const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
@@ -239,7 +239,7 @@ export async function getPackageSpecTags(
 const getAssetTypesObjectReferences = (
   assetTypes: string[] | undefined,
   taggableAssets: ArchiveAsset[]
-) => {
+): ObjectReference[] => {
   if (!assetTypes || assetTypes.length === 0) return [];
 
   return taggableAssets
@@ -253,7 +253,7 @@ const getAssetTypesObjectReferences = (
 const getAssetIdsObjectReferences = (
   assetIds: string[] | undefined,
   taggableAssets: ArchiveAsset[]
-) => {
+): ObjectReference[] => {
   if (!assetIds || assetIds.length === 0) return [];
 
   return taggableAssets
