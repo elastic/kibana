@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export interface StorageExplorerSummary {
   totalProfilingSizeBytes: number;
   totalSymbolsSizeBytes: number;
@@ -11,4 +12,12 @@ export interface StorageExplorerSummary {
   totalNumberOfDistinctProbabilisticValues: number;
   totalNumberOfHosts: number;
   dailyDataGenerationBytes: number;
+}
+
+export interface StorageExplorerHostBreakdownSizeChart {
+  host: string;
+  timeseries: Array<{
+    x: number;
+    y?: number | null;
+  }>;
 }

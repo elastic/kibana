@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export async function getHostAndDistinctProbabilisticCount({
   client,
   timeFrom,
   timeTo,
+  kuery,
 }: {
   client: ProfilingESClient;
   timeFrom: number;
   timeTo: number;
+  kuery: string;
 }) {
   const response = await client.search('profiling_probabilistic_cardinality', {
     index: 'profiling-hosts',
@@ -22,6 +25,7 @@ export async function getHostAndDistinctProbabilisticCount({
       query: {
         bool: {
           filter: {
+            ...kqlQuery(kuery),
             range: {
               '@timestamp': {
                 gte: String(timeFrom),

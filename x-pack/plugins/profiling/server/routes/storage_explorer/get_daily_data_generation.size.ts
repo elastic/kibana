@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
-function getEstimatedSizeForDocumentsInIndex({
+export function getEstimatedSizeForDocumentsInIndex({
   allIndicesStats,
   indexName,
   numberOfDocs,
@@ -32,11 +33,13 @@ export async function getDailyDataGenerationSize({
   timeFrom,
   timeTo,
   allIndicesStats,
+  kuery,
 }: {
   client: ProfilingESClient;
   timeFrom: number;
   timeTo: number;
   allIndicesStats?: Record<string, IndicesStatsIndicesStats>;
+  kuery: string;
 }) {
   const response = await client.search('profiling_indices_size', {
     index: [
@@ -49,6 +52,7 @@ export async function getDailyDataGenerationSize({
       query: {
         bool: {
           filter: {
+            ...kqlQuery(kuery),
             range: {
               '@timestamp': {
                 gte: String(timeFrom),

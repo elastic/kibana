@@ -8,7 +8,10 @@ import { HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
-import { StorageExplorerSummary } from '../common/storage_explorer';
+import type {
+  StorageExplorerSummary,
+  StorageExplorerHostBreakdownSizeChart,
+} from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
@@ -48,6 +51,12 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<StorageExplorerSummary>;
+  fetchStorageExplorerHostBreakdownSizeChart: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+  }) => Promise<StorageExplorerHostBreakdownSizeChart>;
 }
 
 export function getServices(): Services {
@@ -110,6 +119,18 @@ export function getServices(): Services {
         query,
       })) as StorageExplorerSummary;
       return summary;
+    },
+    fetchStorageExplorerHostBreakdownSizeChart: async ({ http, timeFrom, timeTo, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      const eventsMetricsSizeTimeseries = (await http.get(
+        paths.StorageExplorerHostBreakdownSizeChart,
+        { query }
+      )) as StorageExplorerHostBreakdownSizeChart;
+      return eventsMetricsSizeTimeseries;
     },
   };
 }

@@ -63,15 +63,15 @@ export function Summary({ data, isLoading }: Props) {
   ];
   return (
     <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup>
+      <EuiFlexGroup justifyContent="spaceBetween">
         {summaryInfo.map((item, idx) => {
           return (
             <EuiFlexItem grow={false} key={idx}>
               <EuiStat
                 description={
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiText>{item.title}</EuiText>
+                    <EuiFlexItem grow={false} color="subdued">
+                      <EuiText size="xs">{item.title}</EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiToolTip content={item.hint}>
@@ -80,6 +80,7 @@ export function Summary({ data, isLoading }: Props) {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                titleSize="s"
                 title={item.value}
                 isLoading={isLoading}
               />

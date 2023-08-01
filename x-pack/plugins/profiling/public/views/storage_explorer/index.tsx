@@ -22,10 +22,13 @@ export function StorageExplorerView() {
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const {
-    services: { fetchStorageExplorerSummary },
+    services: {
+      fetchStorageExplorerSummary,
+      fetchStorageExplorerHostBreakdownSizeChart: fetchStorageExplorerHostBreakdown,
+    },
   } = useProfilingDependencies();
 
-  const state = useTimeRangeAsync(
+  const storageExplorerSummaryState = useTimeRangeAsync(
     ({ http }) => {
       return fetchStorageExplorerSummary({
         http,
@@ -37,11 +40,26 @@ export function StorageExplorerView() {
     [fetchStorageExplorerSummary, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
   );
 
+  const storageExplorerHostBreakdownState = useTimeRangeAsync(
+    ({ http }) => {
+      return fetchStorageExplorerHostBreakdown({
+        http,
+        timeFrom: timeRange.inSeconds.start,
+        timeTo: timeRange.inSeconds.end,
+        kuery,
+      });
+    },
+    [fetchStorageExplorerHostBreakdown, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
+  );
+
   return (
     <ProfilingAppPageTemplate>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <Summary data={state.data} isLoading={state.status === AsyncStatus.Loading} />
+          <Summary
+            data={storageExplorerSummaryState.data}
+            isLoading={storageExplorerSummaryState.status === AsyncStatus.Loading}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div>caue</div>

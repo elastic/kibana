@@ -11,6 +11,7 @@ import { getRoutePaths } from '../../../common';
 import { StorageExplorerSummary } from '../../../common/storage_explorer';
 import { getClient } from '../compat';
 import { getDailyDataGenerationSize } from './get_daily_data_generation.size';
+import { getHostBreakdownSizeTimeseries } from './get_host_breakdown_size_timeseries';
 import { getHostAndDistinctProbabilisticCount } from './get_host_distinct_probabilistic_count';
 import { getNodesStats, getTotalIndicesStats, getTotalSymbolsStats } from './get_indices_stats';
 
@@ -33,7 +34,7 @@ export function registerStorageExplorerRoute({
       },
     },
     async (context, request, response) => {
-      const { timeFrom, timeTo } = request.query;
+      const { timeFrom, timeTo, kuery } = request.query;
       const client = await getClient(context);
       const profilingClient = createProfilingEsClient({ request, esClient: client });
       const profilingEsClient = profilingClient.getEsClient();
@@ -55,6 +56,7 @@ export function registerStorageExplorerRoute({
           client: profilingClient,
           timeFrom,
           timeTo,
+          kuery,
         }),
       ]);
 
@@ -63,6 +65,7 @@ export function registerStorageExplorerRoute({
         timeFrom,
         timeTo,
         allIndicesStats: totalIndicesStats.indices,
+        kuery,
       });
 
       const { nodes: diskSpacePerNode } = nodeStats;
@@ -90,9 +93,10 @@ export function registerStorageExplorerRoute({
       });
     }
   );
+
   router.get(
     {
-      path: paths.StorageExplorerHostBreakdown,
+      path: paths.StorageExplorerHostBreakdownSizeChart,
       options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
@@ -103,7 +107,17 @@ export function registerStorageExplorerRoute({
       },
     },
     async (context, request, response) => {
-      return response.ok({});
+      const client = await getClient(context);
+      const profilingClient = createProfilingEsClient({ request, esClient: client });
+
+      const { timeFrom, timeTo, kuery } = request.query;
+      const hostBreakdownTimeseries = await getHostBreakdownSizeTimeseries({
+        client: profilingClient,
+        timeFrom,
+        timeTo,
+        kuery,
+      });
+      return response.ok({ body: hostBreakdownTimeseries });
     }
   );
 }

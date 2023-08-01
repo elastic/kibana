@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 const symbolsIndices = ['profiling-symbols-global', 'profiling-symbols-private'];
 const indices = [
   'profiling-events-*',
+  'profiling-metrics',
   'profiling-stacktraces',
   'profiling-executables',
   'profiling-stackframes',
