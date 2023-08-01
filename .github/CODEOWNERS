@@ -1258,7 +1258,6 @@ x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Security Defend Workflows - OSQuery Ownership
-/x-pack/plugins/security_solution/common/api/osquery/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
