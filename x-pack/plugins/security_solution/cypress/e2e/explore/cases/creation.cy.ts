@@ -88,7 +88,7 @@ describe('Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
     (this.mycase as TestCase).tags.forEach((CaseTag) => {
-      cy.get(ALL_CASES_TAGS(tag)).should('have.text', CaseTag);
+      cy.get(ALL_CASES_TAGS(CaseTag)).should('have.text', CaseTag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');

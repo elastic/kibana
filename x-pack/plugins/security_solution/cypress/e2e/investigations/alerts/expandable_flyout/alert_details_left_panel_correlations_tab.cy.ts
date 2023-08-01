@@ -38,7 +38,6 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 describe(
   'Expandable flyout left panel correlations',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -53,43 +52,47 @@ describe(
       openCorrelationsTab();
     });
 
-    it('should render correlations details correctly', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
-      cy.log('link the alert to a new case');
+    it(
+      'should render correlations details correctly',
+      { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+      () => {
+        cy.log('link the alert to a new case');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();
 
-      cy.log('should render the Insights header');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Insights');
+        cy.log('should render the Insights header');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
+          .should('be.visible')
+          .and('have.text', 'Insights');
 
-      cy.log('should render the inner tab switch');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
+        cy.log('should render the inner tab switch');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.log('should render correlations tab activator / button');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Correlations');
+        cy.log('should render correlations tab activator / button');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Correlations');
 
-      cy.log('should render all the correlations sections');
+        cy.log('should render all the correlations sections');
 
-      cy.get(CORRELATIONS_ANCESTRY_SECTION)
-        .should('be.visible')
-        .and('have.text', '1 alert related by ancestry');
+        cy.get(CORRELATIONS_ANCESTRY_SECTION)
+          .should('be.visible')
+          .and('have.text', '1 alert related by ancestry');
 
-      cy.get(CORRELATIONS_SOURCE_SECTION)
-        .should('be.visible')
-        .and('have.text', '0 alerts related by source event');
+        cy.get(CORRELATIONS_SOURCE_SECTION)
+          .should('be.visible')
+          .and('have.text', '0 alerts related by source event');
 
-      cy.get(CORRELATIONS_SESSION_SECTION)
-        .should('be.visible')
-        .and('have.text', '1 alert related by session');
+        cy.get(CORRELATIONS_SESSION_SECTION)
+          .should('be.visible')
+          .and('have.text', '1 alert related by session');
 
-      cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('have.text', '1 related case');
+        cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('have.text', '1 related case');
 
-      expandCorrelationsSection(CORRELATIONS_ANCESTRY_SECTION);
+        expandCorrelationsSection(CORRELATIONS_ANCESTRY_SECTION);
 
-      cy.get(CORRELATIONS_ANCESTRY_TABLE).should('be.visible');
-    });
+        cy.get(CORRELATIONS_ANCESTRY_TABLE).should('be.visible');
+      }
+    );
   }
 );

@@ -26,7 +26,6 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout left panel session view',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -38,22 +37,26 @@ describe(
       expandDocumentDetailsExpandableFlyoutLeftSection();
     });
 
-    it('should display session view under visualize', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
-        .should('be.visible')
-        .and('have.text', 'Visualize');
+    it(
+      'should display session view under visualize',
+      { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] },
+      () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
+          .should('be.visible')
+          .and('have.text', 'Visualize');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Session View');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Session View');
 
-      // TODO ideally we would have a test for the session view component instead
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
-        .should('be.visible')
-        .and('contain.text', 'Unable to display session view')
-        .and('contain.text', 'There was an error displaying session view');
-    });
+        // TODO ideally we would have a test for the session view component instead
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
+          .should('be.visible')
+          .and('contain.text', 'Unable to display session view')
+          .and('contain.text', 'There was an error displaying session view');
+      }
+    );
   }
 );

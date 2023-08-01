@@ -29,7 +29,6 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout left panel entities',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -45,7 +44,7 @@ describe(
 
     it(
       'should display analyzer graph and node list under Insights Entities',
-      { tags: tag.BROKEN_IN_SERVERLESS },
+      { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] },
       () => {
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
           .should('be.visible')

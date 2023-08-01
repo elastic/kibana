@@ -19,7 +19,6 @@ import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expand
 describe(
   'Expandable flyout state sync',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -31,7 +30,7 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should test flyout url sync', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    it('should test flyout url sync', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
       cy.url().should('not.include', 'eventFlyout');
 
       expandFirstAlertExpandableFlyout();

@@ -72,7 +72,6 @@ import {
 describe(
   'Alert details expandable flyout right panel overview tab',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -86,7 +85,7 @@ describe(
     });
 
     describe('about section', () => {
-      it('should display about section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+      it('should display about section', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
         cy.log('header and content');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER)

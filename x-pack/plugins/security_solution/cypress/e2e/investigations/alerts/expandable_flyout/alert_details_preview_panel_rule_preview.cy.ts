@@ -35,7 +35,6 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout rule preview panel',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -52,7 +51,7 @@ describe(
     describe('rule preview', () => {
       it(
         'should display rule preview and its sub sections',
-        { tags: tag.BROKEN_IN_SERVERLESS },
+        { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] },
         () => {
           cy.log('rule preview panel');
 

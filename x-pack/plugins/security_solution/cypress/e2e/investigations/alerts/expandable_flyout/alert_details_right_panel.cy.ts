@@ -69,7 +69,6 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout right panel',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  { tags: [tag.ESS, tag.SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -81,61 +80,67 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should display header and footer basics', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
-      expandFirstAlertExpandableFlyout();
+    it(
+      'should display header and footer basics',
+      { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] },
+      () => {
+        expandFirstAlertExpandableFlyout();
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE)
+          .should('be.visible')
+          .and('have.text', rule.name);
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
-        .should('be.visible')
-        .and('have.text', rule.risk_score);
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
+          .should('be.visible')
+          .and('have.text', rule.risk_score);
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
-        .should('be.visible')
-        .and('have.text', upperFirst(rule.severity));
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
+          .should('be.visible')
+          .and('have.text', upperFirst(rule.severity));
 
-      cy.log('Verify all 3 tabs are visible');
+        cy.log('Verify all 3 tabs are visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB)
-        .should('be.visible')
-        .and('have.text', 'Overview');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').and('have.text', 'Table');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB)
+          .should('be.visible')
+          .and('have.text', 'Overview');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').and('have.text', 'Table');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
 
-      cy.log('Verify the expand/collapse button is visible and functionality works');
+        cy.log('Verify the expand/collapse button is visible and functionality works');
 
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Collapse alert details');
+        expandDocumentDetailsExpandableFlyoutLeftSection();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Collapse alert details');
 
-      collapseDocumentDetailsExpandableFlyoutLeftSection();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Expand alert details');
+        collapseDocumentDetailsExpandableFlyoutLeftSection();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Expand alert details');
 
-      cy.log('Verify the take action button is visible on all tabs');
+        cy.log('Verify the take action button is visible on all tabs');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
-      openTableTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+        openTableTab();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
-      openJsonTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
-    });
+        openJsonTab();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+      }
+    );
 
     // TODO this will change when add to existing case is improved
     //  https://github.com/elastic/security-team/issues/6298
