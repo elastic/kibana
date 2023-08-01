@@ -108,13 +108,13 @@ export function MobileStats({
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
         defaultMessage: 'Crash Rate (Crash per minute)',
       }),
-      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-        defaultMessage: 'Coming Soon',
-      }),
+      // subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+      //   defaultMessage: 'Coming Soon',
+      // }),
       icon: getIcon('bug'),
-      value: 'N/A',
+      value: data?.currentPeriod?.crashes?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value),
-      trend: [],
+      trend: data?.currentPeriod?.crashes?.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {
