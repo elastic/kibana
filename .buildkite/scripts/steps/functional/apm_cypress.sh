@@ -13,7 +13,6 @@ echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-export NODE_OPTIONS="$NODE_OPTIONS --openssl-legacy-provider"
 checks-reporter-with-killswitch "APM Cypress Tests" \
-  node plugins/apm/scripts/test/e2e.js \
+  node --openssl-legacy-provider plugins/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION"
