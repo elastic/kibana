@@ -49,8 +49,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
+      await supertest
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      await supertest
+        .delete(`/api/actions/connector/${actionId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
