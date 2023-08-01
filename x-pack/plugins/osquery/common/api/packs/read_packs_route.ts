@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './create_live_query_request_body_schema';
+import * as t from 'io-ts';
+
+export const readPacksRequestParamsSchema = t.type({
+  id: t.string,
+});
+
+export type ReadPacksRequestParamsSchema = t.OutputOf<typeof readPacksRequestParamsSchema>;
