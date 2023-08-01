@@ -78,7 +78,6 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   web: { title: 'Web Server', parent_id: 'observability' },
   web_application_firewall: { title: 'Web Application Firewall', parent_id: 'security' },
   websphere: { title: 'WebSphere Application Server', parent_id: 'observability' },
-  workplace_search: { title: 'Workplace Search', parent_id: 'enterprise_search' },
   workplace_search_content_source: {
     title: 'Workplace Search Content Source',
     parent_id: 'enterprise_search',

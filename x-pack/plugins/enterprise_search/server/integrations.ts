@@ -32,7 +32,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files and folders stored on Box with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
+    categories: ['enterprise_search', 'workplace_search_content_source'],
   },
   {
     id: 'gmail',
@@ -45,12 +45,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your emails managed by Gmail with Workplace Search.',
       }
     ),
-    categories: [
-      'enterprise_search',
-      'google_cloud',
-      'workplace_search',
-      'workplace_search_content_source',
-    ],
+    categories: ['enterprise_search', 'google_cloud', 'workplace_search_content_source'],
   },
   {
     id: 'onedrive',
@@ -63,12 +58,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on OneDrive with Workplace Search.',
       }
     ),
-    categories: [
-      'enterprise_search',
-      'azure',
-      'workplace_search',
-      'workplace_search_content_source',
-    ],
+    categories: ['enterprise_search', 'azure', 'workplace_search_content_source'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
   },
   {
@@ -85,7 +75,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on Salesforce Sandbox with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
+    categories: ['enterprise_search', 'workplace_search_content_source'],
   },
   {
     id: 'slack',
@@ -98,7 +88,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your messages on Slack with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
+    categories: ['enterprise_search', 'workplace_search_content_source'],
   },
   {
     id: 'zendesk',
@@ -111,7 +101,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your tickets on Zendesk with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
+    categories: ['enterprise_search', 'workplace_search_content_source'],
   },
 ];
 
