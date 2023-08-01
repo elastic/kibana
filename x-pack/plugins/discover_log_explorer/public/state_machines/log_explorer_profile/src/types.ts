@@ -43,11 +43,11 @@ export type LogExplorerProfileTypeState =
     }
   | {
       value: 'initialized';
-      context: WithDatasetSelection;
+      context: WithDatasetSelection & WithControlPanels;
     }
   | {
       value: 'initialized.idle';
-      context: WithDatasetSelection;
+      context: WithDatasetSelection & WithControlPanelGroupAPI & WithControlPanels;
     }
   | {
       value: 'initialized.updatingDataView';
@@ -55,7 +55,7 @@ export type LogExplorerProfileTypeState =
     }
   | {
       value: 'initialized.controlGroups.uninitialized';
-      context: WithDatasetSelection;
+      context: WithDatasetSelection & WithControlPanels;
     }
   | {
       value: 'initialized.controlGroups.idle';
