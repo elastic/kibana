@@ -325,7 +325,8 @@ describe(`UserActions`, () => {
     });
   });
 
-  describe('Host isolation action', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156742
+  describe.skip('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];
       const props = {
