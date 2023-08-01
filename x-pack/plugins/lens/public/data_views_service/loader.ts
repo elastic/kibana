@@ -47,6 +47,7 @@ export function convertDataViewIntoLensIndexPattern(
         customLabel: field.customLabel,
         runtimeField: field.runtimeField,
         runtime: Boolean(field.runtimeField),
+        timeSeriesDimension: field.timeSeriesDimension,
         timeSeriesMetric: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
         partiallyApplicableFunctions: field.isRolledUpField

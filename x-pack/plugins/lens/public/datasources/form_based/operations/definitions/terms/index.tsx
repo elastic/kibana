@@ -53,6 +53,7 @@ import {
   supportedTypes,
 } from './constants';
 import { IncludeExcludeRow } from './include_exclude_options';
+import { containsColumnWithTimeSeriesMetric } from '../../../pure_utils';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -591,6 +592,10 @@ export const termsOperation: OperationDefinition<
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
           invalidFields={invalidFields}
+          showTimeSeriesDimensions={Boolean(
+            dimensionGroups.find(({ groupId: id }) => groupId === id)?.isBreakdownDimension &&
+              containsColumnWithTimeSeriesMetric(layer, indexPattern)
+          )}
         />
       </EuiFormRow>
     );

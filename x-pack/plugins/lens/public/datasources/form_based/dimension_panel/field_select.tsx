@@ -33,6 +33,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
+  showTimeSeriesDimensions: boolean;
 }
 
 export function FieldSelect({
@@ -46,6 +47,7 @@ export function FieldSelect({
   fieldIsInvalid,
   markAllFieldsCompatible,
   ['data-test-subj']: dataTestSub,
+  showTimeSeriesDimensions,
 }: FieldSelectProps) {
   const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
@@ -66,7 +68,15 @@ export function FieldSelect({
       return fieldContainsData(fieldName, currentIndexPattern, hasFieldData);
     }
 
-    function fieldNamesToOptions(items: string[]) {
+    interface FieldOption {
+      label: string;
+      value: { type: 'field'; field: string; dataType: string | undefined; operationType: string };
+      exists: boolean;
+      compatible: number;
+      'data-test-subj': string;
+    }
+
+    function fieldNamesToOptions(items: string[]): FieldOption[] {
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
@@ -75,9 +85,9 @@ export function FieldSelect({
           const exists = containsData(field);
           const fieldInstance = currentIndexPattern.getFieldByName(field);
           return {
-            label: currentIndexPattern.getFieldByName(field)?.displayName,
+            label: currentIndexPattern.getFieldByName(field)?.displayName ?? field,
             value: {
-              type: 'field',
+              type: 'field' as const,
               field,
               dataType: fieldInstance ? getFieldType(fieldInstance) : undefined,
               // Use the operation directly, or choose the first compatible operation.
@@ -102,14 +112,32 @@ export function FieldSelect({
     );
     const [availableFields, emptyFields] = partition(nonMetaFields, containsData);
 
-    const constructFieldsOptions = (fieldsArr: string[], label: string) =>
+    const constructFieldsOptions = (
+      fieldsArr: string[],
+      label: string
+    ): { label: string; options: FieldOption[] } | false =>
       fieldsArr.length > 0 && {
         label,
         options: fieldNamesToOptions(fieldsArr),
       };
 
+    const isTimeSeriesFields = (field: string) => {
+      return (
+        showTimeSeriesDimensions && currentIndexPattern.getFieldByName(field)?.timeSeriesDimension
+      );
+    };
+
+    const [timeSeriesFields, nonTimeseriesFields] = partition(availableFields, isTimeSeriesFields);
+
+    const timeSeriesFieldsOptions = constructFieldsOptions(
+      timeSeriesFields,
+      i18n.translate('xpack.lens.indexPattern.timeSeriesFieldsLabel', {
+        defaultMessage: 'Time series dimensions',
+      })
+    );
+
     const availableFieldsOptions = constructFieldsOptions(
-      availableFields,
+      nonTimeseriesFields,
       i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
         defaultMessage: 'Available fields',
       })
@@ -131,17 +159,19 @@ export function FieldSelect({
 
     return [
       ...fieldNamesToOptions(specialFields),
+      timeSeriesFieldsOptions,
       availableFieldsOptions,
       emptyFieldsOptions,
       metaFieldsOptions,
     ].filter(Boolean);
   }, [
+    operationByField,
     incompleteOperation,
     selectedOperationType,
     currentIndexPattern,
-    operationByField,
     hasFieldData,
     markAllFieldsCompatible,
+    showTimeSeriesDimensions,
   ]);
 
   return (

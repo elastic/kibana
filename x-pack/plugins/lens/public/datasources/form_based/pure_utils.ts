@@ -26,6 +26,16 @@ export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIn
   return 'sourceField' in column;
 }
 
+export function containsColumnWithTimeSeriesMetric(
+  layer: FormBasedLayer,
+  indexPattern: IndexPattern
+): boolean {
+  return Object.values(layer.columns).some(
+    (column) =>
+      hasField(column) && indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric
+  );
+}
+
 export function getFieldType(field: IndexPatternField) {
   if (field.timeSeriesMetric) {
     return field.timeSeriesMetric;
