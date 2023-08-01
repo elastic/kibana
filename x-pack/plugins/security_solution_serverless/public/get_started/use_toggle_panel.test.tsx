@@ -222,8 +222,10 @@ describe('useTogglePanel', () => {
           [GetSetUpCardId.configure]: {
             id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 2,
+            stepsLeft: 4,
             activeStepIds: [
+              ConfigureSteps.learnAbout,
+              ConfigureSteps.deployElasticAgent,
               ConfigureSteps.connectToDataSources,
               ConfigureSteps.enablePrebuiltRules,
             ],

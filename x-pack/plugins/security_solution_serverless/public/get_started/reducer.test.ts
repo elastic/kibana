@@ -135,8 +135,13 @@ describe('getActiveCardsInitialStates', () => {
         [GetSetUpCardId.configure]: {
           id: GetSetUpCardId.configure,
           timeInMins: 0,
-          stepsLeft: 2,
-          activeStepIds: [ConfigureSteps.connectToDataSources, ConfigureSteps.enablePrebuiltRules],
+          stepsLeft: 4,
+          activeStepIds: [
+            ConfigureSteps.learnAbout,
+            ConfigureSteps.deployElasticAgent,
+            ConfigureSteps.connectToDataSources,
+            ConfigureSteps.enablePrebuiltRules,
+          ],
         },
         [GetSetUpCardId.explore]: {
           id: GetSetUpCardId.explore,

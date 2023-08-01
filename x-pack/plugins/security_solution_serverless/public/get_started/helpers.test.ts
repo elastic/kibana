@@ -141,7 +141,6 @@ describe('setupCards', () => {
     ).toEqual([
       ConfigureSteps.learnAbout,
       ConfigureSteps.deployElasticAgent,
-      ConfigureSteps.connectToDataSources,
       ConfigureSteps.enablePrebuiltRules,
     ]);
 
