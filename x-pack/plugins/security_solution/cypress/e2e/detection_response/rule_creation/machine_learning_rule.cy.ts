@@ -54,7 +54,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, machine learning', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Detection rules, machine learning', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');

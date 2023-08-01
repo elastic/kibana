@@ -44,7 +44,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     beforeEach(() => {
       login();

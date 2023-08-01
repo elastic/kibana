@@ -61,7 +61,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('New Terms rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('New Terms rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();

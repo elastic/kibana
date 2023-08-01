@@ -37,7 +37,7 @@ import {
 import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
-  describe('Open timeline modal', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  describe('Open timeline modal', () => {
     before(function () {
       cleanKibana();
       login();
@@ -70,7 +70,7 @@ describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
       openTimelineById(this.timelineId);
     });
 
-    it('should open a modal', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    it('should open a modal', () => {
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
     });
 

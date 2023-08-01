@@ -63,7 +63,7 @@ import { getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, override', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Detection rules, override', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');

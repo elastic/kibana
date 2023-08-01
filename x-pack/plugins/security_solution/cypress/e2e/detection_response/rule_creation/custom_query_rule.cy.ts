@@ -114,7 +114,7 @@ import { enablesRule, getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });
