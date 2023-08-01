@@ -78,14 +78,19 @@ export function createDefaultSetupState(): SetupState {
   };
 }
 
+export function areViewerUsersResourcesSetup(state: SetupState): boolean {
+  return (
+    state.policies.collector.installed &&
+    state.policies.symbolizer.installed &&
+    !state.policies.apm.profilingEnabled
+  );
+}
+
 export function areResourcesSetup(state: SetupState): boolean {
   return (
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&
-    state.policies.collector.installed &&
-    state.policies.symbolizer.installed &&
-    !state.policies.apm.profilingEnabled &&
     state.settings.configured
   );
 }

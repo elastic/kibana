@@ -10,6 +10,7 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import {
   areResourcesSetup,
+  areViewerUsersResourcesSetup,
   createDefaultSetupState,
   mergePartialSetupStates,
 } from '../../common/setup';
@@ -88,22 +89,51 @@ export function registerSetupRoute({
           });
         }
 
-        const verifyFunctions = [
+        const viewerUsersVerifyFunctions = [
           validateCollectorPackagePolicy,
-          validateMaximumBuckets,
-          validateResourceManagement,
-          validateSecurityRole,
           validateSymbolizerPackagePolicy,
           validateProfilingInApmPackagePolicy,
         ];
 
-        const partialStates = await Promise.all([
-          ...verifyFunctions.map((fn) => fn(setupOptions)),
+        const viewerUsersPartialStates = await Promise.all([
+          ...viewerUsersVerifyFunctions.map((fn) => fn(setupOptions)),
           hasProfilingData({
             ...setupOptions,
             client: clientWithProfilingAuth,
           }),
         ]);
+
+        const viewerUsersMergedState = mergePartialSetupStates(state, viewerUsersPartialStates);
+
+        /*
+         * We need to split the verification steps
+         * because of users with viewer privileges
+         * cannot get the cluster settings
+         */
+        if (
+          areViewerUsersResourcesSetup(viewerUsersMergedState) &&
+          viewerUsersMergedState.data.available
+        ) {
+          return response.ok({
+            body: {
+              has_setup: true,
+              has_data: state.data.available,
+            },
+          });
+        }
+
+        /**
+         * Performe advanced verification in case the first step failed.
+         */
+        const adminUsersVerifyFunctions = [
+          validateMaximumBuckets,
+          validateResourceManagement,
+          validateSecurityRole,
+        ];
+
+        const partialStates = await Promise.all(
+          adminUsersVerifyFunctions.map((fn) => fn(setupOptions))
+        );
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
