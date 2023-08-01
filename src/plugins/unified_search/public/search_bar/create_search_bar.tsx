@@ -252,6 +252,7 @@ export function createSearchBar({
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
+            currentDataViewId={props.currentDataViewId}
           />
         </core.i18n.Context>
       </KibanaContextProvider>
