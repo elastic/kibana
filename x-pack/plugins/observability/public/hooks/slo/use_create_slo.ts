@@ -44,7 +44,7 @@ export function useCreateSlo() {
 
         const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
-        const newItem = { ...slo, id: uuidv1() };
+        const newItem = { ...slo, id: uuidv1(), summary: undefined };
 
         const optimisticUpdate = {
           page: previousData?.page ?? 1,
@@ -82,9 +82,6 @@ export function useCreateSlo() {
         navigateToUrl(
           http.basePath.prepend(paths.observability.sloCreateWithEncodedForm(encode(slo)))
         );
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
     }
   );
