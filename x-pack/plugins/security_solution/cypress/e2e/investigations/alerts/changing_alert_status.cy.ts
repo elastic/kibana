@@ -38,7 +38,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Changing alert status', () => {
+describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'auditbeat_big');
     cleanKibana();

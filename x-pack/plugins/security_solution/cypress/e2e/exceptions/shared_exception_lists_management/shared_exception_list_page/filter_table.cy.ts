@@ -34,7 +34,7 @@ const getExceptionList2 = () => ({
   name: EXCEPTION_LIST_NAME_TWO,
   list_id: 'exception_list_2',
 });
-describe('Filter Lists', () => {
+describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();

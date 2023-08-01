@@ -13,7 +13,7 @@ import { DATAGRID_HEADERS, DATAGRID_HEADER } from '../../../screens/timeline';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { removeColumn } from '../../../tasks/timeline';
 
-describe('persistent timeline', () => {
+describe('persistent timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     login();
     visit(HOSTS_URL);

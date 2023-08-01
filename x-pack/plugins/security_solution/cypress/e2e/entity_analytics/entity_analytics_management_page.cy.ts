@@ -24,7 +24,7 @@ import { createRule } from '../../tasks/api_calls/rules';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 
-describe('Entity analytics management page', { tags: '@brokenInServerless' }, () => {
+describe('Entity analytics management page', { tags: ['@brokenInServerless', '@ess'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'all_users');

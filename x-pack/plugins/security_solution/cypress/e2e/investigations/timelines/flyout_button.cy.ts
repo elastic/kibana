@@ -23,7 +23,7 @@ import {
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('timeline flyout button', () => {
+describe('timeline flyout button', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

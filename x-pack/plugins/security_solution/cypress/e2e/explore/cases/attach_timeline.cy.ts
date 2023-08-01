@@ -19,7 +19,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
 import { createCase } from '../../../tasks/api_calls/cases';
 
-describe('attach timeline to case', () => {
+describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
     before(() => {
       cleanKibana();

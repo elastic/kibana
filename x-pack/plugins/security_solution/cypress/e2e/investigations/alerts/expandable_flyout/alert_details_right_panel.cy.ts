@@ -68,6 +68,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout right panel',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const rule = getNewRule();
 

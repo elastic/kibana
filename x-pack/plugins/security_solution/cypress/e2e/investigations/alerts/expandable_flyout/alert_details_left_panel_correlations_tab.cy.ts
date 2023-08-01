@@ -37,6 +37,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 describe(
   'Expandable flyout left panel correlations',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

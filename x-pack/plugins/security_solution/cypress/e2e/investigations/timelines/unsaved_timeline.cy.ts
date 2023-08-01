@@ -33,7 +33,7 @@ import {
 } from '../../../tasks/timeline';
 import { HOSTS_URL, MANAGE_URL } from '../../../urls/navigation';
 
-describe('Save Timeline Prompts', () => {
+describe('Save Timeline Prompts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

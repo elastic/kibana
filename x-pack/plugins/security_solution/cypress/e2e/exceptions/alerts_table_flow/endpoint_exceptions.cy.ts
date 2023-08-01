@@ -45,7 +45,7 @@ import {
   goToEndpointExceptionsTab,
 } from '../../../tasks/rule_details';
 
-describe('Endpoint Exceptions workflows from Alert', () => {
+describe('Endpoint Exceptions workflows from Alert', { tags: ['@ess', '@serverless'] }, () => {
   const expectedNumberOfAlerts = 1;
   const ITEM_NAME = 'Sample Exception List Item';
   const ITEM_NAME_EDIT = 'Sample Exception List Item';

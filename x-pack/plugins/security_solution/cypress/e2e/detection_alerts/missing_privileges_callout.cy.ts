@@ -36,7 +36,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts', () => {
+describe('Detections > Callouts', { tags: '@ess' }, () => {
   const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
   before(() => {

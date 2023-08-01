@@ -25,6 +25,7 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from 
 describe(
   'Expandable flyout left panel threat intelligence',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

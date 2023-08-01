@@ -8,25 +8,29 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  defaultCommandTimeout: 60000,
+  defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@ess',
+    grepTags: '@serverless',
   },
-  execTimeout: 60000,
-  pageLoadTimeout: 60000,
-  responseTimeout: 60000,
+  execTimeout: 150000,
+  pageLoadTimeout: 150000,
+  numTestsKeptInMemory: 0,
+  retries: {
+    runMode: 1,
+  },
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
-  numTestsKeptInMemory: 10,
   e2e: {
-    experimentalRunAllSpecs: true,
+    baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
+    specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires

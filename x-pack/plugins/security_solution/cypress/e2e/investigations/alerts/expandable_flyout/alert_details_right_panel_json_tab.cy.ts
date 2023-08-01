@@ -19,6 +19,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 describe(
   'Alert details expandable flyout right panel json tab',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -30,7 +31,7 @@ describe(
       openJsonTab();
     });
 
-    it('should display the json component', { tags: '@brokenInServerless' }, () => {
+    it('should display the json component', () => {
       // the json component is rendered within a dom element with overflow, so Cypress isn't finding it
       // this next line is a hack that vertically scrolls down to ensure Cypress finds it
       scrollWithinDocumentDetailsExpandableFlyoutRightSection(0, 7000);

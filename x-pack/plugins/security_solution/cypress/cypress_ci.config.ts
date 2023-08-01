@@ -11,6 +11,10 @@ import { esArchiver } from './support/es_archiver';
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   defaultCommandTimeout: 150000,
+  env: {
+    grepFilterSpecs: true,
+    grepTags: '@ess',
+  },
   execTimeout: 150000,
   pageLoadTimeout: 150000,
   numTestsKeptInMemory: 0,

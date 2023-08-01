@@ -34,7 +34,7 @@ import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
 // TODO: See https://github.com/elastic/kibana/issues/154694
-describe.skip('Rules table: auto-refresh', () => {
+describe.skip('Rules table: auto-refresh', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

@@ -26,7 +26,7 @@ import {
 
 import { getNewRule } from '../../../../objects/rule';
 
-describe('Rules table: filtering', () => {
+describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

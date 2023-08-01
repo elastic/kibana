@@ -27,7 +27,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Rule actions during detection rule creation', () => {
+describe('Rule actions during detection rule creation', { tags: ['@ess', '@serverless'] }, () => {
   const indexConnector = getIndexConnector();
 
   before(() => {

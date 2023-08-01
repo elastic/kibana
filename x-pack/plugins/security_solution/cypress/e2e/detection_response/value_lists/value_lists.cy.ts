@@ -28,7 +28,7 @@ import {
   VALUE_LISTS_MODAL_ACTIVATOR,
 } from '../../../screens/lists';
 
-describe('value lists', () => {
+describe('value lists', { tags: ['@ess', '@serverless'] }, () => {
   describe('management modal', () => {
     beforeEach(() => {
       login();

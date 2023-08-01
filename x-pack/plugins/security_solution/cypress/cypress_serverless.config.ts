@@ -8,12 +8,9 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
-  env: {
-    grepFilterSpecs: true,
-    grepTags: '@ess',
-  },
   execTimeout: 60000,
   pageLoadTimeout: 60000,
   responseTimeout: 60000,
@@ -24,6 +21,10 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
+  env: {
+    grepFilterSpecs: true,
+    grepTags: '@serverless --@brokenInServerless',
+  },
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,

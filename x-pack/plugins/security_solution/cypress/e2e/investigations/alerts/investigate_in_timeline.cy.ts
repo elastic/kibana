@@ -26,7 +26,7 @@ import {
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
 
-describe('Investigate in timeline', () => {
+describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

@@ -121,7 +121,7 @@ const defaultRuleData = {
   timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
 
-describe('Detection rules, bulk edit', () => {
+describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

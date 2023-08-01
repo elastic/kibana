@@ -21,7 +21,7 @@ import { login, visit } from '../../../tasks/login';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
-describe('risk tab', () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_hosts');

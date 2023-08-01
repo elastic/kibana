@@ -23,7 +23,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 import { HOSTS_URL } from '../../../urls/navigation';
 
 const defaultPageSize = 25;
-describe('Pagination', () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'timeline');

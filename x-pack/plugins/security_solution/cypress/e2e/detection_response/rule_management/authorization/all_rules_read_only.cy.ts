@@ -26,7 +26,7 @@ import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-describe('All rules - read only', () => {
+describe('All rules - read only', { tags: '@ess' }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: '1' }));

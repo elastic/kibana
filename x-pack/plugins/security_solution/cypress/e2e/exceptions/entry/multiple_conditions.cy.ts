@@ -31,6 +31,7 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 describe(
   'Add multiple conditions and validate the generated exceptions',
   { testIsolation: false },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');

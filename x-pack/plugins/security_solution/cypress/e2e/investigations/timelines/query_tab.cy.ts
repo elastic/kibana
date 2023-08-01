@@ -30,7 +30,7 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline query tab', () => {
+describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

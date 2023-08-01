@@ -57,7 +57,7 @@ describe('Sourcerer', () => {
     });
   });
 
-  describe('Default scope', () => {
+  describe('Default scope', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       login();

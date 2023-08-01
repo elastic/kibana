@@ -22,7 +22,7 @@ import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
-describe('Shared exception lists - read only', () => {
+describe('Shared exception lists - read only', { tags: '@ess' }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
   });

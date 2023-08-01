@@ -59,7 +59,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('New Terms rules', () => {
+describe('New Terms rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

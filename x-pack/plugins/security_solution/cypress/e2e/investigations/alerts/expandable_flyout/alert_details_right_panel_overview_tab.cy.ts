@@ -71,6 +71,7 @@ import {
 describe(
   'Alert details expandable flyout right panel overview tab',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const rule = getNewRule();
 

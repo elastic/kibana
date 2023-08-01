@@ -61,7 +61,7 @@ const loadEndpointRuleAndAlerts = () => {
   waitForAlertsToPopulate();
 };
 
-describe('Rule Exceptions workflows from Alert', () => {
+describe('Rule Exceptions workflows from Alert', { tags: ['@ess', '@serverless'] }, () => {
   const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception Item';
   const ITEM_NAME_EDIT = 'Sample Exception Item Edit';

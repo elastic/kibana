@@ -22,7 +22,7 @@ import {
 import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
 import { postDataView } from '../../../tasks/common';
 
-describe('pinned filters', () => {
+describe('pinned filters', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     postDataView('audit*');
   });

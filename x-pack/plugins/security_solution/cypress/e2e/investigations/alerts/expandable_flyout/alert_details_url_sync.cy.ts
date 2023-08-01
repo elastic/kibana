@@ -18,6 +18,7 @@ import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expand
 describe(
   'Expandable flyout state sync',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const rule = getNewRule();
 

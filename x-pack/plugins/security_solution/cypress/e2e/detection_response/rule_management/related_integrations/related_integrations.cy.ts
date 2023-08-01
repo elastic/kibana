@@ -52,7 +52,7 @@ Note that the rule we are using for testing purposes has the following character
   - Integration: unknown
 */
 
-describe('Related integrations', () => {
+describe('Related integrations', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

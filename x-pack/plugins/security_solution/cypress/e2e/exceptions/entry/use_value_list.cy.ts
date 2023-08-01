@@ -49,7 +49,7 @@ const goToRulesAndOpenValueListModal = () => {
   openValueListsModal();
 };
 
-describe('Use Value list in exception entry', () => {
+describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
