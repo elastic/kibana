@@ -22,10 +22,7 @@ export function StorageExplorerView() {
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const {
-    services: {
-      fetchStorageExplorerSummary,
-      fetchStorageExplorerHostBreakdownSizeChart: fetchStorageExplorerHostBreakdown,
-    },
+    services: { fetchStorageExplorerSummary, fetchStorageExplorerHostBreakdownSizeChart },
   } = useProfilingDependencies();
 
   const storageExplorerSummaryState = useTimeRangeAsync(
@@ -42,14 +39,19 @@ export function StorageExplorerView() {
 
   const storageExplorerHostBreakdownState = useTimeRangeAsync(
     ({ http }) => {
-      return fetchStorageExplorerHostBreakdown({
+      return fetchStorageExplorerHostBreakdownSizeChart({
         http,
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
         kuery,
       });
     },
-    [fetchStorageExplorerHostBreakdown, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
+    [
+      fetchStorageExplorerHostBreakdownSizeChart,
+      timeRange.inSeconds.start,
+      timeRange.inSeconds.end,
+      kuery,
+    ]
   );
 
   return (
