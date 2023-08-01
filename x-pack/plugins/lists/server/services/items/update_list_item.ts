@@ -27,6 +27,7 @@ export interface UpdateListItemOptions {
   user: string;
   meta: MetaOrUndefined;
   dateNow?: string;
+  isPatch?: boolean;
 }
 
 export const updateListItem = async ({
@@ -38,6 +39,7 @@ export const updateListItem = async ({
   user,
   meta,
   dateNow,
+  isPatch = false,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
   const listItem = await getListItem({ esClient, id, listItemIndex });
@@ -58,6 +60,9 @@ export const updateListItem = async ({
       }));
 
       const params = {
+        // when assigning undefined in painless, it will remover property and wil set it to null
+        // for patch we don't want to remove unspecified value in payload
+        assignEmpty: !isPatch,
         keyValues,
         meta,
         updated_at: updatedAt,
@@ -81,7 +86,9 @@ export const updateListItem = async ({
                 def entry = params.keyValues[i];
                 ctx._source[entry.key] = entry.value;
               }
-              ctx._source.meta = params.meta;
+              if (params.assignEmpty == true || params.containsKey('meta')) {
+                ctx._source.meta = params.meta;
+              }
               ctx._source.updated_at = params.updated_at;
               ctx._source.updated_by = params.updated_by;
           `,
@@ -95,7 +102,7 @@ export const updateListItem = async ({
         deserializer: listItem.deserializer,
         id,
         list_id: listItem.list_id,
-        meta,
+        meta: isPatch ? meta ?? listItem.meta : meta,
         serializer: listItem.serializer,
         tie_breaker_id: listItem.tie_breaker_id,
         type: listItem.type,

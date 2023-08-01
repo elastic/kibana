@@ -32,6 +32,7 @@ export interface UpdateListOptions {
   meta: MetaOrUndefined;
   dateNow?: string;
   version: VersionOrUndefined;
+  isPatch?: boolean;
 }
 
 export const updateList = async ({
@@ -44,6 +45,7 @@ export const updateList = async ({
   meta,
   dateNow,
   version,
+  isPatch = false,
 }: UpdateListOptions): Promise<ListSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
   const list = await getList({ esClient, id, listIndex });
@@ -72,14 +74,27 @@ export const updateList = async ({
       refresh: false,
       script: {
         lang: 'painless',
-        params,
+        params: {
+          ...params,
+          // when assigning undefined in painless, it will remover property and wil set it to null
+          // for patch we don't want to remove unspecified value in payload 
+          assignEmpty: !isPatch,
+        },
         source: `
+          if (params.assignEmpty == true || params.containsKey('description')) {
             ctx._source.description = params.description;
+          }
+          if (params.assignEmpty == true || params.containsKey('meta')) {
             ctx._source.meta = params.meta;
+          }
+          if (params.assignEmpty == true || params.containsKey('name')) {
             ctx._source.name = params.name;
-            ctx._source.updated_at = params.updated_at;
-            ctx._source.updated_by = params.updated_by;
+          }
+          if (params.assignEmpty == true || params.containsKey('version')) {
             ctx._source.version = params.version;
+          }
+          ctx._source.updated_at = params.updated_at;
+          ctx._source.updated_by = params.updated_by;
         `,
       },
     });
@@ -92,7 +107,7 @@ export const updateList = async ({
       deserializer: list.deserializer,
       id,
       immutable: list.immutable,
-      meta,
+      meta: isPatch ? meta ?? list.meta : meta,
       name: name ?? list.name,
       serializer: list.serializer,
       tie_breaker_id: list.tie_breaker_id,

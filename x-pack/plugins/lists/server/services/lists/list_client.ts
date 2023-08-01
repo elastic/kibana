@@ -86,7 +86,6 @@ import {
   getList,
   getListIndex,
   getListTemplate,
-  patchList,
   updateList,
 } from '.';
 
@@ -787,6 +786,37 @@ export class ListClient {
       _version,
       esClient,
       id,
+      isPatch: false,
+      listItemIndex,
+      meta,
+      user,
+      value,
+    });
+  };
+
+  /**
+   * Patches a list item's value given the id of the list item.
+   * See {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html}
+   * for more information around optimistic concurrency control.
+   * @param options
+   * @param options._version This is the version, useful for optimistic concurrency control.
+   * @param options.id id of the list to replace the list item with.
+   * @param options.value The value of the list item to replace.
+   * @param options.meta Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" to not update meta values.
+   */
+  public patchListItem = async ({
+    _version,
+    id,
+    value,
+    meta,
+  }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
+    const { esClient, user } = this;
+    const listItemIndex = this.getListItemIndex();
+    return updateListItem({
+      _version,
+      esClient,
+      id,
+      isPatch: true,
       listItemIndex,
       meta,
       user,
@@ -821,6 +851,7 @@ export class ListClient {
       description,
       esClient,
       id,
+      isPatch: false,
       listIndex,
       meta,
       name,
@@ -840,6 +871,7 @@ export class ListClient {
    * @param options.version Updates the version of the list.
    */
   public patchList = async ({
+    _version,
     id,
     name,
     description,
@@ -848,10 +880,12 @@ export class ListClient {
   }: UpdateListOptions): Promise<ListSchema | null> => {
     const { esClient, user } = this;
     const listIndex = this.getListIndex();
-    return patchList({
+    return updateList({
+      _version,
       description,
       esClient,
       id,
+      isPatch: true,
       listIndex,
       meta,
       name,

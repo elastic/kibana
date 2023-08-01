@@ -14,4 +14,3 @@ export * from './get_list';
 export * from './list_client';
 export * from './types';
 export * from './update_list';
-export * from './patch_list';
