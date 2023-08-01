@@ -294,7 +294,7 @@ export class SettingsPageObject extends FtrService {
   async getFieldFilterTabCount() {
     return await this.retry.try(async () => {
       const text = await this.testSubjects.getVisibleText('tab-sourceFilters');
-      return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+      return text.split(' ')[2].replace(/\((.*)\)/, '$1');
     });
   }
 

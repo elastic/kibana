@@ -517,7 +517,7 @@ export type DataViewSpec = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
-  clientId?: number;
+  clientId?: string | number;
 };
 
 export interface HasDataService {

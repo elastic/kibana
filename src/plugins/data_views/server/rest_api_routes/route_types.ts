@@ -17,7 +17,7 @@ import { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
 
 export type SourceFilterRestResponse = {
   value: string;
-  clientId?: number;
+  clientId?: string | number;
 };
 
 export type AggregationRestrictionsRestResponse = Record<

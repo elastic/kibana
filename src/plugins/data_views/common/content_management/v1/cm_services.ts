@@ -27,7 +27,7 @@ const dataViewAttributesSchema = schema.object(
       schema.arrayOf(
         schema.object({
           value: schema.string(),
-          clientId: schema.maybe(schema.number()),
+          clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         })
       )
     ),

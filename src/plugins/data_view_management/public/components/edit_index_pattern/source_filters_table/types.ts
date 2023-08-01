@@ -9,5 +9,5 @@
 /** @internal **/
 export interface SourceFiltersTableFilter {
   value: string;
-  clientId: number;
+  clientId: string | number;
 }
