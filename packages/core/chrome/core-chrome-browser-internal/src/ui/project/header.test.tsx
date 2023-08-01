@@ -9,8 +9,7 @@
 import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ProjectHeader, Props as ProjectHeaderProps } from './header';
@@ -23,7 +22,6 @@ describe('Header', () => {
     breadcrumbs$: Rx.of([]),
     actionMenu$: Rx.of(undefined),
     docLinks: docLinksServiceMock.createStartContract(),
-    isVisible$: new Rx.BehaviorSubject(true),
     globalHelpExtensionMenuLinks$: Rx.of([]),
     headerBanner$: Rx.of(),
     helpExtension$: Rx.of(undefined),
@@ -72,20 +70,5 @@ describe('Header', () => {
     await toggleNav();
     await toggleNav();
     await toggleNav();
-  });
-
-  it('can be invisible', () => {
-    const isVisible$ = new Rx.BehaviorSubject(false);
-    const component = mountWithIntl(
-      <ProjectHeader {...mockProps} isVisible$={isVisible$}>
-        <EuiHeader>Hello, visible!</EuiHeader>
-      </ProjectHeader>
-    );
-    expect(component.find('EuiHeader').exists()).toBeFalsy();
-
-    act(() => isVisible$.next(true));
-    component.update();
-
-    expect(component.find('EuiHeader').exists()).toBeTruthy();
   });
 });
