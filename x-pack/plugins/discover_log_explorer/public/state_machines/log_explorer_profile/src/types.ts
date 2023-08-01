@@ -55,11 +55,11 @@ export type LogExplorerProfileTypeState =
     }
   | {
       value: 'initialized.controlGroups.idle';
-      context: WithControlPanelGroupAPI & WithControlPanels;
+      context: WithDatasetSelection & WithControlPanelGroupAPI & WithControlPanels;
     }
   | {
       value: 'initialized.controlGroups.updatingControlPanels';
-      context: WithControlPanelGroupAPI & WithControlPanels;
+      context: WithDatasetSelection & WithControlPanelGroupAPI & WithControlPanels;
     };
 
 export type LogExplorerProfileContext = LogExplorerProfileTypeState['context'];

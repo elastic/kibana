@@ -97,9 +97,7 @@ const extractDatasetSelectionFromIndex = ({
 }) => {
   // If the index parameter doesn't exists, use initialContext value or fallback to AllDatasetSelection
   if (!index) {
-    return (
-      ('datasetSelection' in context && context.datasetSelection) ?? AllDatasetSelection.create()
-    );
+    return context.datasetSelection ?? AllDatasetSelection.create();
   }
 
   const rawDatasetSelection = decodeDatasetSelectionId(index);

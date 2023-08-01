@@ -14,7 +14,6 @@ export const useDatasetSelection = (
   logExplorerProfileStateService: LogExplorerProfileStateService
 ) => {
   const datasetSelection = useSelector(logExplorerProfileStateService, (state) => {
-    if (!('datasetSelection' in state.context)) return;
     return state.context.datasetSelection;
   });
 
