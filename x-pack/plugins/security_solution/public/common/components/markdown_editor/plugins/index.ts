@@ -10,7 +10,6 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
-
 import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
@@ -29,15 +28,15 @@ export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 
 export const uiPlugins = ({
   licenseIsPlatinum,
-  upsellInvestigationGuide,
+  insightsUpsellingMessage,
 }: {
   licenseIsPlatinum: boolean;
-  upsellInvestigationGuide: string | null;
+  insightsUpsellingMessage: string | null;
 }) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
   const insightPluginWithLicense = insightMarkdownPlugin.plugin({
     licenseIsPlatinum,
-    upsellInvestigationGuide,
+    insightsUpsellingMessage,
   });
   if (currentPlugins.includes(insightPluginWithLicense.name) === false) {
     nonStatefulUiPlugins.push(timelineMarkdownPlugin.plugin);

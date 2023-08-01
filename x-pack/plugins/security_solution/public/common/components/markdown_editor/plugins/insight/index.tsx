@@ -543,19 +543,19 @@ const exampleInsight = `${insightPrefix}{
 
 export const plugin = ({
   licenseIsPlatinum,
-  upsellInvestigationGuide,
+  insightsUpsellingMessage,
 }: {
   licenseIsPlatinum: boolean;
-  upsellInvestigationGuide: string | null;
+  insightsUpsellingMessage: string | null;
 }) => {
   const label = licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INSIGHT_UPSELL;
 
   return {
     name: 'insights',
     button: {
-      label: upsellInvestigationGuide ?? label,
+      label: insightsUpsellingMessage ?? label,
       iconType: 'timelineWithArrow',
-      isDisabled: !licenseIsPlatinum || !!upsellInvestigationGuide,
+      isDisabled: !licenseIsPlatinum || !!insightsUpsellingMessage,
     },
     helpText: (
       <div>

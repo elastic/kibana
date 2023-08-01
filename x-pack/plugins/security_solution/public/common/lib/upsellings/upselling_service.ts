@@ -8,24 +8,39 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '../../../../common';
-import type { SectionUpsellings, PageUpsellings, UpsellingSectionId } from './types';
+import type {
+  SectionUpsellings,
+  PageUpsellings,
+  UpsellingSectionId,
+  UpsellingMessageId,
+  MessageUpsellings,
+} from './types';
 
 export class UpsellingService {
-  private sections: Map<UpsellingSectionId, React.ComponentType | string>;
+  private sections: Map<UpsellingSectionId, React.ComponentType>;
   private pages: Map<SecurityPageName, React.ComponentType>;
-  private sectionsSubject$: BehaviorSubject<Map<UpsellingSectionId, React.ComponentType | string>>;
+  private messages: Map<UpsellingMessageId, string>;
+
+  private messagesSubject$: BehaviorSubject<Map<UpsellingMessageId, string>>;
+  private sectionsSubject$: BehaviorSubject<Map<UpsellingSectionId, React.ComponentType>>;
   private pagesSubject$: BehaviorSubject<Map<SecurityPageName, React.ComponentType>>;
 
-  public sections$: Observable<Map<UpsellingSectionId, React.ComponentType | string>>;
+  public sections$: Observable<Map<UpsellingSectionId, React.ComponentType>>;
   public pages$: Observable<Map<SecurityPageName, React.ComponentType>>;
+  public messages$: Observable<Map<UpsellingMessageId, string>>;
 
   constructor() {
     this.sections = new Map();
     this.sectionsSubject$ = new BehaviorSubject(new Map());
     this.sections$ = this.sectionsSubject$.asObservable();
+
     this.pages = new Map();
     this.pagesSubject$ = new BehaviorSubject(new Map());
     this.pages$ = this.pagesSubject$.asObservable();
+
+    this.messages = new Map();
+    this.messagesSubject$ = new BehaviorSubject(new Map());
+    this.messages$ = this.messagesSubject$.asObservable();
   }
 
   registerSections(sections: SectionUpsellings) {
@@ -40,6 +55,13 @@ export class UpsellingService {
       this.pages.set(pageId as SecurityPageName, component);
     });
     this.pagesSubject$.next(this.pages);
+  }
+
+  registerMessages(messages: MessageUpsellings) {
+    Object.entries(messages).forEach(([messageId, component]) => {
+      this.messages.set(messageId as UpsellingMessageId, component);
+    });
+    this.messagesSubject$.next(this.messages);
   }
 
   isPageUpsellable(id: SecurityPageName) {

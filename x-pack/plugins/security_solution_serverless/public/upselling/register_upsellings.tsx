@@ -12,23 +12,29 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import React, { lazy } from 'react';
+import type {
+  MessageUpsellings,
+  UpsellingMessageId,
+} from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import investigationGuideUpselling from './pages/investigation_guide_upselling';
 const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
 
-interface SectionUpsellingsConfig {
-  pli: AppFeatureKey;
-  component: React.ComponentType | string;
-}
-
-interface PageUpsellingsConfig {
+interface UpsellingsConfig {
   pli: AppFeatureKey;
   component: React.ComponentType;
 }
 
-type UpsellingPages = Array<PageUpsellingsConfig & { pageName: SecurityPageName }>;
-type UpsellingSections = Array<SectionUpsellingsConfig & { id: UpsellingSectionId }>;
+interface UpsellingsMessageConfig {
+  pli: AppFeatureKey;
+  message: string;
+  id: UpsellingMessageId;
+}
+
+type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
+type UpsellingMessages = UpsellingsMessageConfig[];
 
 export const registerUpsellings = (
   upselling: UpsellingService,
@@ -56,8 +62,19 @@ export const registerUpsellings = (
     {}
   );
 
+  const upsellingMessagesToRegister = upsellingMessages.reduce<MessageUpsellings>(
+    (messagesUpsellings, { id, pli, message }) => {
+      if (!enabledPLIsSet.has(pli)) {
+        messagesUpsellings[id] = message;
+      }
+      return messagesUpsellings;
+    },
+    {}
+  );
+
   upselling.registerPages(upsellingPagesToRegister);
   upselling.registerSections(upsellingSectionsToRegister);
+  upselling.registerMessages(upsellingMessagesToRegister);
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
@@ -87,10 +104,13 @@ export const upsellingSections: UpsellingSections = [
   //   pli: AppFeatureKey.advancedInsights,
   //   component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   // },
+];
 
+// Upsellings for sections, linked by arbitrary ids
+export const upsellingMessages: UpsellingMessages = [
   {
     id: 'investigation_guide',
     pli: AppFeatureKey.investigationGuide,
-    component: investigationGuideUpselling(AppFeatureKey.investigationGuide),
+    message: investigationGuideUpselling(AppFeatureKey.investigationGuide),
   },
 ];

@@ -16,7 +16,7 @@ export const UPGRADE_INVESTIGATION_GUIDE = (productTypeRequired: AppFeatureKey) 
     },
   });
 
-export const investigationGuideUpselling = (requiredPLI: AppFeatureKey) =>
+export const investigationGuideUpselling = (requiredPLI: AppFeatureKey): string =>
   UPGRADE_INVESTIGATION_GUIDE(requiredPLI);
 
 // eslint-disable-next-line import/no-default-export
