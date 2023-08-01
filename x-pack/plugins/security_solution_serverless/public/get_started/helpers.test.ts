@@ -14,12 +14,8 @@ import {
 } from './helpers';
 import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
 import {
-  RespondToThreatsSteps,
-  MasterTheInvestigationsWorkflowSteps,
-  OptimizeYourWorkSpaceSteps,
   ExploreSteps,
   ConfigureSteps,
-  GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
   SectionId,
@@ -147,63 +143,19 @@ describe('setupActiveSections', () => {
     expect(
       getCard(GetSetUpCardId.explore, SectionId.getSetUp, activeSections).activeStepIds
     ).toEqual([ExploreSteps.viewAlerts, ExploreSteps.analyzeData]);
-
-    expect(
-      getCard(
-        GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        SectionId.getMoreFromElasticSecurity,
-        activeSections
-      ).activeStepIds
-    ).toEqual([
-      MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
-      MasterTheInvestigationsWorkflowSteps.exploreProcess,
-      MasterTheInvestigationsWorkflowSteps.exploreUser,
-      MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-      MasterTheInvestigationsWorkflowSteps.introductionToCases,
-    ]);
-
-    expect(
-      getCard(
-        GetMoreFromElasticSecurityCardId.respondToThreats,
-        SectionId.getMoreFromElasticSecurity,
-        activeSections
-      ).activeStepIds
-    ).toEqual([]);
-
-    expect(
-      getCard(
-        GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-        SectionId.getMoreFromElasticSecurity,
-        activeSections
-      ).activeStepIds
-    ).toEqual([
-      OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-      OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-      OptimizeYourWorkSpaceSteps.createCustomRules,
-      OptimizeYourWorkSpaceSteps.introductionToExceptions,
-      OptimizeYourWorkSpaceSteps.connectNotification,
-    ]);
   });
 
   it('should set up active cards based on finished steps', () => {
     const finishedSteps = {
-      [GetMoreFromElasticSecurityCardId.respondToThreats]: new Set([
-        RespondToThreatsSteps.automated,
-      ]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
     const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
 
-    expect(
-      getCard(
-        GetMoreFromElasticSecurityCardId.respondToThreats,
-        SectionId.getMoreFromElasticSecurity,
-        activeSections
-      )
-    ).toEqual({
-      activeStepIds: [],
-      id: GetMoreFromElasticSecurityCardId.respondToThreats,
+    expect(getCard(GetSetUpCardId.introduction, SectionId.getSetUp, activeSections)).toEqual({
+      activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+      id: GetSetUpCardId.introduction,
       stepsLeft: 0,
       timeInMins: 0,
     });
@@ -216,7 +168,11 @@ describe('setupActiveSections', () => {
 
     const activeSections = setupActiveSections(finishedSteps, activeProducts);
 
-    expect(activeSections).toBeNull();
+    expect(activeSections).toEqual({
+      activeSections: null,
+      totalActiveSteps: null,
+      totalStepsLeft: null,
+    });
   });
 
   it('should handle null or empty cards in sections', () => {
@@ -233,7 +189,11 @@ describe('setupActiveSections', () => {
 
     const activeSections = setupActiveSections(finishedSteps, activeProducts);
 
-    expect(activeSections).toEqual({});
+    expect(activeSections).toEqual({
+      activeSections: {},
+      totalActiveSteps: 0,
+      totalStepsLeft: 0,
+    });
 
     mockSections.mockRestore();
   });
@@ -262,23 +222,6 @@ describe('updateActiveSections', () => {
         stepsLeft: 2,
       },
     },
-    [SectionId.getMoreFromElasticSecurity]: {
-      [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-    },
   } as ActiveSections;
 
   it('should update the active card based on finished steps and active products', () => {
@@ -304,16 +247,20 @@ describe('updateActiveSections', () => {
     });
 
     expect(updatedSections).toEqual({
-      ...testActiveSections,
-      [SectionId.getSetUp]: {
-        ...testActiveSections[SectionId.getSetUp],
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
-          timeInMins: 0,
-          stepsLeft: 0,
-          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+      activeSections: {
+        ...testActiveSections,
+        [SectionId.getSetUp]: {
+          ...testActiveSections[SectionId.getSetUp],
+          [GetSetUpCardId.introduction]: {
+            id: GetSetUpCardId.introduction,
+            timeInMins: 0,
+            stepsLeft: 0,
+            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+          },
         },
       },
+      totalActiveSteps: 1,
+      totalStepsLeft: 0,
     });
   });
 
@@ -330,7 +277,11 @@ describe('updateActiveSections', () => {
       cardId,
     });
 
-    expect(updatedSections).toBeNull();
+    expect(updatedSections).toEqual({
+      activeSections: null,
+      totalStepsLeft: null,
+      totalActiveSteps: null,
+    });
   });
 
   it('should return null if the card or activeSections is not found', () => {
@@ -346,6 +297,10 @@ describe('updateActiveSections', () => {
       cardId,
     });
 
-    expect(updatedSections).toEqual(activeSections);
+    expect(updatedSections).toEqual({
+      activeSections,
+      totalStepsLeft: null,
+      totalActiveSteps: null,
+    });
   });
 });

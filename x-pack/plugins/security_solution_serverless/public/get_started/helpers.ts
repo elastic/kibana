@@ -101,7 +101,7 @@ export const setupActiveSections = (
         },
         { activeSections: {} as ActiveSections, totalStepsLeft: 0, totalActiveSteps: 0 }
       )
-    : { activeSections: {} as ActiveSections, totalStepsLeft: null, totalActiveSteps: null };
+    : { activeSections: null, totalStepsLeft: null, totalActiveSteps: null };
 
 export const updateActiveSections = ({
   activeProducts,

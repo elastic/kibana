@@ -8,18 +8,13 @@ import React from 'react';
 
 import {
   SectionId,
-  GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
   type Section,
   ConfigureSteps,
   ExploreSteps,
-  MasterTheInvestigationsWorkflowSteps,
-  RespondToThreatsSteps,
-  OptimizeYourWorkSpaceSteps,
 } from './types';
 import * as i18n from './translations';
-import respond from './images/respond.svg';
 import explore from './images/explore.svg';
 import { ProductLine } from '../../common/product';
 import { FleetOverviewLink } from './step_links/fleet_overview_link';
@@ -90,67 +85,6 @@ const exploreSteps = [
   },
 ];
 
-const masterTheInvestigationsWorkflowSteps = [
-  {
-    id: MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
-    title: i18n.MASTER_THE_INVESTIGATION_STEP1,
-  },
-  {
-    id: MasterTheInvestigationsWorkflowSteps.exploreProcess,
-    title: i18n.MASTER_THE_INVESTIGATION_STEP2,
-    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
-  },
-  {
-    id: MasterTheInvestigationsWorkflowSteps.exploreUser,
-    title: i18n.MASTER_THE_INVESTIGATION_STEP3,
-    productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
-  },
-  {
-    id: MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-    title: i18n.MASTER_THE_INVESTIGATION_STEP4,
-  },
-  {
-    id: MasterTheInvestigationsWorkflowSteps.introductionToCases,
-    title: i18n.MASTER_THE_INVESTIGATION_STEP5,
-  },
-];
-
-const respondToThreatsSteps = [
-  {
-    id: RespondToThreatsSteps.automated,
-    title: i18n.RESPOND_TO_THREATS_STEP1,
-    productLineRequired: [ProductLine.endpoint],
-  },
-  {
-    id: RespondToThreatsSteps.takeControlOfEndpoint,
-    title: i18n.RESPOND_TO_THREATS_STEP2,
-    productLineRequired: [ProductLine.endpoint],
-  },
-];
-
-const optimizeYourWorkSpaceSteps = [
-  {
-    id: OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP1,
-  },
-  {
-    id: OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP2,
-  },
-  {
-    id: OptimizeYourWorkSpaceSteps.createCustomRules,
-    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP3,
-  },
-  {
-    id: OptimizeYourWorkSpaceSteps.introductionToExceptions,
-    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP4,
-  },
-  {
-    id: OptimizeYourWorkSpaceSteps.connectNotification,
-    title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP5,
-  },
-];
-
 export const sections: Section[] = [
   {
     id: SectionId.getSetUp,
@@ -173,30 +107,6 @@ export const sections: Section[] = [
         title: i18n.EXPLORE_TITLE,
         id: GetSetUpCardId.explore,
         steps: exploreSteps,
-      },
-    ],
-  },
-  {
-    id: SectionId.getMoreFromElasticSecurity,
-    title: i18n.GET_MORE_TITLE,
-    cards: [
-      {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.MASTER_THE_INVESTIGATION_TITLE,
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        steps: masterTheInvestigationsWorkflowSteps,
-      },
-      {
-        icon: { type: respond, size: 'xl' },
-        title: i18n.RESPOND_TO_THREATS_TITLE,
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
-        steps: respondToThreatsSteps,
-      },
-      {
-        icon: { type: 'spacesApp', size: 'xl' },
-        title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-        steps: optimizeYourWorkSpaceSteps,
       },
     ],
   },

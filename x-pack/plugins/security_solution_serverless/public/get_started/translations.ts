@@ -286,13 +286,6 @@ export const GET_MORE_TITLE = i18n.translate(
   }
 );
 
-export const MASTER_THE_INVESTIGATION_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.title',
-  {
-    defaultMessage: 'Master the investigations workflow',
-  }
-);
-
 export const MASTER_THE_INVESTIGATION_STEP1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.masterTheInvestigationsWorkflow.step1',
   {
@@ -328,13 +321,6 @@ export const MASTER_THE_INVESTIGATION_STEP5 = i18n.translate(
   }
 );
 
-export const RESPOND_TO_THREATS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.title',
-  {
-    defaultMessage: 'Respond to threats with automation',
-  }
-);
-
 export const RESPOND_TO_THREATS_STEP1 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.step1',
   {
@@ -346,13 +332,6 @@ export const RESPOND_TO_THREATS_STEP2 = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.respondToThreatsWithAutomation.step2',
   {
     defaultMessage: 'Take control of your endpoints with the Response Console',
-  }
-);
-
-export const OPTIMIZE_YOUR_WORKSPACE_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.optimizeYourWorkspace.title',
-  {
-    defaultMessage: 'Optimize your workspace',
   }
 );
 

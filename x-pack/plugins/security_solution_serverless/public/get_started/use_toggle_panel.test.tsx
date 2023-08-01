@@ -12,12 +12,8 @@ import type { SecurityProductTypes } from '../../common/config';
 import {
   ConfigureSteps,
   ExploreSteps,
-  GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
-  MasterTheInvestigationsWorkflowSteps,
-  OptimizeYourWorkSpaceSteps,
-  RespondToThreatsSteps,
   SectionId,
 } from './types';
 
@@ -80,41 +76,6 @@ describe('useTogglePanel', () => {
             activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
           },
         },
-        [SectionId.getMoreFromElasticSecurity]: {
-          [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-            id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-            timeInMins: 0,
-            stepsLeft: 5,
-            activeStepIds: [
-              MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
-              MasterTheInvestigationsWorkflowSteps.exploreProcess,
-              MasterTheInvestigationsWorkflowSteps.exploreUser,
-              MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-              MasterTheInvestigationsWorkflowSteps.introductionToCases,
-            ],
-          },
-          [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-            id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-            timeInMins: 0,
-            stepsLeft: 5,
-            activeStepIds: [
-              OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-              OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-              OptimizeYourWorkSpaceSteps.createCustomRules,
-              OptimizeYourWorkSpaceSteps.introductionToExceptions,
-              OptimizeYourWorkSpaceSteps.connectNotification,
-            ],
-          },
-          [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-            id: GetMoreFromElasticSecurityCardId.respondToThreats,
-            timeInMins: 0,
-            stepsLeft: 2,
-            activeStepIds: [
-              RespondToThreatsSteps.automated,
-              RespondToThreatsSteps.takeControlOfEndpoint,
-            ],
-          },
-        },
       })
     );
   });
@@ -156,41 +117,6 @@ describe('useTogglePanel', () => {
             timeInMins: 0,
             stepsLeft: 2,
             activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
-          },
-        },
-        [SectionId.getMoreFromElasticSecurity]: {
-          [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-            id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-            timeInMins: 0,
-            stepsLeft: 5,
-            activeStepIds: [
-              MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
-              MasterTheInvestigationsWorkflowSteps.exploreProcess,
-              MasterTheInvestigationsWorkflowSteps.exploreUser,
-              MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-              MasterTheInvestigationsWorkflowSteps.introductionToCases,
-            ],
-          },
-          [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-            id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-            timeInMins: 0,
-            stepsLeft: 5,
-            activeStepIds: [
-              OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-              OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-              OptimizeYourWorkSpaceSteps.createCustomRules,
-              OptimizeYourWorkSpaceSteps.introductionToExceptions,
-              OptimizeYourWorkSpaceSteps.connectNotification,
-            ],
-          },
-          [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-            id: GetMoreFromElasticSecurityCardId.respondToThreats,
-            timeInMins: 0,
-            stepsLeft: 2,
-            activeStepIds: [
-              RespondToThreatsSteps.automated,
-              RespondToThreatsSteps.takeControlOfEndpoint,
-            ],
           },
         },
       })
@@ -235,36 +161,6 @@ describe('useTogglePanel', () => {
             timeInMins: 0,
             stepsLeft: 2,
             activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
-          },
-        },
-        [SectionId.getMoreFromElasticSecurity]: {
-          [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-            id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-            timeInMins: 0,
-            stepsLeft: 3,
-            activeStepIds: [
-              MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
-              MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-              MasterTheInvestigationsWorkflowSteps.introductionToCases,
-            ],
-          },
-          [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-            id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-            timeInMins: 0,
-            stepsLeft: 5,
-            activeStepIds: [
-              OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-              OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-              OptimizeYourWorkSpaceSteps.createCustomRules,
-              OptimizeYourWorkSpaceSteps.introductionToExceptions,
-              OptimizeYourWorkSpaceSteps.connectNotification,
-            ],
-          },
-          [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-            id: GetMoreFromElasticSecurityCardId.respondToThreats,
-            timeInMins: 0,
-            stepsLeft: 0,
-            activeStepIds: [],
           },
         },
       })

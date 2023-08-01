@@ -18,15 +18,12 @@ import {
   GetStartedPageActions,
   IntroductionSteps,
   SectionId,
-  GetMoreFromElasticSecurityCardId,
   type CardId,
   type StepId,
   type ToggleProductAction,
   type AddFinishedStepAction,
   ConfigureSteps,
   ExploreSteps,
-  OptimizeYourWorkSpaceSteps,
-  MasterTheInvestigationsWorkflowSteps,
 } from './types';
 
 describe('reducer', () => {
@@ -89,8 +86,26 @@ describe('reducer', () => {
       getSetUp: {
         [GetSetUpCardId.introduction]: {
           id: GetSetUpCardId.introduction,
-          stepsLeft: 1,
-          timeInMins: 3,
+          stepsLeft: 0,
+          timeInMins: 0,
+          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+        },
+        [GetSetUpCardId.configure]: {
+          id: GetSetUpCardId.configure,
+          stepsLeft: 4,
+          timeInMins: 0,
+          activeStepIds: [
+            ConfigureSteps.learnAbout,
+            ConfigureSteps.deployElasticAgent,
+            ConfigureSteps.connectToDataSources,
+            ConfigureSteps.enablePrebuiltRules,
+          ],
+        },
+        [GetSetUpCardId.explore]: {
+          id: GetSetUpCardId.explore,
+          stepsLeft: 2,
+          timeInMins: 0,
+          activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
         },
       },
     });
@@ -130,7 +145,14 @@ describe('getActiveSectionsInitialStates', () => {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as unknown as Record<CardId, Set<StepId>>;
 
-    const initialStates = getActiveSectionsInitialStates({ activeProducts, finishedSteps });
+    const {
+      activeSections: initialStates,
+      totalActiveSteps,
+      totalStepsLeft,
+    } = getActiveSectionsInitialStates({
+      activeProducts,
+      finishedSteps,
+    });
 
     expect(initialStates).toEqual({
       [SectionId.getSetUp]: {
@@ -158,36 +180,9 @@ describe('getActiveSectionsInitialStates', () => {
           activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
         },
       },
-      [SectionId.getMoreFromElasticSecurity]: {
-        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-          stepsLeft: 3,
-          timeInMins: 0,
-          activeStepIds: [
-            MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
-            MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
-            MasterTheInvestigationsWorkflowSteps.introductionToCases,
-          ],
-        },
-        [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-          id: GetMoreFromElasticSecurityCardId.respondToThreats,
-          stepsLeft: 0,
-          timeInMins: 0,
-          activeStepIds: [],
-        },
-        [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-          id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-          stepsLeft: 5,
-          timeInMins: 0,
-          activeStepIds: [
-            OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
-            OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
-            OptimizeYourWorkSpaceSteps.createCustomRules,
-            OptimizeYourWorkSpaceSteps.introductionToExceptions,
-            OptimizeYourWorkSpaceSteps.connectNotification,
-          ],
-        },
-      },
     });
+
+    expect(totalActiveSteps).toEqual(7);
+    expect(totalStepsLeft).toEqual(6);
   });
 });

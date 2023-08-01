@@ -32,13 +32,7 @@ export interface Badge {
   id: string;
 }
 
-export type StepId =
-  | IntroductionSteps
-  | ConfigureSteps
-  | ExploreSteps
-  | MasterTheInvestigationsWorkflowSteps
-  | RespondToThreatsSteps
-  | OptimizeYourWorkSpaceSteps;
+export type StepId = IntroductionSteps | ConfigureSteps | ExploreSteps;
 
 export interface Step {
   description?: string[];
@@ -49,7 +43,7 @@ export interface Step {
   timeInMinutes?: number;
 }
 
-export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
+export type CardId = GetSetUpCardId;
 
 export interface Card {
   description?: string | React.ReactNode;
@@ -92,33 +86,6 @@ export enum ConfigureSteps {
 export enum ExploreSteps {
   viewAlerts = 'viewAlerts',
   analyzeData = 'analyzeData',
-}
-
-export enum MasterTheInvestigationsWorkflowSteps {
-  introductionToInvestigations = 'introductionToInvestigations',
-  exploreProcess = 'exploreProcess',
-  exploreUser = 'exploreUser',
-  exploreThreatHunting = 'exploreThreatHunting',
-  introductionToCases = 'introductionToCases',
-}
-
-export enum RespondToThreatsSteps {
-  automated = 'automated',
-  takeControlOfEndpoint = 'takeControlOfEndpoint',
-}
-
-export enum OptimizeYourWorkSpaceSteps {
-  enableThreatIntelligence = 'enableThreatIntelligence',
-  enableEntityAnalytics = 'enableEntityAnalytics',
-  createCustomRules = 'createCustomRules',
-  introductionToExceptions = 'introductionToExceptions',
-  connectNotification = 'connectNotification',
-}
-
-export enum GetMoreFromElasticSecurityCardId {
-  masterTheInvestigationsWorkflow = 'masterTheInvestigationsWorkflow',
-  optimizeYourWorkSpace = 'optimizeYourWorkSpace',
-  respondToThreats = 'respondToThreats',
 }
 
 export interface ActiveCard {

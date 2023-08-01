@@ -9,12 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpSections } from './use_setup_cards';
 import type { ActiveSections, CardId, StepId } from './types';
-import {
-  GetMoreFromElasticSecurityCardId,
-  GetSetUpCardId,
-  IntroductionSteps,
-  SectionId,
-} from './types';
+import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import { ProductLine } from '../../common/product';
 
 const mockEuiTheme: EuiThemeComputed = {
@@ -41,11 +36,6 @@ describe('useSetUpSections', () => {
           stepsLeft: 1,
         },
       },
-      [SectionId.getMoreFromElasticSecurity]: {
-        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        },
-      },
     } as ActiveSections;
 
     const sections = result.current.setUpSections({
@@ -56,7 +46,7 @@ describe('useSetUpSections', () => {
       finishedSteps,
     });
 
-    expect(sections).toHaveLength(2);
+    expect(sections).toHaveLength(1);
   });
 
   it('should return no section if no active cards', () => {
