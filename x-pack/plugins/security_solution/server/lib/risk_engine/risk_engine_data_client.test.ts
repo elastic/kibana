@@ -18,6 +18,7 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { createDataStream } from './utils/create_datastream';
+import * as savedObjectConfig from './utils/saved_object_configuration';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,
@@ -536,11 +537,7 @@ describe('RiskEngineDataClient', () => {
       'initializeResources'
     );
     const enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
-    const initSavedObjectsMock = jest.spyOn(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      RiskEngineDataClient.prototype as any,
-      'initSavedObjects'
-    );
+
     const disableLegacyRiskEngineMock = jest.spyOn(
       RiskEngineDataClient.prototype,
       'disableLegacyRiskEngine'
@@ -556,15 +553,14 @@ describe('RiskEngineDataClient', () => {
         return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
       });
 
-      initSavedObjectsMock.mockImplementation(() => {
-        return Promise.resolve();
+      jest.spyOn(savedObjectConfig, 'initSavedObjects').mockImplementation(() => {
+        return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
       });
     });
 
     afterEach(() => {
       initializeResourcesMock.mockReset();
       enableRiskEngineMock.mockReset();
-      initSavedObjectsMock.mockReset();
       disableLegacyRiskEngineMock.mockReset();
     });
 
@@ -644,7 +640,7 @@ describe('RiskEngineDataClient', () => {
     });
 
     it('should catch error for initSavedObjects and stop', async () => {
-      initSavedObjectsMock.mockImplementationOnce(() => {
+      jest.spyOn(savedObjectConfig, 'initSavedObjects').mockImplementationOnce(() => {
         throw new Error('Error initSavedObjects');
       });
 

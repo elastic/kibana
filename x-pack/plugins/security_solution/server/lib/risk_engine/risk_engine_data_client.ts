@@ -7,11 +7,7 @@
 
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import type {
-  ClusterPutComponentTemplateRequest,
-  TransformGetTransformResponse,
-  TransformGetTransformTransformSummary,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIlmPolicy,
@@ -19,12 +15,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type {
-  Logger,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObject,
-} from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 
 import {
   riskScoreFieldMap,
@@ -37,23 +28,18 @@ import {
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import { riskEngineConfigurationTypeName } from './saved_object';
 import type { InitRiskEngineResult } from '../../../common/risk_engine/types';
 import { RiskEngineStatus } from '../../../common/risk_engine/types';
+import { getLegacyTransforms, removeLegacyTransofrms } from './utils/risk_engine_transforms';
 import {
-  getRiskScorePivotTransformId,
-  getRiskScoreLatestTransformId,
-} from '../../../common/utils/risk_score_modules';
-import { RiskScoreEntity } from '../../../common/search_strategy';
-interface SavedObjectsClients {
-  savedObjectsClient: SavedObjectsClientContract;
-}
+  updateSavedObjectAttribute,
+  getConfiguration,
+  initSavedObjects,
+} from './utils/saved_object_configuration';
+import type { UpdateConfigOpts, SavedObjectsClients } from './types';
+
 interface InitOpts extends SavedObjectsClients {
   namespace: string;
-  user: AuthenticatedUser | null | undefined;
-}
-
-interface UpdateConfigOpts extends SavedObjectsClients {
   user: AuthenticatedUser | null | undefined;
 }
 
@@ -65,11 +51,6 @@ interface RiskEngineDataClientOpts {
   logger: Logger;
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-}
-
-interface Configuration {
-  enabled: boolean;
-  last_updated_by: string;
 }
 
 export class RiskEngineDataClient {
@@ -101,7 +82,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.initSavedObjects({ savedObjectsClient, user });
+      await initSavedObjects({ savedObjectsClient, user });
       result.riskEngineConfigurationCreated = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -155,7 +136,7 @@ export class RiskEngineDataClient {
   public async enableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
     // code to run task
 
-    return this.updateSavedObjectAttribute({
+    return updateSavedObjectAttribute({
       savedObjectsClient,
       user,
       attributes: {
@@ -167,45 +148,13 @@ export class RiskEngineDataClient {
   public async disableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
     // code to stop task
 
-    return this.updateSavedObjectAttribute({
+    return updateSavedObjectAttribute({
       savedObjectsClient,
       user,
       attributes: {
         enabled: false,
       },
     });
-  }
-
-  private async updateSavedObjectAttribute({
-    savedObjectsClient,
-    attributes,
-    user,
-  }: UpdateConfigOpts & {
-    attributes: {
-      enabled: boolean;
-    };
-  }) {
-    const savedObjectConfiguration = await this.getConfigurationSavedObject({
-      savedObjectsClient,
-    });
-
-    if (!savedObjectConfiguration) {
-      throw new Error('There no saved object configuration for risk engine');
-    }
-
-    const result = await savedObjectsClient.update(
-      riskEngineConfigurationTypeName,
-      savedObjectConfiguration.id,
-      {
-        ...attributes,
-        last_updated_by: user?.username ?? '',
-      },
-      {
-        refresh: 'wait_for',
-      }
-    );
-
-    return result;
   }
 
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
@@ -216,16 +165,10 @@ export class RiskEngineDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
-    const transforms = await this.getLegacyTransforms({ namespace });
-
-    const stopTransformRequests = transforms.map((t) =>
-      esClient.transform.deleteTransform({
-        transform_id: t.id,
-        force: true,
-      })
-    );
-
-    await Promise.allSettled(stopTransformRequests);
+    await removeLegacyTransofrms({
+      esClient,
+      namespace,
+    });
 
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
@@ -233,7 +176,7 @@ export class RiskEngineDataClient {
   }
 
   private async getLastUpdatedBy({ savedObjectsClient }: SavedObjectsClients) {
-    const configuration = await this.getConfiguration({ savedObjectsClient });
+    const configuration = await getConfiguration({ savedObjectsClient });
 
     if (configuration) {
       return configuration.last_updated_by;
@@ -243,7 +186,7 @@ export class RiskEngineDataClient {
   }
 
   private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {
-    const configuration = await this.getConfiguration({ savedObjectsClient });
+    const configuration = await getConfiguration({ savedObjectsClient });
 
     if (configuration) {
       return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
@@ -252,88 +195,15 @@ export class RiskEngineDataClient {
     return RiskEngineStatus.NOT_INSTALLED;
   }
 
-  private async getLegacyTransforms({ namespace }: { namespace: string }) {
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    const getTransformStatsRequests: Array<Promise<TransformGetTransformResponse>> = [];
-    [RiskScoreEntity.host, RiskScoreEntity.user].forEach((entity) => {
-      getTransformStatsRequests.push(
-        esClient.transform.getTransform({
-          transform_id: getRiskScorePivotTransformId(entity, namespace),
-        })
-      );
-      getTransformStatsRequests.push(
-        esClient.transform.getTransform({
-          transform_id: getRiskScoreLatestTransformId(entity, namespace),
-        })
-      );
-    });
-
-    const result = await Promise.allSettled(getTransformStatsRequests);
-
-    const fulfuletGetTransformStats = result
-      .filter((r) => r.status === 'fulfilled')
-      .map((r) => (r as PromiseFulfilledResult<TransformGetTransformResponse>).value);
-
-    const transforms = fulfuletGetTransformStats.reduce((acc, val) => {
-      if (val.transforms) {
-        return [...acc, ...val.transforms];
-      }
-      return acc;
-    }, [] as TransformGetTransformTransformSummary[]);
-
-    return transforms;
-  }
-
   private async getLegacyStatus({ namespace }: { namespace: string }) {
-    const transforms = await this.getLegacyTransforms({ namespace });
+    const esClient = await this.options.elasticsearchClientPromise;
+    const transforms = await getLegacyTransforms({ namespace, esClient });
 
     if (transforms.length === 0) {
       return RiskEngineStatus.NOT_INSTALLED;
     }
 
     return RiskEngineStatus.ENABLED;
-  }
-
-  private async getConfigurationSavedObject({
-    savedObjectsClient,
-  }: SavedObjectsClients): Promise<SavedObject<Configuration> | undefined> {
-    const savedObjectsResponse = await savedObjectsClient.find<Configuration>({
-      type: riskEngineConfigurationTypeName,
-    });
-    return savedObjectsResponse.saved_objects?.[0];
-  }
-
-  private async getConfiguration({
-    savedObjectsClient,
-  }: SavedObjectsClients): Promise<Configuration | null> {
-    try {
-      const savedObjectConfiguration = await this.getConfigurationSavedObject({
-        savedObjectsClient,
-      });
-      const configuration = savedObjectConfiguration?.attributes;
-
-      if (configuration) {
-        return configuration;
-      }
-
-      return null;
-    } catch (e) {
-      this.options.logger.error(`Can't get saved object configuration: ${e.message}`);
-      return null;
-    }
-  }
-
-  private async initSavedObjects({ savedObjectsClient, user }: UpdateConfigOpts) {
-    const configuration = await this.getConfiguration({ savedObjectsClient });
-    if (configuration) {
-      return configuration;
-    }
-    const result = await savedObjectsClient.create(riskEngineConfigurationTypeName, {
-      enabled: false,
-      last_updated_by: user?.username ?? '',
-    });
-    return result;
   }
 
   public async initializeResources({
