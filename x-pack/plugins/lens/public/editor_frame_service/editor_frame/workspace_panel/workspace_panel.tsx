@@ -193,10 +193,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const initialRenderTime = useRef<number>(performance.now());
+  const dataReceivedTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
-      console.log('onRender$', performance.now() - initialRenderTime.current);
+      console.log(
+        'visualization took to render after data received',
+        performance.now() - dataReceivedTime.current
+      );
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
           if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
@@ -236,7 +240,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       const startTime = window.performance.now();
       if (renderDeps.current) {
-        console.log('onData$', performance.now() - initialRenderTime.current);
+        dataReceivedTime.current = performance.now();
+        console.log('data took to arrive', dataReceivedTime.current - initialRenderTime.current);
+
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
