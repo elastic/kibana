@@ -88,19 +88,6 @@ export function registerSetupRoute({
           });
         }
 
-        state.data.available = await hasProfilingData({
-          ...setupOptions,
-          client: clientWithProfilingAuth,
-        });
-        if (state.data.available) {
-          return response.ok({
-            body: {
-              has_setup: true,
-              has_data: state.data.available,
-            },
-          });
-        }
-
         const verifyFunctions = [
           validateCollectorPackagePolicy,
           validateMaximumBuckets,
@@ -109,7 +96,14 @@ export function registerSetupRoute({
           validateSymbolizerPackagePolicy,
           validateProfilingInApmPackagePolicy,
         ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+
+        const partialStates = await Promise.all([
+          ...verifyFunctions.map((fn) => fn(setupOptions)),
+          hasProfilingData({
+            ...setupOptions,
+            client: clientWithProfilingAuth,
+          }),
+        ]);
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
