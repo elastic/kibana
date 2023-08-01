@@ -46,9 +46,9 @@ import {
   CsvSearchSourceExportType,
 } from '@kbn/reporting-export-types-csv';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
-import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PngV1ExportType } from './export_types/png';
 import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';

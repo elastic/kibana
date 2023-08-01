@@ -5061,6 +5061,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-deprecated@link:packages/kbn-reporting/export_types/deprecated":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/printable_pdf_v2":
   version "0.0.0"
   uid ""

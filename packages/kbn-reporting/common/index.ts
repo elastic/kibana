@@ -34,4 +34,7 @@ export {
   setFieldFormats,
   generatePdfObservable,
   getFullRedirectAppUrl,
+  validateUrls,
+  getFullUrls,
+  getAbsoluteUrlFactory,
 } from './export_type_helpers';

@@ -1,30 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import { Writable } from 'stream';
-import apm from 'elastic-apm-node';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxjs';
-import { JobParamsPDFDeprecated } from '../../../common/types';
 import {
+  CancellationToken,
+  decryptJobHeaders,
+  ExportType,
+  generatePdfObservable,
+  getCustomLogo,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
-} from '../../../common/constants';
-import { decryptJobHeaders, ExportType, getCustomLogo, getFullUrls, validateUrls } from '../common';
-import { TaskPayloadPDF } from './types';
-import { generatePdfObservable } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/generate_pdf';
+  TaskRunResult,
+  validateUrls,
+  getFullUrls,
+} from '@kbn/reporting-common';
+import { Writable } from 'stream';
+import apm from 'elastic-apm-node';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxjs';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { BaseParams, TaskPayloadPDF } from '@kbn/reporting-common/types';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
+interface BaseParamsPDF {
+  layout: LayoutParams;
+  relativeUrls: string[];
+  isDeprecated?: boolean;
+}
+
+// Job params: structure of incoming user request data, after being parsed from RISON
+
+/**
+ * @deprecated
+ */
+export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
 export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayloadPDF> {
   id = 'printablePdf';
   name = 'PDF';
@@ -42,6 +62,15 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('png-export-v1');
+  }
+
+  public getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    });
   }
 
   public createJob = async (
@@ -85,7 +114,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
         //  make a new function that will call reporting.getScreenshots
         const snapshotFn = () =>
-          this.startDeps.reporting.getScreenshots({
+          this.getScreenshots({
             format: 'pdf',
             title,
             logo,

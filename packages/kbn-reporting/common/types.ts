@@ -110,3 +110,27 @@ export interface JobParamsDownloadCSV {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
 }
+
+/**
+ * Structure of stored job data provided by create_job
+ */
+export interface TaskPayloadPDF extends BasePayload {
+  layout: LayoutParams;
+  forceNow?: string;
+  objects: Array<{ relativeUrl: string }>;
+}
+
+interface BaseParamsPNG {
+  layout: LayoutParams;
+  forceNow?: string;
+  relativeUrl: string;
+}
+
+// Job params: structure of incoming user request data
+/**
+ * @deprecated
+ */
+export type JobParamsPNGDeprecated = BaseParamsPNG & BaseParams;
+
+// Job payload: structure of stored job data provided by create_job
+export type TaskPayloadPNG = BaseParamsPNG & BasePayload;

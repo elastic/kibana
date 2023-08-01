@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../../../packages/kbn-reporting/common/export_type_helpers/generate_pdf.ts", "../../../packages/kbn-reporting/common/export_type_helpers/v2", "../../../packages/kbn-reporting/common/export_type_helpers/get_custom_logo.ts", "../../../packages/kbn-reporting/common/create_config.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../../../packages/kbn-reporting/common/export_type_helpers/generate_pdf.ts", "../../../packages/kbn-reporting/common/export_type_helpers/v2", "../../../packages/kbn-reporting/common/export_type_helpers/get_custom_logo.ts", "../../../packages/kbn-reporting/common/create_config.ts", "../../../packages/kbn-reporting/common/export_type_helpers/get_full_urls.ts", "../../../packages/kbn-reporting/common/export_type_helpers/validate_urls.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",

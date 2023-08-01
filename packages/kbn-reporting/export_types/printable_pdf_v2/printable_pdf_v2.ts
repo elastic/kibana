@@ -35,7 +35,6 @@ import {
   PDF_JOB_TYPE_V2,
   PDF_REPORT_TYPE_V2,
   REPORTING_TRANSACTION_TYPE,
-  UrlOrUrlLocatorTuple,
   decryptJobHeaders,
   ExportType,
   getCustomLogo,
