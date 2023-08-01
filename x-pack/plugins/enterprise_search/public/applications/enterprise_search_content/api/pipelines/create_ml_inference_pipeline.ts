@@ -7,9 +7,8 @@
 import { FieldMapping } from '../../../../../common/ml_inference_pipeline';
 
 import {
-  CreateMLInferencePipelineDefinition,
+  CreateMLInferencePipeline,
   MlInferencePipeline,
-  InferencePipelineInferenceConfig,
 } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -17,7 +16,6 @@ import { HttpLogic } from '../../../shared/http';
 export interface CreateMlInferencePipelineApiLogicArgs {
   fieldMappings: FieldMapping[];
   indexName: string;
-  inferenceConfig?: InferencePipelineInferenceConfig;
   modelId: string;
   pipelineDefinition: MlInferencePipeline;
   pipelineName: string;
@@ -31,9 +29,8 @@ export const createMlInferencePipeline = async (
   args: CreateMlInferencePipelineApiLogicArgs
 ): Promise<CreateMlInferencePipelineResponse> => {
   const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors`;
-  const params: CreateMLInferencePipelineDefinition = {
+  const params: CreateMLInferencePipeline = {
     field_mappings: args.fieldMappings,
-    inference_config: args.inferenceConfig,
     model_id: args.modelId,
     pipeline_definition: args.pipelineDefinition,
     pipeline_name: args.pipelineName,
