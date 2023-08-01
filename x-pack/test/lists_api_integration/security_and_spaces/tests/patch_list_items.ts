@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe.only('patch_list_items', () => {
+  describe('patch_list_items', () => {
     describe('patch list items', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);
