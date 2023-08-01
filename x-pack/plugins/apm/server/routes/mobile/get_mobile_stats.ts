@@ -9,6 +9,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getMobileSessions } from './get_mobile_sessions';
 import { getMobileHttpRequests } from './get_mobile_http_requests';
+import { getMobileCrashRate } from './get_mobile_crash_rate';
 import { Maybe } from '../../../typings/common';
 
 export interface Timeseries {
@@ -18,6 +19,7 @@ export interface Timeseries {
 interface MobileStats {
   sessions: { timeseries: Timeseries[]; value: Maybe<number> };
   requests: { timeseries: Timeseries[]; value: Maybe<number> };
+  crashes: { timeseries: Timeseries[]; value: Maybe<number> };
 }
 
 export interface MobilePeriodStats {
@@ -60,9 +62,10 @@ async function getMobileStats({
     offset,
   };
 
-  const [sessions, httpRequests] = await Promise.all([
+  const [sessions, httpRequests, crashes] = await Promise.all([
     getMobileSessions({ ...commonProps }),
     getMobileHttpRequests({ ...commonProps }),
+    getMobileCrashRate({ ...commonProps }),
   ]);
 
   return {
@@ -74,6 +77,10 @@ async function getMobileStats({
       value: httpRequests.currentPeriod.value,
       timeseries: httpRequests.currentPeriod.timeseries as Timeseries[],
     },
+    crashes: {
+      value: crashes.currentPeriod.value,
+      timeseries: crashes.currentPeriod.timeseries as Timeseries[],
+    }
   };
 }
 
@@ -107,6 +114,7 @@ export async function getMobileStatsPeriods({
     : {
         sessions: { timeseries: [], value: null },
         requests: { timeseries: [], value: null },
+        crashes: { timeseries: [], value: null },
       };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
