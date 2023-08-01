@@ -444,7 +444,6 @@ export default function (providerContext: FtrProviderContext) {
           status: 'active',
           description: 'Test',
           is_managed: false,
-          is_protected: false,
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
