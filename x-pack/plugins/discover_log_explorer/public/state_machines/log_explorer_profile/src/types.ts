@@ -38,6 +38,10 @@ export type LogExplorerProfileTypeState =
       context: WithDatasetSelection;
     }
   | {
+      value: 'initializingControlPanels';
+      context: WithDatasetSelection;
+    }
+  | {
       value: 'initialized';
       context: WithDatasetSelection;
     }
