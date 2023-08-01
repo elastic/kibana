@@ -12,7 +12,7 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '../api';
+import type { CaseMetricsFeature, CasesMetricsResponse, SingleCaseMetricsResponse } from '../api';
 import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
@@ -153,13 +153,7 @@ export interface FilterOptions {
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
-export type SingleCaseMetricsFeature =
-  | 'alerts.count'
-  | 'alerts.users'
-  | 'alerts.hosts'
-  | 'actions.isolateHost'
-  | 'connectors'
-  | 'lifespan';
+export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
 export enum SortFieldCase {
   closedAt = 'closedAt',

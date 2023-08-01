@@ -1473,6 +1473,18 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
           },
@@ -3939,6 +3951,14 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
           },
@@ -4296,23 +4316,23 @@
           },
           {
             "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
           },
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
           },
           {
             "plugin": "synthetics",

@@ -61,9 +61,6 @@ export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as co
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
-export const CASE_METRICS_URL = `${CASES_URL}/metrics` as const;
-export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as const;
-
 /**
  * Internal routes
  */
@@ -83,6 +80,8 @@ export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` 
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
+export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
+export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
 
 /**
  * Action routes
