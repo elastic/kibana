@@ -5,9 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { SyntheticEvent } from 'react';
-
-import type { IBasePath, NavigateToUrlOptions } from '@kbn/core/public';
 
 import {
   SectionId,
@@ -16,7 +13,6 @@ import {
   IntroductionSteps,
   type Section,
   ConfigureSteps,
-  BadgeId,
   ExploreSteps,
   MasterTheInvestigationsWorkflowSteps,
   RespondToThreatsSteps,
@@ -33,21 +29,6 @@ import { RulesManagementLink } from './step_links/rules_management_link';
 import { OverviewLink } from './step_links/overview_link';
 import { AlertsLink } from './step_links/alerts_link';
 import { ExploreLink } from './step_links/explore_link';
-
-const analyticsBadge = {
-  id: BadgeId.analytics,
-  name: i18n.PRODUCT_BADGE_ANALYTICS,
-};
-
-const cloudBadge = {
-  id: BadgeId.cloud,
-  name: i18n.PRODUCT_BADGE_CLOUD,
-};
-
-const edrBadge = {
-  id: BadgeId.edr,
-  name: i18n.PRODUCT_BADGE_EDR,
-};
 
 export const introductionSteps = [
   {
@@ -69,7 +50,6 @@ export const introductionSteps = [
       />
     ),
     timeInMinutes: 3,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
 ];
 
@@ -78,25 +58,21 @@ const configureSteps = [
     id: ConfigureSteps.learnAbout,
     title: i18n.CONFIGURE_STEP1,
     description: [<FleetOverviewLink />],
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: ConfigureSteps.deployElasticAgent,
     title: i18n.CONFIGURE_STEP2,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
     description: [i18n.CONFIGURE_STEP2_DESCRIPTION1, <EndpointManagementLink />],
   },
   {
     id: ConfigureSteps.connectToDataSources,
     title: i18n.CONFIGURE_STEP3,
-    badges: [analyticsBadge],
     description: [i18n.CONFIGURE_STEP3_DESCRIPTION1, <IntegrationsLink />],
     productLineRequired: [ProductLine.security],
   },
   {
     id: ConfigureSteps.enablePrebuiltRules,
     title: i18n.CONFIGURE_STEP4,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
     description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <RulesManagementLink />],
   },
 ];
@@ -105,13 +81,11 @@ const exploreSteps = [
   {
     id: ExploreSteps.viewAlerts,
     title: i18n.EXPLORE_STEP1,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
     description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsLink />],
   },
   {
     id: ExploreSteps.analyzeData,
     title: i18n.EXPLORE_STEP2,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
     description: [<OverviewLink />, <ExploreLink />],
   },
 ];
@@ -120,29 +94,24 @@ const masterTheInvestigationsWorkflowSteps = [
   {
     id: MasterTheInvestigationsWorkflowSteps.introductionToInvestigations,
     title: i18n.MASTER_THE_INVESTIGATION_STEP1,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.exploreProcess,
     title: i18n.MASTER_THE_INVESTIGATION_STEP2,
-    badges: [cloudBadge, edrBadge],
     productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.exploreUser,
     title: i18n.MASTER_THE_INVESTIGATION_STEP3,
-    badges: [cloudBadge, edrBadge],
     productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.exploreThreatHunting,
     title: i18n.MASTER_THE_INVESTIGATION_STEP4,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: MasterTheInvestigationsWorkflowSteps.introductionToCases,
     title: i18n.MASTER_THE_INVESTIGATION_STEP5,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
 ];
 
@@ -150,13 +119,11 @@ const respondToThreatsSteps = [
   {
     id: RespondToThreatsSteps.automated,
     title: i18n.RESPOND_TO_THREATS_STEP1,
-    badges: [edrBadge],
     productLineRequired: [ProductLine.endpoint],
   },
   {
     id: RespondToThreatsSteps.takeControlOfEndpoint,
     title: i18n.RESPOND_TO_THREATS_STEP2,
-    badges: [edrBadge],
     productLineRequired: [ProductLine.endpoint],
   },
 ];
@@ -165,27 +132,22 @@ const optimizeYourWorkSpaceSteps = [
   {
     id: OptimizeYourWorkSpaceSteps.enableThreatIntelligence,
     title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP1,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.enableEntityAnalytics,
     title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP2,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.createCustomRules,
     title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP3,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.introductionToExceptions,
     title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP4,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
   {
     id: OptimizeYourWorkSpaceSteps.connectNotification,
     title: i18n.OPTIMIZE_YOUR_WORKSPACE_STEP5,
-    badges: [analyticsBadge, cloudBadge, edrBadge],
   },
 ];
 
