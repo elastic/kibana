@@ -177,11 +177,8 @@ function DiscoverDocumentsComponent({
   );
 
   const showTimeCol = useMemo(
-    () =>
-      !isTextBasedQuery &&
-      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isTextBasedQuery, uiSettings, dataView.timeFieldName]
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
+    [uiSettings, dataView.timeFieldName]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
