@@ -26,6 +26,7 @@ import icon_cross from './images/icon_cross.svg';
 import { UNDO_MARK_AS_DONE_TITLE, MARK_AS_DONE_TITLE } from './translations';
 import { getStepsByActiveProduct } from './helpers';
 import type { ProductLine } from '../../common/product';
+import { getProductBadges } from './badge';
 
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -51,8 +52,10 @@ const CardStepComponent: React.FC<{
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
   );
-  const { title, badges, description, splitPanel } =
+  const { title, productLineRequired, description, splitPanel } =
     steps?.find((step) => step.id === stepId) ?? {};
+
+  const badges = useMemo(() => getProductBadges(productLineRequired), [productLineRequired]);
 
   const toggleStep = useCallback(
     (e) => {
@@ -100,7 +103,7 @@ const CardStepComponent: React.FC<{
             >
               {title}
             </span>
-            {badges?.map((badge) => (
+            {badges.map((badge) => (
               <EuiBadge key={`${stepId}-badge-${badge.id}`} color="hollow">
                 {badge.name}
               </EuiBadge>
