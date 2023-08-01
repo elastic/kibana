@@ -210,7 +210,7 @@ Sets the interval at which {kib} tries to remove expired and invalid sessions fr
 +
 TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
-xpack.security.session.сoncurrentSessions.maxSessions::
+xpack.security.session.concurrentSessions.maxSessions {ess-icon}::
 Set the maximum number of sessions each user is allowed to have active at any given time.
 By default, no limit is applied.
 If set, the value of this option should be an integer between `1` and `1000`.
