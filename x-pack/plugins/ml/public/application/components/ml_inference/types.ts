@@ -6,13 +6,10 @@
  */
 
 import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 
-export enum AddInferencePipelineSteps {
-  Configuration,
-  Advanced,
-  Test,
-  Create,
-}
+export type AddInferencePipelineSteps =
+  typeof ADD_INFERENCE_PIPELINE_STEPS[keyof typeof ADD_INFERENCE_PIPELINE_STEPS];
 
 export interface MlInferenceState {
   condition?: string;
@@ -24,6 +21,7 @@ export interface MlInferenceState {
   inferenceConfig: IngestInferenceProcessor['inference_config'];
   inferenceConfigError?: string;
   modelId: string;
+  onFailure?: IngestInferenceProcessor['on_failure'];
   pipelineName: string;
   pipelineNameError?: string;
   pipelineDescription: string;

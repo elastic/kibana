@@ -93,7 +93,7 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(({ handleAdvancedConfi
               helpText={
                 <FormattedMessage
                   id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.conditionHelpText"
-                  defaultMessage="This condition should be written as a {painlessDocs} script. If provided, this inference processor will only run when condition is true."
+                  defaultMessage="This condition must be written as a {painlessDocs} script. If provided, this inference processor only runs when condition is true."
                   values={{
                     painlessDocs: (
                       <EuiLink

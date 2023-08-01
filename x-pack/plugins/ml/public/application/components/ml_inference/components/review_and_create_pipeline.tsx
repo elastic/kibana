@@ -33,7 +33,7 @@ interface Props {
   pipelineError?: string;
 }
 
-export const ReviewPipeline: FC<Props> = ({
+export const ReviewAndCreatePipeline: FC<Props> = ({
   inferencePipeline,
   modelType,
   pipelineName,
@@ -96,10 +96,14 @@ export const ReviewPipeline: FC<Props> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.nextStepsMessage"
-                    defaultMessage="You can now use this pipeline to infer against new ingested data or infer against existing data by {reindexLink} with the pipeline."
+                    defaultMessage="You can use this pipeline to infer against new data or infer against existing data by {reindexLink} with the pipeline."
                     values={{
                       reindexLink: (
-                        <EuiLink href={links.upgradeAssistant.reindexWithPipeline}>
+                        <EuiLink
+                          href={links.upgradeAssistant.reindexWithPipeline}
+                          target="_blank"
+                          external
+                        >
                           {'reindexing'}
                         </EuiLink>
                       ),
@@ -113,7 +117,7 @@ export const ReviewPipeline: FC<Props> = ({
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage',
                   {
-                    defaultMessage: "Sorry, unable to create '{pipelineName}'.",
+                    defaultMessage: "Unable to create '{pipelineName}'.",
                     values: { pipelineName },
                   }
                 )}

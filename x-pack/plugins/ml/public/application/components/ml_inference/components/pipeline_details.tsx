@@ -37,7 +37,7 @@ interface Props {
   targetFieldError: string | undefined;
 }
 
-export const ConfigurePipeline: FC<Props> = memo(
+export const PipelineDetails: FC<Props> = memo(
   ({
     handlePipelineConfigUpdate,
     modelId,
@@ -89,7 +89,7 @@ export const ConfigurePipeline: FC<Props> = memo(
                 'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionUsePipelines',
                 {
                   defaultMessage:
-                    "Use pipeline/_simulate or _reindex API to pass data into this pipeline. The model's predictions will be stored in the Target field.",
+                    'Use pipeline/_simulate or _reindex API to pass data into this pipeline. Predictions are stored in the Target field.',
                 }
               )}
             </p>
@@ -114,10 +114,7 @@ export const ConfigurePipeline: FC<Props> = memo(
                         'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
                         {
                           defaultMessage:
-                            'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. This will create a pipeline named {pipelineName}.',
-                          values: {
-                            pipelineName: `${pipelineName.length > 0 ? pipelineName : '<name>'}`,
-                          },
+                            'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens.',
                         }
                       )}
                     </EuiText>

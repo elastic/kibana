@@ -19,14 +19,16 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ModelItem } from '../../model_management/models_list';
-import { AddInferencePipelineSteps } from './types';
+import type { AddInferencePipelineSteps } from './types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 import { AddInferencePipelineFooter } from './components/add_inference_pipeline_footer';
 import { AddInferencePipelineHorizontalSteps } from './components/add_inference_pipeline_horizontal_steps';
 import { getInitialState, getModelType } from './state';
-import { ConfigurePipeline } from './components/configure_pipeline';
-import { AdvancedConfiguration } from './components/advanced_configuration';
+import { PipelineDetails } from './components/pipeline_details';
+import { ProcessorConfiguration } from './components/processor_configuration';
+import { OnFailureConfiguration } from './components/on_failure_configuration';
 import { TestPipeline } from './components/test_pipeline';
-import { ReviewPipeline } from './components/review_and_create_pipeline';
+import { ReviewAndCreatePipeline } from './components/review_and_create_pipeline';
 import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import {
@@ -48,9 +50,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialState = useMemo(() => getInitialState(model), [model.model_id]);
   const [formState, setFormState] = useState<MlInferenceState>(initialState);
-  const [step, setStep] = useState<AddInferencePipelineSteps>(
-    AddInferencePipelineSteps.Configuration
-  );
+  const [step, setStep] = useState<AddInferencePipelineSteps>(ADD_INFERENCE_PIPELINE_STEPS.DETAILS);
 
   const {
     trainedModels: { createInferencePipeline },
@@ -126,10 +126,11 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             inferenceConfigError === undefined &&
             fieldMapError === undefined
           }
+          isOnFailureDataValid={true} // TODO: add validation
         />
         <EuiSpacer size="m" />
-        {step === AddInferencePipelineSteps.Configuration && (
-          <ConfigurePipeline
+        {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
+          <PipelineDetails
             handlePipelineConfigUpdate={handleConfigUpdate}
             pipelineName={formState.pipelineName}
             pipelineNameError={pipelineNameError}
@@ -139,10 +140,10 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             targetFieldError={targetFieldError}
           />
         )}
-        {step === AddInferencePipelineSteps.Advanced && model && (
-          <AdvancedConfiguration
+        {step === ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR && model && (
+          <ProcessorConfiguration
+            fieldMap={formState.fieldMap}
             handleAdvancedConfigUpdate={handleConfigUpdate}
-            ignoreFailure={formState.ignoreFailure}
             inferenceConfig={formState.inferenceConfig}
             inferenceConfigError={inferenceConfigError}
             modelInferenceConfig={model.inference_config}
@@ -151,11 +152,18 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             modelType={modelType as InferenceModelTypes}
           />
         )}
-        {step === AddInferencePipelineSteps.Test && (
+        {step === ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE && (
+          <OnFailureConfiguration
+            ignoreFailure={formState.ignoreFailure}
+            handleAdvancedConfigUpdate={handleConfigUpdate}
+            onFailure={formState.onFailure}
+          />
+        )}
+        {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
           <TestPipeline sourceIndex={sourceIndex} state={formState} />
         )}
-        {step === AddInferencePipelineSteps.Create && (
-          <ReviewPipeline
+        {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
+          <ReviewAndCreatePipeline
             inferencePipeline={getPipelineConfig(formState)}
             modelType={modelType}
             pipelineName={formState.pipelineName}

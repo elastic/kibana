@@ -7,6 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_INFERENCE_PIPELINE_STEPS = {
+  DETAILS: 'Details',
+  CONFIGURE_PROCESSOR: 'Configure processor',
+  ON_FAILURE: 'Failure handling',
+  TEST: 'Test',
+  CREATE: 'create',
+} as const;
+
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.ml.trainedModels.actions.cancelButtonLabel',
   { defaultMessage: 'Cancel' }

@@ -14,6 +14,46 @@ export const getModelType = (model: ModelItem): string | undefined => {
   return analysisConfig !== undefined ? getAnalysisType(analysisConfig) : undefined;
 };
 
+export const getDefaultOnFailureConfiguration = (): MlInferenceState['onFailure'] => [
+  {
+    set: {
+      description: "Index document to 'failed-<index>'",
+      field: '_index',
+      value: 'failed-{{{ _index }}}',
+    },
+  },
+  {
+    set: {
+      field: 'event.timestamp',
+      value: '{{{ _ingest.timestamp }}}',
+    },
+  },
+  {
+    set: {
+      field: 'event.failure.message',
+      value: '{{{ _ingest.on_failure_message }}}',
+    },
+  },
+  {
+    set: {
+      field: 'event.failure.processor_type',
+      value: '{{{ _ingest.on_failure_processor_type }}}',
+    },
+  },
+  {
+    set: {
+      field: 'event.failure.processor_tag',
+      value: '{{{ _ingest.on_failure_processor_tag }}}',
+    },
+  },
+  {
+    set: {
+      field: 'event.failure.pipeline',
+      value: '{{{ _ingest.on_failure_pipeline }}}',
+    },
+  },
+];
+
 export const getInitialState = (model: ModelItem): MlInferenceState => {
   const modelType = getModelType(model);
   let targetField;
@@ -29,9 +69,10 @@ export const getInitialState = (model: ModelItem): MlInferenceState => {
     creatingPipeline: false,
     error: false,
     fieldMap: undefined,
-    ignoreFailure: false,
+    ignoreFailure: true,
     inferenceConfig: model.inference_config,
     modelId: model.model_id,
+    onFailure: getDefaultOnFailureConfiguration(),
     pipelineDescription: `Uses the pre-trained data frame analytics model - ${model.model_id} - to infer against the data that is being ingested in the pipeline`,
     pipelineName: '',
     pipelineCreated: false,

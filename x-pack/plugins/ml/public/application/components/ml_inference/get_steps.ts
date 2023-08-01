@@ -6,6 +6,7 @@
  */
 
 import { AddInferencePipelineSteps } from './types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 
 export function getSteps(
   step: AddInferencePipelineSteps,
@@ -17,22 +18,27 @@ export function getSteps(
   let isContinueButtonEnabled = false;
 
   switch (step) {
-    case AddInferencePipelineSteps.Configuration:
-      nextStep = AddInferencePipelineSteps.Advanced;
+    case ADD_INFERENCE_PIPELINE_STEPS.DETAILS:
+      nextStep = ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR;
       isContinueButtonEnabled = isConfigureStepValid;
       break;
-    case AddInferencePipelineSteps.Advanced:
-      nextStep = AddInferencePipelineSteps.Test;
-      previousStep = AddInferencePipelineSteps.Configuration;
+    case ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR:
+      nextStep = ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE;
+      previousStep = ADD_INFERENCE_PIPELINE_STEPS.DETAILS;
       isContinueButtonEnabled = isPipelineDataValid;
       break;
-    case AddInferencePipelineSteps.Test:
-      nextStep = AddInferencePipelineSteps.Create;
-      previousStep = AddInferencePipelineSteps.Advanced;
+    case ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE:
+      nextStep = ADD_INFERENCE_PIPELINE_STEPS.TEST;
+      previousStep = ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR;
+      isContinueButtonEnabled = isPipelineDataValid;
+      break;
+    case ADD_INFERENCE_PIPELINE_STEPS.TEST:
+      nextStep = ADD_INFERENCE_PIPELINE_STEPS.CREATE;
+      previousStep = ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE;
       isContinueButtonEnabled = true;
       break;
-    case AddInferencePipelineSteps.Create:
-      previousStep = AddInferencePipelineSteps.Test;
+    case ADD_INFERENCE_PIPELINE_STEPS.CREATE:
+      previousStep = ADD_INFERENCE_PIPELINE_STEPS.TEST;
       isContinueButtonEnabled = true;
       break;
   }

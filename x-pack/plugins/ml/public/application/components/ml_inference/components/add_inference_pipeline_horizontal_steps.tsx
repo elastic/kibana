@@ -9,34 +9,36 @@ import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
-import { AddInferencePipelineSteps } from '../types';
+import type { AddInferencePipelineSteps } from '../types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from '../constants';
 
 interface Props {
   step: AddInferencePipelineSteps;
   setStep: React.Dispatch<React.SetStateAction<AddInferencePipelineSteps>>;
   isConfigureStepValid: boolean;
   isPipelineDataValid: boolean;
+  isOnFailureDataValid: boolean;
 }
 
 export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
-  ({ step, setStep, isConfigureStepValid, isPipelineDataValid }) => {
+  ({ step, setStep, isConfigureStepValid, isPipelineDataValid, isOnFailureDataValid }) => {
     const navSteps: EuiStepsHorizontalProps['steps'] = [
       {
-        // Configure
-        onClick: () => setStep(AddInferencePipelineSteps.Configuration),
+        // Details
+        onClick: () => setStep(ADD_INFERENCE_PIPELINE_STEPS.DETAILS),
         status: isConfigureStepValid ? 'complete' : 'disabled',
         title: i18n.translate(
-          'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.configure.title',
+          'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.details.title',
           {
-            defaultMessage: 'Configure',
+            defaultMessage: 'Details',
           }
         ),
       },
       {
-        // Advanced
+        // Processor configuration
         onClick: () => {
           if (!isConfigureStepValid) return;
-          setStep(AddInferencePipelineSteps.Advanced);
+          setStep(ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR);
         },
         status: isConfigureStepValid
           ? isPipelineDataValid
@@ -44,9 +46,27 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
             : 'incomplete'
           : 'disabled',
         title: i18n.translate(
-          'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.advanced.title',
+          'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.configureProcessor.title',
           {
-            defaultMessage: 'Advanced',
+            defaultMessage: 'Configure processor',
+          }
+        ),
+      },
+      {
+        // handle failures
+        onClick: () => {
+          if (!isConfigureStepValid) return;
+          setStep(ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE);
+        },
+        status: isConfigureStepValid
+          ? isPipelineDataValid
+            ? 'complete'
+            : 'incomplete'
+          : 'disabled',
+        title: i18n.translate(
+          'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.handleFailures.title',
+          {
+            defaultMessage: 'Handle failures',
           }
         ),
       },
@@ -54,7 +74,7 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
         // Test
         onClick: () => {
           if (!isPipelineDataValid) return;
-          setStep(AddInferencePipelineSteps.Test);
+          setStep(ADD_INFERENCE_PIPELINE_STEPS.TEST);
         },
         status: isPipelineDataValid ? 'complete' : 'disabled',
         title: i18n.translate(
@@ -68,7 +88,7 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
         // Review and Create
         onClick: () => {
           if (!isPipelineDataValid) return;
-          setStep(AddInferencePipelineSteps.Create);
+          setStep(ADD_INFERENCE_PIPELINE_STEPS.CREATE);
         },
         status: isPipelineDataValid ? 'incomplete' : 'disabled',
         title: i18n.translate(
@@ -80,16 +100,19 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       },
     ];
     switch (step) {
-      case AddInferencePipelineSteps.Configuration:
+      case ADD_INFERENCE_PIPELINE_STEPS.DETAILS:
         navSteps[0].status = isConfigureStepValid ? 'complete' : 'current';
         break;
-      case AddInferencePipelineSteps.Advanced:
+      case ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR:
         navSteps[1].status = isPipelineDataValid ? 'complete' : 'current';
         break;
-      case AddInferencePipelineSteps.Test:
+      case ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE:
+        navSteps[1].status = isOnFailureDataValid ? 'complete' : 'current';
+        break;
+      case ADD_INFERENCE_PIPELINE_STEPS.TEST:
         navSteps[2].status = 'current';
         break;
-      case AddInferencePipelineSteps.Create:
+      case ADD_INFERENCE_PIPELINE_STEPS.CREATE:
         navSteps[3].status = 'current';
         break;
     }

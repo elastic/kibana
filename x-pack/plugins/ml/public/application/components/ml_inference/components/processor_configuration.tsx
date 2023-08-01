@@ -16,10 +16,9 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSpacer,
-  EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiTitle,
+  EuiPopover,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -47,9 +46,9 @@ function getDefaultFieldMapString() {
 }
 
 interface Props {
+  fieldMap: MlInferenceState['fieldMap'];
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
   inferenceConfig: ModelItem['inference_config'];
-  ignoreFailure: boolean;
   modelInferenceConfig: ModelItem['inference_config'];
   modelInputFields: ModelItem['input'];
   inferenceConfigError?: string;
@@ -57,11 +56,11 @@ interface Props {
   modelType?: InferenceModelTypes;
 }
 
-export const AdvancedConfiguration: FC<Props> = memo(
+export const ProcessorConfiguration: FC<Props> = memo(
   ({
+    fieldMap,
     handleAdvancedConfigUpdate,
     inferenceConfig,
-    ignoreFailure,
     modelInputFields,
     modelInferenceConfig,
     inferenceConfigError,
@@ -74,8 +73,9 @@ export const AdvancedConfiguration: FC<Props> = memo(
       },
     } = useMlKibana();
 
-    const [editInferenceConfig, setEditInferenceConfig] = useState(false);
-    const [editFieldMapping, setEditFieldMapping] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+    const [editInferenceConfig, setEditInferenceConfig] = useState<boolean>(false);
+    const [editFieldMapping, setEditFieldMapping] = useState<boolean>(false);
     const [inferenceConfigString, setInferenceConfigString] = useState<string>(
       JSON.stringify(inferenceConfig, null, 2)
     );
@@ -127,10 +127,6 @@ export const AdvancedConfiguration: FC<Props> = memo(
       setEditFieldMapping(false);
     };
 
-    const updateIgnoreFailure = (e: EuiSwitchEvent) => {
-      handleAdvancedConfigUpdate({ ignoreFailure: e.target.checked });
-    };
-
     return (
       <EuiFlexGroup direction="column">
         {/* INFERENCE CONFIG */}
@@ -150,7 +146,7 @@ export const AdvancedConfiguration: FC<Props> = memo(
                 <p>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.description"
-                    defaultMessage="Contains the inference type and its options. The settings defined in the model configuration - shown here - are used by default. {inferenceDocsLink}."
+                    defaultMessage="The inference type and its options. Unless otherwise specified, the default configuration options are used. {inferenceDocsLink}."
                     values={{
                       inferenceDocsLink: (
                         <EuiLink external target="_blank" href={links.ingest.inference}>
@@ -244,14 +240,32 @@ export const AdvancedConfiguration: FC<Props> = memo(
               <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.fieldMapDescription"
-                    defaultMessage="Listed here are the fields the model expects."
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.fieldMapDescriptionTwo"
+                    defaultMessage="The list of fields the model expects. {fieldsList}"
+                    values={{
+                      fieldsList: (
+                        <EuiPopover
+                          button={
+                            <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+                              See them here.
+                            </EuiLink>
+                          }
+                          isOpen={isPopoverOpen}
+                          closePopover={() => setIsPopoverOpen(false)}
+                          anchorPosition="downLeft"
+                        >
+                          <EuiCodeBlock isCopyable={true}>
+                            {JSON.stringify(modelInputFields, null, 2)}
+                          </EuiCodeBlock>
+                        </EuiPopover>
+                      ),
+                    }}
                   />
                 </p>
                 <p>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.fieldMapExtendedDescription"
-                    defaultMessage="If the fields for the incoming data differ, a {fieldMap} must be created to map the input document field name to the name of the field that the model expects. It should be in JSON format. {inferenceDocsLink}"
+                    defaultMessage="If the fields for the incoming data differ, a {fieldMap} must be created to map the input document field name to the name of the field that the model expects. It must be in JSON format. {inferenceDocsLink}"
                     values={{
                       fieldMap: <EuiCode>{'field_map'}</EuiCode>,
                       inferenceDocsLink: (
@@ -265,122 +279,64 @@ export const AdvancedConfiguration: FC<Props> = memo(
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={7}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={5}>
-                  <EuiFormRow
-                    fullWidth
-                    labelAppend={
-                      <EuiFlexGroup gutterSize="xs" justifyContent="flexStart">
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            iconType="pencil"
-                            size="xs"
-                            onClick={() => {
-                              setEditFieldMapping(!editFieldMapping);
-                            }}
-                          >
-                            {editFieldMapping ? cancelEditMessage : createFieldMapMessage}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          {editFieldMapping ? (
-                            <SaveChangesButton
-                              onClick={updateFieldMap}
-                              disabled={isFieldMapValid === false}
-                            />
-                          ) : null}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                  >
-                    <EuiCodeBlock isCopyable={true} overflowHeight={350}>
-                      {JSON.stringify(modelInputFields, null, 2)}
-                    </EuiCodeBlock>
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {editFieldMapping ? (
-                  <EuiFlexItem grow={5}>
-                    <EuiFormRow
-                      fullWidth
-                      hasEmptyLabelSpace
-                      error={fieldMapError}
-                      isInvalid={fieldMapError !== undefined}
-                    >
-                      <>
-                        <EuiSpacer size="s" />
-                        <CodeEditor
-                          height={300}
-                          languageId="json"
-                          options={{
-                            automaticLayout: true,
-                            lineNumbers: 'off',
-                            tabSize: 2,
-                          }}
-                          value={fieldMappingString}
-                          onChange={handleFieldMapChange}
+              <EuiFormRow
+                fullWidth
+                labelAppend={
+                  <EuiFlexGroup gutterSize="xs" justifyContent="flexStart">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        iconType="pencil"
+                        size="xs"
+                        onClick={() => {
+                          setEditFieldMapping(!editFieldMapping);
+                        }}
+                      >
+                        {editFieldMapping
+                          ? cancelEditMessage
+                          : fieldMap !== undefined
+                          ? editMessage
+                          : createFieldMapMessage}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {editFieldMapping ? (
+                        <SaveChangesButton
+                          onClick={updateFieldMap}
+                          disabled={isFieldMapValid === false}
                         />
-                      </>
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
+                      ) : null}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                error={fieldMapError}
+                isInvalid={fieldMapError !== undefined}
+              >
+                <>
+                  {!editFieldMapping ? (
+                    <EuiCodeBlock isCopyable={true} overflowHeight={350}>
+                      {JSON.stringify(fieldMap ?? {}, null, 2)}
+                    </EuiCodeBlock>
+                  ) : null}
+                  {editFieldMapping ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      <CodeEditor
+                        height={300}
+                        languageId="json"
+                        options={{
+                          automaticLayout: true,
+                          lineNumbers: 'off',
+                          tabSize: 2,
+                        }}
+                        value={fieldMappingString}
+                        onChange={handleFieldMapChange}
+                      />
+                    </>
+                  ) : null}
+                </>
+              </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {/* IGNORE FAILURE */}
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={3}>
-                <EuiTitle size="s">
-                  <h4>
-                    {i18n.translate(
-                      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresTitle',
-                      { defaultMessage: 'Handle failures' }
-                    )}
-                  </h4>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiText color="subdued" size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresDescription"
-                      defaultMessage="By default, pipeline processing stops on failure. To ignore the failure, set {ignoreFailure} to true. {inferenceDocsLink}."
-                      values={{
-                        ignoreFailure: <EuiCode>{'ignore_failure'}</EuiCode>,
-                        inferenceDocsLink: (
-                          <EuiLink external target="_blank" href={links.ingest.pipelineFailure}>
-                            Learn more.
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={7}>
-                <EuiFormRow
-                  hasEmptyLabelSpace
-                  fullWidth
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureHelpText"
-                      defaultMessage="Ignore failures for this processor."
-                    />
-                  }
-                >
-                  <EuiSwitch
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
-                        defaultMessage="Ignore failure"
-                      />
-                    }
-                    checked={ignoreFailure}
-                    onChange={updateIgnoreFailure}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
         </EuiFlexItem>
         {/* ADDITIONAL ADVANCED SETTINGS */}
         <EuiFlexItem>

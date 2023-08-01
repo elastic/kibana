@@ -134,7 +134,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
             <h4>
               {i18n.translate(
                 'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.title',
-                { defaultMessage: 'Test your pipeline results' }
+                { defaultMessage: 'Test the pipeline results' }
               )}
             </h4>
           </EuiTitle>
@@ -151,12 +151,12 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
               &nbsp;
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.description"
-                defaultMessage="Use this tool to run a simulation of your pipeline in order to confirm that it produces your anticipated results."
+                defaultMessage="Run a simulation of the pipeline to confirm it produces the anticipated results."
               />
               {state.targetField && (
                 <FormattedMessage
                   id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.targetFieldHint"
-                  defaultMessage="Look for the target field {targetField}."
+                  defaultMessage="Check for the target field {targetField} for the prediction in the Result tab."
                   values={{ targetField: <EuiCode>{state.targetField}</EuiCode> }}
                 />
               )}
@@ -239,7 +239,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
                   >
                     {i18n.translate(
                       'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton',
-                      { defaultMessage: 'Simulate Pipeline' }
+                      { defaultMessage: 'Simulate pipeline' }
                     )}
                   </EuiButton>
                 </div>

@@ -96,7 +96,7 @@ export const validateInferencePipelineAdvancedStep = (
   inferenceConfig: IngestInferenceProcessor['inference_config']
 ) => {
   const errors: AddInferencePipelineFormErrors = {};
-  const fieldMapValues = Object.values(fieldMap ?? {});
+  const fieldMapValues: string[] = Object.values(fieldMap?.field_map ?? {});
 
   // If populated, field map must include at least some model input fields as values.
   if (fieldMap && fieldMapValues.length > 0) {
