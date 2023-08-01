@@ -13,7 +13,7 @@ import type {
   AlertAgent,
   EndpointResponseActionAlerts,
   ResponseActionAlerts,
-  RuleResponseEndpointAction
+  RuleResponseEndpointAction,
 } from './types';
 
 export const endpointResponseAction = (
