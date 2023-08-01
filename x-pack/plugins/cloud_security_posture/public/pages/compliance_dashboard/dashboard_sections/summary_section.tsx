@@ -122,7 +122,7 @@ export const SummarySection = ({
       },
     ],
     [
-      complianceData.clusters.length,
+      complianceData.clusters,
       complianceData.stats.resourcesEvaluated,
       complianceData.stats.totalFailed,
       dashboardType,
