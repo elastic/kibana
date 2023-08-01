@@ -48,7 +48,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       // validate title
-      const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
       expect(await title.getVisibleText()).equal(caseTitle);
 
       // validate description
