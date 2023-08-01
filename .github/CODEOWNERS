@@ -1230,6 +1230,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/common/api/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
