@@ -42,7 +42,7 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
-import { useChartConfigPanel } from './hooks/use_chart_config_panel';
+import { ChartConfigPanel } from './chart_config_panel';
 import { getLensAttributes } from './utils/get_lens_attributes';
 import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
@@ -220,19 +220,6 @@ export function Chart({
     ]
   );
 
-  const ChartConfigPanel = useChartConfigPanel({
-    services,
-    lensAttributesContext,
-    dataView,
-    lensTablesAdapter,
-    currentSuggestion,
-    isFlyoutVisible,
-    setIsFlyoutVisible,
-    isPlainRecord,
-    query: originalQuery,
-    onSuggestionChange,
-  });
-
   const onSuggestionSelectorChange = useCallback(
     (s: Suggestion | undefined) => {
       onSuggestionChange?.(s);
@@ -275,7 +262,7 @@ export function Chart({
     [isFlyoutVisible]
   );
 
-  const canEditVisualizationOnTheFly = isPlainRecord && chartVisible;
+  const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
 
   return (
     <EuiFlexGroup
@@ -438,6 +425,7 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
+              hasLensSuggestions={Boolean(currentSuggestion)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}
@@ -454,7 +442,22 @@ export function Chart({
           isSaveable={false}
         />
       )}
-      {isFlyoutVisible && ChartConfigPanel}
+      {isFlyoutVisible && (
+        <ChartConfigPanel
+          {...{
+            services,
+            lensAttributesContext,
+            dataView,
+            lensTablesAdapter,
+            currentSuggestion,
+            isFlyoutVisible,
+            setIsFlyoutVisible,
+            isPlainRecord,
+            query: originalQuery,
+            onSuggestionChange,
+          }}
+        />
+      )}
     </EuiFlexGroup>
   );
 }

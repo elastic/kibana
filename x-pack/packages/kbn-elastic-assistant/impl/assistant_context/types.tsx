@@ -6,7 +6,6 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
-import { Prompt } from '../assistant/types';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
@@ -46,17 +45,14 @@ export interface ConversationTheme {
 export interface Conversation {
   apiConfig: {
     connectorId?: string;
-    defaultSystemPrompt?: Prompt;
+    defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
+    model?: string;
   };
   id: string;
   messages: Message[];
   replacements?: Record<string, string>;
   theme?: ConversationTheme;
   isDefault?: boolean;
-}
-
-export interface OpenAIConfig {
-  temperature: number;
-  model: string;
+  excludeFromLastConversationStorage?: boolean;
 }

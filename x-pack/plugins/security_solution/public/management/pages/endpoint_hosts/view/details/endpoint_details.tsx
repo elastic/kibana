@@ -7,19 +7,14 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { useGetEndpointDetails } from '../../../../hooks';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import {
-  fullDetailsHostInfo,
-  hostInfoError,
-  policyVersionInfo,
-  showView,
-  uiQueryParams,
-} from '../../store/selectors';
+import { showView, uiQueryParams } from '../../store/selectors';
 import { useEndpointSelector } from '../hooks';
 import * as i18 from '../translations';
 import { ActionsMenu } from './components/actions_menu';
@@ -36,14 +31,16 @@ export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const hostInfo = useEndpointSelector(fullDetailsHostInfo);
-  const hostDetailsError = useEndpointSelector(hostInfoError);
+  const {
+    data: hostInfo,
+    error: hostInfoError,
+    isFetching: isHostInfoLoading,
+  } = useGetEndpointDetails(queryParams.selected_endpoint ?? '');
 
-  const policyInfo = useEndpointSelector(policyVersionInfo);
   const show = useEndpointSelector(showView);
   const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
-  const ContentLoadingMarkup = useMemo(
+  const contentLoadingMarkup = useMemo(
     () => (
       <>
         <EuiSkeletonText lines={3} />
@@ -67,9 +64,9 @@ export const EndpointDetails = memo(() => {
           }),
           content:
             hostInfo === undefined ? (
-              ContentLoadingMarkup
+              contentLoadingMarkup
             ) : (
-              <EndpointDetailsContent hostInfo={hostInfo} policyInfo={policyInfo} />
+              <EndpointDetailsContent hostInfo={hostInfo} policyInfo={hostInfo.policy_info} />
             ),
         },
       ];
@@ -90,14 +87,14 @@ export const EndpointDetails = memo(() => {
       }
       return tabs;
     },
-    [canAccessEndpointActionsLogManagement, ContentLoadingMarkup, hostInfo, policyInfo, queryParams]
+    [canAccessEndpointActionsLogManagement, contentLoadingMarkup, hostInfo, queryParams]
   );
 
   const showFlyoutFooter =
     show === 'details' || show === 'policy_response' || show === 'activity_log';
 
   useEffect(() => {
-    if (hostDetailsError !== undefined) {
+    if (hostInfoError !== null) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
           defaultMessage: 'Could not find host',
@@ -107,15 +104,16 @@ export const EndpointDetails = memo(() => {
         }),
       });
     }
-  }, [hostDetailsError, show, toasts]);
+  }, [hostInfoError, show, toasts]);
 
   return (
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
         <EndpointDetailsFlyoutHeader
-          hasBorder
           endpointId={hostInfo?.metadata?.agent.id}
+          hasBorder
           hostname={hostInfo?.metadata?.host?.hostname}
+          isHostInfoLoading={isHostInfoLoading}
         />
       )}
       {hostInfo === undefined ? (
@@ -127,6 +125,7 @@ export const EndpointDetails = memo(() => {
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
               hostname={hostInfo.metadata.host.hostname}
+              isHostInfoLoading={isHostInfoLoading}
               // show overview tab if forcing response actions history
               // tab via URL without permission
               show={!canAccessEndpointActionsLogManagement ? 'details' : show}
@@ -142,7 +141,7 @@ export const EndpointDetails = memo(() => {
 
           {showFlyoutFooter && (
             <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
-              <ActionsMenu />
+              <ActionsMenu hostMetadata={hostInfo.metadata} />
             </EuiFlyoutFooter>
           )}
         </>

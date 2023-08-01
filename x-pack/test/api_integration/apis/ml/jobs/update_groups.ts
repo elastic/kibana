@@ -57,7 +57,8 @@ export default ({ getService }: FtrProviderContext) => {
     { id: 'new_group', jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id], calendarIds: [] },
   ];
 
-  describe('update groups', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/161324
+  describe.skip('update groups', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -69,6 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('returns expected list of groups after update', async () => {

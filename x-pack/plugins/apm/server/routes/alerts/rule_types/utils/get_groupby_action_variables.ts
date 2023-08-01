@@ -8,6 +8,7 @@
 import { getFieldValueLabel } from '../../../../../common/rules/apm_rule_types';
 import {
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -26,6 +27,8 @@ const renameActionVariable = (field: string): string => {
       return 'transactionName';
     case ERROR_GROUP_ID:
       return 'errorGroupingKey';
+    case ERROR_GROUP_NAME:
+      return 'errorGroupingName';
     default:
       return field;
   }

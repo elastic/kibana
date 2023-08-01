@@ -134,3 +134,22 @@ export const paginationSchema = ({ maxPerPage }: { maxPerPage: number }) =>
     rt.identity,
     undefined
   );
+
+export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
+  new rt.Type<number, number, unknown>(
+    'LimitedNumber',
+    rt.number.is,
+    (input, context) =>
+      either.chain(rt.number.validate(input, context), (s) => {
+        if (s < min) {
+          return rt.failure(input, context, `The ${fieldName} field cannot be less than ${min}.`);
+        }
+
+        if (s > max) {
+          return rt.failure(input, context, `The ${fieldName} field cannot be more than ${max}.`);
+        }
+
+        return rt.success(s);
+      }),
+    rt.identity
+  );

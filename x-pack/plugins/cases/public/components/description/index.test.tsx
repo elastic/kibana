@@ -122,6 +122,23 @@ describe('Description', () => {
 
     await waitFor(() => {
       expect(screen.getByText('A description is required.')).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
+    });
+  });
+
+  it('shows an error when description is a sting of empty characters', async () => {
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
+
+    await waitFor(() => {
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
     });
   });
 
@@ -141,8 +158,11 @@ describe('Description', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('The length of the description is too long. The maximum length is 30000.')
+        screen.getByText(
+          'The length of the description is too long. The maximum length is 30000 characters.'
+        )
       ).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
     });
   });
 

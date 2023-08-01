@@ -103,7 +103,9 @@ describe('Tags', () => {
     userEvent.keyboard('{enter}');
 
     await waitFor(() => {
-      expect(screen.getByText('The length of the tag is too long. The maximum length is 256.'));
+      expect(
+        screen.getByText('The length of the tag is too long. The maximum length is 256 characters.')
+      );
     });
   });
 });

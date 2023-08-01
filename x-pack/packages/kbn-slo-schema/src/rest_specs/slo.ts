@@ -7,11 +7,14 @@
 
 import * as t from 'io-ts';
 import {
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
   dateType,
+  durationType,
+  histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
-  indicatorTypesArraySchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
@@ -23,9 +26,6 @@ import {
   summarySchema,
   tagsSchema,
   timeWindowSchema,
-  apmTransactionErrorRateIndicatorSchema,
-  apmTransactionDurationIndicatorSchema,
-  durationType,
   timeWindowTypeSchema,
 } from '../schema';
 
@@ -68,12 +68,16 @@ const getSLOParamsSchema = t.type({
 });
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('creationTime'), t.literal('indicatorType')]);
+const sortBySchema = t.union([
+  t.literal('error_budget_consumed'),
+  t.literal('error_budget_remaining'),
+  t.literal('sli_value'),
+  t.literal('status'),
+]);
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
-    name: t.string,
-    indicatorTypes: indicatorTypesArraySchema,
+    kqlQuery: t.string,
     page: t.string,
     perPage: t.string,
     sortBy: sortBySchema,
@@ -200,6 +204,7 @@ type Indicator = t.OutputOf<typeof indicatorSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
+type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
 export {
@@ -247,6 +252,7 @@ export type {
   IndicatorType,
   Indicator,
   MetricCustomIndicator,
+  HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
 };

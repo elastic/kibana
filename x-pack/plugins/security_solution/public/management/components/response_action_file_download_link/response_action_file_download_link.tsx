@@ -134,10 +134,10 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }, [action.isCompleted, action.wasSuccessful]);
 
     const downloadUrl: string = useMemo(() => {
-      return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
+      return `${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
         file_id: getFileDownloadId(action, agentId),
-      });
+      })}?apiVersion=2023-10-31`;
     }, [action, agentId]);
 
     const {

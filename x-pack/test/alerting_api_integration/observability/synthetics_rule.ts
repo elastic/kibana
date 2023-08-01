@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
+import { TlsTranslations } from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -35,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates rule when settings are configured', async () => {
       await supertest
-        .post(API_URLS.DYNAMIC_SETTINGS)
+        .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
@@ -75,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('updates rules when settings are updated', async () => {
       await supertest
-        .post(API_URLS.DYNAMIC_SETTINGS)
+        .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
@@ -359,7 +360,7 @@ const tlsRule = {
     {
       group: 'recovered',
       params: {
-        body: 'Alert for TLS certificate {{context.commonName}} from issuer {{context.issuer}} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+        body: TlsTranslations.defaultRecoveryMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '52070ef7-c288-40e7-ae5b-51c7d77463cb',
@@ -369,7 +370,7 @@ const tlsRule = {
     {
       group: 'xpack.synthetics.alerts.actionGroups.tls',
       params: {
-        body: 'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+        body: TlsTranslations.defaultActionMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '4d003e7b-e37d-47e6-8ee6-2d80b61fa31f',
@@ -381,8 +382,7 @@ const tlsRule = {
       params: {
         to: ['test@gmail.com'],
         subject: 'Alert has resolved for certificate {{context.commonName}} - Elastic Synthetics',
-        message:
-          'Alert for TLS certificate {{context.commonName}} from issuer {{context.issuer}} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+        message: TlsTranslations.defaultRecoveryMessage,
         messageHTML: null,
         cc: [],
         bcc: [],
@@ -398,8 +398,7 @@ const tlsRule = {
       params: {
         to: ['test@gmail.com'],
         subject: 'Alert triggered for certificate {{context.commonName}} - Elastic Synthetics',
-        message:
-          'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+        message: TlsTranslations.defaultActionMessage,
         messageHTML: null,
         cc: [],
         bcc: [],
@@ -455,10 +454,8 @@ const tlsRule = {
         subAction: 'pushToService',
         subActionParams: {
           incident: {
-            short_description:
-              'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
-            description:
-              'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+            short_description: TlsTranslations.defaultActionMessage,
+            description: TlsTranslations.defaultActionMessage,
             impact: '2',
             severity: '2',
             urgency: '2',
@@ -479,8 +476,7 @@ const tlsRule = {
     {
       group: 'recovered',
       params: {
-        message:
-          'Alert for TLS certificate {{context.commonName}} from issuer {{context.issuer}} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+        message: TlsTranslations.defaultRecoveryMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '25822900-a030-4e59-b9c7-909ff665a862',
@@ -490,8 +486,7 @@ const tlsRule = {
     {
       group: 'xpack.synthetics.alerts.actionGroups.tls',
       params: {
-        message:
-          'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
+        message: TlsTranslations.defaultActionMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '07896abe-5ebe-4e7f-95e4-3944e6831843',

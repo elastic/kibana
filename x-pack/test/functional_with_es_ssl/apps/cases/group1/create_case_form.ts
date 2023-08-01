@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -48,7 +48,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       // validate title
-      const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
       expect(await title.getVisibleText()).equal(caseTitle);
 
       // validate description
@@ -82,7 +82,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       const title = await find.byCssSelector('[data-test-subj="caseTitle"]');
       expect(await title.getVisibleText()).contain(
-        'The length of the name is too long. The maximum length is 160.'
+        'The length of the name is too long. The maximum length is 160 characters.'
       );
 
       const description = await testSubjects.find('caseDescription');
@@ -90,12 +90,12 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       const tags = await testSubjects.find('caseTags');
       expect(await tags.getVisibleText()).contain(
-        'The length of the tag is too long. The maximum length is 256.'
+        'The length of the tag is too long. The maximum length is 256 characters.'
       );
 
       const category = await testSubjects.find('case-create-form-category');
       expect(await category.getVisibleText()).contain(
-        'The length of the category is too long. The maximum length is 50.'
+        'The length of the category is too long. The maximum length is 50 characters.'
       );
     });
 

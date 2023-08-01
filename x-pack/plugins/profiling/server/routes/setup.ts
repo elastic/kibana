@@ -8,7 +8,6 @@
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getClient } from './compat';
-import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
 import {
   enableResourceManagement,
   setMaximumBuckets,
@@ -18,8 +17,6 @@ import {
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
-  updateApmPolicy,
-  validateApmPolicy,
   validateCollectorPackagePolicy,
   validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
@@ -58,6 +55,11 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
+        const clientWithProfilingAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: false,
+        });
 
         const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
@@ -84,7 +86,10 @@ export function registerSetupRoute({
           });
         }
 
-        state.data.available = await hasProfilingData(setupOptions);
+        state.data.available = await hasProfilingData({
+          ...setupOptions,
+          client: clientWithProfilingAuth,
+        });
         if (state.data.available) {
           return response.ok({
             body: {
@@ -95,8 +100,6 @@ export function registerSetupRoute({
         }
 
         const verifyFunctions = [
-          isApmPackageInstalled,
-          validateApmPolicy,
           validateCollectorPackagePolicy,
           validateMaximumBuckets,
           validateResourceManagement,
@@ -163,38 +166,49 @@ export function registerSetupRoute({
           });
         }
 
-        const verifyFunctions = [
-          isApmPackageInstalled,
-          validateApmPolicy,
-          validateCollectorPackagePolicy,
-          validateMaximumBuckets,
-          validateResourceManagement,
-          validateSecurityRole,
-          validateSymbolizerPackagePolicy,
-        ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+        const partialStates = await Promise.all(
+          [
+            validateCollectorPackagePolicy,
+            validateMaximumBuckets,
+            validateResourceManagement,
+            validateSecurityRole,
+            validateSymbolizerPackagePolicy,
+          ].map((fn) => fn(setupOptions))
+        );
         const mergedState = mergePartialSetupStates(state, partialStates);
 
-        if (areResourcesSetup(mergedState)) {
+        const executeFunctions = [
+          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
+          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
+          ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
+          ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
+        ];
+
+        if (!executeFunctions.length) {
           return response.ok();
         }
 
-        const executeFunctions = [
-          installLatestApmPackage,
-          updateApmPolicy,
-          createCollectorPackagePolicy,
-          createSymbolizerPackagePolicy,
-          enableResourceManagement,
-          setSecurityRole,
-          setMaximumBuckets,
-        ];
         await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
+
+        if (dependencies.telemetryUsageCounter) {
+          dependencies.telemetryUsageCounter.incrementCounter({
+            counterName: `POST ${paths.HasSetupESResources}`,
+            counterType: 'success',
+          });
+        }
 
         // We return a status code of 202 instead of 200 because enabling
         // resource management in Elasticsearch is an asynchronous action
         // and is not guaranteed to complete before Kibana sends a response.
         return response.accepted();
       } catch (error) {
+        if (dependencies.telemetryUsageCounter) {
+          dependencies.telemetryUsageCounter.incrementCounter({
+            counterName: `POST ${paths.HasSetupESResources}`,
+            counterType: 'error',
+          });
+        }
         return handleRouteHandlerError({
           error,
           logger,

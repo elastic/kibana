@@ -8,7 +8,7 @@ import React, { useEffect, useRef, CSSProperties } from 'react';
 import { Chart, Metric, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { ChartLoader } from './chart_loader';
+import { ChartPlaceholder } from '../../../../../components/lens';
 
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
@@ -43,7 +43,9 @@ export const MetricChartWrapper = React.memo(
 
     return (
       <EuiPanel hasShadow={false} paddingSize="none" {...props}>
-        <ChartLoader loading={loading} loadedOnce={loadedOnce.current} style={style}>
+        {loading && !loadedOnce.current ? (
+          <ChartPlaceholder style={style} />
+        ) : (
           <EuiToolTip
             className="eui-fullWidth"
             delay="regular"
@@ -54,7 +56,7 @@ export const MetricChartWrapper = React.memo(
               <Metric id={id} data={[[metricsData]]} />
             </KPIChartStyled>
           </EuiToolTip>
-        </ChartLoader>
+        )}
       </EuiPanel>
     );
   }

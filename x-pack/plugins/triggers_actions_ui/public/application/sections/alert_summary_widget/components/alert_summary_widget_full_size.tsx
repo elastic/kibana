@@ -28,6 +28,7 @@ export interface AlertSummaryWidgetFullSizeProps {
   chartProps: ChartProps;
   recoveredAlertCount: number;
   dateFormat?: string;
+  hideChart?: boolean;
 }
 
 export const AlertSummaryWidgetFullSize = ({
@@ -36,6 +37,7 @@ export const AlertSummaryWidgetFullSize = ({
   chartProps: { theme, baseTheme, onBrushEnd },
   dateFormat,
   recoveredAlertCount,
+  hideChart,
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
     theme,
@@ -59,62 +61,66 @@ export const AlertSummaryWidgetFullSize = ({
           recoveredAlertCount={recoveredAlertCount}
         />
       </EuiFlexItem>
-      <EuiSpacer size="l" />
-      <Chart size={['100%', 170]}>
-        <Tooltip
-          headerFormatter={(tooltip) =>
-            moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT)
-          }
-        />
-        <Settings
-          legendPosition={Position.Right}
-          theme={chartTheme}
-          baseTheme={baseTheme}
-          onBrushEnd={onBrushEnd}
-        />
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          timeAxisLayerCount={2}
-          gridLine={{
-            visible: true,
-          }}
-          style={{
-            tickLine: { size: 0.0001, padding: 4 },
-            tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
-          }}
-        />
-        <Axis
-          id="left"
-          position={Position.Left}
-          gridLine={{ visible: true }}
-          integersOnly
-          ticks={4}
-        />
-        <Axis
-          id="right"
-          position={Position.Right}
-          gridLine={{ visible: true }}
-          integersOnly
-          ticks={4}
-        />
-        <LineSeries
-          id="Active"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="key"
-          yAccessors={['doc_count']}
-          color={[ALL_ALERT_COLOR]}
-          data={activeAlerts}
-          lineSeriesStyle={{
-            line: {
-              strokeWidth: 2,
-            },
-            point: { visible: false },
-          }}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-      </Chart>
+      {!hideChart && (
+        <div data-test-subj="alertSummaryWidgetFullSizeChartContainer">
+          <EuiSpacer size="l" />
+          <Chart size={['100%', 170]}>
+            <Tooltip
+              headerFormatter={(tooltip) =>
+                moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT)
+              }
+            />
+            <Settings
+              legendPosition={Position.Right}
+              theme={chartTheme}
+              baseTheme={baseTheme}
+              onBrushEnd={onBrushEnd}
+            />
+            <Axis
+              id="bottom"
+              position={Position.Bottom}
+              timeAxisLayerCount={2}
+              gridLine={{
+                visible: true,
+              }}
+              style={{
+                tickLine: { size: 0.0001, padding: 4 },
+                tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
+              }}
+            />
+            <Axis
+              id="left"
+              position={Position.Left}
+              gridLine={{ visible: true }}
+              integersOnly
+              ticks={4}
+            />
+            <Axis
+              id="right"
+              position={Position.Right}
+              gridLine={{ visible: true }}
+              integersOnly
+              ticks={4}
+            />
+            <LineSeries
+              id="Active"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="key"
+              yAccessors={['doc_count']}
+              color={[ALL_ALERT_COLOR]}
+              data={activeAlerts}
+              lineSeriesStyle={{
+                line: {
+                  strokeWidth: 2,
+                },
+                point: { visible: false },
+              }}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+          </Chart>
+        </div>
+      )}
     </EuiPanel>
   );
 };

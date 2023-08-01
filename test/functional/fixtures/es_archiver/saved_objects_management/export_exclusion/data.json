@@ -10,7 +10,6 @@
         "enabled": true
       },
       "type": "test-is-exportable",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z",
       "references": [
         {
@@ -40,7 +39,6 @@
         "enabled": false
       },
       "type": "test-is-exportable",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z",
       "references": []
     }
@@ -59,7 +57,6 @@
         "enabled": true
       },
       "type": "test-is-exportable",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z",
       "references": [
         {
@@ -89,7 +86,6 @@
         "enabled": false
       },
       "type": "test-is-exportable",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z",
       "references": []
     }
@@ -108,7 +104,6 @@
         "enabled": true
       },
       "type": "test-is-exportable",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z",
       "references": []
     }
@@ -127,7 +122,6 @@
         "enabled": true
       },
       "type": "test-is-exportable",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z",
       "references": []
     }

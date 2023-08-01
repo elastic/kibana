@@ -14,10 +14,16 @@ export interface AutocompleteBodyParams {
   [key: string]: number | string;
 }
 
+export interface AutocompleteAvailability {
+  stack: boolean;
+  serverless: boolean;
+}
+
 export interface AutocompleteDefinition {
   documentation?: string;
   methods?: string[];
   patterns?: string[];
   url_params?: AutocompleteUrlParams;
   data_autocomplete_rules?: AutocompleteBodyParams;
+  availability?: AutocompleteAvailability;
 }

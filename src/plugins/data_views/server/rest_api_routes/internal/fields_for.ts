@@ -86,6 +86,7 @@ const FieldDescriptorSchema = schema.object({
       schema.literal('summary'),
       schema.literal('counter'),
       schema.literal('gauge'),
+      schema.literal('position'),
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),

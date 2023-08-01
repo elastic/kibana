@@ -146,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Assert that results for the given service didn't find any correlations
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
           expect(apmCorrelationsTable).to.be(
-            'No significant correlations\nCorrelations will only be identified if they have significant impact.\nTry selecting another time range or remove any added filter.'
+            'No significant correlations\nCorrelations are only identified if they have significant impact.\nTry selecting another time range or removing any added filters.'
           );
         });
       });

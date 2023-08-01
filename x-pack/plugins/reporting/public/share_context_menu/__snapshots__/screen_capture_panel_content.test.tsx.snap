@@ -77,7 +77,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </div>
   </div>
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -104,7 +104,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        class="euiButtonIcon euiAccordion__iconButton emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -138,7 +138,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     >
       <div>
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -271,7 +271,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </div>
   </div>
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -298,7 +298,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        class="euiButtonIcon euiAccordion__iconButton emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -332,7 +332,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     >
       <div>
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -406,7 +406,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -433,7 +433,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        class="euiButtonIcon euiAccordion__iconButton emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -467,7 +467,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     >
       <div>
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"

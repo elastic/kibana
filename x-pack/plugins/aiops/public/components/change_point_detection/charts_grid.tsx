@@ -131,7 +131,7 @@ export const ChartsGrid: FC<ChartsGridProps> = ({ changePoints: changePointsDict
                           {
                             title: (
                               <FormattedMessage
-                                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel"
+                                id="xpack.aiops.changePointDetection.pValueLabel"
                                 defaultMessage="p-value"
                               />
                             ),

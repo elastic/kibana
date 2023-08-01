@@ -25,10 +25,17 @@ const configSchema = schema.object({
   deployment_url: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
   billing_url: schema.maybe(schema.string()),
+  performance_url: schema.maybe(schema.string()),
+  users_and_roles_url: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  serverless: schema.maybe(
+    schema.object({
+      project_id: schema.string(),
+    })
+  ),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -40,10 +47,15 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     deployment_url: true,
     id: true,
     billing_url: true,
+    users_and_roles_url: true,
+    performance_url: true,
     organization_url: true,
     profile_url: true,
     trial_end_date: true,
     is_elastic_staff_owned: true,
+    serverless: {
+      project_id: true,
+    },
   },
   schema: configSchema,
 };

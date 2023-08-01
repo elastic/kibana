@@ -32,7 +32,7 @@ describe('LinkToApp component', () => {
   });
 
   it('should render with minimum input', () => {
-    expect(render(<LinkToApp appId="fleet">{'link'}</LinkToApp>)).toMatchSnapshot();
+    expect(render(<LinkToApp appId="fleet">{'link'}</LinkToApp>).render()).toMatchSnapshot();
   });
   it('should render with href', () => {
     expect(
@@ -40,7 +40,7 @@ describe('LinkToApp component', () => {
         <LinkToApp appId="fleet" href="/app/fleet">
           {'link'}
         </LinkToApp>
-      )
+      ).render()
     ).toMatchSnapshot();
   });
   it('should support onClick prop', () => {

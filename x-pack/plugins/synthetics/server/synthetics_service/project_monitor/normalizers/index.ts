@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DataStream,
-  PrivateLocation,
-  Locations,
-  ProjectMonitor,
-} from '../../../../common/runtime_types';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { DataStream, Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import { getNormalizeBrowserFields } from './browser_monitor';
 import { getNormalizeICMPFields } from './icmp_monitor';
 import { getNormalizeTCPFields } from './tcp_monitor';
@@ -46,7 +42,7 @@ export const normalizeProjectMonitors = ({
   version,
 }: {
   locations: Locations;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   monitors: ProjectMonitor[];
   projectId: string;
   namespace: string;

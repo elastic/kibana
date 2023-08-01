@@ -35,7 +35,7 @@ import {
   RuleTypeRegistry,
   RawRuleLastRun,
 } from '../types';
-import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
+import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -65,7 +65,13 @@ import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { loadRule } from './rule_loader';
+import {
+  getRuleAttributes,
+  RuleData,
+  RuleDataResult,
+  ValidatedRuleData,
+  validateRule,
+} from './rule_loader';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
@@ -82,11 +88,36 @@ interface StackTraceLog {
   stackTrace?: string;
 }
 
+interface TaskRunnerConstructorParams<
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  RuleState extends RuleTypeState,
+  AlertState extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
+> {
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    RuleState,
+    AlertState,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >;
+  taskInstance: ConcreteTaskInstance;
+  context: TaskRunnerContext;
+  inMemoryMetrics: InMemoryMetrics;
+}
+
 export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,
-  State extends AlertInstanceState,
+  AlertState extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
@@ -100,7 +131,7 @@ export class TaskRunner<
     Params,
     ExtractedParams,
     RuleState,
-    State,
+    AlertState,
     Context,
     ActionGroupIds,
     RecoveryActionGroupId,
@@ -119,22 +150,24 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
+  private ruleData?: RuleDataResult<RuleData<Params>>;
+  private runDate = new Date();
 
-  constructor(
-    ruleType: NormalizedRuleType<
-      Params,
-      ExtractedParams,
-      RuleState,
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
-    >,
-    taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics
-  ) {
+  constructor({
+    ruleType,
+    taskInstance,
+    context,
+    inMemoryMetrics,
+  }: TaskRunnerConstructorParams<
+    Params,
+    ExtractedParams,
+    RuleState,
+    AlertState,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >) {
     this.context = context;
     const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
     this.logger = context.logger.get(loggerId);
@@ -238,7 +271,6 @@ export class TaskRunner<
 
   private async runRule({
     fakeRequest,
-    rulesClient,
     rule,
     apiKey,
     validatedParams: params,
@@ -304,7 +336,7 @@ export class TaskRunner<
     // of the LegacyAlertsClient and into the AlertsClient.
     let alertsClient: IAlertsClient<
       AlertData,
-      State,
+      AlertState,
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
@@ -314,7 +346,7 @@ export class TaskRunner<
       const client =
         (await this.context.alertsService?.createAlertsClient<
           AlertData,
-          State,
+          AlertState,
           Context,
           ActionGroupIds,
           RecoveryActionGroupId
@@ -326,7 +358,7 @@ export class TaskRunner<
 
       alertsClient = client
         ? client
-        : new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        : new LegacyAlertsClient<AlertState, Context, ActionGroupIds, RecoveryActionGroupId>(
             alertsClientParams
           );
     } catch (err) {
@@ -334,9 +366,12 @@ export class TaskRunner<
         `Error initializing AlertsClient for context ${this.ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
       );
 
-      alertsClient = new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-        alertsClientParams
-      );
+      alertsClient = new LegacyAlertsClient<
+        AlertState,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >(alertsClientParams);
     }
 
     await alertsClient.initializeExecution({
@@ -535,6 +570,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
       maintenanceWindowIds,
+      alertsClient,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
@@ -579,7 +615,11 @@ export class TaskRunner<
   /**
    * Initialize event logger, load and validate the rule
    */
-  private async prepareToRun() {
+  private async prepareToRun(): Promise<ValidatedRuleData<Params>> {
+    if (!this.ruleData) {
+      this.ruleData = await this.loadIndirectParams();
+    }
+
     const {
       params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
@@ -616,25 +656,24 @@ export class TaskRunner<
       ...(namespace ? { namespace } : {}),
     });
 
-    this.alertingEventLogger.start();
+    this.alertingEventLogger.start(this.runDate);
 
-    return await loadRule<Params>({
+    return validateRule({
+      alertingEventLogger: this.alertingEventLogger,
+      ruleData: this.ruleData,
       paramValidator: this.ruleType.validate.params,
       ruleId,
       spaceId,
       context: this.context,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      alertingEventLogger: this.alertingEventLogger,
     });
   }
 
   private async processRunResults({
     nextRun,
-    runDate,
     stateWithMetrics,
   }: {
     nextRun: string | null;
-    runDate: Date;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
   }) {
     const {
@@ -650,8 +689,8 @@ export class TaskRunner<
       IExecutionStatusAndMetrics
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, runDate),
-      (err: ElasticsearchError) => executionStatusFromError(err, runDate)
+      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
+      (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
     );
 
     // New consolidated statuses for lastRun
@@ -704,7 +743,7 @@ export class TaskRunner<
     this.ruleMonitoring.addHistory({
       duration: executionStatus.lastDuration,
       hasError: executionStatus.error != null,
-      runDate,
+      runDate: this.runDate,
     });
 
     if (!this.cancelled) {
@@ -730,6 +769,23 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
+  async loadIndirectParams(): Promise<RuleDataResult<RuleData<Params>>> {
+    this.runDate = new Date();
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
+      try {
+        const {
+          params: { alertId: ruleId, spaceId },
+        } = this.taskInstance;
+        const data = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+        this.ruleData = { data };
+      } catch (err) {
+        const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+        this.ruleData = { error };
+      }
+      return this.ruleData;
+    });
+  }
+
   async run(): Promise<RuleTaskRunResult> {
     const {
       params: { alertId: ruleId, spaceId },
@@ -739,8 +795,10 @@ export class TaskRunner<
     } = this.taskInstance;
 
     this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
-    const runDate = new Date();
-    this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
+
+    this.logger.debug(
+      `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`
+    );
 
     if (startedAt) {
       // Capture how long it took for the rule to start running after being claimed
@@ -750,10 +808,8 @@ export class TaskRunner<
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
     try {
-      const preparedResult = await this.timer.runWithTimer(
-        TaskRunnerTimerSpan.PrepareRule,
-        async () => this.prepareToRun()
-      );
+      const preparedResult = await this.prepareToRun();
+
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       (async () => {
@@ -772,18 +828,8 @@ export class TaskRunner<
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      schedule = asOk(
-        (
-          await loadRule<Params>({
-            paramValidator: this.ruleType.validate.params,
-            ruleId,
-            spaceId,
-            context: this.context,
-            ruleTypeRegistry: this.ruleTypeRegistry,
-            alertingEventLogger: this.alertingEventLogger,
-          })
-        ).rule.schedule
-      );
+      const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+      schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
@@ -801,7 +847,6 @@ export class TaskRunner<
       async () =>
         this.processRunResults({
           nextRun,
-          runDate,
           stateWithMetrics,
         })
     );
@@ -873,6 +918,7 @@ export class TaskRunner<
         return { interval: retryInterval };
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
+      hasError: isErr(schedule),
     };
   }
 

@@ -697,7 +697,7 @@
               "SearchResponse",
               "<TDocument, TAggregations>>; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1658,6 +1658,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; synonyms: ",
               "default",
               "; tasks: ",
               "default",
@@ -2664,10 +2666,10 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-server.ActionType.isSystemAction",
+            "id": "def-server.ActionType.isSystemActionType",
             "type": "CompoundType",
             "tags": [],
-            "label": "isSystemAction",
+            "label": "isSystemActionType",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -2675,6 +2677,52 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.getKibanaPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaPrivileges",
+            "description": [
+              "\nAdditional Kibana privileges to be checked by the actions framework.\nUse it if you want to perform extra authorization checks based on a Kibana feature.\nFor example, you can define the privileges a users needs to have to execute\na Case or OsQuery system action.\n\nThe list of the privileges follows the Kibana privileges format usually generated with `security.authz.actions.*.get(...)`.\n\nIt only works with system actions and only when executing an action.\nFor all other scenarios they will be ignored"
+            ],
+            "signature": [
+              "((args?: { params?: Params | undefined; } | undefined) => string[]) | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionType.getKibanaPrivileges.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "x-pack/plugins/actions/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.ActionType.getKibanaPrivileges.$1.params",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "params",
+                    "description": [],
+                    "signature": [
+                      "Params | undefined"
+                    ],
+                    "path": "x-pack/plugins/actions/server/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "actions",
@@ -2964,6 +3012,66 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-server.InMemoryConnector",
+        "type": "Interface",
+        "tags": [],
+        "label": "InMemoryConnector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.InMemoryConnector",
+            "text": "InMemoryConnector"
+          },
+          "<Config, Secrets> extends ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ActionResult",
+            "text": "ActionResult"
+          },
+          "<Config>"
+        ],
+        "path": "x-pack/plugins/actions/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.InMemoryConnector.secrets",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "Secrets"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.InMemoryConnector.config",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Config"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-server.IUnsecuredActionsClient",
         "type": "Interface",
         "tags": [],
@@ -3022,52 +3130,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
-        "id": "def-server.PreConfiguredAction",
-        "type": "Interface",
-        "tags": [],
-        "label": "PreConfiguredAction",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.PreConfiguredAction",
-            "text": "PreConfiguredAction"
-          },
-          "<Config, Secrets> extends ",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<Config>"
-        ],
-        "path": "x-pack/plugins/actions/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.PreConfiguredAction.secrets",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "secrets",
-            "description": [],
-            "signature": [
-              "Secrets"
-            ],
-            "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3214,7 +3276,7 @@
         "label": "ActionsAuthorization",
         "description": [],
         "signature": [
-          "{ ensureAuthorized: (operation: string, actionTypeId?: string | undefined) => Promise<void>; }"
+          "{ ensureAuthorized: ({ operation, actionTypeId, additionalPrivileges, }: { operation: string; actionTypeId?: string | undefined; additionalPrivileges?: string[] | undefined; }) => Promise<void>; }"
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
@@ -3253,7 +3315,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; get: ({ id }: { id: string; }) => Promise<",
+          ">>; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3263,7 +3325,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; getAll: () => Promise<",
+          ">>; getAll: ({ includeSystemActions }?: GetAllOptions) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3271,7 +3333,7 @@
             "section": "def-server.FindActionResult",
             "text": "FindActionResult"
           },
-          "[]>; getBulk: (ids: string[]) => Promise<",
+          "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -3307,7 +3369,7 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: (featureId?: string | undefined) => Promise<",
+          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ListTypesOptions) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -3315,7 +3377,7 @@
             "section": "def-common.ActionType",
             "text": "ActionType"
           },
-          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
+          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -3848,18 +3910,18 @@
         },
         {
           "parentPluginId": "actions",
-          "id": "def-server.PluginStartContract.preconfiguredActions",
+          "id": "def-server.PluginStartContract.inMemoryConnectors",
           "type": "Array",
           "tags": [],
-          "label": "preconfiguredActions",
+          "label": "inMemoryConnectors",
           "description": [],
           "signature": [
             {
               "pluginId": "actions",
               "scope": "server",
               "docId": "kibActionsPluginApi",
-              "section": "def-server.PreConfiguredAction",
-              "text": "PreConfiguredAction"
+              "section": "def-server.InMemoryConnector",
+              "text": "InMemoryConnector"
             },
             "<",
             "ActionTypeConfig",
@@ -4512,6 +4574,17 @@
             "signature": [
               "string[]"
             ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.isSystemActionType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemActionType",
+            "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

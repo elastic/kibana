@@ -525,7 +525,7 @@ function getActionTypeForm({
   onConnectorSelected,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
-  hasSummary = true,
+  hasAlertsMappings = true,
   messageVariables = { context: [], state: [], params: [] },
   summaryMessageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
@@ -542,7 +542,7 @@ function getActionTypeForm({
   onConnectorSelected?: (id: string) => void;
   setActionFrequencyProperty?: () => void;
   setActionAlertsFilterProperty?: () => void;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
@@ -605,6 +605,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
     '.server-log': {
       id: '.server-log',
@@ -614,6 +615,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
@@ -632,7 +634,7 @@ function getActionTypeForm({
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}
-      hasSummary={hasSummary}
+      hasAlertsMappings={hasAlertsMappings}
       messageVariables={messageVariables}
       summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}

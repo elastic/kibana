@@ -9,14 +9,19 @@
 import { useEffect, useState } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { getResolvedDateRange } from '../utils/get_resolved_date_range';
+import type { TimeRangeUpdatesType, SearchMode } from '../types';
 
 /**
  * Hook params
  */
 export interface QuerySubscriberParams {
   data: DataPublicPluginStart;
-  listenToSearchSessionUpdates?: boolean;
+  /**
+   * Pass `timefilter` only if you are not using search sessions for the global search
+   */
+  timeRangeUpdatesType?: TimeRangeUpdatesType;
 }
 
 /**
@@ -27,17 +32,18 @@ export interface QuerySubscriberResult {
   filters: Filter[] | undefined;
   fromDate: string | undefined;
   toDate: string | undefined;
+  searchMode: SearchMode | undefined;
 }
 
 /**
  * Memorizes current query, filters and absolute date range
  * @param data
- * @param listenToSearchSessionUpdates
+ * @param timeRangeUpdatesType
  * @public
  */
 export const useQuerySubscriber = ({
   data,
-  listenToSearchSessionUpdates = true,
+  timeRangeUpdatesType = 'search-session',
 }: QuerySubscriberParams) => {
   const timefilter = data.query.timefilter.timefilter;
   const [result, setResult] = useState<QuerySubscriberResult>(() => {
@@ -48,11 +54,12 @@ export const useQuerySubscriber = ({
       filters: state?.filters,
       fromDate: dateRange.fromDate,
       toDate: dateRange.toDate,
+      searchMode: getSearchMode(state?.query),
     };
   });
 
   useEffect(() => {
-    if (!listenToSearchSessionUpdates) {
+    if (timeRangeUpdatesType !== 'search-session') {
       return;
     }
 
@@ -66,10 +73,10 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, data.search.session.state$, listenToSearchSessionUpdates]);
+  }, [setResult, timefilter, data.search.session.state$, timeRangeUpdatesType]);
 
   useEffect(() => {
-    if (listenToSearchSessionUpdates) {
+    if (timeRangeUpdatesType !== 'timefilter') {
       return;
     }
 
@@ -83,7 +90,7 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, listenToSearchSessionUpdates]);
+  }, [setResult, timefilter, timeRangeUpdatesType]);
 
   useEffect(() => {
     const subscription = data.query.state$.subscribe(({ state, changes }) => {
@@ -92,6 +99,7 @@ export const useQuerySubscriber = ({
           ...prevState,
           query: state.query,
           filters: state.filters,
+          searchMode: getSearchMode(state.query),
         }));
       }
     });
@@ -114,4 +122,25 @@ export const hasQuerySubscriberData = (
   filters: Filter[];
   fromDate: string;
   toDate: string;
-} => Boolean(result.query && result.filters && result.fromDate && result.toDate);
+  searchMode: SearchMode;
+} =>
+  Boolean(result.query && result.filters && result.fromDate && result.toDate && result.searchMode);
+
+/**
+ * Determines current search mode
+ * @param query
+ */
+export function getSearchMode(query?: Query | AggregateQuery): SearchMode | undefined {
+  if (!query) {
+    return undefined;
+  }
+
+  if (
+    isOfAggregateQueryType(query) &&
+    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
+  ) {
+    return 'text-based';
+  }
+
+  return 'documents';
+}

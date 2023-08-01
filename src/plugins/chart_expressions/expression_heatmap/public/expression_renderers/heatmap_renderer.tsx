@@ -14,6 +14,7 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expre
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -79,24 +80,26 @@ export const heatmapRenderer: (
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
-        <div className="heatmap-container" data-test-subj="heatmapChart">
-          <HeatmapComponent
-            {...config}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-            timeZone={timeZone}
-            datatableUtilities={getDatatableUtilities()}
-            formatFactory={getFormatService().deserialize}
-            chartsThemeService={plugins.charts.theme}
-            paletteService={getPaletteService()}
-            renderComplete={renderComplete}
-            uiState={handlers.uiState as PersistedState}
-            interactive={isInteractive()}
-            chartsActiveCursorService={plugins.charts.activeCursor}
-            syncTooltips={config.syncTooltips}
-            syncCursor={config.syncCursor}
-          />
-        </div>
+        <I18nProvider>
+          <div className="heatmap-container" data-test-subj="heatmapChart">
+            <HeatmapComponent
+              {...config}
+              onClickValue={onClickValue}
+              onSelectRange={onSelectRange}
+              timeZone={timeZone}
+              datatableUtilities={getDatatableUtilities()}
+              formatFactory={getFormatService().deserialize}
+              chartsThemeService={plugins.charts.theme}
+              paletteService={getPaletteService()}
+              renderComplete={renderComplete}
+              uiState={handlers.uiState as PersistedState}
+              interactive={isInteractive()}
+              chartsActiveCursorService={plugins.charts.activeCursor}
+              syncTooltips={config.syncTooltips}
+              syncCursor={config.syncCursor}
+            />
+          </div>
+        </I18nProvider>
       </KibanaThemeProvider>,
       domNode
     );

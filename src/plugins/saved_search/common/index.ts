@@ -23,3 +23,4 @@ export enum VIEW_MODE {
 
 export { SavedSearchType } from './constants';
 export { LATEST_VERSION } from './constants';
+export { getKibanaContextFn } from './expressions/kibana_context';

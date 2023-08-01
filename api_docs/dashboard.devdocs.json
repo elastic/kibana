@@ -344,7 +344,7 @@
             "signature": [
               "((result: ",
               "LoadDashboardReturn",
-              ") => boolean) | undefined"
+              ") => \"valid\" | \"invalid\" | \"redirected\") | undefined"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
