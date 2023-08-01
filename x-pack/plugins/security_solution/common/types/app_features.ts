@@ -33,6 +33,11 @@ export enum AppFeatureSecurityKey {
    * process operations, command execution, etc.
    */
   endpointResponseActions = 'endpoint_response_actions',
+
+  /**
+   * Enables Threat Intelligence
+   */
+  threatIntelligence = 'threat-intelligence',
 }
 
 export enum AppFeatureCasesKey {
