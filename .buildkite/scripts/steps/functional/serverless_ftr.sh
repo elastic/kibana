@@ -9,7 +9,7 @@ export JOB="kibana-serverless-$SERVERLESS_ENVIRONMENT"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
-sysctl -w vm.max_map_count=262144
+sudo sysctl -w vm.max_map_count=262144
 
 if [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
   SERVERLESS_CONFIGS=(
