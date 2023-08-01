@@ -3,14 +3,14 @@
     /* fixates the elements position in the viewport, removes the element from the flow of the page */
     position: fixed;
     /* position below the primary fixed EuiHeader in the viewport */
-    top: 48px;
-    height: 50px;
+    top: $euiHeaderHeightCompensation;
+    height: $euiHeaderHeightCompensation;
     /* use a high z-index since this component is part of the header */
-    z-index: 1000;
+    z-index: $euiZHeader;
   }
 
   .header__actionMenu__clearFix {
     /* make other elements to flow around the fixed menu bar rather than behind it */
-    margin-top: 48px;
+    margin-top: $euiHeaderHeightCompensation;
   }
 }
