@@ -21,7 +21,11 @@ import {
   TriggersActionsUiConfig,
 } from '../../../types';
 import { RuleForm, RuleTypeItems } from './rule_form';
-import { RuleFormConsumerSelectionModal } from './rule_form_consumer_selection_modal';
+import {
+  RuleFormConsumerSelectionModal,
+  VALID_CONSUMERS,
+  ValidConsumer,
+} from './rule_form_consumer_selection_modal';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
 import { createRule } from '../../lib/rule_api/create';
@@ -213,14 +217,14 @@ const RuleAdd = ({
 
     return Object.entries(selectedRuleType.ruleType.authorizedConsumers).reduce<string[]>(
       (result, [authorizedConsumer, privilege]) => {
-        if (privilege.all) {
+        if (privilege.all && VALID_CONSUMERS.includes(authorizedConsumer)) {
           result.push(authorizedConsumer);
         }
         return result;
       },
       []
     );
-  }, [availableRuleTypes, rule.ruleTypeId]);
+  }, [availableRuleTypes, rule.ruleTypeId]) as ValidConsumer[];
 
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
     () => getRuleErrors(rule as Rule, ruleType, config),

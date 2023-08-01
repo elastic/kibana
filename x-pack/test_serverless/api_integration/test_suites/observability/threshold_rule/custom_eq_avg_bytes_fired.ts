@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
+        query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
       });
       await deleteDataView({
         supertest,
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         const createdRule = await createRule({
           supertest,
           tags: ['observability'],
-          consumer: 'alerts',
+          consumer: 'logs',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Threshold (Technical Preview)'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'alerts');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
