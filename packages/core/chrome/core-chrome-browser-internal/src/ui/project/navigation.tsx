@@ -10,8 +10,8 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiCollapsibleNav, EuiCollapsibleNavProps, useIsWithinMinBreakpoint } from '@elastic/eui';
 
-const SIZE_EXPANDED = 248;
-const SIZE_COLLAPSED = 48;
+export const SIZE_EXPANDED = 248;
+export const SIZE_COLLAPSED = 48;
 
 export interface ProjectNavigationProps {
   isOpen: boolean;

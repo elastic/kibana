@@ -7,6 +7,8 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeader,
   EuiHeaderLink,
   EuiHeaderLogo,
@@ -15,6 +17,7 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -43,7 +46,7 @@ import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
-import { ProjectNavigation } from './navigation';
+import { ProjectNavigation, SIZE_COLLAPSED, SIZE_EXPANDED } from './navigation';
 
 const headerCss = {
   logo: {
@@ -271,14 +274,30 @@ export const ProjectHeader = ({
 
           {/* fixme: should have position=fixed */}
           {headerActionMenuMounter.mount && (
-            <EuiHeader className="header__secondBar" data-test-subj="kibanaProjectHeaderActionMenu">
-              <EuiHeaderSection />
-              <EuiHeaderSection side="right">
-                <EuiHeaderSectionItem>
-                  <HeaderActionMenu mounter={headerActionMenuMounter} />
-                </EuiHeaderSectionItem>
-              </EuiHeaderSection>
-            </EuiHeader>
+            <>
+              <div
+                className="header__actionMenu"
+                data-test-subj="kibanaProjectHeaderActionMenu"
+                css={css`
+                  /* span the width of the body content (viewport - width of side nav) */
+                  width: calc(100% - ${isOpen ? SIZE_EXPANDED : SIZE_COLLAPSED}px);
+                `}
+              >
+                <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+                  <EuiFlexGroup>
+                    <EuiFlexItem
+                      grow={false}
+                      css={css`
+                        margin-left: auto; /* force it to use all space on the main axis and push to the right */
+                      `}
+                    >
+                      <HeaderActionMenu mounter={headerActionMenuMounter} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </div>
+              <div className="header__actionMenu__clearFix" />
+            </>
           )}
         </div>
       </header>
