@@ -179,6 +179,15 @@ function validateConnectorTypeConfig(
       })
     );
   }
+
+  if (Boolean(configObject.authType) && !configObject.hasAuth) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
+        defaultMessage:
+          'error configuring webhook action: authType must be null or undefined if hasAuth is false',
+      })
+    );
+  }
 }
 
 // action executor
