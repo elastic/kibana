@@ -60,7 +60,7 @@ export function InstallElasticAgent() {
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
       return callApi(
-        'GET /internal/observability_onboarding/custom_logs/privileges'
+        'GET /internal/observability_onboarding/logs/setup/privileges'
       );
     },
     []
@@ -68,7 +68,7 @@ export function InstallElasticAgent() {
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi(
-      'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+      'GET /internal/observability_onboarding/logs/setup/environment'
     );
   }, []);
 
@@ -79,20 +79,17 @@ export function InstallElasticAgent() {
   } = useFetcher(
     (callApi) => {
       if (monitoringRole?.hasPrivileges) {
-        return callApi(
-          'POST /internal/observability_onboarding/custom_logs/save',
-          {
-            params: {
-              body: {
-                name: datasetName,
-                state: {
-                  datasetName,
-                  namespace,
-                },
+        return callApi('POST /internal/observability_onboarding/logs/flow', {
+          params: {
+            body: {
+              name: datasetName,
+              state: {
+                datasetName,
+                namespace,
               },
             },
-          }
-        );
+          },
+        });
       }
     },
     [monitoringRole?.hasPrivileges]
@@ -102,7 +99,7 @@ export function InstallElasticAgent() {
     const { onboardingId } = getState();
     if (onboardingId) {
       return callApi(
-        'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+        'PUT /internal/observability_onboarding/flow/{onboardingId}',
         {
           params: {
             path: { onboardingId },
@@ -152,7 +149,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
           { params: { path: { onboardingId } } }
         );
       }
