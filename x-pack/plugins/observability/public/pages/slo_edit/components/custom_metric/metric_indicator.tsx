@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields } from '../../helpers/create_options';
@@ -30,11 +30,6 @@ interface MetricIndicatorProps {
   type: 'good' | 'total';
   indexFields: Field[] | undefined;
   isLoadingIndex: boolean;
-  metricLabel: string;
-  filterLabel: string;
-  equationLabel: string;
-  metricTooltip: ReactNode;
-  equationTooltip: ReactNode;
 }
 
 export const NEW_CUSTOM_METRIC = { name: 'A', aggregation: 'sum' as const, field: '' };
@@ -54,16 +49,47 @@ function createEquationFromMetric(names: string[]) {
 
 const SUPPORTED_FIELD_TYPES = ['number', 'histogram'];
 
-export function MetricIndicator({
-  type,
-  indexFields,
-  isLoadingIndex,
-  metricLabel,
-  filterLabel,
-  equationLabel,
-  metricTooltip,
-  equationTooltip,
-}: MetricIndicatorProps) {
+export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricIndicatorProps) {
+  const metricLabel = i18n.translate(
+    'xpack.observability.slo.sloEdit.sliType.customMetric.metricLabel',
+    { defaultMessage: 'Metric' }
+  );
+
+  const filterLabel = i18n.translate(
+    'xpack.observability.slo.sloEdit.sliType.customMetric.filterLabel',
+    { defaultMessage: 'Filter' }
+  );
+
+  const metricTooltip = (
+    <EuiIconTip
+      content={i18n.translate(
+        'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
+        {
+          defaultMessage:
+            'This data from this field will be aggregated with the "sum" aggregation.',
+        }
+      )}
+      position="top"
+    />
+  );
+
+  const equationLabel = i18n.translate(
+    'xpack.observability.slo.sloEdit.sliType.customMetric.equationLabel',
+    { defaultMessage: 'Equation' }
+  );
+
+  const equationTooltip = (
+    <EuiIconTip
+      content={i18n.translate(
+        'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
+        {
+          defaultMessage: 'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+        }
+      )}
+      position="top"
+    />
+  );
+
   const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
   const metricFields = (indexFields ?? []).filter((field) =>
     SUPPORTED_FIELD_TYPES.includes(field.type)
