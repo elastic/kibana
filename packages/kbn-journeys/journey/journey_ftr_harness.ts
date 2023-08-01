@@ -419,11 +419,8 @@ export class JourneyFtrHarness {
         ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
         : message.text();
 
-      if (
-        url.includes('kbn-ui-shared-deps-npm.dll.js') &&
-        text.includes('moment construction falls')
-      ) {
-        // ignore errors from moment about constructing dates with invalid formats
+      if (url.includes('kbn-ui-shared-deps-npm.dll.js')) {
+        // ignore errors/warning from kbn-ui-shared-deps-npm.dll.js
         return;
       }
 

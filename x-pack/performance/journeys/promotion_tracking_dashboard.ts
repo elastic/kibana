@@ -49,6 +49,6 @@ export const journey = new Journey({
     await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
   })
 
-  .step('Wait for visualization animations to finish', async ({ page, kibanaPage }) => {
+  .step('Wait for visualization animations to finish', async ({ kibanaPage }) => {
     await kibanaPage.waitForVisualizations(1);
   });

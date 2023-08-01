@@ -10,6 +10,12 @@ import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Page } from 'playwright';
 
+interface WaitForRenderArgs {
+  expectedItemsCount: number;
+  itemLocator: string;
+  checkAttribute: string;
+}
+
 export class KibanaPage {
   readonly page: Page;
   readonly log: ToolingLog;
@@ -29,22 +35,41 @@ export class KibanaPage {
     await this.page.click(subj('breadcrumb dashboardListingBreadcrumb first'));
   }
 
-  async waitForVisualizations(visCount: number) {
+  async waitForRender({ expectedItemsCount, itemLocator, checkAttribute }: WaitForRenderArgs) {
     try {
-      await this.page.waitForFunction(function renderCompleted(cnt) {
-        const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));
-        const allVisLoaded = visualizations.length === cnt;
-        return allVisLoaded
-          ? visualizations.every((e) => e.getAttribute('data-render-complete') === 'true')
-          : false;
-      }, visCount);
+      await this.page.waitForFunction(
+        function renderCompleted(args: WaitForRenderArgs) {
+          const renderingItems = Array.from(document.querySelectorAll(args.itemLocator));
+          const allItemsLoaded = renderingItems.length === args.expectedItemsCount;
+          return allItemsLoaded
+            ? renderingItems.every((e) => e.getAttribute(args.checkAttribute) === 'true')
+            : false;
+        },
+        { expectedItemsCount, itemLocator, checkAttribute }
+      );
     } catch (err) {
-      const loadedVis = await this.page.$$('[data-rendering-count]');
-      const renderedVis = await this.page.$$('[data-rendering-count][data-render-complete="true"]');
+      const loaded = await this.page.$$(itemLocator);
+      const rendered = await this.page.$$(`${itemLocator}[${checkAttribute}="true"]`);
       this.log.error(
-        `'waitForVisualizations' failed: loaded - ${loadedVis.length}, rendered - ${renderedVis.length}, expected - ${visCount}`
+        `'waitForRendering' failed: loaded - ${loaded.length}, rendered - ${rendered.length}, expected count - ${expectedItemsCount}`
       );
       throw err;
     }
+  }
+
+  async waitForVisualizations(count: number) {
+    await this.waitForRender({
+      expectedItemsCount: count,
+      itemLocator: '[data-rendering-count]',
+      checkAttribute: 'data-render-complete',
+    });
+  }
+
+  async waitForCharts(count: number) {
+    await this.waitForRender({
+      expectedItemsCount: count,
+      itemLocator: '.echChartStatus',
+      checkAttribute: 'data-ech-render-complete',
+    });
   }
 }
