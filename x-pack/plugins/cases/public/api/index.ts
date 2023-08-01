@@ -17,7 +17,7 @@ import type {
 import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
 import {
   CASE_FIND_URL,
-  CASE_METRICS_URL,
+  INTERNAL_CASE_METRICS_URL,
   CASE_STATUS_URL,
   INTERNAL_BULK_GET_CASES_URL,
 } from '../../common/constants';
@@ -62,7 +62,7 @@ export const getCasesMetrics = async ({
   signal,
   query,
 }: HTTPService & { query: CasesMetricsRequest }): Promise<CasesMetrics> => {
-  const res = await http.get<CasesMetricsResponse>(CASE_METRICS_URL, { signal, query });
+  const res = await http.get<CasesMetricsResponse>(INTERNAL_CASE_METRICS_URL, { signal, query });
   return convertToCamelCase(decodeCasesMetricsResponse(res));
 };
 

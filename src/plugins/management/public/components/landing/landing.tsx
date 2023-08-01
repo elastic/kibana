@@ -12,6 +12,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageBody } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
+
 import { useAppContext } from '../management_app/management_context';
 
 interface ManagementLandingPageProps {
@@ -23,8 +24,23 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig } = useAppContext();
+  const {
+    appBasePath,
+    sections,
+    kibanaVersion,
+    cardsNavigationConfig,
+    landingPageRedirect,
+    navigateToUrl,
+    basePath,
+  } = useAppContext();
   setBreadcrumbs();
+
+  // Redirect the user to the configured landing page if there is one
+  useEffect(() => {
+    if (landingPageRedirect) {
+      navigateToUrl(basePath.prepend(landingPageRedirect));
+    }
+  }, [landingPageRedirect, navigateToUrl, basePath]);
 
   useEffect(() => {
     onAppMounted('');
