@@ -106,7 +106,7 @@ export const createPureLogExplorerProfileStateMachine = (
                     src: 'createDataView',
                     onDone: {
                       target: 'idle',
-                      actions: raise('UPDATED_DATA_VIEW'),
+                      actions: ['notifyDataViewUpdate'],
                     },
                     onError: {
                       target: 'idle',
@@ -133,7 +133,7 @@ export const createPureLogExplorerProfileStateMachine = (
                     src: 'subscribeControlGroup',
                   },
                   on: {
-                    UPDATED_DATA_VIEW: {
+                    DATA_VIEW_UPDATED: {
                       target: 'updatingControlPanels',
                     },
                     UPDATE_CONTROL_PANELS: {
@@ -182,6 +182,7 @@ export const createPureLogExplorerProfileStateMachine = (
               }
             : {}
         ),
+        notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
       },
       guards: {
         controlGroupAPIExists: (_context, event) => {

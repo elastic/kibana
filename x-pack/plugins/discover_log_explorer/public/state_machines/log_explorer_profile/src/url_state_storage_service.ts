@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { InvokeCreator } from 'xstate';
-import { pick } from 'lodash';
+import { pick, mapValues } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -210,26 +210,18 @@ export const getVisibleControlPanelsConfig = (dataView?: DataView) => {
 };
 
 const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {
-  return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
-    return {
-      ...acc,
-      [key]: {
-        ...controlPanelConfig,
-        explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
-      },
-    };
-  }, {});
+  return mapValues(controlPanels, (controlPanelConfig) => ({
+    ...controlPanelConfig,
+    explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
+  }));
 };
 
 const cleanControlPanels = (controlPanels: ControlPanels) => {
-  return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
+  return mapValues(controlPanels, (controlPanelConfig) => {
     const { explicitInput } = controlPanelConfig;
     const { dataViewId, ...rest } = explicitInput;
-    return {
-      ...acc,
-      [key]: { ...controlPanelConfig, explicitInput: rest },
-    };
-  }, {});
+    return { ...controlPanelConfig, explicitInput: rest };
+  });
 };
 
 const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlPanels) => {

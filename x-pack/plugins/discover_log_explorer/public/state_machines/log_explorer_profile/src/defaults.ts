@@ -10,8 +10,6 @@ import { ControlPanels, DefaultLogExplorerProfileState } from './types';
 
 export const DEFAULT_CONTEXT: DefaultLogExplorerProfileState = {
   datasetSelection: AllDatasetSelection.create(),
-  controlGroupAPI: undefined,
-  controlPanels: null,
 };
 
 export const CONTROL_PANELS_URL_KEY = 'controlPanels';

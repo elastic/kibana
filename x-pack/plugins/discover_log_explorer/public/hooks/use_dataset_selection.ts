@@ -13,10 +13,10 @@ import { DatasetSelectionChange } from '../utils/dataset_selection';
 export const useDatasetSelection = (
   logExplorerProfileStateService: LogExplorerProfileStateService
 ) => {
-  const datasetSelection = useSelector(
-    logExplorerProfileStateService,
-    (state) => state.context.datasetSelection
-  );
+  const datasetSelection = useSelector(logExplorerProfileStateService, (state) => {
+    if (!('datasetSelection' in state.context)) return;
+    return state.context.datasetSelection;
+  });
 
   const handleDatasetSelectionChange: DatasetSelectionChange = useCallback(
     (data) => {
