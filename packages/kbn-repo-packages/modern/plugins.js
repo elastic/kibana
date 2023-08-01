@@ -111,8 +111,8 @@ function getDistributablePacakgesFilter() {
     //   return false;
     // }
 
-    // @ts-expect-error upgrade ts
     if (
+      // @ts-expect-error upgrade ts
       pkg.isDevOnly ||
       pkg.manifest.type === 'functional-tests' ||
       pkg.manifest.type === 'test-helper'
