@@ -84,7 +84,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   }, [activeDatasourceId, dispatchLens]);
 
   useEffect(() => {
-    const startTime = window.performance.now();
     if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
       initializeSources(
         {
@@ -128,8 +127,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         }
       );
     }
-    const duration = window.performance.now() - startTime;
-    window.console.log(`data_panel_wrapper: ${duration}`);
   }, [
     datasourceStates,
     visualizationState,
