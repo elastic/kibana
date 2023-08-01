@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { actionsClientMock } from './actions_client.mock';
 export type { ActionsClientMock } from './actions_client.mock';
 export * from './actions_client';
