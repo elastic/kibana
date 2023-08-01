@@ -45,7 +45,7 @@ export const noCasesPrivilegesSpace1: Role = {
 };
 
 export const noCasesConnectors: Role = {
-  name: 'no_kibana_privileges',
+  name: 'no_cases_connectors',
   privileges: {
     elasticsearch: {
       indices: [
