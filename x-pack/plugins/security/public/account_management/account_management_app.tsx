@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
+import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { SecurityApiClients } from '../components';
@@ -96,7 +97,16 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
         <I18nProvider>
           <KibanaThemeProvider theme$={theme$}>
             <Router history={history}>
-              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+              <BreadcrumbsProvider onChange={onChange}>
+                <UserProfilesKibanaProvider
+                  core={services}
+                  security={{
+                    userProfiles: securityApiClients.userProfiles,
+                  }}
+                >
+                  {children}
+                </UserProfilesKibanaProvider>
+              </BreadcrumbsProvider>
             </Router>
           </KibanaThemeProvider>
         </I18nProvider>

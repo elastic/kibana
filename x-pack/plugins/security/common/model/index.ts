@@ -15,7 +15,6 @@ export type {
   UserProfileData,
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
-  UserProfileAvatarData,
 } from './user_profile';
 export {
   getUserAvatarColor,
