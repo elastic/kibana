@@ -202,7 +202,8 @@ export async function executor(
   // For backwards compatibility with connectors created before authType was added, interpret a
   // hasAuth: true and undefined authType as basic auth
   const basicAuth =
-    (hasAuth || authType === WebhookAuthType.Basic) &&
+    hasAuth &&
+    (authType === WebhookAuthType.Basic || !authType) &&
     isString(secrets.user) &&
     isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
