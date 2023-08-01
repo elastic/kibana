@@ -30,7 +30,7 @@ export interface ExternalRouteDeps {
 }
 
 export function initExternalSpacesApi(deps: ExternalRouteDeps, buildFlavor: BuildFlavor) {
-  // These three routes are always registered in serverless, internal by default
+  // These three routes are always registered, internal in serverless by default
   initGetSpaceApi(deps);
   initGetAllSpacesApi(deps);
   initPutSpacesApi(deps);

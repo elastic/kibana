@@ -67,7 +67,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
 
   if (params.buildFlavor !== 'serverless') {
     defineAnonymousAccessRoutes(params);
-    defineAuthorizationRoutes(params); // We probably should revisit these. Do we need ANY? The audit table lists a few, but I am not sure
+    defineAuthorizationRoutes(params);
     defineDeprecationsRoutes(params);
     defineIndicesRoutes(params);
     defineRoleMappingRoutes(params);
