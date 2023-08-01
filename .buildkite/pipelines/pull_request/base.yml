@@ -101,6 +101,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
+    parallelism: 10
     soft_fail:
       - exit_status: 10    
     retry:

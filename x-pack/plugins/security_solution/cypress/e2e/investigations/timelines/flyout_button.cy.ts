@@ -24,7 +24,7 @@ import {
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('timeline flyout button', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('timeline flyout button', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

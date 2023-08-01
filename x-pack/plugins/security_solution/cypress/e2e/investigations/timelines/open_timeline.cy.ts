@@ -38,7 +38,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
   describe('Open timeline modal', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
-    beforeEach(function () {
+    before(function () {
       cleanKibana();
       login();
       visitWithoutDateRange(TIMELINES_URL);
@@ -61,6 +61,11 @@ describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
             .then(() => pinFirstEvent())
             .then(() => markAsFavorite());
         });
+    });
+
+    beforeEach(function () {
+      login();
+      visitWithoutDateRange(TIMELINES_URL);
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
     });

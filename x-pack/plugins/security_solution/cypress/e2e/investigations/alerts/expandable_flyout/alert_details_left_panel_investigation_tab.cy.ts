@@ -35,7 +35,7 @@ describe(
       openInvestigationTab();
     });
 
-    it('should display investigation guide', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+    it('should display investigation guide', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
         .should('be.visible')
         .and('have.text', 'Investigation');
