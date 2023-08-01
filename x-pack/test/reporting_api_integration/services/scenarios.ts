@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
-import {
-  API_GET_ILM_POLICY_STATUS,
-  API_MIGRATE_ILM_POLICY_URL,
-} from '@kbn/reporting-plugin/common/constants';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
@@ -137,7 +133,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
     return await supertestWithoutAuth
-      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
+      .post(INTERNAL_ROUTES.DOWNLOAD_CSV)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send(job);
@@ -200,7 +196,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const {
       body: [job],
     } = await supertestWithoutAuth
-      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
+      .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send()
@@ -223,7 +219,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const checkIlmMigrationStatus = async (username: string, password: string) => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
     const { body } = await supertestWithoutAuth
-      .get(API_GET_ILM_POLICY_STATUS)
+      .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
@@ -234,7 +230,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     log.debug('ReportingAPI.migrateReportingIndices');
     try {
       await supertestWithoutAuth
-        .put(API_MIGRATE_ILM_POLICY_URL)
+        .put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
         .auth(username, password)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
@@ -269,10 +265,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
     REPORTING_ROLE,
-    routes: {
-      API_GET_ILM_POLICY_STATUS,
-      API_MIGRATE_ILM_POLICY_URL,
-    },
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
