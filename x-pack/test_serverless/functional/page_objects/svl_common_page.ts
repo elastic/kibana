@@ -14,5 +14,17 @@ export function SvlCommonPageProvider({ getService }: FtrProviderContext) {
     async assertProjectHeaderExists() {
       await testSubjects.existOrFail('kibanaProjectHeader');
     },
+
+    async clickUserAvatar() {
+      testSubjects.click('userMenuAvatar');
+    },
+
+    async assertUserAvatarExists() {
+      await testSubjects.existOrFail('userMenuAvatar');
+    },
+
+    async assertUserMenuExists() {
+      await testSubjects.existOrFail('userMenu');
+    },
   };
 }
