@@ -34,7 +34,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     {
       id: 'ml',
       getDisplayName: () =>
-        i18n.translate('xpack.ml.navMenu.mlAppNameText', {
+        i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
           defaultMessage: 'Machine Learning',
         }),
       getIconType: () => 'machineLearningApp',

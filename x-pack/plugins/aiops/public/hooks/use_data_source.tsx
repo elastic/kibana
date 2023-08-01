@@ -8,7 +8,6 @@
 import React, { createContext, FC, useCallback, useContext, useEffect, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -53,14 +52,6 @@ export const DataSourceContextProvider: FC<{ dataViewId?: string; savedSearchId?
    * Resolve data view or saved search if exists.
    */
   const resolveDataSource = useCallback(async (): Promise<DataViewAndSavedSearch> => {
-    if (dataViewId === '') {
-      throw new Error(
-        i18n.translate('xpack.ml.useResolver.errorIndexPatternIdEmptyString', {
-          defaultMessage: 'dataViewId must not be empty string.',
-        })
-      );
-    }
-
     const dataViewAndSavedSearch: DataViewAndSavedSearch = {
       savedSearch: null,
       // @ts-ignore
@@ -100,7 +91,7 @@ export const DataSourceContextProvider: FC<{ dataViewId?: string; savedSearchId?
         title={
           <h2>
             <FormattedMessage
-              id="xpack.ml.dataSourceContext.errorTitle"
+              id="xpack.aiops.dataSourceContext.errorTitle"
               defaultMessage="Unable to fetch data view or saved search"
             />
           </h2>
