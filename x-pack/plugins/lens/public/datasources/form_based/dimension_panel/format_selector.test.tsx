@@ -13,7 +13,7 @@ import { GenericIndexPatternColumn } from '../../..';
 import { LensAppServices } from '../../../app_plugin/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { EuiComboBox, EuiFieldNumber } from '@elastic/eui';
 
 jest.mock('lodash', () => {
@@ -39,6 +39,7 @@ const bytesColumn: GenericIndexPatternColumn = {
 const getDefaultProps = () => ({
   onChange: jest.fn(),
   selectedColumn: bytesColumn,
+  docLinks: docLinksServiceMock.createStartContract(),
 });
 
 function createMockServices(): LensAppServices {
