@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import {
   secOnly,
   obsOnlyRead,
@@ -16,15 +17,15 @@ import {
   globalRead,
   obsSecRead,
   obsSec,
-} from '../../../../common/lib/authentication/users';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+} from '../../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   deleteAllCaseItems,
   getCasesMetrics,
   updateCase,
-} from '../../../../common/lib/api';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+} from '../../../../../common/lib/api';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -37,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('accepts the features as string', async () => {
       const metrics = await getCasesMetrics({
         supertest,
-        features: 'mttr',
+        features: CaseMetricsFeature.MTTR,
       });
 
       expect(metrics).to.eql({ mttr: null });
@@ -45,11 +46,11 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    describe('MTTR', () => {
+    describe(CaseMetricsFeature.MTTR, () => {
       it('responses with null if there are no cases', async () => {
         const metrics = await getCasesMetrics({
           supertest,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
         });
 
         expect(metrics).to.eql({ mttr: null });
@@ -74,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const metrics = await getCasesMetrics({
           supertest,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
         });
 
         expect(metrics).to.eql({ mttr: null });
@@ -97,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should calculate the mttr correctly across all cases', async () => {
           const metrics = await getCasesMetrics({
             supertest,
-            features: ['mttr'],
+            features: [CaseMetricsFeature.MTTR],
           });
 
           expect(metrics).to.eql({ mttr: 220 });
@@ -106,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should respects the range parameters', async () => {
           const metrics = await getCasesMetrics({
             supertest,
-            features: ['mttr'],
+            features: [CaseMetricsFeature.MTTR],
             query: {
               from: '2022-04-28',
               to: '2022-04-29',
@@ -160,7 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]) {
           const metrics = await getCasesMetrics({
             supertest: supertestWithoutAuth,
-            features: ['mttr'],
+            features: [CaseMetricsFeature.MTTR],
             auth: {
               user: scenario.user,
               space: 'space1',
@@ -181,7 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // user should not be able to read cases at the appropriate space
           await getCasesMetrics({
             supertest: supertestWithoutAuth,
-            features: ['mttr'],
+            features: [CaseMetricsFeature.MTTR],
             auth: {
               user: scenario.user,
               space: scenario.space,
@@ -194,7 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should respect the owner filter when having permissions', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           query: {
             owner: 'securitySolutionFixture',
           },
@@ -210,7 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           query: {
             owner: ['securitySolutionFixture', 'observabilityFixture'],
           },
@@ -226,7 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should respect the owner filter when using range queries', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           query: {
             from: '2022-04-20',
             to: '2022-04-30',
