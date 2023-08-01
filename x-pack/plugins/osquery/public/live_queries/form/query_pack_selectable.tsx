@@ -17,7 +17,7 @@ const StyledEuiCard = styled(EuiCard)`
   flex-direction: row;
   border: ${({ theme, selectable }) => {
     if (selectable?.isSelected) {
-      return `1px solid ${theme.euiTheme.colors.success}`;
+      return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
     }
   }};
   .euiCard__content {

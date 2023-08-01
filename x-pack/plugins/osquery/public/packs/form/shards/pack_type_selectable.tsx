@@ -15,7 +15,7 @@ const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
   border: ${({ theme, selectable }) => {
     if (selectable?.isSelected) {
-      return `1px solid ${theme.euiTheme.colors.success}`;
+      return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
     }
   }};
 

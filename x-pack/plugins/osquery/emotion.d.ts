@@ -6,9 +6,9 @@
  */
 
 import '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+
 declare module '@emotion/react' {
-  export interface Theme {
-    euiTheme: EuiThemeComputed;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,7 @@ import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
-const euiLoadingSpinnerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+const euiLoadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => ({
   marginRight: euiTheme.size.s,
 });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
@@ -16,10 +17,10 @@ interface PackResultsHeadersProps {
   agentIds?: string[];
 }
 
-const resultsHeadingCss = {
+const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
   paddingRight: '20px',
-  borderRight: '2px solid #d3dae6',
-};
+  borderRight: euiTheme.border.thick,
+});
 
 const iconsListCss = {
   alignContent: 'center',

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -17,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
@@ -29,7 +29,7 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 import { AgentPoliciesPopover } from '../../../packs/packs_table';
 
-const dividerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+const dividerCss = ({ euiTheme }: UseEuiTheme) => ({
   width: 0,
   height: '100%',
   borderLeft: euiTheme.border.thin,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-
-export const containerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+import type { UseEuiTheme } from '@elastic/eui';
+export const containerCss = ({ euiTheme }: UseEuiTheme) => ({
   minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
   background: euiTheme.colors.emptyShade,
   display: 'flex',
@@ -20,7 +19,7 @@ export const wrapperCss = {
   flex: 1,
 };
 
-export const navCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+export const navCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,
   borderBottom: euiTheme.border.thin,
   padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l}`,

@@ -9,12 +9,12 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 import { css } from '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-const containerCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+const containerCss = ({ euiTheme }: UseEuiTheme) => ({
   borderBottom: euiTheme.border.thin,
   backgroundColor: euiTheme.colors.body,
 });
@@ -59,7 +59,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const wrapperCss = useCallback(
-    ({ euiTheme }: { euiTheme: EuiThemeComputed }) => css`
+    ({ euiTheme }: UseEuiTheme) => css`
       max-width: ${maxWidth || 1200}px;
       margin-left: auto;
       margin-right: auto;

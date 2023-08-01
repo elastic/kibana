@@ -15,11 +15,6 @@ import { OsquerySchemaLink } from '../components/osquery_schema_link';
 import { useSavedQueries } from './use_saved_queries';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
 
-const textTruncateCss = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-};
-
 const euiCodeBlockCss = {
   '.euiCodeBlock__line': {
     whiteSpace: 'nowrap' as const,
@@ -95,7 +90,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     ({ value }) => (
       <>
         <strong>{value.id}</strong>
-        <div css={textTruncateCss}>
+        <div className="eui-textTruncate">
           <EuiTextColor color="subdued">{value.description}</EuiTextColor>
         </div>
         <EuiCodeBlock css={euiCodeBlockCss} language="sql" fontSize="m" paddingSize="s">

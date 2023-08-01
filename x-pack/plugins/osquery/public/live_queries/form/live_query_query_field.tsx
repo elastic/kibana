@@ -6,12 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
@@ -23,7 +22,7 @@ const euiCodeBlockCss = {
   minHeight: '100px',
 };
 
-const euiAccordionCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiAccordion__button': {
     color: euiTheme.colors.primary,
   },

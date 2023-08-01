@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
 import type { ShardsArray } from '../../../../common/schemas/common/utils';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
@@ -40,9 +39,7 @@ const ShardsFormComponent = ({
   }, [index, onDelete]);
 
   const buttonWrapperCss = useCallback(
-    () => css`
-      margin-top: ${index === 0 && '16px'};
-    `,
+    ({ euiTheme }) => (index === 0 ? { marginTop: euiTheme.size.base } : {}),
     [index]
   );
 

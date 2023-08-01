@@ -14,11 +14,6 @@ import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from
 import { useController } from 'react-hook-form';
 import type { PackSavedObject } from '../../packs/types';
 
-const textTruncateCss = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-};
-
 interface PackComboBoxFieldProps {
   fieldProps?: {
     packsData?: PackSavedObject[];
@@ -102,7 +97,7 @@ export const PacksComboBoxField = ({
           <strong>{option?.name}</strong>
         </EuiFlexItem>
         <EuiFlexItem>
-          <div css={textTruncateCss}>
+          <div className="eui-textTruncate">
             <EuiTextColor color="subdued">{option?.description}</EuiTextColor>
           </div>
         </EuiFlexItem>
