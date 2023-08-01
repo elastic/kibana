@@ -100,5 +100,6 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/unified-field-list",
     "@kbn/core-ui-settings-browser",
+    "@kbn/ml-in-memory-table",
   ],
 }
