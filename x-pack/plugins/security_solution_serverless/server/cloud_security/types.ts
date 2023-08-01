@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,

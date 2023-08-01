@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UsageRecord } from '../types';
 import {
   CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
@@ -15,6 +14,7 @@ import {
   LATEST_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import type { UsageRecord } from '../types';
 
 import {
   AGGREGATION_PRECISION_THRESHOLD,
@@ -30,7 +30,7 @@ import type {
 const queryParams = {
   [CSPM_POLICY_TEMPLATE]: {
     index: LATEST_FINDINGS_INDEX_PATTERN,
-    range: LATEST_FINDINGS_RETENTION_POLICY,
+    timeRange: LATEST_FINDINGS_RETENTION_POLICY,
   },
   [KSPM_POLICY_TEMPLATE]: {
     index: LATEST_FINDINGS_INDEX_PATTERN,
@@ -94,22 +94,25 @@ export const getCloudSecurityUsageRecord = async ({
 
 export const getAggQueryByPostureType = (postureType: PostureType) => {
   const mustFilters = [];
-  postureType === CSPM_POLICY_TEMPLATE || postureType === KSPM_POLICY_TEMPLATE
-    ? mustFilters.push({
-        term: {
-          'rule.benchmark.posture_type': postureType,
-        },
-      })
-    : mustFilters.push({
-        range: {
-          '@timestamp': {
-            gte: 'now-' + queryParams[postureType]['timeRange'],
-          },
-        },
-      });
+
+  mustFilters.push({
+    range: {
+      '@timestamp': {
+        gte: `now-${queryParams[postureType].timeRange}`,
+      },
+    },
+  });
+
+  if (postureType === CSPM_POLICY_TEMPLATE || postureType === KSPM_POLICY_TEMPLATE) {
+    mustFilters.push({
+      term: {
+        'rule.benchmark.posture_type': postureType,
+      },
+    });
+  }
 
   const query = {
-    index: queryParams[postureType]['index'],
+    index: queryParams[postureType].index,
     query: {
       bool: {
         must: mustFilters,

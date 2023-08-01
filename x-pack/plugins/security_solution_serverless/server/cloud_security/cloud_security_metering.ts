@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { MeteringCallbackInput, UsageRecord } from '../types';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
-import { PostureType } from './types';
+import type { PostureType } from './types';
+import type { MeteringCallbackInput, UsageRecord } from '../types';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
