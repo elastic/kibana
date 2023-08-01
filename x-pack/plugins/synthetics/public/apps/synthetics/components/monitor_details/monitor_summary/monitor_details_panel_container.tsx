@@ -24,10 +24,11 @@ export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelP
 
   const { monitor, loading } = useSelectedMonitor();
 
-  if (
-    (latestPing && latestPing?.config_id !== configId) ||
-    (monitor && monitor[ConfigKey.CONFIG_ID] !== configId)
-  ) {
+  const isPingRelevant =
+    latestPing?.config_id === monitor?.[ConfigKey.CONFIG_ID] ||
+    latestPing?.monitor?.id === monitor?.[ConfigKey.MONITOR_QUERY_ID];
+
+  if (!monitor || !isPingRelevant) {
     return <EuiSkeletonText lines={6} />;
   }
 
