@@ -59,8 +59,8 @@ const configSchemaProps = {
     schema.oneOf(
       [
         schema.literal(WebhookAuthType.Basic),
-        schema.literal(WebhookAuthType.None),
         schema.literal(WebhookAuthType.SSL),
+        schema.literal(null),
       ],
       {
         defaultValue: WebhookAuthType.Basic,

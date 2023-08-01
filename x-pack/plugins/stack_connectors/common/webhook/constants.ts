@@ -6,7 +6,6 @@
  */
 
 export enum WebhookAuthType {
-  None = 'webhook-authentication-none',
   Basic = 'webhook-authentication-basic',
   SSL = 'webhook-authentication-ssl',
 }

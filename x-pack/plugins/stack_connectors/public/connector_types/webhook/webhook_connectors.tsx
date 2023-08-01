@@ -53,13 +53,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       'config.hasAuth',
       'config.authType',
       'config.certType',
+      'config.verificationMode',
       '__internal__.hasHeaders',
       '__internal__.hasCA',
     ],
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const authTypeDefaultValue = getFieldDefaultValue('config.authType') ?? WebhookAuthType.Basic;
+  const authTypeDefaultValue =
+    getFieldDefaultValue('config.hasAuth') === false
+      ? null
+      : getFieldDefaultValue('config.authType') ?? WebhookAuthType.Basic;
   const certTypeDefaultValue = getFieldDefaultValue('config.certType') ?? SSLCertType.CRT;
   const hasCADefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.ca') ||
@@ -72,10 +76,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
 
-  useEffect(
-    () => setFieldValue('config.hasAuth', authType !== WebhookAuthType.None),
-    [authType, setFieldValue]
-  );
+  useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
   const basicAuthFields = (
     <EuiFlexGroup justifyContent="spaceBetween">
@@ -296,7 +297,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             componentProps={{
               options: [
                 {
-                  value: WebhookAuthType.None,
+                  value: null,
                   label: i18n.AUTHENTICATION_NONE,
                 },
                 {
@@ -409,7 +410,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                     {
                       validator:
                         config?.verificationMode !== 'none'
-                          ? emptyField(i18n.CRT_REQUIRED)
+                          ? emptyField(i18n.CA_REQUIRED)
                           : () => {},
                     },
                   ],

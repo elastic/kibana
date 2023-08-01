@@ -608,7 +608,6 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      authType: WebhookAuthType.None,
       hasAuth: false,
     };
     const secrets: ConnectorTypeSecretsType = {
