@@ -203,10 +203,10 @@ export class SavedSearchEmbeddable
     // We need to use a redirect URL if this is a by value saved search using
     // an ad hoc data view to ensure the data view spec gets encoded in the URL
     const useRedirect = !savedObjectId && !dataView?.isPersisted();
-    const editPath = useRedirect
+    const editUrl = useRedirect
       ? this.services.locator.getRedirectUrl(locatorParams)
       : await this.services.locator.getUrl(locatorParams);
-    const editUrl = this.services.addBasePath(editPath);
+    const editPath = this.services.core.http.basePath.remove(editUrl);
     const editApp = useRedirect ? 'r' : 'discover';
 
     this.updateOutput({

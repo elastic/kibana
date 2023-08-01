@@ -21,6 +21,19 @@ import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_compon
 import { VIEW_MODE } from '../../common/constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { act } from 'react-dom/test-utils';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { dataViewAdHoc } from '../__mocks__/data_view_complex';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+
+jest.mock('./get_discover_locator_params', () => {
+  const actual = jest.requireActual('./get_discover_locator_params');
+  return {
+    ...actual,
+    getDiscoverLocatorParams: jest.fn(actual.getDiscoverLocatorParams),
+  };
+});
 
 let discoverComponent: ReactWrapper;
 
@@ -70,9 +83,19 @@ describe('saved search embeddable', () => {
   let showFieldStatisticsMockValue: boolean = false;
   let viewModeMockValue: VIEW_MODE = VIEW_MODE.DOCUMENT_LEVEL;
 
-  const createEmbeddable = (searchMock?: jest.Mock, customTitle?: string) => {
-    const searchSource = createSearchSourceMock({ index: dataViewMock }, undefined, searchMock);
-    const savedSearchMock = {
+  const createEmbeddable = ({
+    searchMock,
+    customTitle,
+    dataView = dataViewMock,
+    byValue,
+  }: {
+    searchMock?: jest.Mock;
+    customTitle?: string;
+    dataView?: DataView;
+    byValue?: boolean;
+  } = {}) => {
+    const searchSource = createSearchSourceMock({ index: dataView }, undefined, searchMock);
+    const savedSearch = {
       id: 'mock-id',
       title: 'saved search',
       sort: [['message', 'asc']] as Array<[string, string]>,
@@ -82,20 +105,23 @@ describe('saved search embeddable', () => {
     executeTriggerActions = jest.fn();
     jest
       .spyOn(servicesMock.savedSearch.byValue, 'toSavedSearch')
-      .mockReturnValue(Promise.resolve(savedSearchMock));
+      .mockReturnValue(Promise.resolve(savedSearch));
     const savedSearchEmbeddableConfig: SearchEmbeddableConfig = {
       editable: true,
       services: servicesMock,
       executeTriggerActions,
     };
-    const searchInput: SearchInput = {
+    const baseInput = {
       id: 'mock-embeddable-id',
-      savedObjectId: savedSearchMock.id,
+      viewMode: ViewMode.EDIT,
       timeRange: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
       rowsPerPage: 50,
     };
+    const searchInput: SearchInput = byValue
+      ? { ...baseInput, attributes: {} as SavedSearchByValueAttributes }
+      : { ...baseInput, savedObjectId: savedSearch.id };
     if (customTitle) {
       searchInput.title = customTitle;
     }
@@ -107,7 +133,7 @@ describe('saved search embeddable', () => {
       (input) => (input.lastReloadRequestTime = Date.now())
     );
 
-    return { embeddable, searchInput, searchSource };
+    return { embeddable, searchInput, searchSource, savedSearch };
   };
 
   beforeEach(() => {
@@ -176,7 +202,7 @@ describe('saved search embeddable', () => {
   it('should render saved search embeddable when successfully loading data', async () => {
     // mock return data
     const { search, resolveSearch } = createSearchFnMock(1);
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
 
     await waitOneTick();
@@ -205,7 +231,7 @@ describe('saved search embeddable', () => {
   it('should render saved search embeddable when empty data is returned', async () => {
     // mock return data
     const { search, resolveSearch } = createSearchFnMock(0);
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
 
     await waitOneTick();
@@ -236,7 +262,7 @@ describe('saved search embeddable', () => {
     viewModeMockValue = VIEW_MODE.AGGREGATED_LEVEL;
 
     const { search, resolveSearch } = createSearchFnMock(1);
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
 
     await waitOneTick();
@@ -264,7 +290,7 @@ describe('saved search embeddable', () => {
 
   it('should emit error output in case of fetch error', async () => {
     const search = jest.fn().mockReturnValue(throwError(new Error('Fetch error')));
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
 
     embeddable.render(mountpoint);
@@ -283,7 +309,7 @@ describe('saved search embeddable', () => {
 
   it('should not fetch data if only a new input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable, searchInput } = createEmbeddable(search);
+    const { embeddable, searchInput } = createEmbeddable({ searchMock: search });
     await waitOneTick();
     embeddable.render(mountpoint);
     // wait for data fetching
@@ -297,7 +323,7 @@ describe('saved search embeddable', () => {
 
   it('should not reload when the input title doesnt change', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search, 'custom title');
+    const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
     await waitOneTick();
     embeddable.reload = jest.fn();
     embeddable.render(mountpoint);
@@ -312,7 +338,7 @@ describe('saved search embeddable', () => {
 
   it('should reload when a different input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search, 'custom title');
+    const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
     await waitOneTick();
     embeddable.reload = jest.fn();
     embeddable.render(mountpoint);
@@ -327,7 +353,7 @@ describe('saved search embeddable', () => {
 
   it('should not reload and fetch when a input title matches the saved search title', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     await waitOneTick();
     embeddable.reload = jest.fn();
     embeddable.render(mountpoint);
@@ -363,5 +389,80 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(updateOutput).toHaveBeenCalledTimes(5);
     expect(abortSignals[2].aborted).toBe(false);
+  });
+
+  describe('edit link params', () => {
+    const runEditLinkTest = async (dataView?: DataView, byValue?: boolean) => {
+      jest
+        .spyOn(servicesMock.locator, 'getUrl')
+        .mockClear()
+        .mockResolvedValueOnce('/base/mock-url');
+      jest
+        .spyOn(servicesMock.core.http.basePath, 'remove')
+        .mockClear()
+        .mockReturnValueOnce('/mock-url');
+      const { embeddable, searchInput, savedSearch } = createEmbeddable({ dataView, byValue });
+      const getLocatorParamsArgs = {
+        input: searchInput,
+        savedSearch,
+      };
+      const locatorParams = getDiscoverLocatorParams(getLocatorParamsArgs);
+      (getDiscoverLocatorParams as jest.Mock).mockClear();
+      await waitOneTick();
+      expect(getDiscoverLocatorParams).toHaveBeenCalledTimes(1);
+      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(getLocatorParamsArgs);
+      expect(servicesMock.locator.getUrl).toHaveBeenCalledTimes(1);
+      expect(servicesMock.locator.getUrl).toHaveBeenCalledWith(locatorParams);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
+      const { editApp, editPath, editUrl } = embeddable.getOutput();
+      expect(editApp).toBe('discover');
+      expect(editPath).toBe('/mock-url');
+      expect(editUrl).toBe('/base/mock-url');
+    };
+
+    it('should correctly output edit link params for by reference saved search', async () => {
+      await runEditLinkTest();
+    });
+
+    it('should correctly output edit link params for by reference saved search with ad hoc data view', async () => {
+      await runEditLinkTest(dataViewAdHoc);
+    });
+
+    it('should correctly output edit link params for by value saved search', async () => {
+      await runEditLinkTest(undefined, true);
+    });
+
+    it('should correctly output edit link params for by value saved search with ad hoc data view', async () => {
+      jest
+        .spyOn(servicesMock.locator, 'getRedirectUrl')
+        .mockClear()
+        .mockReturnValueOnce('/base/mock-url');
+      jest
+        .spyOn(servicesMock.core.http.basePath, 'remove')
+        .mockClear()
+        .mockReturnValueOnce('/mock-url');
+      const { embeddable, searchInput, savedSearch } = createEmbeddable({
+        dataView: dataViewAdHoc,
+        byValue: true,
+      });
+      const getLocatorParamsArgs = {
+        input: searchInput,
+        savedSearch,
+      };
+      const locatorParams = getDiscoverLocatorParams(getLocatorParamsArgs);
+      (getDiscoverLocatorParams as jest.Mock).mockClear();
+      await waitOneTick();
+      expect(getDiscoverLocatorParams).toHaveBeenCalledTimes(1);
+      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(getLocatorParamsArgs);
+      expect(servicesMock.locator.getRedirectUrl).toHaveBeenCalledTimes(1);
+      expect(servicesMock.locator.getRedirectUrl).toHaveBeenCalledWith(locatorParams);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
+      const { editApp, editPath, editUrl } = embeddable.getOutput();
+      expect(editApp).toBe('r');
+      expect(editPath).toBe('/mock-url');
+      expect(editUrl).toBe('/base/mock-url');
+    });
   });
 });
