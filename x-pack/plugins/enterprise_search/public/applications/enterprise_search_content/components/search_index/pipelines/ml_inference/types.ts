@@ -10,20 +10,19 @@ import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline'
 import { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
 
 export interface InferencePipelineConfiguration {
-  destinationField: string;
   existingPipeline?: boolean;
   fieldMappings?: FieldMapping[];
   inferenceConfig?: InferencePipelineInferenceConfig;
   modelID: string;
   pipelineName: string;
   sourceField: string;
+  targetField: string;
 }
 
 export interface AddInferencePipelineFormErrors {
-  destinationField?: string;
   modelID?: string;
+  fieldMappings?: string;
   pipelineName?: string;
-  sourceField?: string;
 }
 
 export enum AddInferencePipelineSteps {

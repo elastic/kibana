@@ -30,7 +30,7 @@ describe('SLO Selector', () => {
     render(<SloSelector onSelected={onSelectedSpy} />);
 
     expect(screen.getByTestId('sloSelector')).toBeTruthy();
-    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: '' });
+    expect(useFetchSloListMock).toHaveBeenCalledWith({ kqlQuery: 'slo.name:*' });
   });
 
   it('searches SLOs when typing', async () => {
@@ -42,6 +42,6 @@ describe('SLO Selector', () => {
       await wait(310); // debounce delay
     });
 
-    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: 'latency' });
+    expect(useFetchSloListMock).toHaveBeenCalledWith({ kqlQuery: 'slo.name:latency*' });
   });
 });
