@@ -14,7 +14,7 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
+import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';

@@ -118,6 +118,7 @@ export {
   nodeTypes,
   toElasticsearchQuery,
   escapeKuery,
+  escapeQuotes,
 } from './src/kuery';
 
 export {

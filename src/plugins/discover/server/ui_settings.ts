@@ -31,7 +31,7 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
   ENABLE_TEXT_BASED,
-} from '../common';
+} from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
