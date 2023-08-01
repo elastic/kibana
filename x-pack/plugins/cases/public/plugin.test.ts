@@ -124,35 +124,33 @@ describe('Cases Ui Plugin', () => {
     it('should start cases plugin correctly', async () => {
       const pluginStart = plugin.start(coreStart, pluginsStart);
 
-      expect(pluginStart).toMatchInlineSnapshot(`
-        Object {
-          "api": Object {
-            "cases": Object {
-              "bulkGet": [Function],
-              "find": [Function],
-              "getCasesMetrics": [Function],
-              "getCasesStatus": [Function],
-            },
-            "getRelatedCases": [Function],
+      expect(pluginStart).toStrictEqual({
+        api: {
+          cases: {
+            bulkGet: expect.any(Function), 
+            find: expect.any(Function), 
+            getCasesMetrics: expect.any(Function),
+            getCasesStatus: expect.any(Function)
           },
-          "helpers": Object {
-            "canUseCases": [Function],
-            "getRuleIdFromEvent": [Function],
-            "getUICapabilities": [Function],
-            "groupAlertsByRule": [Function],
-          },
-          "hooks": Object {
-            "useCasesAddToExistingCaseModal": [Function],
-              "useCasesAddToNewCaseFlyout": [Function],
-          },
-          "ui": Object {
-            "getAllCasesSelectorModal": [Function],
-            "getCases": [Function],
-            "getCasesContext": [Function],
-            "getRecentCases": [Function],
-          },
+          getRelatedCases: expect.any(Function)
+        },
+        helpers: {
+          canUseCases: expect.any(Function),
+          getRuleIdFromEvent: expect.any(Function), 
+          getUICapabilities: expect.any(Function),
+          groupAlertsByRule: expect.any(Function)
+        },
+        hooks: {
+          useCasesAddToExistingCaseModal: expect.any(Function), 
+          useCasesAddToNewCaseFlyout: expect.any(Function)
+        },
+        ui: {
+          getAllCasesSelectorModal: expect.any(Function),
+          getCases: expect.any(Function),
+          getCasesContext: expect.any(Function), 
+          getRecentCases: expect.any(Function)
         }
-      `);
+        });
     });
   });
 });
