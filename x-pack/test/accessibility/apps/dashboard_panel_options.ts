@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const inspector = getService('inspector');
 
-  // Failing: See https://github.com/elastic/kibana/issues/147667
-  describe.skip('Dashboard panel options a11y tests', () => {
+  describe('Dashboard panel options a11y tests', () => {
     let header: WebElementWrapper;
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {

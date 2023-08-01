@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/145452
-  describe.skip('Kibana Alerts - rules tab accessibility tests', () => {
+  describe('Kibana Alerts - rules tab accessibility tests', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
       await testSubjects.click('triggersActions');
@@ -34,8 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('createFirstRuleButton');
       await a11y.testAppSnapshot();
     });
-    // https://github.com/elastic/kibana/issues/144953
-    it.skip('a11y test on inputs on rules panel', async () => {
+
+    it('a11y test on inputs on rules panel', async () => {
       await testSubjects.click('ruleNameInput');
       await testSubjects.setValue('ruleNameInput', 'testRule');
       await testSubjects.click('tagsComboBox');
@@ -50,8 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('apm.anomaly-SelectOption');
       await a11y.testAppSnapshot();
     });
-    // https://github.com/elastic/kibana/issues/144953
-    it.skip('a11y test on save rule without connectors panel', async () => {
+
+    it('a11y test on save rule without connectors panel', async () => {
       await toasts.dismissAllToasts();
       await testSubjects.click('saveRuleButton');
       await a11y.testAppSnapshot();
