@@ -23,7 +23,7 @@ import { AvailabilitySparklines } from '../monitor_summary/availability_sparklin
 import { DurationSparklines } from '../monitor_summary/duration_sparklines';
 import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
@@ -42,7 +42,7 @@ export const MonitorHistory = () => {
     [updateUrlParams]
   );
 
-  const monitorId = useMonitorQueryId();
+  const monitorId = useMonitorQueryFilters();
   const redirect = useMonitorDetailsPage();
   if (redirect) {
     return redirect;
@@ -91,12 +91,7 @@ export const MonitorHistory = () => {
                     <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem>
                         {monitorId && (
-                          <MonitorErrorsCount
-                            from={from}
-                            to={to}
-                            monitorId={[monitorId]}
-                            id="monitorErrorsCountHistory"
-                          />
+                          <MonitorErrorsCount from={from} to={to} id="monitorErrorsCountHistory" />
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -104,7 +99,6 @@ export const MonitorHistory = () => {
                           <MonitorErrorSparklines
                             from={from}
                             to={to}
-                            monitorId={[monitorId]}
                             id="monitorErrorsSparklineHistory"
                           />
                         )}

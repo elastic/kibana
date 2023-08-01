@@ -13,7 +13,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import * as localStorageModule from 'react-use/lib/useLocalStorage';
 import { fetchMonitorManagementList } from '../../../state';
 
-import * as useMonitorQueryModule from '../hooks/use_monitor_query_id';
+import * as useMonitorQueryModule from '../hooks/use_monitor_query_filters';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { WrappedHelper } from '../../../utils/testing';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
@@ -46,7 +46,9 @@ describe('useRecentlyViewedMonitors', () => {
       );
     };
 
-    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockImplementation(() => '1');
+    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryFilters').mockReturnValue({
+      monitorQueryId: '1',
+    });
     (useFetcher as jest.Mock).mockImplementation((callback) => {
       callback();
       return { loading: false, status: 'success' as FETCH_STATUS.SUCCESS, refetch: () => {} };
@@ -64,9 +66,9 @@ describe('useRecentlyViewedMonitors', () => {
       persistedIds = ids;
     });
 
-    jest
-      .spyOn(useMonitorQueryModule, 'useMonitorQueryId')
-      .mockImplementation(() => currentMonitorQueryId);
+    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryFilters').mockImplementation(() => ({
+      monitorQueryId: currentMonitorQueryId,
+    }));
 
     jest
       .spyOn(localStorageModule, 'default')
