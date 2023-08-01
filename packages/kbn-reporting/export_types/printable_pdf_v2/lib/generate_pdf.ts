@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { PdfScreenshotOptions } from '../../../types';
-import type { PdfMetrics } from '../../../../common/types';
+import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '@kbn/reporting-common';
+import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printable_pdf_v2';
+import { ReportingServerInfo } from '../../../core';
+import { ReportingConfigType } from '../../../config';
+import type { PdfScreenshotOptions } from '../../../types';
+import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import { getTracker } from '../../common/pdf_tracker';
 
 interface PdfResult {
@@ -21,13 +26,24 @@ interface PdfResult {
 type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
 
 export function generatePdfObservable(
+  config: ReportingConfigType,
+  serverInfo: ReportingServerInfo,
   getScreenshots: GetScreenshotsFn,
-  options: PdfScreenshotOptions
+  job: TaskPayloadPDFV2,
+  locatorParams: LocatorParams[],
+  options: Omit<PdfScreenshotOptions, 'urls'>
 ): Rx.Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
-  return getScreenshots(options).pipe(
+  /**
+   * For each locator we get the relative URL to the redirect app
+   */
+  const urls = locatorParams.map((locator) => [
+    getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
+    locator,
+  ]) as UrlOrUrlLocatorTuple[];
+  const screenshots$ = getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {
         tracker.setCpuUsage(metrics.cpu);
@@ -46,8 +62,6 @@ export function generatePdfObservable(
         warnings.push(...renderErrors);
       }
 
-      tracker.end();
-
       return {
         buffer,
         metrics,
@@ -55,4 +69,6 @@ export function generatePdfObservable(
       };
     })
   );
+
+  return screenshots$;
 }

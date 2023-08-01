@@ -23,7 +23,7 @@ import {
 } from '../../../common/constants';
 import { decryptJobHeaders, ExportType, getCustomLogo, getFullUrls, validateUrls } from '../common';
 import { TaskPayloadPDF } from './types';
-import { generatePdfObservable } from './lib/generate_pdf';
+import { generatePdfObservable } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/generate_pdf';
 
 export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayloadPDF> {
   id = 'printablePdf';

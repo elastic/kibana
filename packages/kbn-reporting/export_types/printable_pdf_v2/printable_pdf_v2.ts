@@ -1,15 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Headers } from '@kbn/core/server';
-import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import {
+  CancellationToken,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  TaskRunResult,
+} from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
+import {
+  catchError,
+  firstValueFrom,
+  fromEventPattern,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  takeUntil,
+  tap,
+  throwError,
+} from 'rxjs';
 import { Writable } from 'stream';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -20,12 +35,16 @@ import {
   PDF_JOB_TYPE_V2,
   PDF_REPORT_TYPE_V2,
   REPORTING_TRANSACTION_TYPE,
-} from '../../../common/constants';
-import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
-import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
-import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
-import { generatePdfObservable } from './lib/generate_pdf';
+  UrlOrUrlLocatorTuple,
+  decryptJobHeaders,
+  ExportType,
+  getCustomLogo,
+  generatePdfObservable,
+  getFullRedirectAppUrl,
+} from '@kbn/reporting-common';
+import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
@@ -44,6 +63,15 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('pdf-export-v2');
+  }
+
+  public getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    });
   }
 
   /**
@@ -79,8 +107,8 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     let apmGeneratePdf: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
-    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
+    const process$: Observable<TaskRunResult> = of(1).pipe(
+      mergeMap(async () => await decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers: Headers) => {
         const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
@@ -88,7 +116,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
-        let urls: UrlOrUrlLocatorTuple[];
+        let urls: UrlOrUrlWithContext[];
         if (locatorParams) {
           urls = locatorParams.map((locator) => [
             getFullRedirectAppUrl(
@@ -98,7 +126,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               payload.forceNow
             ),
             locator,
-          ]) as unknown as UrlOrUrlLocatorTuple[];
+          ]) as unknown as UrlOrUrlWithContext[];
         }
 
         apmGetAssets?.end();
@@ -108,7 +136,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
           this.config,
           this.getServerInfo(),
           () =>
-            this.startDeps.reporting.getScreenshots({
+            this.getScreenshots({
               format: 'pdf',
               title,
               logo,
@@ -143,13 +171,13 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       })),
       catchError((err) => {
         jobLogger.error(err);
-        return Rx.throwError(() => err);
+        return throwError(() => err);
       })
     );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
+    const stop$ = fromEventPattern(cancellationToken.on);
 
     apmTrans?.end();
-    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
+    return firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

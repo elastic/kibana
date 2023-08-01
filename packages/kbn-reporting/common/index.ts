@@ -24,8 +24,14 @@ export type {
   JobParamsDownloadCSV,
   ReportingRequestHandlerContext,
 } from './types';
-export type { LocatorParams } from './url';
+export type { LocatorParams, UrlOrUrlLocatorTuple } from './url';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
-export { getFieldFormats, setFieldFormats } from './services';
-export { decryptJobHeaders } from './decrypt_job_headers';
+export {
+  getCustomLogo,
+  decryptJobHeaders,
+  getFieldFormats,
+  setFieldFormats,
+  generatePdfObservable,
+  getFullRedirectAppUrl,
+} from './export_type_helpers';

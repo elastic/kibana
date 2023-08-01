@@ -19,8 +19,3 @@ export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed
 export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
-
-type Url = string;
-type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
-
-export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

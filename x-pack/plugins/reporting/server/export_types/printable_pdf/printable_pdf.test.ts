@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
-import { generatePdfObservable } from './lib/generate_pdf';
+import { generatePdfObservable } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/generate_pdf';
 import { cryptoFactory } from '../../lib/crypto';
 import { TaskPayloadPDF } from './types';
 import { PdfV1ExportType } from './printable_pdf';

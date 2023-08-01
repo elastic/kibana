@@ -39,17 +39,16 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
-import { ReportingServerInfo } from '@kbn/reporting-common';
+import { ReportingServerInfo, REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
 import {
   CsvV2ExportType,
   CsvSearchSourceImmediateExportType,
   CsvSearchSourceExportType,
 } from '@kbn/reporting-export-types-csv';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import type { ReportingSetup } from '.';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { PdfV1ExportType } from './export_types/printable_pdf';
-import { PdfExportType } from './export_types/printable_pdf_v2';
 import { PngV1ExportType } from './export_types/png';
 import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
@@ -423,7 +422,7 @@ export class ReportingCore {
       this.context
     );
     csvImmediateExport.setup(this.getPluginSetupDeps());
-    csvImmediateExport.start({ ...startDeps, reporting: this.getContract() });
+    csvImmediateExport.start({ ...startDeps });
     return csvImmediateExport;
   }
 }

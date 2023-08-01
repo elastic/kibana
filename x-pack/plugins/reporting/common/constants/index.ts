@@ -7,13 +7,6 @@
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
 import * as reportTypes from './report_types';
-import * as jobTypes from './job_types';
-
-const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
-
-export const PLUGIN_ID = 'reporting';
-
-export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
 
 export const REPORTING_SYSTEM_INDEX = '.reporting';
 
@@ -30,25 +23,14 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
 
 // Re-export type definitions here for convenience.
 export * from './report_types';
-export * from './job_types';
 
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
-
-type JobTypeDeclaration = typeof jobTypes;
-export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
 
 // This is deprecated because it lacks support for runtime fields
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
-
-export const USES_HEADLESS_JOB_TYPES = [
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE_V2,
-];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
@@ -70,8 +52,6 @@ export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
-
-export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 /**
  * A way to get the client side route for the reporting redirect app.

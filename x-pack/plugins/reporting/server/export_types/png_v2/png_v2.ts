@@ -20,6 +20,7 @@ import {
   tap,
 } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
+import { getFullRedirectAppUrl } from '@kbn/reporting-common/export_type_helpers/v2/get_full_redirect_app_url';
 import { LocatorParams } from '../../../common';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -33,7 +34,6 @@ import {
 } from '../../../common/constants';
 import { decryptJobHeaders, ExportType, generatePngObservable } from '../common';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
-import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;

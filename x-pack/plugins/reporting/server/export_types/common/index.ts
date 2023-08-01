@@ -9,7 +9,7 @@ export { decryptJobHeaders } from './decrypt_job_headers';
 export { getFullUrls } from './get_full_urls';
 export { validateUrls } from './validate_urls';
 export { generatePngObservable } from './generate_png';
-export { getCustomLogo } from './get_custom_logo';
+export { getCustomLogo } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/get_custom_logo';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
 

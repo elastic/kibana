@@ -21,3 +21,8 @@ export interface LocatorParams<P extends SerializableRecord = SerializableRecord
    */
   params: P;
 }
+
+type Url = string;
+type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
+
+export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;
