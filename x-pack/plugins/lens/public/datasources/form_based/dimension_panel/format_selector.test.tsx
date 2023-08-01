@@ -123,7 +123,7 @@ describe('FormatSelector', () => {
   });
 
   describe('Duration', () => {
-    it('disables the decimals and compact controls for humanize approximate output', () => {
+    it('hides the decimals and compact controls for humanize approximate output', () => {
       const originalProps = getDefaultProps();
       let component = mountWithServices(
         <FormatSelector
@@ -137,18 +137,12 @@ describe('FormatSelector', () => {
         />
       );
 
-      expect(
-        component
-          .find('[data-test-subj="indexPattern-dimension-formatDecimals"]')
-          .last()
-          .prop('disabled')
-      ).toBe(true);
-      expect(
-        component
-          .find('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')
-          .first()
-          .prop('disabled')
-      ).toBe(true);
+      expect(component.exists('[data-test-subj="indexPattern-dimension-formatDecimals"]')).toBe(
+        false
+      );
+      expect(component.exists('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')).toBe(
+        false
+      );
 
       act(() => {
         component
@@ -158,18 +152,12 @@ describe('FormatSelector', () => {
       });
       component = component.update();
 
-      expect(
-        component
-          .find('[data-test-subj="indexPattern-dimension-formatDecimals"]')
-          .last()
-          .prop('disabled')
-      ).toBe(false);
-      expect(
-        component
-          .find('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')
-          .first()
-          .prop('disabled')
-      ).toBe(false);
+      expect(component.exists('[data-test-subj="indexPattern-dimension-formatDecimals"]')).toBe(
+        true
+      );
+      expect(component.exists('[data-test-subj="lns-indexpattern-dimension-formatCompact"]')).toBe(
+        true
+      );
     });
   });
 });
