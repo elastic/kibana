@@ -6,21 +6,15 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { createTagRequest } from '../../../../common/api/timeline';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { createTag } from '../saved_objects';
-
-const createTagBodySchema = schema.object({
-  name: schema.string(),
-  description: schema.string(),
-  color: schema.maybe(schema.string()),
-});
 
 export const createTagRoute = (
   router: SecuritySolutionPluginRouter,
@@ -30,7 +24,7 @@ export const createTagRoute = (
   router.put(
     {
       path: INTERNAL_TAGS_URL,
-      validate: { body: createTagBodySchema },
+      validate: { body: createTagRequest },
       options: {
         tags: ['access:securitySolution'],
       },

@@ -7,7 +7,10 @@
 
 export * from './model/api';
 export * from './clean_draft_timelines/clean_draft_timelines_route';
+export * from './create_tag/create_tag_route';
+export * from './get_dashboards_by_tags/get_dashboards_by_tags_route';
 export * from './get_draft_timelines/get_draft_timelines_route';
+export * from './get_tags_by_name/get_tags_by_name_route';
 export * from './create_timelines/create_timelines_route';
 export * from './delete_note/delete_note_route';
 export * from './delete_timelines/delete_timelines_route';

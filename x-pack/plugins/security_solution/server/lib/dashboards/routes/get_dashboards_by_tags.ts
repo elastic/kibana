@@ -6,7 +6,6 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -15,10 +14,7 @@ import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-
-const getDashboardsParamsSchema = schema.object({
-  tagIds: schema.arrayOf(schema.string()),
-});
+import { getDashboardsRequest } from '../../../../common/api/timeline';
 
 export const getDashboardsByTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -28,7 +24,7 @@ export const getDashboardsByTagsRoute = (
   router.post(
     {
       path: INTERNAL_DASHBOARDS_URL,
-      validate: { body: getDashboardsParamsSchema },
+      validate: { body: getDashboardsRequest },
       options: {
         tags: ['access:securitySolution'],
       },
