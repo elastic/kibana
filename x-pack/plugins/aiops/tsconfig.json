@@ -60,6 +60,7 @@
     "@kbn/embeddable-plugin",
     "@kbn/core-theme-browser",
     "@kbn/core-lifecycle-browser",
+    "@kbn/cases-plugin",
   ],
   "exclude": [
     "target/**/*",
