@@ -126,7 +126,6 @@ describe('WebhookActionConnectorFields renders', () => {
         config: {
           ...actionConnector.config,
           hasAuth: false,
-          authType: WebhookAuthType.None,
         },
       };
 
@@ -153,7 +152,6 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: false,
-            authType: WebhookAuthType.None,
           },
           __internal__: {
             hasHeaders: true,
