@@ -204,7 +204,13 @@ const constructControlPanelsWithDataViewId = (
 
   const controlsPanelsWithId = mergeDefaultPanelsWithUrlConfig(dataView, validatedControlPanels!);
 
-  stateContainer.stateStorage.set(CONTROL_PANELS_URL_KEY, cleanControlPanels(controlsPanelsWithId));
+  if (!deepEqual(controlsPanelsWithId, stateContainer.stateStorage.get(CONTROL_PANELS_URL_KEY))) {
+    stateContainer.stateStorage.set(
+      CONTROL_PANELS_URL_KEY,
+      cleanControlPanels(controlsPanelsWithId),
+      { replace: true }
+    );
+  }
 
   return controlsPanelsWithId;
 };
