@@ -12,8 +12,10 @@ import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import type { EndpointAppContext } from '../../types';
-import type { GetMetadataRequestSchema } from '.';
-import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type {
+  GetMetadataListRequestQuery,
+  GetMetadataRequestSchema,
+} from '../../../../common/api/endpoint';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,

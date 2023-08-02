@@ -160,7 +160,6 @@ export async function registerLogThresholdRuleType(
       ],
     },
     producer: 'logs',
-    getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
     useSavedObjectReferences: {
       extractReferences,
       injectReferences,
