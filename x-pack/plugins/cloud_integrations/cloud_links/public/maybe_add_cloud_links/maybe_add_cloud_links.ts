@@ -41,7 +41,6 @@ export function maybeAddCloudLinks({ core, security, cloud }: MaybeAddCloudLinks
         core,
         cloud,
         security,
-        uiSettingsClient: core.uiSettings,
       });
       security.navControlService.addUserMenuLinks(userMenuLinks);
     })
