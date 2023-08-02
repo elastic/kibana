@@ -33,13 +33,15 @@ export const getCasesMetricRoute = createCasesRoute({
       const client = await caseContext.getCasesClient();
       const { features } = request.query as metricsApiV1.CasesMetricsRequest;
 
+      const responseBody: metricsApiV1.CasesMetricsResponse = await client.metrics.getCasesMetrics({
+        ...request.query,
+        features: Array.isArray(features)
+          ? (features as metricsApiV1.CasesMetricsFeatureField[])
+          : [features as metricsApiV1.CasesMetricsFeatureField],
+      });
+
       return response.ok({
-        body: await client.metrics.getCasesMetrics({
-          ...request.query,
-          features: Array.isArray(features)
-            ? (features as metricsApiV1.CasesMetricsFeatureField[])
-            : [features as metricsApiV1.CasesMetricsFeatureField],
-        }),
+        body: responseBody,
       });
     } catch (error) {
       throw createCaseError({

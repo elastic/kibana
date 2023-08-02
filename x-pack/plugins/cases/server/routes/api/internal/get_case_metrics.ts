@@ -33,13 +33,16 @@ export const getCaseMetricRoute = createCasesRoute({
       const client = await caseContext.getCasesClient();
       const { features } = request.query as metricsApiV1.SingleCaseMetricsRequest;
 
-      return response.ok({
-        body: await client.metrics.getCaseMetrics({
+      const responseBody: metricsApiV1.SingleCaseMetricsResponse =
+        await client.metrics.getCaseMetrics({
           caseId: request.params.case_id,
           features: Array.isArray(features)
             ? (features as metricsApiV1.SingleCaseMetricsFeatureField[])
             : [features as metricsApiV1.SingleCaseMetricsFeatureField],
-        }),
+        });
+
+      return response.ok({
+        body: responseBody,
       });
     } catch (error) {
       throw createCaseError({
