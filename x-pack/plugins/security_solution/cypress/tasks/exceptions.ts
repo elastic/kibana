@@ -171,6 +171,7 @@ export const validateEmptyExceptionConditionField = () => {
   cy.get(FIELD_INPUT).should('be.empty');
 };
 export const submitNewExceptionItem = () => {
+  cy.get(CONFIRM_BTN).should('exist');
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
 };
