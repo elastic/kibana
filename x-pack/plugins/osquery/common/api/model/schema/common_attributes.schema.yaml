@@ -2,15 +2,15 @@ openapi: 3.0.0
 info:
   title: Common Osquery Attributes
   version: 8.9.0
-paths: {}
+paths: { }
 components:
   schemas:
     Id:
       type: string
     IdOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Id'
-        - type: null
+      $ref: '#/components/schemas/Id'
+      nullable: true
+
     AgentSelection:
       type: object
       properties:
@@ -30,98 +30,94 @@ components:
             type: string
 
     AgentSelectionOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/AgentSelection'
-        - type: null
+      $ref: '#/components/schemas/AgentSelection'
+      nullable: true
+
 
     Description:
       type: string
 
     DescriptionOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Description'
-        - type: null
+      $ref: '#/components/schemas/Description'
+      nullable: true
+
 
     Platform:
       type: string
 
     PlatformOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Platform'
-        - type: null
+      $ref: '#/components/schemas/Platform'
+      nullable: true
+
 
     Query:
       type: string
 
     QueryOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Query'
-        - type: null
+      $ref: '#/components/schemas/Query'
+      nullable: true
 
     Version:
       type: string
 
     VersionOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Version'
-        - type: null
+      $ref: '#/components/schemas/Version'
+      nullable: true
 
     Interval:
       type: string
 
     IntervalOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Interval'
-        - type: null
+      $ref: '#/components/schemas/Interval'
+      nullable: true
 
     Snapshot:
       type: boolean
 
     SnapshotOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Snapshot'
-        - type: null
+      $ref: '#/components/schemas/Snapshot'
+      nullable: true
+
 
     Removed:
       type: boolean
 
     RemovedOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Removed'
-        - type: null
+      $ref: '#/components/schemas/Removed'
+      nullable: true
+
 
     SavedQueryId:
       type: string
 
     SavedQueryIdOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/SavedQueryId'
-        - type: null
+      $ref: '#/components/schemas/SavedQueryId'
+      nullable: true
+
 
     PackId:
       type: string
 
     PackIdOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/PackId'
-        - type: null
+      $ref: '#/components/schemas/PackId'
+      nullable: true
+
 
     ExecutionContext:
       type: object
       properties:
         name:
-          oneOf:
-            - type: string
-            - type: null
+          type: string
+          nullable: true
         url:
-          oneOf:
-            - type: string
-            - type: null
+          type: string
+          nullable: true
+
 
     ExecutionContextOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/ExecutionContext'
-        - type: null
+      $ref: '#/components/schemas/ExecutionContext'
+      nullable: true
+
 
     ECSMappingItem:
       type: object
@@ -141,16 +137,16 @@ components:
         $ref: '#/components/schemas/ECSMappingItem'
 
     ECSMappingOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/ECSMapping'
-        - type: null
+      $ref: '#/components/schemas/ECSMapping'
+      nullable: true
+
 
     StringArrayOrUndefined:
-      oneOf:
-        - type: array
-          items:
-            type: string
-        - type: null
+      type: array
+      items:
+        type: string
+        nullable: true
+
 
     ArrayQueriesItem:
       type: object
@@ -206,29 +202,30 @@ components:
         - $ref: '#/components/schemas/ObjectQueries'
 
     QueriesOrUndefined:
-      oneOf:
-        - $ref: '#/components/schemas/Queries'
-        - type: null
+      $ref: '#/components/schemas/Queries'
+      nullable: true
+
 
     FilterQueryOrUndefined:
-      oneOf:
-        - type: string
-        - type: null
+      type: string
+      nullable: true
+
     PageOrUndefined:
-      oneOf:
-        - type: integer
-        - type: null
+      type: integer
+      nullable: true
+
     PageSizeOrUndefined:
-      oneOf:
-        - type: integer
-        - type: null
+      type: integer
+      nullable: true
+
     SortOrUndefined:
-      oneOf:
-        - type: string
-        - type: null
+      type: string
+      nullable: true
+
     SortOrderOrUndefined:
       oneOf:
-        - type: string
-        - type: null
-        - enum: [ asc, desc ]
+
+      - type: string
+        nullable: true
+      - enum: [ asc, desc ]
 

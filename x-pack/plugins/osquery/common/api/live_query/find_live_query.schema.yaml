@@ -1,23 +1,30 @@
 openapi: 3.0.0
 info:
-  title: Create Live Query Schema
+  title: Find Live Queries Schema
   version: 8.9.0
 components:
+  parameters:
+    FindLiveQueryRequestQueryParameter:
+      name: query
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/FindLiveQueryRequestQuery'
   schemas:
     FindLiveQueryRequestQuery:
       type: object
       properties:
         filterQuery:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/FilterQueryOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/FilterQueryOrUndefined'
         page:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         pageSize:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
         sort:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         sortOrder:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
     SuccessResponse:
       type: object
-      properties:
+      properties: {}
       # Define properties for the success response if needed

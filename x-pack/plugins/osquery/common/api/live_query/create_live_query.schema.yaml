@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Create Live Query Schema
   version: 8.9.0
-paths: {}
+paths: { }
 components:
   schemas:
     CreateLiveQueryRequestBody:
@@ -23,15 +23,15 @@ components:
           items:
             type: string
         query:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/QueryOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/QueryOrUndefined'
         queries:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/ArrayQueries'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ArrayQueries'
         saved_query_id:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/SavedQueryIdOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryIdOrUndefined'
         ecs_mapping:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/EcsMappingOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
         pack_id:
-          $ref: '../model/common_attributes.schema.yaml#/components/schemas/PackIdOrUndefined'
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIdOrUndefined'
         alert_ids:
           type: array
           items:
@@ -45,10 +45,9 @@ components:
           items:
             type: string
         metadata:
-          anyOf:
-            - type: object
-            - type: null
+          type: object
+          nullable: true
     SuccessResponse:
       type: object
-      properties:
+      properties: {}
       # Define properties for the success response if needed
