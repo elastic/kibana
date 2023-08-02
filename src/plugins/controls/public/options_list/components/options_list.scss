@@ -68,6 +68,8 @@
 }
 
 .optionsList--filterBtn {
+  border-radius: 0 !important;
+
   .euiFilterButton__text-hasNotification {
     flex-grow: 1;
     justify-content: space-between;
