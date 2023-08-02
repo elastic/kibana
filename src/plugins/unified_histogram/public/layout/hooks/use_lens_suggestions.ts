@@ -43,7 +43,7 @@ export const useLensSuggestions = ({
     const allSuggestions = isPlainRecord
       ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
       : [];
-    console.dir(allSuggestions);
+
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
