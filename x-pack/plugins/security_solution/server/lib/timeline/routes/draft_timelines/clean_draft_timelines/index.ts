@@ -95,7 +95,7 @@ export const cleanDraftTimelinesRoute = (
           });
         }
 
-        return response.ok({});
+        return response.ok({}); // TODO: Should we return an error here instead?
       } catch (err) {
         const error = transformError(err);
 
