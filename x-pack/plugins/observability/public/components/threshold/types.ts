@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import * as rt from 'io-ts';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -28,7 +29,6 @@ import { MetricsExplorerSeries } from '../../../common/threshold_rule/metrics_ex
 import {
   Comparator,
   CustomMetricExpressionParams,
-  FilterQuery,
   MetricExpressionParams,
   MetricsSourceStatus,
   NonCountMetricExpressionParams,
@@ -90,9 +90,8 @@ export interface TimeRange {
 export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
-  filterQuery?: FilterQuery;
   sourceId: string;
-  filterQueryText?: string;
+  filterQuery?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
   searchConfiguration: SerializedSearchSourceFields;
