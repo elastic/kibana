@@ -60,7 +60,12 @@ const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
   <>
     <EuiSpacer size="m" />
-    <EuiCallOut title={i18n.ERROR_PANEL_TITLE} color="danger" iconType="error">
+    <EuiCallOut
+      title={i18n.ERROR_PANEL_TITLE}
+      color="danger"
+      iconType="error"
+      data-test-subj="riskScoreErrorPanel"
+    >
       <p>{i18n.ERROR_PANEL_MESSAGE}</p>
 
       <EuiAccordion id={'risk-engine-erros'} buttonContent={i18n.ERROR_PANEL_ERRORS}>
@@ -149,10 +154,19 @@ export const RiskScoreEnableSection = () => {
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButtonEmpty color="primary" onClick={closeModal}>
+              <EuiButtonEmpty
+                color="primary"
+                data-test-subj="riskScoreUpdateCancel"
+                onClick={closeModal}
+              >
                 {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_NO}
               </EuiButtonEmpty>
-              <EuiButton color="primary" onClick={() => initRiskEngineMutation.mutate()} fill>
+              <EuiButton
+                color="primary"
+                data-test-subj="riskScoreUpdateConfirm"
+                onClick={() => initRiskEngineMutation.mutate()}
+                fill
+              >
                 {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_YES}
               </EuiButton>
             </EuiModalFooter>
@@ -208,6 +222,7 @@ export const RiskScoreEnableSection = () => {
                     disabled={initRiskEngineMutation.isLoading}
                     color={'primary'}
                     onClick={showModal}
+                    data-test-subj="riskScoreUpdateButton"
                   >
                     {i18n.START_UPDATE}
                   </EuiButtonEmpty>
@@ -216,7 +231,10 @@ export const RiskScoreEnableSection = () => {
               {!isUpdateAvailable && (
                 <EuiFlexGroup gutterSize="s" alignItems={'center'}>
                   <EuiFlexItem>{isLoading && <EuiLoadingSpinner size="m" />}</EuiFlexItem>
-                  <EuiFlexItem css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}>
+                  <EuiFlexItem
+                    css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
+                    data-test-subj="riskScoreStatus"
+                  >
                     {currentRiskEngineStatus === RiskEngineStatus.ENABLED ? (
                       <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>
                     ) : (
@@ -226,6 +244,7 @@ export const RiskScoreEnableSection = () => {
                   <EuiFlexItem>
                     <EuiSwitch
                       label={''}
+                      data-test-subj="riskScoreSwitch"
                       checked={currentRiskEngineStatus === RiskEngineStatus.ENABLED}
                       onChange={onSwitchClick}
                       compressed

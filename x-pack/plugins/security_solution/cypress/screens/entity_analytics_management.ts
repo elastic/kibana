@@ -22,3 +22,15 @@ export const RISK_PREVIEW_ERROR = '[data-test-subj="risk-preview-error"]';
 export const RISK_PREVIEW_ERROR_BUTTON = '[data-test-subj="risk-preview-error-button"]';
 
 export const LOCAL_QUERY_BAR_SELECTOR = getDataTestSubjectSelector('risk-score-preview-search-bar');
+
+export const RISK_SCORE_ERROR_PANEL = '[data-test-subj="riskScoreErrorPanel"]';
+
+export const RISK_SCORE_UPDATE_CANCEL = '[data-test-subj="riskScoreUpdateCancel"]';
+
+export const RISK_SCORE_UPDATE_CONFIRM = '[data-test-subj="riskScoreUpdateConfirm"]';
+
+export const RISK_SCORE_UDATE_BUTTON = '[data-test-subj="riskScoreUpdateButton"]';
+
+export const RISK_SCORE_STATUS = '[data-test-subj="riskScoreStatus"]';
+
+export const RISK_SCORE_SWITCH = '[data-test-subj="riskScoreSwitch"]';

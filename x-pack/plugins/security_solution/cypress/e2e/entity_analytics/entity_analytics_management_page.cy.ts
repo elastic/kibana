@@ -14,15 +14,33 @@ import {
   RISK_PREVIEW_ERROR,
   RISK_PREVIEW_ERROR_BUTTON,
   LOCAL_QUERY_BAR_SELECTOR,
+  RISK_SCORE_ERROR_PANEL,
+  RISK_SCORE_STATUS,
 } from '../../screens/entity_analytics_management';
 
+import {
+  deleteRiskScore,
+  interceptInstallRiskScoreModule,
+  waitForInstallRiskScoreModule,
+} from '../../tasks/api_calls/risk_scores';
+import { clickEnableRiskScore } from '../../tasks/risk_scores';
+import { RiskScoreEntity } from '../../tasks/risk_scores/common';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
-import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import {
+  ENTITY_ANALYTICS_MANAGEMENT_URL,
+  ALERTS_URL,
+  ENTITY_ANALYTICS_URL,
+} from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
+import {
+  riskEngineStatusChange,
+  updateRiskEngine,
+  updateRiskEngineConfirm,
+} from '../../tasks/entity_analytics';
 
 describe(
   'Entity analytics management page',
@@ -92,6 +110,56 @@ describe(
         cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
 
         cy.get(RISK_PREVIEW_ERROR).should('not.exist');
+      });
+    });
+
+    describe('Risk engine', () => {
+      it('should init, disable and enable risk engine', () => {
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+
+        // init
+        riskEngineStatusChange();
+
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+
+        // disable
+        riskEngineStatusChange();
+
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+
+        // enable
+        riskEngineStatusChange();
+
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+      });
+
+      it('should show error panel if API returns error ', () => {
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+
+        cy.intercept('POST', '/internal/risk_score/engine/init', {
+          statusCode: 500,
+        });
+
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+
+        cy.get(RISK_SCORE_ERROR_PANEL).contains('Error enabling risk engine');
+      });
+
+      it('should update if there legacy risk score installed', () => {
+        visit(ENTITY_ANALYTICS_URL);
+        interceptInstallRiskScoreModule();
+        clickEnableRiskScore(RiskScoreEntity.host);
+        waitForInstallRiskScoreModule();
+        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+
+        cy.get(RISK_SCORE_STATUS).should('not.exist');
+
+        updateRiskEngine();
+        updateRiskEngineConfirm();
+
+        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+
+        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
       });
     });
   }

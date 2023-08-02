@@ -12,6 +12,11 @@ import {
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
 } from '../screens/entity_analytics';
 import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
+import {
+  RISK_SCORE_UPDATE_CONFIRM,
+  RISK_SCORE_UDATE_BUTTON,
+  RISK_SCORE_SWITCH,
+} from '../screens/entity_analytics_management';
 
 import { visit } from './login';
 
@@ -30,4 +35,16 @@ export const enableJob = () => {
 
 export const navigateToNextPage = () => {
   cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
+};
+
+export const riskEngineStatusChange = () => {
+  cy.get(RISK_SCORE_SWITCH).click();
+};
+
+export const updateRiskEngine = () => {
+  cy.get(RISK_SCORE_UDATE_BUTTON).click();
+};
+
+export const updateRiskEngineConfirm = () => {
+  cy.get(RISK_SCORE_UPDATE_CONFIRM).click();
 };
