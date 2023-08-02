@@ -238,7 +238,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onData$ = useCallback(
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
-      const startTime = window.performance.now();
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
         console.log('data took to arrive', dataReceivedTime.current - initialRenderTime.current);
@@ -283,7 +282,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           );
         }
       }
-      const duration = window.performance.now() - startTime;
     },
     [addUserMessages, dispatchLens, plugins.data.search]
   );
