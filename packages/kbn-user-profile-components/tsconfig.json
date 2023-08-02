@@ -17,6 +17,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
     "@kbn/react-kibana-context-common",
+    "@kbn/core-notifications-browser",
   ],
   "exclude": [
     "target/**/*",
