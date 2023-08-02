@@ -53,6 +53,7 @@ const defaultProps: ChatBodyProps = {
     selectedConnector: 'foo',
     selectConnector: () => {},
   },
+  connectorsManagementHref: '',
   currentUser: {
     username: 'elastic',
   },

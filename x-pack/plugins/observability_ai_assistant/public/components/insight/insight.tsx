@@ -21,7 +21,8 @@ import { RegenerateResponseButton } from '../buttons/regenerate_response_button'
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { InsightBase } from './insight_base';
-import { InsightMissingCredentials } from './insight_missing_credentials';
+import { MissingCredentialsCallout } from '../missing_credentials_callout';
+import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
 function ChatContent({ messages, connectorId }: { messages: Message[]; connectorId: string }) {
   const service = useObservabilityAIAssistant();
@@ -139,11 +140,7 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
     children = <ChatContent messages={messages} connectorId={connectors.selectedConnector} />;
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
-      <InsightMissingCredentials
-        connectorsManagementHref={http!.basePath.prepend(
-          `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
-        )}
-      />
+      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
     );
   }
 

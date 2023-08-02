@@ -10,7 +10,9 @@ import React from 'react';
 import { ChatBody } from '../../components/chat/chat_body';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
+import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
 const containerClassName = css`
   max-width: 100%;
@@ -27,6 +29,10 @@ export function ConversationView() {
 
   const service = useObservabilityAIAssistant();
 
+  const {
+    services: { http },
+  } = useKibana();
+
   return (
     <EuiFlexGroup direction="row" className={containerClassName}>
       <EuiFlexItem grow={false} />
@@ -35,6 +41,7 @@ export function ConversationView() {
           currentUser={currentUser}
           connectors={connectors}
           initialConversation={undefined}
+          connectorsManagementHref={getConnectorsManagementHref(http!)}
           service={service}
         />
       </EuiFlexItem>

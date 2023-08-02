@@ -43,6 +43,13 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
       })
       .then((results) => {
         setConnectors(results);
+        setSelectedConnector((connectorId) => {
+          if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
+            return '';
+          }
+          return connectorId;
+        });
+
         setError(undefined);
       })
       .catch((err) => {
@@ -56,7 +63,7 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
     return () => {
       controller.abort();
     };
-  }, [assistant]);
+  }, [assistant, setSelectedConnector]);
 
   return {
     connectors,
