@@ -11,23 +11,13 @@ import { act, renderHook, type WrapperComponent } from '@testing-library/react-h
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { useUpdateUserProfile } from './use_update_user_profile';
 import { UserProfilesKibanaProvider } from '../services';
 
 const core = coreMock.createStart();
-const security = {
-  authc: {},
-  navControlService: {},
-  userProfiles: {
-    getCurrent: jest.fn(),
-    bulkGet: jest.fn(),
-    suggest: jest.fn(),
-    update: jest.fn(),
-    userProfile$: of({}),
-  },
-  uiApi: {},
-};
+const security = securityMock.createStart();
 
 const { http, notifications } = core;
 
