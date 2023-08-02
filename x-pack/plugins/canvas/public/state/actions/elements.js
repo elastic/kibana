@@ -152,11 +152,11 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
 // when the components of the arguments update the expression. For example, suppose there are
 // multiple datacolumns that change the column to the first one from the list after datasource update.
 // In that case, it is necessary to fetch the context only for the last version of the expression.
-const fetchRenderableWithContextFnDebounced = debounce(fetchRenderableWithContextFn, 100);
+// const fetchRenderableWithContextFnDebounced = debounce(fetchRenderableWithContextFn, 100);
 
 export const fetchRenderableWithContext = createThunk(
   'fetchRenderableWithContext',
-  fetchRenderableWithContextFnDebounced
+  fetchRenderableWithContextFn
 );
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
