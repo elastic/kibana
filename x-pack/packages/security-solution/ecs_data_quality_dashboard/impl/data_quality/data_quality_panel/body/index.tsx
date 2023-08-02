@@ -51,6 +51,7 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
+  reportDataQualityChecked: (params: DataQualityCheckedParams) => void;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -67,6 +68,7 @@ const BodyComponent: React.FC<Props> = ({
   lastChecked,
   openCreateCaseFlyout,
   patterns,
+  reportDataQualityChecked,
   setLastChecked,
   theme,
   baseTheme,
@@ -122,6 +124,7 @@ const BodyComponent: React.FC<Props> = ({
           patterns={patterns}
           patternIndexNames={patternIndexNames}
           patternRollups={patternRollups}
+          reportDataQualityChecked={reportDataQualityChecked}
           theme={theme}
           baseTheme={baseTheme}
           updatePatternIndexNames={updatePatternIndexNames}

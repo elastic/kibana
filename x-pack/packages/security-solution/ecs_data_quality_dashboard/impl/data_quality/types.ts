@@ -176,11 +176,11 @@ export interface SelectedIndex {
 }
 
 export interface DataQualityCheckedParams {
-  numberOfIndices: number;
-  timeConsumedMs: number;
   error: string | undefined;
-  numberOfIncompatibleFields: number;
   incompatibleFields: Array<{ type?: string; field?: string; value?: string }> | undefined;
   numberOfDocuments: number;
+  numberOfIncompatibleFields: number;
+  numberOfIndices: number;
   sizeInBytes: number;
+  timeConsumedMs: number;
 }

@@ -21,7 +21,7 @@ import React, { useCallback, useState } from 'react';
 import { IlmPhasesEmptyPrompt } from '../../../ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
-import { PatternRollup, SelectedIndex } from '../../../types';
+import { DataQualityCheckedParams, PatternRollup, SelectedIndex } from '../../../types';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -53,6 +53,7 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
+  reportDataQualityChecked: (params: DataQualityCheckedParams) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
@@ -77,6 +78,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   patternIndexNames,
   patternRollups,
   patterns,
+  reportDataQualityChecked,
   theme,
   baseTheme,
   updatePatternIndexNames,
@@ -114,6 +116,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         isAssistantEnabled={isAssistantEnabled}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
+        reportDataQualityChecked={reportDataQualityChecked}
         theme={theme}
         baseTheme={baseTheme}
         patternIndexNames={patternIndexNames}

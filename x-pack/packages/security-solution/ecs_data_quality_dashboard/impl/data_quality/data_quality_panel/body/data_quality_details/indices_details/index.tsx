@@ -77,6 +77,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   patternIndexNames,
   patternRollups,
   patterns,
+  reportDataQualityChecked,
   selectedIndex,
   setSelectedIndex,
   theme,
@@ -99,6 +100,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
           openCreateCaseFlyout={openCreateCaseFlyout}
           pattern={pattern}
           patternRollup={patternRollups[pattern]}
+          reportDataQualityChecked={reportDataQualityChecked}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
           theme={theme}

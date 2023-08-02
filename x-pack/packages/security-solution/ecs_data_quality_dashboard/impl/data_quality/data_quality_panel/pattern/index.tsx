@@ -113,6 +113,7 @@ const PatternComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   pattern,
   patternRollup,
+  reportDataQualityChecked,
   selectedIndex,
   setSelectedIndex,
   theme,
@@ -239,6 +240,22 @@ const PatternComponent: React.FC<Props> = ({
         }),
         stats,
       });
+
+      reportDataQualityChecked({
+        error,
+        incompatibleFields: [],
+        numberOfDocuments: getTotalDocsCount({
+          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+          stats,
+        }),
+        numberOfIncompatibleFields: 0,
+        numberOfIndices: getIndexNames({ stats, ilmExplain, ilmPhases }).length,
+        sizeInBytes: getTotalSizeInBytes({
+          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+          stats,
+        }),
+        timeConsumedMs: 0,
+      });
     }
   }, [
     error,
@@ -248,6 +265,7 @@ const PatternComponent: React.FC<Props> = ({
     indexNames,
     pattern,
     patternRollup,
+    reportDataQualityChecked,
     stats,
     updatePatternIndexNames,
     updatePatternRollup,
