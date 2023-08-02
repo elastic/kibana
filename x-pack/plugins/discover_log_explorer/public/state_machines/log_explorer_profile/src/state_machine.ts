@@ -27,6 +27,7 @@ import {
   listenUrlChange,
   subscribeControlGroup,
   updateControlPanels,
+  updateStateContainer,
 } from './url_state_storage_service';
 
 export const createPureLogExplorerProfileStateMachine = (
@@ -72,8 +73,19 @@ export const createPureLogExplorerProfileStateMachine = (
           invoke: {
             src: 'initializeControlPanels',
             onDone: {
-              target: 'initialized',
+              target: 'initializingStateContainer',
               actions: ['storeControlPanels'],
+            },
+            onError: {
+              target: 'initializingStateContainer',
+            },
+          },
+        },
+        initializingStateContainer: {
+          invoke: {
+            src: 'updateStateContainer',
+            onDone: {
+              target: 'initialized',
             },
             onError: {
               target: 'initialized',
@@ -104,6 +116,18 @@ export const createPureLogExplorerProfileStateMachine = (
                 updatingDataView: {
                   invoke: {
                     src: 'createDataView',
+                    onDone: {
+                      target: 'updatingStateContainer',
+                    },
+                    onError: {
+                      target: 'updatingStateContainer',
+                      actions: ['notifyCreateDataViewFailed'],
+                    },
+                  },
+                },
+                updatingStateContainer: {
+                  invoke: {
+                    src: 'updateStateContainer',
                     onDone: {
                       target: 'idle',
                       actions: ['notifyDataViewUpdate'],
@@ -215,6 +239,7 @@ export const createLogExplorerProfileStateMachine = ({
       listenUrlChange: listenUrlChange({ stateContainer }),
       subscribeControlGroup: subscribeControlGroup({ stateContainer }),
       updateControlPanels: updateControlPanels({ stateContainer }),
+      updateStateContainer: updateStateContainer({ stateContainer }),
     },
   });
 
