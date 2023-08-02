@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
 import semverValid from 'semver/functions/valid';
+import { css } from '@emotion/react';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -66,7 +67,7 @@ const DocsLink = (
       defaultMessage="Read the {docs} for more details"
       values={{
         docs: (
-          <EuiLink href="https://cloud.google.com/docs/authentication" external>
+          <EuiLink href="https://ela.st/cspm-get-started" external>
             documentation
           </EuiLink>
         ),
@@ -75,13 +76,46 @@ const DocsLink = (
   </EuiText>
 );
 
-type GcpCredentialsType = 'credentials_file' | 'credentials_json';
+const GoogleCloudShellSetup = () => {
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        <ol
+          css={css`
+            list-style: auto;
+          `}
+        >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.login"
+              defaultMessage="Log into your Google Cloud Console"
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
+              defaultMessage="Note down the GCP project ID of the project you wish to monitor"
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.csp.gcpIntegration.cloudShellSetupStep.launch"
+              defaultMessage='Click "Save and Continue" at the bottom right of the page. Then, on the pop-up modal, click "Launch Google Cloud Shell"'
+            />
+          </li>
+        </ol>
+      </EuiText>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
 type GcpFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 interface GcpInputFields {
   fields: GcpFields;
 }
 
-const gcpField: GcpInputFields = {
+export const gcpField: GcpInputFields = {
   fields: {
     project_id: {
       label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
@@ -136,7 +170,7 @@ const getSetupFormatOptions = (): Array<{
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
       defaultMessage: 'Google Cloud Shell',
     }),
-    disabled: true,
+    disabled: false,
   },
   {
     id: 'manual',
@@ -175,6 +209,24 @@ const getInputVarsFields = (
       } as const;
     });
 
+const getSetupFormatFromInput = (
+  input: Extract<
+    NewPackagePolicyPostureInput,
+    { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
+  >
+): SetupFormatGCP => {
+  const credentialsType = input.streams[0].vars?.setup_access?.value;
+  // CloudFormation is the default setup format if the integration has a CloudFormation template
+  if (!credentialsType) {
+    return 'google_cloud_shell';
+  }
+  if (credentialsType !== 'google_cloud_shell') {
+    return 'manual';
+  }
+
+  return 'google_cloud_shell';
+};
+
 export const GcpCredentialsForm = ({
   input,
   newPolicy,
@@ -187,15 +239,63 @@ export const GcpCredentialsForm = ({
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
+  const fieldsSnapshot = useRef({});
+  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const setupFormat = getSetupFormatFromInput(input);
+  const getFieldById = (id: keyof GcpInputFields['fields']) => {
+    return fields.find((element) => element.id === id);
+  };
+  const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
+    if (newSetupFormat === 'google_cloud_shell') {
+      // We need to store the current manual fields to restore them later
+      fieldsSnapshot.current = Object.fromEntries(
+        fields.map((field) => [field.id, { value: field.value }])
+      );
+      // We need to store the last manual credentials type to restore it later
+      lastSetupAccessType.current = input.streams[0].vars?.setup_access?.value;
+
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          setup_access: {
+            value: 'google_cloud_shell',
+            type: 'text',
+          },
+          // Clearing fields from previous setup format to prevent exposing credentials
+          // when switching from manual to cloud formation
+          ...Object.fromEntries(fields.map((field) => [field.id, { value: undefined }])),
+          project_id: {
+            value: 'DUMMY VALUE',
+            type: 'text',
+          },
+        })
+      );
+    } else {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          setup_access: {
+            // Restoring last manual credentials type or defaulting to the first option
+            value: lastSetupAccessType.current || 'manual',
+            type: 'text',
+          },
+          // Restoring fields from manual setup format if any
+          ...fieldsSnapshot.current,
+        })
+      );
+    }
+  };
+
   useEffect(() => {
-    setIsValid(!isInvalid);
+    const isProjectIdEmpty = setupFormat === 'manual' && !getFieldById('project_id')?.value;
+    const isInvalidPolicy = isInvalid || isProjectIdEmpty;
+
+    setIsValid(!isInvalidPolicy);
 
     onChange({
-      isValid: !isInvalid,
+      isValid: !isInvalidPolicy,
       updatedPolicy: newPolicy,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, packageInfo]);
+  }, [input, packageInfo, setupFormat]);
 
   if (isInvalid) {
     return (
@@ -214,31 +314,29 @@ export const GcpCredentialsForm = ({
     <>
       <GCPSetupInfoContent />
       <EuiSpacer size="l" />
-      <GcpSetupAccessSelector
-        onChange={(optionId) => updatePolicy(getPosturePolicy(newPolicy, input.type))}
+      <RadioGroup
+        size="s"
+        options={getSetupFormatOptions()}
+        idSelected={setupFormat}
+        onChange={onSetupFormatChange}
       />
       <EuiSpacer size="l" />
-      <GcpInputVarFields
-        fields={fields}
-        onChange={(key, value) =>
-          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
-        }
-      />
+      {setupFormat === 'manual' ? (
+        <GcpInputVarFields
+          fields={fields}
+          onChange={(key, value) =>
+            updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+          }
+        />
+      ) : (
+        <GoogleCloudShellSetup />
+      )}
       <EuiSpacer size="s" />
       {DocsLink}
       <EuiSpacer />
     </>
   );
 };
-
-const GcpSetupAccessSelector = ({ onChange }: { onChange(type: GcpCredentialsType): void }) => (
-  <RadioGroup
-    size="s"
-    options={getSetupFormatOptions()}
-    idSelected={'manual'}
-    onChange={(id: GcpCredentialsType) => onChange(id)}
-  />
-);
 
 const GcpInputVarFields = ({
   fields,

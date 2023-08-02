@@ -304,6 +304,12 @@ export function useOnSubmit({
         ? getCloudFormationTemplateUrlFromPackagePolicy(data.item)
         : false;
 
+      const cisGcpSetupAccess = data?.item?.inputs.find(
+        (element) => element?.type === 'cloudbeat/cis_gcp'
+      )?.streams[0].vars?.setup_access?.value;
+
+      const hasGoogleCloudShell = cisGcpSetupAccess === 'google_cloud_shell';
+
       if (hasCloudFormation) {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
       } else {
@@ -315,6 +321,10 @@ export function useOnSubmit({
         const hasAgentsAssigned = agentCount && agentPolicy;
         if (!hasAgentsAssigned && hasCloudFormation) {
           setFormState('SUBMITTED_CLOUD_FORMATION');
+          return;
+        }
+        if (!hasAgentsAssigned && hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
         if (!hasAgentsAssigned) {
