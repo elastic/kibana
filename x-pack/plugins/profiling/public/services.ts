@@ -56,7 +56,7 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
-  }) => Promise<StorageExplorerHostBreakdownSizeChart>;
+  }) => Promise<StorageExplorerHostBreakdownSizeChart[]>;
 }
 
 export function getServices(): Services {
@@ -129,7 +129,7 @@ export function getServices(): Services {
       const eventsMetricsSizeTimeseries = (await http.get(
         paths.StorageExplorerHostBreakdownSizeChart,
         { query }
-      )) as StorageExplorerHostBreakdownSizeChart;
+      )) as StorageExplorerHostBreakdownSizeChart[];
       return eventsMetricsSizeTimeseries;
     },
   };

@@ -15,7 +15,8 @@ export interface StorageExplorerSummary {
 }
 
 export interface StorageExplorerHostBreakdownSizeChart {
-  host: string;
+  hostId: string;
+  hostName: string;
   timeseries: Array<{
     x: number;
     y?: number | null;
