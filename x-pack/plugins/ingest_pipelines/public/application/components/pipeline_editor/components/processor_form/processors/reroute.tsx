@@ -177,12 +177,7 @@ export const Reroute: FunctionComponent = () => {
         component={ComboBoxField}
         componentProps={{
           euiFieldProps: {
-            placeholder: (
-              <FormattedMessage
-                id="xpack.ingestPipelines.pipelineEditor.reroute.datasetFieldPlaceholder"
-                defaultMessage="{{data_stream.dataset}}"
-              />
-            ),
+            placeholder: '{{data_stream.dataset}}',
           },
         }}
         path="fields.dataset"
@@ -194,12 +189,7 @@ export const Reroute: FunctionComponent = () => {
         component={ComboBoxField}
         componentProps={{
           euiFieldProps: {
-            placeholder: (
-              <FormattedMessage
-                id="xpack.ingestPipelines.pipelineEditor.reroute.namespaceFieldPlaceholder"
-                defaultMessage="{{data_stream.namespace}}"
-              />
-            ),
+            placeholder: '{{data_stream.namespace}}',
           },
         }}
         path="fields.namespace"
