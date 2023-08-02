@@ -120,7 +120,7 @@ async function generateData({
             ),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
-            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
+            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp),huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success(),
@@ -211,6 +211,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
       });
+
+      it('returns same requests', () => {
+        const { value, timeseries } = response.currentPeriod.crashes;
+        const timeseriesTotal = sumBy(timeseries, 'y');
+        expect(value).to.be(timeseriesTotal);
+      })
     });
 
     describe('when filters are applied', () => {
@@ -245,6 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(0);
+        expect(response.currentPeriod.crashes.value).to.eql(1)
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -255,6 +262,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(3);
+        expect(response.currentPeriod.crashes.value).to.eql(2)
+
       });
     });
   });
