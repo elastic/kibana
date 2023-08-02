@@ -5,6 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import fs from 'fs';
+import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -19,13 +21,6 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'only_dashboard';
   const pkgVersion = '0.1.0';
 
-  const installPackage = async (name: string, version: string) => {
-    return await supertest
-      .post(`/api/fleet/epm/packages/${name}/${version}`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({ force: true })
-      .expect(200);
-  };
   const uninstallPackage = async (pkg: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -162,10 +157,25 @@ export default function (providerContext: FtrProviderContext) {
     describe('Handles presence of tags inside integration package', async () => {
       const testPackage = 'assets_with_tags';
       const testPackageVersion = '0.1.0';
+      // tag corresponding to `OnlySomeAssets`
+      const ONLY_SOME_ASSETS_TAG = `fleet-shared-tag-${testPackage}-ef823f10-b5af-5fcb-95da-2340a5257599-default`;
+      // tag corresponding to `MixedTypesTag`
+      const MIXED_TYPES_TAG = `fleet-shared-tag-${testPackage}-ef823f10-b5af-5fcb-95da-2340a5257599-default`;
+
       before(async () => {
         if (!server.enabled) return;
 
-        await installPackage('assets_with_tags', pkgVersion);
+        const testPkgArchiveZip = path.join(
+          path.dirname(__filename),
+          '../fixtures/direct_upload_packages/assets_with_tags-0.1.0.zip'
+        );
+        const buf = fs.readFileSync(testPkgArchiveZip);
+        await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(200);
       });
       after(async () => {
         if (!server.enabled) return;
@@ -173,20 +183,17 @@ export default function (providerContext: FtrProviderContext) {
         await deleteTag('managed');
       });
 
-      it('Should create regular tags and package spec tags', async () => {
+      it('Should create tags based on package spec tags', async () => {
         const managedTag = await getTag('fleet-managed-default');
-        expect(managedTag).equal(undefined);
+        expect(managedTag).not.equal(undefined);
 
         const securitySolutionTag = await getTag('SecuritySolution');
-        expect(securitySolutionTag).equal(undefined);
+        expect(securitySolutionTag).not.equal(undefined);
 
-        const pkgTag1 = await getTag(
-          `fleet-shared-tag-${testPackage}-ef823f10-b5af-5fcb-95da-2340a5257599-default`
-        );
+        const pkgTag1 = await getTag(ONLY_SOME_ASSETS_TAG);
         expect(pkgTag1).equal(undefined);
-        const pkgTag2 = await getTag(
-          `fleet-shared-tag-${testPackage}-6c32dbcd-3f4b-536b-b235-305e65574d1d-default`
-        );
+
+        const pkgTag2 = await getTag(MIXED_TYPES_TAG);
         expect(pkgTag2).equal(undefined);
       });
     });
