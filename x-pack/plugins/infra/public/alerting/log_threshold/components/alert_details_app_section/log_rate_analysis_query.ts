@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { RuleParams, CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
 import { buildFiltersFromCriteria } from '../../../../../common/alerting/logs/log_threshold/query_helpers';
 
-export const getESQueryForLogSpike = (
+export const getESQueryForLogRateAnalysis = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   alert: TopAlert<Record<string, any>>,
