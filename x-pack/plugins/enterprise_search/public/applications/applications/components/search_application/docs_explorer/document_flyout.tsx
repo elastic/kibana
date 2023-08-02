@@ -31,12 +31,12 @@ import {
   convertResultToFieldsAndIndex,
   FieldValue,
 } from './convert_results';
+import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
-import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
 
 export const DocumentFlyout: React.FC = () => {
-  const { fieldTypesByIndex } = useValues(SearchApplicationSearchPreviewLogic);
+  const { fieldTypesByIndex } = useValues(SearchApplicationDocsExplorerLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
 
   if (!selectedDocument) return null;
@@ -53,7 +53,7 @@ export const DocumentFlyout: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<ConvertedResultWithType>> = [
     {
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.fieldLabel',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.documentFlyout.fieldLabel',
         { defaultMessage: 'Field' }
       ),
       render: ({ field: key, type }: ConvertedResultWithType) => (
@@ -71,7 +71,7 @@ export const DocumentFlyout: React.FC = () => {
     {
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.valueLabel',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.documentFlyout.valueLabel',
         { defaultMessage: 'Value' }
       ),
       render: (value: FieldValue) => (
@@ -92,7 +92,7 @@ export const DocumentFlyout: React.FC = () => {
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.title"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.documentFlyout.title"
                 defaultMessage="Document: {id}"
                 values={{ id }}
               />
@@ -100,7 +100,7 @@ export const DocumentFlyout: React.FC = () => {
           </EuiTitle>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.fieldCount"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.documentFlyout.fieldCount"
               defaultMessage="{fieldCount} {fieldCount, plural, one {Field} other {Fields}}"
               values={{ fieldCount: items.length }}
             />
