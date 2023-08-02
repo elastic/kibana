@@ -7,3 +7,6 @@
 
 ## do not terminate process on unhandled promise rejection
  --unhandled-rejections=warn
+
+## restore < Node 16 default DNS lookup behavior
+--dns-result-order=ipv4first
