@@ -35,7 +35,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [getAllFinishedStepsFromStorage]
   );
 
-  const activeProductssInitialStates = useMemo(() => {
+  const activeProductsInitialStates = useMemo(() => {
     const activeProductsFromStorage = getActiveProductsInitialStates({
       activeProducts: getActiveProductsFromStorage(),
     });
@@ -47,15 +47,15 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
 
   const {
     activeSections: activeSectionsInitialStates,
-    totalActiveSteps: totalActiveStepsInitialSstates,
+    totalActiveSteps: totalActiveStepsInitialStates,
     totalStepsLeft: totalStepsLeftInitialStates,
   } = useMemo(
     () =>
       getActiveSectionsInitialStates({
-        activeProducts: activeProductssInitialStates,
+        activeProducts: activeProductsInitialStates,
         finishedSteps: finishedStepsInitialStates,
       }),
-    [activeProductssInitialStates, finishedStepsInitialStates]
+    [activeProductsInitialStates, finishedStepsInitialStates]
   );
 
   const expandedCardsInitialStates = useMemo(
@@ -64,11 +64,11 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
   );
 
   const [state, dispatch] = useReducer(reducer, {
-    activeProducts: activeProductssInitialStates,
+    activeProducts: activeProductsInitialStates,
     activeSections: activeSectionsInitialStates,
     expandedCardSteps: expandedCardsInitialStates,
     finishedSteps: finishedStepsInitialStates,
-    totalActiveSteps: totalActiveStepsInitialSstates,
+    totalActiveSteps: totalActiveStepsInitialStates,
     totalStepsLeft: totalStepsLeftInitialStates,
   });
 
