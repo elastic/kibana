@@ -269,7 +269,6 @@ export class ChromeService {
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
 
-        // render invisible
         if (!isVisible) {
           return (
             <div data-test-subj="kibanaHeaderChromeless">
