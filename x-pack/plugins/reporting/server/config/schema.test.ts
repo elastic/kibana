@@ -112,4 +112,8 @@ describe('Reporting Config Schema', () => {
       ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { dev: true })
     ).not.toThrow();
   });
+
+  it('should have roles enabled set to false for serverless by default', () => {
+    expect(() => ConfigSchema.validate({ roles: { enabled:  false } }, { serverless: true })).not.toThrow()
+  })
 });
