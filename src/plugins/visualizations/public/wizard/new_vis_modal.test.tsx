@@ -12,8 +12,7 @@ import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
 import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -69,8 +68,6 @@ describe('NewVisModal', () => {
     getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
   };
   const addBasePath = (url: string) => `testbasepath${url}`;
-  const settingsGet = jest.fn();
-  const uiSettings: any = { get: settingsGet };
   const docLinks = {
     links: {
       dashboard: {
@@ -78,8 +75,8 @@ describe('NewVisModal', () => {
       },
     },
   };
-  const http = httpServiceMock.createStartContract({ basePath: '' });
-  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
+
+  const contentManagement = contentManagementMock.createStartContract();
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -100,11 +97,9 @@ describe('NewVisModal', () => {
         onClose={() => null}
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
-        uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
-        savedObjectsManagement={savedObjectsManagement}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
@@ -118,11 +113,9 @@ describe('NewVisModal', () => {
         onClose={() => null}
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
-        uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
-        savedObjectsManagement={savedObjectsManagement}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
@@ -135,11 +128,9 @@ describe('NewVisModal', () => {
         onClose={() => null}
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
-        uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
-        savedObjectsManagement={savedObjectsManagement}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
@@ -153,11 +144,9 @@ describe('NewVisModal', () => {
           onClose={() => null}
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
-          uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -173,11 +162,9 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
-          uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -199,12 +186,10 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           originatingApp={'coolJestTestApp'}
           addBasePath={addBasePath}
-          uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -226,11 +211,9 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
-          uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -248,11 +231,9 @@ describe('NewVisModal', () => {
           onClose={() => null}
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
-          uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const aggBasedGroupCard = wrapper

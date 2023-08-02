@@ -71,9 +71,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     embeddable,
     lens,
     storage,
-    http,
-    uiSettings,
-    savedObjectsManagement,
+    contentManagement,
     data: {
       query: {
         timefilter: { timefilter },
@@ -331,9 +329,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           savedObjectMetaData={savedObjectMetaData}
           fixedPageSize={10}
           services={{
-            uiSettings,
-            http,
-            savedObjectsManagement,
+            contentClient: contentManagement.client,
           }}
           leftChildren={createLensButton}
           helpText={i18n.translate(

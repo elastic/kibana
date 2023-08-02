@@ -15,6 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -95,7 +96,9 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const kibana = useKibana<
+    IUnifiedSearchPluginServices & { contentManagement: ContentManagementPublicStart }
+  >();
   const { services, overlays } = kibana;
   const {
     uiSettings,
@@ -107,7 +110,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     notifications,
     http,
     docLinks,
-    savedObjectsManagement,
+    contentManagement,
   } = services;
   if (!overlays) return null;
   return (
@@ -131,11 +134,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               data-test-subj="graphDatasourceButton"
               onClick={() => {
                 confirmWipeWorkspace(
-                  () =>
-                    openSourceModal(
-                      { overlays, http, uiSettings, savedObjectsManagement },
-                      onIndexPatternSelected
-                    ),
+                  () => openSourceModal({ overlays, contentManagement }, onIndexPatternSelected),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                     defaultMessage:
                       'If you change data sources, your current fields and vertices will be reset.',

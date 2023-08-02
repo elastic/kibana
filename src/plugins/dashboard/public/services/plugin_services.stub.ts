@@ -40,6 +40,7 @@ import { visualizationsServiceFactory } from './visualizations/visualizations.st
 import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management.stub';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
+import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
@@ -68,6 +69,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
+  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

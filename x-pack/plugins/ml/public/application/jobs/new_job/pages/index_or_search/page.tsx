@@ -19,7 +19,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
-  const { uiSettings, http, savedObjectsManagement } = useMlKibana().services;
+  const { contentManagement } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
   const onObjectSelection = (id: string, type: string) => {
@@ -67,14 +67,11 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
             services={{
-              uiSettings,
-              http,
-              savedObjectsManagement,
+              contentClient: contentManagement.client,
             }}
           />
         </EuiPageContent>

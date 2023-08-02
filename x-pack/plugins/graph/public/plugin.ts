@@ -132,6 +132,7 @@ export class GraphPlugin
           spaces: pluginsStart.spaces,
           inspect: pluginsStart.inspector,
           savedObjectsManagement: pluginsStart.savedObjectsManagement,
+          contentManagement: pluginsStart.contentManagement,
         });
       },
     });

@@ -9,34 +9,28 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { ReactElement, ReactNode } from 'react';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiTableFieldDataColumnType,
-  IconType,
-  EuiIcon,
-  EuiToolTip,
   EuiSearchBarProps,
-  SearchFilterConfig,
-  Query,
-  PropertySort,
-  EuiFlexItem,
-  EuiFlexGroup,
+  EuiTableFieldDataColumnType,
   EuiText,
+  EuiToolTip,
+  IconType,
+  PropertySort,
+  Query,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import {
-  SavedObjectCommon,
-  FindQueryHTTP,
-  FindResponseHTTP,
-  FinderAttributes,
-  LISTING_LIMIT_SETTING,
-} from '../../common';
+import { FinderAttributes, SavedObjectCommon } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -45,8 +39,8 @@ export interface SavedObjectMetaData<T = unknown> {
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
+  /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
-  defaultSearchField?: string;
 }
 
 interface SavedObjectFinderItem extends SavedObjectCommon {
@@ -63,10 +57,8 @@ interface SavedObjectFinderState {
 }
 
 interface SavedObjectFinderServices {
-  http: HttpStart;
-  uiSettings: IUiSettingsClient;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  contentClient: ContentClient;
 }
 
 interface BaseSavedObjectFinder {
@@ -113,21 +105,9 @@ export class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { savedObjectsManagement, uiSettings, http } = this.props.services;
+    const { contentClient } = this.props.services;
 
-    const fields = Object.values(metaDataMap)
-      .map((metaData) => metaData.includeFields || [])
-      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
-
-    const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
-      if (item.defaultSearchField) {
-        col.push(item.defaultSearchField);
-      }
-      return col;
-    }, []);
-
-    const perPage = uiSettings.get(LISTING_LIMIT_SETTING);
-    const { queryText, visibleTypes, selectedTags } = savedObjectsManagement.parseQuery(
+    const { queryText, visibleTypes, selectedTags } = parseQuery(
       query,
       Object.values(metaDataMap).map((metadata) => ({
         name: metadata.type,
@@ -136,26 +116,22 @@ export class SavedObjectFinderUi extends React.Component<
         displayName: metadata.name,
       }))
     );
-    const hasReference = savedObjectsManagement.getTagFindReferences({
+    const includeTags = getTagFindReferences({
       selectedTags,
       taggingApi: this.props.services.savedObjectsTagging,
+    })?.map(({ id, type }) => id);
+
+    const types = visibleTypes ?? Object.keys(metaDataMap);
+
+    const response = await contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
+      contentTypes: types.map((type) => ({ contentTypeId: type })),
+      query: {
+        text: queryText ? `${queryText}*` : undefined,
+        ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+      },
     });
-    const params: FindQueryHTTP = {
-      type: visibleTypes ?? Object.keys(metaDataMap),
-      search: queryText ? `${queryText}*` : undefined,
-      fields: [...new Set(fields)],
-      page: 1,
-      perPage,
-      searchFields: ['title^3', 'description', ...additionalSearchFields],
-      defaultSearchOperator: 'AND',
-      hasReference: hasReference ? JSON.stringify(hasReference) : undefined,
-    };
 
-    const response = (await http.get('/internal/saved-objects-finder/find', {
-      query: params as Record<string, any>,
-    })) as FindResponseHTTP<FinderAttributes>;
-
-    const savedObjects = response.saved_objects
+    const savedObjects = response.hits
       .map((savedObject) => {
         const {
           attributes: { name, title },

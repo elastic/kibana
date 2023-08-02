@@ -12,7 +12,8 @@
       "inspector",
       "uiActions",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "contentManagement"
     ],
     "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
     "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"],

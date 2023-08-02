@@ -24,7 +24,7 @@ import {
   embeddableStart,
   usageCollection,
   savedObjectsTaggingOss,
-  savedObjectsManagement,
+  contentManagement,
 } from '../kibana_services';
 import {
   IContainer,
@@ -125,9 +125,7 @@ export const AddPanelFlyout = ({
       <EuiFlyoutBody>
         <SavedObjectFinder
           services={{
-            http: core.http,
-            savedObjectsManagement,
-            uiSettings: core.uiSettings,
+            contentClient: contentManagement.client,
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
           }}
           onChoose={onChoose}

@@ -11,7 +11,6 @@ import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
@@ -48,8 +47,7 @@ export function hasIcon(icon: string | undefined): icon is string {
 
 export function getEventAnnotationService(
   core: CoreStart,
-  contentManagement: ContentManagementPublicStart,
-  savedObjectsManagement: SavedObjectsManagementPluginStart
+  contentManagement: ContentManagementPublicStart
 ): EventAnnotationServiceType {
   const client = contentManagement.client;
 
@@ -288,9 +286,7 @@ export function getEventAnnotationService(
     renderEventAnnotationGroupSavedObjectFinder: (props) => {
       return (
         <EventAnnotationGroupSavedObjectFinder
-          http={core.http}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
           checkHasAnnotationGroups={checkHasAnnotationGroups}
           {...props}
         />
