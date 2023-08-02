@@ -17,7 +17,6 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -282,19 +281,21 @@ export const ProjectHeader = ({
                   width: calc(100% - ${isOpen ? SIZE_EXPANDED : SIZE_COLLAPSED}px);
                 `}
               >
-                <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-                  <EuiFlexGroup>
-                    <EuiFlexItem
-                      grow={false}
-                      css={css`
-                        /* force the item to use all space to the left, pushing content to the right edge of the viewport */
-                        margin-left: auto;
-                      `}
-                    >
-                      <HeaderActionMenu mounter={headerActionMenuMounter} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
+                <EuiFlexGroup
+                  css={({ euiTheme }) => css`
+                    padding: euiTheme.size.s;
+                  `}
+                >
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      /* force the item to use all space to the left, pushing content to the right edge of the viewport */
+                      margin-left: auto;
+                    `}
+                  >
+                    <HeaderActionMenu mounter={headerActionMenuMounter} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </div>
               <div className="header__actionMenu__clearFix" />
             </>
