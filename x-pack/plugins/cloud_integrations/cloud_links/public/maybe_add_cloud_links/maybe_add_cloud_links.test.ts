@@ -51,104 +51,28 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "href": "profile-url",
-            "iconType": "user",
-            "label": "Profile",
-            "order": 100,
-            "setAsProfile": true,
-          },
-          Object {
-            "href": "billing-url",
-            "iconType": "visGauge",
-            "label": "Billing",
-            "order": 200,
-          },
-          Object {
-            "href": "organization-url",
-            "iconType": "gear",
-            "label": "Organization",
-            "order": 300,
-          },
-          Object {
-            "content": <ThemDarkModeToggle
-              security={
-                Object {
-                  "authc": Object {
-                    "areAPIKeysEnabled": [MockFunction],
-                    "getCurrentUser": [MockFunction] {
-                      "calls": Array [
-                        Array [],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": Promise {},
-                        },
-                      ],
-                    },
-                  },
-                  "hooks": Object {
-                    "useUpdateUserProfile": [MockFunction],
-                  },
-                  "navControlService": Object {
-                    "addUserMenuLinks": [MockFunction] {
-                      "calls": Array [
-                        [Circular],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": undefined,
-                        },
-                      ],
-                    },
-                    "getUserMenuLinks$": [MockFunction],
-                  },
-                  "uiApi": Object {
-                    "components": Object {
-                      "getChangePassword": [MockFunction],
-                      "getPersonalInfo": [MockFunction],
-                    },
-                  },
-                  "userProfiles": Object {
-                    "bulkGet": [MockFunction],
-                    "getCurrent": [MockFunction],
-                    "suggest": [MockFunction],
-                    "update": [MockFunction],
-                    "userProfile$": Observable {
-                      "_subscribe": [Function],
-                    },
-                  },
-                }
-              }
-              uiSettingsClient={
-                Object {
-                  "get": [MockFunction],
-                  "get$": [MockFunction],
-                  "getAll": [MockFunction],
-                  "getUpdate$": [MockFunction],
-                  "getUpdateErrors$": [MockFunction],
-                  "isCustom": [MockFunction],
-                  "isDeclared": [MockFunction],
-                  "isDefault": [MockFunction],
-                  "isOverridden": [MockFunction],
-                  "remove": [MockFunction],
-                  "set": [MockFunction],
-                }
-              }
-            />,
-            "href": "",
-            "iconType": "",
-            "label": "",
-            "order": 400,
-          },
-        ],
-      ]
-    `);
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+      {
+        href: 'profile-url',
+        iconType: 'user',
+        label: 'Profile',
+        order: 100,
+        setAsProfile: true,
+      },
+      {
+        href: 'billing-url',
+        iconType: 'visGauge',
+        label: 'Billing',
+        order: 200,
+      },
+      {
+        href: 'organization-url',
+        iconType: 'gear',
+        label: 'Organization',
+        order: 300,
+      },
+      expect.any(Object),
+    ]);
 
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
@@ -195,104 +119,28 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "href": "profile-url",
-            "iconType": "user",
-            "label": "Profile",
-            "order": 100,
-            "setAsProfile": true,
-          },
-          Object {
-            "href": "billing-url",
-            "iconType": "visGauge",
-            "label": "Billing",
-            "order": 200,
-          },
-          Object {
-            "href": "organization-url",
-            "iconType": "gear",
-            "label": "Organization",
-            "order": 300,
-          },
-          Object {
-            "content": <ThemDarkModeToggle
-              security={
-                Object {
-                  "authc": Object {
-                    "areAPIKeysEnabled": [MockFunction],
-                    "getCurrentUser": [MockFunction] {
-                      "calls": Array [
-                        Array [],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": Promise {},
-                        },
-                      ],
-                    },
-                  },
-                  "hooks": Object {
-                    "useUpdateUserProfile": [MockFunction],
-                  },
-                  "navControlService": Object {
-                    "addUserMenuLinks": [MockFunction] {
-                      "calls": Array [
-                        [Circular],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": undefined,
-                        },
-                      ],
-                    },
-                    "getUserMenuLinks$": [MockFunction],
-                  },
-                  "uiApi": Object {
-                    "components": Object {
-                      "getChangePassword": [MockFunction],
-                      "getPersonalInfo": [MockFunction],
-                    },
-                  },
-                  "userProfiles": Object {
-                    "bulkGet": [MockFunction],
-                    "getCurrent": [MockFunction],
-                    "suggest": [MockFunction],
-                    "update": [MockFunction],
-                    "userProfile$": Observable {
-                      "_subscribe": [Function],
-                    },
-                  },
-                }
-              }
-              uiSettingsClient={
-                Object {
-                  "get": [MockFunction],
-                  "get$": [MockFunction],
-                  "getAll": [MockFunction],
-                  "getUpdate$": [MockFunction],
-                  "getUpdateErrors$": [MockFunction],
-                  "isCustom": [MockFunction],
-                  "isDeclared": [MockFunction],
-                  "isDefault": [MockFunction],
-                  "isOverridden": [MockFunction],
-                  "remove": [MockFunction],
-                  "set": [MockFunction],
-                }
-              }
-            />,
-            "href": "",
-            "iconType": "",
-            "label": "",
-            "order": 400,
-          },
-        ],
-      ]
-    `);
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+      {
+        href: 'profile-url',
+        iconType: 'user',
+        label: 'Profile',
+        order: 100,
+        setAsProfile: true,
+      },
+      {
+        href: 'billing-url',
+        iconType: 'visGauge',
+        label: 'Billing',
+        order: 200,
+      },
+      {
+        href: 'organization-url',
+        iconType: 'gear',
+        label: 'Organization',
+        order: 300,
+      },
+      expect.any(Object),
+    ]);
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

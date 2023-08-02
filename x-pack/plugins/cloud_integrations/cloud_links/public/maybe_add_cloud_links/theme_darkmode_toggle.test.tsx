@@ -13,15 +13,19 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { ThemDarkModeToggle } from './theme_darkmode_toggle';
 
-describe('ThemDarkModeToggle', () => {
-  const mockUseUpdateUserProfile = jest.fn();
-  const mockGetSpaceDarkModeValue = jest.fn();
+const mockUseUpdateUserProfile = jest.fn();
 
+jest.mock('@kbn/user-profile-components', () => {
+  const original = jest.requireActual('@kbn/user-profile-components');
+  return {
+    ...original,
+    useUpdateUserProfile: () => mockUseUpdateUserProfile(),
+  };
+});
+
+describe('ThemDarkModeToggle', () => {
   it('renders correctly and toggles dark mode', () => {
-    const security = {
-      ...securityMock.createStart(),
-      hooks: { useUpdateUserProfile: mockUseUpdateUserProfile },
-    };
+    const security = securityMock.createStart();
     const core = coreMock.createStart();
 
     const mockUpdate = jest.fn();
@@ -30,8 +34,6 @@ describe('ThemDarkModeToggle', () => {
       isLoading: false,
       update: mockUpdate,
     });
-
-    mockGetSpaceDarkModeValue.mockReturnValue(false);
 
     const { getByTestId, rerender } = render(
       <ThemDarkModeToggle core={core} security={security} />
