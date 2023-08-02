@@ -33,7 +33,7 @@ export const AppMenuBar = ({ isOpen, headerActionMenuMounter }: AppMenuBarProps)
           css={css`
             /* EuiPanel-like styling */
             padding: ${euiTheme.size.s};
-            border-bottom: 1px solid ${euiTheme.colors.lightShade};
+            border-bottom: ${euiTheme.border.thin};
             background: ${euiTheme.colors.emptyShade};
           `}
         >
