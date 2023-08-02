@@ -8,7 +8,7 @@
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../scripts/eslint ./public/detections/mitre/mitre_tactics_techniques.ts --fix",
     "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ../timelines/server/utils/beat_schema/fields.ts --fix",
     "cypress": "../../../node_modules/.bin/cypress",
-    "cypress:open": "TZ=UTC node ./scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config --env grepTags='@ess @brokenInServerless'",
+    "cypress:open": "TZ=UTC node ./scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config",
     "cypress:open:ccs": "yarn cypress:open --config specPattern=./cypress/ccs_e2e/**/*.cy.ts",
     "cypress:open:upgrade": "yarn cypress:open --config specPattern=./cypress/upgrade_e2e/**/*.cy.ts",
     "cypress:run": "yarn cypress:run:reporter --config-file ./cypress/cypress_ci.config.ts --browser chrome --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts'; status=$?; yarn junit:merge && exit $status",
