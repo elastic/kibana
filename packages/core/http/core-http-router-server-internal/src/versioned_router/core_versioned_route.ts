@@ -71,7 +71,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   private isPublic: boolean;
-  private isInternal: boolean;
   private enableQueryVersion: boolean;
   private constructor(
     private readonly router: CoreVersionedRouter,
@@ -81,7 +80,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   ) {
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
-    this.isInternal = !this.isPublic;
     this.router.router[this.method](
       {
         path: this.path,
@@ -100,7 +98,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   /** This method assumes that one or more versions handlers are registered  */
-  private getDefaultVersion(): ApiVersion {
+  private getDefaultVersion(): undefined | ApiVersion {
     return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
   }
 
@@ -120,8 +118,15 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const req = originalReq as Mutable<KibanaRequest>;
-    const requestVersion = readVersion(req, this.enableQueryVersion);
-    if (!requestVersion && !this.canUseDefaultVersion()) {
+    let version: undefined | ApiVersion;
+
+    const maybeVersion = readVersion(req, this.enableQueryVersion);
+    if (!maybeVersion && this.isPublic) {
+      version = this.getDefaultVersion();
+    } else {
+      version = maybeVersion;
+    }
+    if (!version) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
@@ -135,7 +140,6 @@ export class CoreVersionedRoute implements VersionedRoute {
           body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
         });
     }
-    const version: ApiVersion = requestVersion ?? this.getDefaultVersion();
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
     if (invalidVersionMessage) {
@@ -197,10 +201,6 @@ export class CoreVersionedRoute implements VersionedRoute {
       response
     );
   };
-
-  private canUseDefaultVersion(): boolean {
-    return !this.isInternal && !this.router.isDev;
-  }
 
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version

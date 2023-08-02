@@ -71,51 +71,22 @@ export const validateInferencePipelineFields = (
   config: InferencePipelineConfiguration
 ): AddInferencePipelineFormErrors => {
   const errors: AddInferencePipelineFormErrors = {};
-
-  // If there are field mappings, we don't need to validate the single source field
-  if (config.fieldMappings && Object.keys(config.fieldMappings).length > 0) {
-    return errors;
+  if ((config.fieldMappings ?? []).length === 0) {
+    errors.fieldMappings = FIELD_REQUIRED_ERROR;
   }
-
-  if (config.sourceField.trim().length === 0) {
-    errors.sourceField = FIELD_REQUIRED_ERROR;
-  }
-
   return errors;
 };
 
-export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD = (
+export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS = (
   commaSeparatedMissingSourceFields: string
 ) =>
   i18n.translate(
-    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledSourceFieldDescription',
+    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.missingSourceFieldsDescription',
     {
-      defaultMessage:
-        "This pipeline cannot be selected because some source fields don't exist in this index: {commaSeparatedMissingSourceFields}.",
+      defaultMessage: 'Fields missing in this index: {commaSeparatedMissingSourceFields}',
       values: { commaSeparatedMissingSourceFields },
     }
   );
-
-export const EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS = i18n.translate(
-  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledPipelineExistsDescription',
-  {
-    defaultMessage: 'This pipeline cannot be selected because it is already attached.',
-  }
-);
-
-export const getDisabledReason = (
-  missingSourceFields: string[],
-  indexProcessorNames: string[],
-  pipelineName: string
-): string | undefined => {
-  if (missingSourceFields.length > 0) {
-    return EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD(missingSourceFields.join(', '));
-  } else if (indexProcessorNames.includes(pipelineName)) {
-    return EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
-  }
-
-  return undefined;
-};
 
 export const MODEL_SELECT_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.placeholder',

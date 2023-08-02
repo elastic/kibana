@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-export const ENDPOINT_VM_NAME = 'ENDPOINT_VM_NAME';
-
 export const API_AUTH = Object.freeze({
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
-export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const COMMON_API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
 
-export const request = <T = unknown>(
-  options: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> =>
+export const waitForPageToBeLoaded = () => {
+  cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
+  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
+};
+
+export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
+  cy.visit(url, options);
+  waitForPageToBeLoaded();
+};
+
+export const request = <T = unknown>({
+  headers,
+  ...options
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
+    headers: { ...COMMON_API_HEADERS, ...headers },
     ...options,
   });

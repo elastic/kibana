@@ -11,12 +11,12 @@ import {
   Case,
   CaseSeverity,
   CaseStatuses,
-  CommentRequestUserType,
-  CommentType,
+  UserCommentAttachmentPayload,
+  AttachmentType,
+  CreateCaseUserAction,
   ConnectorTypes,
-  getCaseUserActionUrl,
-} from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+} from '@kbn/cases-plugin/common/types/domain';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+      const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
 
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');
@@ -294,7 +294,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: caseWithComments.comments![0].id,
           version: caseWithComments.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -309,7 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentUserAction.payload).to.eql({
         comment: {
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -333,7 +333,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
       const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
-      const castedUserComment = restComment as CommentRequestUserType;
+      const castedUserComment = restComment as UserCommentAttachmentPayload;
 
       expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');

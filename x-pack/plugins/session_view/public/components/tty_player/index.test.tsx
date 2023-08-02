@@ -62,6 +62,7 @@ describe('TTYPlayer component', () => {
       onClose: jest.fn(),
       onJumpToEvent: jest.fn(),
       isFullscreen: false,
+      trackEvent: jest.fn(),
     };
   });
 

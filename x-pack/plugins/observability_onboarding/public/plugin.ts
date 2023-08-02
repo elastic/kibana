@@ -52,10 +52,11 @@ export class ObservabilityOnboardingPlugin
     core: CoreSetup,
     plugins: ObservabilityOnboardingPluginSetupDeps
   ) {
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
       serverless: { enabled: isServerlessEnabled },
-    } = this.ctx.config.get<ObservabilityOnboardingConfig>();
+    } = config;
 
     const pluginSetupDeps = plugins;
 
@@ -90,6 +91,7 @@ export class ObservabilityOnboardingPlugin
             deps: pluginSetupDeps,
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+            config,
           });
         },
       });

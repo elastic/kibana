@@ -1788,6 +1788,53 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.validateActionFilterQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "validateActionFilterQuery",
+        "description": [],
+        "signature": [
+          "(actionItem: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleAction",
+            "text": "RuleAction"
+          },
+          ") => string | null"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.validateActionFilterQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "actionItem",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleAction",
+                "text": "RuleAction"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.ValueExpression",
         "type": "Function",
         "tags": [],
@@ -4396,10 +4443,10 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleType.hasGetSummarizedAlerts",
+            "id": "def-public.RuleType.hasAlertsMappings",
             "type": "CompoundType",
             "tags": [],
-            "label": "hasGetSummarizedAlerts",
+            "label": "hasAlertsMappings",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -6803,6 +6850,64 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.NOT_BETWEEN]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.text",
+                "type": "Any",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.requiredValues",
                 "type": "number",
                 "tags": [],
                 "label": "requiredValues",
@@ -9524,6 +9629,119 @@
         "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.NORMALIZED_FIELD_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "NORMALIZED_FIELD_TYPES",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.long",
+            "type": "string",
+            "tags": [],
+            "label": "long",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.integer",
+            "type": "string",
+            "tags": [],
+            "label": "integer",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.short",
+            "type": "string",
+            "tags": [],
+            "label": "short",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.byte",
+            "type": "string",
+            "tags": [],
+            "label": "byte",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.double",
+            "type": "string",
+            "tags": [],
+            "label": "double",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.float",
+            "type": "string",
+            "tags": [],
+            "label": "float",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.half_float",
+            "type": "string",
+            "tags": [],
+            "label": "half_float",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.scaled_float",
+            "type": "string",
+            "tags": [],
+            "label": "scaled_float",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.NORMALIZED_FIELD_TYPES.unsigned_long",
+            "type": "string",
+            "tags": [],
+            "label": "unsigned_long",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/normalized_field_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

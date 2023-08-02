@@ -343,14 +343,13 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     ]);
     const coreContext = await context.core;
 
-    const { serviceName, start, end } = params.query;
+    const { serviceName } = params.query;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
       config,
       kuery: '',
-      start,
-      end,
     });
+
     const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );

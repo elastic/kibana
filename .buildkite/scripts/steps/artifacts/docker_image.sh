@@ -89,20 +89,9 @@ steps:
     trigger: gpctl-promote
     build:
       env:
-        SERVICE_COMMIT_HASH: $GIT_ABBREV_COMMIT
+        SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/config.yaml
 
-  - trigger: serverless-gitops-update-stack-image-tag
-    async: true
-    label: ":argo: Update image tag for Kibana using the legacy script (used in QA/Staging)"
-    branches: main
-    build:
-      env:
-        IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
-        SERVICE: kibana-controller
-        NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana-serverless
-        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
 EOF
 
 else

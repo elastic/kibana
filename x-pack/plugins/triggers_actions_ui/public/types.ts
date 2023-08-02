@@ -348,7 +348,7 @@ export interface RuleType<
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
   hasFieldsForAAD?: boolean;
-  hasGetSummarizedAlerts?: boolean;
+  hasAlertsMappings?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -594,7 +594,7 @@ export interface BulkActionsConfig {
 
 interface PanelConfig {
   id: number;
-  title?: string;
+  title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
 

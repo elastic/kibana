@@ -12,12 +12,12 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
   SETUP_HEALTH_URL,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 import type {
   FetchRuleExecutionEventsArgs,

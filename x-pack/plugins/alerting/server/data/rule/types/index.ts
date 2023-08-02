@@ -8,6 +8,7 @@
 export type {
   RuleNotifyWhenAttributes,
   RuleLastRunOutcomeValuesAttributes,
+  RuleActionAttributes,
   RuleExecutionStatusValuesAttributes,
   RuleExecutionStatusErrorReasonAttributes,
   RuleExecutionStatusWarningReasonAttributes,

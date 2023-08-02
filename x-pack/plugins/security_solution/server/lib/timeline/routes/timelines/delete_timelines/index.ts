@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
-import { deleteTimelinesSchema } from '../../../schemas/timelines/delete_timelines_schema';
+import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';

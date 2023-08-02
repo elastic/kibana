@@ -120,6 +120,7 @@ import {
   getIndexPatternsObjects,
   getSearchWarningMessages,
   inferTimeField,
+  extractReferencesFromState,
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import {
@@ -741,19 +742,37 @@ export class Embeddable
 
   async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
     const viz = this.savedVis;
-    const datasourceId = (this.activeDatasourceId ??
+    const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
     if (viz?.state) {
+      const datasourceStates = {
+        ...viz.state.datasourceStates,
+        [activeDatasourceId]: datasourceState,
+      };
+      const references = extractReferencesFromState({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: this.deps.datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates: Object.fromEntries(
+          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
+        ),
+        visualizationState,
+        activeVisualization: this.activeVisualizationId
+          ? this.deps.visualizationMap[this.activeVisualizationId]
+          : undefined,
+      });
       const attrs = {
         ...viz,
         state: {
           ...viz.state,
           visualization: visualizationState,
-          datasourceStates: {
-            ...viz.state.datasourceStates,
-            [datasourceId]: datasourceState,
-          },
+          datasourceStates,
         },
+        references,
       };
       this.updateInput({ attributes: attrs });
     }
@@ -761,7 +780,7 @@ export class Embeddable
 
   async openConfingPanel(startDependencies: LensPluginStartDependencies) {
     const { getEditLensConfiguration } = await import('../async_services');
-    const Component = getEditLensConfiguration(
+    const Component = await getEditLensConfiguration(
       this.deps.coreStart,
       startDependencies,
       this.deps.visualizationMap,
@@ -770,6 +789,7 @@ export class Embeddable
 
     const datasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
+
     const attributes = this.savedVis as TypedLensByValueInput['attributes'];
     const dataView = this.dataViews[0];
     if (attributes) {
@@ -780,6 +800,7 @@ export class Embeddable
           updateAll={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
+          panelId={this.id}
         />
       );
     }
@@ -1034,6 +1055,7 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
+              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge

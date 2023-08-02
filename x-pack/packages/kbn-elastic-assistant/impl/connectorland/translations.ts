@@ -100,3 +100,17 @@ export const CONNECTOR_SETUP_SKIP = i18n.translate(
     defaultMessage: 'Click to skip...',
   }
 );
+
+export const MISSING_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutTitle',
+  {
+    defaultMessage: 'The current conversation is missing a connector configuration',
+  }
+);
+
+export const MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.conversationSettingsLink',
+  {
+    defaultMessage: 'Conversation Settings',
+  }
+);

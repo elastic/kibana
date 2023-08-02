@@ -16,6 +16,7 @@ export enum ApmFeatureFlagName {
   MigrationToFleetAvailable = 'migrationToFleetAvailable',
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
+  FastRefreshAvailable = 'fastRefreshAvailable',
 }
 
 const apmFeatureFlagMap = {
@@ -45,6 +46,10 @@ const apmFeatureFlagMap = {
   },
   [ApmFeatureFlagName.StorageExplorerAvailable]: {
     default: true,
+    type: t.boolean,
+  },
+  [ApmFeatureFlagName.FastRefreshAvailable]: {
+    default: false,
     type: t.boolean,
   },
 };

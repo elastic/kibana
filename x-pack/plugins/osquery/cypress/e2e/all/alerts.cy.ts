@@ -132,7 +132,7 @@ describe('Alert Event Details', () => {
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       closeDateTabIfVisible();
       cy.getBySel('edit-rule-actions-tab').click();
-      cy.contains('Response actions are run on each rule execution');
+      cy.contains('Response actions are run on each rule execution.');
       cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains('Query is a required field');

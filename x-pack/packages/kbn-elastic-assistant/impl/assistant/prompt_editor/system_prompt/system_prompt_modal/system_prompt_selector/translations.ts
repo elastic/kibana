@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const SYSTEM_PROMPT_SELECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.systemPromptModal.systemPromptSelector.ariaLabel',
   {
-    defaultMessage: 'Select to edit, or type to create new',
+    defaultMessage: 'Select or type to create new...',
   }
 );
 

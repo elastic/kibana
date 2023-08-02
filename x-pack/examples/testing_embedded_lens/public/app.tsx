@@ -496,7 +496,11 @@ export const App = (props: {
 
   return (
     <KibanaContextProvider
-      services={{ uiSettings: props.core.uiSettings, settings: props.core.settings }}
+      services={{
+        uiSettings: props.core.uiSettings,
+        settings: props.core.settings,
+        theme: props.core.theme,
+      }}
     >
       <EuiPage>
         <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>

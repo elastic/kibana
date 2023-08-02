@@ -13,26 +13,22 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiPagination } from '@elastic/eui';
 
-import { Status } from '../../../../../../../common/types/api';
-
 import { Result } from '../../../../../shared/result/result';
 
-import { INDEX_DOCUMENTS_META_DEFAULT } from '../../documents_logic';
+import { INDEX_DOCUMENTS_META_DEFAULT } from '../../documents';
 
 import { DocumentList } from './document_list';
 
 const mockActions = {};
 
 export const DEFAULT_VALUES = {
-  data: undefined,
-  indexName: 'indexName',
+  docs: [],
+  docsPerPage: 25,
   isLoading: true,
-  mappingData: undefined,
-  mappingStatus: 0,
+  mappings: undefined,
   meta: INDEX_DOCUMENTS_META_DEFAULT,
-  query: '',
-  results: [],
-  status: Status.IDLE,
+  onPaginate: () => {},
+  setDocsPerPage: () => {},
 };
 
 const mockValues = { ...DEFAULT_VALUES };
@@ -44,15 +40,15 @@ describe('DocumentList', () => {
     setMockActions(mockActions);
   });
   it('renders empty', () => {
-    const wrapper = shallow(<DocumentList />);
+    const wrapper = shallow(<DocumentList {...DEFAULT_VALUES} />);
     expect(wrapper.find(Result)).toHaveLength(0);
     expect(wrapper.find(EuiPagination)).toHaveLength(2);
   });
 
   it('renders documents when results when there is data and mappings', () => {
-    setMockValues({
-      ...mockValues,
-      results: [
+    const values = {
+      ...DEFAULT_VALUES,
+      docs: [
         {
           _id: 'M9ntXoIBTq5dF-1Xnc8A',
           _index: 'kibana_sample_data_flights',
@@ -70,19 +66,20 @@ describe('DocumentList', () => {
           },
         },
       ],
-      simplifiedMapping: {
+      mappings: {
         AvgTicketPrice: {
-          type: 'float',
+          type: 'float' as const,
         },
       },
-    });
+    };
 
-    const wrapper = shallow(<DocumentList />);
+    const wrapper = shallow(<DocumentList {...values} />);
     expect(wrapper.find(Result)).toHaveLength(2);
   });
 
   it('renders callout when total results are 10.000', () => {
-    setMockValues({
+    const values = {
+      ...DEFAULT_VALUES,
       ...mockValues,
       meta: {
         page: {
@@ -90,8 +87,8 @@ describe('DocumentList', () => {
           total_results: 10000,
         },
       },
-    });
-    const wrapper = shallow(<DocumentList />);
+    };
+    const wrapper = shallow(<DocumentList {...values} />);
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 });

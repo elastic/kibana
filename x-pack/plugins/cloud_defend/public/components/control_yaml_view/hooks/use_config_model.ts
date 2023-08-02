@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import { setDiagnosticsOptions } from 'monaco-yaml';
 import { monaco } from '@kbn/monaco';
-import { getSelectorsAndResponsesFromYaml } from '../../../common/utils';
+import { getSelectorsAndResponsesFromYaml } from '../../../../common/utils/helpers';
 
 /**
  * In order to keep this json in sync with https://github.com/elastic/cloud-defend/blob/main/modules/service/policy-schema.json

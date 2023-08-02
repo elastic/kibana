@@ -6,39 +6,38 @@
  */
 import type {
   LensAttributes,
-  TVisualization,
-  VisualizationAttributes,
+  LensVisualizationState,
+  Chart,
   VisualizationAttributesBuilder,
 } from '../types';
 import { DataViewCache } from './data_view_cache';
 import { getAdhocDataView } from './utils';
 
-export class LensAttributesBuilder<T extends VisualizationAttributes<TVisualization>>
+export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>
   implements VisualizationAttributesBuilder
 {
   private dataViewCache: DataViewCache;
-  constructor(private visualization: T) {
+  constructor(private state: { visualization: T }) {
     this.dataViewCache = DataViewCache.getInstance();
   }
 
   build(): LensAttributes {
+    const { visualization } = this.state;
     return {
-      title: this.visualization.getTitle(),
-      visualizationType: this.visualization.getVisualizationType(),
-      references: this.visualization.getReferences(),
+      title: visualization.getTitle(),
+      visualizationType: visualization.getVisualizationType(),
+      references: visualization.getReferences(),
       state: {
         datasourceStates: {
           formBased: {
-            layers: this.visualization.getLayers(),
+            layers: visualization.getLayers(),
           },
         },
-        internalReferences: this.visualization.getReferences(),
-        filters: this.visualization.getFilters(),
+        internalReferences: visualization.getReferences(),
+        filters: [],
         query: { language: 'kuery', query: '' },
-        visualization: this.visualization.getVisualizationState(),
-        adHocDataViews: getAdhocDataView(
-          this.dataViewCache.getSpec(this.visualization.getDataView())
-        ),
+        visualization: visualization.getVisualizationState(),
+        adHocDataViews: getAdhocDataView(this.dataViewCache.getSpec(visualization.getDataView())),
       },
     };
   }
