@@ -23,17 +23,17 @@ import { toDateRange } from '../../domain/services/date_range';
 // TODO: Change name of this service...
 // It does compute a summary but from the rollup data.
 export interface SummaryClient {
-  fetchSummary(slo: SLO, instanceId: string): Promise<Summary>;
+  computeSummary(slo: SLO, instanceId?: string): Promise<Summary>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchSummary(slo: SLO, instanceId: string): Promise<Summary> {
+  async computeSummary(slo: SLO, instanceId: string = ALL_VALUE): Promise<Summary> {
     const dateRange = toDateRange(slo.timeWindow);
     const isDefinedWithGroupBy = slo.groupBy !== ALL_VALUE;
     const hasInstanceId = instanceId !== ALL_VALUE;
-    const extraFilter =
+    const extraInstanceIdFilter =
       isDefinedWithGroupBy && hasInstanceId ? [{ term: { 'slo.instanceId': instanceId } }] : [];
 
     const result = await this.esClient.search({
@@ -49,7 +49,7 @@ export class DefaultSummaryClient implements SummaryClient {
                 '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
               },
             },
-            ...extraFilter,
+            ...extraInstanceIdFilter,
           ],
         },
       },

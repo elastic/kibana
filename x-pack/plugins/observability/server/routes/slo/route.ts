@@ -14,6 +14,7 @@ import {
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLODiagnosisParamsSchema,
+  getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
@@ -33,6 +34,7 @@ import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summ
 import { getBurnRates } from '../../services/slo/get_burn_rates';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
+import { GetSLOInstances } from '../../services/slo/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
@@ -271,6 +273,31 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
 });
 
+const getSLOInstancesRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_instances',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: getSLOInstancesParamsSchema,
+  handler: async ({ context, params }) => {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+
+    const getSLOInstances = new GetSLOInstances(repository, esClient);
+
+    const response = await getSLOInstances.execute(params.path.id);
+
+    return response;
+  },
+});
+
 const getDiagnosisRoute = createObservabilityServerRoute({
   endpoint: 'GET /internal/observability/slos/_diagnosis',
   options: {
@@ -363,4 +390,5 @@ export const sloRouteRepository = {
   ...getSloDiagnosisRoute,
   ...getSloBurnRates,
   ...getPreviewData,
+  ...getSLOInstancesRoute,
 };

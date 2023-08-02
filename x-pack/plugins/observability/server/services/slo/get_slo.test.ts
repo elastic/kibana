@@ -26,16 +26,14 @@ describe('GetSLO', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSummaryClient.fetchSummary.mockResolvedValueOnce({
-        [slo.id]: {
-          status: 'HEALTHY',
-          sliValue: 0.9999,
-          errorBudget: {
-            initial: 0.001,
-            consumed: 0.1,
-            remaining: 0.9,
-            isEstimated: false,
-          },
+      mockSummaryClient.computeSummary.mockResolvedValueOnce({
+        status: 'HEALTHY',
+        sliValue: 0.9999,
+        errorBudget: {
+          initial: 0.001,
+          consumed: 0.1,
+          remaining: 0.9,
+          isEstimated: false,
         },
       });
 

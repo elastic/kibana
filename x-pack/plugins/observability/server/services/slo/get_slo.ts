@@ -16,7 +16,7 @@ export class GetSLO {
   public async execute(sloId: string, params: GetSLOParams = {}): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
     const instanceId = params.instanceId ?? ALL_VALUE;
-    const summary = await this.summaryClient.fetchSummary(slo, instanceId);
+    const summary = await this.summaryClient.computeSummary(slo, instanceId);
 
     return getSLOResponseSchema.encode(mergeSloWithSummary(slo, summary, instanceId));
   }
