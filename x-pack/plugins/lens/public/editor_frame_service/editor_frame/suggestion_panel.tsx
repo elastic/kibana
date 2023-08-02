@@ -20,6 +20,7 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiText,
+  EuiProgress,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
@@ -30,6 +31,9 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import fastIsEqual from 'fast-deep-equal';
+import { useWhatChanged } from '@simbathesailor/use-what-changed';
+import { css } from '@emotion/react';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -64,7 +68,6 @@ import {
   selectFrameDatasourceAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
 
@@ -108,11 +111,13 @@ const PreviewRenderer = ({
   ExpressionRendererComponent,
   expression,
   hasError,
+  onRender,
 }: {
   withLabel: boolean;
   expression: string | null | undefined;
   ExpressionRendererComponent: ReactExpressionRendererType;
   hasError: boolean;
+  onRender: () => void;
 }) => {
   const onErrorMessage = (
     <div className="lnsSuggestionPanel__suggestionIcon">
@@ -143,6 +148,7 @@ const PreviewRenderer = ({
           padding="s"
           renderMode="preview"
           expression={expression}
+          onRender$={onRender}
           debounce={2000}
           renderError={() => {
             return onErrorMessage;
@@ -159,6 +165,7 @@ const SuggestionPreview = ({
   selected,
   onSelect,
   showTitleAsLabel,
+  onRender,
 }: {
   onSelect: () => void;
   preview: {
@@ -170,6 +177,7 @@ const SuggestionPreview = ({
   ExpressionRenderer: ReactExpressionRendererType;
   selected: boolean;
   showTitleAsLabel?: boolean;
+  onRender: () => void;
 }) => {
   return (
     <EuiToolTip content={preview.title}>
@@ -194,6 +202,7 @@ const SuggestionPreview = ({
               expression={preview.expression && toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
               hasError={Boolean(preview.error)}
+              onRender={onRender}
             />
           ) : (
             <span className="lnsSuggestionPanel__suggestionIcon">
@@ -358,20 +367,31 @@ export function SuggestionPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existsStagedPreview]);
 
+  const startTime = useRef<number>(0);
+  const suggestionsRendered = useRef<number>(0);
+  const totalSuggestions = suggestions.length + 1;
+
+  const onSuggestionRender = useCallback(() => {
+    suggestionsRendered.current++;
+    if (suggestionsRendered.current === totalSuggestions) {
+      console.log('suggestions finished rendering', performance.now() - startTime.current);
+    }
+  }, [totalSuggestions]);
+
+  const rollbackToCurrentVisualization = useCallback(() => {
+    if (lastSelectedSuggestion !== -1) {
+      setLastSelectedSuggestion(-1);
+      dispatchLens(rollbackSuggestion());
+      dispatchLens(applyChanges());
+    }
+  }, [dispatchLens, lastSelectedSuggestion]);
+
   if (!activeDatasourceId) {
     return null;
   }
 
   if (suggestions.length === 0) {
     return null;
-  }
-
-  function rollbackToCurrentVisualization() {
-    if (lastSelectedSuggestion !== -1) {
-      setLastSelectedSuggestion(-1);
-      dispatchLens(rollbackSuggestion());
-      dispatchLens(applyChanges());
-    }
   }
 
   const renderApplyChangesPrompt = () => (
@@ -400,52 +420,72 @@ export function SuggestionPanel({
     </EuiPanel>
   );
 
-  const renderSuggestionsUI = () => (
-    <>
-      {currentVisualization.activeId && !hideSuggestions && (
-        <SuggestionPreview
-          preview={{
-            error: currentStateError,
-            expression: currentStateExpression,
-            icon:
-              visualizationMap[currentVisualization.activeId].getDescription(
-                currentVisualization.state
-              ).icon || 'empty',
-            title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-              defaultMessage: 'Current visualization',
-            }),
-          }}
-          ExpressionRenderer={AutoRefreshExpressionRenderer}
-          onSelect={rollbackToCurrentVisualization}
-          selected={lastSelectedSuggestion === -1}
-          showTitleAsLabel
-        />
-      )}
-      {!hideSuggestions &&
-        suggestions.map((suggestion, index) => {
-          return (
-            <SuggestionPreview
-              preview={{
-                expression: suggestion.previewExpression,
-                icon: suggestion.previewIcon,
-                title: suggestion.title,
-              }}
-              ExpressionRenderer={AutoRefreshExpressionRenderer}
-              key={index}
-              onSelect={() => {
-                if (lastSelectedSuggestion === index) {
-                  rollbackToCurrentVisualization();
-                } else {
-                  setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
-                }
-              }}
-              selected={index === lastSelectedSuggestion}
-            />
-          );
-        })}
-    </>
+  const renderSuggestionsLoadingState = () => (
+    <EuiPanel
+      hasShadow={false}
+      className="lnsSuggestionPanel__loadingState"
+      paddingSize="none"
+      borderRadius="m"
+      css={css`
+        overflow: hidden;
+      `}
+    >
+      <EuiProgress size="xs" color="accent" />
+    </EuiPanel>
   );
+
+  const renderSuggestionsUI = () => {
+    suggestionsRendered.current = 0;
+    startTime.current = performance.now();
+    return (
+      <>
+        {currentVisualization.activeId && !hideSuggestions && (
+          <SuggestionPreview
+            preview={{
+              error: currentStateError,
+              expression: currentStateExpression,
+              icon:
+                visualizationMap[currentVisualization.activeId].getDescription(
+                  currentVisualization.state
+                ).icon || 'empty',
+              title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+                defaultMessage: 'Current visualization',
+              }),
+            }}
+            ExpressionRenderer={AutoRefreshExpressionRenderer}
+            onSelect={rollbackToCurrentVisualization}
+            selected={lastSelectedSuggestion === -1}
+            showTitleAsLabel
+            onRender={onSuggestionRender}
+          />
+        )}
+        {!hideSuggestions &&
+          suggestions.map((suggestion, index) => {
+            return (
+              <SuggestionPreview
+                preview={{
+                  expression: suggestion.previewExpression,
+                  icon: suggestion.previewIcon,
+                  title: suggestion.title,
+                }}
+                ExpressionRenderer={AutoRefreshExpressionRenderer}
+                key={index}
+                onSelect={() => {
+                  if (lastSelectedSuggestion === index) {
+                    rollbackToCurrentVisualization();
+                  } else {
+                    setLastSelectedSuggestion(index);
+                    switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                  }
+                }}
+                selected={index === lastSelectedSuggestion}
+                onRender={onSuggestionRender}
+              />
+            );
+          })}
+      </>
+    );
+  };
 
   return (
     <div className="lnsSuggestionPanel">
@@ -494,7 +534,11 @@ export function SuggestionPanel({
           role="list"
           tabIndex={0}
         >
-          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
+          {changesApplied
+            ? activeData
+              ? renderSuggestionsUI()
+              : renderSuggestionsLoadingState()
+            : renderApplyChangesPrompt()}
         </div>
       </EuiAccordion>
     </div>
