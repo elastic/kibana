@@ -345,7 +345,7 @@ export interface Datasource<T = unknown, P = unknown> {
     prevState: T;
     layerId: string;
     columnId: string;
-    indexPatterns: IndexPatternMap;
+    indexPatterns?: IndexPatternMap;
   }) => T;
   initializeDimension?: (
     state: T,

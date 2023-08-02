@@ -390,7 +390,7 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
 
-export function reorderElements(items: string[], targetId: string, sourceId: string) {
+export function reorderElements<S>(items: S[], targetId: S, sourceId: S) {
   const result = items.filter((c) => c !== sourceId);
   const targetIndex = items.findIndex((c) => c === sourceId);
   const sourceIndex = items.findIndex((c) => c === targetId);
