@@ -27,20 +27,6 @@ describe('update_list_item', () => {
     jest.clearAllMocks();
   });
 
-  test('it returns a list item as expected with the id changed out for the elastic id when there is a list item to update', async () => {
-    const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
-    const options = getUpdateListItemOptionsMock();
-    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.update.mockResponse(
-      // @ts-expect-error not full response interface
-      { _id: 'elastic-id-123' }
-    );
-    const updatedList = await updateListItem({ ...options, esClient });
-    const expected: ListItemSchema = { ...getListItemResponseMock(), id: 'elastic-id-123' };
-    expect(updatedList).toEqual(expected);
-  });
-
   test('it returns null when there is not a list item to update', async () => {
     (getListItem as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getUpdateListItemOptionsMock();

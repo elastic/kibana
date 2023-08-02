@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
+
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DescriptionOrUndefined,
@@ -15,10 +15,9 @@ import type {
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { decodeVersion } from '@kbn/securitysolution-es-utils';
 
 import { UpdateEsListSchema } from '../../schemas/elastic_query';
-import { waitUntilDocumentIndexed } from '../utils';
+import { checkVersionConflict, waitUntilDocumentIndexed } from '../utils';
 
 import { getList } from '.';
 
@@ -54,13 +53,7 @@ export const updateList = async ({
   if (list == null) {
     return null;
   } else {
-    if (_version && list._version && _version !== list._version) {
-      throw Boom.conflict(
-        `Conflict: versions mismatch. Provided versions:${JSON.stringify(
-          decodeVersion(_version)
-        )} does not match ${JSON.stringify(decodeVersion(list._version))}`
-      );
-    }
+    checkVersionConflict(_version, list._version);
     const calculatedVersion = version == null ? list.version + 1 : version;
 
     const params: UpdateEsListSchema = {
@@ -110,7 +103,7 @@ export const updateList = async ({
 
     let updatedOCCVersion: string | undefined;
     if (response.updated) {
-      const checkIfLisUpdated = async (): Promise<void> => {
+      const checkIfListUpdated = async (): Promise<void> => {
         const updatedList = await getList({ esClient, id, listIndex });
         if (updatedList?._version === list._version) {
           throw Error('Document has not been re-indexed in time');
@@ -118,7 +111,7 @@ export const updateList = async ({
         updatedOCCVersion = updatedList?._version;
       };
 
-      await waitUntilDocumentIndexed(checkIfLisUpdated);
+      await waitUntilDocumentIndexed(checkIfListUpdated);
     } else {
       throw Error('No list has been updated');
     }

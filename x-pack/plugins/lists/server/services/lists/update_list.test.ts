@@ -14,6 +14,11 @@ import { updateList } from './update_list';
 import { getList } from './get_list';
 import { getUpdateListOptionsMock } from './update_list.mock';
 
+jest.mock('../utils', () => ({
+  checkVersionConflict: jest.fn(),
+  waitUntilDocumentIndexed: jest.fn(),
+}));
+
 jest.mock('./get_list', () => ({
   getList: jest.fn(),
 }));
@@ -35,11 +40,9 @@ describe('update_list', () => {
     };
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
+    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.update.mockResponse(
-      // @ts-expect-error not full response interface
-      { _id: 'elastic-id-123' }
-    );
+    esClient.updateByQuery.mockResolvedValue({ updated: 1 });
     const updatedList = await updateList({ ...options, esClient });
     const expected: ListSchema = {
       ...getListResponseMock(),
@@ -55,5 +58,18 @@ describe('update_list', () => {
     const options = getUpdateListOptionsMock();
     const updatedList = await updateList(options);
     expect(updatedList).toEqual(null);
+  });
+
+  test('throw error if no list was updated', async () => {
+    const list: ListSchema = {
+      ...getListResponseMock(),
+      deserializer: '{{value}}',
+      serializer: '(?<value>)',
+    };
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    const options = getUpdateListOptionsMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.updateByQuery.mockResolvedValue({ updated: 0 });
+    await expect(updateList({ ...options, esClient })).rejects.toThrow('No list has been updated');
   });
 });

@@ -8,6 +8,7 @@
 export * from './calculate_scroll_math';
 export * from './encode_decode_cursor';
 export * from './escape_query';
+export * from './check_version_conflict';
 export * from './find_source_type';
 export * from './find_source_value';
 export * from './get_query_filter_from_type_value';
