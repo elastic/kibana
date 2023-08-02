@@ -136,6 +136,7 @@ export const getSpecificSelectorId = (selector: string, id: number) => {
 export const SETTINGS_OUTPUTS_KAFKA = {
   VERSION_SELECT: 'settingsOutputsFlyout.kafkaVersionInput',
   AUTHENTICATION_SELECT: 'settingsOutputsFlyout.kafkaAuthenticationRadioInput',
+  AUTHENTICATION_NONE_OPTION: 'kafkaAuthenticationNoneRadioButton',
   AUTHENTICATION_USERNAME_PASSWORD_OPTION: 'kafkaAuthenticationUsernamePasswordRadioButton',
   AUTHENTICATION_SSL_OPTION: 'kafkaAuthenticationSSLRadioButton',
   AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',

@@ -45,6 +45,11 @@ const kafkaSaslOptions = [
 
 const kafkaAuthenticationsOptions = [
   {
+    id: kafkaAuthType.None,
+    label: 'None',
+    'data-test-subj': 'kafkaAuthenticationNoneRadioButton',
+  },
+  {
     id: kafkaAuthType.Userpass,
     label: 'Username / Password',
     'data-test-subj': 'kafkaAuthenticationUsernamePasswordRadioButton',
@@ -63,6 +68,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
 
   const renderAuthentication = () => {
     switch (inputs.kafkaAuthMethodInput.value) {
+      case kafkaAuthType.None:
+        return null;
       case kafkaAuthType.Ssl:
         return (
           <>

@@ -42,6 +42,7 @@ export const kafkaAuthType = {
   Userpass: 'user_pass',
   Ssl: 'ssl',
   Kerberos: 'kerberos',
+  None: 'none',
 } as const;
 
 export const kafkaSaslMechanism = {
@@ -69,9 +70,9 @@ export const kafkaTopicWhenType = {
 } as const;
 
 export const kafkaAcknowledgeReliabilityLevel = {
-  Commit: 'Wait for local commit',
-  Replica: 'Wait for all replicas to commit',
-  DoNotWait: 'Do not wait',
+  Commit: 1,
+  Replica: -1,
+  DoNotWait: 0,
 } as const;
 
 export const kafkaSupportedVersions = [

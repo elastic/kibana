@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 import {
-  kafkaAcknowledgeReliabilityLevel,
   kafkaAuthType,
   kafkaCompressionType,
   kafkaPartitionType,
@@ -161,6 +160,7 @@ export const KafkaSchema = {
   ),
   client_id: schema.maybe(schema.string()),
   auth_type: schema.oneOf([
+    schema.literal(kafkaAuthType.None),
     schema.literal(kafkaAuthType.Userpass),
     schema.literal(kafkaAuthType.Ssl),
     schema.literal(kafkaAuthType.Kerberos),
@@ -206,13 +206,9 @@ export const KafkaSchema = {
   ),
   timeout: schema.maybe(schema.number()),
   broker_timeout: schema.maybe(schema.number()),
-  broker_buffer_size: schema.maybe(schema.number()),
-  broker_ack_reliability: schema.maybe(
-    schema.oneOf([
-      schema.literal(kafkaAcknowledgeReliabilityLevel.Commit),
-      schema.literal(kafkaAcknowledgeReliabilityLevel.Replica),
-      schema.literal(kafkaAcknowledgeReliabilityLevel.DoNotWait),
-    ])
+  channel_buffer_size: schema.maybe(schema.number()),
+  required_acks: schema.maybe(
+    schema.oneOf([schema.literal(1), schema.literal(0), schema.literal(-1)])
   ),
 };
 
@@ -223,6 +219,7 @@ const KafkaUpdateSchema = {
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
   auth_type: schema.maybe(
     schema.oneOf([
+      schema.literal(kafkaAuthType.None),
       schema.literal(kafkaAuthType.Userpass),
       schema.literal(kafkaAuthType.Ssl),
       schema.literal(kafkaAuthType.Kerberos),

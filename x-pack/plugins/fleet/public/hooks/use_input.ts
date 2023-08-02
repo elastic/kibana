@@ -86,6 +86,16 @@ export function useInput(
 
 export function useRadioInput(defaultValue: string, disabled = false) {
   const [value, setValue] = useState<string>(defaultValue);
+  const [hasChanged, setHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== defaultValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
 
   const onChange = useCallback(setValue, [setValue]);
 
@@ -97,6 +107,7 @@ export function useRadioInput(defaultValue: string, disabled = false) {
     },
     setValue,
     value,
+    hasChanged,
   };
 }
 

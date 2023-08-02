@@ -61,6 +61,7 @@ describe('Outputs', () => {
           cy.get('[placeholder="Specify host"');
           cy.getBySel(SETTINGS_OUTPUTS.ADD_HOST_ROW_BTN);
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SELECT).within(() => {
+            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION);
           });

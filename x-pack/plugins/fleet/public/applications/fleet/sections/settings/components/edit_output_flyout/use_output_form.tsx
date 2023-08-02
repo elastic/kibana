@@ -283,7 +283,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaAuthMethodInput = useRadioInput(
-    kafkaOutput?.auth_type ?? kafkaAuthType.Userpass,
+    kafkaOutput?.auth_type ?? kafkaAuthType.None,
     isDisabled('auth_type')
   );
 
@@ -393,15 +393,15 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaBrokerChannelBufferSizeInput = useInput(
-    `${kafkaOutput?.broker_buffer_size ?? 256}`,
+    `${kafkaOutput?.channel_buffer_size ?? 256}`,
     undefined,
-    isDisabled('broker_buffer_size')
+    isDisabled('channel_buffer_size')
   );
 
   const kafkaBrokerAckReliabilityInput = useInput(
-    kafkaOutput?.broker_ack_reliability ?? kafkaAcknowledgeReliabilityLevel.Commit,
+    `${kafkaOutput?.required_acks ?? kafkaAcknowledgeReliabilityLevel.Commit}`,
     undefined,
-    isDisabled('broker_ack_reliability')
+    isDisabled('required_acks')
   );
 
   const kafkaKeyInput = useInput(kafkaOutput?.key, undefined, isDisabled('key'));
@@ -582,7 +582,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
           if (value !== undefined) {
-            const parsedInt = parseInt(value, 10); // Specify the base as 10 for decimal numbers
+            const parsedInt = parseInt(value, 10);
             if (!isNaN(parsedInt)) {
               return parsedInt;
             }
@@ -626,8 +626,14 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 : {}),
 
               auth_type: kafkaAuthMethodInput.value,
-              ...(kafkaAuthUsernameInput.value ? { username: kafkaAuthUsernameInput.value } : {}),
-              ...(kafkaAuthPasswordInput.value ? { password: kafkaAuthPasswordInput.value } : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
+              kafkaAuthUsernameInput.value
+                ? { username: kafkaAuthUsernameInput.value }
+                : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
+              kafkaAuthPasswordInput.value
+                ? { password: kafkaAuthPasswordInput.value }
+                : {}),
               ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
               kafkaSaslMechanismInput.value
                 ? { sasl: { mechanism: kafkaSaslMechanismInput.value } }
@@ -665,8 +671,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               broker_timeout: parseIntegerIfStringDefined(
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
-              broker_ack_reliability: kafkaBrokerAckReliabilityInput.value,
-              broker_buffer_size: parseIntegerIfStringDefined(
+              required_acks: parseIntegerIfStringDefined(kafkaBrokerAckReliabilityInput.value),
+              channel_buffer_size: parseIntegerIfStringDefined(
                 kafkaBrokerChannelBufferSizeInput.value
               ),
               ...shipperParams,

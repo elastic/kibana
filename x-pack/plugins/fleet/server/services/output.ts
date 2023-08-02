@@ -519,11 +519,12 @@ class OutputService {
       if (!output.broker_timeout) {
         data.broker_timeout = 10;
       }
-      if (!output.broker_ack_reliability) {
-        data.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
+      if (output.required_acks === null || output.required_acks === undefined) {
+        // required_acks can be 0
+        data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
-      if (!output.broker_buffer_size) {
-        data.broker_buffer_size = 256;
+      if (!output.channel_buffer_size) {
+        data.channel_buffer_size = 256;
       }
     }
 
@@ -725,8 +726,8 @@ class OutputService {
       target.headers = null;
       target.timeout = null;
       target.broker_timeout = null;
-      target.broker_ack_reliability = null;
-      target.broker_buffer_size = null;
+      target.required_acks = null;
+      target.channel_buffer_size = null;
     };
 
     // If the output type changed
@@ -792,11 +793,12 @@ class OutputService {
         if (!data.broker_timeout) {
           updateData.broker_timeout = 10;
         }
-        if (!data.broker_ack_reliability) {
-          updateData.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
+        if (updateData.required_acks === null || updateData.required_acks === undefined) {
+          // required_acks can be 0
+          updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
-        if (!data.broker_buffer_size) {
-          updateData.broker_buffer_size = 256;
+        if (!data.channel_buffer_size) {
+          updateData.channel_buffer_size = 256;
         }
       }
     }

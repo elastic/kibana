@@ -303,8 +303,8 @@ export function transformOutputToFullPolicyOutput(
       headers,
       timeout,
       broker_timeout,
-      broker_buffer_size,
-      broker_ack_reliability,
+      channel_buffer_size,
+      required_acks,
     } = output;
     /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -326,8 +326,8 @@ export function transformOutputToFullPolicyOutput(
       headers,
       timeout,
       broker_timeout,
-      broker_buffer_size,
-      broker_ack_reliability,
+      channel_buffer_size,
+      required_acks,
     };
   }
 

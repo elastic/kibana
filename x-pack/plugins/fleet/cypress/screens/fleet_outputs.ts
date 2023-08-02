@@ -21,6 +21,7 @@ export const selectKafkaOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
 };
 
 export const shouldDisplayError = (handler: string) => {
@@ -154,7 +155,7 @@ export const kafkaOutputFormValues = {
   },
   brokerAckReliability: {
     selector: SETTINGS_OUTPUTS_KAFKA.BROKER_ACK_RELIABILITY_SELECT,
-    value: 'Do not wait',
+    value: '0',
   },
   brokerChannelBufferSize: {
     selector: SETTINGS_OUTPUTS_KAFKA.BROKER_CHANNEL_BUFFER_SIZE_SELECT,
@@ -285,6 +286,8 @@ export const validateOutputTypeChangeToKafka = (outputId: string) => {
   visit(`/app/fleet/settings/outputs/${outputId}`);
   cy.getBySel(kafkaOutputFormValues.name.selector).clear();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+
   fillInKafkaOutputForm();
   cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
 
