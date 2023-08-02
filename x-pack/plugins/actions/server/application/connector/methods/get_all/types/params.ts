@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { ActionsClientContext } from '../../../../../actions_client/actions_client';
+import { ActionsClientContext } from '../../../../../actions_client';
 import { Connector } from '../../../types';
 
 export interface GetAllParams {

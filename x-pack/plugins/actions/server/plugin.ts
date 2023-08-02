@@ -93,18 +93,20 @@ import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import { createSubActionConnectorFramework } from './sub_action_framework';
-import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
-import { SubActionConnector } from './sub_action_framework/sub_action_connector';
-import { CaseConnector } from './sub_action_framework/case';
-import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
-import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
-import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
-import { createSystemConnectors } from './create_system_actions';
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
 } from './application/connector/lib';
+import { createSubActionConnectorFramework } from './sub_action_framework';
+import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { CaseConnector } from './sub_action_framework/case';
+import {
+  type IUnsecuredActionsClient,
+  UnsecuredActionsClient,
+} from './unsecured_actions_client/unsecured_actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
+import { createSystemConnectors } from './create_system_actions';
 
 export interface PluginSetupContract {
   registerType<

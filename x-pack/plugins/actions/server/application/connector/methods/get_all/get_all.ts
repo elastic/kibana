@@ -64,7 +64,7 @@ export async function getAll({
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   mergedResult.forEach((connector) => {
-    // Try to validate created rule, but don't throw.
+    // Try to validate the connectors, but don't throw.
     try {
       connectorSchema.validate(connector);
     } catch (e) {
