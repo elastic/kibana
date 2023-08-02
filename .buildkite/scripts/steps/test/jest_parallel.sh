@@ -33,7 +33,11 @@ echo "
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 
-  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  if [[ "$config" == 'x-pack/plugins/index_management/jest.config.js' ]]; then
+    cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" --runInBand --coverage=false --passWithNoTests"
+  else
+    cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+
   echo "actual full command is:"
   echo "$cmd"
   echo ""
