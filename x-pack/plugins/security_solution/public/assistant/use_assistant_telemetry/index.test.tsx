@@ -57,7 +57,7 @@ describe('useAssistantTelemetry', () => {
       expect(result.current).toHaveProperty(fn);
     });
   });
-  // [];
+
   describe.each(trackingFns)('Handles %s id masking', (fn) => {
     it('Should call tracking with appropriate id when tracking is called with an isDefault=true conversation id', () => {
       const { result } = renderHook(() => useAssistantTelemetry(conversations));
