@@ -336,6 +336,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     };
   }, [pageIndex, pageSize, sortField, sortDirection, significantTerms]);
 
+  // If no row is hovered or pinned, fall back to set the first row
+  // into a hovered state to make the main document count chart
+  // show a comparison view by default.
   useEffect(() => {
     if (
       selectedSignificantTerm === null &&
@@ -345,6 +348,17 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       setSelectedSignificantTerm(pageOfItems[0]);
     }
   }, [selectedSignificantTerm, setSelectedSignificantTerm, pageOfItems, pinnedSignificantTerm]);
+
+  // When the analysis results table unmounts,
+  // make sure to reset any hovered or pinned rows.
+  useEffect(
+    () => () => {
+      setSelectedSignificantTerm(null);
+      setPinnedSignificantTerm(null);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const getRowStyle = (significantTerm: SignificantTerm) => {
     if (

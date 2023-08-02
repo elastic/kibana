@@ -423,11 +423,25 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     };
   }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
 
+  // If no row is hovered or pinned, fall back to set the first row
+  // into a hovered state to make the main document count chart
+  // show a comparison view by default.
   useEffect(() => {
     if (selectedGroup === null && pinnedGroup === null && pageOfItems.length > 0) {
       setSelectedGroup(pageOfItems[0]);
     }
   }, [selectedGroup, setSelectedGroup, pageOfItems, pinnedGroup]);
+
+  // When the analysis results table unmounts,
+  // make sure to reset any hovered or pinned rows.
+  useEffect(
+    () => () => {
+      setSelectedGroup(null);
+      setPinnedGroup(null);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const getRowStyle = (group: GroupTableItem) => {
     if (pinnedGroup && pinnedGroup.id === group.id) {
