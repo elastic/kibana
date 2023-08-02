@@ -63,7 +63,11 @@ export const getCloudSecurityUsageRecord = async ({
       return;
     }
     const resourceCount = response.aggregations.unique_resources.value;
-
+    if (resourceCount > AGGREGATION_PRECISION_THRESHOLD) {
+      logger.warn(
+        `The number of unique resources for {${postureType}} is ${resourceCount}, which is higher than the AGGREGATION_PRECISION_THRESHOLD of ${AGGREGATION_PRECISION_THRESHOLD}.`
+      );
+    }
     const minTimestamp = response.aggregations
       ? new Date(response.aggregations.min_timestamp.value_as_string).toISOString()
       : new Date().toISOString();
