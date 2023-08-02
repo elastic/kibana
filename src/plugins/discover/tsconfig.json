@@ -63,6 +63,7 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
     "@kbn/unified-doc-viewer",
     "@kbn/unified-doc-viewer-plugin"

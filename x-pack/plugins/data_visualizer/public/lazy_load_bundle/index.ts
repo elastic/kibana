@@ -6,7 +6,11 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
+import type {
+  DataComparisonSpec,
+  FileDataVisualizerSpec,
+  IndexDataVisualizerSpec,
+} from '../application';
 import { getCoreStart } from '../kibana_services';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;
@@ -14,6 +18,7 @@ let loadModulesPromise: Promise<LazyLoadedModules>;
 interface LazyLoadedModules {
   FileDataVisualizer: FileDataVisualizerSpec;
   IndexDataVisualizer: IndexDataVisualizerSpec;
+  DataComparison: DataComparisonSpec;
   getHttp: () => HttpSetup;
 }
 
