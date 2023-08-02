@@ -15,6 +15,8 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleCreationValidConsumer } from '../../../types';
 
 const consumerSelectionModalTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.title',
@@ -46,25 +48,37 @@ const consumerSelectionModalCancel = i18n.translate(
 );
 
 const featureNameMap: Record<string, string> = {
-  logs: i18n.translate('xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.logs', {
-    defaultMessage: 'Logs',
-  }),
-  infrastructure: i18n.translate(
+  [AlertConsumers.LOGS]: i18n.translate(
+    'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.logs',
+    {
+      defaultMessage: 'Logs',
+    }
+  ),
+  [AlertConsumers.INFRASTRUCTURE]: i18n.translate(
     'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.infrastructure',
     {
       defaultMessage: 'Metrics',
     }
   ),
-  apm: i18n.translate('xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.apm', {
-    defaultMessage: 'APM and User Experience',
-  }),
-  uptime: i18n.translate('xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.uptime', {
-    defaultMessage: 'Synthetics and Uptime',
-  }),
-  slo: i18n.translate('xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.slo', {
-    defaultMessage: 'SLOs',
-  }),
-  stackAlerts: i18n.translate(
+  [AlertConsumers.APM]: i18n.translate(
+    'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.apm',
+    {
+      defaultMessage: 'APM and User Experience',
+    }
+  ),
+  [AlertConsumers.UPTIME]: i18n.translate(
+    'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.uptime',
+    {
+      defaultMessage: 'Synthetics and Uptime',
+    }
+  ),
+  [AlertConsumers.SLO]: i18n.translate(
+    'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.slo',
+    {
+      defaultMessage: 'SLOs',
+    }
+  ),
+  [AlertConsumers.STACK_ALERTS]: i18n.translate(
     'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.stackAlerts',
     {
       defaultMessage: 'Stack Rules',
@@ -72,12 +86,17 @@ const featureNameMap: Record<string, string> = {
   ),
 };
 
-export type ValidConsumer = 'logs' | 'infrastructure' | 'apm' | 'uptime' | 'slo' | 'stackAlerts';
-
-export const VALID_CONSUMERS = ['logs', 'infrastructure', 'apm', 'uptime', 'slo', 'stackAlerts'];
+export const VALID_CONSUMERS = [
+  AlertConsumers.LOGS,
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.APM,
+  AlertConsumers.UPTIME,
+  AlertConsumers.SLO,
+  AlertConsumers.STACK_ALERTS,
+];
 
 export interface RuleFormConsumerSelectionModalProps {
-  consumers: ValidConsumer[];
+  consumers: RuleCreationValidConsumer[];
   onSave: (consumer: string) => void;
   onCancel: () => void;
 }

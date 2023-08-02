@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import {
-  RuleFormConsumerSelectionModal,
-  ValidConsumer,
-} from './rule_form_consumer_selection_modal';
+import { RuleFormConsumerSelectionModal } from './rule_form_consumer_selection_modal';
+import { RuleCreationValidConsumer } from '../../../types';
 
-const mockConsumers: ValidConsumer[] = [
+const mockConsumers: RuleCreationValidConsumer[] = [
   'logs',
   'infrastructure',
   'apm',
