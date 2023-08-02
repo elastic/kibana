@@ -6,16 +6,16 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
+import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { validateActionId } from '../../services';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
-import type { EndpointActionFileInfoParams } from '../../../../common/endpoint/schema/actions';
 import type {
   SecuritySolutionRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../types';
-import { EndpointActionFileInfoSchema } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 import type { ActionFileInfoApiResponse } from '../../../../common/endpoint/types';

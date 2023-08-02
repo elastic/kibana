@@ -8,6 +8,7 @@
 
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
@@ -22,10 +23,12 @@ export function updateVolatileSearchSource(
     dataView,
     services,
     sort,
+    customFilters,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
+    customFilters: Filter[];
   }
 ) {
   const { uiSettings, data } = services;
@@ -36,10 +39,15 @@ export function updateVolatileSearchSource(
 
   searchSource.setField('trackTotalHits', true);
 
+  let filters = [...customFilters];
+
   if (dataView.type !== DataViewType.ROLLUP) {
     // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-    searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
+    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView);
+    filters = timeFilter ? [...filters, timeFilter] : filters;
   }
+
+  searchSource.setField('filter', filters);
 
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
