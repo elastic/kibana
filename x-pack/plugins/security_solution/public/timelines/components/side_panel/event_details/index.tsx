@@ -161,31 +161,37 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const body = useMemo(() => {
     if (isFlyoutView) {
+      // TODO use in alerts page
+      // TODO also used in cases page (activity tab)
       return (
-        <FlyoutBody
-          alertId={alertId}
-          browserFields={browserFields}
-          detailsData={detailsData}
-          detailsEcsData={ecsData}
-          event={expandedEvent}
-          hostName={hostName}
-          handleIsolationActionSuccess={handleIsolationActionSuccess}
-          handleOnEventClosed={handleOnEventClosed}
-          isAlert={isAlert}
-          isDraggable={isDraggable}
-          isolateAction={isolateAction}
-          isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
-          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-          loading={loading}
-          rawEventData={rawEventData}
-          showAlertDetails={showAlertDetails}
-          scopeId={scopeId}
-          isReadOnly={isReadOnly}
-        />
+        <>
+          {'isFlyoutView FlyoutBody'}
+          <FlyoutBody
+            alertId={alertId}
+            browserFields={browserFields}
+            detailsData={detailsData}
+            detailsEcsData={ecsData}
+            event={expandedEvent}
+            hostName={hostName}
+            handleIsolationActionSuccess={handleIsolationActionSuccess}
+            handleOnEventClosed={handleOnEventClosed}
+            isAlert={isAlert}
+            isDraggable={isDraggable}
+            isolateAction={isolateAction}
+            isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
+            isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+            loading={loading}
+            rawEventData={rawEventData}
+            showAlertDetails={showAlertDetails}
+            scopeId={scopeId}
+            isReadOnly={isReadOnly}
+          />
+        </>
       );
     } else if (isHostIsolationPanelOpen) {
       return (
         <>
+          {'isHostIsolationPanelOpen FlyoutBody'}
           {isIsolateActionSuccessBannerVisible && (
             <EndpointIsolateSuccess
               hostName={hostName}
@@ -206,6 +212,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     } else {
       return (
         <>
+          {'else FlyoutBody'}
           <EuiSpacer size="m" />
           <ExpandableEvent
             browserFields={browserFields}
@@ -252,8 +259,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   return (
     <>
+      {'header'}
       {header}
+      {'body'}
       {body}
+      {'footer'}
       <FlyoutFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}

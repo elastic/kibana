@@ -62,26 +62,29 @@ export const useToGetInternalFlyout = () => {
       });
 
       return (
-        <FlyoutBody
-          alertId={alertId}
-          browserFields={browserFields}
-          detailsData={detailsData}
-          detailsEcsData={ecsData}
-          event={{ eventId: localAlert._id, indexName: localAlert._index }}
-          hostName={hostName ?? ''}
-          handleIsolationActionSuccess={handleIsolationActionSuccess}
-          handleOnEventClosed={noop}
-          isAlert={isAlert}
-          isDraggable={false}
-          isolateAction={isolateAction}
-          isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
-          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-          loading={isLoading || loading}
-          rawEventData={rawEventData}
-          showAlertDetails={showAlertDetails}
-          scopeId={TimelineId.casePage}
-          isReadOnly={false}
-        />
+        <>
+          {'cases alerts table FlyoutBody'}
+          <FlyoutBody
+            alertId={alertId}
+            browserFields={browserFields}
+            detailsData={detailsData}
+            detailsEcsData={ecsData}
+            event={{ eventId: localAlert._id, indexName: localAlert._index }}
+            hostName={hostName ?? ''}
+            handleIsolationActionSuccess={handleIsolationActionSuccess}
+            handleOnEventClosed={noop}
+            isAlert={isAlert}
+            isDraggable={false}
+            isolateAction={isolateAction}
+            isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
+            isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+            loading={isLoading || loading}
+            rawEventData={rawEventData}
+            showAlertDetails={showAlertDetails}
+            scopeId={TimelineId.casePage}
+            isReadOnly={false}
+          />
+        </>
       );
     },
     [
@@ -104,17 +107,20 @@ export const useToGetInternalFlyout = () => {
   const header = useCallback(
     ({ isLoading }: AlertsTableFlyoutBaseProps) => {
       return (
-        <FlyoutHeaderContent
-          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-          isAlert={isAlert}
-          eventIndex={alert.indexName ?? ''}
-          eventId={alertId}
-          isolateAction={isolateAction}
-          loading={isLoading || loading}
-          ruleName={ruleName}
-          showAlertDetails={showAlertDetails}
-          timestamp={timestamp}
-        />
+        <>
+          {'cases alerts table FlyoutHeaderContent'}
+          <FlyoutHeaderContent
+            isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+            isAlert={isAlert}
+            eventIndex={alert.indexName ?? ''}
+            eventId={alertId}
+            isolateAction={isolateAction}
+            loading={isLoading || loading}
+            ruleName={ruleName}
+            showAlertDetails={showAlertDetails}
+            timestamp={timestamp}
+          />
+        </>
       );
     },
     [
@@ -133,17 +139,20 @@ export const useToGetInternalFlyout = () => {
   const footer = useCallback(
     ({ isLoading, alert: localAlert }: AlertsTableFlyoutBaseProps) => {
       return (
-        <FlyoutFooter
-          detailsData={detailsData}
-          detailsEcsData={ecsData}
-          refetchFlyoutData={refetchFlyoutData}
-          handleOnEventClosed={noop}
-          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-          isReadOnly={false}
-          loadingEventDetails={isLoading || loading}
-          onAddIsolationStatusClick={showHostIsolationPanel}
-          scopeId={TimelineId.casePage}
-        />
+        <>
+          {'cases alerts table FlyoutFooter'}
+          <FlyoutFooter
+            detailsData={detailsData}
+            detailsEcsData={ecsData}
+            refetchFlyoutData={refetchFlyoutData}
+            handleOnEventClosed={noop}
+            isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+            isReadOnly={false}
+            loadingEventDetails={isLoading || loading}
+            onAddIsolationStatusClick={showHostIsolationPanel}
+            scopeId={TimelineId.casePage}
+          />
+        </>
       );
     },
     [

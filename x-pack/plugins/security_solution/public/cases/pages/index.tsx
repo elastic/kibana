@@ -9,6 +9,9 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { RightPanelKey } from '../../flyout/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -59,20 +62,35 @@ const CaseContainerComponent: React.FC = () => {
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 
+  const { openFlyout } = useExpandableFlyoutContext();
+  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          panelView: 'eventDetail',
-          id: TimelineId.casePage,
-          params: {
-            eventId: alertId,
-            indexName: index,
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: RightPanelKey,
+            params: {
+              id: alertId,
+              indexName: index,
+              scopeId: TimelineId.casePage,
+            },
           },
-        })
-      );
+        });
+      } else {
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
+            id: TimelineId.casePage,
+            params: {
+              eventId: alertId,
+              indexName: index,
+            },
+          })
+        );
+      }
     },
-    [dispatch]
+    [dispatch, isSecurityFlyoutEnabled, openFlyout]
   );
 
   const endpointDetailsHref = (endpointId: string) =>

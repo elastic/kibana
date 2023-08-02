@@ -22,10 +22,9 @@ const UserActionShowAlertComponent = ({
   index,
   onShowAlertDetails,
 }: UserActionShowAlertProps) => {
-  const onClick = useCallback(
-    () => onShowAlertDetails(alertId, index),
-    [alertId, index, onShowAlertDetails]
-  );
+  const onClick = useCallback(() => {
+    onShowAlertDetails(alertId, index);
+  }, [alertId, index, onShowAlertDetails]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.SHOW_ALERT_TOOLTIP}</p>}>

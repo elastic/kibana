@@ -107,6 +107,7 @@ const registerIfNotAlready = (
   registryArgs: AlertsTableConfigurationRegistry
 ) => {
   if (!registry.has(registryArgs.id)) {
+    console.log('registering registryArgs.id', registryArgs.id);
     registry.register(registryArgs);
   }
 };

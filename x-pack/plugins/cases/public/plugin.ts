@@ -147,13 +147,14 @@ export class CasesUiPlugin
     return {
       api: createClientAPI({ http: core.http }),
       ui: {
-        getCases: (props) =>
-          getCasesLazy({
+        getCases: (props) => {
+          return getCasesLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
-          }),
+          });
+        },
         getCasesContext,
         getRecentCases: (props) =>
           getRecentCasesLazy({
