@@ -6,7 +6,7 @@
  */
 
 import { uniqueId } from 'lodash';
-import { MessageRole, Conversation } from '../../common/types';
+import { MessageRole, Conversation, FunctionDefinition } from '../../common/types';
 import { ChatTimelineItem } from '../components/chat/chat_timeline';
 
 type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'role'>;
@@ -94,5 +94,48 @@ export function buildConversation(params?: Partial<Conversation>) {
     numeric_labels: {},
     namespace: '',
     ...params,
+  };
+}
+
+export function buildFunction(): FunctionDefinition {
+  return {
+    options: {
+      name: 'elasticsearch',
+      contexts: ['core'],
+      description: 'Call Elasticsearch APIs on behalf of the user',
+      parameters: {
+        type: 'object',
+        properties: {
+          method: {
+            type: 'string',
+            description: 'The HTTP method of the Elasticsearch endpoint',
+            enum: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'] as const,
+          },
+          path: {
+            type: 'string',
+            description: 'The path of the Elasticsearch endpoint, including query parameters',
+          },
+        },
+        required: ['method' as const, 'path' as const],
+      },
+    },
+    respond: async (options: { arguments: any }, signal: AbortSignal) => ({}),
+  };
+}
+
+export const buildFunctionElasticsearch = buildFunction;
+
+export function buildFunctionServiceSummary(): FunctionDefinition {
+  return {
+    options: {
+      name: 'get_service_summary',
+      contexts: ['core'],
+      description:
+        'Gets a summary of a single service, including: the language, service version, deployments, infrastructure, alerting, etc. ',
+      parameters: {
+        type: 'object',
+      },
+    },
+    respond: async (options: { arguments: any }, signal: AbortSignal) => ({}),
   };
 }

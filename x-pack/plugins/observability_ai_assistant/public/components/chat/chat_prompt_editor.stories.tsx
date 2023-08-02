@@ -8,11 +8,24 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { ChatPromptEditor as Component, ChatPromptEditorProps } from './chat_prompt_editor';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 
+/*
+  JSON Schema validation in the ChatPromptEditor compponent does not work
+  when rendering the component from within Storybook.
+  
+*/
 export default {
   component: Component,
   title: 'app/Molecules/ChatPromptEditor',
   argTypes: {},
+  parameters: {
+    backgrounds: {
+      default: 'white',
+      values: [{ name: 'white', value: '#fff' }],
+    },
+  },
+  decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = (props: ChatPromptEditorProps) => {

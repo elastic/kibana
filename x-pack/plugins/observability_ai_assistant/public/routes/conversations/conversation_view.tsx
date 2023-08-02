@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
 import { ChatBody } from '../../components/chat/chat_body';
@@ -26,7 +26,6 @@ export function ConversationView() {
   const currentUser = useCurrentUser();
 
   const service = useObservabilityAIAssistant();
-
   return (
     <EuiFlexGroup direction="row" className={containerClassName}>
       <EuiFlexItem grow={false} />
@@ -37,6 +36,7 @@ export function ConversationView() {
           initialConversation={undefined}
           service={service}
         />
+        <EuiSpacer size="m" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
