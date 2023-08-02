@@ -12,5 +12,3 @@ import { DiscoverLogExplorerPlugin } from './plugin';
 export function plugin(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
   return new DiscoverLogExplorerPlugin(context);
 }
-
-export { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
