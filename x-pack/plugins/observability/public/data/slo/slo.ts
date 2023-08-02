@@ -62,6 +62,8 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  groupBy: '*',
+  instanceId: '*',
   tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
