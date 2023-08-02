@@ -33,8 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/155122
-  describe.skip('Rule exception operators for data type double', () => {
+  describe('Rule exception operators for data type double', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double_as_string');
@@ -490,6 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql([]);
         });
       });
+      // here
 
       describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
@@ -511,6 +511,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsById(supertest, log, id);
+          log.debug('HERE hits: ', signalsOpen.hits.hits);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.1', '1.2', '1.3']);
         });
