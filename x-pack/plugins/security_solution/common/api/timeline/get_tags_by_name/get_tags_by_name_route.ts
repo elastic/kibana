@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import * as rt from 'io-ts';
 
-export const getTagsByNameRequest = schema.object({
-  name: schema.string(),
-});
+export const getTagsByNameRequest = rt.type({ name: rt.string });

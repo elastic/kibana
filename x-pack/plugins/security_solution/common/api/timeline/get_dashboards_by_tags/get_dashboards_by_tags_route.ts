@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import * as rt from 'io-ts';
 
-export const getDashboardsRequest = schema.object({
-  tagIds: schema.arrayOf(schema.string()),
-});
+export const getDashboardsRequest = rt.type({ tagIds: rt.array(rt.string) });

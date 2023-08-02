@@ -12,6 +12,7 @@ import { getTagsByNameRequest } from '../../../../common/api/timeline';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { findTagsByName } from '../saved_objects';
@@ -24,7 +25,7 @@ export const getTagsByNameRoute = (
   router.get(
     {
       path: INTERNAL_TAGS_URL,
-      validate: { query: getTagsByNameRequest },
+      validate: { query: buildRouteValidationWithExcess(getTagsByNameRequest) },
       options: {
         tags: ['access:securitySolution'],
       },

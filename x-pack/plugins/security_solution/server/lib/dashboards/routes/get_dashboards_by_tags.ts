@@ -15,6 +15,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { getDashboardsRequest } from '../../../../common/api/timeline';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 export const getDashboardsByTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -24,7 +25,7 @@ export const getDashboardsByTagsRoute = (
   router.post(
     {
       path: INTERNAL_DASHBOARDS_URL,
-      validate: { body: getDashboardsRequest },
+      validate: { body: buildRouteValidationWithExcess(getDashboardsRequest) },
       options: {
         tags: ['access:securitySolution'],
       },
