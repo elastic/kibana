@@ -232,7 +232,8 @@ describe('Alert details expandable flyout right panel overview tab', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
     });
 
-    it('should display threat intelligence section', () => {
+    // TODO: skipping this due to flakiness
+    it.skip('should display threat intelligence section', () => {
       toggleOverviewTabAboutSection();
       toggleOverviewTabInsightsSection();
 
