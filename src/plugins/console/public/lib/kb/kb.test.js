@@ -29,22 +29,15 @@ describe('Knowledge base', () => {
 
   const MAPPING = {
     index1: {
-      'type1.1': {
-        properties: {
-          'field1.1.1': { type: 'string' },
-          'field1.1.2': { type: 'long' },
-        },
-      },
-      'type1.2': {
-        properties: {},
+      properties: {
+        'field1.1.1': { type: 'string' },
+        'field1.1.2': { type: 'long' },
       },
     },
     index2: {
-      'type2.1': {
-        properties: {
-          'field2.1.1': { type: 'string' },
-          'field2.1.2': { type: 'string' },
-        },
+      properties: {
+        'field2.1.1': { type: 'string' },
+        'field2.1.2': { type: 'string' },
       },
     },
   };
@@ -93,10 +86,6 @@ describe('Knowledge base', () => {
     }
 
     expect(context).toEqual(expectedContext);
-  }
-
-  function t(term) {
-    return { name: term, meta: 'type' };
   }
 
   function i(term) {
