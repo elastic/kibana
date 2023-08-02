@@ -5,66 +5,60 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CIS_AWS, CIS_GCP } from '../../common/constants';
 import { Cluster } from '../../common/types';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
+import { CompactFormattedNumber } from './compact_formatted_number';
 
 export const AccountsEvaluatedWidget = ({
   clusters,
-  abbreviateAbove = 999,
+  benchmarkAbbreviateAbove = 999,
 }: {
   clusters: Cluster[];
   /** numbers higher than the value of this field will be abbreviated using compact notation and have a tooltip displaying the full value */
-  abbreviateAbove?: number;
+  benchmarkAbbreviateAbove?: number;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const filterClustersById = (benchmarkId: string) => {
     return clusters?.filter((obj) => obj?.meta.benchmark.id === benchmarkId) || [];
   };
 
-  const cisAwsClusterLength = filterClustersById('cis_aws').length;
-  const cisGcpClusterLength = filterClustersById('cis_gcp').length;
+  const cisAwsClusterAmount = filterClustersById(CIS_AWS).length;
+  const cisGcpClusterAmount = filterClustersById(CIS_GCP).length;
 
-  const cisAwsBenchmarkName = filterClustersById('cis_aws')[0]?.meta.benchmark.name || '';
-  const cisGcpBenchmarkName = filterClustersById('cis_gcp')[0]?.meta.benchmark.name || '';
-
-  // const cisAwsClusterLength = 94;
-  // const cisGcpClusterLength = 12;
-
-  if (cisAwsClusterLength <= abbreviateAbove) {
-    return (
-      <>
-        <CISBenchmarkIcon type={'cis_aws'} name={cisAwsBenchmarkName} />
-        <span css={{ paddingRight: euiTheme.size.m, paddingLeft: euiTheme.size.xs }}>
-          {cisAwsClusterLength.toLocaleString()}
-        </span>
-        <CISBenchmarkIcon type={'cis_gcp'} name={cisGcpBenchmarkName} />
-        <span css={{ paddingLeft: euiTheme.size.xs }}>{cisGcpClusterLength.toLocaleString()}</span>
-      </>
-    );
-  }
+  const cisAwsBenchmarkName = filterClustersById(CIS_AWS)[0]?.meta.benchmark.name || '';
+  const cisGcpBenchmarkName = filterClustersById(CIS_GCP)[0]?.meta.benchmark.name || '';
 
   return (
     <>
-      <EuiToolTip content={cisAwsClusterLength.toLocaleString()}>
-        <CISBenchmarkIcon type={'cis_aws'} name={cisAwsBenchmarkName} />
-      </EuiToolTip>
-      <span css={{ paddingRight: euiTheme.size.m }}>
-        {cisAwsClusterLength.toLocaleString(undefined, {
-          notation: 'compact',
-          maximumFractionDigits: 1,
-        })}
-      </span>
-
-      <EuiToolTip content={cisGcpClusterLength.toLocaleString()}>
-        <CISBenchmarkIcon type={'cis_gcp'} name={cisGcpBenchmarkName} />
-      </EuiToolTip>
-      <span>
-        {cisGcpClusterLength.toLocaleString(undefined, {
-          notation: 'compact',
-          maximumFractionDigits: 1,
-        })}
-      </span>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem>
+              <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CompactFormattedNumber
+                number={cisAwsClusterAmount}
+                abbreviateAbove={benchmarkAbbreviateAbove}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CompactFormattedNumber
+                number={cisGcpClusterAmount}
+                abbreviateAbove={benchmarkAbbreviateAbove}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
