@@ -171,7 +171,7 @@ export function fetchMoreDocuments(
   dataSubjects: SavedSearchData,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { getAppState, services, savedSearch } = fetchDeps;
+  const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
@@ -201,16 +201,16 @@ export function fetchMoreDocuments(
       dataView,
       services,
       sort: getAppState().sort as SortOrder[],
+      customFilters: getInternalState().customFilters,
     });
 
     // Start fetching all required requests
     const response = fetchDocuments(searchSource, fetchDeps);
-    // TODO: show it as a separate request in Inspect flyout
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records }) => {
-        sendLoadingMoreFinishedMsg(dataSubjects.documents$, records); // TODO: surface shard failures
+        sendLoadingMoreFinishedMsg(dataSubjects.documents$, records);
       })
       .catch((error) => {
         services.toastNotifications.addError(error, {

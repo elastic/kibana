@@ -22,7 +22,6 @@ export const fetchDocuments = (
   searchSource: ISearchSource,
   { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
-  // TODO: for "Load more" do we want to keep this value or override it with a fixed value (e.g. 200)?
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
@@ -41,15 +40,13 @@ export const fetchDocuments = (
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
-  // TODO: surface shard failures after PR #161271
-
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
       sessionId: searchSessionId,
       inspector: {
         adapter: inspectorAdapters.requests,
-        title: isFetchingMore
+        title: isFetchingMore // TODO: show it as a separate request in Inspect flyout
           ? i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
               defaultMessage: 'More documents',
             })
@@ -61,6 +58,7 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
+      // TODO: after PR #161271, keep shard failures as toasts for "Load more"
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
