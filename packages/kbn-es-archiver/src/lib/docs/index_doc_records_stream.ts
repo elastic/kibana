@@ -75,12 +75,8 @@ export function createIndexDocRecordsStream(
   const doIndexDocs = indexDocs(stats, client, useCreate);
 
   let stanzasCount = 0;
-  const highWaterMark: number = isCompressed(inputDir) ? 5000 : 300;
-  console.log(`\nλjs inputDir: \n\t${inputDir}`);
-
-  console.log(`\nλjs highWaterMark: \n\t${highWaterMark}`);
   return new Writable({
-    highWaterMark,
+    highWaterMark: isCompressed(inputDir) ? 5000 : 300,
     objectMode: true,
 
     async write(record, enc, callback): Promise<void> {
@@ -89,8 +85,7 @@ export function createIndexDocRecordsStream(
         await doIndexDocs(jsonStanza);
         progress.addToComplete(1);
         stanzasCount++;
-        console.log('\nλjs write()');
-        console.log(`\nλjs stanzasCount: \n\t${stanzasCount}`);
+        console.log(`\nλjs write-stanzasCount: \n\t${stanzasCount}`);
         callback(null);
       } catch (err) {
         callback(err);
@@ -104,8 +99,7 @@ export function createIndexDocRecordsStream(
         await doIndexDocs(chunks.map(({ chunk: record }) => record.value));
         progress.addToComplete(chunks.length);
         stanzasCount++;
-        console.log('\nλjs writev()');
-        console.log(`\nλjs stanzasCount: \n\t${stanzasCount}`);
+        console.log(`\nλjs WRITEV-stanzasCount: \n\t${stanzasCount}`);
         callback(null);
       } catch (err) {
         callback(err);
@@ -124,18 +118,23 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
     await client.helpers.bulk(
       {
         retries: 5,
-        datasource: jsonStanzasWithinArchive.map((doc) => {
-          const body = doc.source;
-          const op = doc.data_stream ? BulkOperation.Create : operation;
-          const index = doc.data_stream || doc.index;
-          ops.set(body, {
-            [op]: {
-              _index: index,
-              _id: doc.id,
-            },
-          });
-          return body;
-        }),
+        datasource: jsonStanzasWithinArchive
+          .map((x) => {
+            console.log(`\nλjs jsonStanzaWithinArchive: \n\t${x}`);
+            return x;
+          })
+          .map((doc) => {
+            const body = doc.source;
+            const op = doc.data_stream ? BulkOperation.Create : operation;
+            const index = doc.data_stream || doc.index;
+            ops.set(body, {
+              [op]: {
+                _index: index,
+                _id: doc.id,
+              },
+            });
+            return body;
+          }),
         onDocument(doc) {
           return ops.get(doc);
         },

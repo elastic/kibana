@@ -15,6 +15,7 @@ import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { atLeastOne, freshenUp, hasDotKibanaPrefix, indexingOccurred } from './load_utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
@@ -102,27 +103,4 @@ export async function loadAction({
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
   }
   return result;
-}
-function atLeastOne(predicate: {
-  (x: string): boolean;
-  (value: string, index: number, array: string[]): unknown;
-}) {
-  return (result: {}) => Object.keys(result).some(predicate);
-}
-function indexingOccurred(docs: { indexed: any; archived?: number }) {
-  return docs && docs.indexed > 0;
-}
-async function freshenUp(client: Client, indicesWithDocs: string[]): Promise<void> {
-  await client.indices.refresh(
-    {
-      index: indicesWithDocs.join(','),
-      allow_no_indices: true,
-    },
-    {
-      headers: ES_CLIENT_HEADERS,
-    }
-  );
-}
-function hasDotKibanaPrefix(mainSOIndex: string) {
-  return (x: string) => x.startsWith(mainSOIndex);
 }
