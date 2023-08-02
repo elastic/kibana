@@ -37,7 +37,6 @@ import { EventKind } from '../../shared/hooks/use_fetch_field_value_pair_by_even
 
 interface PrevalenceDetailsTableCell {
   highlightedField: { name: string; values: string[] };
-  scopeId: string;
 }
 
 export const PREVALENCE_TAB_ID = 'prevalence-details';
@@ -60,7 +59,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         type={{
           eventKind: EventKind.signal,
           include: true,
@@ -75,7 +73,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         type={{
           eventKind: EventKind.signal,
           exclude: true,
@@ -90,7 +87,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         aggregationField={'host.name'}
       />
     ),
@@ -102,7 +98,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         aggregationField={'user.name'}
       />
     ),
@@ -129,7 +124,6 @@ export const PrevalenceDetails: React.FC = () => {
         name: summaryRow.description.data.field,
         values: summaryRow.description.values || [],
       },
-      scopeId,
     });
 
     return (summaryRows || []).map((summaryRow) => {

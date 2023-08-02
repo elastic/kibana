@@ -15,17 +15,12 @@ import {
 } from './test_ids';
 import type { EventType } from '../../shared/hooks/use_fetch_field_value_pair_by_event_type';
 import { useFetchFieldValuePairByEventType } from '../../shared/hooks/use_fetch_field_value_pair_by_event_type';
-import { TimelineId } from '../../../../common/types';
 
 export interface PrevalenceDetailsCountCellProps {
   /**
    * The highlighted field name and values
    * */
   highlightedField: { name: string; values: string[] };
-  /**
-   * The scope id
-   */
-  scopeId: string;
   /**
    * Limit the search to include or exclude a specific value for the event.kind field
    * (alert, asset, enrichment, event, metric, state, pipeline_error, signal)
@@ -41,12 +36,10 @@ export interface PrevalenceDetailsCountCellProps {
  */
 export const PrevalenceDetailsCountCell: VFC<PrevalenceDetailsCountCellProps> = ({
   highlightedField,
-  scopeId,
   type,
 }) => {
   const { loading, error, count } = useFetchFieldValuePairByEventType({
     highlightedField,
-    isActiveTimelines: scopeId === TimelineId.active,
     type,
   });
 

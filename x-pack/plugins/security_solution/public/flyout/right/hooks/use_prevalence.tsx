@@ -79,14 +79,13 @@ export const usePrevalence = ({
         return (
           <PrevalenceOverviewRow
             highlightedField={highlightedField}
-            scopeId={scopeId}
             callbackIfNull={() => setCount((prevCount) => prevCount + 1)}
             data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
             key={row.description.data.field}
           />
         );
       }),
-    [summaryRows, scopeId]
+    [summaryRows]
   );
 
   return {

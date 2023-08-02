@@ -9,8 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../common/lib/kibana';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type {
   UseFetchFieldValuePairByEventTypeParams,
   UseFetchFieldValuePairByEventTypeResult,
@@ -22,14 +20,11 @@ import {
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_selector');
-jest.mock('../../../common/containers/use_global_time');
 
 const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const isActiveTimelines = true;
 const type = {
   eventKind: EventKind.alert,
   include: true,
@@ -45,8 +40,6 @@ describe('useFetchFieldValuePairByEventType', () => {
       data: { search: jest.fn() },
     },
   });
-  jest.mocked(useDeepEqualSelector).mockReturnValue({ to: '', from: '' });
-  (useGlobalTime as jest.Mock).mockReturnValue({ to: '', from: '' });
 
   it('should return loading true while data is being fetched', () => {
     (useQuery as jest.Mock).mockReturnValue({
@@ -55,9 +48,7 @@ describe('useFetchFieldValuePairByEventType', () => {
       data: 0,
     });
 
-    hookResult = renderHook(() =>
-      useFetchFieldValuePairByEventType({ highlightedField, isActiveTimelines, type })
-    );
+    hookResult = renderHook(() => useFetchFieldValuePairByEventType({ highlightedField, type }));
 
     expect(hookResult.result.current.loading).toBeTruthy();
     expect(hookResult.result.current.error).toBeFalsy();
@@ -71,9 +62,7 @@ describe('useFetchFieldValuePairByEventType', () => {
       data: 0,
     });
 
-    hookResult = renderHook(() =>
-      useFetchFieldValuePairByEventType({ highlightedField, isActiveTimelines, type })
-    );
+    hookResult = renderHook(() => useFetchFieldValuePairByEventType({ highlightedField, type }));
 
     expect(hookResult.result.current.loading).toBeFalsy();
     expect(hookResult.result.current.error).toBeTruthy();
@@ -87,9 +76,7 @@ describe('useFetchFieldValuePairByEventType', () => {
       data: 1,
     });
 
-    hookResult = renderHook(() =>
-      useFetchFieldValuePairByEventType({ highlightedField, isActiveTimelines, type })
-    );
+    hookResult = renderHook(() => useFetchFieldValuePairByEventType({ highlightedField, type }));
 
     expect(hookResult.result.current.loading).toBeFalsy();
     expect(hookResult.result.current.error).toBeFalsy();
