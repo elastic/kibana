@@ -18,6 +18,8 @@
     "@kbn/core-i18n-browser",
     "@kbn/react-kibana-context-common",
     "@kbn/core-notifications-browser",
+    "@kbn/core",
+    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",
