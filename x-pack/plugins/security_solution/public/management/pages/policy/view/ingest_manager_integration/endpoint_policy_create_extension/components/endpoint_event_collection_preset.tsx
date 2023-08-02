@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { EndpointPreset } from '../constants';
+import { ENDPOINT_INTEGRATION_CONFIG_KEY } from '../constants';
 import { HelpTextWithPadding } from './help_text_with_padding';
 import { DATA_COLLECTION, DATA_COLLECTION_HELP_TEXT } from '../translations';
 import { useGetProtectionsUnavailableComponent } from '../../../policy_settings_form/hooks/use_get_protections_unavailable_component';
@@ -22,6 +24,38 @@ type EndpointEventCollectionPresetProps = PackagePolicyCreateExtensionComponentP
 export const EndpointEventCollectionPreset = memo<EndpointEventCollectionPresetProps>(
   ({ onChange, newPolicy }) => {
     const UpsellToIncludePolicyProtections = useGetProtectionsUnavailableComponent();
+    const preset: EndpointPreset = 'DataCollection';
+
+    useEffect(() => {
+      if (newPolicy.inputs.length === 0) {
+        onChange({
+          isValid: false,
+          updatedPolicy: {
+            ...newPolicy,
+            name: '',
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+                config: {
+                  _config: {
+                    value: {
+                      type: 'endpoint',
+                      endpointConfig: {
+                        preset,
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }
+
+      // Update the policy to ensure it only has Data collection
+    }, [newPolicy, onChange]);
 
     return (
       <div>

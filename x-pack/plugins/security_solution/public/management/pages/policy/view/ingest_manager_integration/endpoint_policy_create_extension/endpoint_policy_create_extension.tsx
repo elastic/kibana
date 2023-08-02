@@ -20,50 +20,25 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { EndpointPreset } from './constants';
+import { ENDPOINT_INTEGRATION_CONFIG_KEY, endpointPresetsMapping } from './constants';
 import { HelpTextWithPadding } from './components/help_text_with_padding';
 import { EndpointEventCollectionPreset } from './components/endpoint_event_collection_preset';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
-  DATA_COLLECTION,
   DATA_COLLECTION_HELP_TEXT,
-  EDR_COMPLETE,
-  EDR_ESSENTIAL,
-  EDR_NOTE,
   ENDPOINT,
   INTERACTIVE_ONLY,
-  NGAV,
-  NGAV_NOTE,
 } from './translations';
 import { useGetProtectionsUnavailableComponent } from '../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 
 const PREFIX = 'endpoint_policy_create_extension';
 
-const ENDPOINT_INTEGRATION_CONFIG_KEY = 'ENDPOINT_INTEGRATION_CONFIG';
-
 const environmentMapping = {
   cloud: CLOUD_SECURITY,
   endpoint: ENDPOINT,
-};
-
-const endpointPresetsMapping = {
-  NGAV: {
-    label: NGAV,
-    note: NGAV_NOTE,
-  },
-  EDREssential: {
-    label: EDR_ESSENTIAL,
-    note: EDR_NOTE,
-  },
-  EDRComplete: {
-    label: EDR_COMPLETE,
-    note: EDR_NOTE,
-  },
-  DataCollection: {
-    label: DATA_COLLECTION,
-    note: null,
-  },
 };
 
 const cloudEventMapping = {
@@ -71,7 +46,6 @@ const cloudEventMapping = {
   ALL_EVENTS,
 };
 
-type EndpointPreset = keyof typeof endpointPresetsMapping;
 type CloudEvent = keyof typeof cloudEventMapping;
 type Environment = keyof typeof environmentMapping;
 
