@@ -291,7 +291,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             <EuiButton data-test-subj="saveCustomizePanelButton" onClick={save} fill>
               <FormattedMessage
                 id="embeddableApi.customizePanel.flyout.saveButtonTitle"
-                defaultMessage="Save"
+                defaultMessage="Apply"
               />
             </EuiButton>
           </EuiFlexItem>

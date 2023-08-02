@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Response } from 'supertest';
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import {
   AvailableTotal,
@@ -14,6 +14,7 @@ import {
   LayoutCounts,
   ReportingUsageType,
 } from '@kbn/reporting-plugin/server/usage/types';
+import { Response } from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function createUsageServices({ getService }: FtrProviderContext) {
@@ -44,7 +45,12 @@ export function createUsageServices({ getService }: FtrProviderContext) {
         }, 1500);
       });
       if (!ignoreFailure) {
-        const jobInfo = await supertest.get(downloadReportPath.replace(/download/, 'info'));
+        const jobInfo = await supertest.get(
+          downloadReportPath.replace(
+            PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX,
+            INTERNAL_ROUTES.JOBS.INFO_PREFIX
+          )
+        );
         expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
         expect(statusCode).to.be(200);
       }
