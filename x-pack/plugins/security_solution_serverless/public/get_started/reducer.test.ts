@@ -13,6 +13,7 @@ import {
   getActiveProductsInitialStates,
   getActiveSectionsInitialStates,
 } from './reducer';
+import type { ExpandedCardSteps } from './types';
 import {
   GetSetUpCardId,
   GetStartedPageActions,
@@ -40,6 +41,7 @@ describe('reducer', () => {
       activeSections,
       totalStepsLeft,
       totalActiveSteps,
+      expandedCardSteps: {} as ExpandedCardSteps,
     };
 
     const action: ToggleProductAction = {
@@ -66,6 +68,7 @@ describe('reducer', () => {
       activeSections,
       totalStepsLeft,
       totalActiveSteps,
+      expandedCardSteps: {} as ExpandedCardSteps,
     };
 
     const action: AddFinishedStepAction = {

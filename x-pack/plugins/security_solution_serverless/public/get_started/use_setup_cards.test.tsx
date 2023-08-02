@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpSections } from './use_setup_cards';
-import type { ActiveSections, CardId, StepId } from './types';
+import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import { ProductLine } from '../../common/product';
 
@@ -41,6 +41,8 @@ describe('useSetUpSections', () => {
     const sections = result.current.setUpSections({
       activeProducts: new Set([ProductLine.security]),
       activeSections,
+      expandedCardSteps: {} as ExpandedCardSteps,
+      onCardClicked: jest.fn(),
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,
@@ -57,6 +59,8 @@ describe('useSetUpSections', () => {
     const sections = result.current.setUpSections({
       activeSections,
       activeProducts: new Set([ProductLine.security]),
+      expandedCardSteps: {} as ExpandedCardSteps,
+      onCardClicked: jest.fn(),
       onStepClicked,
       onStepButtonClicked,
       finishedSteps,
