@@ -93,8 +93,14 @@ describe('Reporting Plugin', () => {
       // wait for the startup phase background work
       plugin.start(coreStart, pluginStart);
       await new Promise(setImmediate);
-      expect(reportingCore.getExportTypesRegistry().getById(PDF_REPORT_TYPE_V2)).toHaveProperty('id', PDF_REPORT_TYPE_V2);
-      expect(reportingCore.getExportTypesRegistry().getById(PNG_REPORT_TYPE_V2)).toHaveProperty('id', PNG_REPORT_TYPE_V2);
+      expect(reportingCore.getExportTypesRegistry().getById(PDF_REPORT_TYPE_V2)).toHaveProperty(
+        'id',
+        PDF_REPORT_TYPE_V2
+      );
+      expect(reportingCore.getExportTypesRegistry().getById(PNG_REPORT_TYPE_V2)).toHaveProperty(
+        'id',
+        PNG_REPORT_TYPE_V2
+      );
     });
     it('expect pdf to not be in registry if config does not enable it', async () => {
       configSchema = { ...createMockConfigSchema(), export_types: { pdf: { enabled: false } } };
