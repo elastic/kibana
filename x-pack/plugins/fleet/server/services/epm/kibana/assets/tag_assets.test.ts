@@ -15,6 +15,17 @@ describe('tagKibanaAssets', () => {
     create: jest.fn(),
   } as any;
 
+  const FOO_TAG_ID = 'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default';
+  const BAR_TAG_ID = 'fleet-shared-tag-test-pkg-e8d5cf6d-de0f-5e77-9aa3-91093cdfbf62-default';
+  const MY_CUSTOM_TAG_ID = 'fleet-shared-tag-test-pkg-cdc93456-cbdd-5560-a16c-117190be14ca-default';
+
+  const managedTagPayloadArg1 = {
+    color: '#0077CC',
+    description: '',
+    name: 'Managed',
+  };
+  const managedTagPayloadArg2 = { id: 'fleet-managed-default', overwrite: true, refresh: false };
+
   beforeEach(() => {
     savedObjectTagAssignmentService.updateTagAssignments.mockReset();
     savedObjectTagClient.get.mockReset();
@@ -288,7 +299,7 @@ describe('tagKibanaAssets', () => {
     });
   });
 
-  it('should create tags based on assetTags obtained from packageInfo', async () => {
+  it('should create tags based on assetTags obtained from packageInfo and apply them to all taggable assets of that type', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
@@ -306,12 +317,6 @@ describe('tagKibanaAssets', () => {
         text: 'Foo',
         asset_types: ['dashboard'],
       },
-      { text: 'Bar', asset_ids: ['dashboard1', 'search_id1'] },
-      {
-        text: 'myCustomTag',
-        asset_types: ['search'],
-        asset_ids: ['dashboard2'],
-      },
     ];
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -323,14 +328,10 @@ describe('tagKibanaAssets', () => {
       importedAssets: [],
       assetTags,
     });
-    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(5);
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      {
-        color: '#0077CC',
-        description: '',
-        name: 'Managed',
-      },
-      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+      managedTagPayloadArg1,
+      managedTagPayloadArg2
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -347,13 +348,12 @@ describe('tagKibanaAssets', () => {
         name: 'Foo',
       },
       {
-        id: 'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
+        id: FOO_TAG_ID,
         overwrite: true,
         refresh: false,
       }
     );
-    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(5);
-
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       assign: [
         {
@@ -385,10 +385,7 @@ describe('tagKibanaAssets', () => {
         },
       ],
       refresh: false,
-      tags: [
-        'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
-        'fleet-shared-tag-test-pkg-e8d5cf6d-de0f-5e77-9aa3-91093cdfbf62-default',
-      ],
+      tags: [FOO_TAG_ID],
       unassign: [],
     });
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
@@ -399,10 +396,203 @@ describe('tagKibanaAssets', () => {
         },
       ],
       refresh: false,
-      tags: [
-        'fleet-shared-tag-test-pkg-b84ed8ed-a7b1-502f-83f6-90132e68adef-default',
-        'fleet-shared-tag-test-pkg-cdc93456-cbdd-5560-a16c-117190be14ca-default',
+      tags: [FOO_TAG_ID],
+      unassign: [],
+    });
+  });
+
+  it('should create tags based on assetTags obtained from packageInfo and apply them to the specified taggable assets ids', async () => {
+    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
       ],
+    } as any;
+    const assetTags = [{ text: 'Bar', asset_ids: ['dashboard1', 'search_id1'] }];
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
+      pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
+      assetTags,
+    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      managedTagPayloadArg1,
+      managedTagPayloadArg2
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: '#4DD2CA',
+        description: '',
+        name: 'TestPackage',
+      },
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: expect.any(String),
+        description: 'Tag defined in package-spec',
+        name: 'Bar',
+      },
+      {
+        id: BAR_TAG_ID,
+        overwrite: true,
+        refresh: false,
+      }
+    );
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
+        {
+          id: 'dashboard1',
+          type: 'dashboard',
+        },
+        {
+          id: 'dashboard2',
+          type: 'dashboard',
+        },
+        {
+          id: 'search_id1',
+          type: 'search',
+        },
+        {
+          id: 'search_id2',
+          type: 'search',
+        },
+      ],
+      refresh: false,
+      tags: ['fleet-managed-default', 'fleet-pkg-test-pkg-default'],
+      unassign: [],
+    });
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
+        {
+          id: 'dashboard1',
+          type: 'dashboard',
+        },
+      ],
+      refresh: false,
+      tags: [BAR_TAG_ID],
+      unassign: [],
+    });
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
+        {
+          id: 'search_id1',
+          type: 'search',
+        },
+      ],
+      refresh: false,
+      tags: [BAR_TAG_ID],
+      unassign: [],
+    });
+  });
+
+  it('should create tags based on assetTags obtained from packageInfo and apply them to all the specified assets', async () => {
+    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+      ],
+    } as any;
+    const assetTags = [
+      {
+        text: 'myCustomTag',
+        asset_types: ['search'],
+        asset_ids: ['dashboard2'],
+      },
+    ];
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
+      pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
+      assetTags,
+    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      managedTagPayloadArg1,
+      managedTagPayloadArg2
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: '#4DD2CA',
+        description: '',
+        name: 'TestPackage',
+      },
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: expect.any(String),
+        description: 'Tag defined in package-spec',
+        name: 'myCustomTag',
+      },
+      {
+        id: MY_CUSTOM_TAG_ID,
+        overwrite: true,
+        refresh: false,
+      }
+    );
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
+
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
+        {
+          id: 'dashboard1',
+          type: 'dashboard',
+        },
+        {
+          id: 'dashboard2',
+          type: 'dashboard',
+        },
+        {
+          id: 'search_id1',
+          type: 'search',
+        },
+      ],
+      refresh: false,
+      tags: ['fleet-managed-default', 'fleet-pkg-test-pkg-default'],
+      unassign: [],
+    });
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
+        {
+          id: 'search_id1',
+          type: 'search',
+        },
+      ],
+      refresh: false,
+      tags: [MY_CUSTOM_TAG_ID],
+      unassign: [],
+    });
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      assign: [
+        {
+          id: 'dashboard2',
+          type: 'dashboard',
+        },
+      ],
+      refresh: false,
+      tags: [MY_CUSTOM_TAG_ID],
       unassign: [],
     });
   });
@@ -445,6 +635,59 @@ describe('tagKibanaAssets', () => {
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
   });
 
+  it('should not call savedObjectTagClient.create if the tag id is the same but different case', async () => {
+    savedObjectTagClient.get.mockImplementation(async (id: string) => {
+      if (id === FOO_TAG_ID) {
+        return {
+          name: 'Foo',
+          id,
+          color: '',
+          description: '',
+        };
+      } else throw new Error('not found');
+    });
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ],
+    } as any;
+    const assetTags = [
+      {
+        text: 'foo',
+        asset_types: ['dashboard'],
+      },
+    ];
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
+      pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
+      assetTags,
+    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      managedTagPayloadArg1,
+      managedTagPayloadArg2
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        name: 'TestPackage',
+        description: '',
+        color: '#4DD2CA',
+      },
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+    );
+  });
+
   it('should respect SecuritySolution tags', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
@@ -475,12 +718,8 @@ describe('tagKibanaAssets', () => {
       assetTags,
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
-      {
-        color: '#0077CC',
-        description: '',
-        name: 'Managed',
-      },
-      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+      managedTagPayloadArg1,
+      managedTagPayloadArg2
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -500,7 +739,7 @@ describe('tagKibanaAssets', () => {
     );
   });
 
-  it('should only call savedObjectTagClient.create for basic tgs if there are no assetTags to assign', async () => {
+  it('should only call savedObjectTagClient.create for basic tags if there are no assetTags to assign', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
@@ -528,7 +767,7 @@ describe('tagKibanaAssets', () => {
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(1);
   });
 
-  it('should only call savedObjectTagClient.create for basic tgs if there are no taggable assetTags', async () => {
+  it('should only call savedObjectTagClient.create for basic tags if there are no taggable assetTags', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })

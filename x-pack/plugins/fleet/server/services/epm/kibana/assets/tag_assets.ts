@@ -58,8 +58,12 @@ const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
 const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
 
+/*
+  This function is exported via fleet/plugin.ts to make it available to other plugins
+  The `SecuritySolution` tag is a special case that needs to be handled separately
+  In that case simply return `SecuritySolution`
+*/
 export const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
-  // handle case of `securitySolution` tag
   if (tagName.toLowerCase() === SECURITY_SOLUTION_TAG_ID.toLowerCase())
     return SECURITY_SOLUTION_TAG_ID;
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
