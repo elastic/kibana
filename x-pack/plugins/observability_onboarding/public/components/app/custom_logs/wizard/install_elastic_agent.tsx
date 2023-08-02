@@ -60,7 +60,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (!hasAlreadySavedFlow(getState())) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/privileges'
+          'GET /internal/observability_onboarding/logs/setup/privileges'
         );
       }
     },
@@ -69,7 +69,7 @@ export function InstallElasticAgent() {
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi(
-      'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+      'GET /internal/observability_onboarding/logs/setup/environment'
     );
   }, []);
 
@@ -87,23 +87,20 @@ export function InstallElasticAgent() {
         logFilePaths,
       } = getState();
       if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
-        return callApi(
-          'POST /internal/observability_onboarding/custom_logs/save',
-          {
-            params: {
-              body: {
-                name: datasetName,
-                state: {
-                  datasetName,
-                  serviceName,
-                  namespace,
-                  customConfigurations,
-                  logFilePaths,
-                },
+        return callApi('POST /internal/observability_onboarding/logs/flow', {
+          params: {
+            body: {
+              name: datasetName,
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
               },
             },
-          }
-        );
+          },
+        });
       }
     },
     [monitoringRole?.hasPrivileges]
@@ -120,7 +117,7 @@ export function InstallElasticAgent() {
     } = getState();
     if (onboardingId) {
       return callApi(
-        'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+        'PUT /internal/observability_onboarding/flow/{onboardingId}',
         {
           params: {
             path: { onboardingId },
@@ -173,7 +170,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
           { params: { path: { onboardingId } } }
         );
       }
