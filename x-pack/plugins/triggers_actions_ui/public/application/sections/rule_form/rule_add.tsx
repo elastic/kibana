@@ -39,11 +39,9 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_RULE_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
-
-const MULTI_CONSUMER_RULE_TYPE_IDS = ['observability.rules.threshold', '.es-query'];
 
 const RuleAdd = ({
   consumer,
@@ -58,6 +56,7 @@ const RuleAdd = ({
   hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
+  validConsumers,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
