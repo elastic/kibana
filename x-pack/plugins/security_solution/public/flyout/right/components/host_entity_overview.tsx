@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink, EuiIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import styled from 'styled-components';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -37,7 +37,13 @@ import {
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeXS};
 `;
+const HOST_ICON = 'storage';
 const CONTEXT_ID = `flyout-host-entity-overview`;
+
+const StyledEuiLink = styled(EuiLink)`
+  font-size: 12px;
+  font-weight: 700;
+`;
 
 export interface HostEntityOverviewProps {
   /**
@@ -130,20 +136,34 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   );
 
   return (
-    <EuiFlexGroup data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
       <EuiFlexItem>
-        <OverviewDescriptionList
-          dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
-          descriptionList={descriptionList}
-        />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={HOST_ICON} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StyledEuiLink onClick={() => window.alert('test')}>{hostName}</StyledEuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isAuthorized && (
-          <DescriptionListStyled
-            data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
-            listItems={[hostRiskLevel]}
-          />
-        )}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <OverviewDescriptionList
+              dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
+              descriptionList={descriptionList}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isAuthorized && (
+              <DescriptionListStyled
+                data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
+                listItems={[hostRiskLevel]}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

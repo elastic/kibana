@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiIcon, EuiLink } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import styled from 'styled-components';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -37,8 +37,13 @@ import { useObservedUserDetails } from '../../../explore/users/containers/users/
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeXS};
 `;
-
+const USER_ICON = 'user';
 const CONTEXT_ID = `flyout-user-entity-overview`;
+
+const StyledEuiLink = styled(EuiLink)`
+  font-size: 12px;
+  font-weight: 700;
+`;
 
 export interface UserEntityOverviewProps {
   /**
@@ -130,20 +135,34 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   }, [userRisk]);
 
   return (
-    <EuiFlexGroup data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
       <EuiFlexItem>
-        <OverviewDescriptionList
-          dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
-          descriptionList={descriptionList}
-        />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={USER_ICON} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StyledEuiLink onClick={() => window.alert('test')}>{userName}</StyledEuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isAuthorized && (
-          <DescriptionListStyled
-            data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
-            listItems={[userRiskLevel]}
-          />
-        )}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <OverviewDescriptionList
+              dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
+              descriptionList={descriptionList}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isAuthorized && (
+              <DescriptionListStyled
+                data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
+                listItems={[userRiskLevel]}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
