@@ -11,7 +11,7 @@ Array [
 exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction],
@@ -33,7 +33,7 @@ Array [
           mount={[Function]}
         />
       </EuiFlyout>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -44,21 +44,50 @@ exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div dat
 exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiFlyout
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiFlyout>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
                     >
@@ -67,31 +96,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiFlyout>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiFlyout
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiFlyout>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -113,25 +119,54 @@ Array [
           mount={[Function]}
         />
       </EuiFlyout>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiFlyout
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiFlyout>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
                     >
@@ -140,31 +175,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiFlyout>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiFlyout
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiFlyout>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -186,7 +198,7 @@ Array [
           mount={[Function]}
         />
       </EuiFlyout>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]

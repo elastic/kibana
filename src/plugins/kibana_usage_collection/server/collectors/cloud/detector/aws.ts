@@ -9,7 +9,6 @@
 import { readFile } from 'fs/promises';
 import { get, omit } from 'lodash';
 import fetch from 'node-fetch';
-import { AbortSignal } from 'abort-controller';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
