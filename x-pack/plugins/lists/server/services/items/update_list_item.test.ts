@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
