@@ -24,7 +24,6 @@ interface Props {
 export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
   ({ step, setStep, isDetailsStepValid, isConfigureProcessorStepValid }) => {
     const currentStepIndex = steps.findIndex((s) => s === step);
-    console.log('current step index', currentStepIndex); // remove
     const navSteps: EuiStepsHorizontalProps['steps'] = [
       {
         // Details

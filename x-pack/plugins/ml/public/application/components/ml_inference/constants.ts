@@ -34,21 +34,21 @@ export const CONTINUE_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Continue' }
 );
 
-export const editMessage = i18n.translate(
+export const EDIT_MESSAGE = i18n.translate(
   'xpack.ml.trainedModels.actions.create.advancedDetails.editButtonText',
   {
     defaultMessage: 'Edit',
   }
 );
 
-export const createFieldMapMessage = i18n.translate(
+export const CREATE_FIELD_MAPPING_MESSAGE = i18n.translate(
   'xpack.ml.trainedModels.actions.create.advancedDetails.createFieldMapText',
   {
     defaultMessage: 'Create field map',
   }
 );
 
-export const cancelEditMessage = i18n.translate(
+export const CANCEL_EDIT_MESSAGE = i18n.translate(
   'xpack.ml.trainedModels.actions.create.advancedDetails.cancelEditButtonText',
   {
     defaultMessage: 'Cancel',

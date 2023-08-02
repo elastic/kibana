@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { ModelItem } from '../../../model_management/models_list';
-import { editMessage, cancelEditMessage, createFieldMapMessage } from '../constants';
+import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE, CREATE_FIELD_MAPPING_MESSAGE } from '../constants';
 import { validateInferenceConfigType } from '../validation';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import { SaveChangesButton } from './save_changes_button';
@@ -175,7 +175,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                           setEditInferenceConfig(!editInferenceConfig);
                         }}
                       >
-                        {editInferenceConfig ? cancelEditMessage : editMessage}
+                        {editInferenceConfig ? CANCEL_EDIT_MESSAGE : EDIT_MESSAGE}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -292,10 +292,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
                         }}
                       >
                         {editFieldMapping
-                          ? cancelEditMessage
+                          ? CANCEL_EDIT_MESSAGE
                           : fieldMap !== undefined
-                          ? editMessage
-                          : createFieldMapMessage}
+                          ? EDIT_MESSAGE
+                          : CREATE_FIELD_MAPPING_MESSAGE}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

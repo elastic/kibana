@@ -103,7 +103,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
       resp = await esSearch({
         index: sourceIndex,
         body: {
-          size: 2,
+          size: 1,
         },
       });
 
@@ -115,6 +115,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
       console.error(error);
     }
     setSampleDocsString(JSON.stringify(records, null, 2));
+    setIsValid(true);
   }, [sourceIndex, esSearch]);
 
   useEffect(
@@ -167,6 +168,48 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={false} hasShadow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiButton
+                    onClick={simulatePipeline}
+                    disabled={sampleDocsString === '' || !isValid}
+                  >
+                    {i18n.translate(
+                      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton',
+                      { defaultMessage: 'Simulate pipeline' }
+                    )}
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={clearResults}
+                  disabled={simulatePipelineResult === undefined}
+                >
+                  {i18n.translate(
+                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.clearResultsButton',
+                    { defaultMessage: 'Clear results' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={getSampleDocs}
+                  disabled={sampleDocsString === ''}
+                >
+                  {i18n.translate(
+                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.resetSampleDocsButton',
+                    { defaultMessage: 'Reset sample docs' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -229,47 +272,6 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
             </EuiResizableContainer>
           </EuiFlexItem>
           <EuiSpacer />
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div>
-                  <EuiButton
-                    onClick={simulatePipeline}
-                    disabled={sampleDocsString === '' || !isValid}
-                  >
-                    {i18n.translate(
-                      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton',
-                      { defaultMessage: 'Simulate pipeline' }
-                    )}
-                  </EuiButton>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={clearResults}
-                  disabled={simulatePipelineResult === undefined}
-                >
-                  {i18n.translate(
-                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.clearResultsButton',
-                    { defaultMessage: 'Clear results' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={getSampleDocs}
-                  disabled={sampleDocsString === ''}
-                >
-                  {i18n.translate(
-                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.resetSampleDocsButton',
-                    { defaultMessage: 'Reset sample docs' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </>
