@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-/* eslint-disable react/button-has-type */
-
 import React, { useCallback, useMemo, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -123,6 +120,7 @@ const StyledGraphControls = styled.div<Partial<StyledGraphControlProps>>`
  * Controls for zooming, panning, and centering in Resolver
  */
 
+// eslint-disable-next-line react/display-name
 export const GraphControls = React.memo(
   ({
     id,
@@ -201,6 +199,7 @@ export const GraphControls = React.memo(
       });
     }, [dispatch, timestamp, id]);
 
+    /* eslint-disable react/button-has-type */
     return (
       <StyledGraphControls
         className={className}
@@ -312,6 +311,7 @@ export const GraphControls = React.memo(
         </StyledGraphControlsColumn>
       </StyledGraphControls>
     );
+    /* eslint-enable react/button-has-type */
   }
 );
 
