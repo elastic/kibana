@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Live Queries Schema
+  version: 8.9.0
+paths:
+  /api/osquery/live_queries:
+    get:
+      summary: Find live queries
+      requestBody:
+        required: true
+        content:
+          application/json: {}
+        query:
+          $ref: './find_live_query.schema.yaml#/components/schemas/CreateLiveQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+              $ref: './find_live_query.schema.yaml#/components/schemas/SuccessResponse'
+    post:
+      summary: Create a live query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+              $ref: './create_live_query.schema.yaml#/components/schemas/SuccessResponse'
+  /api/osquery/live_queries/{id}:
+    get:
+      summary: Get live query details
+      requestBody:
+        required: true
+        content:
+          application/json: { }
+          query:
+            type: object
+            additionalProperties: true
+          parameters:
+            $ref: './find_live_query_details.schema.yaml#/components/schemas/FindLiveQueryDetailsRequestParams'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+              $ref: './find_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
+  /api/osquery/live_queries/{id}/results/{actionId}:
+      get:
+        summary: Get live query results
+        requestBody:
+          required: true
+          content:
+            application/json: { }
+            query:
+              $ref: './find_live_query_results.schema.yaml#/components/schemas/FindLiveQueryResultsRequestQuery'
+            parameters:
+              $ref: './find_live_query_results.schema.yaml#/components/schemas/FindLiveQueryResultsRequestParams'
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                $ref: './find_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
