@@ -11,7 +11,7 @@ import { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -70,6 +70,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The current columns
    */
   columns?: string[];
+  /**
+   * The selected columns with their meta
+   */
+  textBasedQueryColumns?: DatatableColumn[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -169,6 +173,7 @@ export const UnifiedHistogramLayout = ({
   timeRange,
   relativeTimeRange,
   columns,
+  textBasedQueryColumns,
   request,
   hits,
   lensTablesAdapter,
@@ -199,6 +204,7 @@ export const UnifiedHistogramLayout = ({
     originalSuggestion,
     isPlainRecord,
     columns,
+    textBasedQueryColumns,
     lensSuggestionsApi,
     onSuggestionChange,
   });

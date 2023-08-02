@@ -115,22 +115,34 @@ export function getTextBasedDatasource({
       const newLayerId = generateId();
       const indexPattern = indexPatterns[indexPatternId];
 
-      const contextualFields = context.contextualFields;
-      const newColumns = contextualFields?.map((c) => {
-        let field = indexPattern?.getFieldByName(c);
-        if (!field) {
-          field = indexPattern?.fields.find((f) => f.name.includes(c));
-        }
-        const newId = generateId();
-        const type = field?.type ?? 'number';
-        return {
-          columnId: newId,
-          fieldName: c,
-          meta: {
-            type: type as DatatableColumnType,
-          },
-        };
-      });
+      const contextualFields = context.contextualFields ?? [];
+      const textBasedQueryColumns = context.textBasedQueryColumns ?? [];
+      let newColumns = [];
+      if (textBasedQueryColumns.length) {
+        newColumns = textBasedQueryColumns?.map((c) => {
+          return {
+            columnId: c.id,
+            fieldName: c.name,
+            meta: c.meta,
+          };
+        });
+      } else {
+        newColumns = contextualFields?.map((c) => {
+          let field = indexPattern?.getFieldByName(c);
+          if (!field) {
+            field = indexPattern?.fields.find((f) => f.name.includes(c));
+          }
+          const newId = generateId();
+          const type = field?.type ?? 'number';
+          return {
+            columnId: newId,
+            fieldName: c,
+            meta: {
+              type: type as DatatableColumnType,
+            },
+          };
+        });
+      }
 
       const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;

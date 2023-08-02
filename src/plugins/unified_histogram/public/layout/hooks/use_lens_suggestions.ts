@@ -8,6 +8,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -18,6 +19,7 @@ export const useLensSuggestions = ({
   originalSuggestion,
   isPlainRecord,
   columns,
+  textBasedQueryColumns,
   lensSuggestionsApi,
   onSuggestionChange,
 }: {
@@ -26,6 +28,7 @@ export const useLensSuggestions = ({
   originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   columns?: string[];
+  textBasedQueryColumns?: DatatableColumn[];
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
 }) => {
@@ -34,15 +37,17 @@ export const useLensSuggestions = ({
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
       contextualFields: columns,
+      textBasedQueryColumns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord
       ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
       : [];
+    console.dir(allSuggestions);
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
-  }, [columns, dataView, isPlainRecord, lensSuggestionsApi, query]);
+  }, [columns, dataView, isPlainRecord, lensSuggestionsApi, query, textBasedQueryColumns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
