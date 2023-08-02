@@ -38,7 +38,7 @@ const RiskScoreEnableButtonComponent = ({
   const { http, notifications, theme, dashboard } = useKibana().services;
   const { renderDocLink, renderDashboardLink } = useRiskScoreToastContent(riskScoreEntity);
   const { fetch, isLoading } = useFetch(REQUEST_NAMES.ENABLE_RISK_SCORE, installRiskScoreModule);
-  const isRiskEngineEnabled = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled')
+  const isRiskEngineEnabled = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   const onBoardingRiskScore = useCallback(() => {
     fetch({
