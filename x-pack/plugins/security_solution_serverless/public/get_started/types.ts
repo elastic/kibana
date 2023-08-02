@@ -21,7 +21,6 @@ export interface HeaderSection {
 }
 export interface Section {
   cards?: Card[];
-  description?: string;
   icon?: EuiIconProps;
   id: SectionId;
   title: string;
@@ -35,7 +34,7 @@ export interface Badge {
 export type StepId = IntroductionSteps | ConfigureSteps | ExploreSteps;
 
 export interface Step {
-  description?: string[];
+  description?: Array<React.ReactNode | string>;
   id: StepId;
   productLineRequired?: ProductLine[];
   splitPanel?: React.ReactNode;
@@ -46,7 +45,6 @@ export interface Step {
 export type CardId = GetSetUpCardId;
 
 export interface Card {
-  description?: string | React.ReactNode;
   icon?: EuiIconProps;
   id: CardId;
   steps?: Step[];

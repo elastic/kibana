@@ -64,13 +64,10 @@ export const WELCOME_PANEL_PROGRESS_TRACKER_TITLE = i18n.translate(
 );
 
 export const WELCOME_PANEL_PROGRESS_TRACKER_DESCRIPTION = (tasks: number) =>
-  i18n.translate(
-    'xpack.securitySolutionServerless.getStarted.welcomePanel.progressTracker.description',
-    {
-      defaultMessage: `{tasks, plural, =1 {task} other {tasks}} completed`,
-      values: { tasks },
-    }
-  );
+  i18n.translate('xpack.securitySolutionServerless.getStarted.welcomePanel.progressTracker.note', {
+    defaultMessage: `{tasks, plural, =1 {task} other {tasks}} completed`,
+    values: { tasks },
+  });
 
 export const STEP_TIME_MIN = (min: number) =>
   i18n.translate(

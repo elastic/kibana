@@ -40,6 +40,7 @@ describe('CardStepComponent', () => {
       sectionId: SectionId.getSetUp,
       stepId: IntroductionSteps.getToKnowElasticSecurity,
       cardId: GetSetUpCardId.introduction,
+      expanded: true,
     });
   });
 
