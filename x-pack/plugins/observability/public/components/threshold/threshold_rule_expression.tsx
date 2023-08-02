@@ -370,7 +370,7 @@ export default function Expressions(props: Props) {
         derivedIndexPattern={derivedIndexPattern}
         onChange={debouncedOnFilterChange}
         onSubmit={onFilterChange}
-        value={ruleParams.filterQueryText}
+        value={ruleParams.filterQuery}
       />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
