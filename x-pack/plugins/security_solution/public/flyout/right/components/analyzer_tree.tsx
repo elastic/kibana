@@ -5,14 +5,9 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiPanel,
-  EuiButtonEmpty,
-  EuiTreeView,
-  EuiLoadingSpinner,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiTreeView, EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EntityPanel } from './entity_panel';
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
 import { ANALYZER_PREVIEW_TITLE, ANALYZER_PREVIEW_TEXT } from './translations';
@@ -20,7 +15,6 @@ import {
   ANALYZER_TREE_TEST_ID,
   ANALYZER_TREE_LOADING_TEST_ID,
   ANALYZER_TREE_ERROR_TEST_ID,
-  ANALYZER_TREE_VIEW_DETAILS_BUTTON_TEST_ID,
 } from './test_ids';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { getTreeNodes } from '../utils/analyzer_helpers';
@@ -101,24 +95,19 @@ export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({
 
   if (items && items.length !== 0) {
     return (
-      <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={ANALYZER_TREE_TEST_ID}>
-        <EuiPanel color="subdued" paddingSize="s">
-          <EuiButtonEmpty
-            color="primary"
-            iconType="sessionViewer"
-            onClick={goToAnalyserTab}
-            data-test-subj={ANALYZER_TREE_VIEW_DETAILS_BUTTON_TEST_ID}
-          >
-            {ANALYZER_PREVIEW_TITLE}
-          </EuiButtonEmpty>
-          <EuiTreeView
-            items={items}
-            display="compressed"
-            aria-label={ANALYZER_PREVIEW_TITLE}
-            showExpansionArrows
-          />
-        </EuiPanel>
-      </EuiPanel>
+      <EntityPanel
+        title={ANALYZER_PREVIEW_TITLE}
+        iconType={'arrowStart'}
+        onClick={goToAnalyserTab}
+        data-test-subj={ANALYZER_TREE_TEST_ID}
+      >
+        <EuiTreeView
+          items={items}
+          display="compressed"
+          aria-label={ANALYZER_PREVIEW_TITLE}
+          showExpansionArrows
+        />
+      </EntityPanel>
     );
   }
   return null;

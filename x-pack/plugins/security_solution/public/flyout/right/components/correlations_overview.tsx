@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EntityPanel } from './entity_panel';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useCorrelations } from '../../shared/hooks/use_correlations';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
-import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_TEXT, CORRELATIONS_TITLE, VIEW_ALL } from './translations';
+import { CORRELATIONS_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
 
 /**
@@ -60,27 +60,16 @@ export const CorrelationsOverview: React.FC = () => {
   );
 
   return (
-    <InsightsSubSection
-      loading={loading}
-      error={error}
+    <EntityPanel
       title={CORRELATIONS_TITLE}
+      onClick={goToCorrelationsTab}
+      iconType={'arrowStart'}
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
-      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {correlationRows}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiButtonEmpty
-        onClick={goToCorrelationsTab}
-        iconType="arrowStart"
-        iconSide="left"
-        size="s"
-        data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}ViewAllButton`}
-      >
-        {VIEW_ALL(CORRELATIONS_TEXT)}
-      </EuiButtonEmpty>
-    </InsightsSubSection>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {correlationRows}
+      </EuiFlexGroup>
+    </EntityPanel>
   );
 };
 

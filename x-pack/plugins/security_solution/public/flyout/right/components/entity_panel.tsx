@@ -9,12 +9,13 @@ import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiSplitPanel,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiPanel,
   EuiIcon,
+  EuiLink,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import {
@@ -33,11 +34,20 @@ const IconWrapper = styled(EuiIcon)`
   margin: ${({ theme }) => theme.eui.euiSizeS} 0;
 `;
 
+const StylesEuiLink = styled(EuiLink)`
+  font-size: 12px;
+  font-weight: 700;
+`;
+
 export interface EntityPanelProps {
   /**
    * String value of the title to be displayed in the header of panel
    */
   title: string;
+  /**
+   *
+   */
+  onClick?: () => void;
   /**
    * Icon string for displaying the specified icon in the header
    */
@@ -50,11 +60,11 @@ export interface EntityPanelProps {
    * Boolean to allow the component to be expanded or collapsed on first render
    */
   expanded?: boolean;
-  /** 
+  /**
   Optional content and actions to be displayed on the right side of header
   */
   headerContent?: React.ReactNode;
-  /** 
+  /**
   Data test subject string for testing
   */
   ['data-test-subj']?: string;
@@ -65,6 +75,7 @@ export interface EntityPanelProps {
  */
 export const EntityPanel: React.FC<EntityPanelProps> = ({
   title,
+  onClick,
   iconType,
   children,
   expandable = false,
@@ -102,12 +113,16 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
         >
           <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <IconWrapper type={iconType} />
+            <IconWrapper color="primary" type={iconType} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxxs">
-              <EuiText>{title}</EuiText>
-            </EuiTitle>
+            {onClick ? (
+              <StylesEuiLink onClick={() => onClick()}>{title}</StylesEuiLink>
+            ) : (
+              <EuiTitle size="xxxs">
+                <EuiText>{title}</EuiText>
+              </EuiTitle>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

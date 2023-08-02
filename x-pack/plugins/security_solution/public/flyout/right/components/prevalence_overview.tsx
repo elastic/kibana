@@ -7,14 +7,14 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { usePrevalence } from '../hooks/use_prevalence';
 import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
-import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
-import { PREVALENCE_TEXT, PREVALENCE_TITLE, VIEW_ALL } from './translations';
+import { PREVALENCE_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+import { EntityPanel } from './entity_panel';
 
 /**
  * Prevalence section under Insights section, overview tab.
@@ -50,22 +50,16 @@ export const PrevalenceOverview: FC = () => {
   }
 
   return (
-    <InsightsSubSection title={PREVALENCE_TITLE} data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}>
-      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {prevalenceRows}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiButtonEmpty
-        onClick={goToCorrelationsTab}
-        iconType="arrowStart"
-        iconSide="left"
-        size="s"
-        data-test-subj={`${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`}
-      >
-        {VIEW_ALL(PREVALENCE_TEXT)}
-      </EuiButtonEmpty>
-    </InsightsSubSection>
+    <EntityPanel
+      title={PREVALENCE_TITLE}
+      onClick={goToCorrelationsTab}
+      iconType={'arrowStart'}
+      data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
+    >
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {prevalenceRows}
+      </EuiFlexGroup>
+    </EntityPanel>
   );
 };
 

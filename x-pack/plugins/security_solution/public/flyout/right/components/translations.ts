@@ -158,20 +158,6 @@ export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
   }
 );
 
-export const ENTITIES_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.entitiesText',
-  {
-    defaultMessage: 'entities',
-  }
-);
-
-export const THREAT_INTELLIGENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText',
-  {
-    defaultMessage: 'fields of threat intelligence',
-  }
-);
-
 export const THREAT_MATCH_DETECTED = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatch',
   {
@@ -197,13 +183,6 @@ export const THREAT_ENRICHMENTS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatEnrichments',
   {
     defaultMessage: `fields enriched with threat intelligence`,
-  }
-);
-
-export const CORRELATIONS_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText',
-  {
-    defaultMessage: 'fields of correlation',
   }
 );
 
@@ -257,13 +236,6 @@ export const CORRELATIONS_RELATED_CASES = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCases',
   {
     defaultMessage: 'related cases',
-  }
-);
-
-export const PREVALENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
-  {
-    defaultMessage: 'fields of prevalence',
   }
 );
 

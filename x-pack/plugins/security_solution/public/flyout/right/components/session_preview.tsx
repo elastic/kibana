@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCode, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React, { useMemo, type FC, useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EntityPanel } from './entity_panel';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
 import { useProcessData } from '../hooks/use_process_data';
-import { SESSION_PREVIEW_TEST_ID, SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID } from './test_ids';
+import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
   SESSION_PREVIEW_COMMAND_TEXT,
   SESSION_PREVIEW_PROCESS_TEXT,
@@ -120,29 +121,23 @@ export const SessionPreview: FC = () => {
   }, [command, workdir]);
 
   return (
-    <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={SESSION_PREVIEW_TEST_ID}>
-      <EuiPanel color="subdued" paddingSize="s">
-        <EuiButtonEmpty
-          color="primary"
-          iconType="sessionViewer"
-          onClick={goToSessionViewTab}
-          data-test-subj={SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID}
-        >
-          {SESSION_PREVIEW_TITLE}
-        </EuiButtonEmpty>
-
-        <div>
-          <ValueContainer>
-            <EuiIcon type="user" />
-            &nbsp;
-            <span style={emphasisStyles}>{userName}</span>
-          </ValueContainer>
-          {processNameFragment}
-          {timeFragment}
-          {ruleFragment}
-          {commandFragment}
-        </div>
-      </EuiPanel>
-    </EuiPanel>
+    <EntityPanel
+      title={SESSION_PREVIEW_TITLE}
+      iconType={'arrowStart'}
+      onClick={goToSessionViewTab}
+      data-test-subj={SESSION_PREVIEW_TEST_ID}
+    >
+      <div>
+        <ValueContainer>
+          <EuiIcon type="user" />
+          &nbsp;
+          <span style={emphasisStyles}>{userName}</span>
+        </ValueContainer>
+        {processNameFragment}
+        {timeFragment}
+        {ruleFragment}
+        {commandFragment}
+      </div>
+    </EntityPanel>
   );
 };

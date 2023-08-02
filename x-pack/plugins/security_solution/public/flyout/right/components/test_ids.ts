@@ -74,8 +74,6 @@ export const ENTITIES_USER_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserContent';
 export const ENTITIES_HOST_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
-export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
 export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';

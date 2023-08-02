@@ -7,17 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EntityPanel } from './entity_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { InsightsSubSection } from './insights_subsection';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useRightPanelContext } from '../context';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
 import {
-  VIEW_ALL,
   THREAT_INTELLIGENCE_TITLE,
-  THREAT_INTELLIGENCE_TEXT,
   THREAT_MATCH_DETECTED,
   THREAT_ENRICHMENT,
   THREAT_MATCHES_DETECTED,
@@ -58,41 +56,31 @@ export const ThreatIntelligenceOverview: FC = () => {
   const error: boolean = !eventId || !dataFormattedForFieldBrowser || threatIntelError;
 
   return (
-    <InsightsSubSection
-      error={error}
+    <EntityPanel
       title={THREAT_INTELLIGENCE_TITLE}
+      onClick={goToThreatIntelligenceTab}
+      iconType={'arrowStart'}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
     >
-      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <InsightsSummaryRow
-            loading={threatIntelLoading}
-            error={error}
-            icon={'warning'}
-            value={threatMatchesCount}
-            text={threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED}
-            data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
-          />
-          <InsightsSummaryRow
-            loading={threatIntelLoading}
-            error={error}
-            icon={'warning'}
-            value={threatEnrichmentsCount}
-            text={threatEnrichmentsCount <= 1 ? THREAT_ENRICHMENT : THREAT_ENRICHMENTS}
-            data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
-          />
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiButtonEmpty
-        onClick={goToThreatIntelligenceTab}
-        iconType="arrowStart"
-        iconSide="left"
-        size="s"
-        data-test-subj={`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ViewAllButton`}
-      >
-        {VIEW_ALL(THREAT_INTELLIGENCE_TEXT)}
-      </EuiButtonEmpty>
-    </InsightsSubSection>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <InsightsSummaryRow
+          loading={threatIntelLoading}
+          error={error}
+          icon={'warning'}
+          value={threatMatchesCount}
+          text={threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED}
+          data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+        />
+        <InsightsSummaryRow
+          loading={threatIntelLoading}
+          error={error}
+          icon={'warning'}
+          value={threatEnrichmentsCount}
+          text={threatEnrichmentsCount <= 1 ? THREAT_ENRICHMENT : THREAT_ENRICHMENTS}
+          data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+        />
+      </EuiFlexGroup>
+    </EntityPanel>
   );
 };
 

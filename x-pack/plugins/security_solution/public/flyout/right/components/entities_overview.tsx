@@ -6,17 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
-import {
-  ENTITIES_HEADER_TEST_ID,
-  ENTITIES_CONTENT_TEST_ID,
-  ENTITIES_HOST_CONTENT_TEST_ID,
-  ENTITIES_USER_CONTENT_TEST_ID,
-  ENTITIES_VIEW_ALL_BUTTON_TEST_ID,
-} from './test_ids';
-import { ENTITIES_TITLE, ENTITIES_TEXT, VIEW_ALL } from './translations';
+import { ENTITIES_HEADER_TEST_ID, ENTITIES_CONTENT_TEST_ID } from './test_ids';
+import { ENTITIES_TITLE } from './translations';
 import { EntityPanel } from './entity_panel';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
@@ -53,43 +47,25 @@ export const EntitiesOverview: React.FC = () => {
 
   return (
     <>
-      <EuiTitle size="xxs" data-test-subj={ENTITIES_HEADER_TEST_ID}>
-        <h5>{ENTITIES_TITLE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup data-test-subj={ENTITIES_CONTENT_TEST_ID} direction="column" gutterSize="s">
-        {userName && (
-          <EuiFlexItem>
-            <EntityPanel
-              title={userName}
-              iconType={USER_ICON}
-              data-test-subj={ENTITIES_USER_CONTENT_TEST_ID}
-            >
+      <EntityPanel
+        title={ENTITIES_TITLE}
+        onClick={goToEntitiesTab}
+        iconType={'arrowStart'}
+        data-test-subj={ENTITIES_HEADER_TEST_ID}
+      >
+        <EuiFlexGroup data-test-subj={ENTITIES_CONTENT_TEST_ID} direction="column" gutterSize="s">
+          {userName && (
+            <EuiFlexItem>
               <UserEntityOverview userName={userName} />
-            </EntityPanel>
-          </EuiFlexItem>
-        )}
-        {hostName && (
-          <EuiFlexItem>
-            <EntityPanel
-              title={hostName}
-              iconType={HOST_ICON}
-              data-test-subj={ENTITIES_HOST_CONTENT_TEST_ID}
-            >
+            </EuiFlexItem>
+          )}
+          {hostName && (
+            <EuiFlexItem>
               <HostEntityOverview hostName={hostName} />
-            </EntityPanel>
-          </EuiFlexItem>
-        )}
-        <EuiButtonEmpty
-          onClick={goToEntitiesTab}
-          iconType="arrowStart"
-          iconSide="left"
-          size="s"
-          data-test-subj={ENTITIES_VIEW_ALL_BUTTON_TEST_ID}
-        >
-          {VIEW_ALL(ENTITIES_TEXT)}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EntityPanel>
     </>
   );
 };
