@@ -1,0 +1,12 @@
+- text: SecuritySolution
+  asset_types:
+    - dashboard
+- text: OnlySomeAssetsTag
+  asset_ids:
+    - sample_dashboard
+    - sample_search2
+- text: MixedTypesTag
+  asset_ids:
+    - sample_visualization
+  asset_types:
+    - search

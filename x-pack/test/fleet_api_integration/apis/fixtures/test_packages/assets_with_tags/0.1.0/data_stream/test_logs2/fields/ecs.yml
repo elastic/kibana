@@ -1,0 +1,3 @@
+- name: test_logs2
+  title: test_logs2
+  type: keyword

@@ -1,0 +1,24 @@
+format_version: 2.10.0
+name: assets_with_tags
+title: Test package with tags
+description: Tests that tags in tags.yml are correctly applied
+version: 0.1.0
+categories: []
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+conditions:
+  kibana.version: "^8.10.1"
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

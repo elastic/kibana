@@ -19,6 +19,13 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'only_dashboard';
   const pkgVersion = '0.1.0';
 
+  const installPackage = async (name: string, version: string) => {
+    return await supertest
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
   const uninstallPackage = async (pkg: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -65,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
   const deleteSpace = async (spaceId: string) => {
     await supertest.delete(`/api/spaces/space/${spaceId}`).set('kbn-xsrf', 'xxxx').send();
   };
-  describe('asset tagging', () => {
+  describe('Assets tagging', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -149,6 +156,38 @@ export default function (providerContext: FtrProviderContext) {
 
         const pkgTag = await getTag(`fleet-pkg-${pkgName}-default`);
         expect(pkgTag).equal(undefined);
+      });
+    });
+
+    describe('Handles presence of tags inside integration package', async () => {
+      const testPackage = 'assets_with_tags';
+      const testPackageVersion = '0.1.0';
+      before(async () => {
+        if (!server.enabled) return;
+
+        await installPackage('assets_with_tags', pkgVersion);
+      });
+      after(async () => {
+        if (!server.enabled) return;
+        await uninstallPackage(testPackage, testPackageVersion);
+        await deleteTag('managed');
+      });
+
+      it('Should create regular tags and package spec tags', async () => {
+        const managedTag = await getTag('fleet-managed-default');
+        expect(managedTag).equal(undefined);
+
+        const securitySolutionTag = await getTag('SecuritySolution');
+        expect(securitySolutionTag).equal(undefined);
+
+        const pkgTag1 = await getTag(
+          `fleet-shared-tag-${testPackage}-ef823f10-b5af-5fcb-95da-2340a5257599-default`
+        );
+        expect(pkgTag1).equal(undefined);
+        const pkgTag2 = await getTag(
+          `fleet-shared-tag-${testPackage}-6c32dbcd-3f4b-536b-b235-305e65574d1d-default`
+        );
+        expect(pkgTag2).equal(undefined);
       });
     });
   });
