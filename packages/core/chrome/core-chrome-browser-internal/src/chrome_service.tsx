@@ -272,10 +272,10 @@ export class ChromeService {
         // render invisible
         if (!isVisible) {
           return (
-            <>
+            <div data-test-subj="kibanaHeaderChromeless">
               <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
               <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
-            </>
+            </div>
           );
         }
 

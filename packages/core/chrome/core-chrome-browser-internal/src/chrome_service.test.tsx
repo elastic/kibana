@@ -192,7 +192,7 @@ describe('start', () => {
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
   });
 
-  describe('getComponent', () => {
+  describe('getHeaderComponent', () => {
     it('returns a renderable React component', async () => {
       const { chrome } = await start();
 
@@ -238,6 +238,17 @@ describe('start', () => {
 
       const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
       expect(customProjectSideNav.text()).toBe('HELLO');
+    });
+
+    it('renders chromeless header', async () => {
+      const { chrome } = await start({ startDeps: defaultStartDeps() });
+
+      chrome.setIsVisible(false);
+
+      const component = mount(chrome.getHeaderComponent());
+
+      const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
+      expect(chromeless.length).toBe(1);
     });
   });
 
