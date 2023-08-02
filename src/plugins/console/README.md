@@ -55,7 +55,7 @@ Autocomplete definitions are all created in the form of javascript objects loade
 The [`generated`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch REST API specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/README.md) file for more information on the `spec-to-console` script. 
 
 Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
-are not created by the script. Any other fixes such as documentation links, request methods and patters and url parameters 
+are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
 should be addressed at the source. That means this should be fixed in Elasticsearch REST API specifications and then 
 autocomplete definitions can be re-generated with the script. 
 
