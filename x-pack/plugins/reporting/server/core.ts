@@ -39,7 +39,11 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
-import { ExportType, ReportingServerInfo, REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+import {
+  ExportType,
+  ReportingServerInfo,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+} from '@kbn/reporting-common';
 import {
   CsvV2ExportType,
   CsvSearchSourceImmediateExportType,
