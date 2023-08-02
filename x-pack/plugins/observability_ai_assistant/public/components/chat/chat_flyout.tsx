@@ -12,6 +12,8 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { ChatBody } from './chat_body';
 import { ConversationList } from './conversation_list';
+import { useKibana } from '../../hooks/use_kibana';
+import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
 export function ChatFlyout({
   initialConversation,
@@ -27,6 +29,10 @@ export function ChatFlyout({
   const currentUser = useCurrentUser();
 
   const { euiTheme } = useEuiTheme();
+
+  const {
+    services: { http },
+  } = useKibana();
 
   const [isConversationListExpanded, setIsConversationListExpanded] = useState(false);
 
@@ -57,6 +63,7 @@ export function ChatFlyout({
             connectors={connectors}
             initialConversation={initialConversation}
             currentUser={currentUser}
+            connectorsManagementHref={getConnectorsManagementHref(http)}
             isConversationListExpanded={isConversationListExpanded}
             onToggleExpandConversationList={() =>
               setIsConversationListExpanded(!isConversationListExpanded)

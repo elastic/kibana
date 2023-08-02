@@ -23,6 +23,9 @@ export const formatSyntheticsPolicy = (
       location_id: string;
       'monitor.project.name': string;
       'monitor.project.id': string;
+      'monitor.id': string;
+      test_run_id: string;
+      run_once: boolean;
     }
   >,
   params: Record<string, string>,

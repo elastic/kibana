@@ -160,7 +160,7 @@ export function ChatItem({
       }
       username={getRoleTranslation(role)}
     >
-      {content || error || loading || controls ? (
+      {content || error || controls ? (
         <MessagePanel
           body={
             content || loading ? <MessageText content={content || ''} loading={loading} /> : null

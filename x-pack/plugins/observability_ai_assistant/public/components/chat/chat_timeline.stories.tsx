@@ -8,10 +8,11 @@
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
 import React, { ComponentProps, useState } from 'react';
+import { MessageRole } from '../../../common';
 import {
   buildAssistantChatItem,
   buildChatInitItem,
-  buildSystemChatItem,
+  buildFunctionChatItem,
   buildUserChatItem,
 } from '../../utils/builders';
 import { ChatTimeline as Component, ChatTimelineProps } from './chat_timeline';
@@ -29,7 +30,7 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) => {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(props.items.length - 1);
 
   return (
     <>
@@ -49,7 +50,6 @@ const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) =>
 const defaultProps: ComponentProps<typeof Component> = {
   items: [
     buildChatInitItem(),
-    buildSystemChatItem(),
     buildUserChatItem(),
     buildAssistantChatItem(),
     buildUserChatItem({ content: 'How does it work?' }),
@@ -65,6 +65,39 @@ const defaultProps: ComponentProps<typeof Component> = {
         Step 3: Output - After processing the input, the function produces an output value, denoted as 'f(x)' or 'y'. This output represents the dependent variable and is the result of applying the function's rule to the input.
         
         Step 4: Uniqueness - A well-defined mathematical function ensures that each input value corresponds to exactly one output value. In other words, the function should yield the same output for the same input whenever it is called.`,
+    }),
+    buildUserChatItem({
+      content: 'Can you execute a function?',
+    }),
+    buildAssistantChatItem({
+      content: 'Sure, I can do that.',
+      title: 'suggested a function',
+      function_call: {
+        name: 'a_function',
+        arguments: '{ "foo": "bar" }',
+        trigger: MessageRole.Assistant,
+      },
+      canEdit: true,
+    }),
+    buildFunctionChatItem({
+      content: '{ "message": "The arguments are wrong" }',
+      error: new Error(),
+      canRegenerate: false,
+    }),
+    buildAssistantChatItem({
+      content: '',
+      title: 'suggested a function',
+      function_call: {
+        name: 'a_function',
+        arguments: '{ "bar": "foo" }',
+        trigger: MessageRole.Assistant,
+      },
+      canEdit: true,
+    }),
+    buildFunctionChatItem({
+      content: '',
+      title: 'are executing a function',
+      loading: true,
     }),
   ],
   onEdit: () => {},

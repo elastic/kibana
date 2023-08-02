@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -15,6 +23,7 @@ import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors'
 import { useTimeline } from '../../hooks/use_timeline';
 import { ObservabilityAIAssistantService } from '../../types';
 import { HideExpandConversationListButton } from '../buttons/hide_expand_conversation_list_button';
+import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
@@ -27,11 +36,16 @@ const timelineClassName = css`
   overflow-y: auto;
 `;
 
+const loadingSpinnerContainerClassName = css`
+  align-self: center;
+`;
+
 export function ChatBody({
   initialConversation,
   connectors,
   currentUser,
   service,
+  connectorsManagementHref,
   isConversationListExpanded,
   onToggleExpandConversationList,
 }: {
@@ -39,6 +53,7 @@ export function ChatBody({
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   service: ObservabilityAIAssistantService;
+  connectorsManagementHref: string;
   isConversationListExpanded?: boolean;
   onToggleExpandConversationList?: () => void;
 }) {
@@ -50,6 +65,51 @@ export function ChatBody({
     currentUser,
     service,
   });
+
+  let footer: React.ReactNode;
+
+  if (connectors.loading || connectors.connectors?.length === 0) {
+    footer = (
+      <>
+        <EuiSpacer size="l" />
+        {connectors.connectors?.length === 0 ? (
+          <MissingCredentialsCallout connectorsManagementHref={connectorsManagementHref} />
+        ) : (
+          <EuiFlexItem className={loadingSpinnerContainerClassName}>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        )}
+      </>
+    );
+  } else {
+    footer = (
+      <>
+        <EuiFlexItem grow className={timelineClassName}>
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+            <ChatTimeline
+              items={timeline.items}
+              onEdit={timeline.onEdit}
+              onFeedback={timeline.onFeedback}
+              onRegenerate={timeline.onRegenerate}
+              onStopGenerating={timeline.onStopGenerating}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+            <ChatPromptEditor
+              loading={false}
+              disabled={!connectors.selectedConnector}
+              onSubmit={timeline.onSubmit}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </>
+    );
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
@@ -82,29 +142,7 @@ export function ChatBody({
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
       </EuiFlexItem>
-      <EuiFlexItem grow className={timelineClassName}>
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatTimeline
-            items={timeline.items}
-            onEdit={timeline.onEdit}
-            onFeedback={timeline.onFeedback}
-            onRegenerate={timeline.onRegenerate}
-            onStopGenerating={timeline.onStopGenerating}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatPromptEditor
-            loading={false}
-            disabled={!connectors.selectedConnector}
-            onSubmit={timeline.onSubmit}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
+      {footer}
     </EuiFlexGroup>
   );
 }
