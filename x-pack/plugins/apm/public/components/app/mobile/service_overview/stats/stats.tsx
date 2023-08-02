@@ -104,7 +104,7 @@ export function MobileStats({
 
   const metrics: MetricDatum[] = [
     {
-      color: euiTheme.eui.euiColorDisabled,
+      color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
         defaultMessage: 'Crash Rate (Crash per minute)',
       }),

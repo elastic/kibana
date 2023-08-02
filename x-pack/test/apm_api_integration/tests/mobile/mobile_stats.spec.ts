@@ -223,11 +223,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(0);
         expect(response.currentPeriod.requests.value).to.eql(0);
+        expect(repsonse.currentPeriod.crashes.value).to.eql(0);
 
         expect(response.currentPeriod.sessions.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
         expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.request.timeseries.every((item)=> item.y === 0)).to.eql(
           true
         );
       });
