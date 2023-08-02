@@ -73,6 +73,6 @@ export const DELETED_RULE = i18n.translate(
 export const DELETE_CONFIRMATION_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.deleteRuleConfirmationBody',
   {
-    defaultMessage: 'This action will delete the rule. Click "Confirm" to continue.',
+    defaultMessage: 'This action will delete the rule. Click "Delete" to continue.',
   }
 );

@@ -868,7 +868,7 @@ export const SINGLE_DELETE_CONFIRMATION_TITLE = i18n.translate(
 export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
   {
-    defaultMessage: 'Confirm',
+    defaultMessage: 'Delete',
   }
 );
 

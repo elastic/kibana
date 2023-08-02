@@ -282,7 +282,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         >
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationModalBody"
-            defaultMessage='This action will delete {rulesToDeleteCount, plural, one {the chosen rule} other {{rulesToDeleteCountStrong} rules}}. Click "Confirm" to continue.'
+            defaultMessage='This action will delete {rulesToDeleteCount, plural, one {the chosen rule} other {{rulesToDeleteCountStrong} rules}}. Click "Delete" to continue.'
             values={{
               rulesToDeleteCount,
               rulesToDeleteCountStrong: <strong>{rulesToDeleteCount}</strong>,
