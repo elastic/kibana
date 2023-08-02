@@ -40,7 +40,7 @@ export function InstallElasticAgent() {
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  const datasetName = 'elastic-agent';
+  const datasetName = 'system-logs';
   const namespace = 'default';
 
   function onBack() {
@@ -83,6 +83,7 @@ export function InstallElasticAgent() {
           params: {
             body: {
               name: datasetName,
+              type: 'systemLogs',
               state: {
                 datasetName,
                 namespace,
