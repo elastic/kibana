@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiPanel,
+  keys,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,8 @@ export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEdit
 
   const { model, initialJsonString } = useJsonEditorModel(selectedFunction);
 
+  const ref = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     setFunctionPayload(initialJsonString);
   }, [initialJsonString, selectedFunction]);
@@ -56,7 +59,7 @@ export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEdit
     setFunctionPayload('');
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     const currentPrompt = prompt;
     const currentPayload = functionPayload;
 
@@ -86,7 +89,27 @@ export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEdit
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  };
+  }, [functionPayload, onSubmit, prompt, selectedFunction]);
+
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.key === keys.ENTER) {
+        handleSubmit();
+      }
+    };
+
+    window.addEventListener('keyup', keyboardListener);
+
+    return () => {
+      window.removeEventListener('keyup', keyboardListener);
+    };
+  }, [handleSubmit]);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.focus();
+    }
+  });
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -169,6 +192,7 @@ export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEdit
                 placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
                   defaultMessage: 'Press ‘$’ for function recommendations',
                 })}
+                inputRef={ref}
                 onChange={handleChange}
                 onSubmit={handleSubmit}
               />
