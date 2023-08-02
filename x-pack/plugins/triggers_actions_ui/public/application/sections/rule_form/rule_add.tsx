@@ -88,6 +88,7 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
+  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | null>(null);
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
   const [isConsumerSelectionModalOpen, setIsConsumerSelectionModalOpen] = useState<boolean>(false);
   const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
@@ -245,7 +246,13 @@ const RuleAdd = ({
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
-      const newRule = await createRule({ http, rule: rule as RuleUpdates });
+      const newRule = await createRule({
+        http,
+        rule: {
+          ...rule,
+          ...(selectedConsumer ? { consumer: selectedConsumer } : {}),
+        } as RuleUpdates,
+      });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveSuccessNotificationText', {
           defaultMessage: 'Created rule "{ruleName}"',
@@ -294,10 +301,18 @@ const RuleAdd = ({
     saveRule();
   };
 
-  const handleOnConsumerSaveClick = (newConsumer: string) => {
+  const handleOnConsumerSave = () => {
     setIsConsumerSelectionModalOpen(false);
-    setRuleProperty('consumer', newConsumer);
     saveRule();
+  };
+
+  const handleOnConsumerCancel = () => {
+    setSelectedConsumer(null);
+    setIsConsumerSelectionModalOpen(false);
+  };
+
+  const handleOnConsumerChange = (newConsumer: RuleCreationValidConsumer) => {
+    setSelectedConsumer(newConsumer);
   };
 
   return (
@@ -339,6 +354,7 @@ const RuleAdd = ({
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
                 hideInterval={hideInterval}
+                validConsumers={validConsumers}
                 onChangeMetaData={onChangeMetaData}
                 onSetAvailableRuleTypes={setAvailableRuleTypes}
               />
@@ -377,8 +393,10 @@ const RuleAdd = ({
         {isConsumerSelectionModalOpen && (
           <RuleFormConsumerSelectionModal
             consumers={authorizedConsumers}
-            onSave={handleOnConsumerSaveClick}
-            onCancel={() => setIsConsumerSelectionModalOpen(false)}
+            initialConsumer={rule.consumer as RuleCreationValidConsumer}
+            onSave={handleOnConsumerSave}
+            onChange={handleOnConsumerChange}
+            onCancel={handleOnConsumerCancel}
           />
         )}
       </EuiFlyout>

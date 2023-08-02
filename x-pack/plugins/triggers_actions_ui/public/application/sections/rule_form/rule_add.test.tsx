@@ -16,12 +16,14 @@ import RuleAdd from './rule_add';
 import { createRule } from '../../lib/rule_api/create';
 import { alertingFrameworkHealth } from '../../lib/rule_api/health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   Rule,
   RuleAddProps,
   RuleFlyoutCloseReason,
   GenericValidationResult,
   ValidationResult,
+  RuleCreationValidConsumer,
   RuleType,
   RuleTypeModel,
 } from '../../../types';
@@ -93,6 +95,7 @@ describe('rule_add', () => {
     defaultScheduleInterval,
     ruleTypeId,
     actionsShow = false,
+    validConsumers,
     ruleTypesOverwrite,
     ruleTypeModelOverwrite,
   }: {
@@ -101,6 +104,7 @@ describe('rule_add', () => {
     defaultScheduleInterval?: string;
     ruleTypeId?: string;
     actionsShow?: boolean;
+    validConsumers?: RuleCreationValidConsumer[];
     ruleTypesOverwrite?: RuleType[];
     ruleTypeModelOverwrite?: RuleTypeModel;
   }) {
@@ -344,7 +348,7 @@ describe('rule_add', () => {
     await setup({
       initialValues: {
         name: 'Simple rule',
-        consumer: 'apm',
+        consumer: 'alerts',
         ruleTypeId: 'observability.rules.threshold',
         tags: ['uptime', 'logs'],
         schedule: {
@@ -398,6 +402,13 @@ describe('rule_add', () => {
         ruleParamsExpression: TestExpression,
         requiresAppContext: false,
       },
+      validConsumers: [
+        AlertConsumers.APM,
+        AlertConsumers.INFRASTRUCTURE,
+        AlertConsumers.LOGS,
+        AlertConsumers.UPTIME,
+        AlertConsumers.SLO,
+      ],
     });
 
     await act(async () => {

@@ -21,6 +21,7 @@ const mockConsumers: RuleCreationValidConsumer[] = [
 
 const mockOnSave = jest.fn();
 const mockOnCancel = jest.fn();
+const mockOnChange = jest.fn();
 
 describe('RuleFormConsumerSelectionModal', () => {
   beforeEach(() => {
@@ -33,6 +34,7 @@ describe('RuleFormConsumerSelectionModal', () => {
         consumers={mockConsumers}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onChange={mockOnChange}
       />
     );
 
@@ -49,12 +51,55 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(screen.getByText('Stack Rules')).toBeInTheDocument();
   });
 
+  it('should initialize dropdown if provided with a valid initial consumer', () => {
+    render(
+      <RuleFormConsumerSelectionModal
+        consumers={mockConsumers}
+        onSave={mockOnSave}
+        onCancel={mockOnCancel}
+        onChange={mockOnChange}
+      />
+    );
+
+    // Selects first option if no initial value is provided
+    expect(mockOnChange).toHaveBeenLastCalledWith('apm');
+    mockOnChange.mockClear();
+
+    // Selects initial consumer
+    render(
+      <RuleFormConsumerSelectionModal
+        consumers={mockConsumers}
+        initialConsumer={'slo'}
+        onSave={mockOnSave}
+        onCancel={mockOnCancel}
+        onChange={mockOnChange}
+      />
+    );
+
+    expect(mockOnChange).toHaveBeenLastCalledWith('slo');
+    mockOnChange.mockClear();
+
+    // Selects first value if provided with invalid consumer
+    render(
+      <RuleFormConsumerSelectionModal
+        consumers={mockConsumers}
+        initialConsumer={'hello' as RuleCreationValidConsumer}
+        onSave={mockOnSave}
+        onCancel={mockOnCancel}
+        onChange={mockOnChange}
+      />
+    );
+
+    expect(mockOnChange).toHaveBeenLastCalledWith('apm');
+  });
+
   it('should select options and save', () => {
     render(
       <RuleFormConsumerSelectionModal
         consumers={mockConsumers}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onChange={mockOnChange}
       />
     );
 
@@ -62,6 +107,9 @@ describe('RuleFormConsumerSelectionModal', () => {
       fireEvent.change(screen.getByTestId('ruleFormConsumerSelect'), {
         target: { value: consumer },
       });
+
+      expect(mockOnChange).toHaveBeenLastCalledWith(consumer);
+
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       expect(mockOnSave).toHaveBeenLastCalledWith(consumer);
     });
@@ -73,6 +121,7 @@ describe('RuleFormConsumerSelectionModal', () => {
         consumers={mockConsumers}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onChange={mockOnChange}
       />
     );
 
@@ -86,6 +135,7 @@ describe('RuleFormConsumerSelectionModal', () => {
         consumers={mockConsumers}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onChange={mockOnChange}
       />
     );
 
