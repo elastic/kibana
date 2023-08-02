@@ -130,7 +130,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
             fill
-            iconType="plusInCircle"
+            iconType="plusInCircleFilled"
             data-test-subj="apiKeysCreatePromptButton"
           >
             <FormattedMessage
@@ -160,7 +160,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
                     <EuiButton
                       {...reactRouterNavigate(history, '/create')}
                       fill
-                      iconType="plusInCircle"
+                      iconType="plusInCircleFilled"
                       data-test-subj="apiKeysCreateTableButton"
                     >
                       <FormattedMessage
