@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       const req = await observabilityOnboardingApiClient.logMonitoringUser({
-        endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
+        endpoint: 'POST /internal/observability_onboarding/logs/flow',
         params: {
           body: {
             name: 'name',
