@@ -43,17 +43,17 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
           }
         } else if (!listDataStreamExists && listItemDataStreamExists) {
           return siemResponse.error({
-            body: `data stream ${lists.getListIndex()} does not exist`,
+            body: `data stream ${lists.getListName()} does not exist`,
             statusCode: 404,
           });
         } else if (!listItemDataStreamExists && listDataStreamExists) {
           return siemResponse.error({
-            body: `data stream ${lists.getListItemIndex()} does not exist`,
+            body: `data stream ${lists.getListItemName()} does not exist`,
             statusCode: 404,
           });
         } else {
           return siemResponse.error({
-            body: `data stream ${lists.getListIndex()} and data stream ${lists.getListItemIndex()} does not exist`,
+            body: `data stream ${lists.getListName()} and data stream ${lists.getListItemName()} does not exist`,
             statusCode: 404,
           });
         }

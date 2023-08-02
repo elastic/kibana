@@ -47,7 +47,7 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
         if (listDataStreamExists && listItemDataStreamExists) {
           return siemResponse.error({
-            body: `data stream: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
+            body: `data stream: "${lists.getListName()}" and "${lists.getListItemName()}" already exists`,
             statusCode: 409,
           });
         }

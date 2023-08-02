@@ -122,10 +122,10 @@ export class ListClient {
   }
 
   /**
-   * Returns the list index name
-   * @returns The list index name
+   * Returns the list data stream or index name
+   * @returns The list data stream/index name
    */
-  public getListIndex = (): string => {
+  public getListName = (): string => {
     const {
       spaceId,
       config: { listIndex: listsIndexName },
@@ -134,10 +134,10 @@ export class ListClient {
   };
 
   /**
-   * Returns the list item index name
-   * @returns The list item index name
+   * Returns the list item data stream or index name
+   * @returns The list item data stream/index name
    */
-  public getListItemIndex = (): string => {
+  public getListItemName = (): string => {
     const {
       spaceId,
       config: { listItemIndex: listsItemsIndexName },
@@ -153,8 +153,8 @@ export class ListClient {
    */
   public getList = async ({ id }: GetListOptions): Promise<ListSchema | null> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return getList({ esClient, id, listIndex });
+    const listName = this.getListName();
+    return getList({ esClient, id, listIndex: listName });
   };
 
   /**
@@ -185,14 +185,14 @@ export class ListClient {
     version,
   }: CreateListOptions): Promise<ListSchema> => {
     const { esClient, user } = this;
-    const listIndex = this.getListIndex();
+    const listName = this.getListName();
     return createList({
       description,
       deserializer,
       esClient,
       id,
       immutable,
-      listIndex,
+      listIndex: listName,
       meta,
       name,
       serializer,
@@ -232,14 +232,14 @@ export class ListClient {
     version,
   }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
     const { esClient, user } = this;
-    const listIndex = this.getListIndex();
+    const listName = this.getListName();
     return createListIfItDoesNotExist({
       description,
       deserializer,
       esClient,
       id,
       immutable,
-      listIndex,
+      listIndex: listName,
       meta,
       name,
       serializer,
@@ -252,12 +252,11 @@ export class ListClient {
   /**
    * True if the list index exists, otherwise false
    * @returns True if the list index exists, otherwise false
-   * @deprecated
    */
   public getListIndexExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return getBootstrapIndexExists(esClient, listIndex);
+    const listName = this.getListName();
+    return getBootstrapIndexExists(esClient, listName);
   };
 
   /**
@@ -266,19 +265,18 @@ export class ListClient {
    */
   public getListDataStreamExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return getDataStreamExists(esClient, listIndex);
+    const listName = this.getListName();
+    return getDataStreamExists(esClient, listName);
   };
 
   /**
    * True if the list index item exists, otherwise false
    * @returns True if the list item index exists, otherwise false
-   * @deprecated
    */
   public getListItemIndexExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return getBootstrapIndexExists(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return getBootstrapIndexExists(esClient, listItemName);
   };
 
   /**
@@ -287,19 +285,19 @@ export class ListClient {
    */
   public getListItemDataStreamExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return getDataStreamExists(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return getDataStreamExists(esClient, listItemName);
   };
 
   /**
    * Creates the list boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
-   * @deprecated
+   * @deprecated after moving to data streams there should not be need to use it
    */
   public createListBootStrapIndex = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return createBootstrapIndex(esClient, listIndex);
+    const listName = this.getListName();
+    return createBootstrapIndex(esClient, listName);
   };
 
   /**
@@ -308,8 +306,8 @@ export class ListClient {
    */
   public createListDataStream = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return createDataStream(esClient, listIndex);
+    const listName = this.getListName();
+    return createDataStream(esClient, listName);
   };
 
   /**
@@ -318,14 +316,14 @@ export class ListClient {
    */
   public migrateListIndexToDataStream = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
+    const listName = this.getListName();
     // first need to update mapping of existing index to add @timestamp
     await putMappings(
       esClient,
-      listIndex,
+      listName,
       listMappings.properties as Record<string, MappingProperty>
     );
-    return migrateToDataStream(esClient, listIndex);
+    return migrateToDataStream(esClient, listName);
   };
 
   /**
@@ -334,25 +332,25 @@ export class ListClient {
    */
   public migrateListItemIndexToDataStream = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     // first need to update mapping of existing index to add @timestamp
     await putMappings(
       esClient,
-      listItemIndex,
+      listItemName,
       listItemMappings.properties as Record<string, MappingProperty>
     );
-    return migrateToDataStream(esClient, listItemIndex);
+    return migrateToDataStream(esClient, listItemName);
   };
 
   /**
    * Creates the list item boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
-   * @deprecated
+   * @deprecated after moving to data streams there should not be need to use it
    */
   public createListItemBootStrapIndex = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return createBootstrapIndex(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return createBootstrapIndex(esClient, listItemName);
   };
 
   /**
@@ -361,8 +359,8 @@ export class ListClient {
    */
   public createListItemDataStream = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return createDataStream(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return createDataStream(esClient, listItemName);
   };
 
   /**
@@ -371,8 +369,8 @@ export class ListClient {
    */
   public getListPolicyExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return getPolicyExists(esClient, listIndex);
+    const listName = this.getListName();
+    return getPolicyExists(esClient, listName);
   };
 
   /**
@@ -381,7 +379,7 @@ export class ListClient {
    */
   public getListItemPolicyExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listsItemIndex = this.getListItemIndex();
+    const listsItemIndex = this.getListItemName();
     return getPolicyExists(esClient, listsItemIndex);
   };
 
@@ -391,8 +389,8 @@ export class ListClient {
    */
   public getListTemplateExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return getIndexTemplateExists(esClient, listIndex);
+    const listName = this.getListName();
+    return getIndexTemplateExists(esClient, listName);
   };
 
   /**
@@ -401,8 +399,8 @@ export class ListClient {
    */
   public getListItemTemplateExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return getIndexTemplateExists(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return getIndexTemplateExists(esClient, listItemName);
   };
 
   /**
@@ -411,8 +409,8 @@ export class ListClient {
    */
   public getLegacyListTemplateExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return getTemplateExists(esClient, listIndex);
+    const listName = this.getListName();
+    return getTemplateExists(esClient, listName);
   };
 
   /**
@@ -421,8 +419,8 @@ export class ListClient {
    */
   public getLegacyListItemTemplateExists = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return getTemplateExists(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return getTemplateExists(esClient, listItemName);
   };
 
   /**
@@ -430,8 +428,8 @@ export class ListClient {
    * @returns The contents of the list template for ILM.
    */
   public getListTemplate = (): Record<string, unknown> => {
-    const listIndex = this.getListIndex();
-    return getListTemplate(listIndex);
+    const listName = this.getListName();
+    return getListTemplate(listName);
   };
 
   /**
@@ -439,8 +437,8 @@ export class ListClient {
    * @returns The contents of the list item template for ILM.
    */
   public getListItemTemplate = (): Record<string, unknown> => {
-    const listItemIndex = this.getListItemIndex();
-    return getListItemTemplate(listItemIndex);
+    const listItemName = this.getListItemName();
+    return getListItemTemplate(listItemName);
   };
 
   /**
@@ -450,8 +448,8 @@ export class ListClient {
   public setListTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
     const template = this.getListTemplate();
-    const listIndex = this.getListIndex();
-    return setIndexTemplate(esClient, listIndex, template);
+    const listName = this.getListName();
+    return setIndexTemplate(esClient, listName, template);
   };
 
   /**
@@ -461,8 +459,8 @@ export class ListClient {
   public setListItemTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
     const template = this.getListItemTemplate();
-    const listItemIndex = this.getListItemIndex();
-    return setIndexTemplate(esClient, listItemIndex, template);
+    const listItemName = this.getListItemName();
+    return setIndexTemplate(esClient, listItemName, template);
   };
 
   /**
@@ -471,8 +469,8 @@ export class ListClient {
    */
   public setListPolicy = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return setPolicy(esClient, listIndex, listPolicy);
+    const listName = this.getListName();
+    return setPolicy(esClient, listName, listPolicy);
   };
 
   /**
@@ -481,8 +479,8 @@ export class ListClient {
    */
   public setListItemPolicy = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return setPolicy(esClient, listItemIndex, listsItemsPolicy);
+    const listItemName = this.getListItemName();
+    return setPolicy(esClient, listItemName, listsItemsPolicy);
   };
 
   /**
@@ -491,8 +489,8 @@ export class ListClient {
    */
   public deleteListIndex = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return deleteAllIndex(esClient, `${listIndex}-*`);
+    const listName = this.getListName();
+    return deleteAllIndex(esClient, `${listName}-*`);
   };
 
   /**
@@ -501,8 +499,8 @@ export class ListClient {
    */
   public deleteListItemIndex = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return deleteAllIndex(esClient, `${listItemIndex}-*`);
+    const listItemName = this.getListItemName();
+    return deleteAllIndex(esClient, `${listItemName}-*`);
   };
 
   /**
@@ -511,8 +509,8 @@ export class ListClient {
    */
   public deleteListDataStream = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return deleteDataStream(esClient, listIndex);
+    const listName = this.getListName();
+    return deleteDataStream(esClient, listName);
   };
 
   /**
@@ -521,8 +519,8 @@ export class ListClient {
    */
   public deleteListItemDataStream = async (): Promise<boolean> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return deleteDataStream(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return deleteDataStream(esClient, listItemName);
   };
 
   /**
@@ -531,8 +529,8 @@ export class ListClient {
    */
   public deleteListPolicy = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return deletePolicy(esClient, listIndex);
+    const listName = this.getListName();
+    return deletePolicy(esClient, listName);
   };
 
   /**
@@ -541,8 +539,8 @@ export class ListClient {
    */
   public deleteListItemPolicy = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return deletePolicy(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return deletePolicy(esClient, listItemName);
   };
 
   /**
@@ -551,8 +549,8 @@ export class ListClient {
    */
   public deleteListTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return deleteIndexTemplate(esClient, listIndex);
+    const listName = this.getListName();
+    return deleteIndexTemplate(esClient, listName);
   };
 
   /**
@@ -561,8 +559,8 @@ export class ListClient {
    */
   public deleteListItemTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return deleteIndexTemplate(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return deleteIndexTemplate(esClient, listItemName);
   };
 
   /**
@@ -571,8 +569,8 @@ export class ListClient {
    */
   public deleteLegacyListTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    return deleteTemplate(esClient, listIndex);
+    const listName = this.getListName();
+    return deleteTemplate(esClient, listName);
   };
 
   /**
@@ -581,8 +579,8 @@ export class ListClient {
    */
   public deleteLegacyListItemTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return deleteTemplate(esClient, listItemIndex);
+    const listItemName = this.getListItemName();
+    return deleteTemplate(esClient, listItemName);
   };
 
   /**
@@ -591,8 +589,8 @@ export class ListClient {
    */
   public deleteListItem = async ({ id }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
-    return deleteListItem({ esClient, id, listItemIndex });
+    const listItemName = this.getListItemName();
+    return deleteListItem({ esClient, id, listItemIndex: listItemName });
   };
 
   /**
@@ -609,11 +607,11 @@ export class ListClient {
     type,
   }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return deleteListItemByValue({
       esClient,
       listId,
-      listItemIndex,
+      listItemIndex: listItemName,
       type,
       value,
     });
@@ -627,13 +625,13 @@ export class ListClient {
    */
   public deleteList = async ({ id }: DeleteListOptions): Promise<ListSchema | null> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    const listItemIndex = this.getListItemIndex();
+    const listName = this.getListName();
+    const listItemName = this.getListItemName();
     return deleteList({
       esClient,
       id,
-      listIndex,
-      listItemIndex,
+      listIndex: listName,
+      listItemIndex: listItemName,
     });
   };
 
@@ -650,11 +648,11 @@ export class ListClient {
     stream,
   }: ExportListItemsToStreamOptions): void => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     exportListItemsToStream({
       esClient,
       listId,
-      listItemIndex,
+      listItemIndex: listItemName,
       stream,
       stringToAppend,
     });
@@ -683,15 +681,15 @@ export class ListClient {
     version,
   }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
     const { esClient, user, config } = this;
-    const listItemIndex = this.getListItemIndex();
-    const listIndex = this.getListIndex();
+    const listItemName = this.getListItemName();
+    const listName = this.getListName();
     return importListItemsToStream({
       config,
       deserializer,
       esClient,
       listId,
-      listIndex,
-      listItemIndex,
+      listIndex: listName,
+      listItemIndex: listItemName,
       meta,
       serializer,
       stream,
@@ -715,11 +713,11 @@ export class ListClient {
     type,
   }: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return getListItemByValue({
       esClient,
       listId,
-      listItemIndex,
+      listItemIndex: listItemName,
       type,
       value,
     });
@@ -749,13 +747,13 @@ export class ListClient {
     meta,
   }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return createListItem({
       deserializer,
       esClient,
       id,
       listId,
-      listItemIndex,
+      listItemIndex: listItemName,
       meta,
       serializer,
       type,
@@ -781,13 +779,13 @@ export class ListClient {
     meta,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return updateListItem({
       _version,
       esClient,
       id,
       isPatch: false,
-      listItemIndex,
+      listItemIndex: listItemName,
       meta,
       user,
       value,
@@ -811,13 +809,13 @@ export class ListClient {
     meta,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return updateListItem({
       _version,
       esClient,
       id,
       isPatch: true,
-      listItemIndex,
+      listItemIndex: listItemName,
       meta,
       user,
       value,
@@ -845,14 +843,14 @@ export class ListClient {
     version,
   }: UpdateListOptions): Promise<ListSchema | null> => {
     const { esClient, user } = this;
-    const listIndex = this.getListIndex();
+    const listName = this.getListName();
     return updateList({
       _version,
       description,
       esClient,
       id,
       isPatch: false,
-      listIndex,
+      listIndex: listName,
       meta,
       name,
       user,
@@ -879,14 +877,14 @@ export class ListClient {
     version,
   }: UpdateListOptions): Promise<ListSchema | null> => {
     const { esClient, user } = this;
-    const listIndex = this.getListIndex();
+    const listName = this.getListName();
     return updateList({
       _version,
       description,
       esClient,
       id,
       isPatch: true,
-      listIndex,
+      listIndex: listName,
       meta,
       name,
       user,
@@ -902,11 +900,11 @@ export class ListClient {
    */
   public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return getListItem({
       esClient,
       id,
-      listItemIndex,
+      listItemIndex: listItemName,
     });
   };
 
@@ -924,11 +922,11 @@ export class ListClient {
     value,
   }: GetListItemsByValueOptions): Promise<ListItemArraySchema> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return getListItemByValues({
       esClient,
       listId,
-      listItemIndex,
+      listItemIndex: listItemName,
       type,
       value,
     });
@@ -948,11 +946,11 @@ export class ListClient {
     value,
   }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
     const { esClient } = this;
-    const listItemIndex = this.getListItemIndex();
+    const listItemName = this.getListItemName();
     return searchListItemByValues({
       esClient,
       listId,
-      listItemIndex,
+      listItemIndex: listItemName,
       type,
       value,
     });
@@ -982,12 +980,12 @@ export class ListClient {
     runtimeMappings,
   }: FindListOptions): Promise<FoundListSchema> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
+    const listName = this.getListName();
     return findList({
       currentIndexPosition,
       esClient,
       filter,
-      listIndex,
+      listIndex: listName,
       page,
       perPage,
       runtimeMappings,
@@ -1024,15 +1022,15 @@ export class ListClient {
     searchAfter,
   }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    const listItemIndex = this.getListItemIndex();
+    const listName = this.getListName();
+    const listItemName = this.getListItemName();
     return findListItem({
       currentIndexPosition,
       esClient,
       filter,
       listId,
-      listIndex,
-      listItemIndex,
+      listIndex: listName,
+      listItemIndex: listItemName,
       page,
       perPage,
       runtimeMappings,
@@ -1049,14 +1047,14 @@ export class ListClient {
     sortOrder,
   }: FindAllListItemsOptions): Promise<FoundAllListItemsSchema | null> => {
     const { esClient } = this;
-    const listIndex = this.getListIndex();
-    const listItemIndex = this.getListItemIndex();
+    const listName = this.getListName();
+    const listItemName = this.getListItemName();
     return findAllListItems({
       esClient,
       filter,
       listId,
-      listIndex,
-      listItemIndex,
+      listIndex: listName,
+      listItemIndex: listItemName,
       sortField,
       sortOrder,
     });

@@ -46,7 +46,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         const listExists = await lists.getListDataStreamExists();
         if (!listExists) {
           return siemResponse.error({
-            body: `To import a list item, the data steam must exist first. Data stream "${lists.getListIndex()}" does not exist`,
+            body: `To import a list item, the data steam must exist first. Data stream "${lists.getListName()}" does not exist`,
             statusCode: 400,
           });
         }
