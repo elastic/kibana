@@ -7,7 +7,7 @@
 
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import {

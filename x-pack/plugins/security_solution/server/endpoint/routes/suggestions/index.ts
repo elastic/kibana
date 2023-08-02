@@ -16,7 +16,7 @@ import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
-} from '../../../../common/endpoint/schema/suggestions';
+} from '../../../../common/api/endpoint';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
