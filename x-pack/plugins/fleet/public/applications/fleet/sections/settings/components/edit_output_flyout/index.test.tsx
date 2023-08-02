@@ -43,9 +43,6 @@ const logstashInputsLabels = [
 ];
 
 const kafkaInputsLabels = [
-  'Username',
-  'Password',
-  'SASL Mechanism',
   'Partitioning strategy',
   'Number of events',
   'Default topic',
