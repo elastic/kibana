@@ -7,27 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleActionParams } from '../types';
+import { RuleUrl } from './execution_handler';
 
 export interface InjectActionParamsOpts {
   actionTypeId: string;
   actionParams: RuleActionParams;
-  ruleUrl?: string;
+  ruleUrl?: RuleUrl;
 }
 
 export function injectActionParams({
   actionTypeId,
   actionParams,
-  ruleUrl = '',
+  ruleUrl = {},
 }: InjectActionParamsOpts) {
   // Inject kibanaFooterLink if action type is email. This is used by the email action type
   // to inject a "View alert in Kibana" with a URL in the email's footer.
   if (actionTypeId === '.email') {
-    let path;
-    try {
-      path = new URL(ruleUrl).pathname;
-    } catch (e) {
-      path = '';
-    }
+    const path = [ruleUrl.spaceIdSegment ?? '', ruleUrl.relativePath ?? ''].join('');
     return {
       ...actionParams,
       kibanaFooterLink: {

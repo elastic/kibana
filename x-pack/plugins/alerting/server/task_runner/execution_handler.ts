@@ -57,6 +57,14 @@ export interface RunResult {
   throttledSummaryActions: ThrottledActions;
 }
 
+export interface RuleUrl {
+  absoluteUrl?: string;
+  kibanaBaseUrl?: string;
+  basePathname?: string;
+  spaceIdSegment?: string;
+  relativePath?: string;
+}
+
 export class ExecutionHandler<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -235,7 +243,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl,
+                ruleUrl: ruleUrl?.absoluteUrl,
               }),
             }),
           };
@@ -285,7 +293,7 @@ export class ExecutionHandler<
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 flapping: executableAlert.getFlapping(),
-                ruleUrl,
+                ruleUrl: ruleUrl?.absoluteUrl,
               }),
             }),
           };
@@ -433,7 +441,7 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string, start?: number, end?: number): string | undefined {
+  private buildRuleUrl(spaceId: string, start?: number, end?: number): RuleUrl | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
@@ -452,7 +460,13 @@ export class ExecutionHandler<
         this.taskRunnerContext.kibanaBaseUrl
       );
 
-      return ruleUrl.toString();
+      return {
+        absoluteUrl: ruleUrl.toString(),
+        kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+        basePathname: basePathnamePrefix,
+        spaceIdSegment,
+        relativePath,
+      };
     } catch (error) {
       this.logger.debug(
         `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
