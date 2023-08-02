@@ -53,6 +53,7 @@ export const useDashboardMenuItems = ({
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
    * Show the Dashboard app's share menu
@@ -106,7 +107,12 @@ export const useDashboardMenuItems = ({
    * Clone the dashboard
    */
   const clone = useCallback(() => {
-    dashboard.runClone().then((result) => maybeRedirect(result));
+    setIsSaveInProgress(true);
+
+    dashboard.runClone().then((result) => {
+      setIsSaveInProgress(false);
+      maybeRedirect(result);
+    });
   }, [maybeRedirect, dashboard]);
 
   /**
@@ -134,6 +140,7 @@ export const useDashboardMenuItems = ({
   /**
    * Register all of the top nav configs that can be used by dashboard.
    */
+
   const menuItems = useMemo(() => {
     return {
       fullScreen: {
@@ -141,6 +148,7 @@ export const useDashboardMenuItems = ({
         id: 'full-screen',
         testId: 'dashboardFullScreenMode',
         run: () => dashboard.dispatch.setFullScreenMode(true),
+        disableButton: disableTopNav,
       } as TopNavMenuData,
 
       labs: {
@@ -161,6 +169,7 @@ export const useDashboardMenuItems = ({
           dashboard.dispatch.setViewMode(ViewMode.EDIT);
           dashboard.clearOverlays();
         },
+        disableButton: disableTopNav,
       } as TopNavMenuData,
 
       quickSave: {
@@ -170,13 +179,13 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: !hasUnsavedChanges || isSaveInProgress || hasOverlays,
+        disableButton: disableTopNav || !hasUnsavedChanges,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
       saveAs: {
         description: topNavStrings.saveAs.description,
-        disableButton: isSaveInProgress || hasOverlays,
+        disableButton: disableTopNav,
         id: 'save',
         emphasize: !Boolean(lastSavedId),
         testId: 'dashboardSaveMenuItem',
@@ -188,7 +197,7 @@ export const useDashboardMenuItems = ({
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
         id: 'cancel',
-        disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
+        disableButton: disableTopNav || !lastSavedId,
         testId: 'dashboardViewOnlyMode',
         run: () => resetChanges(true),
       } as TopNavMenuData,
@@ -197,7 +206,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.share,
         id: 'share',
         testId: 'shareTopNavButton',
-        disableButton: isSaveInProgress || hasOverlays,
+        disableButton: disableTopNav,
         run: showShare,
       } as TopNavMenuData,
 
@@ -205,7 +214,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.settings,
         id: 'settings',
         testId: 'dashboardSettingsButton',
-        disableButton: isSaveInProgress || hasOverlays,
+        disableButton: disableTopNav,
         run: () => dashboard.showSettings(),
       } as TopNavMenuData,
 
@@ -213,22 +222,22 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.clone,
         id: 'clone',
         testId: 'dashboardClone',
-        disableButton: isSaveInProgress,
+        disableButton: disableTopNav,
         run: () => clone(),
       } as TopNavMenuData,
     };
   }, [
-    quickSaveDashboard,
-    hasUnsavedChanges,
+    disableTopNav,
     isSaveInProgress,
-    saveDashboardAs,
-    setIsLabsShown,
-    resetChanges,
-    hasOverlays,
+    hasUnsavedChanges,
     lastSavedId,
-    isLabsShown,
     showShare,
     dashboard,
+    setIsLabsShown,
+    isLabsShown,
+    quickSaveDashboard,
+    saveDashboardAs,
+    resetChanges,
     clone,
   ]);
 
