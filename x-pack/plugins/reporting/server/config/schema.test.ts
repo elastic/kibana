@@ -114,6 +114,8 @@ describe('Reporting Config Schema', () => {
   });
 
   it('should have roles enabled set to false for serverless by default', () => {
-    expect(() => ConfigSchema.validate({ roles: { enabled:  false } }, { serverless: true })).not.toThrow()
-  })
+    expect(() =>
+      ConfigSchema.validate({ roles: { enabled: false } }, { serverless: true })
+    ).not.toThrow();
+  });
 });
