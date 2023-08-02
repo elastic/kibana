@@ -86,8 +86,4 @@ export class ExportTypesRegistry {
 
     return result;
   }
-
-  keys() {
-    return this._map.keys();
-  }
 }
