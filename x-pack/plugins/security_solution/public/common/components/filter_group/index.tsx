@@ -63,6 +63,10 @@ const FilterWrapper = styled.div.attrs((props) => ({
   & .controlGroup {
     min-height: 40px;
   }
+
+  & .dummy {
+    display: none;
+  }
 `;
 
 const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
