@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy } from 'lodash';
 
 import {
@@ -423,6 +423,12 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     };
   }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
 
+  useEffect(() => {
+    if (selectedGroup === null && pinnedGroup === null && pageOfItems.length > 0) {
+      setSelectedGroup(pageOfItems[0]);
+    }
+  }, [selectedGroup, setSelectedGroup, pageOfItems, pinnedGroup]);
+
   const getRowStyle = (group: GroupTableItem) => {
     if (pinnedGroup && pinnedGroup.id === group.id) {
       return {
@@ -464,7 +470,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
             }
           },
           onMouseEnter: () => {
-            setSelectedGroup(group);
+            if (pinnedGroup === null) {
+              setSelectedGroup(group);
+            }
           },
           onMouseLeave: () => {
             setSelectedGroup(null);

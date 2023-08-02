@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -336,6 +336,16 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     };
   }, [pageIndex, pageSize, sortField, sortDirection, significantTerms]);
 
+  useEffect(() => {
+    if (
+      selectedSignificantTerm === null &&
+      pinnedSignificantTerm === null &&
+      pageOfItems.length > 0
+    ) {
+      setSelectedSignificantTerm(pageOfItems[0]);
+    }
+  }, [selectedSignificantTerm, setSelectedSignificantTerm, pageOfItems, pinnedSignificantTerm]);
+
   const getRowStyle = (significantTerm: SignificantTerm) => {
     if (
       pinnedSignificantTerm &&
@@ -393,7 +403,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
             }
           },
           onMouseEnter: () => {
-            setSelectedSignificantTerm(significantTerm);
+            if (pinnedSignificantTerm === null) {
+              setSelectedSignificantTerm(significantTerm);
+            }
           },
           onMouseLeave: () => {
             setSelectedSignificantTerm(null);
