@@ -92,7 +92,8 @@ describe('Reporting Plugin', () => {
       // wait for the startup phase background work
       plugin.start(coreStart, pluginStart);
       await new Promise(setImmediate);
-      expect(reportingCore.getExportTypesRegistry().keys()).toContain('printablePdfV2');
+      expect(reportingCore.getExportTypesRegistry().getById(pdfId)).toHaveProperty('id', pdfId);
+      expect(reportingCore.getExportTypesRegistry().getById(pngId)).toHaveProperty('id', pngId);
     });
     it('expect pdf to not be in registry if config does not enable it', async () => {
       configSchema = { ...createMockConfigSchema(), export_types: { pdf: { enabled: false } } };
@@ -113,8 +114,10 @@ describe('Reporting Plugin', () => {
       // wait for the startup phase background work
       plugin.start(coreStart, pluginStart);
       await new Promise(setImmediate);
-      expect(reportingCore.getExportTypesRegistry()).not.toContain('printablePdfV2');
-      expect(reportingCore.getExportTypesRegistry()).not.toContain('pngV2');
+      const checkPdf = () => reportingCore.getExportTypesRegistry().getById(pdfId);
+      const checkPng = () => reportingCore.getExportTypesRegistry().getById(pngId);
+      expect(checkPdf).toThrowError(`Unknown id ${pdfId}`);
+      expect(checkPng).toThrowError(`Unknown id ${pngId}`);
     });
   });
 });

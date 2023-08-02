@@ -241,7 +241,6 @@ export class ReportingCore {
       exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
       // deprecated export types for tests
       exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-      exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
     }
     return exportTypes;
   }
