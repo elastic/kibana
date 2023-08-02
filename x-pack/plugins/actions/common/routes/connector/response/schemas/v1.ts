@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 export const connectorResponseSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
-  config: schema.maybe(schema.string()),
+  config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   connector_type_id: schema.string(),
   is_missing_secrets: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean(),
