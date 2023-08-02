@@ -163,6 +163,9 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
+export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
+
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
@@ -210,7 +213,6 @@ export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/n
 /**
  * Exceptions management routes
  */
-
 export const SHARED_EXCEPTION_LIST_URL = `/api${EXCEPTIONS_PATH}/shared` as const;
 
 /**
@@ -316,12 +318,12 @@ export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
 
-/*
+/**
   Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
 
-/*
+/**
   Machine Learning constants
  */
 export const ML_GROUP_ID = 'security' as const;

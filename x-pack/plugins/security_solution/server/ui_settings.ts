@@ -36,6 +36,7 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
+  ENABLE_EXPANDABLE_FLYOUT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -158,6 +159,22 @@ export const initUiSettings = (
       description: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedDescription', {
         defaultMessage: '<p>Enables the News feed</p>',
       }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_EXPANDABLE_FLYOUT_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableExpandableFlyoutLabel', {
+        defaultMessage: 'Expandable flyout',
+      }),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableExpandableFlyoutDescription',
+        {
+          defaultMessage: '<p>Enables the expandable flyout</p>',
+        }
+      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,
