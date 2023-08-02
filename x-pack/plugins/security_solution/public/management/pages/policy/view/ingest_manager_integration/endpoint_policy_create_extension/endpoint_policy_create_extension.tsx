@@ -5,36 +5,38 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
+  EuiCallOut,
+  EuiCode,
   EuiForm,
+  EuiFormRow,
+  EuiLink,
   EuiRadio,
   EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
-  EuiFormRow,
-  EuiCallOut,
-  EuiLink,
-  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
+import { HelpTextWithPadding } from './components/help_text_with_padding';
+import { EndpointEventCollectionPreset } from './components/endpoint_event_collection_preset';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
+  DATA_COLLECTION,
+  DATA_COLLECTION_HELP_TEXT,
   EDR_COMPLETE,
-  NGAV,
   EDR_ESSENTIAL,
+  EDR_NOTE,
   ENDPOINT,
   INTERACTIVE_ONLY,
+  NGAV,
   NGAV_NOTE,
-  EDR_NOTE,
-  DATA_COLLECTION,
 } from './translations';
+import { useGetProtectionsUnavailableComponent } from '../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 
 const PREFIX = 'endpoint_policy_create_extension';
 
@@ -78,10 +80,6 @@ const environmentOptions: Array<{ value: Environment; text: string }> = [
   { value: 'cloud', text: CLOUD_SECURITY },
 ];
 
-const HelpTextWithPadding = styled.div`
-  padding-left: ${(props) => props.theme.eui.euiSizeL};
-`;
-
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -90,7 +88,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
   ({ newPolicy, onChange }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEnterprise = useLicense().isEnterprise();
-    const UpsellToIncludePolicyProtections = useUpsellingComponent('endpointPolicyProtections');
+    const showEndpointEventCollectionOnlyPreset = Boolean(useGetProtectionsUnavailableComponent());
 
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('EDRComplete');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
@@ -245,97 +243,93 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             fullWidth={true}
           />
         </EuiFormRow>
+
         {selectedEnvironment === 'endpoint' ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointDataCollection"
-                    defaultMessage="Augment your existing anti-virus solution with advanced data collection and detection"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('DataCollection')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
-                    defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, plus process telemetry"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('NGAV')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDREssential"
-                    defaultMessage="Everything in NGAV, plus file and network telemetry"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('EDREssential')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDRComplete"
-                    defaultMessage="Everything in Essential EDR, plus full telemetry"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
-            </EuiFormRow>
+          !showEndpointEventCollectionOnlyPreset ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                helpText={<HelpTextWithPadding>{DATA_COLLECTION_HELP_TEXT}</HelpTextWithPadding>}
+              >
+                <EuiRadio {...getEndpointPresetsProps('DataCollection')} />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <HelpTextWithPadding>
+                    <FormattedMessage
+                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
+                      defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, plus process telemetry"
+                    />
+                  </HelpTextWithPadding>
+                }
+              >
+                <EuiRadio {...getEndpointPresetsProps('NGAV')} />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <HelpTextWithPadding>
+                    <FormattedMessage
+                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDREssential"
+                      defaultMessage="Everything in NGAV, plus file and network telemetry"
+                    />
+                  </HelpTextWithPadding>
+                }
+              >
+                <EuiRadio {...getEndpointPresetsProps('EDREssential')} />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <HelpTextWithPadding>
+                    <FormattedMessage
+                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDRComplete"
+                      defaultMessage="Everything in Essential EDR, plus full telemetry"
+                    />
+                  </HelpTextWithPadding>
+                }
+              >
+                <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
+              </EuiFormRow>
 
-            {UpsellToIncludePolicyProtections && <UpsellToIncludePolicyProtections />}
-
-            {showNote && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut iconType="iInCircle">
-                  <EuiText size="s" data-test-subj="create-ensdpoint-policy-license-note">
-                    <p>
-                      {endpointPresetsMapping[endpointPreset].note}{' '}
-                      <FormattedMessage
-                        id="xpack.securitySolution.createPackagePolicy.stepConfigure.seeDocumentation"
-                        defaultMessage="See {documentation} for more information."
-                        values={{
-                          documentation: (
-                            <EuiLink
-                              href="https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html"
-                              target="_blank"
-                            >
-                              <FormattedMessage
-                                id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.seeDocumentationLink"
-                                defaultMessage="documentation"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiText>
-                </EuiCallOut>
-              </>
-            )}
-          </>
+              {showNote && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiCallOut iconType="iInCircle">
+                    <EuiText size="s" data-test-subj="create-ensdpoint-policy-license-note">
+                      <p>
+                        {endpointPresetsMapping[endpointPreset].note}{' '}
+                        <FormattedMessage
+                          id="xpack.securitySolution.createPackagePolicy.stepConfigure.seeDocumentation"
+                          defaultMessage="See {documentation} for more information."
+                          values={{
+                            documentation: (
+                              <EuiLink
+                                href="https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html"
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.seeDocumentationLink"
+                                  defaultMessage="documentation"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                </>
+              )}
+            </>
+          ) : (
+            <EndpointEventCollectionPreset onChange={onChange} newPolicy={newPolicy} />
+          )
         ) : (
           <>
             <EuiSpacer size="m" />
