@@ -23,6 +23,7 @@ export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 export const LeftPanelVisualizeTabPath: LeftPanelProps['path'] = ['visualize'];
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
 export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
+export const LeftPanelResponseTabPath: LeftPanelProps['path'] = ['response'];
 
 export interface LeftPanelProps extends FlyoutPanelProps {
   key: 'document-details-left';

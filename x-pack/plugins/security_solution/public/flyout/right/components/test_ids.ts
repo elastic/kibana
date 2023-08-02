@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RESPONSE_BASE_TEST_ID } from '../../left/components/test_ids';
 import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 /* Header */
@@ -142,3 +143,9 @@ export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnala
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
 export const SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsSessionPreviewViewDetailsButton';
+
+/* Response section */
+
+export const RESPONSE_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseSection';
+export const RESPONSE_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseButton';
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;
