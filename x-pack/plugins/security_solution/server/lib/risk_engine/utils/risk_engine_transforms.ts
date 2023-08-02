@@ -37,15 +37,11 @@ export const getLegacyTransforms = async ({
     );
   });
 
-  const result = await Promise.allSettled(getTransformStatsRequests);
+  const results = await Promise.allSettled(getTransformStatsRequests);
 
-  const fulfuletGetTransformStats = result
-    .filter((r) => r.status === 'fulfilled')
-    .map((r) => (r as PromiseFulfilledResult<TransformGetTransformResponse>).value);
-
-  const transforms = fulfuletGetTransformStats.reduce((acc, val) => {
-    if (val.transforms) {
-      return [...acc, ...val.transforms];
+  const transforms = results.reduce((acc, result) => {
+    if (result.status === 'fulfilled' && result.value?.transforms?.length > 0) {
+      acc.push(...result.value.transforms);
     }
     return acc;
   }, [] as TransformGetTransformTransformSummary[]);
@@ -53,13 +49,13 @@ export const getLegacyTransforms = async ({
   return transforms;
 };
 
-export const removeLegacyTransofrms = async ({
+export const removeLegacyTransforms = async ({
   namespace,
   esClient,
 }: {
   namespace: string;
   esClient: ElasticsearchClient;
-}) => {
+}): Promise<void> => {
   const transforms = await getLegacyTransforms({ namespace, esClient });
 
   const stopTransformRequests = transforms.map((t) =>

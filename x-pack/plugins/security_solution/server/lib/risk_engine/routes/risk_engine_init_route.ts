@@ -41,7 +41,7 @@ export const riskEngineInitRoute = (
           user,
         });
 
-        const initResultSnakeCase = {
+        const initResultResponse = {
           risk_engine_enabled: initResult.riskEngineEnabled,
           risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
           risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
@@ -57,12 +57,12 @@ export const riskEngineInitRoute = (
           return siemResponse.error({
             statusCode: 400,
             body: {
-              message: initResultSnakeCase.errors.join('\n'),
-              full_error: initResultSnakeCase,
+              message: initResultResponse.errors.join('\n'),
+              full_error: initResultResponse,
             },
           });
         }
-        return response.ok({ body: { result: initResultSnakeCase } });
+        return response.ok({ body: { result: initResultResponse } });
       } catch (e) {
         const error = transformError(e);
 

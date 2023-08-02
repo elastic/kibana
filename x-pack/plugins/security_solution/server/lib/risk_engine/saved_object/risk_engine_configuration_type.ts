@@ -11,6 +11,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 export const riskEngineConfigurationTypeName = 'risk-engine-configuration';
 
 export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',

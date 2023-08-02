@@ -13,6 +13,7 @@ import type {
   EcsRiskScore,
   RiskScore,
 } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
   createRule,
@@ -139,7 +140,7 @@ export const waitForRiskScoresToBePresent = async (
 
 export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
   const soResponse = await kibanaServer.savedObjects.find({
-    type: 'risk-engine-configuration',
+    type: riskEngineConfigurationTypeName,
   });
 
   return soResponse?.saved_objects?.[0];
@@ -153,7 +154,7 @@ export const cleanRiskEngineConfig = async ({
   const so = await getRiskEngineConfigSO({ kibanaServer });
   if (so) {
     await kibanaServer.savedObjects.delete({
-      type: 'risk-engine-configuration',
+      type: riskEngineConfigurationTypeName,
       id: so.id,
     });
   }
@@ -166,7 +167,7 @@ export const legacyTransformIds = [
   'ml_userriskscore_latest_transform_default',
 ];
 
-export const clearLegacyTranforms = async ({ es }: { es: Client }): Promise<void> => {
+export const clearLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
   const transforms = legacyTransformIds.map((transform) =>
     es.transform.deleteTransform({
       transform_id: transform,

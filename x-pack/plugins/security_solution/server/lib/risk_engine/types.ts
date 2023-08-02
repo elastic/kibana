@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AfterKey,
@@ -86,7 +84,7 @@ export interface InitRiskEngineError {
   };
 }
 
-export interface EnableDisableRiskEngineResponse {
+export interface EnableDisableRiskEngineErrorResponse {
   body: {
     message: {
       message: string;
@@ -95,11 +93,11 @@ export interface EnableDisableRiskEngineResponse {
   };
 }
 
-export interface GetRiskEngineEnableResponse {
+export interface EnableRiskEngineResponse {
   success: boolean;
 }
 
-export interface GetRiskEngineDisableResponse {
+export interface DisableRiskEngineResponse {
   success: boolean;
 }
 
@@ -167,12 +165,4 @@ export interface RiskScoreBucket {
 export interface RiskEngineConfiguration {
   enabled: boolean;
   last_updated_by: string;
-}
-
-export interface SavedObjectsClients {
-  savedObjectsClient: SavedObjectsClientContract;
-}
-
-export interface UpdateConfigOpts extends SavedObjectsClients {
-  user: AuthenticatedUser | null | undefined;
 }

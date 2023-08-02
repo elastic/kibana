@@ -9,15 +9,15 @@ import { useMutation } from '@tanstack/react-query';
 import { enableRiskEngine } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 import type {
-  GetRiskEngineEnableResponse,
-  EnableDisableRiskEngineResponse,
+  EnableRiskEngineResponse,
+  EnableDisableRiskEngineErrorResponse,
 } from '../../../../server/lib/risk_engine/types';
 export const ENABLE_RISK_ENGINE_MUTATION_KEY = ['POST', 'ENABLE_RISK_ENGINE'];
 
 export const useEnableRiskEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
 
-  return useMutation<GetRiskEngineEnableResponse, EnableDisableRiskEngineResponse>(
+  return useMutation<EnableRiskEngineResponse, EnableDisableRiskEngineErrorResponse>(
     () => enableRiskEngine(),
     {
       ...options,

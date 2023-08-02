@@ -16,10 +16,10 @@ import {
 import { KibanaServices } from '../../common/lib/kibana';
 import type {
   CalculateScoresResponse,
-  GetRiskEngineEnableResponse,
+  EnableRiskEngineResponse,
   GetRiskEngineStatusResponse,
   InitRiskEngineResponse,
-  GetRiskEngineDisableResponse,
+  DisableRiskEngineResponse,
 } from '../../../server/lib/risk_engine/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
 
@@ -66,8 +66,8 @@ export const initRiskEngine = async (): Promise<InitRiskEngineResponse> => {
 /**
  * Enable risk score engine
  */
-export const enableRiskEngine = async (): Promise<GetRiskEngineEnableResponse> => {
-  return KibanaServices.get().http.fetch<GetRiskEngineEnableResponse>(RISK_ENGINE_ENABLE_URL, {
+export const enableRiskEngine = async (): Promise<EnableRiskEngineResponse> => {
+  return KibanaServices.get().http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
     method: 'POST',
   });
 };
@@ -75,8 +75,8 @@ export const enableRiskEngine = async (): Promise<GetRiskEngineEnableResponse> =
 /**
  * Disable risk score engine
  */
-export const disableRiskEngine = async (): Promise<GetRiskEngineDisableResponse> => {
-  return KibanaServices.get().http.fetch<GetRiskEngineDisableResponse>(RISK_ENGINE_DISABLE_URL, {
+export const disableRiskEngine = async (): Promise<DisableRiskEngineResponse> => {
+  return KibanaServices.get().http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
     method: 'POST',
   });
 };

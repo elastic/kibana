@@ -30,13 +30,13 @@ import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import type { InitRiskEngineResult } from '../../../common/risk_engine/types';
 import { RiskEngineStatus } from '../../../common/risk_engine/types';
-import { getLegacyTransforms, removeLegacyTransofrms } from './utils/risk_engine_transforms';
+import { getLegacyTransforms, removeLegacyTransforms } from './utils/risk_engine_transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
 } from './utils/saved_object_configuration';
-import type { UpdateConfigOpts, SavedObjectsClients } from './types';
+import type { UpdateConfigOpts, SavedObjectsClients } from './utils/saved_object_configuration';
 
 interface InitOpts extends SavedObjectsClients {
   namespace: string;
@@ -165,7 +165,7 @@ export class RiskEngineDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
-    await removeLegacyTransofrms({
+    await removeLegacyTransforms({
       esClient,
       namespace,
     });

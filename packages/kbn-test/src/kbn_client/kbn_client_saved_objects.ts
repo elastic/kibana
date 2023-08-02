@@ -33,7 +33,7 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
   version?: string;
 }
 
-interface GetFindOptions {
+interface FindOptions {
   type: string;
   space?: string;
 }
@@ -163,7 +163,7 @@ export class KbnClientSavedObjects {
   /**
    * Find saved objects
    */
-  public async find<Attributes extends Record<string, any>>(options: GetFindOptions) {
+  public async find<Attributes extends Record<string, any>>(options: FindOptions) {
     this.log.debug('Find saved objects: %j', options);
 
     const { data } = await this.requester.request<SavedObjectsFindResponse<Attributes>>({

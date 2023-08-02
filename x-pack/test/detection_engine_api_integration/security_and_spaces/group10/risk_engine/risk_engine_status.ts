@@ -12,12 +12,13 @@ import {
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   cleanRiskEngineConfig,
   legacyTransformIds,
   createTransforms,
-  clearLegacyTranforms,
+  clearLegacyTransforms,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       await cleanRiskEngineConfig({
         kibanaServer,
       });
-      await clearLegacyTranforms({
+      await clearLegacyTransforms({
         es,
       });
     });
@@ -280,7 +281,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create configuration saved object', async () => {
         await initRiskEngine();
         const response = await kibanaServer.savedObjects.find({
-          type: 'risk-engine-configuration',
+          type: riskEngineConfigurationTypeName,
         });
 
         expect(response?.saved_objects?.[0]?.attributes).to.eql({
@@ -292,12 +293,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create configuration saved object only once', async () => {
         await initRiskEngine();
         const firstResponse = await kibanaServer.savedObjects.find({
-          type: 'risk-engine-configuration',
+          type: riskEngineConfigurationTypeName,
         });
 
         await initRiskEngine();
         const secondResponse = await kibanaServer.savedObjects.find({
-          type: 'risk-engine-configuration',
+          type: riskEngineConfigurationTypeName,
         });
 
         expect(secondResponse?.saved_objects?.length).to.eql(1);

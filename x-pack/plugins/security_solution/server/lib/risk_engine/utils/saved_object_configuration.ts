@@ -4,10 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import type { RiskEngineConfiguration, UpdateConfigOpts, SavedObjectsClients } from '../types';
+import type { RiskEngineConfiguration } from '../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
+
+export interface SavedObjectsClients {
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+export interface UpdateConfigOpts extends SavedObjectsClients {
+  user: AuthenticatedUser | null | undefined;
+}
 
 const getConfigurationSavedObject = async ({
   savedObjectsClient,
