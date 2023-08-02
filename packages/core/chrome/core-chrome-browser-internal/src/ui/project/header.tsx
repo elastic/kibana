@@ -272,7 +272,6 @@ export const ProjectHeader = ({
             </EuiHeaderSection>
           </EuiHeader>
 
-          {/* fixme: should have position=fixed */}
           {headerActionMenuMounter.mount && (
             <>
               <div
@@ -288,7 +287,8 @@ export const ProjectHeader = ({
                     <EuiFlexItem
                       grow={false}
                       css={css`
-                        margin-left: auto; /* force it to use all space on the main axis and push to the right */
+                        /* force the item to use all space to the left, pushing content to the right edge of the viewport */
+                        margin-left: auto;
                       `}
                     >
                       <HeaderActionMenu mounter={headerActionMenuMounter} />
