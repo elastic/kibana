@@ -25,15 +25,15 @@
 // overriding padding on the body element added by EUI
 .kbnBody.kbnBody--hasHeaderBanner.kbnBody--projectLayout.euiBody--headerIsFixed {
   padding-top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
-}
 
-.kbnBody.kbnBody--hasHeaderBanner.kbnBody--projectLayout {
   // overriding `top` positioning of the project layout app menu toolbar
   .header__actionMenu {
     top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
   }
-  .projectLayoutSideNav {
-    /* FIXME: no !important */
-    top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation !important;
+
+  &.euiBody--headerIsFixed .euiCollapsibleNav,
+  &.euiBody--headerIsFixed:not(.euiDataGrid__restrictBody) .euiFlyout,
+  {
+    top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
   }
 }
