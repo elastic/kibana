@@ -39,7 +39,7 @@ export function FunctionListPopover({
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
-      if (event.code === 'Digit4') {
+      if (event.shiftKey && event.code === 'Digit4') {
         setIsFunctionListOpen(true);
       }
     };
