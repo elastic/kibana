@@ -6,6 +6,7 @@
  */
 
 import { Journey } from '@kbn/journeys';
+import { subj } from '@kbn/test-subj-selector';
 import { SynthtraceClient } from '../services/synthtrace';
 import { generateData } from '../synthtrace_data/apm_data';
 
@@ -24,8 +25,8 @@ export const journey = new Journey({
     // Setup Synthtrace Client
     await synthClient.initialiseEsClient();
     // Generate data using Synthtrace
-    const start = Date.now() - 1000;
-    const end = Date.now();
+    const start = Date.now() - 1000 * 60 * 15;
+    const end = Date.now() + 1000 * 60 * 15;
     await synthClient.index(
       generateData({
         from: new Date(start).getTime(),
@@ -39,15 +40,15 @@ export const journey = new Journey({
     await page.goto(kbnUrl.get(`app/apm/services`));
     await page.waitForSelector(`[data-test-subj="serviceLink_nodejs"]`);
   })
-  .step('Navigate to Service Overview Page', async ({ page, kbnUrl }) => {
-    await page.click(`[data-test-subj="serviceLink_nodejs"]`);
-    await page.waitForSelector(`[data-test-subj="apmMainTemplateHeaderServiceName"]`);
+  .step('Navigate to Service Overview Page', async ({ page }) => {
+    await page.click(subj('serviceLink_nodejs'));
+    await page.waitForSelector(subj('apmMainTemplateHeaderServiceName'));
   })
-  .step('Navigate to Transactions tabs', async ({ page, kbnUrl }) => {
-    await page.click(`[data-test-subj="transactionsTab"]`);
-    await page.waitForSelector(`[data-test-subj="apmTransactionDetailLinkLink"]`);
+  .step('Navigate to Transactions tabs', async ({ page }) => {
+    await page.click(subj('transactionsTab'));
+    await page.waitForSelector(subj('apmTransactionDetailLinkLink'));
   })
-  .step('Wait for Trace Waterfall on the page to load', async ({ page, kbnUrl }) => {
-    await page.click(`[data-test-subj="apmTransactionDetailLinkLink"]`);
-    await page.waitForSelector(`[data-test-subj="apmWaterfallButton"]`);
+  .step('Wait for Trace Waterfall on the page to load', async ({ page }) => {
+    await page.click(subj('apmTransactionDetailLinkLink'));
+    await page.waitForSelector(subj('apmWaterfallButton'));
   });

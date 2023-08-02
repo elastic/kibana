@@ -9,7 +9,7 @@
 import { SavedSearch, SavedSearchAttributes } from '.';
 
 export const fromSavedSearchAttributes = (
-  id: string,
+  id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
   searchSource: SavedSearch['searchSource']

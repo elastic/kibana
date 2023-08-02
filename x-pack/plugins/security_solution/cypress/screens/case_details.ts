@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api';
+
 export const CASE_ACTIONS = '[data-test-subj="property-actions-ellipses"]';
 
 export const CASE_CONNECTOR = '[data-test-subj="connector-fields"] .euiCard__title';
@@ -14,7 +16,7 @@ export const CASE_DELETE = '[data-test-subj="property-actions-trash"]';
 export const CASE_DETAILS_DESCRIPTION =
   '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]';
 
-export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="header-page-title"]';
+export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="editable-title-header-value"]';
 
 export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status-dropdown"]';
 
@@ -50,8 +52,13 @@ export const PARTICIPANTS = 1;
 
 export const REPORTER = 0;
 
-export const EXPECTED_METRICS = ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors'];
-export const UNEXPECTED_METRICS = ['actions.isolateHost'];
+export const EXPECTED_METRICS = [
+  CaseMetricsFeature.ALERTS_COUNT,
+  CaseMetricsFeature.ALERTS_USERS,
+  CaseMetricsFeature.ALERTS_HOSTS,
+  CaseMetricsFeature.CONNECTORS,
+];
+export const UNEXPECTED_METRICS = [CaseMetricsFeature.ACTIONS_ISOLATE_HOST];
 
 export const CASES_METRIC = (metric: string) => {
   return `[data-test-subj="case-metrics-totals-${metric}"]`;
