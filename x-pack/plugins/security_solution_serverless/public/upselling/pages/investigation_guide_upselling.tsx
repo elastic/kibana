@@ -7,8 +7,9 @@
 
 import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-export const UPGRADE_INVESTIGATION_GUIDE = (productTypeRequired: AppFeatureKey) =>
+export const UPGRADE_INVESTIGATION_GUIDE = (productTypeRequired: string) =>
   i18n.translate('xpack.securitySolutionServerless.markdown.insight.upsell', {
     defaultMessage: 'Upgrade to {productTypeRequired} make use of insights in investigation guides',
     values: {
@@ -16,8 +17,10 @@ export const UPGRADE_INVESTIGATION_GUIDE = (productTypeRequired: AppFeatureKey) 
     },
   });
 
-export const investigationGuideUpselling = (requiredPLI: AppFeatureKey): string =>
-  UPGRADE_INVESTIGATION_GUIDE(requiredPLI);
+export const investigationGuideUpselling = (requiredPLI: AppFeatureKey): string => {
+  const productTypeRequired = getProductTypeByPLI(requiredPLI);
+  return productTypeRequired ? UPGRADE_INVESTIGATION_GUIDE(productTypeRequired) : '';
+};
 
 // eslint-disable-next-line import/no-default-export
 export { investigationGuideUpselling as default };
