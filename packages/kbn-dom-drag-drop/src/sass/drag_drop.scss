@@ -146,7 +146,8 @@ $reorderItemMargin: $euiSizeS;
   right: calc(100% + #{$euiSizeS});
   top: 0;
   transition: opacity $euiAnimSpeedFast ease-in-out;
-  width:100%;
+  width: 100%;
+  max-width: $euiFormMaxWidth;
 }
 
 .domDragDrop__extraDrops-visible {

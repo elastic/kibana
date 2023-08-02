@@ -6,7 +6,7 @@
  */
 
 import type { FormBasedPersistedState, MetricVisualizationState } from '@kbn/lens-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_LAYER_ID } from '../utils';
 
