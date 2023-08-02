@@ -11,6 +11,7 @@ import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '@kbn/reporting-common';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -28,10 +29,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
+import { ReportApiJSON } from '../common/types';
 import type { ReportingConfigType } from './config';
-import { ExportTypesRegistry } from './lib';
 import { ReportingCore } from './core';
+import { ExportTypesRegistry } from './lib';
 
 /**
  * Plugin Setup Contract
@@ -71,6 +72,23 @@ export interface ReportingStartDeps {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+}
+
+/**
+ * Interface of a response to an HTTP request for our plugin to generate a report.
+ * @public
+ */
+export interface ReportingJobResponse {
+  /**
+   * Contractual field with Watcher: used to automate download of the report once it is finished
+   * @public
+   */
+  path: string;
+  /**
+   * Details of a new report job that was requested
+   * @public
+   */
+  job: ReportApiJSON;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

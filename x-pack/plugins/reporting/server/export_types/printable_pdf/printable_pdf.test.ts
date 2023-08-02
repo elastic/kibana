@@ -68,10 +68,9 @@ test(`passes browserTimezone to generatePdf`, async () => {
   await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({
-      title: 'PDF Params Timezone Test',
-      relativeUrl: '/app/kibana#/something',
       browserTimezone,
       headers: encryptedHeaders,
+      objects: [{ relativeUrl: '/app/kibana#/something' }],
     }),
     cancellationToken,
     stream

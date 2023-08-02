@@ -39,7 +39,7 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
-import { ReportingServerInfo, REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+import { ExportType, ReportingServerInfo, REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
 import {
   CsvV2ExportType,
   CsvSearchSourceImmediateExportType,
@@ -55,7 +55,6 @@ import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
-import { ExportType } from './export_types/common';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -173,7 +172,7 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
 
     this.exportTypes.forEach((et) => {
-      et.start({ ...startDeps, reporting: this.getContract() });
+      et.start({ ...startDeps });
     });
 
     const { taskManager } = startDeps;
