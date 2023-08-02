@@ -284,8 +284,8 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             backfillFn: migratePackagePolicyToV8100,
           },
           {
-            type: 'unsafe_transform',
-            transformFn: migrateSyntheticsPackagePolicyToV8100,
+            type: 'data_backfill',
+            backfillFn: migrateSyntheticsPackagePolicyToV8100,
           },
         ],
         schemas: {

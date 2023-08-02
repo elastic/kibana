@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-
-import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
+import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 
 import type { PackagePolicy, PackagePolicyConfigRecord } from '../../../../common';
 
-export const migrateSyntheticsPackagePolicyToV8100: SavedObjectModelUnsafeTransformFn<
+export const migrateSyntheticsPackagePolicyToV8100: SavedObjectModelDataBackfillFn<
   PackagePolicy,
   PackagePolicy
 > = (packagePolicyDoc) => {
@@ -19,21 +17,17 @@ export const migrateSyntheticsPackagePolicyToV8100: SavedObjectModelUnsafeTransf
     packagePolicyDoc.attributes.package?.name !== 'synthetics' ||
     !packagePolicyDoc.attributes.is_managed
   ) {
-    return {
-      document: packagePolicyDoc,
-    };
+    return packagePolicyDoc;
   }
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
+  const updatedAttributes = packagePolicyDoc.attributes;
 
-  const enabledInput = updatedPackagePolicyDoc.attributes.inputs.find(
-    (input) => input.enabled === true
-  );
+  const enabledInput = updatedAttributes.inputs.find((input) => input.enabled === true);
   const enabledStream = enabledInput?.streams.find((stream) => {
     return ['browser', 'http', 'icmp', 'tcp'].includes(stream.data_stream.dataset);
   });
   if (!enabledStream) {
     return {
-      document: updatedPackagePolicyDoc,
+      attributes: updatedAttributes,
     };
   }
 
@@ -44,7 +38,7 @@ export const migrateSyntheticsPackagePolicyToV8100: SavedObjectModelUnsafeTransf
   }
 
   return {
-    document: updatedPackagePolicyDoc,
+    attributes: updatedAttributes,
   };
 };
 
