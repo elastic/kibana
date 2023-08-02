@@ -78,7 +78,7 @@ export function createDefaultSetupState(): SetupState {
   };
 }
 
-export function areViewerUsersResourcesSetup(state: SetupState): boolean {
+export function areResourcesSetupForViewer(state: SetupState): boolean {
   return (
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
@@ -86,7 +86,7 @@ export function areViewerUsersResourcesSetup(state: SetupState): boolean {
   );
 }
 
-export function areResourcesSetup(state: SetupState): boolean {
+export function areResourcesSetupForAdmin(state: SetupState): boolean {
   return (
     state.resource_management.enabled &&
     state.resources.created &&

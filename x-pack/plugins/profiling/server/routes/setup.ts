@@ -9,8 +9,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import {
-  areResourcesSetup,
-  areViewerUsersResourcesSetup,
+  areResourcesSetupForAdmin,
+  areResourcesSetupForViewer,
   createDefaultSetupState,
   mergePartialSetupStates,
 } from '../../common/setup';
@@ -89,21 +89,21 @@ export function registerSetupRoute({
           });
         }
 
-        const viewerUsersVerifyFunctions = [
+        const verifyFunctionsForViewer = [
           validateCollectorPackagePolicy,
           validateSymbolizerPackagePolicy,
           validateProfilingInApmPackagePolicy,
         ];
 
-        const viewerUsersPartialStates = await Promise.all([
-          ...viewerUsersVerifyFunctions.map((fn) => fn(setupOptions)),
+        const partialStatesForViewer = await Promise.all([
+          ...verifyFunctionsForViewer.map((fn) => fn(setupOptions)),
           hasProfilingData({
             ...setupOptions,
             client: clientWithProfilingAuth,
           }),
         ]);
 
-        const viewerUsersMergedState = mergePartialSetupStates(state, viewerUsersPartialStates);
+        const mergedStateForViewer = mergePartialSetupStates(state, partialStatesForViewer);
 
         /*
          * We need to split the verification steps
@@ -111,13 +111,13 @@ export function registerSetupRoute({
          * cannot get the cluster settings
          */
         if (
-          areViewerUsersResourcesSetup(viewerUsersMergedState) &&
-          viewerUsersMergedState.data.available
+          areResourcesSetupForViewer(mergedStateForViewer) &&
+          mergedStateForViewer.data.available
         ) {
           return response.ok({
             body: {
               has_setup: true,
-              has_data: state.data.available,
+              has_data: mergedStateForViewer.data.available,
             },
           });
         }
@@ -125,20 +125,20 @@ export function registerSetupRoute({
         /**
          * Performe advanced verification in case the first step failed.
          */
-        const adminUsersVerifyFunctions = [
+        const verifyFunctionsForAdmin = [
           validateMaximumBuckets,
           validateResourceManagement,
           validateSecurityRole,
         ];
 
-        const partialStates = await Promise.all(
-          adminUsersVerifyFunctions.map((fn) => fn(setupOptions))
+        const partialStatesForAdmin = await Promise.all(
+          verifyFunctionsForAdmin.map((fn) => fn(setupOptions))
         );
-        const mergedState = mergePartialSetupStates(state, partialStates);
+        const mergedState = mergePartialSetupStates(mergedStateForViewer, partialStatesForAdmin);
 
         return response.ok({
           body: {
-            has_setup: areResourcesSetup(mergedState),
+            has_setup: areResourcesSetupForAdmin(mergedState),
             has_data: mergedState.data.available,
           },
         });
