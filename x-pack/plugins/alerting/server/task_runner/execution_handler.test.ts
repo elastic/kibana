@@ -1716,13 +1716,13 @@ describe('Execution Handler', () => {
         Array [
           Object {
             "actionParams": Object {
-              "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
+              "val": "rule url: http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
               "basePathname": "/basePath",
-              "kibanaBaseUrl": "http://localhost:12345",
+              "kibanaBaseUrl": "http://localhost:12345/basePath",
               "relativePath": "/app/test/rule/1?start=30000&end=90000",
               "spaceIdSegment": "/s/test1",
             },
