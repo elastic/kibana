@@ -43,7 +43,7 @@ export function createIndexDocRecordsStream(
 ): Writable {
   const doIndexDocs = indexDocs(stats, client, useCreate);
 
-  let stanzasCount = 0;
+  // let stanzasCount = 0;
   return new Writable({
     highWaterMark: isCompressed(inputDir) ? 5000 : 300,
     objectMode: true,
@@ -53,8 +53,8 @@ export function createIndexDocRecordsStream(
       try {
         await doIndexDocs(jsonStanza);
         progress.addToComplete(1);
-        stanzasCount++;
-        console.log(`\nλjs write-stanzasCount: \n\t${stanzasCount}`);
+        // stanzasCount++;
+        // console.log(`\nλjs write-stanzasCount: \n\t${stanzasCount}`);
         callback(null);
       } catch (err) {
         callback(err);
@@ -67,8 +67,8 @@ export function createIndexDocRecordsStream(
       try {
         await doIndexDocs(chunks.map(({ chunk: record }) => record.value));
         progress.addToComplete(chunks.length);
-        stanzasCount++;
-        console.log(`\nλjs WRITEV-stanzasCount: \n\t${stanzasCount}`);
+        // stanzasCount++;
+        // console.log(`\nλjs WRITEV-stanzasCount: \n\t${stanzasCount}`);
         callback(null);
       } catch (err) {
         callback(err);
@@ -78,8 +78,8 @@ export function createIndexDocRecordsStream(
 }
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
-    const length = jsonStanzasWithinArchive.length;
-    console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
+    // const length = jsonStanzasWithinArchive.length;
+    // console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
@@ -91,10 +91,10 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
         concurrency: 10,
         retries: 5,
         datasource: jsonStanzasWithinArchive
-          .map((x) => {
-            console.log(`\nλjs jsonStanzaWithinArchive: \n\t${JSON.stringify(x, null, 2)}`);
-            return x;
-          })
+          // .map((x) => {
+          //   // console.log(`\nλjs jsonStanzaWithinArchive: \n\t${JSON.stringify(x, null, 2)}`);
+          //   return x;
+          // })
           .map((doc) => {
             const body = doc.source;
             const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -105,6 +105,7 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
                 _id: doc.id,
               },
             });
+            // console.log(`\nλjs op: \n${JSON.stringify(op, null, 2)}`);
             return body;
           }),
         onDocument(doc) {
