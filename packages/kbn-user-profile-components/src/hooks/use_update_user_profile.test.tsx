@@ -70,13 +70,7 @@ describe('useUpdateUserProfile() hook', () => {
       await lastValueFrom(updateDone.pipe(first((v) => v === true)));
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useUpdateUserProfile(), {
-      wrapper: ({ children }) => (
-        <UserProfilesKibanaProvider core={core} security={security}>
-          {children}
-        </UserProfilesKibanaProvider>
-      ),
-    });
+    const { result, waitForNextUpdate } = renderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     expect(result.current.isLoading).toBeFalsy();
@@ -116,13 +110,7 @@ describe('useUpdateUserProfile() hook', () => {
       return true;
     };
 
-    const { result } = renderHook(
-      () =>
-        useUpdateUserProfile({
-          pageReloadChecker,
-        }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
     const { update } = result.current;
 
     await act(async () => {
@@ -150,13 +138,7 @@ describe('useUpdateUserProfile() hook', () => {
       userProfile$: of(initialValue),
     };
 
-    const { result } = renderHook(
-      () =>
-        useUpdateUserProfile({
-          pageReloadChecker,
-        }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
     const { update } = result.current;
 
     const nextValue = { userSettings: { darkMode: 'light' as const } };
