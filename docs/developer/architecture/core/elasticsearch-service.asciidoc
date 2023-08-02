@@ -2,15 +2,13 @@
 == Elasticsearch service
 `Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server HTTP API.
 
-NOTE: The Elasticsearch service is only available server side. You can use the {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.md[Data plugin] APIs on the client side.
+NOTE: The Elasticsearch service is only available server side. You can use the {kib-repo}blob/{branch}/src/plugins/data/README.mdx[Data plugin].
 
 `elasticsearch.client` interacts with Elasticsearch service on behalf of:
 
 - `kibana_system` user via `elasticsearch.client.asInternalUser.*` methods.
 - a current end-user via `elasticsearch.client.asCurrentUser.*` methods. In this case Elasticsearch client should be given the current user credentials.
 See <<scoped-services>> and <<development-security>>.
-
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.elasticsearchservicestart.md[Elasticsearch service API docs]
 
 [source,typescript]
 ----
@@ -26,5 +24,5 @@ export class MyPlugin implements Plugin {
 }
 ----
 
-For advanced use-cases, such as a search, use {kib-repo}blob/{branch}/docs/development/plugins/data/server/kibana-plugin-plugins-data-server.md[Data plugin]
+For advanced use-cases, such as a search for specific objects, use the {kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[Global search plugin].
 
