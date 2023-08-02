@@ -60,16 +60,12 @@ export class Plugin implements PluginType {
 
     this.server = {
       config,
-      router: core.http.createRouter(),
-      cloud: plugins.cloud,
-      stackVersion: this.initContext.env.packageInfo.version,
       basePath: core.http.basePath,
-      logger: this.logger,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
-    } as UptimeServerSetup;
+    };
 
-    initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
+    initUptimeServer(this.server, plugins, ruleDataClient, this.logger, core.http.createRouter());
 
     registerUptimeSavedObjects(core.savedObjects);
 

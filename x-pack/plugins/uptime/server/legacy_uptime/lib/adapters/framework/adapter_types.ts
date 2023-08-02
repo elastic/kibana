@@ -26,7 +26,6 @@ import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UptimeEsClient } from '../../lib';
-import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
 
 export type UMElasticsearchQueryFnParams<P> = {
@@ -44,22 +43,10 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeServerSetup {
-  router: UptimeRouter;
   config: UptimeConfig;
-  // cloud?: CloudSetup;
-  // spaces?: SpacesPluginStart;
-  // fleet: FleetStartContract;
-  // security: SecurityPluginStart;
-  // savedObjectsClient?: SavedObjectsClientContract;
-  // authSavedObjectsClient?: SavedObjectsClientContract;
-  // encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   share: SharePluginSetup;
-  // stackVersion: string;
-  // logger: Logger;
-  // uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
-  // isDev?: boolean;
-  // coreStart: CoreStart;
+  isDev?: boolean;
 }
 
 export interface UptimeCorePluginsSetup {
