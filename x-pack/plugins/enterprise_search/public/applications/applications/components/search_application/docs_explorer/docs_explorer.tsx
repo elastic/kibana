@@ -448,12 +448,6 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
               <EuiSpacer size="m" />
               <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
-              <EuiLink href={docLinks.searchTemplates} target="_blank">
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.improveResultsLink"
-                  defaultMessage="Improve these results"
-                />
-              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
               <PagingInfo view={PagingInfoView} />
