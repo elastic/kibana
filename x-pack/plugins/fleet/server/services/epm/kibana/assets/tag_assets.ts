@@ -36,6 +36,7 @@ const MANAGED_TAG_COLOR = '#0077CC';
 const PACKAGE_TAG_COLOR = '#4DD2CA';
 const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
+const SECURITY_SOLUTION_TAG_ID = 'SecuritySolution';
 
 // the tag service only accepts 6-digits hex colors
 const TAG_COLORS = [
@@ -58,6 +59,9 @@ const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgNa
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
 
 export const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
+  // handle case of `securitySolution` tag
+  if (tagName.toLowerCase() === SECURITY_SOLUTION_TAG_ID.toLowerCase())
+    return SECURITY_SOLUTION_TAG_ID;
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
   const uniqueId = uuidv5(`${tagName.toLowerCase()}`, uuidv5.DNS);
   return `fleet-shared-tag-${pkgName}-${uniqueId}-${spaceId}`;
@@ -202,7 +206,7 @@ async function ensurePackageTag(
 }
 
 // Ensure that asset tags coming from the kibana/tags.yml file are correctly parsed and created
-export async function getPackageSpecTags(
+async function getPackageSpecTags(
   taggableAssets: ArchiveAsset[],
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'assetTags'>
 ): Promise<PackageSpecTagsAssets[]> {

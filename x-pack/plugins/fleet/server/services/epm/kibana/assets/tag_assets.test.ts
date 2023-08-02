@@ -445,6 +445,61 @@ describe('tagKibanaAssets', () => {
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
   });
 
+  it('should respect SecuritySolution tags', async () => {
+    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = {
+      dashboard: [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ],
+    } as any;
+    const assetTags = [
+      {
+        text: 'SecuritySolution',
+        asset_types: ['dashboard'],
+      },
+    ];
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'TestPackage',
+      pkgName: 'test-pkg',
+      spaceId: 'default',
+      importedAssets: [],
+      assetTags,
+    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: '#0077CC',
+        description: '',
+        name: 'Managed',
+      },
+      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: '#4DD2CA',
+        description: '',
+        name: 'TestPackage',
+      },
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        color: expect.any(String),
+        description: 'Tag defined in package-spec',
+        name: 'SecuritySolution',
+      },
+      { id: 'SecuritySolution', overwrite: true, refresh: false }
+    );
+  });
+
   it('should only call savedObjectTagClient.create for basic tgs if there are no assetTags to assign', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
