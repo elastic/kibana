@@ -109,7 +109,6 @@ export class SecurityPlugin
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
       securityApiClients: this.securityApiClients,
-      showNavLinks: this.config.showNavLinks,
     });
 
     this.analyticsService.setup({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SLO_RESOURCES_VERSION } from '../constants';
+
 export const getSLOSettingsTemplate = (name: string) => ({
   name,
   template: {
@@ -14,7 +16,7 @@ export const getSLOSettingsTemplate = (name: string) => ({
   },
   _meta: {
     description: 'Settings for SLO rollup data',
-    version: 1,
+    version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
   },
