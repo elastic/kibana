@@ -74,6 +74,7 @@ export function createIndexDocRecordsStream(
 ): Writable {
   const doIndexDocs = indexDocs(stats, client, useCreate);
 
+  let stanzasCount = 0;
   const highWaterMark: number = isCompressed(inputDir) ? 5000 : 300;
   console.log(`\nλjs inputDir: \n\t${inputDir}`);
 
@@ -87,6 +88,9 @@ export function createIndexDocRecordsStream(
       try {
         await doIndexDocs(jsonStanza);
         progress.addToComplete(1);
+        stanzasCount++;
+        console.log('\nλjs write()');
+        console.log(`\nλjs stanzasCount: \n\t${stanzasCount}`);
         callback(null);
       } catch (err) {
         callback(err);
@@ -99,6 +103,9 @@ export function createIndexDocRecordsStream(
       try {
         await doIndexDocs(chunks.map(({ chunk: record }) => record.value));
         progress.addToComplete(chunks.length);
+        stanzasCount++;
+        console.log('\nλjs writev()');
+        console.log(`\nλjs stanzasCount: \n\t${stanzasCount}`);
         callback(null);
       } catch (err) {
         callback(err);
