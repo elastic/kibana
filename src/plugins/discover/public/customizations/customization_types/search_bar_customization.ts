@@ -13,5 +13,6 @@ import type { ComponentType, ReactElement } from 'react';
 export interface SearchBarCustomization {
   id: 'search_bar';
   CustomDataViewPicker?: ComponentType;
+  PrependFilterBar?: ComponentType;
   CustomSearchBar?: (props: TopNavMenuProps<AggregateQuery>) => ReactElement;
 }

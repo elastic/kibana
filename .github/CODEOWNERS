@@ -1059,6 +1059,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 ## Security Solution sub teams - Threat Hunting Investigations
 
+/x-pack/plugins/security_solution/common/api/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
@@ -1230,6 +1231,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/common/api/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
@@ -1237,6 +1239,10 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
+/x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
+/x-pack/test_serverless/functional/test_suites/security/cypress/e2e/endpoint_management @elastic/security-defend-workflows
+/x-pack/test_serverless/functional/test_suites/security/cypress/screens/endpoint_management @elastic/security-defend-workflows
+/x-pack/test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
