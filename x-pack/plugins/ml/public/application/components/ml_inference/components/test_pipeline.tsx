@@ -50,7 +50,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
   const [isValid, setIsValid] = useState<boolean>(true);
   const {
     esSearch,
-    trainedModels: { simulateInferencePipeline },
+    trainedModels: { trainedModelPipelineSimulate },
   } = useMlApiContext();
   const {
     notifications: { toasts },
@@ -61,9 +61,9 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
   const simulatePipeline = async () => {
     try {
       const pipelineConfig = getPipelineConfig(state);
-      const result = await simulateInferencePipeline(
-        JSON.parse(sampleDocsString) as IngestSimulateDocument[],
-        pipelineConfig
+      const result = await trainedModelPipelineSimulate(
+        pipelineConfig,
+        JSON.parse(sampleDocsString) as IngestSimulateDocument[]
       );
       setSimulatePipelineResult(result);
     } catch (error) {

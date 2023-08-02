@@ -177,6 +177,8 @@
     "DeleteTrainedModel",
     "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
+    "CreateInferencePipeline",
+    "GetIngestPipelines",
 
     "Alerting",
     "PreviewAlert",

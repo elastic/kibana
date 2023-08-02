@@ -118,21 +118,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     /**
-     * Simulates the effect of the pipeline on given documents
-     */
-    simulateInferencePipeline(
-      docs: estypes.IngestSimulateDocument[],
-      pipeline: estypes.IngestPipeline
-    ) {
-      return httpService.http<estypes.IngestSimulateResponse>({
-        path: `${ML_INTERNAL_BASE_PATH}/trained_models/simulate_pipeline`,
-        method: 'POST',
-        body: JSON.stringify({ docs, pipeline }),
-        version: '1',
-      });
-    },
-
-    /**
      * Creates inference pipeline
      */
     createInferencePipeline(pipelineName: string, pipeline: estypes.IngestPipeline) {

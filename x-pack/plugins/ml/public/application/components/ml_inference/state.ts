@@ -73,7 +73,7 @@ export const getInitialState = (model: ModelItem): MlInferenceState => {
     inferenceConfig: model.inference_config,
     modelId: model.model_id,
     onFailure: getDefaultOnFailureConfiguration(),
-    pipelineDescription: `Uses the pre-trained data frame analytics model - ${model.model_id} - to infer against the data that is being ingested in the pipeline`,
+    pipelineDescription: `Uses the pre-trained data frame analytics model ${model.model_id} to infer against the data that is being ingested in the pipeline`,
     pipelineName: '',
     pipelineCreated: false,
     tag: undefined,

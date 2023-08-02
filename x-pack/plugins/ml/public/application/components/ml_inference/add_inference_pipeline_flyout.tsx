@@ -120,13 +120,10 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         <AddInferencePipelineHorizontalSteps
           step={step}
           setStep={setStep}
-          isConfigureStepValid={pipelineNameError === undefined && targetFieldError === undefined}
-          isPipelineDataValid={
-            pipelineNameError === undefined &&
-            inferenceConfigError === undefined &&
-            fieldMapError === undefined
+          isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
+          isConfigureProcessorStepValid={
+            inferenceConfigError === undefined && fieldMapError === undefined
           }
-          isOnFailureDataValid={true} // TODO: add validation
         />
         <EuiSpacer size="m" />
         {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
@@ -178,8 +175,10 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           onCreate={createPipeline}
           step={step}
           setStep={setStep}
-          isConfigureStepValid={pipelineNameError === undefined && targetFieldError === undefined}
-          isPipelineDataValid={inferenceConfigError === undefined && fieldMapError === undefined}
+          isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
+          isConfigureProcessorStepValid={
+            inferenceConfigError === undefined && fieldMapError === undefined
+          }
           pipelineCreated={formState.pipelineCreated}
           creatingPipeline={formState.creatingPipeline}
         />

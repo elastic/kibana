@@ -19,8 +19,8 @@ import {
 import { getSteps } from '../get_steps';
 
 interface Props {
-  isConfigureStepValid: boolean;
-  isPipelineDataValid: boolean;
+  isDetailsStepValid: boolean;
+  isConfigureProcessorStepValid: boolean;
   pipelineCreated: boolean;
   creatingPipeline: boolean;
   step: AddInferencePipelineSteps;
@@ -30,8 +30,8 @@ interface Props {
 }
 
 export const AddInferencePipelineFooter: FC<Props> = ({
-  isConfigureStepValid,
-  isPipelineDataValid,
+  isDetailsStepValid,
+  isConfigureProcessorStepValid,
   creatingPipeline,
   pipelineCreated,
   onClose,
@@ -40,8 +40,8 @@ export const AddInferencePipelineFooter: FC<Props> = ({
   setStep,
 }) => {
   const { nextStep, previousStep, isContinueButtonEnabled } = useMemo(
-    () => getSteps(step, isConfigureStepValid, isPipelineDataValid),
-    [isConfigureStepValid, isPipelineDataValid, step]
+    () => getSteps(step, isDetailsStepValid, isConfigureProcessorStepValid),
+    [isDetailsStepValid, isConfigureProcessorStepValid, step]
   );
 
   return (

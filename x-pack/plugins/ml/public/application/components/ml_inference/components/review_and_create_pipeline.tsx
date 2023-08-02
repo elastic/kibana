@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { useMlKibana } from '../../../contexts/kibana';
 
+const MANAGEMENT_APP_ID = 'management';
+
 interface Props {
   inferencePipeline: IngestPipeline;
   modelType?: string;
@@ -42,6 +44,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
 }) => {
   const {
     services: {
+      application,
       docLinks: { links },
     },
   } = useMlKibana();
@@ -95,7 +98,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
               >
                 <p>
                   <FormattedMessage
-                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.nextStepsMessage"
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.reIndexingMessage"
                     defaultMessage="You can use this pipeline to infer against new data or infer against existing data by {reindexLink} with the pipeline."
                     values={{
                       reindexLink: (
@@ -109,6 +112,28 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                       ),
                     }}
                   />
+                  {application.capabilities.management?.ingest?.ingest_pipelines ? (
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.ingestPipelinesManagementMessage"
+                      defaultMessage=" Navigate to {pipelineManagementLink} to view and manage pipelines."
+                      values={{
+                        pipelineManagementLink: (
+                          <EuiLink
+                            onClick={async () => {
+                              await application.navigateToApp(MANAGEMENT_APP_ID, {
+                                path: '/ingest/ingest_pipelines/',
+                                openInNewTab: true,
+                              });
+                            }}
+                            target="_blank"
+                            external
+                          >
+                            {'Ingest Pipelines'}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  ) : null}
                 </p>
               </EuiCallOut>
             ) : null}

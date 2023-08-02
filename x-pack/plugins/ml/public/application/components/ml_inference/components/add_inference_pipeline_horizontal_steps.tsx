@@ -12,21 +12,24 @@ import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
 import type { AddInferencePipelineSteps } from '../types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../constants';
 
+const steps = Object.values(ADD_INFERENCE_PIPELINE_STEPS);
+
 interface Props {
   step: AddInferencePipelineSteps;
   setStep: React.Dispatch<React.SetStateAction<AddInferencePipelineSteps>>;
-  isConfigureStepValid: boolean;
-  isPipelineDataValid: boolean;
-  isOnFailureDataValid: boolean;
+  isDetailsStepValid: boolean;
+  isConfigureProcessorStepValid: boolean;
 }
 
 export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
-  ({ step, setStep, isConfigureStepValid, isPipelineDataValid, isOnFailureDataValid }) => {
+  ({ step, setStep, isDetailsStepValid, isConfigureProcessorStepValid }) => {
+    const currentStepIndex = steps.findIndex((s) => s === step);
+    console.log('current step index', currentStepIndex); // remove
     const navSteps: EuiStepsHorizontalProps['steps'] = [
       {
         // Details
         onClick: () => setStep(ADD_INFERENCE_PIPELINE_STEPS.DETAILS),
-        status: isConfigureStepValid ? 'complete' : 'disabled',
+        status: isDetailsStepValid ? 'complete' : 'incomplete',
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.details.title',
           {
@@ -37,14 +40,13 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // Processor configuration
         onClick: () => {
-          if (!isConfigureStepValid) return;
+          if (!isDetailsStepValid) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR);
         },
-        status: isConfigureStepValid
-          ? isPipelineDataValid
+        status:
+          isDetailsStepValid && isConfigureProcessorStepValid && currentStepIndex > 1
             ? 'complete'
-            : 'incomplete'
-          : 'disabled',
+            : 'incomplete',
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.configureProcessor.title',
           {
@@ -55,14 +57,10 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // handle failures
         onClick: () => {
-          if (!isConfigureStepValid) return;
+          if (!isDetailsStepValid) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE);
         },
-        status: isConfigureStepValid
-          ? isPipelineDataValid
-            ? 'complete'
-            : 'incomplete'
-          : 'disabled',
+        status: currentStepIndex > 2 ? 'complete' : 'incomplete',
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.handleFailures.title',
           {
@@ -73,10 +71,10 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // Test
         onClick: () => {
-          if (!isPipelineDataValid) return;
+          if (!isConfigureProcessorStepValid || !isDetailsStepValid) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.TEST);
         },
-        status: isPipelineDataValid ? 'complete' : 'disabled',
+        status: currentStepIndex > 3 ? 'complete' : 'incomplete',
         title: i18n.translate(
           'xpack.ml.trainedModels.content.indices.transforms.addInferencePipelineModal.steps.test.title',
           {
@@ -87,10 +85,10 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // Review and Create
         onClick: () => {
-          if (!isPipelineDataValid) return;
+          if (!isConfigureProcessorStepValid) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.CREATE);
         },
-        status: isPipelineDataValid ? 'incomplete' : 'disabled',
+        status: isDetailsStepValid && isConfigureProcessorStepValid ? 'incomplete' : 'disabled',
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.create.title',
           {
@@ -101,19 +99,19 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
     ];
     switch (step) {
       case ADD_INFERENCE_PIPELINE_STEPS.DETAILS:
-        navSteps[0].status = isConfigureStepValid ? 'complete' : 'current';
+        navSteps[0].status = 'current';
         break;
       case ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR:
-        navSteps[1].status = isPipelineDataValid ? 'complete' : 'current';
+        navSteps[1].status = 'current';
         break;
       case ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE:
-        navSteps[1].status = isOnFailureDataValid ? 'complete' : 'current';
-        break;
-      case ADD_INFERENCE_PIPELINE_STEPS.TEST:
         navSteps[2].status = 'current';
         break;
-      case ADD_INFERENCE_PIPELINE_STEPS.CREATE:
+      case ADD_INFERENCE_PIPELINE_STEPS.TEST:
         navSteps[3].status = 'current';
+        break;
+      case ADD_INFERENCE_PIPELINE_STEPS.CREATE:
+        navSteps[4].status = 'current';
         break;
     }
     return <EuiStepsHorizontal steps={navSteps} />;

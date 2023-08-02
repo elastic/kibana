@@ -22,7 +22,6 @@ import {
   putTrainedModelQuerySchema,
   threadingParamsSchema,
   updateDeploymentParamsSchema,
-  simulateIngestPipelineSchema,
   createIngestPipelineSchema,
 } from './schemas/inference_schema';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -262,43 +261,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const body = await modelsProvider(client).getPipelines();
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      })
-    );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/simulate_pipeline simulate the ingest pipelines
-   * @apiName SimulateIngestPipeline
-   * @apiDescription Simulates the pipeline
-   */
-  router.versioned
-    .post({
-      path: `${ML_INTERNAL_BASE_PATH}/trained_models/simulate_pipeline`,
-      access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            body: simulateIngestPipelineSchema,
-          },
-        },
-      },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
-        try {
-          const { docs, pipeline } = request.body;
-          const body = await modelsProvider(client).simulatePipeline(docs, pipeline);
           return response.ok({
             body,
           });
