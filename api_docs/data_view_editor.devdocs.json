@@ -298,43 +298,6 @@
           "path": "src/plugins/data_view_editor/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "dataViewEditor",
-          "id": "def-public.PluginStart.dataViewEditorServiceFactory",
-          "type": "Function",
-          "tags": [],
-          "label": "dataViewEditorServiceFactory",
-          "description": [],
-          "signature": [
-            "({ requireTimestampField, initialValues, }: Omit<",
-            "DataViewEditorServiceConstructorArgs",
-            ", \"services\">) => ",
-            "DataViewEditorService"
-          ],
-          "path": "src/plugins/data_view_editor/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "dataViewEditor",
-              "id": "def-public.PluginStart.dataViewEditorServiceFactory.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "{\n    requireTimestampField,\n    initialValues,\n  }",
-              "description": [],
-              "signature": [
-                "Omit<",
-                "DataViewEditorServiceConstructorArgs",
-                ", \"services\">"
-              ],
-              "path": "src/plugins/data_view_editor/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",
