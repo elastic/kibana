@@ -26,7 +26,7 @@ const ignoreHttp409Error = (error: AxiosError) => {
 };
 
 const DEFAULT_HEADERS = Object.freeze({
-  'x-elastic-internal-product': 'kibana',
+  'x-elastic-internal-product': 'security-solution',
 });
 
 export interface LoadedRoleAndUser {
