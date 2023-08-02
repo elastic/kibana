@@ -81,7 +81,14 @@ export function SloListItem({
   };
 
   const handleViewDetails = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
+    navigateToUrl(
+      basePath.prepend(
+        paths.observability.sloDetails(
+          slo.id,
+          slo.groupBy !== '*' && slo.instanceId ? slo.instanceId : undefined
+        )
+      )
+    );
   };
 
   const handleEdit = () => {

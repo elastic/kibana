@@ -22,20 +22,22 @@ export function SloGroupByBadge({ slo }: Props) {
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.observability.slo.groupByBadge', {
-          defaultMessage: 'Group by {groupBy}',
-          values: {
-            groupBy: slo.groupBy,
-          },
-        })}
-        display="block"
-      >
-        <EuiBadge color={euiLightVars.euiColorDisabled}>
-          {slo.groupBy}: {slo.instanceId}
-        </EuiBadge>
-      </EuiToolTip>
+      <EuiBadge color={euiLightVars.euiColorDisabled}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.observability.slo.groupByBadge', {
+            defaultMessage: 'Group by {groupBy}',
+            values: {
+              groupBy: slo.groupBy,
+            },
+          })}
+          display="block"
+        >
+          <span>
+            {slo.groupBy}: {slo.instanceId}
+          </span>
+        </EuiToolTip>
+      </EuiBadge>
     </EuiFlexItem>
   );
 }

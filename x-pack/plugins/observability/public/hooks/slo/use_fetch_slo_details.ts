@@ -31,9 +31,11 @@ const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloDetails({
   sloId,
+  instanceId,
   shouldRefetch,
 }: {
   sloId?: string;
+  instanceId?: string;
   shouldRefetch?: boolean;
 }): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
@@ -44,7 +46,9 @@ export function useFetchSloDetails({
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
-            query: {},
+            query: {
+              ...(!!instanceId && instanceId !== '*' && { instanceId }),
+            },
             signal,
           });
 
