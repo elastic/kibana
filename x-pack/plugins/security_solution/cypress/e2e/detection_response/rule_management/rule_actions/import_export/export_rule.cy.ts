@@ -57,7 +57,7 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-describe('Export rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {

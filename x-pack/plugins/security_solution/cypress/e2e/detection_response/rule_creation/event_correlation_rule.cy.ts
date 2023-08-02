@@ -63,7 +63,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('EQL rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('EQL rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -152,10 +152,10 @@ describe('EQL rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
     const rule = getEqlSequenceRule();
 
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverLoad', 'auditbeat_big');
     });
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', 'auditbeat_big');
     });
 

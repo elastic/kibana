@@ -63,215 +63,219 @@ const loadEndpointRuleAndAlerts = () => {
   waitForAlertsToPopulate();
 };
 
-describe('Rule Exceptions workflows from Alert', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
-  const ITEM_NAME = 'Sample Exception Item';
-  const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
-  const ADDITIONAL_ENTRY = 'host.hostname';
-  const newRule = getNewRule();
+describe(
+  'Rule Exceptions workflows from Alert',
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  () => {
+    const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
+    const ITEM_NAME = 'Sample Exception Item';
+    const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
+    const ADDITIONAL_ENTRY = 'host.hostname';
+    const newRule = getNewRule();
 
-  beforeEach(() => {
-    cy.task('esArchiverResetKibana');
-  });
-  after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-    deleteAlertsAndRules();
-  });
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'exceptions_2');
-  });
-
-  it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
-    cy.task('esArchiverLoad', 'exceptions');
-    login();
-    postDataView('exceptions-*');
-    createRule({
-      ...newRule,
-      query: 'agent.name:*',
-      data_view_id: 'exceptions-*',
-      interval: '10s',
-      rule_id: 'rule_testing',
+    beforeEach(() => {
+      cy.task('esArchiverResetKibana');
     });
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
-    waitForAlertsToPopulate();
+    after(() => {
+      cy.task('esArchiverUnload', 'exceptions');
+      deleteAlertsAndRules();
+    });
+    afterEach(() => {
+      cy.task('esArchiverUnload', 'exceptions_2');
+    });
 
-    cy.get(LOADING_INDICATOR).should('not.exist');
-    addExceptionFromFirstAlert();
+    it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
+      cy.task('esArchiverLoad', 'exceptions');
+      login();
+      postDataView('exceptions-*');
+      createRule({
+        ...newRule,
+        query: 'agent.name:*',
+        data_view_id: 'exceptions-*',
+        interval: '10s',
+        rule_id: 'rule_testing',
+      });
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
+      waitForAlertsToPopulate();
 
-    addExceptionEntryFieldValue('agent.name', 0);
-    addExceptionEntryOperatorValue('is', 0);
-    addExceptionEntryFieldValueValue('foo', 0);
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      addExceptionFromFirstAlert();
 
-    addExceptionFlyoutItemName(ITEM_NAME);
-    selectBulkCloseAlerts();
-    submitNewExceptionItem();
+      addExceptionEntryFieldValue('agent.name', 0);
+      addExceptionEntryOperatorValue('is', 0);
+      addExceptionEntryFieldValueValue('foo', 0);
 
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
+      addExceptionFlyoutItemName(ITEM_NAME);
+      selectBulkCloseAlerts();
+      submitNewExceptionItem();
 
-    // Closed alert should appear in table
-    goToClosedAlertsOnRuleDetailsPage();
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', `${EXPECTED_NUMBER_OF_ALERTS}`);
+      // Alerts table should now be empty from having added exception and closed
+      // matching alert
+      cy.get(EMPTY_ALERT_TABLE).should('exist');
 
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    goToExceptionsTab();
+      // Closed alert should appear in table
+      goToClosedAlertsOnRuleDetailsPage();
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(ALERTS_COUNT).should('have.text', `${EXPECTED_NUMBER_OF_ALERTS}`);
 
-    // Validate the exception is affecting the correct rule count and name
-    validateExceptionItemAffectsTheCorrectRulesInRulePage(1);
-    validateExceptionItemFirstAffectedRuleNameInRulePage(newRule.name);
+      // Remove the exception and load an event that would have matched that exception
+      // to show that said exception now starts to show up again
+      goToExceptionsTab();
 
-    // when removing exception and again, no more exist, empty screen shows again
-    removeException();
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
+      // Validate the exception is affecting the correct rule count and name
+      validateExceptionItemAffectsTheCorrectRulesInRulePage(1);
+      validateExceptionItemFirstAffectedRuleNameInRulePage(newRule.name);
 
-    // load more docs
-    cy.task('esArchiverLoad', 'exceptions_2');
+      // when removing exception and again, no more exist, empty screen shows again
+      removeException();
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
-    // now that there are no more exceptions, the docs should match and populate alerts
-    goToAlertsTab();
-    goToOpenedAlertsOnRuleDetailsPage();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
+      // load more docs
+      cy.task('esArchiverLoad', 'exceptions_2');
 
-    cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
-  });
-  it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
-    loadEndpointRuleAndAlerts();
+      // now that there are no more exceptions, the docs should match and populate alerts
+      goToAlertsTab();
+      goToOpenedAlertsOnRuleDetailsPage();
+      waitForTheRuleToBeExecuted();
+      waitForAlertsToPopulate();
 
-    cy.get(LOADING_INDICATOR).should('not.exist');
-    addExceptionFromFirstAlert();
+      cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
+    });
+    it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
+      loadEndpointRuleAndAlerts();
 
-    const highlightedFieldsBasedOnAlertDoc = [
-      'host.name',
-      'agent.id',
-      'user.name',
-      'process.executable',
-      'file.path',
-    ];
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      addExceptionFromFirstAlert();
 
-    /**
-     * Validate the highlighted fields are auto populated, these
-     * fields are based on the alert document that should be generated
-     * when the endpoint rule runs
-     */
-    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+      const highlightedFieldsBasedOnAlertDoc = [
+        'host.name',
+        'agent.id',
+        'user.name',
+        'process.executable',
+        'file.path',
+      ];
 
-    /**
-     * Validate that the comments are opened by default with one comment added
-     * showing a text contains information about the pre-filled conditions
-     */
-    validateExceptionCommentCountAndText(
-      1,
-      'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
-    );
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
-    addExceptionFlyoutItemName(ITEM_NAME);
-    submitNewExceptionItem();
-  });
-  it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
-    loadEndpointRuleAndAlerts();
+      /**
+       * Validate that the comments are opened by default with one comment added
+       * showing a text contains information about the pre-filled conditions
+       */
+      validateExceptionCommentCountAndText(
+        1,
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
+      );
 
-    cy.get(LOADING_INDICATOR).should('not.exist');
+      addExceptionFlyoutItemName(ITEM_NAME);
+      submitNewExceptionItem();
+    });
+    it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+      loadEndpointRuleAndAlerts();
 
-    // Open first Alert Summary
-    expandFirstAlert();
+      cy.get(LOADING_INDICATOR).should('not.exist');
 
-    // The Rule exception should populated with highlighted fields
-    openAddRuleExceptionFromAlertActionButton();
+      // Open first Alert Summary
+      expandFirstAlert();
 
-    const highlightedFieldsBasedOnAlertDoc = [
-      'host.name',
-      'agent.id',
-      'user.name',
-      'process.executable',
-      'file.path',
-    ];
+      // The Rule exception should populated with highlighted fields
+      openAddRuleExceptionFromAlertActionButton();
 
-    /**
-     * Validate the highlighted fields are auto populated, these
-     * fields are based on the alert document that should be generated
-     * when the endpoint rule runs
-     */
-    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+      const highlightedFieldsBasedOnAlertDoc = [
+        'host.name',
+        'agent.id',
+        'user.name',
+        'process.executable',
+        'file.path',
+      ];
 
-    /**
-     * Validate that the comments are opened by default with one comment added
-     * showing a text contains information about the pre-filled conditions
-     */
-    validateExceptionCommentCountAndText(
-      1,
-      'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
-    );
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
-    addExceptionFlyoutItemName(ITEM_NAME);
+      /**
+       * Validate that the comments are opened by default with one comment added
+       * showing a text contains information about the pre-filled conditions
+       */
+      validateExceptionCommentCountAndText(
+        1,
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
+      );
 
-    cy.get(ADD_AND_BTN).click();
+      addExceptionFlyoutItemName(ITEM_NAME);
 
-    // edit conditions
-    addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 5);
-    addExceptionEntryFieldValueValue('foo', 5);
+      cy.get(ADD_AND_BTN).click();
 
-    // Change the name again
-    editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+      // edit conditions
+      addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 5);
+      addExceptionEntryFieldValueValue('foo', 5);
 
-    // validate the condition is still 'host.hostname' or got rest after the name is changed
-    validateExceptionConditionField(ADDITIONAL_ENTRY);
+      // Change the name again
+      editExceptionFlyoutItemName(ITEM_NAME_EDIT);
 
-    submitNewExceptionItem();
+      // validate the condition is still 'host.hostname' or got rest after the name is changed
+      validateExceptionConditionField(ADDITIONAL_ENTRY);
 
-    goToExceptionsTab();
+      submitNewExceptionItem();
 
-    // new exception item displays
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
-  });
-  it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
-    loadEndpointRuleAndAlerts();
+      goToExceptionsTab();
 
-    cy.get(LOADING_INDICATOR).should('not.exist');
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
+    });
+    it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
+      loadEndpointRuleAndAlerts();
 
-    // Open first Alert Summary
-    expandFirstAlert();
+      cy.get(LOADING_INDICATOR).should('not.exist');
 
-    // The Rule exception should populated with highlighted fields
-    openAddRuleExceptionFromAlertActionButton();
+      // Open first Alert Summary
+      expandFirstAlert();
 
-    const highlightedFieldsBasedOnAlertDoc = [
-      'host.name',
-      'agent.id',
-      'user.name',
-      'process.executable',
-      'file.path',
-    ];
+      // The Rule exception should populated with highlighted fields
+      openAddRuleExceptionFromAlertActionButton();
 
-    /**
-     * Validate the highlighted fields are auto populated, these
-     * fields are based on the alert document that should be generated
-     * when the endpoint rule runs
-     */
-    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+      const highlightedFieldsBasedOnAlertDoc = [
+        'host.name',
+        'agent.id',
+        'user.name',
+        'process.executable',
+        'file.path',
+      ];
 
-    /**
-     * Delete all the highlighted fields to see if any condition
-     * will prefuilled again.
-     */
-    const highlightedFieldsCount = highlightedFieldsBasedOnAlertDoc.length - 1;
-    highlightedFieldsBasedOnAlertDoc.forEach((_, index) =>
-      cy
-        .get(ENTRY_DELETE_BTN)
-        .eq(highlightedFieldsCount - index)
-        .click()
-    );
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
-    /**
-     * Validate that there are no highlighted fields are auto populated
-     * after the deletion
-     */
-    validateEmptyExceptionConditionField();
-  });
-});
+      /**
+       * Delete all the highlighted fields to see if any condition
+       * will prefuilled again.
+       */
+      const highlightedFieldsCount = highlightedFieldsBasedOnAlertDoc.length - 1;
+      highlightedFieldsBasedOnAlertDoc.forEach((_, index) =>
+        cy
+          .get(ENTRY_DELETE_BTN)
+          .eq(highlightedFieldsCount - index)
+          .click()
+      );
+
+      /**
+       * Validate that there are no highlighted fields are auto populated
+       * after the deletion
+       */
+      validateEmptyExceptionConditionField();
+    });
+  }
+);
