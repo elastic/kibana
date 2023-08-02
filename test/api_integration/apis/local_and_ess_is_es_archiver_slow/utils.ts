@@ -320,4 +320,5 @@ export const archives = [
   'x-pack/test/functional/es_archives/logstash_functional',
   'test/functional/fixtures/es_archiver/many_fields',
   'x-pack/test/functional/es_archives/ml/farequote',
+  'x-pack/test/functional/es_archives/action_task_params',
 ] as const;
