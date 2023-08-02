@@ -86,6 +86,9 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
 
     await client.helpers.bulk(
       {
+        flushBytes: 10000000,
+        flushInterval: 10000,
+        concurrency: 10,
         retries: 5,
         datasource: jsonStanzasWithinArchive
           .map((x) => {
