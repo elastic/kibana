@@ -49,11 +49,11 @@ export const AppRootProvider = memo<{
               <UpsellingProvider upsellingService={startServices.upselling}>
                 <MockAssistantProvider>
                   <NavigationProvider core={coreStart}>
-                    <ConsoleManager>
-                      <Router history={history}>
+                    <Router history={history}>
+                      <ConsoleManager>
                         <RouteCapture>{children}</RouteCapture>
-                      </Router>
-                    </ConsoleManager>
+                      </ConsoleManager>
+                    </Router>
                   </NavigationProvider>
                 </MockAssistantProvider>
               </UpsellingProvider>
