@@ -8,7 +8,7 @@
 import type { KbnClient } from '@kbn/test';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 
 export const fetchEndpointActionList = async (
   kbn: KbnClient,
