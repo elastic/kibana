@@ -42,6 +42,25 @@
       }
     }
   },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -127,25 +146,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
@@ -1407,6 +1407,14 @@
     "dynamic": false,
     "properties": {}
   },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -2262,14 +2270,6 @@
       }
     }
   },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
-  },
   "ml-job": {
     "properties": {
       "job_id": {
@@ -2939,6 +2939,7 @@
     }
   },
   "risk-engine-configuration": {
+    "dynamic": false,
     "properties": {
       "enabled": {
         "type": "boolean"
