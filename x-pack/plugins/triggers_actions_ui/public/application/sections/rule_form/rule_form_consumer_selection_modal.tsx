@@ -78,7 +78,7 @@ const featureNameMap: Record<string, string> = {
       defaultMessage: 'SLOs',
     }
   ),
-  [AlertConsumers.STACK_ALERTS]: i18n.translate(
+  stackAlerts: i18n.translate(
     'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.stackAlerts',
     {
       defaultMessage: 'Stack Rules',
@@ -92,28 +92,33 @@ export const VALID_CONSUMERS = [
   AlertConsumers.APM,
   AlertConsumers.UPTIME,
   AlertConsumers.SLO,
-  AlertConsumers.STACK_ALERTS,
+  'stackAlerts',
 ];
 
 export interface RuleFormConsumerSelectionModalProps {
   consumers: RuleCreationValidConsumer[];
-  onSave: (consumer: string) => void;
+  initialConsumer?: RuleCreationValidConsumer;
+  onChange: (consumer: RuleCreationValidConsumer) => void;
+  onSave: (consumer: RuleCreationValidConsumer) => void;
   onCancel: () => void;
 }
 
 export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionModalProps) => {
-  const { consumers, onSave, onCancel } = props;
-  const [selectedConsumer, setSelectedConsumer] = useState<string>('');
+  const { consumers, initialConsumer, onSave, onCancel, onChange } = props;
+  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer>();
 
   const handleOnChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedConsumer(e.target.value);
+      setSelectedConsumer(e.target.value as RuleCreationValidConsumer);
+      onChange(e.target.value as RuleCreationValidConsumer);
     },
-    [setSelectedConsumer]
+    [setSelectedConsumer, onChange]
   );
 
   const handleOnSave = useCallback(() => {
-    onSave(selectedConsumer);
+    if (selectedConsumer) {
+      onSave(selectedConsumer);
+    }
   }, [selectedConsumer, onSave]);
 
   const formattedSelectOptions: EuiSelectOption[] = useMemo(() => {
@@ -128,16 +133,32 @@ export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionM
         return result;
       }, [])
       .sort((a, b) => {
-        return (a.value as string).localeCompare(b.value as string);
+        return (a.value as RuleCreationValidConsumer).localeCompare(
+          b.value as RuleCreationValidConsumer
+        );
       });
   }, [consumers]);
 
-  // Initialize dropdown with the first option
+  // Initialize dropdown with the initial consumer, otherwise the first option
   useEffect(() => {
-    if (!selectedConsumer && formattedSelectOptions.length) {
-      setSelectedConsumer(formattedSelectOptions[0].value as string);
+    if (selectedConsumer || formattedSelectOptions.length === 0) {
+      return;
     }
-  }, [selectedConsumer, formattedSelectOptions]);
+
+    if (
+      initialConsumer &&
+      formattedSelectOptions.find((option) => option.value === initialConsumer)
+    ) {
+      setSelectedConsumer(initialConsumer);
+      onChange(initialConsumer);
+      return;
+    }
+
+    const firstConsumer = formattedSelectOptions[0].value as RuleCreationValidConsumer;
+    setSelectedConsumer(firstConsumer);
+    onChange(firstConsumer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConsumer, formattedSelectOptions, initialConsumer]);
 
   return (
     <EuiConfirmModal
