@@ -237,6 +237,7 @@ describe('ES search strategy', () => {
 
       it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {
         mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'foo-程', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(
