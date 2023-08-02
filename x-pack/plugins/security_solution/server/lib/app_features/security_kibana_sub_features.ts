@@ -9,7 +9,40 @@ import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID } from '../../../common';
-
+const assistantSubFeature: SubFeatureConfig = {
+  requireAllSpaces: false,
+  privilegesTooltip: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.assistantTooltip',
+    {
+      defaultMessage: 'Just making sure this works chief!',
+    }
+  ),
+  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.assistant', {
+    defaultMessage: 'Elastic AI Assistant',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.assistant.description',
+    { defaultMessage: 'Interact with the Elastic AI Assistant.' }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [],
+          id: 'assistant',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['isAssistantEnabled'],
+        },
+      ],
+    },
+  ],
+};
 const endpointListSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -525,6 +558,7 @@ const executeActionSubFeature: SubFeatureConfig = {
 };
 
 export enum SecuritySubFeatureId {
+  assistant = 'assistantSubFeature',
   endpointList = 'endpointListSubFeature',
   trustedApplications = 'trustedApplicationsSubFeature',
   hostIsolationExceptions = 'hostIsolationExceptionsSubFeature',
@@ -541,6 +575,7 @@ export enum SecuritySubFeatureId {
 // Defines all the ordered Security subFeatures available
 export const securitySubFeaturesMap = Object.freeze(
   new Map<SecuritySubFeatureId, SubFeatureConfig>([
+    [SecuritySubFeatureId.assistant, assistantSubFeature],
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
     [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],

@@ -152,6 +152,10 @@ export const getSecurityAppFeaturesConfig = (
       },
     },
 
+    [AppFeatureSecurityKey.assistant]: {
+      subFeatureIds: [SecuritySubFeatureId.assistant],
+    },
+
     [AppFeatureSecurityKey.threatIntelligence]: {
       privileges: {
         all: {

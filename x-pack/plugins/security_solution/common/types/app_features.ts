@@ -12,6 +12,11 @@ export enum AppFeatureSecurityKey {
   advancedInsights = 'advanced_insights',
 
   /**
+   * Enables Elastic AI Assistant
+   */
+  assistant = 'assistant',
+
+  /**
    * Enables access to the Endpoint List and associated views that allows management of hosts
    * running endpoint security
    */
