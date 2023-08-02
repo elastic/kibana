@@ -17,13 +17,27 @@ export enum AppFeatureSecurityKey {
   investigationGuide = 'investigation_guide',
 
   /**
-   * Enables Endpoint Response Actions like isolate host, trusted apps, blocklist, etc.
+   * Enables access to the Endpoint List and associated views that allows management of hosts
+   * running endpoint security
+   */
+  endpointHostManagement = 'endpoint_host_management',
+
+  /**
+   * Enables endpoint policy views that enables user to manage endpoint security policies
+   */
+  endpointPolicyManagement = 'endpoint_policy_management',
+
+  /**
+   * Enables management of all endpoint related artifacts (ex. Trusted Applications, Event Filters,
+   * Host Isolation Exceptions, Blocklist.
+   */
+  endpointArtifactManagement = 'endpoint_artifact_management',
+
+  /**
+   * Enables all of endpoint's supported response actions - like host isolation, file operations,
+   * process operations, command execution, etc.
    */
   endpointResponseActions = 'endpoint_response_actions',
-  /**
-   * Enables Endpoint Exceptions like isolate host, trusted apps, blocklist, etc.
-   */
-  endpointExceptions = 'endpoint_exceptions',
 
   /**
    * Enables Threat Intelligence
