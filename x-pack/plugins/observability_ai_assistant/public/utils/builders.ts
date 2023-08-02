@@ -14,7 +14,7 @@ type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'ro
 export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
   return {
     id: uniqueId(),
-    title: 'My title',
+    title: '',
     canEdit: false,
     canGiveFeedback: false,
     canRegenerate: params.role === MessageRole.User,
@@ -37,6 +37,7 @@ export function buildChatInitItem() {
   return buildChatItem({
     role: MessageRole.User,
     title: 'started a conversation',
+    canRegenerate: false,
   });
 }
 
@@ -60,13 +61,14 @@ export function buildAssistantChatItem(params?: Omit<ChatItemBuildProps, 'role'>
   });
 }
 
-export function buildFunctionInnerMessage(params: Omit<ChatItemBuildProps, 'role'>) {
+export function buildFunctionChatItem(params: Omit<ChatItemBuildProps, 'role'>) {
   return buildChatItem({
-    role: MessageRole.Function,
+    role: MessageRole.User,
+    title: 'executed a function',
     function_call: {
       name: 'leftpad',
       arguments: '{ foo: "bar" }',
-      trigger: MessageRole.User,
+      trigger: MessageRole.Assistant,
     },
     ...params,
   });
