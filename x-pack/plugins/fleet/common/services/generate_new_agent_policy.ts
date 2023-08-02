@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dataTypes } from '../constants';
+import { agentPolicyStatuses, dataTypes } from '../constants';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
@@ -21,6 +21,22 @@ export function generateNewAgentPolicyWithDefaults(
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),
     inactivity_timeout: TWO_WEEKS_SECONDS,
+    ...overrideProps,
+  };
+}
+
+export function generateAgentPolicyWithDefaults(
+  overrideProps: Partial<AgentPolicy> = {}
+): AgentPolicy {
+  return {
+    ...generateNewAgentPolicyWithDefaults(),
+    id: 'some-agent-policy-id',
+    status: agentPolicyStatuses.Active,
+    is_managed: false,
+    updated_at: '2023-08-21T19:20:23.794Z',
+    updated_by: 'elastic',
+    revision: 2,
+    is_protected: false,
     ...overrideProps,
   };
 }

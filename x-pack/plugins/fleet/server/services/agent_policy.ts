@@ -152,7 +152,7 @@ class AgentPolicyService {
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       ...(options.removeProtection
         ? { is_protected: false }
-        : { is_protected: existingAgentPolicy.is_protected }),
+        : { is_protected: agentPolicy.is_protected }),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -496,7 +496,7 @@ class AgentPolicyService {
 
     this.checkTamperProtectionLicense(agentPolicy);
 
-    if (agentPolicy?.is_protected && !policyHasEndpointSecurity) {
+    if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
       throw new Error('Agent policy requires Elastic Defend integration');
     }
 

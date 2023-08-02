@@ -112,7 +112,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
-  const isAgentPolicy = useMemo(() => isAgentPolicyType(agentPolicy), [agentPolicy]);
 
   return (
     <>
@@ -344,7 +343,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 )}
               </>
             }
-            checked={isAgentPolicy ? agentPolicy.is_protected : false}
+            checked={isAgentPolicyType(agentPolicy) ? agentPolicy.is_protected : false}
             onChange={(e) => {
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
@@ -359,7 +358,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   setIsUninstallCommandFlyoutOpen(true);
                 }}
                 disabled={
-                  isAgentPolicy
+                  isAgentPolicyType(agentPolicy)
                     ? agentPolicy.is_protected !== true || !policyHasElasticDefend
                     : false
                 }

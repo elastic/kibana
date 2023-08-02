@@ -16,7 +16,7 @@ import {
 export function isAgentPolicy(
   policy: Partial<NewAgentPolicy | AgentPolicy>
 ): policy is AgentPolicy {
-  return (policy as AgentPolicy).is_protected !== undefined;
+  return (policy as AgentPolicy).revision !== undefined;
 }
 
 export function policyHasFleetServer(agentPolicy: AgentPolicy) {
