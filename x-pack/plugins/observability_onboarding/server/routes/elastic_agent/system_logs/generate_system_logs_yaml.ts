@@ -69,7 +69,6 @@ export const generateSystemLogsYml = ({
               pattern: '^s',
               match: 'after',
             },
-            tags: ['system-auth'],
             processors: [
               {
                 add_locale: null,
