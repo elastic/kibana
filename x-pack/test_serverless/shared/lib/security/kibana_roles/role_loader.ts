@@ -25,6 +25,10 @@ const ignoreHttp409Error = (error: AxiosError) => {
   throw error;
 };
 
+const DEFAULT_HEADERS = Object.freeze({
+  'x-elastic-internal-product': 'security-solution',
+});
+
 export interface LoadedRoleAndUser {
   role: string;
   username: string;
@@ -75,6 +79,9 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .request({
         method: 'PUT',
         path: `/api/security/role/${roleName}`,
+        headers: {
+          ...DEFAULT_HEADERS,
+        },
         body: roleDefinition,
       })
       .catch(ignoreHttp409Error)
@@ -104,6 +111,9 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .request({
         method: 'POST',
         path: `/internal/security/users/${username}`,
+        headers: {
+          ...DEFAULT_HEADERS,
+        },
         body: user,
       })
       .catch(ignoreHttp409Error)
