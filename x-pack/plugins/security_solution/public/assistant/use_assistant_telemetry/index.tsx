@@ -5,18 +5,43 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AssistantTelemetry } from '@kbn/elastic-assistant';
-import type { StartServices } from '../../types';
+import type { AssistantTelemetry, Conversation } from '@kbn/elastic-assistant';
+import { useCallback } from 'react';
+import { useKibana } from '../../common/lib/kibana';
 
-export const useAssistantTelemetry = (): AssistantTelemetry => {
+export const useAssistantTelemetry = (
+  conversations: Record<string, Conversation>
+): AssistantTelemetry => {
   const {
     services: { telemetry },
-  } = useKibana<StartServices>();
+  } = useKibana();
+
+  const getAnonymizedConversationId = useCallback(
+    (id) => {
+      const convo = conversations[id] ?? { isDefault: false };
+      return convo.isDefault ? id : 'Custom';
+    },
+    [conversations]
+  );
+
+  const reportTelemetry = useCallback(
+    ({
+      fn,
+      params: { conversationId, ...rest },
+    }): { fn: keyof AssistantTelemetry; params: AssistantTelemetry[keyof AssistantTelemetry] } =>
+      fn({
+        ...rest,
+        conversationId: getAnonymizedConversationId(conversationId),
+      }),
+    [getAnonymizedConversationId]
+  );
 
   return {
-    reportAssistantInvoked: telemetry.reportAssistantInvoked,
-    reportAssistantMessageSent: telemetry.reportAssistantMessageSent,
-    reportAssistantQuickPrompt: telemetry.reportAssistantQuickPrompt,
+    reportAssistantInvoked: (params) =>
+      reportTelemetry({ fn: telemetry.reportAssistantInvoked, params }),
+    reportAssistantMessageSent: (params) =>
+      reportTelemetry({ fn: telemetry.reportAssistantMessageSent, params }),
+    reportAssistantQuickPrompt: (params) =>
+      reportTelemetry({ fn: telemetry.reportAssistantQuickPrompt, params }),
   };
 };

@@ -60,7 +60,11 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     const onClickAddQuickPrompt = useCallback(
       (badge: QuickPrompt) => {
         setInput(badge.prompt);
-        trackPrompt(badge.title);
+        if (badge.isDefault) {
+          trackPrompt(badge.title);
+        } else {
+          trackPrompt('Custom');
+        }
       },
       [setInput, trackPrompt]
     );

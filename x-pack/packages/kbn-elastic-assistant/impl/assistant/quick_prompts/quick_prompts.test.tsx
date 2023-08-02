@@ -29,6 +29,7 @@ const mockUseAssistantContext = {
 
 const testTitle = 'SPL_QUERY_CONVERSION_TITLE';
 const testPrompt = 'SPL_QUERY_CONVERSION_PROMPT';
+const customTitle = 'A_CUSTOM_OPTION';
 
 jest.mock('../../assistant_context', () => ({
   ...jest.requireActual('../../assistant_context'),
@@ -49,6 +50,16 @@ describe('QuickPrompts', () => {
 
     expect(setInput).toHaveBeenCalledWith(testPrompt);
     expect(trackPrompt).toHaveBeenCalledWith(testTitle);
+  });
+  it('onClickAddQuickPrompt calls trackPrompt with "Custom" when isDefault=false prompt is chosen', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <QuickPrompts {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getByText(customTitle));
+
+    expect(trackPrompt).toHaveBeenCalledWith('Custom');
   });
 
   it('clicking "Add quick prompt" button opens the settings modal', () => {
