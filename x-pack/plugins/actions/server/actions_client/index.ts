@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { ActionsClientMock } from './actions_client.mock';
+export type { ActionsClientMock } from '../actions_client.mock';
 export * from './actions_client';
