@@ -15,7 +15,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   SearchResponseWarnings,
   type SearchResponseInterceptedWarning,
@@ -29,19 +28,10 @@ export const SavedSearchEmbeddableBadge: React.FC<SavedSearchEmbeddableBadgeProp
   interceptedWarnings,
 }) => {
   return interceptedWarnings?.length ? (
-    <div
-      css={css({
-        position: 'absolute',
-        zIndex: 2,
-        left: 0,
-        bottom: 0,
-      })}
-    >
-      <SearchResponseWarnings
-        variant="badge"
-        interceptedWarnings={interceptedWarnings}
-        data-test-subj="savedSearchEmbeddableWarningsCallout"
-      />
-    </div>
+    <SearchResponseWarnings
+      variant="badge"
+      interceptedWarnings={interceptedWarnings}
+      data-test-subj="savedSearchEmbeddableWarningsCallout"
+    />
   ) : null;
 };

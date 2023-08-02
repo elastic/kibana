@@ -56,7 +56,6 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import { SavedSearchEmbeddableBadge } from './saved_search_embeddable_badge';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
@@ -592,9 +591,6 @@ export class SavedSearchEmbeddable
             <KibanaContextProvider services={searchProps.services}>
               <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
                 <SavedSearchEmbeddableComponent {...props} />
-                <SavedSearchEmbeddableBadge
-                  interceptedWarnings={props.searchProps.interceptedWarnings}
-                />
               </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>
