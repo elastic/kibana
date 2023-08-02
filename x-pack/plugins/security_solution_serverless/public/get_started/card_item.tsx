@@ -7,9 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
+import type {
+  CardId,
+  ExpandedCardSteps,
+  OnCardClicked,
+  OnStepButtonClicked,
+  OnStepClicked,
+  SectionId,
+  StepId,
+} from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
 import { getCard } from './helpers';
@@ -20,7 +28,9 @@ const CardItemComponent: React.FC<{
   activeStepIds: StepId[] | undefined;
   cardId: CardId;
   euiTheme: EuiThemeComputed;
+  expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Record<CardId, Set<StepId>>;
+  onCardClicked: OnCardClicked;
   onStepButtonClicked: OnStepButtonClicked;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
@@ -30,24 +40,31 @@ const CardItemComponent: React.FC<{
 }> = ({
   activeProducts,
   activeStepIds,
+  cardId,
+  euiTheme,
+  expandedCardSteps,
+  finishedSteps,
+  onCardClicked,
+  onStepButtonClicked,
+  onStepClicked,
+  sectionId,
+  shadow,
   stepsLeft,
   timeInMins,
-  shadow,
-  euiTheme,
-  onStepClicked,
-  onStepButtonClicked,
-  finishedSteps,
-  sectionId,
-  cardId,
 }) => {
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
-  const [expandCard, setExpandCard] = useState(false);
+  const expandCard = expandedCardSteps[cardId]?.isExpanded ?? false;
+  const expandedSteps = useMemo(
+    () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
+    [cardId, expandedCardSteps]
+  );
   const toggleCard = useCallback(
     (e) => {
       e.preventDefault();
-      setExpandCard(!expandCard);
+      const isExpanded = !expandCard;
+      onCardClicked({ cardId, isExpanded });
     },
-    [expandCard]
+    [cardId, expandCard, onCardClicked]
   );
   const hasActiveSteps = activeStepIds != null && activeStepIds.length > 0;
   return cardItem && hasActiveSteps ? (
@@ -119,6 +136,7 @@ const CardItemComponent: React.FC<{
                 <CardStep
                   activeProducts={activeProducts}
                   cardId={cardItem.id}
+                  expandedSteps={expandedSteps}
                   finishedStepsByCard={finishedSteps[cardItem.id]}
                   key={stepId}
                   onStepButtonClicked={onStepButtonClicked}

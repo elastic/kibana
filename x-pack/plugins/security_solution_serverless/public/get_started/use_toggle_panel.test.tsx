@@ -177,7 +177,7 @@ describe('useTogglePanel', () => {
         stepId: IntroductionSteps.getToKnowElasticSecurity,
         cardId: GetSetUpCardId.introduction,
         sectionId: SectionId.getSetUp,
-        expandStep: true,
+        isExpanded: true,
       });
     });
 
@@ -198,7 +198,7 @@ describe('useTogglePanel', () => {
         stepId: IntroductionSteps.getToKnowElasticSecurity,
         cardId: GetSetUpCardId.introduction,
         sectionId: SectionId.getSetUp,
-        expandStep: false,
+        isExpanded: false,
       });
     });
 

@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from './types';
 import icon_step from './images/icon_step.svg';
@@ -31,6 +31,7 @@ import { getProductBadges } from './badge';
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
   cardId: CardId;
+  expandedSteps: Set<StepId>;
   finishedStepsByCard: Set<StepId>;
   onStepButtonClicked: OnStepButtonClicked;
   onStepClicked: OnStepClicked;
@@ -39,6 +40,7 @@ const CardStepComponent: React.FC<{
 }> = ({
   activeProducts,
   cardId,
+  expandedSteps,
   finishedStepsByCard = new Set(),
   onStepButtonClicked,
   onStepClicked,
@@ -47,7 +49,7 @@ const CardStepComponent: React.FC<{
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [expandStep, setExpandStep] = useState(false);
+  const expandStep = expandedSteps.has(stepId);
   const steps = useMemo(
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
@@ -61,8 +63,7 @@ const CardStepComponent: React.FC<{
     (e) => {
       e.preventDefault();
       const newState = !expandStep;
-      setExpandStep(newState);
-      onStepClicked({ stepId, cardId, sectionId, expandStep: newState });
+      onStepClicked({ stepId, cardId, sectionId, isExpanded: newState });
     },
     [cardId, expandStep, onStepClicked, sectionId, stepId]
   );

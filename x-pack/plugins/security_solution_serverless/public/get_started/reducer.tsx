@@ -92,6 +92,48 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
     };
   }
 
+  if (
+    action.type === GetStartedPageActions.ToggleExpandedCardStep &&
+    action.payload.isCardExpanded != null
+  ) {
+    return {
+      ...state,
+      expandedCardSteps: {
+        ...state.expandedCardSteps,
+        [action.payload.cardId]: {
+          expandedSteps: state.expandedCardSteps[action.payload.cardId]?.expandedSteps ?? [],
+          isExpanded: action.payload.isCardExpanded,
+        },
+      },
+    };
+  }
+
+  if (
+    action.type === GetStartedPageActions.ToggleExpandedCardStep &&
+    action.payload.isStepExpanded != null
+  ) {
+    const expandedSteps = new Set(
+      [...state.expandedCardSteps[action.payload.cardId]?.expandedSteps] ?? []
+    );
+    if (action.payload.isStepExpanded === true && action.payload.stepId) {
+      expandedSteps.add(action.payload.stepId);
+    }
+
+    if (action.payload.isStepExpanded === false && action.payload.stepId) {
+      expandedSteps.delete(action.payload.stepId);
+    }
+    return {
+      ...state,
+      expandedCardSteps: {
+        ...state.expandedCardSteps,
+        [action.payload.cardId]: {
+          expandedSteps: [...expandedSteps],
+          isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+        },
+      },
+    };
+  }
+
   return state;
 };
 

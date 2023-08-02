@@ -18,14 +18,17 @@ describe('CardStepComponent', () => {
 
   const onStepClicked = jest.fn();
   const onStepButtonClicked = jest.fn();
+  const expandedSteps = new Set([IntroductionSteps.getToKnowElasticSecurity]);
+
   const props = {
     activeProducts: new Set([ProductLine.security]),
-    sectionId: SectionId.getSetUp,
     cardId: GetSetUpCardId.introduction,
-    stepId: step.id,
-    onStepClicked,
+    expandedSteps,
+    finishedStepsByCard: new Set<StepId>(),
     onStepButtonClicked,
-    finishedStepsByCard: new Set() as Set<StepId>,
+    onStepClicked,
+    sectionId: SectionId.getSetUp,
+    stepId: step.id,
   };
   const testStepTitle = 'Get to know Elastic Security';
 
@@ -40,7 +43,7 @@ describe('CardStepComponent', () => {
       sectionId: SectionId.getSetUp,
       stepId: IntroductionSteps.getToKnowElasticSecurity,
       cardId: GetSetUpCardId.introduction,
-      expanded: true,
+      isExpanded: false,
     });
   });
 
@@ -63,17 +66,17 @@ describe('CardStepComponent', () => {
     expect(description2).toBeInTheDocument();
   });
 
-  it('should render split panel when expanded', () => {
-    const { getByText, getByTestId } = render(<CardStep {...props} />);
-
-    const stepTitle = getByText(testStepTitle);
-    fireEvent.click(stepTitle);
+  it('should render expended steps', () => {
+    const { getByTestId } = render(<CardStep {...props} />);
 
     const splitPanel = getByTestId('split-panel');
     expect(splitPanel).toBeInTheDocument();
+  });
 
-    fireEvent.click(stepTitle);
+  it('should render collapsed steps', () => {
+    const { queryByTestId } = render(<CardStep {...props} expandedSteps={new Set()} />);
 
+    const splitPanel = queryByTestId('split-panel');
     expect(splitPanel).not.toBeInTheDocument();
   });
 

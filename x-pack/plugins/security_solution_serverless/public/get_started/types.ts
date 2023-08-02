@@ -92,12 +92,15 @@ export interface ActiveCard {
   stepsLeft: number;
   activeStepIds: StepId[] | undefined;
 }
+
+export type ExpandedCardSteps = Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>;
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
-  finishedSteps: Record<CardId, Set<StepId>>;
   activeSections: ActiveSections | null;
-  totalStepsLeft: number | null;
+  expandedCardSteps: ExpandedCardSteps;
+  finishedSteps: Record<CardId, Set<StepId>>;
   totalActiveSteps: number | null;
+  totalStepsLeft: number | null;
 }
 
 export interface ToggleProductAction {
@@ -115,7 +118,16 @@ export interface RemoveFinishedStepAction {
   payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
 }
 
-export type ReducerActions = ToggleProductAction | AddFinishedStepAction | RemoveFinishedStepAction;
+export interface ToggleCardStepAction {
+  type: GetStartedPageActions.ToggleExpandedCardStep;
+  payload: { stepId?: StepId; cardId: CardId; isCardExpanded?: boolean; isStepExpanded?: boolean };
+}
+
+export type ReducerActions =
+  | ToggleProductAction
+  | AddFinishedStepAction
+  | RemoveFinishedStepAction
+  | ToggleCardStepAction;
 
 export interface Switch {
   id: ProductLine;
@@ -126,18 +138,27 @@ export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
   RemoveFinishedStep = 'removeFinishedStep',
   ToggleProduct = 'toggleProduct',
+  ToggleExpandedCardStep = 'toggleExpandedCardStep',
 }
 
 export type OnStepClicked = ({
   stepId,
   cardId,
   sectionId,
-  expandStep,
+  isExpanded,
 }: {
   stepId: StepId;
   cardId: CardId;
   sectionId: SectionId;
-  expandStep: boolean;
+  isExpanded: boolean;
+}) => void;
+
+export type OnCardClicked = ({
+  cardId,
+  isExpanded,
+}: {
+  cardId: CardId;
+  isExpanded: boolean;
 }) => void;
 
 export type OnStepButtonClicked = ({

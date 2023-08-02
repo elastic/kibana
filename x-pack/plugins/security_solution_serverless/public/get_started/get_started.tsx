@@ -34,9 +34,17 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   const shadow = useEuiShadow('s');
   const {
     onProductSwitchChanged,
+    onCardClicked,
     onStepClicked,
     onStepButtonClicked,
-    state: { activeProducts, activeSections, finishedSteps, totalActiveSteps, totalStepsLeft },
+    state: {
+      activeProducts,
+      activeSections,
+      finishedSteps,
+      totalActiveSteps,
+      totalStepsLeft,
+      expandedCardSteps,
+    },
   } = useTogglePanel({ productTypes });
   const services = useKibana().services;
   return (
@@ -111,7 +119,9 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
             finishedSteps={finishedSteps}
             activeSections={activeSections}
             activeProducts={activeProducts}
+            expandedCardSteps={expandedCardSteps}
             onStepClicked={onStepClicked}
+            onCardClicked={onCardClicked}
             onStepButtonClicked={onStepButtonClicked}
           />
         </NavigationProvider>

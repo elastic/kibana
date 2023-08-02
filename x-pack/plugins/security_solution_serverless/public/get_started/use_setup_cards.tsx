@@ -12,6 +12,8 @@ import { css } from '@emotion/react';
 import type {
   ActiveSections,
   CardId,
+  ExpandedCardSteps,
+  OnCardClicked,
   OnStepButtonClicked,
   OnStepClicked,
   SectionId,
@@ -33,14 +35,18 @@ export const useSetUpSections = ({
     ({
       activeProducts,
       activeSections,
+      expandedCardSteps,
       finishedSteps,
+      onCardClicked,
       onStepButtonClicked,
       onStepClicked,
       sectionId,
     }: {
       activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
+      expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
+      onCardClicked: OnCardClicked;
       onStepButtonClicked: OnStepButtonClicked;
       onStepClicked: OnStepClicked;
       sectionId: SectionId;
@@ -54,8 +60,10 @@ export const useSetUpSections = ({
                 activeStepIds={cardItem.activeStepIds}
                 cardId={cardItem.id}
                 data-test-subj={cardItem.id}
+                expandedCardSteps={expandedCardSteps}
                 euiTheme={euiTheme}
                 finishedSteps={finishedSteps}
+                onCardClicked={onCardClicked}
                 onStepButtonClicked={onStepButtonClicked}
                 onStepClicked={onStepClicked}
                 sectionId={sectionId}
@@ -74,13 +82,17 @@ export const useSetUpSections = ({
     ({
       activeProducts,
       activeSections,
+      expandedCardSteps,
       finishedSteps,
+      onCardClicked,
       onStepButtonClicked,
       onStepClicked,
     }: {
       activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
+      expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
+      onCardClicked: OnCardClicked;
       onStepButtonClicked: OnStepButtonClicked;
       onStepClicked: OnStepClicked;
     }) =>
@@ -88,7 +100,9 @@ export const useSetUpSections = ({
         const cardNodes = setUpCards({
           activeProducts,
           activeSections,
+          expandedCardSteps,
           finishedSteps,
+          onCardClicked,
           onStepButtonClicked,
           onStepClicked,
           sectionId: currentSection.id,
