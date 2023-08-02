@@ -785,7 +785,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       content={
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.managedDescription"
-          defaultMessage="Created and managed by Kibana to run background tasks."
+          defaultMessage="Created and managed by Kibana to correctly run background tasks."
         />
       }
     >
