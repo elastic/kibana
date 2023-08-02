@@ -12,11 +12,11 @@ import { FieldConfiguration } from '@elastic/search-ui';
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 import { SearchApplicationNameLogic } from '../search_application_name_logic';
 
-interface SearchApplicationSearchPreviewActions {
+interface SearchApplicationDocsExplorerActions {
   fetchSearchApplicationFieldCapabilities: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.actions.makeRequest;
 }
 
-export interface SearchApplicationPreviewValues {
+export interface SearchApplicationDocsExplorerValues {
   fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
   searchApplicationFieldCapabilitiesData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
@@ -24,8 +24,8 @@ export interface SearchApplicationPreviewValues {
   sortableFields: string[];
 }
 
-export const SearchApplicationSearchPreviewLogic = kea<
-  MakeLogicType<SearchApplicationPreviewValues, SearchApplicationSearchPreviewActions>
+export const SearchApplicationDocsExplorerLogic = kea<
+  MakeLogicType<SearchApplicationDocsExplorerValues, SearchApplicationDocsExplorerActions>
 >({
   connect: {
     actions: [
@@ -48,11 +48,11 @@ export const SearchApplicationSearchPreviewLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'search_application_search_preview_logic'],
+  path: ['enterprise_search', 'content', 'search_application_docs_explorer_logic'],
   selectors: ({ selectors }) => ({
     fieldTypesByIndex: [
       () => [selectors.searchApplicationFieldCapabilitiesData],
-      (data: SearchApplicationPreviewValues['searchApplicationFieldCapabilitiesData']) => {
+      (data: SearchApplicationDocsExplorerValues['searchApplicationFieldCapabilitiesData']) => {
         if (!data) return {};
 
         return data.fields.reduce(
@@ -73,7 +73,7 @@ export const SearchApplicationSearchPreviewLogic = kea<
     ],
     resultFields: [
       () => [selectors.searchApplicationFieldCapabilitiesData],
-      (data: SearchApplicationPreviewValues['searchApplicationFieldCapabilitiesData']) => {
+      (data: SearchApplicationDocsExplorerValues['searchApplicationFieldCapabilitiesData']) => {
         if (!data) return {};
 
         return Object.fromEntries(
@@ -85,7 +85,7 @@ export const SearchApplicationSearchPreviewLogic = kea<
     ],
     sortableFields: [
       () => [selectors.searchApplicationFieldCapabilitiesData],
-      (data: SearchApplicationPreviewValues['searchApplicationFieldCapabilitiesData']) => {
+      (data: SearchApplicationDocsExplorerValues['searchApplicationFieldCapabilitiesData']) => {
         if (!data) return [];
 
         return data.fields
