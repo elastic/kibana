@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Ref, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
