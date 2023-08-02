@@ -74,7 +74,7 @@ export const ConfigurePipeline: React.FC = () => {
   useEffect(() => {
     setInferencePipelineConfiguration({
       ...configuration,
-      pipelineName: pipelineName ? pipelineName : indexName,
+      pipelineName: pipelineName || indexName,
     })
   }, [])
 
