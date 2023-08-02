@@ -8,10 +8,10 @@
 import type { Indicator } from '@kbn/slo-schema';
 
 interface SloListFilter {
-  name: string;
+  kqlQuery: string;
   page: number;
   sortBy: string;
-  indicatorTypes: string[];
+  sortDirection: string;
 }
 
 interface CompositeSloKeyFilter {

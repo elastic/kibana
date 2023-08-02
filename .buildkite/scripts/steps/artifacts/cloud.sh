@@ -69,6 +69,9 @@ export CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOY
 echo "Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL"
 echo "ES: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
 
+# Disable ansi color output for Node.js as we want to get plain values when executing node as a script runner below
+export FORCE_COLOR=0
+
 export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).protocol.replace(':', ''))")
 export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).hostname)")
 export TEST_KIBANA_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).port || 443)")
@@ -80,6 +83,9 @@ export TEST_ES_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYM
 export TEST_ES_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).port || 443)")
 export TEST_ES_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
 export TEST_ES_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
+
+# Enabling ansi color output for Node.js again as we don't need to use it as a script interpreter anymore
+export FORCE_COLOR=1
 
 export TEST_BROWSER_HEADLESS=1
 

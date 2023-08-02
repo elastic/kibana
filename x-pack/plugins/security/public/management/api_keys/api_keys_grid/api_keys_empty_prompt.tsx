@@ -147,7 +147,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
 
   return (
     <KibanaPageTemplate.EmptyPrompt
-      iconType="gear"
+      iconType="managementApp"
       title={
         <h1>
           <FormattedMessage
