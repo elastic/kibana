@@ -179,6 +179,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   objective: {
     target: 99,
   },
+  groupBy: '*',
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
@@ -194,4 +195,5 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   objective: {
     target: 99,
   },
+  groupBy: '*',
 };
