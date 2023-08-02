@@ -71,7 +71,6 @@ export const readCasesCapabilities = () =>
     update_cases: false,
     delete_cases: false,
     push_cases: false,
-    cases_connectors: true,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({

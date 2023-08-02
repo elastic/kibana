@@ -46,7 +46,7 @@ describe('Connectors', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
+    appMockRender = createAppMockRenderer();
   });
 
   it('shows the connectors from group', () => {

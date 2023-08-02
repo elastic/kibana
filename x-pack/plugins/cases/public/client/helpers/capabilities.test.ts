@@ -109,4 +109,27 @@ describe('getUICapabilities', () => {
       }
     `);
   });
+
+  it('returns false for the all field when cases_connectors is false', () => {
+    expect(
+      getUICapabilities({
+        create_cases: false,
+        read_cases: true,
+        update_cases: true,
+        delete_cases: true,
+        push_cases: true,
+        cases_connectors: false,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "all": false,
+        "connectors": false,
+        "create": false,
+        "delete": true,
+        "push": true,
+        "read": true,
+        "update": true,
+      }
+    `);
+  });
 });

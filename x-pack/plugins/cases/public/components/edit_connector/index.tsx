@@ -47,7 +47,7 @@ export const EditConnector = React.memo(
 
     const { actions } = useApplicationCapabilities();
     const { permissions } = useCasesContext();
-    const hasReadPermissions = permissions.connectors && actions.read;
+    const canUseConnectors = permissions.connectors && actions.read;
 
     const onEditClick = useCallback(() => setIsEdit(true), []);
     const onCancelConnector = useCallback(() => setIsEdit(false), []);
@@ -104,7 +104,7 @@ export const EditConnector = React.memo(
             <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
               <h4>{i18n.CONNECTORS}</h4>
             </EuiFlexItem>
-            {!isLoading && !isEdit && hasPushPermissions && hasReadPermissions ? (
+            {!isLoading && !isEdit && hasPushPermissions && canUseConnectors ? (
               <EuiFlexItem data-test-subj="connector-edit" grow={false}>
                 <EuiButtonIcon
                   data-test-subj="connector-edit-button"
@@ -117,7 +117,7 @@ export const EditConnector = React.memo(
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
           <EuiFlexGroup data-test-subj="edit-connectors" direction="column" alignItems="stretch">
-            {!isLoading && !isEdit && hasErrorMessages && hasReadPermissions && (
+            {!isLoading && !isEdit && hasErrorMessages && canUseConnectors && (
               <EuiFlexItem data-test-subj="push-callouts">
                 <PushCallouts
                   errorsMsg={errorsMsg}
@@ -127,18 +127,18 @@ export const EditConnector = React.memo(
                 />
               </EuiFlexItem>
             )}
-            {!hasReadPermissions && (
+            {!canUseConnectors && (
               <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
                 <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
               </EuiText>
             )}
-            {hasReadPermissions && !isEdit && (
+            {canUseConnectors && !isEdit && (
               <ConnectorFieldsPreviewForm
                 connector={caseActionConnector}
                 fields={caseConnectorFields}
               />
             )}
-            {hasReadPermissions && isEdit && (
+            {canUseConnectors && isEdit && (
               <ConnectorsForm
                 caseData={caseData}
                 caseConnectors={caseConnectors}
@@ -148,25 +148,21 @@ export const EditConnector = React.memo(
                 onSubmit={onSubmitConnector}
               />
             )}
-            {!hasErrorMessages &&
-              !isLoading &&
-              !isEdit &&
-              hasPushPermissions &&
-              hasReadPermissions && (
-                <EuiFlexItem grow={false}>
-                  <span>
-                    <PushButton
-                      hasBeenPushed={hasBeenPushed}
-                      disabled={disablePushButton}
-                      isLoading={isLoadingPushToService}
-                      pushToService={handlePushToService}
-                      errorsMsg={errorsMsg}
-                      showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
-                      connectorName={connectorWithName.name}
-                    />
-                  </span>
-                </EuiFlexItem>
-              )}
+            {!hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors && (
+              <EuiFlexItem grow={false}>
+                <span>
+                  <PushButton
+                    hasBeenPushed={hasBeenPushed}
+                    disabled={disablePushButton}
+                    isLoading={isLoadingPushToService}
+                    pushToService={handlePushToService}
+                    errorsMsg={errorsMsg}
+                    showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
+                    connectorName={connectorWithName.name}
+                  />
+                </span>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiText>
       </EuiFlexItem>

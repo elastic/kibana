@@ -22,7 +22,11 @@ import { incidentTypes, severity, choices } from '../connectors/mock';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  noConnectorsCasePermission,
+  createAppMockRenderer,
+  TestProviders,
+} from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
@@ -30,16 +34,6 @@ jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../containers/configure/use_configure');
-
-const mockUseCasesContext = jest.fn().mockReturnValue({
-  permissions: {
-    connectors: true,
-  },
-});
-
-jest.mock('../cases_context/use_cases_context', () => ({
-  useCasesContext: () => mockUseCasesContext(),
-}));
 
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -202,11 +196,7 @@ describe('Connector', () => {
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
-    mockUseCasesContext.mockReturnValue({
-      permissions: {
-        connectors: false,
-      },
-    });
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(
       <MockHookWrapperComponent>
