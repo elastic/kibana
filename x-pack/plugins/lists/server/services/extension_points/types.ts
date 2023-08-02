@@ -184,9 +184,9 @@ export interface ExtensionPointStorageClientInterface {
 
   pipeRun<
     T extends ExtensionPoint['type'],
-    D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
-    // @ts-expect-error ts upgrade v4.7.4
-    P extends Parameters<D['callback']> = Parameters<D['callback']>
+    P extends Parameters<NarrowExtensionPointToType<T>['callback']> = Parameters<
+      NarrowExtensionPointToType<T>['callback']
+    >
   >(
     extensionType: T,
     initialCallbackInput: P[0]['data'],
