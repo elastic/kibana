@@ -103,6 +103,7 @@ export interface SuggestionPanelProps {
   getUserMessages?: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
   customSwitchSuggestionAction?: (s: Suggestion) => void;
+  hiddenByDefault?: boolean;
 }
 
 const PreviewRenderer = ({
@@ -224,6 +225,7 @@ export function SuggestionPanel({
   getUserMessages,
   nowProvider,
   customSwitchSuggestionAction,
+  hiddenByDefault,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -240,8 +242,13 @@ export function SuggestionPanel({
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
-    false
+    Boolean(hiddenByDefault)
   );
+  useEffect(() => {
+    if (hiddenByDefault) {
+      setHideSuggestions(hiddenByDefault);
+    }
+  }, [hiddenByDefault, setHideSuggestions]);
 
   const toggleSuggestions = useCallback(() => {
     setHideSuggestions(!hideSuggestions);

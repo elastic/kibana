@@ -39,6 +39,7 @@ export function LensEditConfigurationFlyout({
     attributes.state.query
   );
   const [dataTable, setDataTable] = useState<Datatable | undefined>();
+  const [suggestionsPanelIsClosed, setSuggestionsPanelIsClosed] = useState(true);
   const [fetchFromAdapters, setFetchFromAdapters] = useState(true);
 
   const frameApi = useFramePublicApi({
@@ -134,6 +135,7 @@ export function LensEditConfigurationFlyout({
               renderRunButton={true}
               disableSubmitAction={isEqual(queryTextBased, attributes.state.query)}
               onTextLangQuerySubmit={(q) => {
+                setSuggestionsPanelIsClosed(true);
                 if (q) {
                   runQuery(q);
                 }
@@ -172,6 +174,7 @@ export function LensEditConfigurationFlyout({
             visualizationMap={visualizationMap}
             frame={frameApi}
             nowProvider={startDependencies.data.nowProvider}
+            hiddenByDefault={suggestionsPanelIsClosed}
             customSwitchSuggestionAction={(suggestion) => {
               const attrs = getLensAttributes({
                 filters: [],
@@ -181,6 +184,7 @@ export function LensEditConfigurationFlyout({
               });
               updateAllAttributes?.(attrs);
               setCurrentAttributes?.(attrs);
+              setSuggestionsPanelIsClosed(false);
             }}
           />
         </>
