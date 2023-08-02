@@ -26,10 +26,12 @@ import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
+import { InternalState } from '../services/discover_internal_state_container';
 
 export interface FetchDeps {
   abortController: AbortController;
   getAppState: () => DiscoverAppState;
+  getInternalState: () => InternalState;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -50,7 +52,14 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, getAppState, services, inspectorAdapters, savedSearch } = fetchDeps;
+  const {
+    initialFetchStatus,
+    getAppState,
+    getInternalState,
+    services,
+    inspectorAdapters,
+    savedSearch,
+  } = fetchDeps;
   const { data } = services;
   const searchSource = savedSearch.searchSource.createChild();
 
@@ -70,6 +79,7 @@ export function fetchAll(
         dataView,
         services,
         sort: getAppState().sort as SortOrder[],
+        customFilters: getInternalState().customFilters,
       });
     }
 

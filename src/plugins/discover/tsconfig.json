@@ -63,8 +63,9 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
-    "@kbn/search-response-warnings",
+    "@kbn/search-response-warnings"
   ],
   "exclude": [
     "target/**/*"
