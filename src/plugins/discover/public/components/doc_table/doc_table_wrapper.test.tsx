@@ -15,7 +15,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer';
+import { DocViewer } from '@kbn/unified-doc-viewer';
 
 describe('Doc table component', () => {
   const mountComponent = (customProps?: Partial<DocTableWrapperProps>) => {

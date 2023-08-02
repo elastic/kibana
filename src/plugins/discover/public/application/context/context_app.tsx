@@ -18,6 +18,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
@@ -27,7 +28,6 @@ import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 

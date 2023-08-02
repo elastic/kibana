@@ -14,9 +14,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DocViewerProps } from '@kbn/unified-doc-viewer/src/components/doc_viewer/doc_viewer';
 import { TableHeader } from './components/table_header/table_header';
 import { TableRow } from './components/table_row';
-import { DocViewFilterFn, DocViewRenderProps } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DocTableProps {
@@ -92,7 +93,7 @@ export interface DocTableProps {
   /**
    * Doc viewer component
    */
-  DocViewer: React.ComponentType<DocViewRenderProps>;
+  DocViewer: React.ComponentType<DocViewerProps>;
 }
 
 export interface DocTableRenderProps {

@@ -9,7 +9,7 @@
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 
 export { JsonCodeEditor } from './components';
-export { getDocViewsRegistry } from './plugin';
+export { getDocViewsRegistry, setDocViewsRegistry } from './plugin';
 export { useEsDocSearch } from './hooks';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

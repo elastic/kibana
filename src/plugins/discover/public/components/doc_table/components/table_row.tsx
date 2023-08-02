@@ -19,10 +19,11 @@ import type {
 } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
-import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewerProps } from '@kbn/unified-doc-viewer/src/components/doc_viewer/doc_viewer';
+import { getDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
@@ -43,7 +44,7 @@ export interface TableRowProps {
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
-  DocViewer: React.ComponentType<DocViewRenderProps>;
+  DocViewer: React.ComponentType<DocViewerProps>;
 }
 
 export const TableRow = ({
@@ -222,6 +223,7 @@ export const TableRow = ({
             isPlainRecord={isPlainRecord}
           >
             <DocViewer
+              docViewsRegistry={getDocViewsRegistry()}
               columns={columns}
               filter={filter}
               hit={row}

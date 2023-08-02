@@ -12,7 +12,7 @@ import type { DocViewsRegistry } from '../../..';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
 
-interface DocViewerProps extends DocViewRenderProps {
+export interface DocViewerProps extends DocViewRenderProps {
   docViewsRegistry: DocViewsRegistry;
 }
 

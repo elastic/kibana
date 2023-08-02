@@ -42,7 +42,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
