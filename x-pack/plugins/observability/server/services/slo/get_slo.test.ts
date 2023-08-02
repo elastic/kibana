@@ -82,6 +82,7 @@ describe('GetSLO', () => {
         enabled: slo.enabled,
         revision: slo.revision,
         groupBy: slo.groupBy,
+        instanceId: '*',
       });
     });
   });
