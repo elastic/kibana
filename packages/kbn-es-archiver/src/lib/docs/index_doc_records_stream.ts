@@ -33,37 +33,6 @@ const isCompressed = (x: string): boolean => {
   const isIt: boolean = isGzip(dirent?.name);
   opened.closeSync();
   return isIt;
-
-  // TODO-TRE: LATER!
-  // pipe(
-  //   TE.tryCatch(
-  //     () => opendirSync(x),
-  //     (reason: any) => toError(reason)
-  //   ),
-  //   TE.map((opened) => {
-  //     return {
-  //       dirent: opened.readSync(),
-  //       opened,
-  //     };
-  //   }),
-  //   TE.map({ opened, dirent }) => {
-  //     return {
-  //       name: dirent?.name,
-  //       opened,
-  //     };
-  //   }),
-  //   TE.fold(
-  //     (e) => {
-  //       console.log(`\nλjs error?: \n\t${e}`);
-  //       opened.closeSync();
-  //
-  //     },
-  //     ({ opened, name }) => {
-  //       const isIt: boolean =
-  //         opened.closeSync();
-  //     }
-  //   )
-  // );
 };
 export function createIndexDocRecordsStream(
   client: Client,
@@ -109,8 +78,8 @@ export function createIndexDocRecordsStream(
 }
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
-    // const length = jsonStanzasWithinArchive.length;
-    // console.log(`\nλjs length: \n\t${length}`);
+    const length = jsonStanzasWithinArchive.length;
+    console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
@@ -120,7 +89,7 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
         retries: 5,
         datasource: jsonStanzasWithinArchive
           .map((x) => {
-            console.log(`\nλjs jsonStanzaWithinArchive: \n\t${x}`);
+            console.log(`\nλjs jsonStanzaWithinArchive: \n\t${JSON.stringify(x, null, 2)}`);
             return x;
           })
           .map((doc) => {

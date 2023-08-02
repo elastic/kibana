@@ -16,7 +16,6 @@ import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { atLeastOne, freshenUp, hasDotKibanaPrefix, indexingOccurred } from './load_utils';
-import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
   isGzip,
