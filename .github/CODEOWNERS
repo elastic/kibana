@@ -790,7 +790,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # used for the 'team' designator within Kibana Stats
 
 # Data Discovery
-/examples/demo_search @elastic/kibana-data-discovery
 /test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
 /test/api_integration/apis/data_views @elastic/kibana-data-discovery
 /test/api_integration/apis/data_view_field_editor @elastic/kibana-data-discovery
@@ -809,7 +808,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/functional/apps/management/data_views @elastic/kibana-data-discovery
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
 /x-pack/test/accessibility/apps/search_sessions.ts @elastic/kibana-data-discovery
-/x-pack/test/api_integration/apis/management/rollup @elastic/kibana-data-discovery
+/x-pack/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/test/api_integration/apis/search @elastic/kibana-data-discovery
 /x-pack/test/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
