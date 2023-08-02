@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
@@ -89,6 +90,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
   ({ newPolicy, onChange }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEnterprise = useLicense().isEnterprise();
+    const UpsellToIncludePolicyProtections = useUpsellingComponent('endpointPolicyProtections');
 
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('EDRComplete');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
@@ -301,6 +303,9 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             >
               <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
             </EuiFormRow>
+
+            {UpsellToIncludePolicyProtections && <UpsellToIncludePolicyProtections />}
+
             {showNote && (
               <>
                 <EuiSpacer size="m" />

@@ -44,7 +44,7 @@ import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
-import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
@@ -306,7 +306,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
-        Component: LazyEndpointPolicyCreateExtension,
+        Component: getLazyEndpointPolicyCreateExtension(registerOptions),
       });
 
       registerExtension({
