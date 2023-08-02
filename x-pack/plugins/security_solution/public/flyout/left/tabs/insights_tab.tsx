@@ -19,7 +19,8 @@ import {
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
   INSIGHTS_TAB_RESPONSE_BUTTON_TEST_ID,
 } from './test_ids';
-
+import { useLeftPanelContext } from '../context';
+import { LeftPanelKey } from '..';
 import {
   INSIGHTS_BUTTONGROUP_OPTIONS,
   ENTITIES_BUTTON,
@@ -68,14 +69,30 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  * Insights view displayed in the document details expandable flyout left section
  */
 export const InsightsTab: React.FC = memo(() => {
-  const { panels } = useExpandableFlyoutContext();
+  const { eventId, indexName, scopeId } = useLeftPanelContext();
+  const { panels, openLeftPanel } = useExpandableFlyoutContext();
   const [activeInsightsId, setActiveInsightsId] = useState(
     panels.left?.path?.subTab ?? ENTITIES_TAB_ID
   );
 
-  const onChangeCompressed = useCallback((optionId: string) => {
-    setActiveInsightsId(optionId);
-  }, []);
+  const onChangeCompressed = useCallback(
+    (optionId: string) => {
+      setActiveInsightsId(optionId);
+      openLeftPanel({
+        id: LeftPanelKey,
+        path: {
+          tab: 'insights',
+          subTab: optionId,
+        },
+        params: {
+          id: eventId,
+          indexName,
+          scopeId,
+        },
+      });
+    },
+    [eventId, indexName, scopeId, openLeftPanel]
+  );
 
   useEffect(() => {
     if (panels.left?.path?.subTab) {

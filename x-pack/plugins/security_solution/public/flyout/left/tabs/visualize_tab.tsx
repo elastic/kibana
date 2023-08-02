@@ -10,6 +10,8 @@ import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useLeftPanelContext } from '../context';
+import { LeftPanelKey } from '..';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
@@ -42,7 +44,8 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab: FC = memo(() => {
-  const { panels } = useExpandableFlyoutContext();
+  const { eventId, indexName, scopeId } = useLeftPanelContext();
+  const { panels, openLeftPanel } = useExpandableFlyoutContext();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
@@ -53,8 +56,20 @@ export const VisualizeTab: FC = memo(() => {
       if (optionId === ANALYZE_GRAPH_ID) {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
       }
+      openLeftPanel({
+        id: LeftPanelKey,
+        path: {
+          tab: 'visualize',
+          subTab: optionId,
+        },
+        params: {
+          id: eventId,
+          indexName,
+          scopeId,
+        },
+      });
     },
-    [startTransaction]
+    [startTransaction, eventId, indexName, scopeId, openLeftPanel]
   );
 
   useEffect(() => {
