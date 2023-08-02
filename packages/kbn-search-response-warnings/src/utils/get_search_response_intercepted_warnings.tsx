@@ -17,6 +17,12 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SearchResponseInterceptedWarning } from '../types';
 
+/**
+ * Intercepts warnings for a search source request
+ * @param services
+ * @param adapter
+ * @param options
+ */
 export const getSearchResponseInterceptedWarnings = ({
   services,
   adapter,
@@ -63,6 +69,10 @@ export const getSearchResponseInterceptedWarnings = ({
   return removeInterceptedWarningDuplicates(interceptedWarnings);
 };
 
+/**
+ * Removes duplicated warnings
+ * @param interceptedWarnings
+ */
 export const removeInterceptedWarningDuplicates = (
   interceptedWarnings: SearchResponseInterceptedWarning[] | undefined
 ): SearchResponseInterceptedWarning[] | undefined => {

@@ -9,6 +9,9 @@
 import type { ReactNode } from 'react';
 import type { SearchResponseWarning } from '@kbn/data-plugin/public';
 
+/**
+ * Search Response Warning type which also includes an action
+ */
 export interface SearchResponseInterceptedWarning {
   originalWarning: SearchResponseWarning;
   action?: ReactNode;

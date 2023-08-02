@@ -27,12 +27,33 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseInterceptedWarning } from '../../types';
 
+/**
+ * SearchResponseWarnings component props
+ */
 export interface SearchResponseWarningsProps {
+  /**
+   * An array of warnings which can have actions
+   */
   interceptedWarnings?: SearchResponseInterceptedWarning[];
+
+  /**
+   * View variant
+   */
   variant: 'callout' | 'badge' | 'empty_prompt';
+
+  /**
+   * Custom data-test-subj value
+   */
   'data-test-subj': string;
 }
 
+/**
+ * SearchResponseWarnings component
+ * @param interceptedWarnings
+ * @param variant
+ * @param dataTestSubj
+ * @constructor
+ */
 export const SearchResponseWarnings = ({
   interceptedWarnings,
   variant,
