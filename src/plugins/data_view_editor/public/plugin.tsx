@@ -14,7 +14,7 @@ import { getEditorOpener } from './open_editor';
 import { DataViewEditor } from './components/data_view_editor';
 import {
   DataViewEditorService,
-  DataViewEditorServiceConstructorArgs,
+  type DataViewEditorServiceConstructorArgs,
 } from './data_view_editor_service';
 
 export class DataViewEditorPlugin
@@ -67,6 +67,12 @@ export class DataViewEditorPlugin
       userPermissions: {
         editDataView: () => dataViews.getCanSaveSync(),
       },
+      /**
+       * Helper method to generate a new data view editor service.
+       * @param requireTimestampField - whether service requires requireTimestampField
+       * @param initialValues - initial type, indexPattern, and name to populate service
+       * @returns DataViewEditorService
+       */
       dataViewEditorServiceFactory: ({
         requireTimestampField,
         initialValues,

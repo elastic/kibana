@@ -37,12 +37,24 @@ export const matchedIndiciesDefault = {
   visibleIndices: [],
 };
 
+/**
+ * ConstructorArgs for DataViewEditorService
+ */
 export interface DataViewEditorServiceConstructorArgs {
+  /**
+   * Dependencies for the to create a new DataViewEditorService
+   */
   services: {
     http: HttpSetup;
     dataViews: DataViewsServicePublic;
   };
+  /**
+   * Whether service requires requireTimestampField
+   */
   requireTimestampField?: boolean;
+  /**
+   * Initial type, indexPattern, and name to populate service
+   */
   initialValues: {
     name?: string;
     type?: INDEX_PATTERN_TYPE;
