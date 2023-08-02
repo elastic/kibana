@@ -224,7 +224,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               euiFieldProps: {
                 'data-test-subj': 'webhookSSLPFXInput',
                 display: 'default',
-                accept: '.pfx',
+                accept: '.pfx,.p12',
               },
             }}
           />

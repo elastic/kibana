@@ -30,10 +30,12 @@ const CERT_DIR = '../../../../../../packages/kbn-dev-utils/certs';
 
 const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
 const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
+const KIBANA_P12_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.p12'));
 const CA_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'ca.crt'));
 
 const KIBANA_KEY = fsReadFileSync(KIBANA_KEY_FILE, 'utf8');
 const KIBANA_CRT = fsReadFileSync(KIBANA_CRT_FILE, 'utf8');
+const KIBANA_P12 = fsReadFileSync(KIBANA_P12_FILE);
 const CA = fsReadFileSync(CA_FILE, 'utf8');
 
 const Auth = 'elastic:changeme';
@@ -207,6 +209,72 @@ describe('axios connections', () => {
       });
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
+    });
+
+    test('it works with ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        ca: Buffer.from(CA),
+      };
+      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with cert, key, and ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        ca: Buffer.from(CA),
+        cert: Buffer.from(KIBANA_CRT),
+        key: Buffer.from(KIBANA_KEY),
+      };
+      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with pfx and passphrase in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        pfx: KIBANA_P12,
+        passphrase: 'storepass',
+      };
+      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      expect(res.status).toBe(200);
+    });
+
+    test('it fails with cert and key but no ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        cert: Buffer.from(KIBANA_CRT),
+        key: Buffer.from(KIBANA_KEY),
+      };
+      const fn = async () =>
+        await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      await expect(fn()).rejects.toThrow('certificate');
+    });
+
+    test('it fails with pfx but no passphrase in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        pfx: KIBANA_P12,
+      };
+      const fn = async () =>
+        await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      await expect(fn()).rejects.toThrow('mac verify');
     });
   });
 
