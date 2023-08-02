@@ -34,7 +34,9 @@ export const CoverageOverviewPanelMetadata = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge color="subdued">{disabledRules}</EuiNotificationBadge>
+          <EuiNotificationBadge data-test-subj="metadataDisabledRulesCount" color="subdued">
+            {disabledRules}
+          </EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -45,7 +47,9 @@ export const CoverageOverviewPanelMetadata = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge color="subdued">{enabledRules}</EuiNotificationBadge>
+          <EuiNotificationBadge data-test-subj="metadataEnabledRulesCount" color="subdued">
+            {enabledRules}
+          </EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>

@@ -12,6 +12,15 @@ import { getMockCoverageOverviewMitreTechnique } from '../../../rule_management/
 import { TestProviders } from '../../../../common/mock';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
+import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+
+jest.mock('../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
+
+const mockExecuteBulkAction = jest.fn();
+
+(useExecuteBulkAction as jest.Mock).mockReturnValue({
+  executeBulkAction: mockExecuteBulkAction,
+});
 
 const renderTechniquePanelPopover = (
   technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique(),
@@ -43,5 +52,31 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
         getMockCoverageOverviewMitreTechnique().disabledRules[0].name
       )
     ).toBeInTheDocument();
+  });
+
+  test('calls bulk action enable when "Enable all disabled" button is pressed', async () => {
+    const wrapper = renderTechniquePanelPopover();
+
+    act(() => {
+      fireEvent.click(wrapper.getByTestId('coverageOverviewTechniquePanel'));
+    });
+    await act(async () => {
+      fireEvent.click(wrapper.getByTestId('enableAllDisabledButton'));
+    });
+
+    expect(mockExecuteBulkAction).toHaveBeenCalledWith({ ids: ['rule-id'], type: 'enable' });
+  });
+
+  test('"Enable all disabled" button is disabled when there are no disabled rules', async () => {
+    const mockTechnique: CoverageOverviewMitreTechnique = {
+      ...getMockCoverageOverviewMitreTechnique(),
+      disabledRules: [],
+    };
+    const wrapper = renderTechniquePanelPopover(mockTechnique);
+
+    act(() => {
+      fireEvent.click(wrapper.getByTestId('coverageOverviewTechniquePanel'));
+    });
+    expect(wrapper.getByTestId('enableAllDisabledButton')).toBeDisabled();
   });
 });

@@ -24,9 +24,11 @@ const renderTacticPanel = (
 };
 
 describe('CoverageOverviewTacticPanel', () => {
-  test('it renders', () => {
+  test('it renders information correctly', () => {
     const wrapper = renderTacticPanel();
 
     expect(wrapper.getByTestId('coverageOverviewTacticPanel')).toBeInTheDocument();
+    expect(wrapper.getByTestId('metadataDisabledRulesCount')).toHaveTextContent('1');
+    expect(wrapper.getByTestId('metadataEnabledRulesCount')).toHaveTextContent('1');
   });
 });

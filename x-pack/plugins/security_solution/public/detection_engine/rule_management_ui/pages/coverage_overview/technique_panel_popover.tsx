@@ -125,7 +125,11 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       data-test-subj="coverageOverviewPopover"
       ownFocus={false}
     >
-      <EuiPopoverTitle>
+      <EuiPopoverTitle
+        className={css`
+          min-width: 30em;
+        `}
+      >
         <EuiFlexGroup gutterSize="xs" alignItems="flexStart" direction="column">
           <EuiFlexItem>
             <EuiButtonEmpty
@@ -175,6 +179,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButton
+              data-test-subj="enableAllDisabledButton"
               isLoading={isEnableButtonLoading}
               disabled={isEnableButtonDisabled}
               onClick={handleEnableAllDisabled}
