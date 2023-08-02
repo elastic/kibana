@@ -33,13 +33,13 @@ interface Props {
 const i18nTexts = {
   notificationSuccess: {
     title: i18n.translate(
-      'xpackTODOCHANGE.security.accountManagement.userProfile.submitSuccessTitle',
+      'userProfileComponents.updateUserProfile.notification.submitSuccessTitle',
       {
         defaultMessage: 'Profile updated',
       }
     ),
     pageReloadText: i18n.translate(
-      'xpack.security.accountManagement.userProfile.requiresPageReloadToastDescription',
+      'userProfileComponents.updateUserProfile.notification.requiresPageReloadDescription',
       {
         defaultMessage: 'One or more settings require you to reload the page to take effect.',
       }
@@ -79,7 +79,7 @@ export const useUpdateUserProfile = ({
                     data-test-subj="windowReloadButton"
                   >
                     {i18n.translate(
-                      'xpack.security.accountManagement.userProfile.requiresPageReloadToastButtonLabel',
+                      'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
                       {
                         defaultMessage: 'Reload page',
                       }
@@ -113,10 +113,10 @@ export const useUpdateUserProfile = ({
   );
 
   const update = useCallback(
-    <D extends UserProfileData>(udpatedData: D) => {
+    <D extends UserProfileData>(updatedData: D) => {
       userProfileSnapshot.current = userProfileData;
       setIsLoading(true);
-      return userProfileApiClient.update(udpatedData).then(() => onUserProfileUpdate(udpatedData));
+      return userProfileApiClient.update(updatedData).then(() => onUserProfileUpdate(updatedData));
     },
     [userProfileApiClient, onUserProfileUpdate, userProfileData]
   );
