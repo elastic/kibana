@@ -22,6 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { rulesLocatorID, sloFeatureId } from '../../../../common';
+import {
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  observabilityRuleCreationValidConsumers,
+} from '../../../../common/constants';
 import { sloKeys } from '../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
@@ -34,8 +39,6 @@ import {
   transformSloResponseToCreateSloForm,
   transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../routes/paths';
 import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -276,6 +279,7 @@ export function SloListItem({
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          validConsumers={observabilityRuleCreationValidConsumers}
           onSave={handleSavedRule}
           onClose={() => {
             setIsAddRuleFlyoutOpen(false);

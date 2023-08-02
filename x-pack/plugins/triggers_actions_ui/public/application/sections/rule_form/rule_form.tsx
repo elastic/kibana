@@ -61,10 +61,11 @@ import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
+  RuleCreationValidConsumer,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import { hasAllPrivilegeWithProducerCheck, hasShowActionsCapability } from '../../lib/capabilities';
+import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
@@ -73,6 +74,7 @@ import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_ena
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
@@ -88,15 +90,31 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
 const authorizedToDisplayRuleType = ({
   rule,
   ruleType,
-  ruleTypeModel,
+  validConsumers,
 }: {
   rule: InitialRule;
   ruleType: RuleType;
-  ruleTypeModel: RuleTypeModel;
+  validConsumers?: RuleCreationValidConsumer[];
 }) => {
-  const consumer = rule.consumer === ALERTS_FEATURE_ID ? ruleType.producer : rule.consumer;
-
-  return ruleType && hasAllPrivilegeWithProducerCheck(consumer, ruleType);
+  if (!ruleType) {
+    return false;
+  }
+  // If we have a generic threshold/ES query rule...
+  if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
+    // And an array of valid consumers are passed in, we will show it
+    // if the rule type has at least one of the consumers as authorized
+    if (Array.isArray(validConsumers)) {
+      return validConsumers.some((consumer) => hasAllPrivilege(consumer, ruleType));
+    }
+    // If no array was passed in, then we will show it if at least one of its
+    // authorized consumers allows it to be shown.
+    return Object.entries(ruleType.authorizedConsumers).some(([_, privilege]) => {
+      return privilege.all;
+    });
+  }
+  // For non-generic threshold/ES query rules, we will still do the check
+  // against `alerts` since we are still setting rule consumers to `alerts`
+  return hasAllPrivilege(rule.consumer, ruleType);
 };
 
 export type RuleTypeItems = Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>;
@@ -116,6 +134,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   filteredRuleTypes?: string[];
   hideInterval?: boolean;
   connectorFeatureId?: string;
+  validConsumers?: RuleCreationValidConsumer[];
   onSetAvailableRuleTypes?: (ruleTypes: RuleTypeItems) => void;
   onChangeMetaData: (metadata: MetaData) => void;
 }
@@ -135,6 +154,7 @@ export const RuleForm = ({
   filteredRuleTypes: ruleTypeToFilter,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
+  validConsumers,
   onChangeMetaData,
   onSetAvailableRuleTypes,
 }: RuleFormProps) => {
@@ -201,12 +221,17 @@ export const RuleForm = ({
           }
           return arr;
         }, [])
-        .filter(({ ruleType, ruleTypeModel: ruleTypeRegistryItem }) =>
+        .filter(({ ruleType }) =>
           authorizedToDisplayRuleType({
             rule,
             ruleType,
-            ruleTypeModel: ruleTypeRegistryItem,
+            validConsumers,
           })
+        )
+        .filter((item) =>
+          rule.consumer === ALERTS_FEATURE_ID
+            ? !item.ruleTypeModel.requiresAppContext
+            : item.ruleType!.producer === rule.consumer
         );
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
@@ -232,7 +257,15 @@ export const RuleForm = ({
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
+  }, [
+    ruleTypes,
+    ruleTypeIndex,
+    rule.ruleTypeId,
+    kibanaFeatures,
+    rule.consumer,
+    ruleTypeRegistry,
+    validConsumers,
+  ]);
 
   useEffect(() => {
     if (loadRuleTypesError) {
