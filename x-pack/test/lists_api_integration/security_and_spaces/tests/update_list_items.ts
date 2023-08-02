@@ -213,6 +213,94 @@ export default ({ getService }: FtrProviderContext) => {
           message: 'list item id: "some-other-id" not found',
         });
       });
+
+      describe('version control OCC', () => {
+        it('should return error if _version in payload mismatched', async () => {
+          const { id, ...listNoId } = getCreateMinimalListSchemaMock();
+          // create a simple list with no id which will use an auto-generated id
+          const { body: createListBody } = await supertest
+            .post(LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send(listNoId)
+            .expect(200);
+
+          // create a simple list item also with an auto-generated id using the list's auto-generated id
+          const listItem: CreateListItemSchema = {
+            ...getCreateMinimalListItemSchemaMock(),
+            list_id: createListBody.id,
+          };
+          const { body: createListItemBody } = await supertest
+            .post(LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(listItem)
+            .expect(200);
+
+          // update a simple list item's value
+          const updatedListItem: UpdateListItemSchema = {
+            ...getUpdateMinimalListItemSchemaMock(),
+            id: createListItemBody.id,
+            value: '192.168.0.2',
+            _version: createListItemBody._version,
+          };
+          await supertest
+            .put(LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(updatedListItem)
+            .expect(200);
+
+          // next update with the same _version should return 409
+          const { body: errorBody } = await supertest
+            .put(LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(updatedListItem)
+            .expect(409);
+
+          expect(errorBody.message).to.equal(
+            'Conflict: versions mismatch. Provided versions:{"if_primary_term":1,"if_seq_no":0} does not match {"if_primary_term":1,"if_seq_no":1}'
+          );
+        });
+
+        it('should return updated _version', async () => {
+          const { id, ...listNoId } = getCreateMinimalListSchemaMock();
+          // create a simple list with no id which will use an auto-generated id
+          const { body: createListBody } = await supertest
+            .post(LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send(listNoId)
+            .expect(200);
+
+          // create a simple list item also with an auto-generated id using the list's auto-generated id
+          const listItem: CreateListItemSchema = {
+            ...getCreateMinimalListItemSchemaMock(),
+            list_id: createListBody.id,
+          };
+          const { body: createListItemBody } = await supertest
+            .post(LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(listItem)
+            .expect(200);
+
+          // update a simple list item's value
+          const updatedListItem: UpdateListItemSchema = {
+            ...getUpdateMinimalListItemSchemaMock(),
+            id: createListItemBody.id,
+            value: '192.168.0.2',
+            _version: createListItemBody._version,
+          };
+          const { body: updatedListItemBody } = await supertest
+            .put(LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(updatedListItem)
+            .expect(200);
+
+          // next update with the new version should be successful
+          await supertest
+            .put(LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ...updatedListItem, _version: updatedListItemBody._version })
+            .expect(200);
+        });
+      });
     });
   });
 };

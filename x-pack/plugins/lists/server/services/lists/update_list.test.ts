@@ -40,7 +40,6 @@ describe('update_list', () => {
     };
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 1 });
     const updatedList = await updateList({ ...options, esClient });

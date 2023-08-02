@@ -12,9 +12,12 @@ import type {
   MetaOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { transformListItemToElasticQuery } from '../utils';
+import {
+  checkVersionConflict,
+  transformListItemToElasticQuery,
+  waitUntilDocumentIndexed,
+} from '../utils';
 
 import { getListItem } from './get_list_item';
 
@@ -54,6 +57,7 @@ export const updateListItem = async ({
     if (elasticQuery == null) {
       return null;
     } else {
+      checkVersionConflict(_version, listItem._version);
       const keyValues = Object.entries(elasticQuery).map(([key, keyValue]) => ({
         key,
         value: keyValue,
@@ -94,9 +98,25 @@ export const updateListItem = async ({
           `,
         },
       });
+
+      let updatedOCCVersion: string | undefined;
+      if (response.updated) {
+        const checkIfListUpdated = async (): Promise<void> => {
+          const updatedListItem = await getListItem({ esClient, id, listItemIndex });
+          if (updatedListItem?._version === listItem._version) {
+            throw Error('List item has not been re-indexed in time');
+          }
+          updatedOCCVersion = updatedListItem?._version;
+        };
+
+        await waitUntilDocumentIndexed(checkIfListUpdated);
+      } else {
+        throw Error('No list item has been updated');
+      }
+
       return {
         '@timestamp': listItem['@timestamp'],
-        _version: encodeHitVersion(response),
+        _version: updatedOCCVersion,
         created_at: listItem.created_at,
         created_by: listItem.created_by,
         deserializer: listItem.deserializer,
