@@ -237,10 +237,3 @@ export const CHANGE_POINT_DETECTIONS_DESC = i18n.translate(
     defaultMessage: 'Change Point Detections Page',
   }
 );
-
-export const DEV_TOOLS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.devTools.title',
-  {
-    defaultMessage: 'Dev Tools',
-  }
-);

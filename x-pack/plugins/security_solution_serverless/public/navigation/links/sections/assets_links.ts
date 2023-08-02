@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { SecurityPageName, LinkCategoryType } from '@kbn/security-solution-navigation';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SERVER_APP_ID } from '@kbn/security-solution-plugin/common';
 import type { LinkItem } from '@kbn/security-solution-plugin/public';
 import { ExternalPageName, SecurityPagePath } from '../constants';
-import type { ProjectLinkCategory, ProjectNavigationLink } from '../types';
+import type { ProjectNavigationLink } from '../types';
+import { IconEcctlLazy, IconFleetLazy } from '../../../common/lazy_icons';
 import * as i18n from './translations';
-import {
-  IconLensLazy,
-  IconEndpointLazy,
-  IconSpacesLazy,
-  IconIndexManagementLazy,
-  IconDataConnectorLazy,
-  IconDevToolsLazy,
-  IconFleetLazy,
-  IconAuditbeatLazy,
-  IconSiemLazy,
-} from '../../../common/lazy_icons';
 
 // appLinks configures the Security Solution pages links
-export const assetsAppLink: LinkItem = {
+const assetsAppLink: LinkItem = {
   id: SecurityPageName.assets,
   title: 'Assets', // i18n,
   path: SecurityPagePath[SecurityPageName.assets],
@@ -32,105 +22,65 @@ export const assetsAppLink: LinkItem = {
   globalSearchKeywords: ['assets'], // i18n,
   hideTimeline: true,
   skipUrlState: true,
-  links: [],
+  links: [], // endpoints and cloudDefend links are added in createAssetsLinkFromManage on runtime
+};
+
+// TODO: define the main Cloud Defend link in security_solution plugin
+const assetsCloudDefendAppLink: LinkItem = {
+  id: SecurityPageName.cloudDefend,
+  title: 'Cloud', // i18n,
+  description: 'Cloud hosts running Elastic Defend', // i18n,
+  path: SecurityPagePath[SecurityPageName.cloudDefend],
+  capabilities: [`${SERVER_APP_ID}.show`],
+  landingIcon: IconEcctlLazy,
+  isBeta: true,
+  hideTimeline: true,
+  links: [], // cloudDefendPolicies link is added in createAssetsLinkFromManage on runtime
+};
+
+export const createAssetsLinkFromManage = (manageLink: LinkItem): LinkItem => {
+  const assetsSubLinks = [];
+
+  // Get endpoint sub links from management endpoints category
+  const endpointsSubLinkIds =
+    manageLink.categories
+      ?.find(({ linkIds }) => linkIds.includes(SecurityPageName.endpoints))
+      ?.linkIds.filter((linkId) => linkId !== SecurityPageName.endpoints) ?? [];
+
+  const endpointsLink = manageLink.links?.find(({ id }) => id === SecurityPageName.endpoints);
+  const endpointsSubLinks =
+    manageLink.links?.filter(({ id }) => endpointsSubLinkIds.includes(id)) ?? [];
+
+  if (endpointsLink) {
+    assetsSubLinks.push({ ...endpointsLink, links: endpointsSubLinks });
+  }
+
+  // Add cloud defend link
+  const cloudPoliciesLink = manageLink.links?.find(
+    ({ id }) => id === SecurityPageName.cloudDefendPolicies
+  );
+  if (cloudPoliciesLink) {
+    assetsSubLinks.push({ ...assetsCloudDefendAppLink, links: [cloudPoliciesLink] });
+  }
+
+  return {
+    ...assetsAppLink,
+    links: assetsSubLinks, // cloudDefend and endpoints links are added in the projectAppLinksSwitcher on runtime
+  };
 };
 
 // navLinks define the navigation links for the Security Solution pages and External pages as well
-export const assetsNavLinks: ProjectNavigationLink[] = [
-  {
-    id: ExternalPageName.mlOverview,
-    title: i18n.OVERVIEW_TITLE,
-    landingIcon: IconLensLazy,
-    description: i18n.OVERVIEW_DESC,
-  },
-  {
-    id: ExternalPageName.mlNotifications,
-    title: i18n.NOTIFICATIONS_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.NOTIFICATIONS_DESC,
-  },
-  {
-    id: ExternalPageName.mlAnomalyDetection,
-    title: i18n.ANOMALY_DETECTION_TITLE,
-    landingIcon: IconSpacesLazy,
-    description: i18n.ANOMALY_DETECTION_DESC,
-  },
-  {
-    id: ExternalPageName.mlAnomalyExplorer,
-    title: i18n.ANOMALY_EXPLORER_TITLE,
-    landingIcon: IconIndexManagementLazy,
-    description: i18n.ANOMALY_EXPLORER_DESC,
-  },
-  {
-    id: ExternalPageName.mlSingleMetricViewer,
-    title: i18n.SINGLE_METRIC_VIEWER_TITLE,
-    landingIcon: IconDataConnectorLazy,
-    description: i18n.SINGLE_METRIC_VIEWER_DESC,
-  },
-  {
-    id: ExternalPageName.mlSettings,
-    title: i18n.SETTINGS_TITLE,
-    landingIcon: IconDevToolsLazy,
-    description: i18n.SETTINGS_DESC,
-  },
-  {
-    id: ExternalPageName.mlDataFrameAnalytics,
-    title: i18n.DATA_FRAME_ANALYTICS_TITLE,
-    landingIcon: IconIndexManagementLazy,
-    description: i18n.DATA_FRAME_ANALYTICS_DESC,
-  },
-  {
-    id: ExternalPageName.mlResultExplorer,
-    title: i18n.RESULT_EXPLORER_TITLE,
-    landingIcon: IconFleetLazy,
-    description: i18n.RESULT_EXPLORER_DESC,
-  },
-  {
-    id: ExternalPageName.mlAnalyticsMap,
-    title: i18n.ANALYTICS_MAP_TITLE,
-    landingIcon: IconAuditbeatLazy,
-    description: i18n.ANALYTICS_MAP_DESC,
-  },
-  {
-    id: ExternalPageName.mlNodesOverview,
-    title: i18n.NODES_OVERVIEW_TITLE,
-    landingIcon: IconSiemLazy,
-    description: i18n.NODES_OVERVIEW_DESC,
-  },
-  {
-    id: ExternalPageName.mlNodes,
-    title: i18n.NODES_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.NODES_DESC,
-  },
-  {
-    id: ExternalPageName.mlFileUpload,
-    title: i18n.FILE_UPLOAD_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.FILE_UPLOAD_DESC,
-  },
-  {
-    id: ExternalPageName.mlIndexDataVisualizer,
-    title: i18n.INDEX_DATA_VISUALIZER_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.INDEX_DATA_VISUALIZER_DESC,
-  },
-  {
-    id: ExternalPageName.mlExplainLogRateSpikes,
-    title: i18n.EXPLAIN_LOG_RATE_SPIKES_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.EXPLAIN_LOG_RATE_SPIKES_DESC,
-  },
-  {
-    id: ExternalPageName.mlLogPatternAnalysis,
-    title: i18n.LOG_PATTERN_ANALYSIS_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.LOG_PATTERN_ANALYSIS_DESC,
-  },
-  {
-    id: ExternalPageName.mlChangePointDetections,
-    title: i18n.CHANGE_POINT_DETECTIONS_TITLE,
-    landingIcon: IconEndpointLazy,
-    description: i18n.CHANGE_POINT_DETECTIONS_DESC,
-  },
-];
+export const assetsFleetNavLinks: ProjectNavigationLink = {
+  id: ExternalPageName.fleet,
+  title: 'Fleet', // i18n
+  landingIcon: IconFleetLazy,
+  description: 'Centralized management for Elastic Agents', // i18n,
+  links: [
+    { id: ExternalPageName.fleetAgents, title: 'Agents' },
+    { id: ExternalPageName.fleetPolicies, title: 'Policies' },
+    { id: ExternalPageName.fleetEnrollmentTokens, title: 'EnrollmentTokens' },
+    { id: ExternalPageName.fleetUninstallTokens, title: 'UninstallTokens' },
+    { id: ExternalPageName.fleetDataStreams, title: 'DataStreams' },
+    { id: ExternalPageName.fleetSettings, title: 'Settings' },
+  ],
+};

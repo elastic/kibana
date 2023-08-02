@@ -11,6 +11,7 @@ import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-na
 import { isExternalId } from '@kbn/security-solution-navigation/links';
 import { mlNavCategories, mlNavLinks } from './sections/ml_links';
 import { devToolsNavLink } from './sections/dev_tools_links';
+import { assetsFleetNavLinks } from './sections/assets_links';
 import type { ProjectNavigationLink } from './types';
 import { getNavLinkIdFromProjectPageName } from './util';
 
@@ -52,7 +53,17 @@ const processNavLinks = (
   // Dev Tools. just pushing it
   projectNavLinks.push(devToolsNavLink);
 
-  // TODO: Project Settings. Override "Settings" link
+  // Assets, adding fleet external sub-links
+  const assetsLinkIndex = projectNavLinks.findIndex(({ id }) => id === SecurityPageName.assets);
+  if (assetsLinkIndex !== -1) {
+    const assetsNavLink = projectNavLinks[assetsLinkIndex];
+    projectNavLinks[assetsLinkIndex] = {
+      ...assetsNavLink,
+      links: [assetsFleetNavLinks, ...(assetsNavLink.links ?? [])],
+    };
+  }
+
+  // TODO: Project Settings
 
   return filterDisabled(projectNavLinks, chromeNavLinks);
 };

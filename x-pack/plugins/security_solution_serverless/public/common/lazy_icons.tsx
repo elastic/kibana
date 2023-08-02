@@ -30,3 +30,4 @@ export const IconDevToolsLazy = withSuspenseIcon(React.lazy(() => import('./icon
 export const IconFleetLazy = withSuspenseIcon(React.lazy(() => import('./icons/fleet')));
 export const IconAuditbeatLazy = withSuspenseIcon(React.lazy(() => import('./icons/auditbeat')));
 export const IconSiemLazy = withSuspenseIcon(React.lazy(() => import('./icons/siem')));
+export const IconEcctlLazy = withSuspenseIcon(React.lazy(() => import('./icons/ecctl')));

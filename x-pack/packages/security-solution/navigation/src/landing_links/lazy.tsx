@@ -26,6 +26,9 @@ export const LandingLinksIconsCategories = withSuspense(LandingLinksIconsCategor
 const LandingLinksIconsLazy = lazy(() => import('./landing_links_icons'));
 export const LandingLinksIcons = withSuspense(LandingLinksIconsLazy);
 
+const LandingLinksIconsGroupsLazy = lazy(() => import('./landing_links_icons_groups'));
+export const LandingLinksIconsGroups = withSuspense(LandingLinksIconsGroupsLazy);
+
 const LandingLinksImagesLazy = lazy(() => import('./landing_links_images'));
 export const LandingLinksImages = withSuspense(LandingLinksImagesLazy);
 

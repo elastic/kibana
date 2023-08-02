@@ -7,11 +7,14 @@
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
+// Paths for internal Security pages that only exist in serverless projects and do not exist on ESS
 export const SecurityPagePath = {
   [SecurityPageName.mlLanding]: '/ml',
   [SecurityPageName.assets]: '/assets',
+  [SecurityPageName.cloudDefend]: '/cloud_defend',
 } as const;
 
+// External (non-Security) page names that need to be linked in the Security nav for serverless
 export enum ExternalPageName {
   // Machine Learning
   // Ref: packages/default-nav/ml/default_navigation.ts
@@ -34,4 +37,13 @@ export enum ExternalPageName {
   // Dev Tools
   // Ref: packages/default-nav/devtools/default_navigation.ts
   devToolsRoot = 'dev_tools:',
+  // Fleet
+  // Ref: x-pack/plugins/fleet/public/deep_links.ts
+  fleet = 'fleet:',
+  fleetAgents = 'fleet:agents',
+  fleetPolicies = 'fleet:policies',
+  fleetEnrollmentTokens = 'fleet:enrollment_tokens',
+  fleetUninstallTokens = 'fleet:uninstall_tokens',
+  fleetDataStreams = 'fleet:data_streams',
+  fleetSettings = 'fleet:settings',
 }

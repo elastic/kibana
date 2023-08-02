@@ -35,7 +35,7 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   },
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.rulesLanding],
+    linkIds: [ExternalPageName.fleet, SecurityPageName.assets, SecurityPageName.rulesLanding],
   },
   {
     type: LinkCategoryType.separator,

@@ -23,12 +23,19 @@ const withSuspense = <T extends object = {}>(Component: React.ComponentType<T>):
 const MachineLearningPageLazy = lazy(() => import('./machine_learning'));
 const MachineLearningPage = withSuspense(MachineLearningPageLazy);
 
+const AssetsPageLazy = lazy(() => import('./assets'));
+const AssetsPage = withSuspense(AssetsPageLazy);
+
 // Sets the project specific routes for Serverless as extra routes in the Security Solution plugin
 export const setRoutes = (services: Services) => {
   const projectRoutes: RouteProps[] = [
     {
       path: SecurityPagePath[SecurityPageName.mlLanding],
       component: withServicesProvider(MachineLearningPage, services),
+    },
+    {
+      path: SecurityPagePath[SecurityPageName.assets],
+      component: withServicesProvider(AssetsPage, services),
     },
   ];
   services.securitySolution.setExtraRoutes(projectRoutes);

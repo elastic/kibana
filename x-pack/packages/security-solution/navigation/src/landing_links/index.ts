@@ -6,10 +6,12 @@
  */
 export type { LandingLinksIconsProps } from './landing_links_icons';
 export type { LandingLinksIconsCategoriesProps } from './landing_links_icons_categories';
+export type { LandingLinksIconsGroupsProps } from './landing_links_icons_groups';
 export type { LandingLinksImagesProps } from './landing_links_images';
 export {
   LandingLinksIcons,
   LandingLinksIconsCategories,
+  LandingLinksIconsGroups,
   LandingLinksImages,
   LandingLinksImageCards,
 } from './lazy';
