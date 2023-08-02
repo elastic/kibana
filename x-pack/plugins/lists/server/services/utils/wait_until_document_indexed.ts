@@ -10,6 +10,12 @@ import pRetry from 'p-retry';
 // https://www.elastic.co/guide/en/elasticsearch/reference/8.9/index-modules.html#dynamic-index-settings
 const DEFAULT_INDEX_REFRESH_TIME = 1000;
 
+/**
+ * retries until list/list item has been re-indexed
+ * After migration to data stream and using update_by_query, delete_by_query which do support only refresh=true/false,
+ * this utility needed response back when updates/delete applied
+ * @param fn execution function to retry
+ */
 export const waitUntilDocumentIndexed = async (fn: () => Promise<void>): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, DEFAULT_INDEX_REFRESH_TIME));
   await pRetry(fn, {

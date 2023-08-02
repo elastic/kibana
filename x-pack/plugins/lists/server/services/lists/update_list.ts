@@ -78,7 +78,7 @@ export const updateList = async ({
         lang: 'painless',
         params: {
           ...params,
-          // when assigning undefined in painless, it will remover property and wil set it to null
+          // when assigning undefined in painless, it will remove property and wil set it to null
           // for patch we don't want to remove unspecified value in payload
           assignEmpty: !isPatch,
         },

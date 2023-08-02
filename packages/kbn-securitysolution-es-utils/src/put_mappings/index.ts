@@ -8,6 +8,12 @@
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
+/**
+ * update mappings of index
+ * @param esClient
+ * @param index
+ * @param mappings
+ */
 export const putMappings = async (
   esClient: ElasticsearchClient,
   index: string,

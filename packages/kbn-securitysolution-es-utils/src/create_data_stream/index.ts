@@ -12,7 +12,6 @@ import type { ElasticsearchClient } from '../elasticsearch_client';
  * creates data stream
  * @param esClient
  * @param name
- * @returns
  */
 export const createDataStream = async (
   esClient: ElasticsearchClient,

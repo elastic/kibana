@@ -9,10 +9,9 @@
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
 /**
- * creates data stream
+ * checks if data stream exists
  * @param esClient
  * @param name
- * @returns
  */
 export const getDataStreamExists = async (
   esClient: ElasticsearchClient,

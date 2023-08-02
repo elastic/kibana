@@ -12,7 +12,6 @@ import type { ElasticsearchClient } from '../elasticsearch_client';
  * migrate to data stream
  * @param esClient
  * @param name
- * @returns
  */
 export const migrateToDataStream = async (
   esClient: ElasticsearchClient,

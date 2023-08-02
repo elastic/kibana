@@ -8,6 +8,11 @@
 
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
+/**
+ * deletes data stream
+ * @param esClient
+ * @param name
+ */
 export const deleteDataStream = async (
   esClient: ElasticsearchClient,
   name: string
