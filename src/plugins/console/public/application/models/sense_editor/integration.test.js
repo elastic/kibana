@@ -948,6 +948,8 @@ describe('Integration', () => {
         autoCompleteSet: [
           tt('field1.1.1', { f: 1 }, 'string'),
           tt('field1.1.2', { f: 1 }, 'string'),
+          tt('field2.1.1', { f: 1 }, 'string'),
+          tt('field2.1.2', { f: 1 }, 'string'),
         ],
       },
       {
@@ -956,6 +958,8 @@ describe('Integration', () => {
         autoCompleteSet: [
           { name: 'field1.1.1', meta: 'string' },
           { name: 'field1.1.2', meta: 'string' },
+          { name: 'field2.1.1', meta: 'string' },
+          { name: 'field2.1.2', meta: 'string' },
         ],
       },
     ]
