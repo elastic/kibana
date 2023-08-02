@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
-import type { ShardsArray } from '../../../../common/schemas/common/utils';
+import type { ShardsArray } from '../../../../common/utils/converters';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
 import { overflowCss } from '../../utils';
