@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import React, { memo, useEffect, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio, EuiSpacer } from '@elastic/eui';
+import type {
+  NewPackagePolicy,
+  PackagePolicyCreateExtensionComponentProps,
+} from '@kbn/fleet-plugin/public';
 import type { EndpointPreset } from '../constants';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from '../constants';
 import { HelpTextWithPadding } from './help_text_with_padding';
@@ -25,37 +28,51 @@ export const EndpointEventCollectionPreset = memo<EndpointEventCollectionPresetP
   ({ onChange, newPolicy }) => {
     const UpsellToIncludePolicyProtections = useGetProtectionsUnavailableComponent();
     const preset: EndpointPreset = 'DataCollection';
+    const policyInputs: NewPackagePolicy['inputs'] = useMemo(() => {
+      return [
+        {
+          enabled: true,
+          streams: [],
+          type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+          config: {
+            _config: {
+              value: {
+                type: 'endpoint',
+                endpointConfig: {
+                  preset,
+                },
+              },
+            },
+          },
+        },
+      ];
+    }, []);
 
     useEffect(() => {
-      if (newPolicy.inputs.length === 0) {
+      const inputs = newPolicy.inputs;
+
+      if (inputs.length === 0) {
         onChange({
           isValid: false,
           updatedPolicy: {
             ...newPolicy,
             name: '',
-            inputs: [
-              {
-                enabled: true,
-                streams: [],
-                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
-                config: {
-                  _config: {
-                    value: {
-                      type: 'endpoint',
-                      endpointConfig: {
-                        preset,
-                      },
-                    },
-                  },
-                },
-              },
-            ],
+            inputs: policyInputs,
+          },
+        });
+        return;
+      }
+
+      if (inputs[0]?.config?._config.value.endpointConfig.preset !== preset) {
+        onChange({
+          isValid: true,
+          updatedPolicy: {
+            ...newPolicy,
+            inputs: policyInputs,
           },
         });
       }
-
-      // Update the policy to ensure it only has Data collection
-    }, [newPolicy, onChange]);
+    }, [newPolicy, onChange, policyInputs]);
 
     return (
       <div>
@@ -66,7 +83,7 @@ export const EndpointEventCollectionPreset = memo<EndpointEventCollectionPresetP
         >
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiCheckbox
+              <EuiRadio
                 id="endpoint_data_collection_only_preset"
                 onChange={NOOP}
                 disabled

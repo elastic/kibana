@@ -79,63 +79,74 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     // only during 1st component render (thus why the eslint disabled rule below).
     // Default values for config are endpoint + NGAV
     useEffect(() => {
-      if (newPolicy.inputs.length === 0) {
-        onChange({
-          isValid: false,
-          updatedPolicy: {
-            ...newPolicy,
-            name: '',
-            inputs: [
-              {
-                enabled: true,
-                streams: [],
-                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
-                config: {
-                  _config: {
-                    value: {
-                      type: 'endpoint',
-                      endpointConfig: {
-                        preset: 'NGAV',
+      // When ONLY Data collection is allowed, the updates to the policy are handled by the
+      // EndpointEventCollectionPreset component
+      if (!showEndpointEventCollectionOnlyPreset) {
+        if (newPolicy.inputs.length === 0) {
+          onChange({
+            isValid: false,
+            updatedPolicy: {
+              ...newPolicy,
+              name: '',
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+                  config: {
+                    _config: {
+                      value: {
+                        type: 'endpoint',
+                        endpointConfig: {
+                          preset: 'NGAV',
+                        },
                       },
                     },
                   },
                 },
-              },
-            ],
-          },
-        });
-      } else {
-        onChange({
-          isValid: true,
-          updatedPolicy: {
-            ...newPolicy,
-            inputs: [
-              {
-                ...newPolicy.inputs[0],
-                config: {
-                  _config: {
-                    value: {
-                      type: selectedEnvironment,
-                      ...(selectedEnvironment === 'cloud'
-                        ? {
-                            eventFilters: {
-                              nonInteractiveSession: selectedCloudEvent === 'INTERACTIVE_ONLY',
-                            },
-                          }
-                        : {
-                            endpointConfig: {
-                              preset: endpointPreset,
-                            },
-                          }),
+              ],
+            },
+          });
+        } else {
+          onChange({
+            isValid: true,
+            updatedPolicy: {
+              ...newPolicy,
+              inputs: [
+                {
+                  ...newPolicy.inputs[0],
+                  config: {
+                    _config: {
+                      value: {
+                        type: selectedEnvironment,
+                        ...(selectedEnvironment === 'cloud'
+                          ? {
+                              eventFilters: {
+                                nonInteractiveSession: selectedCloudEvent === 'INTERACTIVE_ONLY',
+                              },
+                            }
+                          : {
+                              endpointConfig: {
+                                preset: endpointPreset,
+                              },
+                            }),
+                      },
                     },
                   },
                 },
-              },
-            ],
-          },
-        });
+              ],
+            },
+          });
+        }
       }
-    }, [selectedEnvironment, selectedCloudEvent, endpointPreset, onChange, newPolicy]);
+    }, [
+      selectedEnvironment,
+      selectedCloudEvent,
+      endpointPreset,
+      onChange,
+      newPolicy,
+      showEndpointEventCollectionOnlyPreset,
+    ]);
 
     const onChangeEnvironment = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedEnvironment(e?.target?.value as Environment);
