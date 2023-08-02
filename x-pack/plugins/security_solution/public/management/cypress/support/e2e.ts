@@ -36,7 +36,16 @@ Cypress.Commands.addQuery<'getByTestSubj'>(
       subject: Cypress.Chainable<JQuery<HTMLElement>>
     ) => Cypress.Chainable<JQuery<HTMLElement>>;
 
-    return (subject) => getFn(subject);
+    return (subject) => {
+      if (subject) {
+        const errMessage =
+          '`cy.getByTestSubj()` is a parent query and can not be chained off a existing subject. Did you mean to use `.findByTestSubj()`?';
+        cy.now('log', errMessage, [selector, subject]);
+        throw new TypeError(errMessage);
+      }
+
+      return getFn(subject);
+    };
   }
 );
 
@@ -45,7 +54,7 @@ Cypress.Commands.addQuery<'findByTestSubj'>(
   function findByTestSubj(selector, options) {
     return (subject) => {
       Cypress.ensure.isElement(subject, this.get('name'), cy);
-      return subject.find(testSubjSelector(selector), {});
+      return subject.find(testSubjSelector(selector), options);
     };
   }
 );
