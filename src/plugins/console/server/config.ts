@@ -26,8 +26,9 @@ const schemaLatest = schema.object(
     }),
     autocompleteDefinitions: schema.object({
       // Only displays the endpoints that are available in the specified environment
-      // Current supported values are 'stack' and 'serverless'
-      endpointsAvailability: schema.string({ defaultValue: 'stack' }),
+      endpointsAvailability: schema.oneOf([schema.literal('stack'), schema.literal('serverless')], {
+        defaultValue: 'stack',
+      }),
     }),
   },
   { defaultValue: undefined }
