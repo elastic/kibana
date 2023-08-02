@@ -42,10 +42,8 @@ exports[`OpenSearchPanel render 1`] = `
       }
       services={
         Object {
-          "http": undefined,
-          "savedObjectsManagement": undefined,
+          "contentClient": undefined,
           "savedObjectsTagging": undefined,
-          "uiSettings": undefined,
         }
       }
       showFilter={true}

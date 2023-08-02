@@ -101,6 +101,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       lens: deps.lens,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
+      contentManagement: deps.contentManagement,
       ...coreStart,
       mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
     };
