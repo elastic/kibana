@@ -170,10 +170,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // used for creating a custom stateful KQL Query Bar
       const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
-        query: {
-          ...query,
-        },
+        query,
       };
+
+      customDataService.query.filterManager._name = 'customFilter';
 
       const services: StartServices = {
         ...coreStart,

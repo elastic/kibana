@@ -25,7 +25,7 @@ import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { FetchStatus } from '../../types';
+import { DiscoverDisplayMode, FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
@@ -63,6 +63,11 @@ interface DiscoverStateContainerParams {
    * core ui settings service
    */
   services: DiscoverServices;
+  /*
+   * mode in which discover is running
+   *
+   * */
+  mode: DiscoverDisplayMode;
 }
 
 export interface LoadParams {
@@ -183,6 +188,7 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
+  mode,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -193,6 +199,7 @@ export function getDiscoverStateContainer({
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
+    useHashQuery: mode === 'standalone',
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
@@ -336,9 +343,12 @@ export function getDiscoverStateContainer({
    */
   const initializeAndSync = () => {
     // initialize app state container, syncing with _g and _a part of the URL
+    debugger;
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
+
+    addLog('Initializing Sync');
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
@@ -350,6 +360,7 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 

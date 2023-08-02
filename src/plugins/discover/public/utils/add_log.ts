@@ -14,7 +14,7 @@
 
 export const addLog = (message: string, payload?: unknown) => {
   // @ts-expect-error
-  const logger = window?.ELASTIC_DISCOVER_LOGGER;
+  const logger = window?.ELASTIC_DISCOVER_LOGGER ?? 'debug';
 
   if (logger) {
     if (logger === 'debug') {

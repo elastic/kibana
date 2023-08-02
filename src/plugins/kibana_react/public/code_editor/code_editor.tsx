@@ -435,7 +435,7 @@ export const CodeEditor: React.FC<Props> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   return (
-    <div className="kibanaCodeEditor" onKeyDown={onKeyDown}>
+    <div className="kibanaCodeEditor" onKeyDown={onKeyDown} data-test-subj="kibanaCodeEditor">
       {renderPrompt()}
 
       <FullScreenDisplay>

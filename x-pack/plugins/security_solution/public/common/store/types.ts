@@ -24,6 +24,7 @@ import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { GroupState } from './grouping/types';
 import type { AnalyzerOuterState } from '../../resolver/types';
+import type { SecuritySolutionDiscoverState } from './discover/model';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -36,6 +37,7 @@ export type State = HostsPluginState &
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
+    discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
   AnalyzerOuterState;
