@@ -31,7 +31,8 @@
     "@kbn/ui-theme",
     "@kbn/user-profile-components",
     "@kbn/observability-shared-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/monaco"
   ],
   "exclude": ["target/**/*"]
 }
