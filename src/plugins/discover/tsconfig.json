@@ -63,8 +63,9 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
   ],
   "exclude": [
     "target/**/*"
