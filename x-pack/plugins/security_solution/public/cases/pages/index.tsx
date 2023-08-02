@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { RightPanelKey } from '../../flyout/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -18,8 +20,18 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
-import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
+import {
+  useGetUserCasesPermissions,
+  useKibana,
+  useNavigation,
+  useUiSetting$,
+} from '../../common/lib/kibana';
+import {
+  APP_ID,
+  CASES_PATH,
+  ENABLE_EXPANDABLE_FLYOUT_SETTING,
+  SecurityPageName,
+} from '../../../common/constants';
 import { timelineActions } from '../../timelines/store/timeline';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
@@ -59,20 +71,35 @@ const CaseContainerComponent: React.FC = () => {
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 
+  const { openFlyout } = useExpandableFlyoutContext();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          panelView: 'eventDetail',
-          id: TimelineId.casePage,
-          params: {
-            eventId: alertId,
-            indexName: index,
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: RightPanelKey,
+            params: {
+              id: alertId,
+              indexName: index,
+              scopeId: TimelineId.casePage,
+            },
           },
-        })
-      );
+        });
+      } else {
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
+            id: TimelineId.casePage,
+            params: {
+              eventId: alertId,
+              indexName: index,
+            },
+          })
+        );
+      }
     },
-    [dispatch]
+    [dispatch, isSecurityFlyoutEnabled, openFlyout]
   );
 
   const endpointDetailsHref = (endpointId: string) =>
