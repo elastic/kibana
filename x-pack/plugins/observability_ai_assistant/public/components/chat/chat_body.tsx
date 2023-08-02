@@ -15,6 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React from 'react';
 import { type ConversationCreateRequest } from '../../../common/types';
@@ -128,7 +129,12 @@ export function ChatBody({
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
           <ChatHeader
-            title={initialConversation?.conversation.title ?? ''}
+            title={
+              initialConversation?.conversation.title ??
+              i18n.translate('xpack.observabilityAiAssistant.chatHeader.newConversation', {
+                defaultMessage: 'New conversation',
+              })
+            }
             connectors={connectors}
           />
         </EuiPanel>
