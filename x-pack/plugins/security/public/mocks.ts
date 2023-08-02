@@ -32,9 +32,6 @@ function createStartMock() {
       userProfile$: of({}),
     },
     uiApi: getUiApiMock.createStart(),
-    hooks: {
-      useUpdateUserProfile: jest.fn(),
-    },
   };
 }
 
