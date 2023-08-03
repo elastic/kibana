@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import React from 'react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
+import { HttpStart } from '@kbn/core-http-browser';
 
 export const GithubLink: React.FC<{
   label: string;
   href: string;
-  http: any;
+  http: HttpStart;
   pluginId: string;
 }> = ({ label, href, http, pluginId }) => {
   return (

@@ -22,10 +22,17 @@ export * from './components/install_client';
 
 export interface WelcomeBannerProps {
   userProfile: any;
-  assetBasePath: string;
+  assetBasePath?: string;
+  image?: string;
+  showDescription?: boolean;
 }
 
-export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ userProfile, assetBasePath }) => (
+export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
+  userProfile,
+  assetBasePath,
+  image,
+  showDescription = true,
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
       {/* Reversing column direction here so screenreaders keep h1 as the first element */}
@@ -51,17 +58,19 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ userProfile, asset
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiText>
-        {i18n.translate('xpack.serverlessSearch.header.description', {
-          defaultMessage:
-            "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
-        })}
-      </EuiText>
+      {showDescription && (
+        <EuiText>
+          {i18n.translate('xpack.serverlessSearch.header.description', {
+            defaultMessage:
+              "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
+          })}
+        </EuiText>
+      )}
       <EuiSpacer size="xxl" />
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiImage alt="" src={`${assetBasePath}serverless_header.png`} size="554px" />
+      <EuiImage alt="" src={image ? image : `${assetBasePath}serverless_header.png`} size="554px" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

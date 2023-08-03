@@ -9,9 +9,17 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { WelcomeBanner } from '@kbn/serverless-api-panels';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ErrorStateCallout } from '../../../shared/error_state';
@@ -20,79 +28,126 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
+import headerImage from '../../assets/search_header.svg';
+
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { BehavioralAnalyticsProductCard } from './behavioral_analytics_product_card';
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
+import { IngestionSelector } from './ingestion_selector';
 import { SearchApplicationsProductCard } from './search_applications_product_card';
 
+import './product_selector.scss';
+
 export const ProductSelector: React.FC = () => {
-  const { config } = useValues(KibanaLogic);
+  const { config, userProfile } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
   // to no longer rely on ent-search we can always show the Add Content component
-  const showAddContent = config.host && !errorConnectingMessage;
+  const showAddContent = false && config.host && !errorConnectingMessage;
 
   return (
-    <EnterpriseSearchOverviewPageTemplate
-      restrictWidth
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.overview.pageTitle', {
-          defaultMessage: 'Welcome to Search',
-        }),
-      }}
-    >
-      <SetPageChrome />
-      <SendTelemetry action="viewed" metric="overview" />
-      <TrialCallout />
-      {showAddContent && (
-        <>
-          <AddContentEmptyPrompt
-            title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
-              defaultMessage: 'Add data and start searching',
+    <>
+      <EnterpriseSearchOverviewPageTemplate grow offset={0}>
+        <SetPageChrome />
+        <SendTelemetry action="viewed" metric="overview" />
+        <TrialCallout />
+        <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
+          <EuiText color="ghost">
+            <WelcomeBanner
+              userProfile={{ user: { ...userProfile } }}
+              image={headerImage}
+              showDescription={false}
+            />
+          </EuiText>
+        </EuiPageTemplate.Section>
+        <TrialCallout />
+        <EuiSpacer size="xl" />
+        <EuiTitle>
+          <h4>
+            {i18n.translate('xpack.enterpriseSearch.overview.title', {
+              defaultMessage: 'Ingest your content',
             })}
-            buttonLabel={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptButtonLabel', {
-              defaultMessage: 'Create an Elasticsearch index',
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.enterpriseSearch.overview.description', {
+              defaultMessage:
+                'The first step in building your search experience is to create a search-optimized Elasticsearch index and import your content into it. Elasticsearch offers several user-friendly options you can choose from that best match your technical expertise and data sources.',
             })}
-          />
-          <EuiSpacer size="l" />
-        </>
-      )}
-      {showErrorConnecting && (
-        <>
-          <SendTelemetry action="error" metric="cannot_connect" />
-          <ErrorStateCallout />
-        </>
-      )}
-      <EuiTitle>
-        <h3>
-          {i18n.translate('xpack.enterpriseSearch.overview.productSelector.title', {
-            defaultMessage: "What's next?",
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="xl" />
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <ElasticsearchProductCard />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SearchApplicationsProductCard />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <BehavioralAnalyticsProductCard />
-        </EuiFlexItem>
-        {!config.host && config.canDeployEntSearch && (
-          <EuiFlexItem>
-            <SetupGuideCta />
-          </EuiFlexItem>
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="xl" />
+        <IngestionSelector />
+        <EuiSpacer />
+        {showAddContent && (
+          <>
+            <AddContentEmptyPrompt
+              title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
+                defaultMessage: 'Add data and start searching',
+              })}
+              buttonLabel={i18n.translate(
+                'xpack.enterpriseSearch.overview.emptyPromptButtonLabel',
+                {
+                  defaultMessage: 'Create an Elasticsearch index',
+                }
+              )}
+            />
+            <EuiSpacer size="l" />
+          </>
         )}
-      </EuiFlexGroup>
-      <Chat />
-    </EnterpriseSearchOverviewPageTemplate>
+        {showErrorConnecting && (
+          <>
+            <SendTelemetry action="error" metric="cannot_connect" />
+            <ErrorStateCallout />
+          </>
+        )}
+        <EuiSpacer size="xl" />
+
+        <EuiTitle>
+          <h4>
+            {i18n.translate('xpack.enterpriseSearch.overview.createCustom.title', {
+              defaultMessage: 'Create a custom search experience',
+            })}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.enterpriseSearch.overview.createCustom.description', {
+              defaultMessage:
+                'Once your Elasticsearch index is created and populated, you are ready to get the full power of Elasticsearch and accelerate building search applications with plentiful out-of-the-box tools and multiple language clients, all backed by a robust and fully consumable set of APIs.',
+            })}
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="xl" />
+
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <ElasticsearchProductCard />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SearchApplicationsProductCard />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <BehavioralAnalyticsProductCard />
+          </EuiFlexItem>
+          {!config.host && config.canDeployEntSearch && (
+            <EuiFlexItem>
+              <SetupGuideCta />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <Chat />
+      </EnterpriseSearchOverviewPageTemplate>
+    </>
   );
 };

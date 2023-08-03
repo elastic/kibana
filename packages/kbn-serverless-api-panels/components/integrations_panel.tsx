@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import {
   EuiThemeProvider,
   EuiPanel,
@@ -17,14 +19,14 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
+import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { LEARN_MORE_LABEL } from '../constants';
 import { GithubLink } from './github_link';
 
 export interface IntegrationsPanelProps {
   docLinks: any;
-  http: any;
+  http: HttpStart;
   pluginId: string;
 }
 

@@ -9,19 +9,23 @@
 import React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compressToEncodedURIComponent } from 'lz-string';
 
 export interface TryInConsoleButtonProps {
   request: string;
-  useKibanaServicesHook: any;
+  application?: ApplicationStart;
+  sharePlugin: SharePluginStart;
 }
-export const TryInConsoleButton = ({ request, useKibanaServicesHook }: TryInConsoleButtonProps) => {
-  const {
-    application,
-    share: { url },
-  } = useKibanaServicesHook();
+export const TryInConsoleButton = ({
+  request,
+  application,
+  sharePlugin,
+}: TryInConsoleButtonProps) => {
+  const { url } = sharePlugin;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   if (!canShowDevtools || !url) return null;
 

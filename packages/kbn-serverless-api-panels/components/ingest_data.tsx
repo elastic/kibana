@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
+
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
 import { languageDefinitions } from '../languages/languages';
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from '../languages/types';
@@ -20,9 +24,10 @@ interface IngestDataProps {
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   docLinks: any;
-  http: any;
+  http: HttpStart;
   pluginId: string;
-  useKibanaServicesHook: any;
+  application?: ApplicationStart;
+  sharePlugin: SharePluginStart;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -32,7 +37,8 @@ export const IngestData: React.FC<IngestDataProps> = ({
   docLinks,
   http,
   pluginId,
-  useKibanaServicesHook,
+  application,
+  sharePlugin,
 }) => {
   const [selectedIngestMethod, setSelectedIngestMethod] = useState<
     'ingestViaApi' | 'ingestViaIntegration'
@@ -53,7 +59,8 @@ export const IngestData: React.FC<IngestDataProps> = ({
             setSelectedLanguage={setSelectedLanguage}
             http={http}
             pluginId={pluginId}
-            useKibanaServicesHook={useKibanaServicesHook}
+            application={application}
+            sharePlugin={sharePlugin}
           />
         ) : (
           <IntegrationsPanel docLinks={docLinks} http={http} pluginId={pluginId} />

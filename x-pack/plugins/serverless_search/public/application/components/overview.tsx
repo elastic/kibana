@@ -44,12 +44,9 @@ export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const {
-    application: { navigateToApp },
-    cloud,
-    http,
-    userProfile,
-  } = useKibanaServices();
+  const { application, cloud, http, userProfile, share } = useKibanaServices();
+  const { navigateToApp } = application;
+
   const elasticsearchURL = useMemo(() => {
     return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
   }, [cloud]);
@@ -87,9 +84,10 @@ export const ElasticsearchOverview = () => {
           codeArguments={codeSnippetArguments}
           language={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
-          useKibanaServicesHook={useKibanaServices}
           http={http}
           pluginId={PLUGIN_ID}
+          application={application}
+          sharePlugin={share}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
@@ -126,7 +124,8 @@ export const ElasticsearchOverview = () => {
               setSelectedLanguage={setSelectedLanguage}
               http={http}
               pluginId={PLUGIN_ID}
-              useKibanaServicesHook={useKibanaServices}
+              application={application}
+              sharePlugin={share}
             />
           }
           links={[
@@ -177,7 +176,8 @@ export const ElasticsearchOverview = () => {
               setSelectedLanguage={setSelectedLanguage}
               http={http}
               pluginId={PLUGIN_ID}
-              useKibanaServicesHook={useKibanaServices}
+              application={application}
+              sharePlugin={share}
             />
           }
           links={[]}
@@ -194,7 +194,8 @@ export const ElasticsearchOverview = () => {
           http={http}
           docLinks={docLinks}
           pluginId={PLUGIN_ID}
-          useKibanaServicesHook={useKibanaServices}
+          application={application}
+          sharePlugin={share}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
@@ -212,7 +213,8 @@ export const ElasticsearchOverview = () => {
               setSelectedLanguage={setSelectedLanguage}
               http={http}
               pluginId={PLUGIN_ID}
-              useKibanaServicesHook={useKibanaServices}
+              application={application}
+              sharePlugin={share}
             />
           }
           links={[]}

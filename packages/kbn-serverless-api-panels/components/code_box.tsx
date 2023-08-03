@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -20,7 +22,10 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+
 import { consoleDefinition } from '../languages/console';
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from '../languages/types';
 import { TryInConsoleButton } from './try_in_console_button';
@@ -34,9 +39,10 @@ interface CodeBoxProps {
   languageType?: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  http: any;
+  http: HttpStart;
   pluginId: string;
-  useKibanaServicesHook: any;
+  application?: ApplicationStart;
+  sharePlugin: SharePluginStart;
 }
 
 const getCodeSnippet = (
@@ -59,9 +65,11 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   setSelectedLanguage,
   http,
   pluginId,
-  useKibanaServicesHook,
+  application,
+  sharePlugin,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
   const items = languages.map((language) => (
     <EuiContextMenuItem
       key={language.id}
@@ -125,7 +133,8 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
                 request={getCodeSnippet(consoleDefinition, code, codeArgs)}
-                useKibanaServicesHook={useKibanaServicesHook}
+                application={application}
+                sharePlugin={sharePlugin}
               />
             </EuiFlexItem>
           )}

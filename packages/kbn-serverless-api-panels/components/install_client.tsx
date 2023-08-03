@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
 import { languageDefinitions } from '../languages/languages';
 import { OverviewPanel } from './overview_panel';
@@ -23,12 +27,14 @@ interface InstallClientProps {
   codeArguments: LanguageDefinitionSnippetArguments;
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
-  http: any;
+  http: HttpStart;
   pluginId: string;
-  useKibanaServicesHook: any;
+  application?: ApplicationStart;
+  sharePlugin: SharePluginStart;
+  isPanelLeft?: boolean;
 }
 
-const Link: React.FC<{ language: Languages; http: any; pluginId: string }> = ({
+const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }> = ({
   language,
   http,
   pluginId,
@@ -77,8 +83,43 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   setSelectedLanguage,
   http,
   pluginId,
-  useKibanaServicesHook,
+  application,
+  sharePlugin,
+  isPanelLeft = true,
 }) => {
+  const panelContent = (
+    <>
+      <CodeBox
+        code="installClient"
+        codeArgs={codeArguments}
+        languageType="shell"
+        languages={languageDefinitions}
+        selectedLanguage={language}
+        setSelectedLanguage={setSelectedLanguage}
+        http={http}
+        pluginId={pluginId}
+        application={application}
+        sharePlugin={sharePlugin}
+      />
+      <EuiSpacer />
+      <Link language={language.id} http={http} pluginId={pluginId} />
+      <EuiSpacer />
+      <EuiCallOut
+        iconType="iInCircle"
+        title={i18n.translate('xpack.serverlessSearch.apiCallOut.title', {
+          defaultMessage: 'Call the API with Console',
+        })}
+        color="primary"
+      >
+        <EuiText size="s">
+          {i18n.translate('xpack.serverlessSearch.apiCallout.content', {
+            defaultMessage:
+              'Console enables you to call Elasticsearch and Kibana REST APIs directly, without needing to install a language client.',
+          })}
+        </EuiText>
+      </EuiCallOut>
+    </>
+  );
   return (
     <OverviewPanel
       description={i18n.translate('xpack.serverlessSearch.installClient.description', {
@@ -97,38 +138,8 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
       title={i18n.translate('xpack.serverlessSearch.installClient.title', {
         defaultMessage: 'Install a client',
       })}
-      leftPanelContent={
-        <>
-          <CodeBox
-            code="installClient"
-            codeArgs={codeArguments}
-            languageType="shell"
-            languages={languageDefinitions}
-            selectedLanguage={language}
-            setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={pluginId}
-            useKibanaServicesHook={useKibanaServicesHook}
-          />
-          <EuiSpacer />
-          <Link language={language.id} http={http} pluginId={pluginId} />
-          <EuiSpacer />
-          <EuiCallOut
-            iconType="iInCircle"
-            title={i18n.translate('xpack.serverlessSearch.apiCallOut.title', {
-              defaultMessage: 'Call the API with Console',
-            })}
-            color="primary"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.serverlessSearch.apiCallout.content', {
-                defaultMessage:
-                  'Console enables you to call Elasticsearch and Kibana REST APIs directly, without needing to install a language client.',
-              })}
-            </EuiText>
-          </EuiCallOut>
-        </>
-      }
+      leftPanelContent={isPanelLeft ? panelContent : undefined}
+      rightPanelContent={!isPanelLeft ? panelContent : undefined}
     />
   );
 };

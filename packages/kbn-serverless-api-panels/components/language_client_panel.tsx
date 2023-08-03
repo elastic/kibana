@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import React from 'react';
+import type { HttpStart } from '@kbn/core-http-browser';
+
 import { LanguageDefinition } from '../languages/types';
 import './select_client.scss';
 
@@ -24,8 +27,9 @@ interface SelectClientProps {
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   isSelectedLanguage: boolean;
-  http: any;
-  pluginId: string;
+  http: HttpStart;
+  pluginId?: string;
+  src?: string;
 }
 
 export const LanguageClientPanel: React.FC<SelectClientProps> = ({
@@ -34,6 +38,7 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
   isSelectedLanguage,
   http,
   pluginId,
+  src,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -55,7 +60,9 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
             <EuiFlexItem grow={false}>
               <EuiImage
                 alt=""
-                src={http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)}
+                src={
+                  src || http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)
+                }
                 height={euiTheme.size.xl}
                 width={euiTheme.size.xl}
               />

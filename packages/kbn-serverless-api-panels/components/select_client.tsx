@@ -6,24 +6,70 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
+import type { HttpStart } from '@kbn/core-http-browser';
 import { OverviewPanel } from './overview_panel';
 import './select_client.scss';
 
 export interface SelectClientPanelProps {
   docLinks: any;
-  http: any;
+  http: HttpStart;
+  isPanelLeft?: boolean;
 }
 
 export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
   docLinks,
   children,
   http,
+  isPanelLeft = true,
 }) => {
+  const panelContent = (
+    <>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('xpack.serverlessSearch.selectClient.heading', {
+                defaultMessage: 'Choose one',
+              })}
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="xs" direction="row">
+        {children}
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiCallOut
+        title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
+          defaultMessage: 'Try it now in Console',
+        })}
+        size="m"
+        iconType="iInCircle"
+      >
+        <p>
+          {i18n.translate('xpack.serverlessSearch.selectClient.callout.description', {
+            defaultMessage:
+              'With Console, you can get started right away with our REST API’s. No installation required. ',
+          })}
+
+          <span>
+            <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
+              {i18n.translate('xpack.serverlessSearch.selectClient.callout.link', {
+                defaultMessage: 'Try Console now',
+              })}
+            </EuiLink>
+          </span>
+        </p>
+      </EuiCallOut>
+    </>
+  );
   return (
     <OverviewPanel
       description={
@@ -41,48 +87,8 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
           }}
         />
       }
-      leftPanelContent={
-        <>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.serverlessSearch.selectClient.heading', {
-                    defaultMessage: 'Choose one',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="xs" direction="row">
-            {children}
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiCallOut
-            title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
-              defaultMessage: 'Try it now in Console',
-            })}
-            size="m"
-            iconType="iInCircle"
-          >
-            <p>
-              {i18n.translate('xpack.serverlessSearch.selectClient.callout.description', {
-                defaultMessage:
-                  'With Console, you can get started right away with our REST API’s. No installation required. ',
-              })}
-
-              <span>
-                <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
-                  {i18n.translate('xpack.serverlessSearch.selectClient.callout.link', {
-                    defaultMessage: 'Try Console now',
-                  })}
-                </EuiLink>
-              </span>
-            </p>
-          </EuiCallOut>
-        </>
-      }
+      leftPanelContent={isPanelLeft ? panelContent : undefined}
+      rightPanelContent={!isPanelLeft ? panelContent : undefined}
       links={[
         {
           href: docLinks.elasticsearchClients,
