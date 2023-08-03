@@ -79,15 +79,20 @@ export function createIndexDocRecordsStream(
   });
 }
 const concurrencyMaxMinus1 = () => cpuCount() - 1;
-const isSame = (a) => (b) => {
-  return a === b;
-};
+// So the axiom held up in ci
+// https://ci.ml-qa.com/blue/organizations/jenkins/dev%2Fes-archiver-benchmark/detail/es-archiver-benchmark/47/pipeline/45/
+// But the sample size is small not highly varied compared to what's available in all the myriad
+// FTR tests.
+// So, soon I'll run a test on all the archives.
+// const isSame = (a) => (b) => {
+//   return a === b;
+// };
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
     // const length = jsonStanzasWithinArchive.length;
     // console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
-    const isSameAsOperation = isSame(operation);
+    // const isSameAsOperation = isSame(operation);
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
@@ -104,13 +109,14 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
           // })
           .map((doc) => {
             const body = doc.source;
-            const op = doc.data_stream ? BulkOperation.Create : operation;
+            // const op = doc.data_stream ? BulkOperation.Create : operation;
             // console.log(`\nλjs op: \n${JSON.stringify(op, null, 2)}`);
-            const isSameAsOp = isSameAsOperation(op);
-            console.log(`\nλjs isSameAsOp: \n\t${isSameAsOp}`);
+            // const isSameAsOp = isSameAsOperation(op);
+            // console.log(`\nλjs isSameAsOp: \n\t${isSameAsOp}`);
             const index = doc.data_stream || doc.index;
             ops.set(body, {
-              [op]: {
+              // [op]: {
+              [operation]: {
                 _index: index,
                 _id: doc.id,
               },
