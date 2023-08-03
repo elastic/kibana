@@ -133,14 +133,6 @@ export const buildErrorAlertReason = (metric: string) =>
     },
   });
 
-export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
-  i18n.translate('xpack.observability.threshold.rule.threshold.queryErrorAlertReason', {
-    defaultMessage: 'Alert is using a malformed KQL query: {filterQueryText}',
-    values: {
-      filterQueryText,
-    },
-  });
-
 export const groupByKeysActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.groupByKeysActionVariableDescription',
   {

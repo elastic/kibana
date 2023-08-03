@@ -92,6 +92,7 @@ export {
   ACTION_EDIT_PANEL,
   RemovePanelAction,
   REMOVE_PANEL_ACTION,
+  tracksOverlays,
 } from './embeddable_panel/panel_actions';
 
 export type {
