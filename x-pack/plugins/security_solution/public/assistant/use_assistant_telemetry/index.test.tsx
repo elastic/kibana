@@ -11,7 +11,7 @@ import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
 
 const customId = `My Convo`;
-const conversations = {
+const mockedConversations = {
   ...BASE_SECURITY_CONVERSATIONS,
   [customId]: {
     id: customId,
@@ -28,6 +28,15 @@ const mockedTelemetry = {
   reportAssistantMessageSent,
   reportAssistantQuickPrompt,
 };
+
+jest.mock('../use_conversation_store', () => {
+  return {
+    useConversationStore: () => ({
+      conversations: mockedConversations,
+    }),
+  };
+});
+
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -52,7 +61,7 @@ describe('useAssistantTelemetry', () => {
     jest.clearAllMocks();
   });
   it('should return the expected telemetry object with tracking functions', () => {
-    const { result } = renderHook(() => useAssistantTelemetry(conversations));
+    const { result } = renderHook(() => useAssistantTelemetry());
     trackingFns.forEach((fn) => {
       expect(result.current).toHaveProperty(fn);
     });
@@ -60,8 +69,8 @@ describe('useAssistantTelemetry', () => {
 
   describe.each(trackingFns)('Handles %s id masking', (fn) => {
     it('Should call tracking with appropriate id when tracking is called with an isDefault=true conversation id', () => {
-      const { result } = renderHook(() => useAssistantTelemetry(conversations));
-      const validId = Object.keys(conversations)[0];
+      const { result } = renderHook(() => useAssistantTelemetry());
+      const validId = Object.keys(mockedConversations)[0];
       // @ts-ignore
       const trackingFn = result.current[fn];
       trackingFn({ conversationId: validId, invokedBy: 'shortcut' });
@@ -74,7 +83,7 @@ describe('useAssistantTelemetry', () => {
     });
 
     it('Should call tracking with "Custom" id when tracking is called with an isDefault=false conversation id', () => {
-      const { result } = renderHook(() => useAssistantTelemetry(conversations));
+      const { result } = renderHook(() => useAssistantTelemetry());
       // @ts-ignore
       const trackingFn = result.current[fn];
       trackingFn({ conversationId: customId, invokedBy: 'shortcut' });
@@ -87,7 +96,7 @@ describe('useAssistantTelemetry', () => {
     });
 
     it('Should call tracking with "Custom" id when tracking is called with an unknown conversation id', () => {
-      const { result } = renderHook(() => useAssistantTelemetry(conversations));
+      const { result } = renderHook(() => useAssistantTelemetry());
       // @ts-ignore
       const trackingFn = result.current[fn];
       trackingFn({ conversationId: '123', invokedBy: 'shortcut' });

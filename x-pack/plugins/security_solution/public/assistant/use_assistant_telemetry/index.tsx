@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AssistantTelemetry, Conversation } from '@kbn/elastic-assistant';
+import type { AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
+import { useConversationStore } from '../use_conversation_store';
 import { useKibana } from '../../common/lib/kibana';
 
-export const useAssistantTelemetry = (
-  conversations: Record<string, Conversation>
-): AssistantTelemetry => {
+export const useAssistantTelemetry = (): AssistantTelemetry => {
+  const { conversations } = useConversationStore();
   const {
     services: { telemetry },
   } = useKibana();

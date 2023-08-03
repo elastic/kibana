@@ -82,7 +82,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = useKibana().services.docLinks;
 
-  const assistantTelemetry = useAssistantTelemetry(conversations);
+  const assistantTelemetry = useAssistantTelemetry();
 
   return (
     <EuiErrorBoundary>
