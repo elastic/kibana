@@ -49,8 +49,6 @@ import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
-import { useMlCapabilities } from '../common/components/ml/hooks/use_ml_capabilities';
-import { useHasSecurityCapability } from '../helper_hooks';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
