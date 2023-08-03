@@ -14,6 +14,7 @@ import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
+import { getDefaultRequestHeaders } from '.';
 
 function parseBfetchResponse(resp: request.Response, compressed: boolean = false) {
   return resp.text
@@ -34,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(getDefaultRequestHeaders())
           .send({
             batch: [
               {
@@ -67,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch?compress=true`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(getDefaultRequestHeaders())
           .send({
             batch: [
               {
@@ -100,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(getDefaultRequestHeaders())
           .send({
             batch: [
               {
@@ -143,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(getDefaultRequestHeaders())
           .send({
             batch: [
               {
@@ -174,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(getDefaultRequestHeaders())
           .send({
             batch: [
               {
@@ -214,6 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`/internal/bsearch`)
             .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+            .set(getDefaultRequestHeaders())
             .send({
               batch: [
                 {

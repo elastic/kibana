@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getDefaultRequestHeaders } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/sql`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               query: sqlQuery,
@@ -48,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp1 = await supertest
           .post(`/internal/search/sql`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               query: sqlQuery,
@@ -60,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp2 = await supertest
           .post(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({});
 
         expect(resp2.status).to.be(200);
@@ -76,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp1 = await supertest
           .post(`/internal/search/sql`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               query: sqlQuery,
@@ -89,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({})
           .expect(200);
 
@@ -96,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .delete(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send()
           .expect(200);
 
@@ -103,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/internal/search/sql/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({})
           .expect(404);
       });

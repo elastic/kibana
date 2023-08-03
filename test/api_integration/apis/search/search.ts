@@ -8,6 +8,7 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import { getDefaultRequestHeaders } from '.';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               body: {
@@ -52,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               terminateAfter: 1,
@@ -77,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             body: {
               query: {
@@ -93,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/banana`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             body: {
               query: {
@@ -111,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               timeout: 1, // This should be a time range string!
@@ -132,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send({
             params: {
               body: {
@@ -149,6 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send(painlessErrReq)
           .expect(400);
 
@@ -161,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .delete(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send()
           .expect(404);
         verifyErrorResponse(resp.body, 404);
@@ -170,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .delete(`/internal/search/es/123`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(getDefaultRequestHeaders())
           .send()
           .expect(400);
         verifyErrorResponse(resp.body, 400);

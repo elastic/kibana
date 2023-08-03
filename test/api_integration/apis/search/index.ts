@@ -8,6 +8,12 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+let internalGetDefaultRequestHeaders: () => object = () => ({});
+export const getDefaultRequestHeaders = () => internalGetDefaultRequestHeaders();
+export const setDefaultRequestHeaders = (fn: () => object) => {
+  internalGetDefaultRequestHeaders = fn;
+};
+
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('search', () => {
     loadTestFile(require.resolve('./search'));
