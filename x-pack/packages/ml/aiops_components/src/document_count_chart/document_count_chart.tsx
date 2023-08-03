@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { median } from 'd3-array';
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
@@ -29,9 +28,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import {
+  getLogRateAnalysisType,
   getSnappedWindowParameters,
   getWindowParameters,
-  LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
 } from '@kbn/aiops-utils';
@@ -167,21 +166,6 @@ function getBaselineBadgeOverflow(
   return deviationMin < baselineBadgeActualMax
     ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
     : 0;
-}
-
-function getLogRateAnalysisType(
-  chartPoints: DocumentCountChartPoint[],
-  { baselineMin, baselineMax, deviationMin, deviationMax }: WindowParameters
-): LogRateAnalysisType {
-  const baselineItems = chartPoints.filter((d) => d.time >= baselineMin && d.time < baselineMax);
-  const baselineMedian = median(baselineItems.map((d) => d.value)) ?? 0;
-
-  const deviationItems = chartPoints.filter((d) => d.time >= deviationMin && d.time < deviationMax);
-  const deviationMedian = median(deviationItems.map((d) => d.value)) ?? 0;
-
-  return deviationMedian >= baselineMedian
-    ? LOG_RATE_ANALYSIS_TYPE.SPIKE
-    : LOG_RATE_ANALYSIS_TYPE.DIP;
 }
 
 /**
