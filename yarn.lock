@@ -4658,6 +4658,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/metrics-data-plugin@link:x-pack/plugins/metrics_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
   version "0.0.0"
   uid ""
