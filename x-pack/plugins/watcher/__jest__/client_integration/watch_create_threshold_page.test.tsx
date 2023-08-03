@@ -23,20 +23,6 @@ const MATCH_INDICES = ['index1'];
 
 const ES_FIELDS = [{ name: '@timestamp', type: 'date' }];
 
-// Since watchID's are dynamically created, we have to mock
-// the function that generates them in order to be able to match
-// against it.
-jest.mock('uuid', () => ({
-  v4: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require('./helpers/jest_constants').WATCH_ID;
-  },
-  v1: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require('./helpers/jest_constants').WATCH_ID;
-  },
-}));
-
 const SETTINGS = {
   action_types: {
     email: { enabled: true },
@@ -58,6 +44,37 @@ const WATCH_VISUALIZE_DATA = {
     ],
   },
 };
+
+// Since watchID's are dynamically created, we have to mock
+// the function that generates them in order to be able to match
+// against it.
+jest.mock('uuid', () => ({
+  v4: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('./helpers/jest_constants').WATCH_ID;
+  },
+  v1: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('./helpers/jest_constants').WATCH_ID;
+  },
+}));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
