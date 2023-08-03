@@ -1,8 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
-import { FilterListButton, Filters, FilterName } from '../../public/application/sections/pipelines_list/main';
+import {
+  FilterListButton,
+  Filters,
+  FilterName,
+} from '../../public/application/sections/pipelines_list/main';
 
 describe('FilterListButton', () => {
   const mockData = [
@@ -60,10 +71,12 @@ describe('FilterListButton', () => {
       fireEvent.click(notManagedFilter);
     });
 
-    expect(setFilters).toHaveBeenCalledWith(expect.objectContaining({
-      managed: expect.objectContaining({ checked: 'on', handleFilter: expect.any(Function) }),
-      notManaged: expect.objectContaining({ checked: 'off', handleFilter: expect.any(Function) }),
-    }));
+    expect(setFilters).toHaveBeenCalledWith(
+      expect.objectContaining({
+        managed: expect.objectContaining({ checked: 'on', handleFilter: expect.any(Function) }),
+        notManaged: expect.objectContaining({ checked: 'off', handleFilter: expect.any(Function) }),
+      })
+    );
 
     const filteredPipelines = mockFilters.managed.handleFilter?.(mockData);
     const onlyManagedPipelines = mockData.filter((pipeline) => pipeline.isManaged);
@@ -78,10 +91,12 @@ describe('FilterListButton', () => {
       fireEvent.click(managedFilter);
     });
 
-    expect(setFilters).toHaveBeenCalledWith(expect.objectContaining({
-      managed: expect.objectContaining({ checked: 'off', handleFilter: expect.any(Function) }),
-      notManaged: expect.objectContaining({ checked: 'on', handleFilter: expect.any(Function) }),
-    }));
+    expect(setFilters).toHaveBeenCalledWith(
+      expect.objectContaining({
+        managed: expect.objectContaining({ checked: 'off', handleFilter: expect.any(Function) }),
+        notManaged: expect.objectContaining({ checked: 'on', handleFilter: expect.any(Function) }),
+      })
+    );
 
     const filteredPipelines = mockFilters.notManaged.handleFilter?.(mockData);
     const onlyNotManagedPipelines = mockData.filter((pipeline) => !pipeline.isManaged);
