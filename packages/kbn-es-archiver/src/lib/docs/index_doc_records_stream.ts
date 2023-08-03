@@ -89,8 +89,8 @@ const concurrencyMaxMinus1 = () => cpuCount() - 1;
 // };
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
-    // const length = jsonStanzasWithinArchive.length;
-    // console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
+    const length = jsonStanzasWithinArchive.length;
+    console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
     // const isSameAsOperation = isSame(operation);
     const ops = new WeakMap<any, any>();
