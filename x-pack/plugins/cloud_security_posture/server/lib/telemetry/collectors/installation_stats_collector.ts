@@ -8,8 +8,8 @@ import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/se
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AgentPolicy,
-  PackagePolicy,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
@@ -17,20 +17,34 @@ import type { CloudSecurityInstallationStats } from './types';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
 
+const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
+  const enabledInput = packagePolicy.inputs.find((input) => input.enabled);
+  return enabledInput?.streams[0].vars;
+};
+
+const getCspmTelemetryFields = (packagePolicy: PackagePolicy) => {
+  if (packagePolicy.vars?.posture.value !== 'cspm') return;
+
+  const provider = packagePolicy.vars?.deployment?.value;
+  const inputStreamVars = getEnabledInputStreamVars(packagePolicy);
+  const accountType = inputStreamVars?.[`${provider}.account_type`]?.value;
+
+  if (!accountType) return;
+
+  return {
+    account_type: accountType,
+  };
+};
+
 const getInstalledPackagePolicies = (
   packagePolicies: PackagePolicy[],
-  agentPolicies: AgentPolicy[],
-  logger: any
+  agentPolicies: AgentPolicy[]
 ) => {
   const installationStats = packagePolicies.map(
     (packagePolicy: PackagePolicy): CloudSecurityInstallationStats => {
       const agentCounts =
         agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
         0;
-
-      console.log('packagePolicy ##################################');
-      logger(packagePolicy);
-      console.log(JSON.stringify(packagePolicy, null, 2));
 
       return {
         package_policy_id: packagePolicy.id,
@@ -40,6 +54,7 @@ const getInstalledPackagePolicies = (
         created_at: packagePolicy.created_at,
         agent_policy_id: packagePolicy.policy_id,
         agent_count: agentCounts,
+        cspm: getCspmTelemetryFields(packagePolicy),
       };
     }
   );
@@ -79,8 +94,7 @@ export const getInstallationStats = async (
 
   const installationStats: CloudSecurityInstallationStats[] = getInstalledPackagePolicies(
     packagePolicies.items,
-    agentPolicies?.items || [],
-    logger
+    agentPolicies?.items || []
   );
 
   return installationStats;
