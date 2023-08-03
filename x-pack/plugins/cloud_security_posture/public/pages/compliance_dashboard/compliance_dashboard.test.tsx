@@ -679,4 +679,22 @@ describe('getDefaultTab', () => {
       });
     });
   });
+
+  it('returns CSPM tab is plugin status and kspm status is not provided', () => {
+    const cspmStats = getStatsMock(1) as ComplianceDashboardData;
+
+    expect(getDefaultTab(undefined, cspmStats, undefined)).toEqual('cspm');
+  });
+
+  it('returns KSPM tab is plugin status and csp status is not provided', () => {
+    const kspmStats = getStatsMock(1) as ComplianceDashboardData;
+
+    expect(getDefaultTab(undefined, undefined, kspmStats)).toEqual('kspm');
+  });
+
+  it('returns CSPM tab when only plugins status data is provided', () => {
+    const pluginStatus = getPluginStatusMock('indexed', 'indexed') as BaseCspSetupStatus;
+
+    expect(getDefaultTab(pluginStatus, undefined, undefined)).toEqual('cspm');
+  });
 });
