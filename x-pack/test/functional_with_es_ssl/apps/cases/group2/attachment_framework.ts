@@ -9,13 +9,13 @@ import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ExternalReferenceStorageType,
-  CommentType,
+  AttachmentType,
   Case,
-  CommentRequest,
-  CommentRequestExternalReferenceType,
-  CommentRequestPersistableStateType,
-} from '@kbn/cases-plugin/common/api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
+import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
@@ -62,7 +62,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const lens = getPageObject('lens');
   const listingTable = getService('listingTable');
 
-  const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
+  const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
       title: `Registered attachment of type ${attachment.type}`,
     });
@@ -104,7 +104,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(CommentType.externalReference, attachmentId);
+        await validateAttachment(AttachmentType.externalReference, attachmentId);
         await testSubjects.existOrFail('test-attachment-content');
       });
     });
@@ -130,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(CommentType.persistableState, attachmentId);
+        await validateAttachment(AttachmentType.persistableState, attachmentId);
         await retry.waitFor(
           'persistable state to exist',
           async () => await find.existsByCssSelector('.lnsExpressionRenderer')
@@ -185,8 +185,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const externalRefAttachmentId = theCase?.comments?.[0].id;
         const persistableStateAttachmentId = theCase?.comments?.[1].id;
-        await validateAttachment(CommentType.externalReference, externalRefAttachmentId);
-        await validateAttachment(CommentType.persistableState, persistableStateAttachmentId);
+        await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
+        await validateAttachment(AttachmentType.persistableState, persistableStateAttachmentId);
 
         await testSubjects.existOrFail('test-attachment-content');
         await retry.waitFor(
@@ -385,7 +385,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
 
-        const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
         await testSubjects.existOrFail('comment-persistableState-.lens');
@@ -412,7 +412,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
 
-        const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);
 
         await testSubjects.existOrFail('comment-persistableState-.lens');
@@ -492,8 +492,8 @@ const getLensState = (dataViewId: string) => ({
   },
 });
 
-const getExternalReferenceAttachment = (): CommentRequestExternalReferenceType => ({
-  type: CommentType.externalReference,
+const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayload => ({
+  type: AttachmentType.externalReference,
   externalReferenceId: 'my-id',
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
   externalReferenceAttachmentTypeId: '.test',
@@ -501,8 +501,8 @@ const getExternalReferenceAttachment = (): CommentRequestExternalReferenceType =
   owner: 'cases',
 });
 
-const getPersistableStateAttachment = (dataViewId: string): CommentRequestPersistableStateType => ({
-  type: CommentType.persistableState,
+const getPersistableStateAttachment = (dataViewId: string): PersistableStateAttachmentPayload => ({
+  type: AttachmentType.persistableState,
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: getLensState(dataViewId),
   owner: 'cases',
