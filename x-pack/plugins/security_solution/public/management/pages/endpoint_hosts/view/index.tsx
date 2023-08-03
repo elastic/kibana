@@ -7,6 +7,7 @@
 
 import React, { type CSSProperties, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   type EuiBasicTableColumn,
@@ -42,6 +43,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_con
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
   HostInfo,
+  HostInfoInterface,
   Immutable,
   PolicyDetailsRouteState,
 } from '../../../../../common/endpoint/types';
@@ -101,6 +103,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
         defaultMessage: 'Endpoint',
       }),
+      sortable: true,
       render: (hostname: HostInfo['metadata']['host']['hostname'], item: HostInfo) => {
         const toRoutePath = getEndpointDetailsPath(
           {
@@ -129,6 +132,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
         defaultMessage: 'Agent status',
       }),
+      sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
         return (
           <EndpointAgentStatus
@@ -145,6 +149,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
         defaultMessage: 'Policy',
       }),
+      sortable: true,
       truncateText: true,
       render: (
         policyName: HostInfo['metadata']['Endpoint']['policy']['applied']['name'],
@@ -196,6 +201,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
         defaultMessage: 'Policy status',
       }),
+      sortable: true,
       render: (
         status: HostInfo['metadata']['Endpoint']['policy']['applied']['status'],
         item: HostInfo
@@ -230,6 +236,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
         defaultMessage: 'OS',
       }),
+      sortable: true,
       render: (os: string) => {
         return (
           <EuiToolTip content={os} anchorClassName="eui-textTruncate">
@@ -246,6 +253,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
         defaultMessage: 'IP address',
       }),
+      sortable: true,
       render: (ip: string[]) => {
         return (
           <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-textTruncate">
@@ -264,6 +272,7 @@ const getEndpointListColumns = ({
       name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
         defaultMessage: 'Version',
       }),
+      sortable: true,
       render: (version: string) => {
         return (
           <EuiToolTip content={version} anchorClassName="eui-textTruncate">
@@ -278,6 +287,7 @@ const getEndpointListColumns = ({
       field: 'metadata.@timestamp',
       name: lastActiveColumnName,
       width: '9%',
+      sortable: true,
       render(dateValue: HostInfo['metadata']['@timestamp']) {
         return (
           <FormattedDate
@@ -314,6 +324,8 @@ export const EndpointList = () => {
     listData,
     pageIndex,
     pageSize,
+    sortField,
+    sortDirection,
     totalHits: totalItemCount,
     listLoading: loading,
     listError,
@@ -374,7 +386,7 @@ export const EndpointList = () => {
   }, [pageIndex, pageSize, maxPageCount]);
 
   const onTableChange = useCallback(
-    ({ page }: { page: { index: number; size: number } }) => {
+    ({ page, sort }: CriteriaWithPagination<HostInfoInterface>) => {
       const { index, size } = page;
       // FIXME: PT: if endpoint details is open, table is not displaying correct number of rows
       history.push(
@@ -383,6 +395,8 @@ export const EndpointList = () => {
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
+          sort_direction: sort?.direction,
+          sort_field: sort?.field,
         })
       );
     },
@@ -517,6 +531,12 @@ export const EndpointList = () => {
           onChange={onTableChange}
           loading={loading}
           rowProps={setTableRowProps}
+          sorting={{
+            sort: {
+              field: sortField as keyof HostInfoInterface,
+              direction: sortDirection,
+            },
+          }}
         />
       );
     } else if (canReadEndpointList && !canAccessFleet) {
@@ -568,6 +588,8 @@ export const EndpointList = () => {
     policyItems,
     selectedPolicyId,
     setTableRowProps,
+    sortField,
+    sortDirection,
   ]);
 
   return (

@@ -35,6 +35,11 @@ export const pageIndex = (state: Immutable<EndpointState>): number => state.page
 
 export const pageSize = (state: Immutable<EndpointState>): number => state.pageSize;
 
+export const sortField = (state: Immutable<EndpointState>): string => state.sortField;
+
+export const sortDirection = (state: Immutable<EndpointState>): 'asc' | 'desc' =>
+  state.sortDirection;
+
 export const totalHits = (state: Immutable<EndpointState>): number => state.total;
 
 export const listLoading = (state: Immutable<EndpointState>): boolean => state.loading;
@@ -94,6 +99,8 @@ export const uiQueryParams: (
         'selected_endpoint',
         'show',
         'admin_query',
+        'sort_field',
+        'sort_direction',
       ];
 
       const allowedShowValues: Array<EndpointIndexUIQueryParams['show']> = [
@@ -116,6 +123,10 @@ export const uiQueryParams: (
           if (key === 'show') {
             if (allowedShowValues.includes(value as EndpointIndexUIQueryParams['show'])) {
               data[key] = value as EndpointIndexUIQueryParams['show'];
+            }
+          } else if (key === 'sort_direction') {
+            if (['asc', 'desc'].includes(value)) {
+              data[key] = value as EndpointIndexUIQueryParams['sort_direction'];
             }
           } else {
             data[key] = value;
