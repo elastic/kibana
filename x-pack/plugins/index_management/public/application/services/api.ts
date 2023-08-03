@@ -311,3 +311,10 @@ export function useLoadNodesPlugins() {
     method: 'get',
   });
 }
+
+export const useLoadEnrichPolicies = () => {
+  return useRequest({
+    path: `${API_BASE_PATH}/enrich_policies`,
+    method: 'get',
+  });
+};

@@ -13,6 +13,7 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
 import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
+import { EnrichPoliciesList } from './enrich_policies_list';
 import { TemplateList } from './template_list';
 import { ComponentTemplateList } from '../../components/component_templates';
 import { breadcrumbService } from '../../services/breadcrumbs';
@@ -22,6 +23,7 @@ export enum Section {
   DataStreams = 'data_streams',
   IndexTemplates = 'templates',
   ComponentTemplates = 'component_templates',
+  EnrichPolicies = 'enrich_policies',
 }
 
 export const homeSections = [
@@ -29,6 +31,7 @@ export const homeSections = [
   Section.DataStreams,
   Section.IndexTemplates,
   Section.ComponentTemplates,
+  Section.EnrichPolicies,
 ];
 
 interface MatchParams {
@@ -70,6 +73,15 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplatesTabTitle"
           defaultMessage="Component Templates"
+        />
+      ),
+    },
+    {
+      id: Section.EnrichPolicies,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.enrichPoliciesTabTitle"
+          defaultMessage="Enrich Policies"
         />
       ),
     },
@@ -136,6 +148,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
             `/${Section.ComponentTemplates}/:componentTemplateName?`,
           ]}
           component={ComponentTemplateList}
+        />
+        <Route
+          exact
+          path={`/${Section.EnrichPolicies}`}
+          component={EnrichPoliciesList}
         />
       </Routes>
     </>
