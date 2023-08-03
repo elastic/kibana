@@ -391,11 +391,13 @@ describe('fleet usage telemetry', () => {
         agents_per_policy: [2],
         agents_per_os: [
           {
-            os: 'Ubuntu jammy(22.04.2 LTS (Jammy Jellyfish))',
+            name: 'Ubuntu',
+            version: '22.04.2 LTS (Jammy Jellyfish)',
             count: 1,
           },
           {
-            os: 'Ubuntu focal(20.04.5 LTS (Focal Fossa))',
+            name: 'Ubuntu',
+            version: '20.04.5 LTS (Focal Fossa)',
             count: 1,
           },
         ],
