@@ -351,7 +351,6 @@ describe('RiskEngineDataClient', () => {
       expect(status).toEqual({
         riskEngineStatus: 'NOT_INSTALLED',
         legacyRiskEngineStatus: 'NOT_INSTALLED',
-        lastUpdatedBy: '',
       });
     });
 
@@ -378,7 +377,6 @@ describe('RiskEngineDataClient', () => {
         expect(status).toEqual({
           riskEngineStatus: 'ENABLED',
           legacyRiskEngineStatus: 'NOT_INSTALLED',
-          lastUpdatedBy: 'elastic',
         });
       });
 
@@ -392,7 +390,6 @@ describe('RiskEngineDataClient', () => {
         expect(status).toEqual({
           riskEngineStatus: 'DISABLED',
           legacyRiskEngineStatus: 'NOT_INSTALLED',
-          lastUpdatedBy: 'elastic',
         });
       });
     });
@@ -430,7 +427,6 @@ describe('RiskEngineDataClient', () => {
         expect(status).toEqual({
           riskEngineStatus: 'NOT_INSTALLED',
           legacyRiskEngineStatus: 'ENABLED',
-          lastUpdatedBy: '',
         });
 
         esClient.transform.getTransformStats.mockReset();
