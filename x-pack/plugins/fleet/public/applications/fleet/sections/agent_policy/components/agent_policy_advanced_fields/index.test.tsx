@@ -18,7 +18,7 @@ import { allowedExperimentalValues } from '../../../../../../../common/experimen
 import { ExperimentalFeaturesService } from '../../../../../../services/experimental_features';
 
 import { createPackagePolicyMock } from '../../../../../../../common/mocks';
-import type { AgentPolicy } from '../../../../../../../common/types';
+import type { AgentPolicy, NewAgentPolicy } from '../../../../../../../common/types';
 
 import { useLicense } from '../../../../../../hooks/use_license';
 
