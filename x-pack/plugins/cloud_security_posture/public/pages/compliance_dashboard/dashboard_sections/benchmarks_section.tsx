@@ -41,7 +41,8 @@ export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
     // TODO: remove assertion after typing CspFinding as discriminating union
     return { 'cloud.account.id': cluster.meta.cloud!.account.id };
   }
-  return { 'orchestrator.cluster.id': cluster.meta.assetIdentifierId };
+  // using runtime field since old events won't have orchestrator.cluster.id
+  return { asset_identifier: cluster.meta.assetIdentifierId };
 };
 
 export const BenchmarksSection = ({
