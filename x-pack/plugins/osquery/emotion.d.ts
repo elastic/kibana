@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export type {
-  JobParamsPNGDeprecated,
-  TaskPayloadPNG,
-} from '../../../common/types/export_types/png';
+import '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+declare module '@emotion/react' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
+}

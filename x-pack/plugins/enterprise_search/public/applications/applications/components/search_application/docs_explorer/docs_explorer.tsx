@@ -19,7 +19,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -46,7 +45,6 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -65,9 +63,9 @@ import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { APICallData, APICallFlyout } from './api_call_flyout';
 
+import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
-import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
 
 import {
   PagingInfoView,
@@ -164,7 +162,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.tourContent',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.tourContent',
                         {
                           defaultMessage:
                             'Create your API key, learn about using language clients and find more resources in Connect.',
@@ -183,7 +181,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 stepsTotal={1}
                 anchorPosition="downCenter"
                 title={i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.tourTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.tourTitle',
                   {
                     defaultMessage: 'Review our API page to start using your search application',
                   }
@@ -201,7 +199,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 onClick={setCloseConfiguration}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.buttonTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.buttonTitle',
                   {
                     defaultMessage: 'Configuration',
                   }
@@ -216,7 +214,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.contentTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.contentTitle',
                   {
                     defaultMessage: 'Content',
                   }
@@ -239,7 +237,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.Indices',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.content.Indices',
               {
                 defaultMessage: 'Indices',
               }
@@ -259,13 +257,13 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.schema"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.content.schema"
                 defaultMessage="Schema"
               />
               {hasSchemaConflicts && (
                 <EuiText size="s" color="danger">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.schemaConflict"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.content.schemaConflict"
                     defaultMessage="Conflict"
                   />
                 </EuiText>
@@ -277,7 +275,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.connectTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.connectTitle',
                   {
                     defaultMessage: 'Connect',
                   }
@@ -299,7 +297,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.connect.Api',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.connect.Api',
               {
                 defaultMessage: 'API',
               }
@@ -310,7 +308,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.settingsTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.settingsTitle',
                   {
                     defaultMessage: 'Settings',
                   }
@@ -335,7 +333,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTextColor color="danger">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.settings.delete',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.settings.delete',
                   {
                     defaultMessage: 'Delete this app',
                   }
@@ -348,7 +346,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
     </>
   );
 };
-export const SearchApplicationSearchPreview: React.FC = () => {
+export const SearchApplicationDocsExplorer: React.FC = () => {
   const { http } = useValues(HttpLogic);
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
@@ -356,7 +354,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
-  const { resultFields, sortableFields } = useValues(SearchApplicationSearchPreviewLogic);
+  const { resultFields, sortableFields } = useValues(SearchApplicationDocsExplorerLogic);
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -384,13 +382,13 @@ export const SearchApplicationSearchPreview: React.FC = () => {
       pageChrome={[
         searchApplicationName,
         i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pageChrome',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pageChrome',
           {
-            defaultMessage: 'Search Preview',
+            defaultMessage: 'Docs Explorer',
           }
         ),
       ]}
-      pageViewTelemetry={SearchApplicationViewTabs.PREVIEW}
+      pageViewTelemetry={SearchApplicationViewTabs.DOCS_EXPLORER}
       isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
@@ -426,13 +424,13 @@ export const SearchApplicationSearchPreview: React.FC = () => {
                           isLoading={lastAPICall == null}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.appendButtonLabel',
+                            'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.appendButtonLabel',
                             { defaultMessage: 'View API call' }
                           )}
                         </EuiButtonEmpty>
                       ),
                       placeholder: i18n.translate(
-                        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.placeholder',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.placeholder',
                         { defaultMessage: 'Search' }
                       ),
                     })}
@@ -448,12 +446,6 @@ export const SearchApplicationSearchPreview: React.FC = () => {
               <EuiSpacer size="m" />
               <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
-              <EuiLink href={docLinks.searchTemplates} target="_blank">
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.improveResultsLink"
-                  defaultMessage="Improve these results"
-                />
-              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
               <PagingInfo view={PagingInfoView} />
