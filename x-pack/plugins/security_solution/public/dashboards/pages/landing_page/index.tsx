@@ -134,6 +134,7 @@ export const DashboardsLandingPage = () => {
 
       {canReadDashboard && securityTagsExist && initialFilter ? (
         <>
+          <EuiSpacer size="m" />
           <EuiTitle size="xxxs">
             <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
           </EuiTitle>
