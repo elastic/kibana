@@ -70,12 +70,10 @@ export interface AgentData {
     degraded: number;
   };
   agents_per_policy: number[];
-  agents_per_os: Array<
-    {
-      os: string;
-      count: number;
-    }
-  >;
+  agents_per_os: Array<{
+    os: string;
+    count: number;
+  }>;
 }
 
 const DEFAULT_AGENT_DATA = {
@@ -125,8 +123,8 @@ export const getAgentData = async (
             terms: { field: 'policy_id' },
           },
           os: {
-            terms: { field: 'local_metadata.os.full.keyword' }
-          }
+            terms: { field: 'local_metadata.os.full.keyword' },
+          },
         },
       },
       { signal: abortController.signal }
@@ -176,12 +174,10 @@ export const getAgentData = async (
       (bucket: any) => bucket.doc_count
     );
 
-    const agentsPerOS = ((response?.aggregations?.os as any).buckets ?? []).map(
-      (bucket: any) => ({
-        os: bucket.key,
-        count: bucket.doc_count,
-      })
-    );
+    const agentsPerOS = ((response?.aggregations?.os as any).buckets ?? []).map((bucket: any) => ({
+      os: bucket.key,
+      count: bucket.doc_count,
+    }));
 
     return {
       agent_checkin_status: statuses,
