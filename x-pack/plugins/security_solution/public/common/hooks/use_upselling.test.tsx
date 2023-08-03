@@ -62,7 +62,9 @@ describe('use_upselling', () => {
       investigation_guide: testMessage,
     });
 
-    const { result } = renderHook(() => useUpsellingMessage('investigation_guide'));
+    const { result } = renderHook(() => useUpsellingMessage('investigation_guide'), {
+      wrapper: RenderWrapper,
+    });
     expect(result.current).toBe(testMessage);
   });
 
@@ -70,8 +72,11 @@ describe('use_upselling', () => {
     const emptyMessages = {};
     mockUpselling.registerMessages(emptyMessages);
 
-    const { result } = renderHook(() =>
-      useUpsellingMessage('my_fake_message_id' as 'investigation_guide')
+    const { result } = renderHook(
+      () => useUpsellingMessage('my_fake_message_id' as 'investigation_guide'),
+      {
+        wrapper: RenderWrapper,
+      }
     );
     expect(result.current).toBe(null);
   });

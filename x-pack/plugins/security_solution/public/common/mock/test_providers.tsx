@@ -21,6 +21,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { UpsellingProvider } from '../components/upselling_provider';
 import { MockAssistantProvider } from './mock_assistant_provider';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
@@ -68,6 +69,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
       },
     },
   });
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
@@ -77,11 +79,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
               <QueryClientProvider client={queryClient}>
                 <ExpandableFlyoutProvider>
                   <ConsoleManager>
-                    <CellActionsProvider
-                      getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                    >
-                      <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                    </CellActionsProvider>
+                    <UpsellingProvider upsellingService={createStartServicesMock().upselling}>
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                      >
+                        <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                      </CellActionsProvider>
+                    </UpsellingProvider>
                   </ConsoleManager>
                 </ExpandableFlyoutProvider>
               </QueryClientProvider>
