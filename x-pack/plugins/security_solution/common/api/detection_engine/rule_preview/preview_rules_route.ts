@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { SharedCreateProps, TypeSpecificCreateProps } from '../../model';
+import { SharedCreateProps, TypeSpecificCreateProps } from '../model';
 
 export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 export const previewRulesSchema = t.intersection([

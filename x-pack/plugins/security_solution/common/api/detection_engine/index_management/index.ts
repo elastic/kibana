@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from '../index_management/create_index/create_index_route';
-export * from './query_signals/query_signals_route';
-export * from './set_signal_status/set_signal_status_route';
-export * from './set_signal_status/set_signal_status_type_dependents';
+export * from './delete_index/delete_index_route';
+export * from './read_alerts_index_exists/read_alerts_index_exists_route';
+export * from './read_index/read_index_route';
+export * from './read_privileges/read_privileges_route';

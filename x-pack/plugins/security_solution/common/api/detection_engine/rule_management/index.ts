@@ -30,6 +30,5 @@ export * from './import_rules/rule_to_import_validation';
 export * from './import_rules/rule_to_import';
 export * from './model/query_rule_by_ids_validation';
 export * from './model/query_rule_by_ids';
-export * from './preview_rules/preview_rules_route';
 export * from './urls';
 export * from './tags/read_tags/read_tags_route';
