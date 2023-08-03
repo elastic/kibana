@@ -6,8 +6,8 @@
  */
 
 import { first, get } from 'lodash';
+import { InfraSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
-import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';

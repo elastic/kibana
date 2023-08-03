@@ -6,9 +6,9 @@
  */
 
 import { ESSearchRequest } from '@kbn/es-types';
+import { InfraStaticSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { lastValueFrom } from 'rxjs';
 
-import { InfraStaticSourceConfiguration } from '../../../../lib/sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { GetInfraMetricsRequestBodyPayload } from '../../../../../common/http_api/infra';
 import {

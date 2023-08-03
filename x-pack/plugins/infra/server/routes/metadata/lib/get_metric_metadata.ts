@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InfraSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { get } from 'lodash';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
@@ -12,7 +13,6 @@ import {
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
-import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';

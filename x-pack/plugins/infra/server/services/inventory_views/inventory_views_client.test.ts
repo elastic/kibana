@@ -8,10 +8,9 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { InfraSource } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { InventoryViewAttributes } from '../../../common/inventory_views';
 
-import { InfraSource } from '../../lib/sources';
-import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { InventoryViewsClient } from './inventory_views_client';
 import { createInventoryViewMock } from '../../../common/inventory_views/inventory_view.mock';
@@ -180,7 +179,15 @@ describe('InventoryViewsClient class', () => {
 const createInventoryViewsClient = () => {
   const logger = loggerMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
-  const infraSources = createInfraSourcesMock();
+  const infraSources = {
+    getSourceConfiguration: jest.fn(),
+    createSourceConfiguration: jest.fn(),
+    deleteSourceConfiguration: jest.fn(),
+    updateSourceConfiguration: jest.fn(),
+    getAllSourceConfigurations: jest.fn(),
+    getInternalSourceConfiguration: jest.fn(),
+    defineInternalSourceConfiguration: jest.fn(),
+  };
 
   const inventoryViewsClient = new InventoryViewsClient(logger, savedObjectsClient, infraSources);
 

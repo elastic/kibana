@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { LogIndexReference, LogView, LogViewAttributes } from '@kbn/logs-shared-plugin/common';
+import { InfraSource } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { LogIndexReference as SourceConfigurationLogIndexReference } from '../../common/source_configuration/source_configuration';
-import { InfraSource } from '../lib/sources';
 
 export const mapSourceToLogView = (sourceConfiguration: InfraSource): LogView => {
   return {

@@ -8,10 +8,9 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { InfraSource } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 
-import { InfraSource } from '../../lib/sources';
-import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { metricsExplorerViewSavedObjectName } from '../../saved_objects/metrics_explorer_view';
 import { MetricsExplorerViewsClient } from './metrics_explorer_views_client';
 import { createMetricsExplorerViewMock } from '../../../common/metrics_explorer_views/metrics_explorer_view.mock';
@@ -183,7 +182,15 @@ describe('MetricsExplorerViewsClient class', () => {
 const createMetricsExplorerViewsClient = () => {
   const logger = loggerMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
-  const infraSources = createInfraSourcesMock();
+  const infraSources = {
+    getSourceConfiguration: jest.fn(),
+    createSourceConfiguration: jest.fn(),
+    deleteSourceConfiguration: jest.fn(),
+    updateSourceConfiguration: jest.fn(),
+    getAllSourceConfigurations: jest.fn(),
+    getInternalSourceConfiguration: jest.fn(),
+    defineInternalSourceConfiguration: jest.fn(),
+  };
 
   const metricsExplorerViewsClient = new MetricsExplorerViewsClient(
     logger,

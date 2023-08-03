@@ -45,31 +45,6 @@ describe('the InfraSources lib', () => {
       });
     });
 
-    test('adds missing attributes from the static configuration to a source configuration', async () => {
-      const sourcesLib = new InfraSources();
-
-      const request: any = createRequestContext({
-        id: 'TEST_ID',
-        version: 'foo',
-        type: infraSourceConfigurationSavedObjectName,
-        updated_at: '2000-01-01T00:00:00.000Z',
-        attributes: {},
-        references: [],
-      });
-
-      expect(
-        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
-      ).toMatchObject({
-        id: 'TEST_ID',
-        version: 'foo',
-        updatedAt: 946684800000,
-        configuration: {
-          metricAlias: 'METRIC_ALIAS',
-          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
-        },
-      });
-    });
-
     test('adds missing attributes from the default configuration to a source configuration', async () => {
       const sourcesLib = new InfraSources();
 

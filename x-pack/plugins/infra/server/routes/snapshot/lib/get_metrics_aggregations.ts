@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
+import { InfraSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import {
   InventoryItemType,
   MetricsUIAggregation,
@@ -19,7 +20,6 @@ import {
 } from '../../../../common/http_api';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { InfraSourceConfiguration } from '../../../lib/sources';
 
 export interface InfraSnapshotRequestOptions
   extends Omit<SnapshotRequest, 'sourceId' | 'filterQuery'> {

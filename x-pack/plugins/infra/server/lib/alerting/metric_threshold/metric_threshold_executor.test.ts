@@ -18,13 +18,13 @@ import {
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
+import { InfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import {
   Aggregators,
   Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
-import { InfraSources } from '../../sources';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
