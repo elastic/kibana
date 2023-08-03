@@ -50,3 +50,4 @@ export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';
 export { getCloudFormationTemplateUrlFromPackagePolicy } from './get_cloud_formation_template_url_from_package_policy';
 export { getCloudFormationTemplateUrlFromAgentPolicy } from './get_cloud_formation_template_url_from_agent_policy';
+export { getCloudShellUrlFromPackagePolicy } from './get_cloud_shell_url_from_package_policy';

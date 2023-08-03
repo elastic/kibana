@@ -24,7 +24,11 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
 } from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import {
+  getCloudShellUrlFromPackagePolicy,
+  isVerificationError,
+  packageToPackagePolicy,
+} from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -304,11 +308,7 @@ export function useOnSubmit({
         ? getCloudFormationTemplateUrlFromPackagePolicy(data.item)
         : false;
 
-      const cisGcpSetupAccess = data?.item?.inputs.find(
-        (element) => element?.type === 'cloudbeat/cis_gcp'
-      )?.streams[0].vars?.setup_access?.value;
-
-      const hasGoogleCloudShell = cisGcpSetupAccess === 'google_cloud_shell';
+      const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
       if (hasCloudFormation) {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');

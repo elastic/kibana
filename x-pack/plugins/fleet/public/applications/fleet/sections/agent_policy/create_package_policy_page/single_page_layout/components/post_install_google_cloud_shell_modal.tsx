@@ -23,11 +23,10 @@ import { useQuery } from '@tanstack/react-query';
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import {
   sendGetEnrollmentAPIKeys,
-  useCreateCloudFormationUrl,
+  useCreateCloudShellUrl,
   useFleetServerHostsForPolicy,
   useKibanaVersion,
 } from '../../../../../hooks';
-import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../../../../services';
 import { GoogleCloudShellGuide } from '../../../../../components';
 import { ManualInstructions } from '../../../../../../../components/enrollment_instructions';
 
@@ -54,11 +53,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
     kibanaVersion,
   });
 
-  const cloudFormationTemplateUrl =
-    getCloudFormationTemplateUrlFromPackagePolicy(packagePolicy) || '';
-
-  const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
-    cloudFormationTemplateUrl,
+  const { cloudShellUrl, error, isError, isLoading } = useCreateCloudShellUrl({
     enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
     packagePolicy,
   });
@@ -97,7 +92,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
         <EuiButton
           data-test-subj="confirmGoogleCloudShellModalConfirmButton"
           onClick={() => {
-            window.open(cloudFormationUrl);
+            window.open(cloudShellUrl);
             onConfirm();
           }}
           fill

@@ -25,8 +25,13 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CLOUDBEAT_GCP } from '../../../common/constants';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import {
+  getCspmCloudShellDefaultValue,
+  getPosturePolicy,
+  NewPackagePolicyPostureInput,
+} from './utils';
 import { MIN_VERSION_GCP_CIS } from '../../common/constants';
 
 export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
@@ -232,6 +237,65 @@ const getSetupFormatFromInput = (
   return 'google_cloud_shell';
 };
 
+const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
+  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_GCP)
+    ?.config?.cloud_shell_url?.value;
+
+  return template || undefined;
+};
+
+const updateCloudShellUrl = (
+  newPolicy: NewPackagePolicy,
+  updatePolicy: (policy: NewPackagePolicy) => void,
+  templateUrl: string | undefined
+) => {
+  updatePolicy?.({
+    ...newPolicy,
+    inputs: newPolicy.inputs.map((input) => {
+      if (input.type === CLOUDBEAT_GCP) {
+        return {
+          ...input,
+          config: { cloud_shell_url: { value: templateUrl } },
+        };
+      }
+      return input;
+    }),
+  });
+};
+
+const useCloudShellUrl = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+  setupFormat,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+  setupFormat: SetupFormatGCP;
+}) => {
+  useEffect(() => {
+    const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
+
+    if (setupFormat === 'manual') {
+      if (!!policyInputCloudShellUrl) {
+        updateCloudShellUrl(newPolicy, updatePolicy, undefined);
+      }
+      return;
+    }
+    const templateUrl = getCspmCloudShellDefaultValue(packageInfo);
+
+    // If the template is not available, do not update the policy
+    if (templateUrl === '') return;
+
+    // If the template is already set, do not update the policy
+    if (policyInputCloudShellUrl === templateUrl) return;
+
+    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat]);
+};
+
 export const GcpCredentialsForm = ({
   input,
   newPolicy,
@@ -251,6 +315,12 @@ export const GcpCredentialsForm = ({
     return fields.find((element) => element.id === id);
   };
 
+  useCloudShellUrl({
+    packageInfo,
+    newPolicy,
+    updatePolicy,
+    setupFormat,
+  });
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
     if (newSetupFormat === 'google_cloud_shell') {
       // We need to store the current manual fields to restore them later
@@ -269,10 +339,6 @@ export const GcpCredentialsForm = ({
           // Clearing fields from previous setup format to prevent exposing credentials
           // when switching from manual to cloud formation
           ...Object.fromEntries(fields.map((field) => [field.id, { value: undefined }])),
-          project_id: {
-            value: 'DUMMY VALUE',
-            type: 'text',
-          },
         })
       );
     } else {
