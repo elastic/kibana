@@ -12,8 +12,7 @@ import { timerange } from '../model/timerange';
 import { sort } from './model/sort';
 
 export const kpiUniqueIpsSchema = requestBasicOptionsSchema.extend({
-  defaultIndex: z.array(z.string()),
-  sort: z.optional(sort.partial()),
+  sort,
   pagination,
   timerange,
 });

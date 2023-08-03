@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { z } from 'zod';
 import { sort } from '../hosts/model/sort';
 import { pagination } from './pagination';
 import { requestBasicOptionsSchema } from './request_basic_options';
 
-export const requestOptionsPaginatedSchema = requestBasicOptionsSchema.extend({
-  pagination,
-  sort: sort
-    .extend({
-      field: z.string().optional(),
-    })
-    .optional(),
-});
+export const requestOptionsPaginatedSchema = requestBasicOptionsSchema
+  .extend({
+    pagination,
+    sort,
+  })
+  .passthrough();

@@ -13,11 +13,15 @@ import { timerange } from '../model/timerange';
 
 export const networkHttpSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().optional(),
-  defaultIndex: z.array(z.string()).min(1),
+  defaultIndex: z.array(z.string()).min(1).optional(),
   timerange,
-  sort: sort.extend({
-    field: z.string(),
-  }),
+  sort: sort
+    .unwrap()
+    .extend({
+      field: z.string(),
+    })
+    .deepPartial()
+    .optional(),
 });
 
 export type NetworkHttpRequestOptions = z.infer<typeof networkHttpSchema>;

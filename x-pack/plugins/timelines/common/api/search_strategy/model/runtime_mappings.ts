@@ -17,18 +17,20 @@ export type MappingRuntimeFieldType =
   | 'long'
   | 'lookup';
 
-export const runtimeMappings = z.record(
-  z.object({
-    type: z.union([
-      z.literal('boolean'),
-      z.literal('date'),
-      z.literal('double'),
-      z.literal('geo_point'),
-      z.literal('ip'),
-      z.literal('keyword'),
-      z.literal('long'),
-      z.literal('lookup'),
-    ]),
-    script: z.string(),
-  })
-);
+export const runtimeMappings = z
+  .record(
+    z.object({
+      type: z.union([
+        z.literal('boolean'),
+        z.literal('date'),
+        z.literal('double'),
+        z.literal('geo_point'),
+        z.literal('ip'),
+        z.literal('keyword'),
+        z.literal('long'),
+        z.literal('lookup'),
+      ]),
+      script: z.string(),
+    })
+  )
+  .optional();

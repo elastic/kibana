@@ -11,17 +11,18 @@ import { runtimeMappings } from '../model/runtime_mappings';
 import { sortItem } from '../model/sort';
 import { requestPaginated } from './request_paginated';
 
+const extendedSortItem = sortItem.extend({
+  esTypes: z.array(z.string()),
+});
+
+const sort = z.array(extendedSortItem);
+
 export const timelineEventsAllSchema = requestPaginated.extend({
   authFilter: z.object({}).optional(),
   excludeEcsData: z.boolean().optional(),
   fieldRequested: z.array(z.string()),
-  sort: z.array(
-    sortItem.extend({
-      esTypes: z.array(z.string()),
-      type: z.string(),
-    })
-  ),
-  filterQuery: z.string(),
+  sort,
+  filterQuery: z.any(),
   fields: z.array(
     z.union([
       z.string(),
@@ -39,3 +40,5 @@ export const timelineEventsAllSchema = requestPaginated.extend({
 });
 
 export type TimelineEventsAllOptions = z.infer<typeof timelineEventsAllSchema>;
+
+export type SortItem = z.infer<typeof extendedSortItem>;

@@ -9,11 +9,14 @@ import { z } from 'zod';
 
 export type PaginationInputPaginated = z.infer<typeof pagination>;
 
-export const pagination = z.object({
-  /** The activePage parameter defines the page of results you want to fetch */
-  activePage: z.number(),
-  /** The cursorStart parameter defines the start of the results to be displayed */
-  cursorStart: z.number().optional(),
-  /** The querySize parameter is the number of items to be returned */
-  querySize: z.number(),
-});
+export const pagination = z
+  .object({
+    /** The activePage parameter defines the page of results you want to fetch */
+    activePage: z.number(),
+    /** The cursorStart parameter defines the start of the results to be displayed */
+    cursorStart: z.number().optional(),
+    /** The querySize parameter is the number of items to be returned */
+    querySize: z.number(),
+  })
+  .passthrough()
+  .optional();

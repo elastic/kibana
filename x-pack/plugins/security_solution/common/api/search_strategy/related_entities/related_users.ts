@@ -13,7 +13,7 @@ export const relatedUsersRequestOptionsSchema = requestBasicOptionsSchema.extend
   hostName: z.string(),
   skip: z.boolean().optional(),
   from: z.string(),
-  inspect: inspect.optional(),
+  inspect,
 });
 
 export type RelatedUsersRequestOptions = z.infer<typeof relatedUsersRequestOptionsSchema>;

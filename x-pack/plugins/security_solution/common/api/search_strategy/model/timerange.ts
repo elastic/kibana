@@ -7,8 +7,10 @@
 
 import { z } from 'zod';
 
-export const timerange = z.object({
-  interval: z.string(),
-  from: z.string(),
-  to: z.string(),
-});
+export const timerange = z
+  .object({
+    interval: z.string(),
+    from: z.string(),
+    to: z.string(),
+  })
+  .passthrough();

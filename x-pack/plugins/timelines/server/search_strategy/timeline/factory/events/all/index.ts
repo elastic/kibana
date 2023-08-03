@@ -43,7 +43,12 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
 
-    const { activePage, querySize } = options.pagination;
+    const {
+      pagination: { activePage, querySize } = {
+        activePage: undefined,
+        querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
+      },
+    } = options;
     const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;

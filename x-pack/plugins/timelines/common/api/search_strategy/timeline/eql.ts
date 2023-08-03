@@ -13,7 +13,7 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 
 export const timelineEqlRequestOptionsSchema = z.object({
-  defaultIndex: z.array(z.string()),
+  defaultIndex: z.array(z.string()).optional(),
   timerange,
   sort,
   filterQuery,

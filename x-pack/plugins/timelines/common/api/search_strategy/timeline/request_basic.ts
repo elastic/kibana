@@ -13,7 +13,7 @@ import { timerange } from '../model/timerange';
 export const timelineRequestBasicOptionsSchema = z.object({
   timerange: timerange.optional(),
   filterQuery,
-  defaultIndex: z.array(z.string()),
+  defaultIndex: z.array(z.string()).optional(),
   factoryQueryType: z.string().optional(),
   entityType: z.enum(['events', 'sessions']).optional(),
   runtimeMappings,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { z } from 'zod';
-
 export enum HostsFields {
   lastSeen = 'lastSeen',
   hostName = 'hostName',
@@ -15,8 +13,4 @@ export enum HostsFields {
 
 import { sort as baseSort } from '../../model/sort';
 
-const field = z.enum([HostsFields.lastSeen, HostsFields.hostName, HostsFields.success]);
-
-export const sort = baseSort.extend({
-  field,
-});
+export const sort = baseSort;

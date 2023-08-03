@@ -21,9 +21,13 @@ const networkUsersFields = z.enum([NetworkUsersFields.name, NetworkUsersFields.c
 export const networkUsersSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip(),
   flowTarget,
-  sort: sort.extend({
-    field: networkUsersFields,
-  }),
+  sort: sort
+    .unwrap()
+    .extend({
+      field: networkUsersFields,
+    })
+    .deepPartial()
+    .optional(),
   timerange,
 });
 

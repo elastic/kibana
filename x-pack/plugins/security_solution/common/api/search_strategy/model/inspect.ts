@@ -8,7 +8,13 @@
 import { z } from 'zod';
 
 export const inspect = z
-  .object({
-    dsl: z.array(z.string()),
-  })
-  .nullable();
+  .union([
+    z
+      .object({
+        dsl: z.array(z.string()),
+      })
+      .passthrough()
+      .nullable(),
+    z.boolean(),
+  ])
+  .optional();

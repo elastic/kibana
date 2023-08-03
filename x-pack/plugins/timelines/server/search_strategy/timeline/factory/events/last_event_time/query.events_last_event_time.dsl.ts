@@ -23,8 +23,8 @@ export const buildLastEventTimeQuery = ({
   defaultIndex,
 }: TimelineEventsLastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
-    hosts: defaultIndex,
-    network: defaultIndex,
+    hosts: defaultIndex || [],
+    network: defaultIndex || [],
   };
   const getUserDetailsFilter = (userName: string) => [{ term: { 'user.name': userName } }];
   const getHostDetailsFilter = (hostName: string) => [{ term: { 'host.name': hostName } }];

@@ -15,9 +15,13 @@ import { topTablesFields } from './model/top_tables_fields';
 export const networkTopNFlowSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().nullable().optional(),
   flowTarget,
-  sort: sort.extend({
-    field: topTablesFields,
-  }),
+  sort: sort
+    .unwrap()
+    .extend({
+      field: topTablesFields,
+    })
+    .deepPartial()
+    .optional(),
   timerange,
 });
 

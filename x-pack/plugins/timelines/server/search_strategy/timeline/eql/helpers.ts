@@ -105,7 +105,12 @@ export const parseEqlResponse = async (
   options: TimelineEqlRequestOptions,
   response: EqlSearchStrategyResponse<EqlSearchResponse<unknown>>
 ): Promise<TimelineEqlResponse> => {
-  const { activePage, querySize } = options.pagination;
+  const {
+    pagination: { activePage, querySize } = {
+      activePage: 0,
+      querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
+    },
+  } = options;
   let edges: TimelineEdges[] = [];
 
   if (response.rawResponse.body.hits.sequences !== undefined) {

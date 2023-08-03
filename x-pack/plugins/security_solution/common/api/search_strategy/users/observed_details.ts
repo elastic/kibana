@@ -15,7 +15,7 @@ export const observedUserDetailsSchema = requestBasicOptionsSchema.partial().ext
   userName: z.string(),
   skip: z.boolean().optional(),
   timerange,
-  inspect: inspect.optional(),
+  inspect,
 });
 
 export type ObservedUserDetailsRequestOptions = z.infer<typeof observedUserDetailsSchema>;

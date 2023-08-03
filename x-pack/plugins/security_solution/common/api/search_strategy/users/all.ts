@@ -16,11 +16,17 @@ export enum UsersFields {
   lastSeen = 'lastSeen',
 }
 
-export const usersSchema = requestOptionsPaginatedSchema.extend({
-  sort: sort.extend({
-    field: z.enum([UsersFields.name, UsersFields.lastSeen]),
-  }),
-  timerange,
-});
+export const usersSchema = requestOptionsPaginatedSchema
+  .extend({
+    sort: sort
+      .unwrap()
+      .extend({
+        field: z.enum([UsersFields.name, UsersFields.lastSeen]),
+      })
+      .deepPartial()
+      .optional(),
+    timerange,
+  })
+  .passthrough();
 
 export type UsersRequestOptions = z.infer<typeof usersSchema>;

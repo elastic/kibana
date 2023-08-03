@@ -28,7 +28,7 @@ export const matrixHistogramSchema = requestBasicOptionsSchema.extend({
     MatrixHistogramType.events,
     MatrixHistogramType.preview,
   ]),
-  stackByField: z.string(),
+  stackByField: z.string().optional(),
   threshold: z
     .object({
       field: z.array(z.string()),
@@ -41,7 +41,7 @@ export const matrixHistogramSchema = requestBasicOptionsSchema.extend({
         .optional(),
     })
     .optional(),
-  inspect: inspect.nullable().optional(),
+  inspect,
   isPtrIncluded: z.boolean().optional(),
   includeMissingData: z.boolean().optional(),
   // TODO: add stricter type here

@@ -21,7 +21,6 @@ export enum AuthStackByField {
 }
 
 export const userAuthenticationsSchema = requestOptionsPaginatedSchema.extend({
-  defaultIndex: z.array(z.string()),
   stackByField: z.enum([AuthStackByField.userName, AuthStackByField.hostName]),
   timerange,
 });

@@ -10,7 +10,7 @@ import { pagination } from '../model/pagination';
 import { timerange } from '../model/timerange';
 
 export const requestPaginated = z.object({
-  defaultIndex: z.array(z.string()),
+  defaultIndex: z.array(z.string()).optional(),
   pagination,
   timerange,
 });

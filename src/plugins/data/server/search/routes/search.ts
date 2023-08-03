@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
+import { inspect } from 'util';
 
 export const SEARCH_API_BASE_URL = '/internal/search';
 

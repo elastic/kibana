@@ -12,8 +12,7 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 
 export const hostUncommonProcessesSchema = requestBasicOptionsSchema.extend({
-  defaultIndex: z.array(z.string()),
-  sort: sort.deepPartial(),
+  sort: sort.optional(),
   pagination,
   timerange,
 });

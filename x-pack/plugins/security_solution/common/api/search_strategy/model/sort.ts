@@ -8,7 +8,11 @@
 import { z } from 'zod';
 import { order } from './order';
 
-export const sort = z.object({
-  direction: order,
-  field: z.string(),
-});
+export const sort = z
+  .object({
+    direction: order,
+    field: z.string(),
+  })
+  .deepPartial()
+  .passthrough()
+  .optional();

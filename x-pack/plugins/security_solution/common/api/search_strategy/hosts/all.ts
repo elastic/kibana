@@ -17,7 +17,7 @@ export const allHostsSchema = z
     pagination,
   })
   .extend(requestBasicOptionsSchema.partial().shape)
-  .extend(z.object({ defaultIndex: z.array(z.string()) }).shape)
-  .extend(z.object({ timerange }).shape);
+  .extend(z.object({ timerange }).shape)
+  .passthrough();
 
 export type HostsRequestOptions = z.infer<typeof allHostsSchema>;
