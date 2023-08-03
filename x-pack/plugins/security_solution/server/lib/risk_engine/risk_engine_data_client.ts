@@ -55,7 +55,7 @@ interface InitializeRiskEngineResourcesOpts {
 interface RiskEngineDataClientOpts {
   logger: Logger;
   kibanaVersion: string;
-  elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  esClient: ElasticsearchClient;
 }
 
 export class RiskEngineDataClient {
@@ -126,6 +126,7 @@ export class RiskEngineDataClient {
     esClient: ElasticsearchClient
   ): Promise<Writer> {
     const writer = new RiskEngineDataWriter({
+      esClient: this.options.esClient,
       namespace,
       index,
       logger: this.options.logger,
@@ -183,9 +184,8 @@ export class RiskEngineDataClient {
       return true;
     }
 
-    const esClient = await this.options.elasticsearchClientPromise;
     await removeLegacyTransforms({
-      esClient,
+      esClient: this.options.esClient,
       namespace,
     });
 
@@ -205,8 +205,7 @@ export class RiskEngineDataClient {
   }
 
   private async getLegacyStatus({ namespace }: { namespace: string }) {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const transforms = await getLegacyTransforms({ namespace, esClient });
+    const transforms = await getLegacyTransforms({ namespace, esClient: this.options.esClient });
 
     if (transforms.length === 0) {
       return RiskEngineStatus.NOT_INSTALLED;
@@ -220,7 +219,7 @@ export class RiskEngineDataClient {
     esClient,
   }: InitializeRiskEngineResourcesOpts) {
     try {
-      // const esClient = await this.options.elasticsearchClientPromise;
+      const esClient = this.options.esClient;
 
       const indexPatterns = getIndexPattern(namespace);
 
