@@ -66,6 +66,15 @@ export interface StackTraceResponse {
   ['sampling_rate']: number;
 }
 
+export interface DecodedStackTraceResponse {
+  events: Map<StackTraceID, number>;
+  stackTraces: Map<StackTraceID, StackTrace>;
+  stackFrames: Map<StackFrameID, StackFrame>;
+  executables: Map<FileID, Executable>;
+  totalFrames: number;
+  samplingRate: number;
+}
+
 export const makeFrameID = (frameID: string, n: number): string => {
   return n === 0 ? frameID : frameID + ';' + n.toString();
 };
@@ -109,7 +118,7 @@ const createInlineTrace = (
   } as StackTrace;
 };
 
-export function decodeStackTraceResponse(response: StackTraceResponse) {
+export function decodeStackTraceResponse(response: StackTraceResponse): DecodedStackTraceResponse {
   const stackTraceEvents: Map<StackTraceID, number> = new Map();
   for (const [key, value] of Object.entries(response.stack_trace_events ?? {})) {
     stackTraceEvents.set(key, value);
@@ -146,7 +155,7 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
   }
 
   return {
-    stackTraceEvents,
+    events: stackTraceEvents,
     stackTraces,
     stackFrames,
     executables,
