@@ -47,7 +47,6 @@ export const USES_HEADLESS_JOB_TYPES = [
 type JobTypeDeclaration = typeof jobTypes;
 export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
 
-
 /**
  * A way to get the client side route for the reporting redirect app.
  *
