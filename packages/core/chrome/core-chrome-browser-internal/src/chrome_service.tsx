@@ -450,7 +450,7 @@ export class ChromeService {
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
       project: {
         setHome: setProjectHome,
-        setProjectsUrl: setProjectsUrl,
+        setProjectsUrl,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
