@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_INIT_URL } from '../../../../common/constants';
+import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -23,7 +23,7 @@ export const riskEngineInitRoute = (
       path: RISK_ENGINE_INIT_URL,
       validate: {},
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     },
     async (context, request, response) => {

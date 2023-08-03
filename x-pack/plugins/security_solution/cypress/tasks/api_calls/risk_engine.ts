@@ -23,3 +23,24 @@ export const deleteConfiguration = () => {
     }
   });
 };
+
+export const interceptRiskPreviewError = () => {
+  cy.intercept('POST', '/internal/risk_score/preview', {
+    statusCode: 500,
+  });
+};
+
+export const interceptRiskPreviewSuccess = () => {
+  cy.intercept('POST', '/internal/risk_score/preview', {
+    statusCode: 200,
+    body: {
+      scores: { host: [], user: [] },
+    },
+  });
+};
+
+export const interceptRiskInitError = () => {
+  cy.intercept('POST', '/internal/risk_score/engine/init', {
+    statusCode: 500,
+  });
+};

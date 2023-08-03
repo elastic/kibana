@@ -49,7 +49,8 @@ import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
-
+import { useMlCapabilities } from '../common/components/ml/hooks/use_ml_capabilities';
+import { useHasSecurityCapability } from '../helper_hooks';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
@@ -218,6 +219,8 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
@@ -254,6 +257,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!(hasEntityAnalyticsCapability && isPlatinumOrTrialLicense)) {
+    linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
   return excludeLinks(linksToExclude);
