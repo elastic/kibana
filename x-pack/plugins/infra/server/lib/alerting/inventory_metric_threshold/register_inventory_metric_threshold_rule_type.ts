@@ -145,7 +145,6 @@ export async function registerMetricInventoryThresholdRuleType(
         },
       ],
     },
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
     fieldsForAAD: O11Y_AAD_FIELDS,
   });
