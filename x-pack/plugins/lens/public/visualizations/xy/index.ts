@@ -27,7 +27,6 @@ export class XyVisualization {
     { editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const startTime = window.performance.now();
       const { getXyVisualization } = await import('../../async_services');
       const [
         coreStart,
@@ -46,8 +45,6 @@ export class XyVisualization {
         eventAnnotation.getService(),
       ]);
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
-      const duration = window.performance.now() - startTime;
-      window.console.log(`XyVisualization register: ${duration}`);
       return getXyVisualization({
         core: coreStart,
         data,

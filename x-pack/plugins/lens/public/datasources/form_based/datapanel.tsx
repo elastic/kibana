@@ -274,7 +274,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   }, []);
 
   const refreshFieldList = useCallback(async () => {
-    const startTime = window.performance.now();
     if (currentIndexPattern) {
       const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
         patterns: [currentIndexPattern.id],
@@ -290,8 +289,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     }
     // start a new session so all charts are refreshed
     data.search.session.start();
-    const endTime = window.performance.now();
-    window.console.log(`refreshFieldList: ${endTime - startTime}`);
   }, [
     indexPatternService,
     currentIndexPattern,

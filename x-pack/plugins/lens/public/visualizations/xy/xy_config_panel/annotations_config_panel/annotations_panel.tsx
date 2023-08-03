@@ -65,7 +65,6 @@ export const AnnotationsPanel = (
 
   useEffect(() => {
     const updateDataView = async () => {
-      const startTime = window.performance.now();
       let dataView: DataView;
       const availableIds = await props.dataViewsService.getIds();
       if (availableIds.includes(localLayer.indexPatternId)) {
@@ -76,8 +75,6 @@ export const AnnotationsPanel = (
         );
       }
       setCurrentDataView(dataView);
-      const duration = window.performance.now() - startTime;
-      window.console.log(`updateDataView: ${duration}`);
     };
 
     updateDataView();
