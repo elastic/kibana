@@ -8,7 +8,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiEmptyPrompt,
   EuiPopover,
   EuiButtonEmpty,
@@ -106,12 +106,7 @@ export const RestoreList: React.FunctionComponent = () => {
   } else {
     if (restores && restores.length === 0) {
       content = (
-        <EuiPageContent
-          hasShadow={false}
-          paddingSize="none"
-          verticalPosition="center"
-          horizontalPosition="center"
-        >
+        <EuiPageSection paddingSize="none" alignment="center">
           <EuiEmptyPrompt
             iconType="managementApp"
             title={
@@ -144,7 +139,7 @@ export const RestoreList: React.FunctionComponent = () => {
             }
             data-test-subj="emptyPrompt"
           />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     } else {
       content = (

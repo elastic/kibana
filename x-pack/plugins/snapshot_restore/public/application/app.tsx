@@ -8,7 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -87,7 +87,7 @@ export const App: React.FunctionComponent = () => {
             </Routes>
           </div>
         ) : (
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+          <EuiPageSection alignment="center" color="subdued">
             <NotAuthorizedSection
               title={
                 <FormattedMessage
@@ -107,7 +107,7 @@ export const App: React.FunctionComponent = () => {
                 />
               }
             />
-          </EuiPageContent>
+          </EuiPageSection>
         )
       }
     </WithPrivileges>

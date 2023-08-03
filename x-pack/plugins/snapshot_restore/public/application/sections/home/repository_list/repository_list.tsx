@@ -8,11 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiButton,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiPageSection, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -102,12 +98,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     );
   } else if (repositories && repositories.length === 0) {
     content = (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
+      <EuiPageSection paddingSize="none" alignment="center">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -143,7 +134,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           }
           data-test-subj="emptyPrompt"
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   } else {
     content = (

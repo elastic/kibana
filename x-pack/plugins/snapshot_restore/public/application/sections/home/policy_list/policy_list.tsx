@@ -8,13 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageSection, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -123,12 +117,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     );
   } else if (policies && policies.length === 0) {
     content = (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
+      <EuiPageSection paddingSize="none" alignment="center">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -164,7 +153,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           }
           data-test-subj="emptyPrompt"
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   } else {
     const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);

@@ -8,14 +8,14 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 
 export const RepositoryError: React.FunctionComponent = () => {
   const history = useHistory();
   return (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+    <EuiPageSection alignment="center" color="danger">
       <EuiEmptyPrompt
         iconType="managementApp"
         data-test-subj="repositoryErrorsPrompt"
@@ -46,6 +46,6 @@ export const RepositoryError: React.FunctionComponent = () => {
           </p>
         }
       />
-    </EuiPageContent>
+    </EuiPageSection>
   );
 };

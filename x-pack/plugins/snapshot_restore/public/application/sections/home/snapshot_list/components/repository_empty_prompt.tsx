@@ -7,11 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToAddRepository } from '../../../../services/navigation';
@@ -19,13 +15,7 @@ import { linkToAddRepository } from '../../../../services/navigation';
 export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
   const history = useHistory();
   return (
-    <EuiPageContent
-      hasShadow={false}
-      paddingSize="none"
-      verticalPosition="center"
-      horizontalPosition="center"
-      data-test-subj="snapshotListEmpty"
-    >
+    <EuiPageSection paddingSize="none" alignment="center" data-test-subj="snapshotListEmpty">
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
@@ -61,6 +51,6 @@ export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
         }
         data-test-subj="emptyPrompt"
       />
-    </EuiPageContent>
+    </EuiPageSection>
   );
 };

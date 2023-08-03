@@ -7,13 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiIcon,
-  EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../../common';
 import { reactRouterNavigate, WithPrivileges } from '../../../../../shared_imports';
@@ -26,12 +20,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
   const { docLinks } = useCore();
   const history = useHistory();
   return (
-    <EuiPageContent
-      hasShadow={false}
-      paddingSize="none"
-      verticalPosition="center"
-      horizontalPosition="center"
-    >
+    <EuiPageSection paddingSize="none" alignment="center">
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
@@ -124,6 +113,6 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
         }
         data-test-subj="emptyPrompt"
       />
-    </EuiPageContent>
+    </EuiPageSection>
   );
 };
