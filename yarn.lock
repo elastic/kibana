@@ -14723,7 +14723,7 @@ elastic-apm-http-client@11.4.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-http-client@12.0.0, elastic-apm-http-client@^12.0.0:
+elastic-apm-http-client@12.0.0:
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-12.0.0.tgz#8e64ccc8bb34625ebdbcada2e6f49a067f200e10"
   integrity sha512-dD067YAenZ7aYBkv+Pb5Z3tV3FmvvWVmV9S2+7BZdFkKwL+gkcT+ivbdmqKAILEfGV8p4V+/KzV+HeA3w+fQ9Q==
