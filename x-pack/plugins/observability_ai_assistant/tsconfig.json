@@ -32,7 +32,8 @@
     "@kbn/user-profile-components",
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/io-ts-utils"
   ],
   "exclude": ["target/**/*"]
 }
