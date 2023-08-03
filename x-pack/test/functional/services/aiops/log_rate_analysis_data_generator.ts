@@ -24,7 +24,7 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-function getArtificialLogsWithSpike(index: string) {
+function getArtificialLogsWithDeviation(index: string, deviationType: string) {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
@@ -81,7 +81,7 @@ function getArtificialLogsWithSpike(index: string) {
           response_code: responseCode,
           url,
           version: 'v1.0.0',
-          '@timestamp': DEVIATION_TS + tsOffset,
+          '@timestamp': (deviationType === 'spike' ? DEVIATION_TS : BASELINE_TS) + tsOffset,
           should_ignore_this_field: 'should_ignore_this_field',
         });
       });
@@ -104,7 +104,7 @@ function getArtificialLogsWithSpike(index: string) {
           response_code: '500',
           url,
           version: 'v1.0.0',
-          '@timestamp': DEVIATION_TS + tsOffset,
+          '@timestamp': (deviationType === 'spike' ? DEVIATION_TS : BASELINE_TS) + tsOffset,
           should_ignore_this_field: 'should_ignore_this_field',
         });
       });
@@ -159,17 +159,18 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_dip':
           try {
             await es.indices.delete({
-              index: 'artificial_logs_with_spike',
+              index: dataGenerator,
             });
           } catch (e) {
-            log.info(`Could not delete index 'artificial_logs_with_spike' in before() callback`);
+            log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
 
           // Create index with mapping
           await es.indices.create({
-            index: 'artificial_logs_with_spike',
+            index: dataGenerator,
             mappings: {
               properties: {
                 user: { type: 'keyword' },
@@ -184,7 +185,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
 
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithSpike('artificial_logs_with_spike'),
+            body: getArtificialLogsWithDeviation(
+              dataGenerator,
+              dataGenerator.split('_').pop() ?? 'spike'
+            ),
           });
           break;
 
@@ -204,12 +208,13 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_dip':
           try {
             await es.indices.delete({
-              index: 'artificial_logs_with_spike',
+              index: dataGenerator,
             });
           } catch (e) {
-            log.error(`Error deleting index 'artificial_logs_with_spike' in after() callback`);
+            log.error(`Error deleting index '${dataGenerator}' in after() callback`);
           }
           break;
 

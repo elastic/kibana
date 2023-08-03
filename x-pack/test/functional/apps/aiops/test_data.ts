@@ -171,11 +171,11 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-export const artificialLogDataViewTestData: TestData = {
-  suiteTitle: 'artificial logs with spike',
-  dataGenerator: 'artificial_logs_with_spike',
+const getArtificialLogDataViewTestData = (analysisType: 'spike' | 'dip'): TestData => ({
+  suiteTitle: `artificial logs with ${analysisType}`,
+  dataGenerator: `artificial_logs_with_${analysisType}`,
   isSavedSearch: false,
-  sourceIndexOrSavedSearch: 'artificial_logs_with_spike',
+  sourceIndexOrSavedSearch: `artificial_logs_with_${analysisType}`,
   brushBaselineTargetTimestamp: BASELINE_TS + DAY_MS / 2,
   brushDeviationTargetTimestamp: DEVIATION_TS + DAY_MS / 2,
   brushIntervalFactor: 10,
@@ -224,11 +224,12 @@ export const artificialLogDataViewTestData: TestData = {
     ],
     fieldSelectorPopover: ['response_code', 'url', 'user'],
   },
-};
+});
 
 export const logRateAnalysisTestData: TestData[] = [
   kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
-  artificialLogDataViewTestData,
+  getArtificialLogDataViewTestData('spike'),
+  getArtificialLogDataViewTestData('dip'),
 ];
