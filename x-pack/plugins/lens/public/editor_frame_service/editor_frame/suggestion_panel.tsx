@@ -20,7 +20,6 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiText,
-  EuiProgress,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
@@ -31,7 +30,6 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { css } from '@emotion/react';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -366,18 +364,18 @@ export function SuggestionPanel({
   }, [existsStagedPreview]);
 
   const startTime = useRef<number>(0);
-  const suggestionsRendered = useRef<number>(0);
+  const suggestionsRendered = useRef<boolean[]>([]);
   const totalSuggestions = suggestions.length + 1;
 
-  const onSuggestionRender = useCallback(() => {
-    suggestionsRendered.current++;
-    if (suggestionsRendered.current === totalSuggestions) {
+  const onSuggestionRender = useCallback((suggestionIndex: number) => {
+    suggestionsRendered.current[suggestionIndex] = true;
+    if (suggestionsRendered.current.every(Boolean)) {
       // console.log(
-      //   'suggestions took to fetch data and render',
+      //   'time to fetch data and perform initial render for all suggestions',
       //   performance.now() - startTime.current
       // );
     }
-  }, [totalSuggestions]);
+  }, []);
 
   const rollbackToCurrentVisualization = useCallback(() => {
     if (lastSelectedSuggestion !== -1) {
@@ -421,22 +419,8 @@ export function SuggestionPanel({
     </EuiPanel>
   );
 
-  const renderSuggestionsLoadingState = () => (
-    <EuiPanel
-      hasShadow={false}
-      className="lnsSuggestionPanel__loadingState"
-      paddingSize="none"
-      borderRadius="m"
-      css={css`
-        overflow: hidden;
-      `}
-    >
-      <EuiProgress size="xs" color="accent" />
-    </EuiPanel>
-  );
-
   const renderSuggestionsUI = () => {
-    suggestionsRendered.current = 0;
+    suggestionsRendered.current = new Array(totalSuggestions).fill(false);
     startTime.current = performance.now();
     return (
       <>
@@ -457,7 +441,7 @@ export function SuggestionPanel({
             onSelect={rollbackToCurrentVisualization}
             selected={lastSelectedSuggestion === -1}
             showTitleAsLabel
-            onRender={onSuggestionRender}
+            onRender={() => onSuggestionRender(0)}
           />
         )}
         {!hideSuggestions &&
@@ -480,7 +464,7 @@ export function SuggestionPanel({
                   }
                 }}
                 selected={index === lastSelectedSuggestion}
-                onRender={onSuggestionRender}
+                onRender={() => onSuggestionRender(index + 1)}
               />
             );
           })}
@@ -535,11 +519,7 @@ export function SuggestionPanel({
           role="list"
           tabIndex={0}
         >
-          {changesApplied
-            ? activeData
-              ? renderSuggestionsUI()
-              : renderSuggestionsLoadingState()
-            : renderApplyChangesPrompt()}
+          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
         </div>
       </EuiAccordion>
     </div>
