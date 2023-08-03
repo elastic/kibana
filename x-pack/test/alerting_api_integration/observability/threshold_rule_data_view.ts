@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         const createdRule = await createRule({
           supertest,
           tags: ['observability'],
-          consumer: 'alerts',
+          consumer: 'logs',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {

@@ -28,7 +28,12 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+  alerting: [
+    METRIC_THRESHOLD_ALERT_TYPE_ID,
+    METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+    '.es-query',
+    'observability.rules.threshold',
+  ],
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
@@ -40,10 +45,20 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
         alert: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
       },
       management: {
@@ -61,10 +76,20 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
         alert: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+            'observability.rules.threshold',
+          ],
         },
       },
       management: {
@@ -87,7 +112,7 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+  alerting: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
@@ -99,10 +124,10 @@ export const LOGS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
         },
         alert: {
-          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
         },
       },
       management: {
@@ -116,10 +141,10 @@ export const LOGS_FEATURE = {
       api: ['infra', 'rac', 'ai_assistant'],
       alerting: {
         rule: {
-          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
         },
         alert: {
-          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
         },
       },
       management: {

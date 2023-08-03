@@ -116,3 +116,5 @@ export const CONNECTOR_LOCKED_COLUMNS = ['timestamp', 'status', 'connector_name'
 export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
   ...CONNECTOR_LOCKED_COLUMNS,
 ];
+
+export const MULTI_CONSUMER_RULE_TYPE_IDS = ['observability.rules.threshold', '.es-query'];

@@ -18,6 +18,7 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 
 export function RulesPage() {
   const {
@@ -175,6 +176,7 @@ export function RulesPage() {
         <AddRuleFlyout
           consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
+          validConsumers={observabilityRuleCreationValidConsumers}
           onClose={() => {
             setAddRuleFlyoutVisibility(false);
           }}

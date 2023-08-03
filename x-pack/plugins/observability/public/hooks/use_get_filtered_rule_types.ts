@@ -7,9 +7,12 @@
 
 import { useMemo } from 'react';
 import { usePluginContext } from './use_plugin_context';
+import { ES_QUERY_RULE_TYPE_ID } from '../../common/constants';
 
 export function useGetFilteredRuleTypes() {
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  return useMemo(() => observabilityRuleTypeRegistry.list(), [observabilityRuleTypeRegistry]);
+  return useMemo(() => {
+    return [...observabilityRuleTypeRegistry.list(), ES_QUERY_RULE_TYPE_ID];
+  }, [observabilityRuleTypeRegistry]);
 }

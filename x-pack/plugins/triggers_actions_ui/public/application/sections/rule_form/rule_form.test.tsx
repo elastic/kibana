@@ -605,14 +605,6 @@ describe('rule_form', () => {
       );
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
     });
-
-    it('does not render rule type options which producer does not correspond to the rule consumer', async () => {
-      await setup();
-      const ruleTypeSelectOptions = wrapper.find(
-        '[data-test-subj="other-consumer-producer-rule-type-SelectOption"]'
-      );
-      expect(ruleTypeSelectOptions.exists()).toBeFalsy();
-    });
   });
 
   describe('rule_form edit rule', () => {
