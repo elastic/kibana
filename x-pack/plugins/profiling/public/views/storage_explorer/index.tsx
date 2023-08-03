@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { AsyncComponent } from '../../components/async_component';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { AsyncStatus } from '../../hooks/use_async';
@@ -65,10 +66,9 @@ export function StorageExplorerView() {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <HostBreakdownChart
-            data={storageExplorerHostBreakdownState.data}
-            isLoading={storageExplorerHostBreakdownState.status === AsyncStatus.Loading}
-          />
+          <AsyncComponent size="xl" {...storageExplorerHostBreakdownState} style={{ height: 400 }}>
+            <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
+          </AsyncComponent>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ProfilingAppPageTemplate>

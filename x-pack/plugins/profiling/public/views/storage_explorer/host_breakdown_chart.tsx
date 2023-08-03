@@ -21,20 +21,19 @@ import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme'
 
 interface Props {
   data?: StorageExplorerHostBreakdownSizeChart[];
-  isLoading: boolean;
 }
-export function HostBreakdownChart({ data, isLoading }: Props) {
+export function HostBreakdownChart({ data = [] }: Props) {
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
   const timeZone = useKibanaTimeZoneSetting();
 
   const hostBreakdownTimeseries = useMemo(() => {
     return (
-      data?.map(({ host, timeseries }, index) => {
+      data.map(({ hostId, hostName, timeseries }, index) => {
         return {
           data: timeseries ?? [],
           type: 'area',
           // color: groupedPalette[Math.floor(index % (10 * euiPaletteColorBlindRotations))],
-          title: host,
+          title: `${hostName} (${hostId})`,
         };
       }) ?? []
     );
