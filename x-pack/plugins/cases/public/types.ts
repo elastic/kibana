@@ -27,7 +27,6 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
-import type { CasesMetricsRequest } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { canUseCases } from './client/helpers/can_use_cases';
@@ -49,6 +48,7 @@ import type {
   CasesStatusRequest,
   CasesBulkGetRequest,
   CasesBulkGetResponse,
+  CasesMetricsRequest,
 } from '../common/types/api';
 import type {
   AlertAttachmentPayload,
