@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { median } from 'd3-array';
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
@@ -27,8 +28,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import {
+  getSnappedWindowParameters,
+  getWindowParameters,
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -95,7 +101,11 @@ export interface DocumentCountChartProps {
     uiSettings: IUiSettingsClient;
   };
   /** Optional callback function which gets called the brush selection has changed */
-  brushSelectionUpdateHandler?: (windowParameters: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler?: (
+    logRateAnalysisType: LogRateAnalysisType,
+    windowParameters: WindowParameters,
+    force: boolean
+  ) => void;
   /** Optional width */
   width?: number;
   /** Data chart points */
@@ -157,6 +167,21 @@ function getBaselineBadgeOverflow(
   return deviationMin < baselineBadgeActualMax
     ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
     : 0;
+}
+
+function getLogRateAnalysisType(
+  chartPoints: DocumentCountChartPoint[],
+  { baselineMin, baselineMax, deviationMin, deviationMax }: WindowParameters
+): LogRateAnalysisType {
+  const baselineItems = chartPoints.filter((d) => d.time >= baselineMin && d.time < baselineMax);
+  const baselineMedian = median(baselineItems.map((d) => d.value)) ?? 0;
+
+  const deviationItems = chartPoints.filter((d) => d.time >= deviationMin && d.time < deviationMax);
+  const deviationMedian = median(deviationItems.map((d) => d.value)) ?? 0;
+
+  return deviationMedian >= baselineMedian
+    ? LOG_RATE_ANALYSIS_TYPE.SPIKE
+    : LOG_RATE_ANALYSIS_TYPE.DIP;
 }
 
 /**
@@ -333,8 +358,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
+
           if (brushSelectionUpdateHandler !== undefined) {
-            brushSelectionUpdateHandler(wpSnap, true);
+            brushSelectionUpdateHandler(
+              getLogRateAnalysisType(adjustedChartPoints, wpSnap),
+              wpSnap,
+              true
+            );
           }
         }
       }
@@ -385,7 +415,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
-    brushSelectionUpdateHandler(wp, false);
+    brushSelectionUpdateHandler(getLogRateAnalysisType(adjustedChartPoints, wp), wp, false);
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();

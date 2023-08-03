@@ -13,12 +13,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  LogRateAnalysisContent,
-  LOG_RATE_ANALYSIS_TYPE,
-  type LogRateAnalysisResultsData,
-  type LogRateAnalysisType,
-} from '@kbn/aiops-plugin/public';
+import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
 import {
@@ -33,7 +29,6 @@ import { ALERT_END } from '@kbn/rule-data-utils';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
-  Comparator,
   CountRuleParams,
   isRatioRuleParams,
   PartialRuleParams,
@@ -60,11 +55,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
-    { significantFieldValues: SignificantFieldValue[] } | undefined
+    | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
+    | undefined
   >();
-  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType | undefined>(
-    undefined
-  );
 
   const validatedParams = useMemo(() => decodeOrThrow(ruleParamsRT)(rule.params), [rule]);
 
@@ -95,19 +88,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
     if (!isRatioRuleParams(validatedParams)) {
       getDataView();
-
-      switch (validatedParams.count.comparator) {
-        case Comparator.GT:
-        case Comparator.GT_OR_EQ:
-          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.SPIKE);
-          break;
-        case Comparator.LT:
-        case Comparator.LT_OR_EQ:
-          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.DIP);
-          break;
-        default:
-          setLogRateAnalysisType(undefined);
-      }
     }
   }, [validatedParams, alert, dataViews, logsShared]);
 
@@ -188,7 +168,13 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       ['pValue', 'docCount'],
       ['asc', 'asc']
     ).slice(0, 50);
-    setLogRateAnalysisParams(significantFieldValues ? { significantFieldValues } : undefined);
+
+    const logRateAnalysisType = analysisResults?.analysisType;
+    setLogRateAnalysisParams(
+      significantFieldValues && logRateAnalysisType
+        ? { logRateAnalysisType, significantFieldValues }
+        : undefined
+    );
   };
 
   const aiAssistant = useObservabilityAIAssistant();
@@ -200,6 +186,8 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     if (!hasLogRateAnalysisParams) {
       return undefined;
     }
+
+    const { logRateAnalysisType } = logRateAnalysisParams;
 
     const header = 'Field name,Field value,Doc count,p-value';
     const rows = logRateAnalysisParams.significantFieldValues
@@ -251,7 +239,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         },
       },
     ];
-  }, [logRateAnalysisParams, logRateAnalysisType]);
+  }, [logRateAnalysisParams]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -271,7 +259,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         <EuiFlexItem>
           <LogRateAnalysisContent
             dataView={dataView}
-            analysisType={logRateAnalysisType}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}

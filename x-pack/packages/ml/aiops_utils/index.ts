@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { getSnappedWindowParameters, getWindowParameters } from './src/get_window_parameters';
-export type { WindowParameters } from './src/get_window_parameters';
+export {
+  getSnappedWindowParameters,
+  getWindowParameters,
+  type WindowParameters,
+} from './src/get_window_parameters';
+export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './src/log_rate_analysis_type';

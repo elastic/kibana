@@ -13,7 +13,7 @@ import {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType, WindowParameters } from '@kbn/aiops-utils';
 import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
@@ -22,7 +22,11 @@ import { DocumentCountStats } from '../../../get_document_stats';
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler: (
+    logRateAnalysisType: LogRateAnalysisType,
+    d: WindowParameters,
+    force: boolean
+  ) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
