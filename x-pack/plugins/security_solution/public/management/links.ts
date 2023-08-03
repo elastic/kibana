@@ -178,7 +178,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [`'entity-analytics'`],
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
     },
     {
