@@ -12,6 +12,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiThemeProvider, EuiThemeProviderProps } from '@elastic/eui';
 // @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
+// @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
+import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
 
 import { KibanaEuiProvider } from '@kbn/react-kibana-context-root/eui_provider';
 
@@ -69,15 +71,22 @@ export const KibanaThemeProviderOnly = ({
 const KibanaThemeProviderCheck = ({ theme, children, ...props }: KibanaThemeProviderProps) => {
   const hasEuiProvider = useIsNestedEuiProvider();
 
-  return hasEuiProvider ? (
-    <KibanaThemeProviderOnly theme={theme} {...props}>
-      {children}
-    </KibanaThemeProviderOnly>
-  ) : (
-    <KibanaEuiProvider theme={theme} globalStyles={false}>
-      {children}
-    </KibanaEuiProvider>
-  );
+  if (hasEuiProvider) {
+    return (
+      <KibanaThemeProviderOnly theme={theme} {...props}>
+        {children}
+      </KibanaThemeProviderOnly>
+    );
+  } else {
+    emitEuiProviderWarning(
+      'Your plugin used an KibanaThemeProvider without a required parent KibanaRootContextProvider.'
+    );
+    return (
+      <KibanaEuiProvider theme={theme} globalStyles={false}>
+        {children}
+      </KibanaEuiProvider>
+    );
+  }
 };
 
 /**
