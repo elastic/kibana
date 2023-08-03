@@ -69,16 +69,6 @@ export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/re
 
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
-/**
- * A way to get the client side route for the reporting redirect app.
- *
- * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
- * be injected to the page
- */
-export const getRedirectAppPath = () => {
-  return '/app/reportingRedirect';
-};
-
 // Statuses
 export enum JOB_STATUSES {
   PENDING = 'pending',

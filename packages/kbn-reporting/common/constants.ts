@@ -46,3 +46,14 @@ export const USES_HEADLESS_JOB_TYPES = [
 
 type JobTypeDeclaration = typeof jobTypes;
 export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
+
+
+/**
+ * A way to get the client side route for the reporting redirect app.
+ *
+ * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
+ * be injected to the page
+ */
+export const getRedirectAppPath = () => {
+  return '/app/reportingRedirect';
+};

@@ -7,15 +7,14 @@
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BaseParams } from '@kbn/reporting-common';
+import { BaseParams, getRedirectAppPath } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
 import { DownloadReportFn, ManagementLinkFn } from '@kbn/reporting-common/url';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { buildKibanaPath } from '../../../common/build_kibana_path';
+import { buildKibanaPath } from '../../../../../../packages/kbn-reporting/common/export_type_helpers/v2/build_kibana_path';
 import {
-  getRedirectAppPath,
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,

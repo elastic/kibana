@@ -11,6 +11,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/saved_searches_url.ts"
   ],
   "exclude": [
     "target/**/*"
