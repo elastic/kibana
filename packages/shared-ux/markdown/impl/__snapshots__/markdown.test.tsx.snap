@@ -209,7 +209,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
         id="generated-id"
         placeholder=""
         rows="6"
-        style="height:100%;max-height:"
+        style="height:100%"
       />
       <div
         class="euiMarkdownEditorFooter"
