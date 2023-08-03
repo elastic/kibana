@@ -66,7 +66,7 @@ export interface AiopsAppDependencies {
    */
   notifications: CoreSetup['notifications'];
   /**
-   * Used to store user settings in local storate.
+   * Used to store user settings in local storage.
    */
   storage: IStorageWrapper;
   /**

@@ -26,6 +26,6 @@ export type LogRateAnalysisType =
 
 /**
  * For the technical preview of Log Rate Analysis we use a hard coded seed.
- * In future versions we might use a user specific seed or let the user costumise it.
+ * In future versions we might use a user specific seed or let the user customise it.
  */
 export const RANDOM_SAMPLER_SEED = 3867412;

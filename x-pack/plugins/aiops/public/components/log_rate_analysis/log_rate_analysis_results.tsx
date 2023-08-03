@@ -73,9 +73,9 @@ const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
  * Interface for log rate analysis results data.
  */
 export interface LogRateAnalysisResultsData {
-  /** Stasticitally significant field/value items. */
+  /** Statistically significant field/value items. */
   significantTerms: SignificantTerm[];
-  /** Stasticitally significant groups of field/value items. */
+  /** Statistically significant groups of field/value items. */
   significantTermsGroups: SignificantTermGroup[];
 }
 
