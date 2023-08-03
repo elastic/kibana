@@ -23,7 +23,7 @@ export interface StorageExplorerHostBreakdownSizeChart {
   }>;
 }
 
-export interface HostDetails {
+export interface StorageExplorerHostDetails {
   hostId: string;
   hostName: string;
   projectId: string;

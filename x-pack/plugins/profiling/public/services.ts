@@ -11,6 +11,7 @@ import { TopNFunctions } from '../common/functions';
 import type {
   StorageExplorerSummary,
   StorageExplorerHostBreakdownSizeChart,
+  StorageExplorerHostDetails,
 } from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
@@ -57,6 +58,12 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<StorageExplorerHostBreakdownSizeChart[]>;
+  fetchStorageExplorerHostsDetails: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+  }) => Promise<StorageExplorerHostDetails[]>;
 }
 
 export function getServices(): Services {
@@ -130,6 +137,17 @@ export function getServices(): Services {
         paths.StorageExplorerHostBreakdownSizeChart,
         { query }
       )) as StorageExplorerHostBreakdownSizeChart[];
+      return eventsMetricsSizeTimeseries;
+    },
+    fetchStorageExplorerHostsDetails: async ({ http, timeFrom, timeTo, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      const eventsMetricsSizeTimeseries = (await http.get(paths.StorageExplorerHostDetails, {
+        query,
+      })) as StorageExplorerHostDetails[];
       return eventsMetricsSizeTimeseries;
     },
   };

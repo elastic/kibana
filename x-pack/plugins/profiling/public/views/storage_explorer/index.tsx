@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { AsyncComponent } from '../../components/async_component';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -14,6 +14,7 @@ import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
+import { HostsTable } from './hosts_table';
 import { HostBreakdownChart } from './host_breakdown_chart';
 import { Summary } from './summary';
 
@@ -24,7 +25,11 @@ export function StorageExplorerView() {
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const {
-    services: { fetchStorageExplorerSummary, fetchStorageExplorerHostBreakdownSizeChart },
+    services: {
+      fetchStorageExplorerSummary,
+      fetchStorageExplorerHostBreakdownSizeChart,
+      fetchStorageExplorerHostsDetails,
+    },
   } = useProfilingDependencies();
 
   const storageExplorerSummaryState = useTimeRangeAsync(
@@ -56,6 +61,18 @@ export function StorageExplorerView() {
     ]
   );
 
+  const storageExplorerHostsDetails = useTimeRangeAsync(
+    ({ http }) => {
+      return fetchStorageExplorerHostsDetails({
+        http,
+        timeFrom: timeRange.inSeconds.start,
+        timeTo: timeRange.inSeconds.end,
+        kuery,
+      });
+    },
+    [fetchStorageExplorerHostsDetails, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
+  );
+
   return (
     <ProfilingAppPageTemplate>
       <EuiFlexGroup direction="column">
@@ -66,8 +83,19 @@ export function StorageExplorerView() {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AsyncComponent size="xl" {...storageExplorerHostBreakdownState} style={{ height: 400 }}>
-            <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
+          <EuiPanel hasShadow={false} hasBorder>
+            <AsyncComponent
+              size="xl"
+              {...storageExplorerHostBreakdownState}
+              style={{ height: 400 }}
+            >
+              <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
+            </AsyncComponent>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AsyncComponent size="xl" {...storageExplorerHostsDetails} style={{ height: 400 }}>
+            <HostsTable data={storageExplorerHostsDetails.data} />
           </AsyncComponent>
         </EuiFlexItem>
       </EuiFlexGroup>

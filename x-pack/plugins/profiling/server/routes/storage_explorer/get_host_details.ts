@@ -7,7 +7,7 @@
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '../../../common/elasticsearch';
-import { HostDetails } from '../../../common/storage_explorer';
+import { StorageExplorerHostDetails } from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
 import { getTotalIndicesStats } from './get_indices_stats';
@@ -25,7 +25,7 @@ export async function getHostDetails({
   timeFrom: number;
   timeTo: number;
   kuery: string;
-}): Promise<HostDetails[]> {
+}): Promise<StorageExplorerHostDetails[]> {
   const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ client: client.getEsClient() }),
     client.search('profiling_events_metrics_details', {
@@ -81,7 +81,7 @@ export async function getHostDetails({
       const hostId = bucket.key as string;
       const { hostName, probabilisticValues } = hostsDetailsMap[hostId];
 
-      return bucket.projectIds.buckets.map((projectBucket): HostDetails => {
+      return bucket.projectIds.buckets.map((projectBucket): StorageExplorerHostDetails => {
         const totalPerIndex = allIndicesStats
           ? projectBucket.indices.buckets.reduce((acc, indexBucket) => {
               const indexName = indexBucket.key as string;
