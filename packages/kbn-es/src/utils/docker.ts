@@ -240,11 +240,41 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 }
 
 /**
+ *
+ * Pull a Docker image if needed.
+ * Stops serverless from pulling the same image in each node's promise and
+ * gives better control of log output, instead of falling back to docker run.
+ */
+export async function maybePullDockerImage(log: ToolingLog, image: string) {
+  log.info(chalk.bold(`Checking for local image: ${image}`));
+  log.indent(4);
+
+  const process = await execa('docker', ['pull', image], {
+    // inherit is required to show Docker output
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
+  // .catch(({ message }) => {
+  //   if (message.includes('network with name elastic already exists')) {
+  //     log.info('Using existing network.');
+  //   } else {
+  //     throw createCliError(message);
+  //   }
+  // });
+
+  if (process?.exitCode === 0) {
+    log.success('Pulled Image.');
+  }
+
+  log.indent(-4);
+}
+
+/**
  * Common setup for Docker and Serverless containers
  */
-async function setupDocker(log: ToolingLog) {
+async function setupDocker(log: ToolingLog, image: string) {
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
+  await maybePullDockerImage(log, image);
 }
 
 /**
@@ -351,10 +381,10 @@ export async function runServerlessEsNode(
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
-  await setupDocker(log);
+  const image = getServerlessImage(options);
+  await setupDocker(log, image);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
-  const image = getServerlessImage(options);
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -394,7 +424,7 @@ function getDockerImage(options: DockerOptions) {
 /**
  * Resolve the full command to run Elasticsearch Docker container
  */
-export function resolveDockerCmd(options: DockerOptions) {
+export function resolveDockerCmd(options: DockerOptions, image: string = DOCKER_IMG) {
   if (options.dockerCmd) {
     return options.dockerCmd.split(' ');
   }
@@ -402,7 +432,7 @@ export function resolveDockerCmd(options: DockerOptions) {
   return DOCKER_BASE_CMD.concat(
     resolveEsArgs(DEFAULT_DOCKER_ESARGS, options),
     resolvePort(options),
-    getDockerImage(options)
+    image
   );
 }
 
@@ -411,9 +441,14 @@ export function resolveDockerCmd(options: DockerOptions) {
  * Runs an Elasticsearch Docker Container
  */
 export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {
-  await setupDocker(log);
+  let image;
 
-  const dockerCmd = resolveDockerCmd(options);
+  if (!options.dockerCmd) {
+    image = getDockerImage(options);
+    await setupDocker(log, image);
+  }
+
+  const dockerCmd = resolveDockerCmd(options, image);
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
   return await execa('docker', dockerCmd, {
