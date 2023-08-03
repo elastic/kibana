@@ -71,7 +71,7 @@ export type ESQuery =
   | ESBoolQuery
   | JsonObject;
 
-const esQuerySchema = z.union([
+export const esQuerySchema = z.union([
   esRangeQuerySchema,
   esQueryStringQuerySchema,
   esMatchQuerySchema,
@@ -80,4 +80,4 @@ const esQuerySchema = z.union([
   jsonObjectSchema,
 ]);
 
-export const filterQuery = z.union([z.string(), z.undefined(), esQuerySchema]);
+export const filterQuery = z.union([z.string(), z.undefined(), z.any()]).optional();
