@@ -1906,9 +1906,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
 });
 
 const mockLibs: any = {
-  sources: new InfraSources({
-    config: createMockStaticConfiguration({}),
-  }),
+  sources: new InfraSources(),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {
     createLifecycleRuleExecutor: createLifecycleRuleExecutorMock,
