@@ -1,10 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`License prompt renders a prompt with a link to License Management 1`] = `
-<EuiPageContent_Deprecated
+<EuiPageSection
   color="danger"
-  horizontalPosition="center"
-  verticalPosition="center"
+  alignment="center"
 >
   <EuiEmptyPrompt
     actions={
@@ -36,14 +35,13 @@ exports[`License prompt renders a prompt with a link to License Management 1`] =
       </h1>
     }
   />
-</EuiPageContent_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`License prompt renders a prompt without a link to License Management 1`] = `
-<EuiPageContent_Deprecated
+<EuiPageSection
   color="danger"
-  horizontalPosition="center"
-  verticalPosition="center"
+  alignment="center"
 >
   <EuiEmptyPrompt
     actions={
@@ -76,5 +74,5 @@ exports[`License prompt renders a prompt without a link to License Management 1`
       </h1>
     }
   />
-</EuiPageContent_Deprecated>
+</EuiPageSection>
 `;

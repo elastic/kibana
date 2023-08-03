@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
 import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
 
 export const LicensePrompt = ({
@@ -41,7 +41,7 @@ export const LicensePrompt = ({
     </>
   );
   return (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+    <EuiPageSection alignment="center" color="danger">
       <EuiEmptyPrompt
         iconType="warning"
         title={
@@ -55,6 +55,6 @@ export const LicensePrompt = ({
         body={promptBody}
         actions={[promptAction]}
       />
-    </EuiPageContent>
+    </EuiPageSection>
   );
 };

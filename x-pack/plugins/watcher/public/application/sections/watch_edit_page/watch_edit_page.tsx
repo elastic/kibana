@@ -8,7 +8,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -134,9 +134,9 @@ export const WatchEditPage = ({
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <PageError errorCode={errorCode} id={id} />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   } else if (loadError) {
     return (
@@ -154,14 +154,14 @@ export const WatchEditPage = ({
 
   if (!watch) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
             defaultMessage="Loading watch…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

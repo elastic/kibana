@@ -14,7 +14,7 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -173,23 +173,23 @@ export const WatchListPage = () => {
 
   if (isWatchesLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchList.loadingWatchesDescription"
             defaultMessage="Loading watches…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   const errorCode = getPageErrorCode(error);
   if (errorCode) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <PageError errorCode={errorCode} />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   } else if (error) {
     return (
@@ -221,7 +221,7 @@ export const WatchListPage = () => {
     );
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -236,7 +236,7 @@ export const WatchListPage = () => {
           actions={createWatchContextMenu}
           data-test-subj="emptyPrompt"
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

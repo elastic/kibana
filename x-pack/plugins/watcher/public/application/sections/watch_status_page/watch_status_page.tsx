@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiSpacer,
   EuiToolTip,
   EuiBadge,
@@ -77,22 +77,22 @@ export const WatchStatusPage = ({
 
   if (isWatchDetailLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchStatus.loadingWatchDetailsDescription"
             defaultMessage="Loading watch details…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (errorCode) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <PageError errorCode={errorCode} id={id} />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
