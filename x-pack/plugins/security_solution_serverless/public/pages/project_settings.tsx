@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import {
-  LandingLinksIcons,
-  LandingLinksIconsCategories,
-} from '@kbn/security-solution-navigation/landing_links';
+import { LandingLinksIcons } from '@kbn/security-solution-navigation/landing_links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
