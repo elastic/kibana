@@ -6,7 +6,6 @@
  */
 
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
@@ -15,7 +14,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
   riskScoreFieldMap,
@@ -36,11 +35,9 @@ import {
   getConfiguration,
   initSavedObjects,
 } from './utils/saved_object_configuration';
-import type { UpdateConfigOpts, SavedObjectsClients } from './utils/saved_object_configuration';
 
-interface InitOpts extends SavedObjectsClients {
+interface InitOpts {
   namespace: string;
-  user: AuthenticatedUser | null | undefined;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -51,13 +48,15 @@ interface RiskEngineDataClientOpts {
   logger: Logger;
   kibanaVersion: string;
   esClient: ElasticsearchClient;
+  namespace: string;
+  soClient: SavedObjectsClientContract;
 }
 
 export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace, savedObjectsClient, user }: InitOpts) {
+  public async init({ namespace }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
@@ -82,7 +81,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await initSavedObjects({ savedObjectsClient, user });
+      await initSavedObjects({ savedObjectsClient: this.options.soClient });
       result.riskEngineConfigurationCreated = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -90,7 +89,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.enableRiskEngine({ savedObjectsClient, user });
+      await this.enableRiskEngine();
       result.riskEngineEnabled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -121,35 +120,28 @@ export class RiskEngineDataClient {
     return writer;
   }
 
-  public async getStatus({
-    savedObjectsClient,
-    namespace,
-  }: SavedObjectsClients & {
-    namespace: string;
-  }) {
-    const riskEngineStatus = await this.getCurrentStatus({ savedObjectsClient });
+  public async getStatus({ namespace }: { namespace: string }) {
+    const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
     return { riskEngineStatus, legacyRiskEngineStatus };
   }
 
-  public async enableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
+  public async enableRiskEngine() {
     // code to run task
 
     return updateSavedObjectAttribute({
-      savedObjectsClient,
-      user,
+      savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: true,
       },
     });
   }
 
-  public async disableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
+  public async disableRiskEngine() {
     // code to stop task
 
     return updateSavedObjectAttribute({
-      savedObjectsClient,
-      user,
+      savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: false,
       },
@@ -173,8 +165,8 @@ export class RiskEngineDataClient {
     return newlegacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED;
   }
 
-  private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {
-    const configuration = await getConfiguration({ savedObjectsClient });
+  private async getCurrentStatus() {
+    const configuration = await getConfiguration({ savedObjectsClient: this.options.soClient });
 
     if (configuration) {
       return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
