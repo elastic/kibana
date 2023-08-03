@@ -12,6 +12,8 @@ import { safeLoad } from 'js-yaml';
 
 import type {
   KafkaOutput,
+  KafkaPartitionHashOutput,
+  KafkaPartitionRoundRobinOutput,
   NewElasticsearchOutput,
   NewLogstashOutput,
   NewOutput,
@@ -44,6 +46,8 @@ import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import type { KafkaPartitionRandomOutput } from '../../../../../../../common/types/models';
+
 import {
   validateName,
   validateESHosts,
@@ -57,6 +61,9 @@ import {
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
   validateKafkaTopics,
+  validatePartitionRandomGroupEvents,
+  validatePartitionRoundRobinEvents,
+  validatePartitionHashHash,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -321,23 +328,27 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaPartitionTypeInput = useRadioInput(
-    kafkaOutput?.partition ?? kafkaPartitionType.Random,
+    kafkaOutput?.partition ? Object.keys(kafkaOutput.partition)[0] : kafkaPartitionType.Random,
     isDisabled('partition')
   );
 
   const kafkaPartitionTypeRandomInput = useInput(
-    kafkaOutput?.random?.group_events ? `${kafkaOutput.random.group_events}` : undefined,
-    undefined,
+    (kafkaOutput?.partition as KafkaPartitionRandomOutput)?.random?.group_events
+      ? `${(kafkaOutput?.partition as KafkaPartitionRandomOutput)?.random.group_events}`
+      : '1',
+    kafkaPartitionTypeInput.value === 'random' ? validatePartitionRandomGroupEvents : undefined,
     isDisabled('partition')
   );
   const kafkaPartitionTypeHashInput = useInput(
-    kafkaOutput?.hash?.hash,
-    undefined,
+    (kafkaOutput?.partition as KafkaPartitionHashOutput)?.hash?.hash ?? '',
+    kafkaPartitionTypeInput.value === 'hash' ? validatePartitionHashHash : undefined,
     isDisabled('partition')
   );
   const kafkaPartitionTypeRoundRobinInput = useInput(
-    kafkaOutput?.round_robin?.group_events ? `${kafkaOutput.round_robin.group_events}` : undefined,
-    undefined,
+    (kafkaOutput?.partition as KafkaPartitionRoundRobinOutput)?.round_robin?.group_events
+      ? `${(kafkaOutput?.partition as KafkaPartitionRoundRobinOutput)?.round_robin?.group_events}`
+      : '1',
+    kafkaPartitionTypeInput.value === 'round_robin' ? validatePartitionRoundRobinEvents : undefined,
     isDisabled('partition')
   );
 
@@ -467,6 +478,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordValid = kafkaAuthPasswordInput.validate();
+    const kafkaPartitionTypeRandomValid = kafkaPartitionTypeRandomInput.validate();
+    const kafkaPartitionTypeHashValid = kafkaPartitionTypeHashInput.validate();
+    const kafkaPartitionTypeRoundRobinValid = kafkaPartitionTypeRoundRobinInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyValid = kafkaSslKeyInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
@@ -501,7 +515,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
         kafkaTopicsValid &&
-        additionalYamlConfigValid
+        additionalYamlConfigValid &&
+        kafkaPartitionTypeRandomValid &&
+        kafkaPartitionTypeHashValid &&
+        kafkaPartitionTypeRoundRobinValid
       );
     } else {
       // validate ES
@@ -519,6 +536,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
+    kafkaPartitionTypeRandomInput,
+    kafkaPartitionTypeHashInput,
+    kafkaPartitionTypeRoundRobinInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaDefaultTopicInput,
@@ -592,6 +612,30 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
         switch (typeInput.value) {
           case outputType.Kafka:
+            const preparePartition = () => {
+              if (kafkaPartitionTypeInput.value === 'random') {
+                return {
+                  random: {
+                    group_events: parseIntegerIfStringDefined(kafkaPartitionTypeRandomInput.value),
+                  },
+                };
+              } else if (kafkaPartitionTypeInput.value === 'round_robin') {
+                return {
+                  round_robin: {
+                    group_events: parseIntegerIfStringDefined(
+                      kafkaPartitionTypeRoundRobinInput.value
+                    ),
+                  },
+                };
+              } else {
+                return {
+                  hash: {
+                    hash: kafkaPartitionTypeHashInput.value,
+                  },
+                };
+              }
+            };
+
             return {
               name: nameInput.value,
               type: outputType.Kafka,
@@ -639,32 +683,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 ? { sasl: { mechanism: kafkaSaslMechanismInput.value } }
                 : {}),
 
-              partition: kafkaPartitionTypeInput.value,
-              ...(kafkaPartitionTypeRandomInput.value
-                ? {
-                    random: {
-                      group_events: parseIntegerIfStringDefined(
-                        kafkaPartitionTypeRandomInput.value
-                      ),
-                    },
-                  }
-                : {}),
-              ...(kafkaPartitionTypeRoundRobinInput.value
-                ? {
-                    round_robin: {
-                      group_events: parseIntegerIfStringDefined(
-                        kafkaPartitionTypeRoundRobinInput.value
-                      ),
-                    },
-                  }
-                : {}),
-              ...(kafkaPartitionTypeHashInput.value
-                ? {
-                    hash: {
-                      hash: kafkaPartitionTypeHashInput.value,
-                    },
-                  }
-                : {}),
+              partition: preparePartition(),
               topics: [...kafkaTopicsInput.value, { topic: kafkaDefaultTopicInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),

@@ -594,7 +594,7 @@ export default function (providerContext: FtrProviderContext) {
             mechanism: 'PLAIN',
           },
           timeout: 30,
-          partition: 'hash',
+          partition: { hash: { hash: '' } },
           version: '1.0.0',
         });
       });
@@ -636,7 +636,7 @@ export default function (providerContext: FtrProviderContext) {
             mechanism: 'PLAIN',
           },
           timeout: 30,
-          partition: 'hash',
+          partition: { hash: { hash: '' } },
           version: '1.0.0',
         });
 

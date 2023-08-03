@@ -55,6 +55,7 @@ export const OutputFormKafkaPartitioning: React.FunctionComponent<{
                 defaultMessage="Number of events"
               />
             }
+            {...inputs.kafkaPartitionTypeRandomInput.formRowProps}
           >
             <EuiFieldText
               data-test-subj="settingsOutputsFlyout.kafkaPartitionTypeRandomInput"
@@ -73,6 +74,7 @@ export const OutputFormKafkaPartitioning: React.FunctionComponent<{
                 defaultMessage="Number of events"
               />
             }
+            {...inputs.kafkaPartitionTypeRoundRobinInput.formRowProps}
           >
             <EuiFieldText
               data-test-subj="settingsOutputsFlyout.kafkaPartitionTypeRoundRobinInput"
@@ -98,14 +100,13 @@ export const OutputFormKafkaPartitioning: React.FunctionComponent<{
                 defaultMessage="Comma separated."
               />
             }
+            {...inputs.kafkaPartitionTypeHashInput.formRowProps}
           >
-            <>
-              <EuiFieldText
-                data-test-subj="settingsOutputsFlyout.kafkaPartitionTypeHashInput"
-                fullWidth
-                {...inputs.kafkaPartitionTypeHashInput.props}
-              />
-            </>
+            <EuiFieldText
+              data-test-subj="settingsOutputsFlyout.kafkaPartitionTypeHashInput"
+              fullWidth
+              {...inputs.kafkaPartitionTypeHashInput.props}
+            />
           </EuiFormRow>
         );
     }
