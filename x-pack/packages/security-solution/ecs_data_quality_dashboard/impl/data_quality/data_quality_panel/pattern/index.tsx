@@ -46,7 +46,12 @@ import { RemoteClustersCallout } from '../remote_clusters_callout';
 import { SummaryTable } from '../summary_table';
 import { getSummaryTableColumns } from '../summary_table/helpers';
 import * as i18n from './translations';
-import type { PatternRollup, ReportDataQualityChecked, SelectedIndex, SortConfig } from '../../types';
+import type {
+  PatternRollup,
+  ReportDataQualityChecked,
+  SelectedIndex,
+  SortConfig,
+} from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
 
