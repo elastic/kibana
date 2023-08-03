@@ -61,7 +61,6 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
           data-test-subj="metric_label"
           style={{
             ...(labelConfig.style.spec as CSSProperties),
-            fontSize: '24px',
             order: labelConfig.position === 'top' ? -1 : 2,
           }}
         >
