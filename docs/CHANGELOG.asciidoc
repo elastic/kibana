@@ -57,8 +57,6 @@ For information about the {kib} 8.9.0 release, review the following information.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.9.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-159118]]
 .Hide Uptime app if no data is available
@@ -77,9 +75,6 @@ For synthetic monitoring, we now recommend to use the new Synthetics app. For mo
 *Details* +
 Data from browser monitors and monitors of all types created within the Synthetics App or via the Elastic Synthetics Fleet Integration will no longer appear in Uptime. For more information, refer to {kibana-pull}159012[#159012]
 ====
-      
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-8.9.0]]
