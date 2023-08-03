@@ -16,7 +16,7 @@ import { DEFAULT_FREQUENCY } from '../../../common/constants';
 describe('action_notify_when', () => {
   async function setup(
     frequency: RuleDefaultAction['frequency'] = DEFAULT_FREQUENCY,
-    hasSummary: boolean = true
+    hasAlertsMappings: boolean = true
   ) {
     const wrapper = mountWithIntl(
       <ActionNotifyWhen
@@ -26,7 +26,7 @@ describe('action_notify_when', () => {
         onNotifyWhenChange={jest.fn()}
         onThrottleChange={jest.fn()}
         onSummaryChange={jest.fn()}
-        hasSummary={hasSummary}
+        hasAlertsMappings={hasAlertsMappings}
       />
     );
 
@@ -94,7 +94,7 @@ describe('action_notify_when', () => {
     ).toEqual('h');
   });
 
-  it('hides the summary selector when hasSummary is false', async () => {
+  it('hides the summary selector when hasAlertsMappings is false', async () => {
     const wrapper = await setup(DEFAULT_FREQUENCY, false);
     const summaryOrPerRuleSelect = wrapper.find('[data-test-subj="summaryOrPerRuleSelect"]');
     expect(summaryOrPerRuleSelect.exists()).toBeFalsy();

@@ -13,16 +13,12 @@ import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plu
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
+import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
 import {
-  ActionOpts as EventLogAction,
   AlertingEventLogger,
+  ActionOpts as EventLogAction,
 } from '../lib/alerting_event_logger/alerting_event_logger';
-import {
-  GetSummarizedAlertsFnOpts,
-  parseDuration,
-  CombinedSummarizedAlerts,
-  ThrottledActions,
-} from '../types';
+import { parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
@@ -95,6 +91,14 @@ interface RunActionReturnValue {
   actionsToLog: EventLogAction[];
 }
 
+export interface RuleUrl {
+  absoluteUrl?: string;
+  kibanaBaseUrl?: string;
+  basePathname?: string;
+  spaceIdSegment?: string;
+  relativePath?: string;
+}
+
 export class ExecutionHandler<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -133,6 +137,13 @@ export class ExecutionHandler<
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
   private maintenanceWindowIds: string[] = [];
+  private alertsClient: IAlertsClient<
+    AlertData,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
 
   constructor({
     rule,
@@ -149,6 +160,7 @@ export class ExecutionHandler<
     previousStartedAt,
     actionsClient,
     maintenanceWindowIds,
+    alertsClient,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -178,6 +190,7 @@ export class ExecutionHandler<
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
     this.maintenanceWindowIds = maintenanceWindowIds ?? [];
+    this.alertsClient = alertsClient;
   }
 
   public async run(
@@ -257,7 +270,7 @@ export class ExecutionHandler<
       ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-      if (isSummaryAction(action) && summarizedAlerts && !isSystemAction(action)) {
+      if (summarizedAlerts && !isSystemAction(action)) {
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runSummarizedAction({
           action,
           summarizedAlerts,
@@ -298,13 +311,11 @@ export class ExecutionHandler<
           enqueueActions.push(...actionsToEnqueueForExecution);
           logActions.push(...actionsToLog);
         }
-      } else if (!isSystemAction(action)) {
-        const executableAlert = alert!;
-
+      } else if (!isSystemAction(action) && alert) {
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runAction({
           action,
           spaceId,
-          alert: executableAlert,
+          alert,
           ruleId,
         });
 
@@ -313,15 +324,15 @@ export class ExecutionHandler<
 
         if (!this.isRecoveredAlert(action.group)) {
           if (isActionOnInterval(action)) {
-            executableAlert.updateLastScheduledActions(
+            alert.updateLastScheduledActions(
               action.group as ActionGroupIds,
               generateActionHash(action),
               action.uuid
             );
           } else {
-            executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
+            alert.updateLastScheduledActions(action.group as ActionGroupIds);
           }
-          executableAlert.unscheduleActions();
+          alert.unscheduleActions();
         }
       }
     }
@@ -358,7 +369,7 @@ export class ExecutionHandler<
           actionsPlugin: this.taskRunnerContext.actionsPlugin,
           actionTypeId: action.actionTypeId,
           kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-          ruleUrl,
+          ruleUrl: ruleUrl?.absoluteUrl,
         }),
       }),
     };
@@ -419,7 +430,7 @@ export class ExecutionHandler<
           alertParams: this.rule.params,
           actionParams: action.params,
           flapping: alert.getFlapping(),
-          ruleUrl,
+          ruleUrl: ruleUrl?.absoluteUrl,
         }),
       }),
     };
@@ -459,7 +470,7 @@ export class ExecutionHandler<
     const connectorAdapterActionParams = connectorAdapter.buildActionParams({
       alerts: summarizedAlerts,
       rule: { id: rule.id, tags: rule.tags, name: rule.name },
-      ruleUrl,
+      ruleUrl: ruleUrl?.absoluteUrl,
       spaceId,
       params: action.params,
     });
@@ -603,7 +614,7 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string, start?: number, end?: number): string | undefined {
+  private buildRuleUrl(spaceId: string, start?: number, end?: number): RuleUrl | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
@@ -622,7 +633,13 @@ export class ExecutionHandler<
         this.taskRunnerContext.kibanaBaseUrl
       );
 
-      return ruleUrl.toString();
+      return {
+        absoluteUrl: ruleUrl.toString(),
+        kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+        basePathname: basePathnamePrefix,
+        spaceIdSegment,
+        relativePath,
+      };
     } catch (error) {
       this.logger.debug(
         `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
@@ -747,15 +764,8 @@ export class ExecutionHandler<
     return executables;
   }
 
-  private canFetchSummarizedAlerts(action: RuleAction) {
-    const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
-
-    if ((isSystemAction(action) || action.frequency?.summary) && !hasGetSummarizedAlerts) {
-      this.logger.error(
-        `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
-      );
-    }
-    return hasGetSummarizedAlerts;
+  private canGetSummarizedAlerts() {
+    return !!this.ruleType.alerts && !!this.alertsClient.getSummarizedAlerts;
   }
 
   private shouldGetSummarizedAlerts({
@@ -765,7 +775,13 @@ export class ExecutionHandler<
     action: RuleAction;
     throttledSummaryActions: ThrottledActions;
   }) {
-    if (!this.canFetchSummarizedAlerts(action)) {
+    if (!this.canGetSummarizedAlerts()) {
+      if (isSystemAction(action) || action.frequency?.summary) {
+        this.logger.error(
+          `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
+        );
+      }
+
       return false;
     }
 
@@ -806,30 +822,31 @@ export class ExecutionHandler<
     ruleId: string;
     spaceId: string;
   }): Promise<CombinedSummarizedAlerts> {
-    let options: GetSummarizedAlertsFnOpts = {
+    const optionsBase = {
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       alertsFilter: isSystemAction(action) ? undefined : action.alertsFilter,
     };
 
+    let options: GetSummarizedAlertsParams;
+
     if (isActionOnInterval(action) && !isSystemAction(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
       options = {
+        ...optionsBase,
         start,
         end: new Date(),
-        ...options,
       };
     } else {
       options = {
+        ...optionsBase,
         executionUuid: this.executionId,
-        ...options,
       };
     }
-
-    const alerts = await this.ruleType.getSummarizedAlerts!(options);
+    const alerts = await this.alertsClient.getSummarizedAlerts!(options);
 
     const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
     return {

@@ -62,7 +62,6 @@ import {
   DATE_1970,
   DATE_1970_5_MIN,
   DATE_9999,
-  getSummarizedAlertsMock,
   mockAAD,
   mockedRawRuleSO,
 } from './fixtures';
@@ -83,6 +82,7 @@ import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -100,6 +100,7 @@ const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemM
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
+const alertsClient = alertsClientMock.create();
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -1444,30 +1445,19 @@ describe('Task Runner', () => {
         true
       );
       actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
+      ruleType.executor.mockImplementation(async () => {
+        return { state: {} };
+      });
 
-      getSummarizedAlertsMock.mockResolvedValue({
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 1,
           data: [mockAAD],
         },
-        ongoing: { count: 1, data: [] },
+        ongoing: { count: 0, data: [] },
         recovered: { count: 0, data: [] },
       });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
       const taskRunner = new TaskRunner({
         ruleType,
@@ -1500,12 +1490,6 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       await taskRunner.run();
 
-      expect(ruleType.getSummarizedAlerts).toHaveBeenCalledWith({
-        executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-        ruleId: '1',
-        spaceId: 'default',
-        excludedAlertInstanceIds: [],
-      });
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
@@ -1523,30 +1507,20 @@ describe('Task Runner', () => {
         true
       );
       actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
+      ruleType.executor.mockImplementation(async () => {
+        return { state: {} };
+      });
 
-      getSummarizedAlertsMock.mockResolvedValue({
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 1,
           data: [mockAAD],
         },
-        ongoing: { count: 1, data: [] },
+        ongoing: { count: 0, data: [] },
         recovered: { count: 0, data: [] },
       });
+      alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
       const taskRunner = new TaskRunner({
         ruleType,
@@ -1576,16 +1550,18 @@ describe('Task Runner', () => {
           },
         ],
       });
+
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
       const result = await taskRunner.run();
 
-      expect(ruleType.getSummarizedAlerts).toHaveBeenCalledWith({
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         start: new Date('1969-12-31T23:00:00.000Z'),
         end: new Date(DATE_1970),
         ruleId: '1',
         spaceId: 'default',
         excludedAlertInstanceIds: [],
       });
+
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
