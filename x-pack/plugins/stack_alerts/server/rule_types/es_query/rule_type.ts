@@ -146,7 +146,7 @@ export function getRuleType(
     }
   );
 
-  const alerts: IRuleTypeAlerts = {
+  const alerts: IRuleTypeAlerts<RuleAlertData> = {
     context: 'stack.esquery',
     mappings: {
       fieldMap: {
