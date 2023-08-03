@@ -174,7 +174,7 @@ export const SelectConnector: React.FC = () => {
                     onClick={() => setUseNativeFilter(!useNativeFilter)}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.selectConnector.callout.description.connectorsClient',
+                      'xpack.enterpriseSearch.content.indices.selectConnector.allConnectorsLabel',
                       { defaultMessage: 'All connectors' }
                     )}
                   </EuiFacetButton>
@@ -184,7 +184,7 @@ export const SelectConnector: React.FC = () => {
                     onClick={() => setUseNativeFilter(!useNativeFilter)}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.selectConnector.callout.description.connectorsClient',
+                      'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
                       { defaultMessage: 'Native connectors' }
                     )}
                   </EuiFacetButton>
