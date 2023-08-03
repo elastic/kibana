@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   CasesMetricsFeatureField,
   SingleCaseMetricsFeatureField,
-} from '../../../common/api/metrics/case';
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
