@@ -12,7 +12,6 @@ import {
   USER_RISK_PREVIEW_TABLE,
   USER_RISK_PREVIEW_TABLE_ROWS,
   RISK_PREVIEW_ERROR,
-  RISK_PREVIEW_ERROR_BUTTON,
   LOCAL_QUERY_BAR_SELECTOR,
   RISK_SCORE_ERROR_PANEL,
   RISK_SCORE_STATUS,
@@ -25,13 +24,19 @@ import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
-import { deleteConfiguration } from '../../tasks/api_calls/risk_engine';
+import {
+  deleteConfiguration,
+  interceptRiskPreviewError,
+  interceptRiskPreviewSuccess,
+  interceptRiskInitError,
+} from '../../tasks/api_calls/risk_engine';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 import {
   riskEngineStatusChange,
   updateRiskEngine,
   updateRiskEngineConfirm,
+  previewErrorButtonClick,
 } from '../../tasks/entity_analytics';
 
 describe(
@@ -87,20 +92,13 @@ describe(
       });
 
       it('show error panel if API returns error and then try to refetch data', () => {
-        cy.intercept('POST', '/internal/risk_score/preview', {
-          statusCode: 500,
-        });
+        interceptRiskPreviewError();
 
         cy.get(RISK_PREVIEW_ERROR).contains('Preview failed');
 
-        cy.intercept('POST', '/internal/risk_score/preview', {
-          statusCode: 200,
-          body: {
-            scores: { host: [], user: [] },
-          },
-        });
+        interceptRiskPreviewSuccess();
 
-        cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
+        previewErrorButtonClick();
 
         cy.get(RISK_PREVIEW_ERROR).should('not.exist');
       });
@@ -129,9 +127,7 @@ describe(
       it('should show error panel if API returns error ', () => {
         cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
 
-        cy.intercept('POST', '/internal/risk_score/engine/init', {
-          statusCode: 500,
-        });
+        interceptRiskInitError();
 
         // init
         riskEngineStatusChange();

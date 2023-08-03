@@ -16,6 +16,7 @@ import {
   RISK_SCORE_UPDATE_CONFIRM,
   RISK_SCORE_UDATE_BUTTON,
   RISK_SCORE_SWITCH,
+  RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
 
 import { visit } from './login';
@@ -48,4 +49,8 @@ export const updateRiskEngine = () => {
 
 export const updateRiskEngineConfirm = () => {
   cy.get(RISK_SCORE_UPDATE_CONFIRM).click();
+};
+
+export const previewErrorButtonClick = () => {
+  cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
 };
