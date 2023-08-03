@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
-import { PrimaryProfilingSearchBar } from '../../../components/profiling_app_page_template/primary_profiling_search_bar';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -58,12 +57,6 @@ export function FlameGraphView() {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <PrimaryProfilingSearchBar />
-          <EuiHorizontalRule />
-        </EuiPanel>
-      </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
           <FlameGraph

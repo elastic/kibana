@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ".storybook/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*",
+    ".storybook/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
@@ -55,9 +61,12 @@
     "@kbn/unified-field-list",
     "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
-    "@kbn/discover-utils",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-server",
+    "@kbn/discover-utils"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

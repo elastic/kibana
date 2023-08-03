@@ -18,6 +18,7 @@ import {
 import type { PostureInput } from '../../../common/types';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
+export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 export const getMockPolicyVulnMgmtAWS = () =>
@@ -50,8 +51,9 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmAWS = () => {
+export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   return {
+    version: packageVersion,
     name: 'cspm',
     policy_templates: [
       {
@@ -71,6 +73,28 @@ export const getMockPackageInfoCspmAWS = () => {
                 show_user: false,
               },
             ],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
+export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
+  return {
+    version: packageVersion,
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_GCP,
+            title: 'GCP',
+            description: '',
+            vars: [{}],
           },
         ],
       },
@@ -103,6 +127,12 @@ const getPolicyMock = (
     credential_profile_name: { type: 'text' },
     role_arn: { type: 'text' },
     'aws.credentials.type': { value: 'assume_role', type: 'text' },
+  };
+
+  const gcpVarsMock = {
+    project_id: { type: 'text' },
+    credentials_file: { type: 'text' },
+    credentials_json: { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
@@ -144,8 +174,8 @@ const getPolicyMock = (
       {
         type: CLOUDBEAT_GCP,
         policy_template: 'cspm',
-        enabled: false,
-        streams: [{ enabled: false, data_stream: dataStream }],
+        enabled: type === CLOUDBEAT_GCP,
+        streams: [{ enabled: type === CLOUDBEAT_GCP, data_stream: dataStream, vars: gcpVarsMock }],
       },
       {
         type: CLOUDBEAT_AZURE,

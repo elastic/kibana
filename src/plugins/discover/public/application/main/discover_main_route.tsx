@@ -34,6 +34,7 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import type { DiscoverDisplayMode } from '../types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -44,9 +45,14 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  mode?: DiscoverDisplayMode;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
+export function DiscoverMainRoute({
+  customizationCallbacks,
+  isDev,
+  mode = 'standalone',
+}: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -64,10 +70,11 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       services,
     })
   );
-  const customizationService = useDiscoverCustomizationService({
-    customizationCallbacks,
-    stateContainer,
-  });
+  const { customizationService, isInitialized: isCustomizationServiceInitialized } =
+    useDiscoverCustomizationService({
+      customizationCallbacks,
+      stateContainer,
+    });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -145,21 +152,21 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
         });
+        if (mode === 'standalone') {
+          if (currentSavedSearch?.id) {
+            chrome.recentlyAccessed.add(
+              getSavedSearchFullPathUrl(currentSavedSearch.id),
+              currentSavedSearch.title ?? '',
+              currentSavedSearch.id
+            );
+          }
 
-        if (currentSavedSearch?.id) {
-          chrome.recentlyAccessed.add(
-            getSavedSearchFullPathUrl(currentSavedSearch.id),
-            currentSavedSearch.title ?? '',
-            currentSavedSearch.id
+          chrome.setBreadcrumbs(
+            currentSavedSearch && currentSavedSearch.title
+              ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
+              : getRootBreadcrumbs({ services })
           );
         }
-
-        chrome.setBreadcrumbs(
-          currentSavedSearch && currentSavedSearch.title
-            ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
-            : getRootBreadcrumbs({ services })
-        );
-
         setLoading(false);
         if (services.analytics) {
           const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
@@ -204,6 +211,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       core.theme,
       basePath,
       toastNotifications,
+      mode,
     ]
   );
 
@@ -219,8 +227,9 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     [loadSavedSearch]
   );
 
-  // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
+    if (!isCustomizationServiceInitialized) return;
+
     setLoading(true);
     setHasESData(false);
     setHasUserDataView(false);
@@ -228,16 +237,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     setError(undefined);
     // restore the previously selected data view for a new state
     loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [
-    loadSavedSearch,
-    savedSearchId,
-    stateContainer,
-    setLoading,
-    setHasESData,
-    setHasUserDataView,
-    setShowNoDataPage,
-    setError,
-  ]);
+  }, [isCustomizationServiceInitialized, loadSavedSearch, savedSearchId, stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -285,8 +285,10 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        <DiscoverMainAppMemoized stateContainer={stateContainer} mode={mode} />
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
 }
+// eslint-disable-next-line import/no-default-export
+export default DiscoverMainRoute;

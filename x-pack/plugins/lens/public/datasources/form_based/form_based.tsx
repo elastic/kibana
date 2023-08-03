@@ -135,6 +135,27 @@ function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPatte
   }
 }
 
+export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = ({
+  prevState,
+  layerId,
+  columnId,
+  indexPatterns,
+}) => {
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
+  return mergeLayer({
+    state: prevState,
+    layerId,
+    newLayer: deleteColumn({
+      layer: prevState.layers[layerId],
+      columnId,
+      indexPattern,
+    }),
+  });
+};
+
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
@@ -300,18 +321,7 @@ export function getFormBasedDatasource({
       return Object.keys(state?.layers);
     },
 
-    removeColumn({ prevState, layerId, columnId, indexPatterns }) {
-      const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
-      return mergeLayer({
-        state: prevState,
-        layerId,
-        newLayer: deleteColumn({
-          layer: prevState.layers[layerId],
-          columnId,
-          indexPattern,
-        }),
-      });
-    },
+    removeColumn,
 
     initializeDimension(
       state,

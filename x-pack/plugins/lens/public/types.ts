@@ -93,7 +93,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -344,7 +344,7 @@ export interface Datasource<T = unknown, P = unknown> {
     prevState: T;
     layerId: string;
     columnId: string;
-    indexPatterns: IndexPatternMap;
+    indexPatterns?: IndexPatternMap;
   }) => T;
   initializeDimension?: (
     state: T,
@@ -379,7 +379,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDropProps: (
     props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => T | undefined;
   getCustomWorkspaceRenderer?: (
     state: T,
     dragging: DraggingIdentifier,
@@ -637,7 +637,10 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
+  core: Pick<
+    CoreStart,
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+  >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
@@ -684,24 +687,14 @@ export function isOperation(operationCandidate: unknown): operationCandidate is 
   );
 }
 
-export interface DatasourceDimensionDropProps<T> {
+export interface DatasourceDimensionDropHandlerProps<T> {
   target: DragDropOperation;
   state: T;
-  setState: StateSetter<
-    T,
-    {
-      isDimensionComplete?: boolean;
-      forceRender?: boolean;
-    }
-  >;
   targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
-}
-
-export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
   source: DragDropIdentifier;
   dropType: DropType;
   indexPatterns: IndexPatternMap;
-};
+}
 
 export type FieldOnlyDataType =
   | 'document'

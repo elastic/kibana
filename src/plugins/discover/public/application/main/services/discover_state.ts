@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -98,6 +99,10 @@ export interface DiscoverStateContainer {
    */
   savedSearchState: DiscoverSavedSearchContainer;
   /**
+   * State of url, allows updating and subscribing to url changes
+   */
+  stateStorage: IKbnUrlStateStorage;
+  /**
    * Service for handling search sessions
    */
   searchSessionManager: DiscoverSearchSessionManager;
@@ -129,7 +134,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
+    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -252,6 +257,7 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     getAppState: appStateContainer.getState,
+    getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -389,7 +395,7 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const onCreateDefaultAdHocDataView = async (dataViewSpec: DataViewSpec) => {
+  const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
     const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
@@ -397,6 +403,7 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.appendAdHocDataViews(newDataView);
 
     await onChangeDataView(newDataView);
+    return newDataView;
   };
   /**
    * Triggered when a user submits a query in the search bar
@@ -450,6 +457,7 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
+    stateStorage,
     searchSessionManager,
     actions: {
       initializeAndSync,
@@ -457,7 +465,7 @@ export function getDiscoverStateContainer({
       loadDataViewList,
       loadSavedSearch,
       onChangeDataView,
-      onCreateDefaultAdHocDataView,
+      createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
@@ -539,6 +547,6 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
-    dataViewSpec: !dataView?.isPersisted() ? dataView?.toSpec(false) : undefined,
+    dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
   };
 }

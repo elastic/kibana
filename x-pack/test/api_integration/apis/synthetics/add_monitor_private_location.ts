@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -69,12 +70,12 @@ export default function ({ getService }: FtrProviderContext) {
         {
           concurrentMonitors: 1,
           id: testFleetPolicyID,
-          isInvalid: false,
           isServiceManaged: false,
+          isInvalid: false,
           label: 'Test private location 0',
           geo: {
-            lat: '',
-            lon: '',
+            lat: 0,
+            lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
         },
@@ -131,12 +132,17 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor)
         .expect(200);
 
-      expect(apiResponse.body.attributes).eql(
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -185,12 +191,16 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson);
 
-      expect(apiResponse.body.attributes).eql(
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(apiResponse.body).eql(
         omit(
           {
             ...httpMonitorJson,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            updated_at: updatedAt,
             revision: 2,
           },
           secretKeys
@@ -341,13 +351,18 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
 
-        expect(apiResponse.body.attributes).eql(
+        const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+        expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+        expect(apiResponse.body).eql(
           omit(
             {
               ...monitor,
               [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
               [ConfigKey.CONFIG_ID]: apiResponse.body.id,
               [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+              created_at: createdAt,
+              updated_at: updatedAt,
             },
             secretKeys
           )
@@ -522,7 +537,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('1.0.1');
+        expect(packagePolicy.package.version).eql('1.0.4');
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -532,7 +547,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '1.0.1')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '1.0.4')).eql(true);
       } finally {
         await supertestAPI
           .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
-
-export const BULK_ACTIONS_PROGRESS_BTN = '[data-test-subj="bulkActions-progress"]';
-
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
@@ -23,20 +19,15 @@ export const DISABLED_RULES_BTN = '[data-test-subj="showDisabledRulesFilterButto
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
+export const CONFIRM_DELETE_RULE_BTN =
+  '[data-test-subj="deleteRulesConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
-
-export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
-
-export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
-
-export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
-
-export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
 export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"] label';
 
@@ -48,8 +39,6 @@ export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExce
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
-
-export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
 
 export const FIRST_RULE = 0;
 
@@ -117,7 +106,7 @@ export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
 
-export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteConfirmationModal"]';
+export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="deleteRulesConfirmationModal"]';
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 

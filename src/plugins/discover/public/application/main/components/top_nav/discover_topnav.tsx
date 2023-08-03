@@ -9,9 +9,9 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ENABLE_SQL } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
@@ -178,7 +178,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onCreateDefaultAdHocDataView: stateContainer.actions.onCreateDefaultAdHocDataView,
+    onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
     onChangeDataView: stateContainer.actions.onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,
@@ -201,8 +201,13 @@ export const DiscoverTopNav = ({
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
+  );
+
   return (
-    <AggregateQueryTopNavMenu
+    <SearchBar
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}
@@ -229,6 +234,11 @@ export const DiscoverTopNav = ({
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
       }
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      prependFilterBar={
+        searchBarCustomization?.PrependFilterBar ? (
+          <searchBarCustomization.PrependFilterBar />
+        ) : undefined
+      }
     />
   );
 };
