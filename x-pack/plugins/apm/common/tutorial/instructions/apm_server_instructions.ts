@@ -60,7 +60,7 @@ export function createStartServerUnixBinari() {
   return {
     title: START_SERVER.title,
     textPre: START_SERVER.textPre,
-    commands: ['./apm-server -c ./apm-server.yml'],
+    commands: ['./apm-server'],
   };
 }
 
