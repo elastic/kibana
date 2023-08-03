@@ -22,6 +22,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AppFeatures } from '../lib/app_features';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -72,7 +73,8 @@ export const getPackagePolicyCreateCallback = (
   alerts: AlertsStartContract,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  appFeatures: AppFeatures
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -140,7 +142,8 @@ export const getPackagePolicyCreateCallback = (
       licenseService,
       endpointIntegrationConfig,
       cloud,
-      esClientInfo
+      esClientInfo,
+      appFeatures
     );
 
     return {

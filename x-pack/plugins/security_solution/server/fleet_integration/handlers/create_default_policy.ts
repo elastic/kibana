@@ -7,6 +7,7 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AppFeatures } from '../../lib/app_features';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -29,7 +30,8 @@ export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined,
   cloud: CloudSetup,
-  esClientInfo: InfoResponse
+  esClientInfo: InfoResponse,
+  appFeatures: AppFeatures
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
 
@@ -54,8 +56,8 @@ export const createDefaultPolicy = (
   }
 
   // If no Policy Protection allowed (ex. serverless)
-  if (true) {
-    // implement
+  if (!appFeatures.isEnabled('endpointPolicyProtections')) {
+    // todo: turn off all protections
   }
 
   // Apply license limitations in the final step, so it's not overriden (see malware popup)

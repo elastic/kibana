@@ -46,6 +46,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
+import { AppFeatures } from '../lib/app_features';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -163,6 +164,8 @@ export const createMockEndpointAppContextServiceStartContract =
       },
       savedObjectsStart
     );
+    const experimentalFeatures = config.experimentalFeatures;
+    const appFeatures = new AppFeatures(logger, experimentalFeatures);
 
     packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
@@ -207,11 +210,12 @@ export const createMockEndpointAppContextServiceStartContract =
       cases: casesMock,
       cloud: cloudMock.createSetup(),
       featureUsageService: createFeatureUsageServiceMock(),
-      experimentalFeatures: createMockConfig().experimentalFeatures,
+      experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
       actionCreateService: undefined,
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
       esClient: elasticsearchClientMock.createElasticsearchClient(),
+      appFeatures,
     };
   };
 
