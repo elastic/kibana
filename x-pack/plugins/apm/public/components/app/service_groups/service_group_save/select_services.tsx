@@ -221,7 +221,7 @@ export function SelectServices({
                     title={i18n.translate(
                       'xpack.apm.serviceGroups.searchResults.error',
                       {
-                        defaultMessage: 'Unable to retrieve search results',
+                        defaultMessage: 'Error retrieving search results',
                       }
                     )}
                     color="danger"
@@ -296,7 +296,9 @@ export function SelectServices({
               onClick={() => {
                 onSaveClick({ ...serviceGroup, kuery });
               }}
-              isDisabled={isLoading || !kuery || kueryValidationMessage?.length}
+              isDisabled={
+                isLoading || !kuery || !isEmpty(kueryValidationMessage)
+              }
             >
               {i18n.translate(
                 'xpack.apm.serviceGroups.selectServicesForm.saveGroup',
