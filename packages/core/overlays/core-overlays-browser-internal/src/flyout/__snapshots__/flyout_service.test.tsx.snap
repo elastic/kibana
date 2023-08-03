@@ -51,7 +51,7 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaThemeProvider
+                  "children": <KibanaThemeProviderCheck
                     theme={
                       Object {
                         "theme$": Observable {
@@ -70,7 +70,7 @@ Array [
                         />
                       </EuiFlyout>
                     </EuiErrorBoundary>
-                  </KibanaThemeProvider>,
+                  </KibanaThemeProviderCheck>,
                 },
                 Object {},
               ],
@@ -78,7 +78,7 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaThemeProvider
+                "value": <KibanaThemeProviderCheck
                   theme={
                     Object {
                       "theme$": Observable {
@@ -97,7 +97,7 @@ Array [
                       />
                     </EuiFlyout>
                   </EuiErrorBoundary>
-                </KibanaThemeProvider>,
+                </KibanaThemeProviderCheck>,
               },
             ],
           },
@@ -130,7 +130,7 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaThemeProvider
+                  "children": <KibanaThemeProviderCheck
                     theme={
                       Object {
                         "theme$": Observable {
@@ -149,7 +149,7 @@ Array [
                         />
                       </EuiFlyout>
                     </EuiErrorBoundary>
-                  </KibanaThemeProvider>,
+                  </KibanaThemeProviderCheck>,
                 },
                 Object {},
               ],
@@ -157,7 +157,7 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaThemeProvider
+                "value": <KibanaThemeProviderCheck
                   theme={
                     Object {
                       "theme$": Observable {
@@ -176,7 +176,7 @@ Array [
                       />
                     </EuiFlyout>
                   </EuiErrorBoundary>
-                </KibanaThemeProvider>,
+                </KibanaThemeProviderCheck>,
               },
             ],
           },
