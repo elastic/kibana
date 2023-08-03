@@ -120,11 +120,14 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   }
 
   public start(core: CoreStart): SharePluginStart {
+    console.log(JSON.stringify(this.initializerContext.env, null, ' '));
+    const allowEmbed = this.initializerContext.env.packageInfo.buildFlavor !== 'serverless';
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
       this.shareMenuRegistry.start(),
-      this.anonymousAccessServiceProvider
+      allowEmbed,
+      this.anonymousAccessServiceProvider,
     );
 
     return {
