@@ -46,11 +46,11 @@ export async function getMobileFilters({
     end,
     size: MAX_ITEMS,
   };
-  const mobileTransactionEventsFiltersResponse = await getDeviceOSApp(
-    commonProps
-  );
 
-  const mobileNetworkConnectionTypeFiltersResponse = await getNCT(commonProps);
+  const [
+    mobileTransactionEventsFiltersResponse,
+    mobileNetworkConnectionTypeFiltersResponse,
+  ] = await Promise.all([getDeviceOSApp(commonProps), getNCT(commonProps)]);
 
   return [
     {

@@ -49,9 +49,8 @@ export async function getMobileMostUsedCharts({
     end,
     size: MAX_ITEMS_PER_CHART,
   };
-  const mobileTransactionEventsResponse = await getDeviceOSApp(commonProps);
-
-  const mobileNetworkConnectionTypeResponse = await getNCT(commonProps);
+  const [mobileTransactionEventsResponse, mobileNetworkConnectionTypeResponse] =
+    await Promise.all([getDeviceOSApp(commonProps), getNCT(commonProps)]);
 
   return [
     {
