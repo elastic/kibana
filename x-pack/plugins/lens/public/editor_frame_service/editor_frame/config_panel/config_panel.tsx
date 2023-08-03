@@ -17,7 +17,7 @@ import {
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import {
   changeIndexPattern,
-  onDimensionDrop,
+  onDropToDimension,
   removeDimension,
 } from '../../../state_management/lens_slice';
 import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
@@ -158,8 +158,9 @@ export function LayerPanels(
   }, [dispatchLens]);
 
   const handleDimensionDrop = useCallback(
-    (payload: { source: DragDropIdentifier; target: DragDropOperation; dropType: DropType }) =>
-      dispatchLens(onDimensionDrop(payload)),
+    (payload: { source: DragDropIdentifier; target: DragDropOperation; dropType: DropType }) => {
+      dispatchLens(onDropToDimension(payload));
+    },
     [dispatchLens]
   );
 
@@ -265,7 +266,7 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
-              onDimensionDrop={handleDimensionDrop}
+              onDropToDimension={handleDimensionDrop}
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
               activeVisualization={activeVisualization}

@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Dashboard control group hierarchical chaining', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/162777
+  describe.skip('Dashboard control group hierarchical chaining', () => {
     const newDocuments: Array<{ index: string; id: string }> = [];
     let controlIds: string[];
 
