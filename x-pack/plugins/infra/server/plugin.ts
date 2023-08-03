@@ -232,7 +232,6 @@ export class InfraServerPlugin
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
     return {
-      defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
       metricsExplorerViews,
     } as InfraPluginSetup;
