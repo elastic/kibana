@@ -11,5 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless search API', function () {
     loadTestFile(require.resolve('./snapshot_telemetry'));
     loadTestFile(require.resolve('./cases/post_case.ts'));
+    loadTestFile(require.resolve('./cases/get_cases.ts'));
+    loadTestFile(require.resolve('./cases/find_cases.ts'));
   });
 }

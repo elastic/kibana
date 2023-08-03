@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { getPostCaseRequest } from './mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
-  describe('post_case', () => {
-    it('400s when trying to create case', async () => {
+  describe('get_cases using alertID', () => {
+    it('400 when trying get cases using alertID', async () => {
       await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getPostCaseRequest())
+        .get(
+          `${CASES_URL}/alerts/test-id`
+        )
         .expect(400);
-    });
+    });;
   });
 };
