@@ -80,7 +80,7 @@ export const NodeList = memo(({ id }: { id: string }) => {
   const processTableView: ProcessTableView[] = useSelector(
     useCallback(
       (state: State) => {
-        const { processNodePositions } = selectors.layout(state.analyzer.analyzerById[id]);
+        const { processNodePositions } = selectors.layout(state.analyzer[id]);
         const view: ProcessTableView[] = [];
         for (const treeNode of processNodePositions.keys()) {
           const name = nodeModel.nodeName(treeNode);
@@ -111,14 +111,10 @@ export const NodeList = memo(({ id }: { id: string }) => {
     ];
   }, []);
 
-  const children = useSelector((state: State) =>
-    selectors.hasMoreChildren(state.analyzer.analyzerById[id])
-  );
-  const ancestors = useSelector((state: State) =>
-    selectors.hasMoreAncestors(state.analyzer.analyzerById[id])
-  );
+  const children = useSelector((state: State) => selectors.hasMoreChildren(state.analyzer[id]));
+  const ancestors = useSelector((state: State) => selectors.hasMoreAncestors(state.analyzer[id]));
   const generations = useSelector((state: State) =>
-    selectors.hasMoreGenerations(state.analyzer.analyzerById[id])
+    selectors.hasMoreGenerations(state.analyzer[id])
   );
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
@@ -140,10 +136,10 @@ export const NodeList = memo(({ id }: { id: string }) => {
 
 function NodeDetailLink({ id, name, nodeID }: { id: string; name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: State) => {
-    return selectors.originID(state.analyzer.analyzerById[id]) === nodeID;
+    return selectors.originID(state.analyzer[id]) === nodeID;
   });
   const nodeState = useSelector((state: State) =>
-    selectors.nodeDataStatus(state.analyzer.analyzerById[id])(nodeID)
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
   const { descriptionText } = useColors();
   const linkProps = useLinkProps(id, { panelView: 'nodeDetail', panelParameters: { nodeID } });
