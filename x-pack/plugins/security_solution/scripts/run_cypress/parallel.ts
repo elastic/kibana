@@ -13,6 +13,9 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
+import { findChangedFiles } from 'find-cypress-specs';
+import minimatch from 'minimatch';
+import path from 'path';
 
 import {
   EsVersion,
@@ -84,7 +87,16 @@ export const cli = () => {
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+      const basePath = process.cwd().split('kibana/')[1];
+      let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+
+      if (argv.changedSpecsOnly) {
+        files = findChangedFiles('main', false).filter(
+          minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
+            matchBase: true,
+          })
+        );
+      }
 
       if (!files?.length) {
         throw new Error('No files found');
@@ -333,8 +345,8 @@ ${JSON.stringify(config.getAll(), null, 2)}
               type: 'elasticsearch' | 'kibana' | 'fleetserver',
               withAuth: boolean = false
             ): string => {
-              const getKeyPath = (path: string = ''): string => {
-                return `servers.${type}${path ? `.${path}` : ''}`;
+              const getKeyPath = (keyPath: string = ''): string => {
+                return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
               };
 
               if (!config.get(getKeyPath())) {
