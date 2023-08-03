@@ -46,7 +46,6 @@ import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
 import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
-import { PngV1ExportType } from './export_types/png';
 import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -135,7 +134,6 @@ export class ReportingCore {
     this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
     // deprecated export types for tests
     this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
 
     this.exportTypes.forEach((et) => {
       this.exportTypesRegistry.register(et);
