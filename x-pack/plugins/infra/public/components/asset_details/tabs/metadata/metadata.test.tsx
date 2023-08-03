@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { Metadata } from './metadata';
-
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
@@ -27,8 +26,8 @@ const renderHostMetadata = () =>
             from: '2023-04-09T11:07:49Z',
             to: '2023-04-09T11:23:49Z',
           },
-          nodeType: 'host',
-          node: {
+          assetType: 'host',
+          asset: {
             id: 'host-1',
             name: 'host-1',
           },

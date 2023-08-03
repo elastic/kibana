@@ -12,7 +12,7 @@ import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards
 export const KPIGrid = React.memo(({ nodeName, dataView, timeRange: dateRange }: TileProps) => {
   return (
     <>
-      <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="assetDetailsKPIGrid">
+      <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
         {KPI_CHARTS.map((chartProp, index) => (
           <EuiFlexItem key={index}>
             <Tile {...chartProp} nodeName={nodeName} dataView={dataView} timeRange={dateRange} />

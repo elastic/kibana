@@ -35,7 +35,7 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 }));
 
 export const Processes = () => {
-  const { node, nodeType, overrides, dateRangeTs, onTabsStateChange } =
+  const { asset, assetType, overrides, dateRangeTs, onTabsStateChange } =
     useAssetDetailsStateContext();
 
   const { query: overrideQuery } = overrides?.processes ?? {};
@@ -52,9 +52,9 @@ export const Processes = () => {
   });
 
   const hostTerm = useMemo(() => {
-    const field = getFieldByType(nodeType) ?? nodeType;
-    return { [field]: node.name };
-  }, [node.name, nodeType]);
+    const field = getFieldByType(assetType) ?? assetType;
+    return { [field]: asset.name };
+  }, [asset.name, assetType]);
 
   const {
     loading,
@@ -159,7 +159,7 @@ export const Processes = () => {
           }
           actions={
             <EuiButton
-              data-test-subj="infraTabComponentTryAgainButton"
+              data-test-subj="infraAssetDetailsTabComponentTryAgainButton"
               color="primary"
               fill
               onClick={reload}

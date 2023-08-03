@@ -276,7 +276,11 @@ export const MetricsGrid = React.memo(
         <EuiFlexItem grow={false}>
           <HostMetricsDocsLink />
           <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="s"
+            data-test-subj="infraAssetDetailsMetricsChartGrid"
+          >
             {CHARTS_IN_ORDER.map(({ dataViewType, ...chartProp }, index) => (
               <EuiFlexItem key={index} grow={false}>
                 <MetricChart

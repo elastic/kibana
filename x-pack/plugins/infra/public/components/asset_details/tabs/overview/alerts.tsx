@@ -25,12 +25,12 @@ import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 
 export const AlertsSummaryContent = ({
-  nodeName,
-  nodeType,
+  assetName,
+  assetType,
   dateRange,
 }: {
-  nodeName: string;
-  nodeType: InventoryItemType;
+  assetName: string;
+  assetType: InventoryItemType;
   dateRange: TimeRange;
 }) => {
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -39,10 +39,10 @@ export const AlertsSummaryContent = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [nodeName],
+        hostNodeNames: [assetName],
         status: ALERT_STATUS_ALL,
       }),
-    [nodeName, dateRange]
+    [assetName, dateRange]
   );
 
   return (
@@ -56,8 +56,8 @@ export const AlertsSummaryContent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LinkToAlertsPage
-            nodeName={nodeName}
-            queryField={`${nodeType}.name`}
+            assetName={assetName}
+            queryField={`${assetType}.name`}
             dateRange={dateRange}
           />
         </EuiFlexItem>
@@ -65,8 +65,8 @@ export const AlertsSummaryContent = ({
       <EuiSpacer size="s" />
       <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
       <AlertFlyout
-        filter={`${findInventoryFields(nodeType).name}: "${nodeName}"`}
-        nodeType={nodeType}
+        filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
+        nodeType={assetType}
         setVisible={toggleAlertFlyout}
         visible={isAlertFlyoutVisible}
       />
@@ -112,7 +112,7 @@ const AlertsSectionTitle = () => {
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj="assetDetailsAlertsTitle" size="xxs">
+        <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
           <h5>
             <FormattedMessage
               id="xpack.infra.assetDetails.overview.alertsSectionTitle"
@@ -125,7 +125,7 @@ const AlertsSectionTitle = () => {
         <EuiPopover
           button={
             <EuiIcon
-              data-test-subj="assetDetailsAlertsPopoverButton"
+              data-test-subj="infraAssetDetailsAlertsPopoverButton"
               type="iInCircle"
               onClick={togglePopover}
             />

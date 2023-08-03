@@ -100,7 +100,7 @@ export const Tile = ({
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper
-            id={`assetDetailsKPIGrid${id}Tile`}
+            id={`infraAssetDetailsKPIGrid${id}Tile`}
             attributes={attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={extraActions}

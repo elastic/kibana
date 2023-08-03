@@ -15,7 +15,7 @@ export interface LinkToAlertsRuleProps {
 export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"
+      data-test-subj="infraAssetDetailsCreateAlertsRuleButton"
       onClick={onClick}
       size="xs"
       iconSide="left"

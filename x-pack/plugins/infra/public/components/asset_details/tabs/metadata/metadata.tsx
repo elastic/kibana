@@ -24,26 +24,26 @@ export interface MetadataSearchUrlState {
 }
 
 export interface MetadataProps {
+  assetName: string;
+  assetType: InventoryItemType;
   dateRange: TimeRange;
-  nodeName: string;
-  nodeType: InventoryItemType;
   showActionsColumn?: boolean;
   search?: string;
   onSearchChange?: (query: string) => void;
 }
 
 export const Metadata = () => {
-  const { node, nodeType, overrides, dateRangeTs, onTabsStateChange } =
+  const { asset, assetType, overrides, dateRangeTs, onTabsStateChange } =
     useAssetDetailsStateContext();
   const { query, showActionsColumn = false } = overrides?.metadata ?? {};
 
-  const inventoryModel = findInventoryModel(nodeType);
+  const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
-  } = useMetadata(node.name, nodeType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
+  } = useMetadata(asset.name, assetType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 

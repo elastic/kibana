@@ -33,6 +33,7 @@ export function useTabSwitcher({ initialActiveTabId }: TabSwitcherParams) {
   };
 
   return {
+    initialActiveTabId,
     activeTabId,
     renderedTabsSet,
     showTab,

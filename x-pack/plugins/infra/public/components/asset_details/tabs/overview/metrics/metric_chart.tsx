@@ -100,7 +100,7 @@ export const MetricChart = ({
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`assetDetailsMetricsChart${id}`}
+          id={`infraAssetDetailsMetricsChart${id}`}
           attributes={attributes}
           style={{ height: MIN_HEIGHT }}
           extraActions={extraActions}

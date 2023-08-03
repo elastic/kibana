@@ -19,12 +19,12 @@ const DEFAULT_DATE_RANGE = {
 export interface UseAssetDetailsStateProps {
   state: Pick<
     AssetDetailsProps,
-    'node' | 'nodeType' | 'overrides' | 'dateRange' | 'onTabsStateChange'
+    'asset' | 'assetType' | 'overrides' | 'dateRange' | 'onTabsStateChange'
   >;
 }
 
 export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
-  const { node, nodeType, dateRange: rawDateRange, onTabsStateChange, overrides } = state;
+  const { asset, assetType, dateRange: rawDateRange, onTabsStateChange, overrides } = state;
 
   const dateRange = useMemo(() => {
     const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
@@ -36,8 +36,8 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
   const dateRangeTs = toTimestampRange(dateRange);
 
   return {
-    node,
-    nodeType,
+    asset,
+    assetType,
     dateRange,
     dateRangeTs,
     onTabsStateChange,

@@ -14,12 +14,12 @@ import { useMetadata } from '../../hooks/use_metadata';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Osquery = () => {
-  const { node, nodeType, dateRangeTs } = useAssetDetailsStateContext();
-  const inventoryModel = findInventoryModel(nodeType);
+  const { asset, assetType, dateRangeTs } = useAssetDetailsStateContext();
+  const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
   const { loading, metadata } = useMetadata(
-    node.name,
-    nodeType,
+    asset.name,
+    assetType,
     inventoryModel.requiredMetrics,
     sourceId,
     dateRangeTs

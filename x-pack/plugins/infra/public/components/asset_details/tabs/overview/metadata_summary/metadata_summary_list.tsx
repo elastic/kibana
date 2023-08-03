@@ -78,7 +78,7 @@ export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSumma
       </EuiFlexGroup>
       <EuiFlexItem grow={false} key="metadata-link">
         <EuiButtonEmpty
-          data-test-subj="infraMetadataSummaryShowAllMetadataButton"
+          data-test-subj="infraAssetDetailsMetadataShowAllButton"
           onClick={onClick}
           size="xs"
           flush="both"
