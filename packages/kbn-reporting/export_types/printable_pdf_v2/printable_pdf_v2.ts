@@ -7,43 +7,30 @@
  */
 
 import { Headers } from '@kbn/core/server';
-import {
-  CancellationToken,
-  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-  TaskRunResult,
-} from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import {
-  catchError,
-  firstValueFrom,
-  fromEventPattern,
-  map,
-  mergeMap,
-  Observable,
-  of,
-  takeUntil,
-  tap,
-  throwError,
-} from 'rxjs';
+import { catchError, firstValueFrom, fromEventPattern, map, mergeMap, Observable, of, takeUntil, tap, throwError } from 'rxjs';
 import { Writable } from 'stream';
 import {
+  PDF_REPORT_TYPE_V2,
+  PDF_JOB_TYPE_V2,
+  LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
+  LICENSE_TYPE_ENTERPRISE,
   REPORTING_TRANSACTION_TYPE,
+  CancellationToken,
+  TaskRunResult,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   decryptJobHeaders,
-  ExportType,
   getCustomLogo,
-  generatePdfObservable,
   getFullRedirectAppUrl,
+  ExportType,
 } from '@kbn/reporting-common';
-import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
+import { generatePdfObservableV2 } from '@kbn/reporting-common/export_type_helpers';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
@@ -64,15 +51,6 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     this.logger = this.logger.get('pdf-export-v2');
   }
 
-  public getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult> {
-    return this.startDeps.screenshotting.getScreenshots({
-      ...options,
-      urls: options?.urls?.map((url) =>
-        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ),
-    });
-  }
-
   /**
    * @param JobParamsPDFV2
    * @returns jobParams
@@ -86,6 +64,15 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       forceNow: new Date().toISOString(),
     };
   };
+
+  public getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    });
+  }
 
   /**
    *
@@ -131,7 +118,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
         apmGetAssets?.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-        return generatePdfObservable(
+        return generatePdfObservableV2(
           this.config,
           this.getServerInfo(),
           () =>

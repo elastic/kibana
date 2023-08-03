@@ -15,3 +15,5 @@ export { validateUrls } from './validate_urls';
 export { getFullUrls } from './get_full_urls';
 export { getAbsoluteUrlFactory } from './get_absolute_url';
 export { generatePngObservable } from './generate_png';
+export { generatePdfObservableV2 } from './generate_pdf_v2';
+

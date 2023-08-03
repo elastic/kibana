@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { getFullRedirectAppUrl } from '@kbn/reporting-common';
-import type { LocatorParams, ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common';
-import { PdfMetrics } from '@kbn/reporting-common/metrics';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
-import { getTracker } from '@kbn/reporting-common/export_type_helpers/pdf_tracker';
-import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import {
+  getFullRedirectAppUrl,
+  LocatorParams,
+  ReportingConfigType,
+  ReportingServerInfo,
+} from '@kbn/reporting-common';
+import { Observable } from 'rxjs';
+import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { PdfMetrics } from '../metrics';
+import { getTracker } from './pdf_tracker';
+import { TaskPayloadPDFV2 } from '../types';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -22,16 +26,16 @@ interface PdfResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+type GetScreenshotsFn = (options: PdfScreenshotOptions) => Observable<PdfScreenshotResult>;
 
-export function generatePdfObservable(
+export function generatePdfObservableV2(
   config: ReportingConfigType,
   serverInfo: ReportingServerInfo,
   getScreenshots: GetScreenshotsFn,
   job: TaskPayloadPDFV2,
   locatorParams: LocatorParams[],
   options: Omit<PdfScreenshotOptions, 'urls'>
-): Rx.Observable<PdfResult> {
+): Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
