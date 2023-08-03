@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -15,11 +14,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_cases using alertID', () => {
     it('400 when trying get cases using alertID', async () => {
-      await supertest
-        .get(
-          `${CASES_URL}/alerts/test-id`
-        )
-        .expect(400);
-    });;
+      await supertest.get(`${CASES_URL}/alerts/test-id`).expect(400);
+    });
   });
 };

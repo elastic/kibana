@@ -90,13 +90,17 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('shows cases in sidebar navigation', async () => {
       await svlCommonNavigation.expectExists();
 
-      await svlCommonNavigation.sidenav.expectLinkExists({ deepLinkId: 'observability-overview:cases' });
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'observability-overview:cases',
+      });
     });
 
     it('navigates to cases app', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
 
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'observability-overview:cases' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:cases',
+      });
       expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
     });
   });
