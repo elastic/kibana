@@ -42,7 +42,12 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
     )?.vars;
 
-    const configId: string = vars?.config_id?.value as DataStream;
+    let configId: string = '';
+    try {
+      configId = JSON.parse(vars?.processors.value)[0].add_fields.fields.config_id;
+    } catch (e) {
+      // ignore
+    }
 
     const url = useEditMonitorLocator({ configId, locators });
 
