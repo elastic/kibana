@@ -73,7 +73,6 @@ describe('EQL search strategy', () => {
             },
           },
         },
-        rollupsEnabled: true,
       } as unknown as SearchStrategyDependencies;
       params = {
         index: 'logstash-*',

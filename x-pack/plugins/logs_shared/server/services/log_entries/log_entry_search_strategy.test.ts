@@ -272,7 +272,6 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),
-  rollupsEnabled: true,
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
