@@ -30,9 +30,8 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { IndexViewLogic } from '../../index_view_logic';
-
 import { IndexNameLogic } from '../../index_name_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
@@ -75,8 +74,8 @@ export const ConfigurePipeline: React.FC = () => {
     setInferencePipelineConfiguration({
       ...configuration,
       pipelineName: pipelineName || indexName,
-    })
-  }, [])
+    });
+  }, []);
 
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
 
