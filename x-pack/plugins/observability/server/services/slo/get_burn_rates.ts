@@ -24,7 +24,7 @@ interface LookbackWindow {
 
 export async function getBurnRates(
   sloId: string,
-  instanceId: string | undefined,
+  instanceId: string,
   windows: LookbackWindow[],
   services: Services
 ) {

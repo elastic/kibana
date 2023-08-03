@@ -29,7 +29,7 @@ import { InternalQueryError } from '../../errors';
 export interface SLIClient {
   fetchSLIDataFrom(
     slo: SLO,
-    instanceId: string | undefined,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>>;
 }
@@ -48,7 +48,7 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchSLIDataFrom(
     slo: SLO,
-    instanceId: string | undefined,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>

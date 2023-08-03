@@ -182,19 +182,15 @@ const getSLOBurnRatesResponseSchema = t.type({
 
 const getSLOBurnRatesParamsSchema = t.type({
   path: t.type({ id: t.string }),
-  body: t.intersection([
-    t.type({
-      windows: t.array(
-        t.type({
-          name: t.string,
-          duration: durationType,
-        })
-      ),
-    }),
-    t.partial({
-      instanceId: t.string,
-    }),
-  ]),
+  body: t.type({
+    instanceId: allOrAnyString,
+    windows: t.array(
+      t.type({
+        name: t.string,
+        duration: durationType,
+      })
+    ),
+  }),
 });
 
 const getSLOInstancesParamsSchema = t.type({
