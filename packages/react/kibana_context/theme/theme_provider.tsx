@@ -9,11 +9,11 @@
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import {
-  CurrentEuiBreakpointProvider,
-  EuiThemeProvider,
-  EuiThemeProviderProps,
-} from '@elastic/eui';
+import { EuiThemeProvider, EuiThemeProviderProps } from '@elastic/eui';
+// @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
+import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
+
+import { KibanaEuiProvider } from '@kbn/react-kibana-context-root/eui_provider';
 
 import {
   getColorMode,
@@ -40,8 +40,11 @@ export interface KibanaThemeProviderProps extends EuiProps {
 
 /**
  * A Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme.
+ *
+ * TODO: Restore this to the main `KibanaThemeProvider` once all theme providers can be guaranteed
+ * to have a parent `EuiProvider`
  */
-export const KibanaThemeProvider = ({
+export const KibanaThemeProviderOnly = ({
   theme: { theme$ },
   euiTheme: theme,
   children,
@@ -50,14 +53,36 @@ export const KibanaThemeProvider = ({
   const kibanaTheme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(kibanaTheme), [kibanaTheme]);
 
-  // We have to add a breakpoint provider, because the `EuiProvider` we were using-- instead
-  // of `EuiThemeProvider`-- adds a breakpoint.  Without it here now, several Kibana layouts
-  // break, particularly sidebars.
-  //
-  // We can investigate removing it later, but I'm adding it here for now.
-  return (
-    <EuiThemeProvider {...{ colorMode, theme, ...props }}>
-      <CurrentEuiBreakpointProvider>{children}</CurrentEuiBreakpointProvider>
-    </EuiThemeProvider>
+  return <EuiThemeProvider {...{ colorMode, theme, ...props }}>{children}</EuiThemeProvider>;
+};
+
+/**
+ * Unfortunately, a lot of plugins are using `KibanaThemeProvider` without a parent
+ * `EuiProvider` which provides very necessary setup (e.g. Emotion cache, breakpoints).
+ *
+ * If so, we need to render an EuiProvider first (but without global styles, since those
+ * are already handled by `KibanaRootContextProvider`)
+ *
+ * TODO: We can hopefully remove this and revert to only exporting the above component once
+ * all plugins are on `KibanaRootContextProvider`?
+ */
+const KibanaThemeProviderCheck = ({ theme, children, ...props }: KibanaThemeProviderProps) => {
+  const hasEuiProvider = useIsNestedEuiProvider();
+
+  return hasEuiProvider ? (
+    <KibanaThemeProviderOnly theme={theme} {...props}>
+      {children}
+    </KibanaThemeProviderOnly>
+  ) : (
+    <KibanaEuiProvider theme={theme} globalStyles={false}>
+      {children}
+    </KibanaEuiProvider>
   );
 };
+
+/**
+ * A Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme.
+ *
+ * If the theme provider is missing a parent EuiProvider, one will automatically be rendered instead.
+ */
+export const KibanaThemeProvider = KibanaThemeProviderCheck;
