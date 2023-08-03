@@ -200,8 +200,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   // NOTE: initialRenderTime is only set once when the component mounts
-  const initialRenderTime = useRef<number>(performance.now());
-  const dataReceivedTime = useRef<number>(0);
+  const visualizationRenderStartTime = useRef<number>(NaN);
+  const dataReceivedTime = useRef<number>(NaN);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -254,7 +254,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         dataReceivedTime.current = performance.now();
         if (!initialVisualizationRenderComplete.current) {
           // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
-          log('initial data took to arrive', dataReceivedTime.current - initialRenderTime.current);
+          log(
+            'initial data took to arrive',
+            dataReceivedTime.current - visualizationRenderStartTime.current
+          );
         }
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
@@ -585,7 +588,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
-        framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
@@ -594,9 +596,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         errors={localState.errors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
-        activeDatasourceId={activeDatasourceId}
         onRender$={onRender$}
         onData$={onData$}
+        onComponentRendered={() => {
+          visualizationRenderStartTime.current = performance.now();
+        }}
       />
     );
   };
@@ -682,7 +686,6 @@ function useReportingState(errors: UserMessage[]): {
 
 export const VisualizationWrapper = ({
   expression,
-  framePublicAPI,
   lensInspector,
   onEvent,
   hasCompatibleActions,
@@ -691,12 +694,11 @@ export const VisualizationWrapper = ({
   errors,
   ExpressionRendererComponent,
   core,
-  activeDatasourceId,
   onRender$,
   onData$,
+  onComponentRendered,
 }: {
   expression: string | null | undefined;
-  framePublicAPI: FramePublicAPI;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
@@ -705,10 +707,15 @@ export const VisualizationWrapper = ({
   errors: UserMessage[];
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
-  activeDatasourceId: string | null;
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onComponentRendered: () => void;
 }) => {
+  useEffect(() => {
+    onComponentRendered();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const context = useLensSelector(selectExecutionContext);
   // Used for reporting
   const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
