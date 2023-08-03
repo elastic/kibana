@@ -172,7 +172,9 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
@@ -346,7 +348,9 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
@@ -502,7 +506,9 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
