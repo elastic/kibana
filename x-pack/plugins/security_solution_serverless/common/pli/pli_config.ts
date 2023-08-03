@@ -17,12 +17,17 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     essentials: [],
     complete: [
       AppFeatureKey.advancedInsights,
+      AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
     ],
   },
   endpoint: {
-    essentials: [AppFeatureKey.endpointExceptions],
+    essentials: [
+      AppFeatureKey.endpointHostManagement,
+      AppFeatureKey.endpointPolicyManagement,
+      AppFeatureKey.endpointArtifactManagement,
+    ],
     complete: [AppFeatureKey.endpointResponseActions],
   },
   cloud: {
