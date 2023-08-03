@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+ 
 export const elasticAgentStandaloneManifest = `---
 # For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
@@ -42,7 +42,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent/templates.d"
       #    volumeMounts:
       #      - name: external-inputs
       #        mountPath: /etc/elastic-agent/inputs.d
@@ -172,6 +172,182 @@ spec:
         #  hostPath:
         #    path: /var/cache/Elastic
         #    type: DirectoryOrCreate
+---
+# Configmap for Statefulset Agents. It includes only Kube-State-metrics datastream. The URL is set to localhost:8080 for all datasets and Leader Election is disabled
+# For more information https://github.com/elastic/elastic-agent/blob/main/docs/elastic-agent-ksm-sharding.md
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-ksm-datastreams
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+data:
+  agent.yml: |-
+    outputs:
+      default:
+        type: elasticsearch
+        hosts:
+          - >-
+        username: ${ES_USERNAME}
+        password: ${ES_PASSWORD}
+    agent:
+      monitoring:
+        enabled: true
+        use_output: default
+        logs: true
+        metrics: true
+    providers.kubernetes:
+      enabled: false
+    inputs:
+      - type: kubernetes/metrics
+        data_stream:
+          namespace: default
+        streams:
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_container
+            metricsets:
+              - state_container
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_cronjob
+            metricsets:
+              - state_cronjob
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_daemonset
+            metricsets:
+              - state_daemonset
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_deployment
+            metricsets:
+              - state_deployment
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_job
+            metricsets:
+              - state_job
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_node
+            metricsets:
+              - state_node
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_persistentvolume
+            metricsets:
+              - state_persistentvolume
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_persistentvolumeclaim
+            metricsets:
+              - state_persistentvolumeclaim
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_pod
+            metricsets:
+              - state_pod
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_replicaset
+            metricsets:
+              - state_replicaset
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_resourcequota
+            metricsets:
+              - state_resourcequota
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_service
+            metricsets:
+              - state_service
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_statefulset
+            metricsets:
+              - state_statefulset
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+          - data_stream:
+              type: metrics
+              dataset: kubernetes.state_storageclass
+            metricsets:
+              - state_storageclass
+            add_metadata: true
+            hosts:
+              - 'localhost:8080'
+            period: 10s
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        meta:
+          package:
+            name: kubernetes
+            version: 1.42.0
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
