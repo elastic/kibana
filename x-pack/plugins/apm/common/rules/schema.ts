@@ -33,6 +33,8 @@ export const transactionDurationParamsSchema = schema.object({
   ]),
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  useFilterQuery: schema.maybe(schema.boolean()),
+  filterQuery: schema.maybe(schema.string()),
 });
 
 export const anomalyParamsSchema = schema.object({

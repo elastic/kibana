@@ -24,6 +24,7 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -82,6 +83,21 @@ export function registerTransactionDurationRuleType({
     logger,
   });
 
+  const getParsedFilterQuery: (
+    filterQuery: string | undefined
+  ) => Array<Record<string, any>> = (filterQuery) => {
+    if (!filterQuery) return [];
+
+    try {
+      const parsedQuery = toElasticsearchQuery(
+        fromKueryExpression(filterQuery)
+      );
+      return [parsedQuery];
+    } catch (error) {
+      return [];
+    }
+  };
+
   const ruleType = createLifecycleRuleType({
     id: ApmRuleType.TransactionDuration,
     name: ruleTypeConfig.name,
@@ -136,6 +152,21 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
+      const termFilterQuery = !ruleParams.filterQuery
+        ? [
+            ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+              queryEmptyString: false,
+            }),
+            ...environmentQuery(ruleParams.environment),
+          ]
+        : [];
+
       const searchParams = {
         index,
         body: {
@@ -154,16 +185,8 @@ export function registerTransactionDurationRuleType({
                 ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                  queryEmptyString: false,
-                }),
-                ...environmentQuery(ruleParams.environment),
+                ...termFilterQuery,
+                ...getParsedFilterQuery(ruleParams.filterQuery),
               ] as QueryDslQueryContainer[],
             },
           },
