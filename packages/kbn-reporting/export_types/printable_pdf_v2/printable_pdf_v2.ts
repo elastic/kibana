@@ -8,7 +8,18 @@
 
 import { Headers } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
-import { catchError, firstValueFrom, fromEventPattern, map, mergeMap, Observable, of, takeUntil, tap, throwError } from 'rxjs';
+import {
+  catchError,
+  firstValueFrom,
+  fromEventPattern,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  takeUntil,
+  tap,
+  throwError,
+} from 'rxjs';
 import { Writable } from 'stream';
 import {
   PDF_REPORT_TYPE_V2,

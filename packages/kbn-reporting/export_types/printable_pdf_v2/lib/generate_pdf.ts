@@ -10,7 +10,11 @@ import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { getFullRedirectAppUrl } from '@kbn/reporting-common';
-import type { LocatorParams, ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common';
+import type {
+  LocatorParams,
+  ReportingConfigType,
+  ReportingServerInfo,
+} from '@kbn/reporting-common';
 import { PdfMetrics } from '@kbn/reporting-common/metrics';
 import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 import { getTracker } from '@kbn/reporting-common/export_type_helpers/pdf_tracker';

@@ -8,14 +8,9 @@
 
 import { mergeMap, tap } from 'rxjs/operators';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import {
-  getFullRedirectAppUrl,
-  LocatorParams,
-  ReportingConfigType,
-  ReportingServerInfo,
-} from '@kbn/reporting-common';
 import { Observable } from 'rxjs';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { getFullRedirectAppUrl, LocatorParams, ReportingConfigType, ReportingServerInfo } from '..';
 import { PdfMetrics } from '../metrics';
 import { getTracker } from './pdf_tracker';
 import { TaskPayloadPDFV2 } from '../types';
