@@ -20,6 +20,8 @@ import { isGzip } from '..';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { cpuCount } from '../../../../../test/api_integration/apis/local_and_ess_is_es_archiver_slow/utils';
 
 enum BulkOperation {
   Create = 'create',
@@ -76,20 +78,25 @@ export function createIndexDocRecordsStream(
     },
   });
 }
+const concurrencyMaxMinus1 = () => cpuCount() - 1;
+const isSame = (a) => (b) => {
+  return a === b;
+};
 function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (jsonStanzasWithinArchive: any[]): Promise<void> => {
     // const length = jsonStanzasWithinArchive.length;
     // console.log(`\nλjs jsonStanzasWithinArchive.length: \n\t${length}`);
     const operation = useCreate ? BulkOperation.Create : BulkOperation.Index;
+    const isSameAsOperation = isSame(operation);
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
     await client.helpers.bulk(
       {
-        flushBytes: 10000000,
-        flushInterval: 10000,
-        concurrency: 10,
-        retries: 5,
+        // flushBytes: 10000000,
+        // flushInterval: 10000,
+        concurrency: concurrencyMaxMinus1(),
+        retries: 3,
         datasource: jsonStanzasWithinArchive
           // .map((x) => {
           //   // console.log(`\nλjs jsonStanzaWithinArchive: \n\t${JSON.stringify(x, null, 2)}`);
@@ -98,6 +105,9 @@ function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
           .map((doc) => {
             const body = doc.source;
             const op = doc.data_stream ? BulkOperation.Create : operation;
+            // console.log(`\nλjs op: \n${JSON.stringify(op, null, 2)}`);
+            const isSameAsOp = isSameAsOperation(op);
+            console.log(`\nλjs isSameAsOp: \n\t${isSameAsOp}`);
             const index = doc.data_stream || doc.index;
             ops.set(body, {
               [op]: {

@@ -263,13 +263,14 @@ const logLoops = (x: number): void => {
   ];
   console.log(brightAndNoticeable.join(''));
 };
+export const cpuCount = () => os.cpus().length;
 export const hardware = () =>
   dedent`
     λ os.arch -> ${os.arch()}
     λ os.platform -> ${os.platform()}
     λ os.totalmem -> ${pipe(os.totalmem(), byteSize)}
     λ os.freemem -> ${pipe(os.freemem(), byteSize)}
-    λ CPU Count -> ${os.cpus().length}
+    λ CPU Count -> ${cpuCount()}
   `;
 
 const loud = (x: unknown): string => `${chalk.bold.cyanBright.underline(x)}`;
