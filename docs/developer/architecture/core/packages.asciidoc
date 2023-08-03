@@ -1,0 +1,28 @@
+[[core-packages]]
+== Core packages
+
+experimental[]
+
+Core packages have well defined boundaries, have a single responsibility, are organized by domain and follow the following naming scheme:
+
+`@kbn/core-domain-component-type`
+For example:
+*
+*
+*
+*
+*
+*
+
+Generally, every domain has a specific package for:
+* public types available everywhere in {kib} `src` and `x-pack`
+* implementation and unit tests
+
+In addition, domains contain separate packages for the client-side and server-side and, in some cases, a base, that 
+supports both client and server needs. When a domain shares code between the server and client, that code lives in
+a `common` package. Mocks have their own dedicated package.
+
+All of core's public API's have inline `jsdocs` that include examples as nescessary.
+
+
+
