@@ -60,7 +60,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickLogsFlyoutTab() {
-      return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
+      return testSubjects.click('infraAssetDetailsLogsTab');
     },
 
     async clickOverviewLinkToAlerts() {
@@ -92,11 +92,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAddMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataAddFilter');
+      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
     },
 
     async clickRemoveMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataRemoveFilter');
+      return testSubjects.click('infraAssetDetailsMetadataRemoveFilterButton');
     },
 
     // Splash screen
@@ -217,7 +217,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     overviewAlertsTitleExist() {
-      return testSubjects.exists('nfraAssetDetailsAlertsTitle');
+      return testSubjects.exists('infraAssetDetailsAlertsTitle');
     },
 
     async getActiveAlertsCountText() {
@@ -253,7 +253,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getRemoveFilterExist() {
-      return testSubjects.exists('infraAssetDetailsMetadataRemoveFilter');
+      return testSubjects.exists('infraAssetDetailsMetadataRemoveFilterButton');
     },
 
     async getProcessesTabContentTitle(index: number) {

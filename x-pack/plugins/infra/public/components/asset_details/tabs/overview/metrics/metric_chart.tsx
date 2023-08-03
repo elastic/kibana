@@ -76,7 +76,7 @@ export const MetricChart = ({
         min-height: calc(${MIN_HEIGHT}px + ${euiTheme.size.l});
         position: relative;
       `}
-      data-test-subj={`assetDetailsMetricsChart${id}`}
+      data-test-subj={`infraAssetDetailsMetricsChart${id}`}
     >
       {error ? (
         <EuiFlexGroup
