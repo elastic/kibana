@@ -355,13 +355,15 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           <EuiSpacer size="s" />
           <EuiCallOut
             title={
-              currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-                ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
-                    defaultMessage: 'Analysis type: Log rate spike',
-                  })
-                : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
-                    defaultMessage: 'Analysis type: Log rate dip',
-                  })
+              <span data-test-subj="aiopsAnalysisTypeCalloutTitle">
+                {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                  ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
+                      defaultMessage: 'Analysis type: Log rate spike',
+                    })
+                  : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
+                      defaultMessage: 'Analysis type: Log rate dip',
+                    })}
+              </span>
             }
             color="primary"
             iconType="pin"
@@ -375,7 +377,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                   })
                 : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
                     defaultMessage:
-                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less present or missing within the deviation time range. The "doc count" column refers to the amount of documents in baseline time range.',
+                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less present or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
                   })}
             </EuiText>
           </EuiCallOut>

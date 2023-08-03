@@ -147,7 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.logRateAnalysisPage.clickRerunAnalysisButton(true);
       }
 
-      await aiops.logRateAnalysisPage.assertAnalysisComplete();
+      await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
 
       // The group switch should be disabled by default
       await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
