@@ -730,7 +730,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Updated name',
             description: 'Updated description',
             namespace: 'default',
-            is_protected: true,
+            is_protected: false,
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
@@ -748,7 +748,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
-          is_protected: true,
+          is_protected: false,
         });
       });
 

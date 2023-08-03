@@ -18,11 +18,15 @@ import { allowedExperimentalValues } from '../../../../../../../common/experimen
 import { ExperimentalFeaturesService } from '../../../../../../services/experimental_features';
 
 import { createPackagePolicyMock } from '../../../../../../../common/mocks';
-import type { NewAgentPolicy, AgentPolicy } from '../../../../../../../common/types';
+import type { AgentPolicy } from '../../../../../../../common/types';
 
 import { useLicense } from '../../../../../../hooks/use_license';
 
 import type { LicenseService } from '../../../../../../../common/services';
+import {
+  generateAgentPolicyWithDefaults,
+  generateNewAgentPolicyWithDefaults,
+} from '../../../../../../../common/services';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
@@ -35,12 +39,7 @@ const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 describe('Agent policy advanced options content', () => {
   let testRender: TestRenderer;
   let renderResult: RenderResult;
-
-  const mockAgentPolicy: Partial<NewAgentPolicy | AgentPolicy> = {
-    name: 'some-agent-policy',
-    is_managed: false,
-  };
-
+  let mockAgentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   const mockUpdateAgentPolicy = jest.fn();
   const mockValidation = jest.fn() as unknown as ValidationResults;
   const usePlatinumLicense = () =>
@@ -52,6 +51,7 @@ describe('Agent policy advanced options content', () => {
   const render = ({
     isProtected = false,
     policyId = 'agent-policy-1',
+    newAgentPolicy = false,
     packagePolicy = [createPackagePolicyMock()],
   } = {}) => {
     // remove when feature flag is removed
@@ -59,6 +59,12 @@ describe('Agent policy advanced options content', () => {
       ...allowedExperimentalValues,
       agentTamperProtectionEnabled: true,
     });
+
+    if (newAgentPolicy) {
+      mockAgentPolicy = generateNewAgentPolicyWithDefaults();
+    } else {
+      mockAgentPolicy = generateAgentPolicyWithDefaults();
+    }
 
     renderResult = testRender.render(
       <AgentPolicyAdvancedOptionsContent
@@ -147,6 +153,13 @@ describe('Agent policy advanced options content', () => {
       });
       it('should show an icon tip explaining why the switch is disabled', () => {
         expect(renderResult.getByTestId('tamperMissingIntegrationTooltip')).toBeTruthy();
+      });
+    });
+    describe('when the user is creating a new agent policy', () => {
+      it('should be disabled, since it has no package policies and therefore elastic defend integration is not installed', async () => {
+        usePlatinumLicense();
+        render({ newAgentPolicy: true });
+        expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
       });
     });
   });
