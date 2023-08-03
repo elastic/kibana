@@ -23,7 +23,7 @@ import {
 import { InfraSources } from './lib/sources';
 
 const deprecatedFieldMessage = (fieldName: string, defaultValue: string, configNames: string[]) =>
-  i18n.translate('xpack.infra.deprecations.deprecatedFieldDescription', {
+  i18n.translate('xpack.metricsData.deprecations.deprecatedFieldDescription', {
     defaultMessage:
       'Configuring the "{fieldName}" field has been deprecated and will be removed in 8.0.0. This plugin is designed to work with ECS, and expects this field to have a value of `{defaultValue}`. It has a different value configured in Source {configCount, plural, one {Configuration} other {Configurations}}: {configNames}',
     values: {
@@ -46,11 +46,11 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
   {
     timestamp: (configNames) => ({
       level: 'critical',
-      title: i18n.translate('xpack.infra.deprecations.timestampFieldTitle', {
+      title: i18n.translate('xpack.metricsData.deprecations.timestampFieldTitle', {
         defaultMessage: 'Source configuration field "timestamp" is deprecated.',
       }),
       message: deprecatedFieldMessage(
-        i18n.translate('xpack.infra.deprecations.timestampFieldName', {
+        i18n.translate('xpack.metricsData.deprecations.timestampFieldName', {
           defaultMessage: 'timestamp',
         }),
         DEFAULT_VALUES.timestamp,
@@ -58,7 +58,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       ),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.infra.deprecations.timestampAdjustIndexing', {
+          i18n.translate('xpack.metricsData.deprecations.timestampAdjustIndexing', {
             defaultMessage: 'Adjust your indexing to use "{field}" as a timestamp.',
             values: { field: '@timestamp' },
           }),
@@ -67,11 +67,11 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
     tiebreaker: (configNames) => ({
       level: 'critical',
-      title: i18n.translate('xpack.infra.deprecations.tiebreakerFieldTitle', {
+      title: i18n.translate('xpack.metricsData.deprecations.tiebreakerFieldTitle', {
         defaultMessage: 'Source configuration field "tiebreaker" is deprecated.',
       }),
       message: deprecatedFieldMessage(
-        i18n.translate('xpack.infra.deprecations.tiebreakerFieldName', {
+        i18n.translate('xpack.metricsData.deprecations.tiebreakerFieldName', {
           defaultMessage: 'tiebreaker',
         }),
         DEFAULT_VALUES.tiebreaker,
@@ -79,7 +79,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       ),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.infra.deprecations.tiebreakerAdjustIndexing', {
+          i18n.translate('xpack.metricsData.deprecations.tiebreakerAdjustIndexing', {
             defaultMessage: 'Adjust your indexing to use "{field}" as a tiebreaker.',
             values: { field: '_doc' },
           }),
@@ -88,11 +88,11 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
     host: (configNames) => ({
       level: 'critical',
-      title: i18n.translate('xpack.infra.deprecations.hostnameFieldTitle', {
+      title: i18n.translate('xpack.metricsData.deprecations.hostnameFieldTitle', {
         defaultMessage: 'Source configuration field "host name" is deprecated.',
       }),
       message: deprecatedFieldMessage(
-        i18n.translate('xpack.infra.deprecations.hostnameFieldName', {
+        i18n.translate('xpack.metricsData.deprecations.hostnameFieldName', {
           defaultMessage: 'host name',
         }),
         DEFAULT_VALUES.host,
@@ -100,7 +100,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       ),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.infra.deprecations.hostAdjustIndexing', {
+          i18n.translate('xpack.metricsData.deprecations.hostAdjustIndexing', {
             defaultMessage: 'Adjust your indexing to identify hosts using "{field}"',
             values: { field: 'host.name' },
           }),
@@ -109,17 +109,19 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
     pod: (configNames) => ({
       level: 'critical',
-      title: i18n.translate('xpack.infra.deprecations.podIdFieldTitle', {
+      title: i18n.translate('xpack.metricsData.deprecations.podIdFieldTitle', {
         defaultMessage: 'Source configuration field "pod ID" is deprecated.',
       }),
       message: deprecatedFieldMessage(
-        i18n.translate('xpack.infra.deprecations.podIdFieldName', { defaultMessage: 'pod ID' }),
+        i18n.translate('xpack.metricsData.deprecations.podIdFieldName', {
+          defaultMessage: 'pod ID',
+        }),
         DEFAULT_VALUES.pod,
         configNames
       ),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.infra.deprecations.podAdjustIndexing', {
+          i18n.translate('xpack.metricsData.deprecations.podAdjustIndexing', {
             defaultMessage: 'Adjust your indexing to identify Kubernetes pods using "{field}"',
             values: { field: 'kubernetes.pod.uid' },
           }),
@@ -128,11 +130,11 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
     container: (configNames) => ({
       level: 'critical',
-      title: i18n.translate('xpack.infra.deprecations.containerIdFieldTitle', {
+      title: i18n.translate('xpack.metricsData.deprecations.containerIdFieldTitle', {
         defaultMessage: 'Source configuration field "container ID" is deprecated.',
       }),
       message: deprecatedFieldMessage(
-        i18n.translate('xpack.infra.deprecations.containerIdFieldName', {
+        i18n.translate('xpack.metricsData.deprecations.containerIdFieldName', {
           defaultMessage: 'container ID',
         }),
         DEFAULT_VALUES.container,
@@ -140,7 +142,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
       ),
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.infra.deprecations.containerAdjustIndexing', {
+          i18n.translate('xpack.metricsData.deprecations.containerAdjustIndexing', {
             defaultMessage: 'Adjust your indexing to identify Docker containers using "{field}"',
             values: { field: 'container.id' },
           }),
@@ -158,23 +160,26 @@ export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => 
           return completeConfig;
         }
         addDeprecation({
-          title: i18n.translate('xpack.infra.deprecations.deprecatedFieldConfigTitle', {
+          title: i18n.translate('xpack.metricsData.deprecations.deprecatedFieldConfigTitle', {
             defaultMessage: '"{fieldKey}" is deprecated.',
             values: {
               fieldKey: key,
             },
           }),
-          message: i18n.translate('xpack.infra.deprecations.deprecatedFieldConfigDescription', {
-            defaultMessage:
-              'Configuring "xpack.infra.sources.default.fields.{fieldKey}" has been deprecated and will be removed in 8.0.0.',
-            values: {
-              fieldKey: key,
-            },
-          }),
+          message: i18n.translate(
+            'xpack.metricsData.deprecations.deprecatedFieldConfigDescription',
+            {
+              defaultMessage:
+                'Configuring "xpack.infra.sources.default.fields.{fieldKey}" has been deprecated and will be removed in 8.0.0.',
+              values: {
+                fieldKey: key,
+              },
+            }
+          ),
           level: 'warning',
           correctiveActions: {
             manualSteps: [
-              i18n.translate('xpack.infra.deprecations.removeConfigField', {
+              i18n.translate('xpack.metricsData.deprecations.removeConfigField', {
                 defaultMessage:
                   'Remove "xpack.infra.sources.default.fields.{fieldKey}" from your Kibana configuration.',
                 values: { fieldKey: key },
